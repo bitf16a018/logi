@@ -95,7 +95,11 @@ class lcUser {
 		}
 
 
-		$temp2 = unserialize(gzuncompress(base64_decode($db->Record['sessdata'])));
+		if (function_exists("gzuncompress")) { 
+			$temp2 = unserialize(gzuncompress(base64_decode($db->Record['sessdata'])));
+		} else {
+			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
+		}
 		if (!$temp2) { 
 			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
 		}
@@ -408,7 +412,11 @@ class lcUser {
 		//$this->newval = crc32($val);
 
 		$sessBlob['_userobj'] = $this;
-		$val = gzcompress(serialize($sessBlob));
+		if (function_exists("gzcompress")) { 
+			$val = gzcompress(serialize($sessBlob));
+		} else { 
+			$val = serialize($sessBlob);
+		}
 
 #		if ( crc32($val) == $this->_origSessionData) { return; }
 		$db = DB::getHandle();
