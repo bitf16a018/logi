@@ -150,14 +150,16 @@ class lcUser {
 		global $hadCookie;
 		if ($hadCookie==true) {
 		//trigger_error('we had a cookie submitted from you, but we cannot find your session.');
-		$f = fopen("/tmp/badsess.txt","a");
-		$s = date("m/d/Y h:i:s")." - {$_SERVER['REMOTE_ADDR']} - $sessID - ".$_SERVER['HTTP_USER_AGENT']."\n";
-		ob_start();
-		if ( function_exists('apache_request_headers') ) print_r(apache_request_headers());
-		$x = ob_get_contents();
-		ob_end_clean();
-		fputs($f,$s.$x."\n==========\n");
-		fclose($f);
+		$f = @fopen("/tmp/badsess.txt","a");
+			if ($f) { 
+				$s = date("m/d/Y h:i:s")." - {$_SERVER['REMOTE_ADDR']} - $sessID - ".$_SERVER['HTTP_USER_AGENT']."\n";
+				ob_start();
+				if ( function_exists('apache_request_headers') ) print_r(apache_request_headers());
+				$x = ob_get_contents();
+				ob_end_clean();
+				fputs($f,$s.$x."\n==========\n");
+				fclose($f);
+			}
 		}
 			$db->RESULT_TYPE=MYSQL_BOTH;
 			//none found, make new session, return new user
