@@ -54,6 +54,7 @@ class discussion_view extends StudentService {
 
 		$id= $forumPost->lcForumId;
 		$f = lcForum::load($id);
+		$t['forum'] = $f;
 		$classid = $u->activeClassTaken->id_classes;
 		if ($f->lcForumNumericLink != $classid ) { 
 			$t['message'] =  "You can not view this forum";	
@@ -67,6 +68,9 @@ class discussion_view extends StudentService {
 			if ($u->isFaculty()) { 
 				$t['perms']['dele'] = true;
 			}
+		}
+		if ($f->lcForumParentId>0) { 
+			$t['forumParent'][] = LcForum::load(array("lc_forum_id"=>$f->lcForumParentId));
 		}
 
 		if ($lc->getvars['fileid']==1) { 

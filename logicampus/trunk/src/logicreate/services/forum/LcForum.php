@@ -319,6 +319,20 @@ class LcForum extends LcForumBase {
                 $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' and lc_forum_numeric_link=0');
                 return $array;
         }
+
+        function getLcForumsStudentGroups($studentGroups) {
+		while(list($k,$v) = @each($studentGroups)) { 
+			$x[] = "lc_forum_char_link='g_$v'";
+		}
+		$where = " (";
+		$where .= implode(" or ",$x);
+		$where .= ")";
+
+                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' and '.$where);
+                return $array;
+        }
+
+
 // get forum (singular) for a class
 // based on ID
 // only one forum per class - executive decision by mgk
@@ -352,7 +366,18 @@ class LcForum extends LcForumBase {
                 }
                 return $array[0];
         }
-        
+
+        function getLcForumForClassStudentGroups($class_id,$studentGroups) {
+		while(list($k,$v) = @each($studentGroups)) { 
+			$x[] = "lc_forum_char_link='g_$v'";
+		}
+		$where = "lc_forum_numeric_link=$class_id and (";
+		$where .= implode(" or ",$x);
+		$where .= ")";
+	        $array = LcForumPeer::doSelect($where);
+                return $array[0];
+        }
+ 
         function updateStats() {
                 $db =db::getHandle();
                 // __FIX_ME

@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS `lc_forum`;
 CREATE TABLE `lc_forum` (
   `lc_forum_id` int(11) NOT NULL auto_increment,
   `lc_forum_parent_id` int(11) default NULL,
-  `lc_forum_name` varchar(30) default NULL,
+  `lc_forum_name` varchar(70) default NULL,
   `lc_forum_description` varchar(255) default NULL,
   `lc_forum_recent_post_id` int(11) default '0',
   `lc_forum_recent_post_timedate` int(11) default '0',
@@ -110,6 +110,7 @@ CREATE TABLE `lc_forum_post` (
   `lc_forum_file2_size` varchar(100) default NULL,
   `lc_forum_file2_mime` varchar(100) default NULL,
   `lc_forum_file2_count` int(11) default '0',
+  PRIMARY KEY  (`lc_forum_post_id`)
 ) TYPE=MyISAM AUTO_INCREMENT=1 ;
 
 #
