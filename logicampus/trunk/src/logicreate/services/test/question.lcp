@@ -1,0 +1,314 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'AssessmentLog.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'LC_html.php');
+
+class question extends StudentService {
+
+
+	var $presentor = 'HTMLPresentation';
+	var $data = array();  # cleaned form data
+	var $sectionTitle = 'Class Assessments';
+
+	/*
+	 * Main function which handles test taking for students. Students are brought to here from
+	 * test/take/event=start/id=$assessmentId
+	 * 
+	 * startRun in assessments sets up several sessionvars for us such as the time they student started
+	 * taking the test, the sort order of questions, and we add the assessment object to the sessionvars
+	 * to keep from having to hit the DB on every page request. The Run() below does everything from
+	 * saving the question, loading up the next question and moving forward or back.  If you modify this
+	 * file, please follow the syntax set in this file as there are a lot of nested if blocks.
+	 */
+
+	 function Run(&$db,&$u,&$lc,&$t) {
+		
+		// assume we want to display something, because no event was passed in
+		$this->displayRun($db,&$u,&$lc,&$t); 
+	}
+
+
+	 function displayRun(&$db,&$u,&$lc,&$t) {
+		$test = $u->sessionvars['testObj'];
+	 	$this->sectionTitle = $test->displayName;
+		$questionID = $lc->postvars['questionID'];
+		if ($questionID=='') {  
+			$questionID = $lc->getvars['qid'];
+		}
+		# If student clicks on a link to a question, load that question
+		if ($questionID) {
+			$qst = AssessmentQuestion::load($questionID, $u->activeClassTaken->id_classes);
+
+	 	# Try to load up the previous answer if there is one
+			$answer = AssessmentAnswerPeer::doSelect("assessment_question_id='$questionID' AND
+			student_id='".$u->username."' AND id_classes='".$u->activeClassTaken->id_classes."'" );
+
+			$hasOldAnswer = FALSE;
+			if ($answer) {
+				$hasOldAnswer = TRUE;
+			}
+
+		}
+		
+		# Does the user have permission to take this question?
+		if ($test->assessmentId != $qst->assessmentId) {
+
+			# Denied permission to question, how did they get here anyway?
+			$lc->templateName = 'question_error';
+			$t['message'] = 'You do not have permission to access this question.';
+			$t['message'] .= '<br><a href="'.APP_URL.'test/take/">Back to Assessments</a>';
+			# load up their last log entry and write the stop date to it
+			if (is_object($test)) { 
+				$log = $test->getLastLogEntry($u->username);
+				#$debug($log); exit();
+				$log->endDate = time();
+				$log->save();
+			}
+
+			unset($u->sessionvars['testObj']);
+			unset($u->sessionvars['test_start_date']);
+			unset($u->sessionvars['questionOrder']);
+			return;
+		}
+
+# Send question to the template
+# If there is no $lc->getvars['qid'] we do not have a $qst object
+# so we need to figure out the next question
+		$t['q'] = $qst;
+
+# Is the user in the proper time frame to answer another question?
+		if ($test->canTake($u->sessionvars['test_date_start']) ) {
+
+
+	# Switch out the template for the right question
+			switch($qst->questionType) {
+				case QUESTION_MCHOICE:
+					$lc->templateName = 'question_mchoice';
+					$this->sectionTitle .= ' - Multiple Choice Question';
+					break;
+				case QUESTION_MATCHING:
+					$lc->templateName = 'question_matching';
+					$this->sectionTitle .= ' - Matching Question';
+					break;
+				case QUESTION_TRUEFALSE:
+					$lc->templateName = 'question_truefalse';
+					$this->sectionTitle .= ' - True / False Question';
+					break;
+				case QUESTION_ESSAY:
+					$lc->templateName = 'question_essay';
+					$this->sectionTitle .= ' - Essay Question';
+					break;
+				case QUESTION_FILLINBLANK:
+					$lc->templateName = 'question_fillinblank';
+					$this->sectionTitle .= ' - Fill in the blank';
+					break;
+				case QUESTION_MANSWER:
+					$lc->templateName = 'question_manswer';
+					$this->sectionTitle .= ' - Multiple Answer Question';
+					break;
+				default:
+					$lc->templateName = 'question_error';
+					$this->sectionTitle = 'Error';
+					$t['message'] = 'Error:  The question you are taking is not defined properly.
+					Please alert your teacher of this error.';
+					return;
+			}
+
+	# Formatting and Clean up
+			$t['q']->questionText = nl2br($t['q']->questionText);
+			$t['answer'] = $answer[0];
+		} else {
+	# Test is over, STOP
+			echo 'testover';
+				include(SERVICE_PATH.'test/take.lcp');
+				# Pass a messaage to the template so the student knows why the test ended
+				$t['testover'] = '<h3>Test Stopped</h3> The time expired on the test you were taking.
+				All of your answers were saved.';
+				$test= new Test();
+				$test->stopRun($db, $u, $lc, $t);
+			echo 'testoverend';
+			return;
+		}
+
+# Print time stuff into template
+		$end = $test->dateUnavailable;
+		$t['starttime'] = date('g:i A', $u->sessionvars['test_date_start']);
+		$t['minute_limit'] = $test->minuteLimit;
+		$t['endtime'] =  date('m-d-y h:i A', $test->dateUnavailable);
+		$totalseconds = $t['minute_limit'] * 60;
+		$start = $u->sessionvars['test_date_start'];
+		$time = time();
+
+		if ( ($end - $start) > $totalseconds ) {
+			$calc = $t['minute_limit'] - ( ($time - $start) / 60);
+			$t['minutes_remaining'] = ($calc);
+			if ($t['minutes_remaining'] < 0)
+			{
+				$t['minutes_remaining'] = 0;
+			}
+		} else {
+			$t['minutes_remaining'] = (($end - $time) / 60); 
+		}
+
+		# convert decimal time to seconds
+		$min = floor($t['minutes_remaining']);
+		$sec = $t['minutes_remaining'] - $min;
+		$sec = floor($sec * 60);
+		$t['minutes_remaining'] =  "$min:".sprintf('%02d',$sec);
+
+// get 'question 4 of x' stuff
+		$currentIdKey = array_search($t['q']->assessmentQuestionId, $u->sessionvars['questionOrder']);		
+		$t['questionNumber'] = $currentIdKey+1; // stupid - we shouldn't be using a zero-based array
+		$t['questionCount'] = count($u->sessionvars['questionOrder']);
+	 }
+
+	function resetSessionInfo(&$u) {
+		unset($u->sessionvars['test_date_start']);
+		unset($u->sessionvars['testObj']);
+		unset($u->sessionvars['questionOrder']);
+	}
+
+
+	function answerRun($db,&$u,&$lc,&$t) {  
+
+		$test = $u->sessionvars['testObj'];
+
+		// pull the question ID from the submitted form info
+		$questionID = $lc->postvars['questionID'];
+		$qst = AssessmentQuestion::load($questionID, $u->activeClassTaken->id_classes);
+
+	 	# Try to load up the previous answer if there is one
+		$answer = AssessmentAnswerPeer::doSelect("assessment_question_id='$questionID' AND
+		student_id='".$u->username."' AND id_classes='".$u->activeClassTaken->id_classes."'" );
+
+		$hasOldAnswer = FALSE;
+		if ($answer) {
+			$hasOldAnswer = TRUE;
+		}
+
+
+		# Student is re-answering a previous question
+		# Take current qst ID and move to the next one
+		if ($hasOldAnswer) {
+			$answer = $answer[0];
+			if ($qst->questionType == QUESTION_MATCHING || $qst->questionType == QUESTION_MANSWER) {
+				$answer->assessmentAnswerValues = serialize($lc->postvars['answer']);
+			} else {
+				$answer->assessmentAnswerValues = $lc->postvars['answer'];	
+			}
+
+			// MAK 10-15-2003 question->grade() calls save on the passed in
+			// answer, need we save twice in a row?
+			// $answer->save();
+
+			# Grade the answer
+			$qst->grade($answer);
+
+			unset($answer);
+		} else {
+			$answer = new AssessmentAnswer();
+			if ($qst->questionType == QUESTION_MATCHING || $qst->questionType == QUESTION_MANSWER) {
+				$answer->assessmentAnswerValues = serialize($lc->postvars['answer']);
+			} else {
+				$answer->assessmentAnswerValues = $lc->postvars['answer'];	
+			}
+
+			//__FIXME__ make database column accept nulls for points_earned
+			$answer->assessmentQuestionId = $lc->getvars['qid'];
+			$answer->studentId = $u->username;
+			$answer->idClasses = $u->activeClassTaken->id_classes;
+			$answer->assessmentId = $test->assessmentId;
+
+			//MAK 10-15-2003 question->grade() calls save on the passed in
+			// answer, need we save twice in a row?
+			//$answer->save();
+
+			# Grade the answer
+			$qst->grade($answer);
+			unset($answer);
+		}
+
+		# Do we go forward or back?
+		if ($lc->postvars['next'])  {
+			$qstId = getNextQuestionId($qst->assessmentQuestionId, $u->sessionvars['questionOrder']);		
+		}
+		
+		if ($lc->postvars['prev']) {
+			$qstId = getPrevQuestionId($qst->assessmentQuestionId, $u->sessionvars['questionOrder']);		
+		}
+		
+		# If a question ID was returned, processed, else we are out of IDs, 
+		# and need to back to the beginning, or show them a "review" page?
+		if ($qstId) {
+			$lc->postvars['questionID'] = $qstId;
+			$this->displayRun($db,&$u,&$lc,&$t);
+			return;
+#			$qst = AssessmentQuestion::load($qstId, $u->activeClassTaken->id_classes);
+#			$answer = AssessmentAnswerPeer::doSelect("assessment_question_id='".$qstId."' AND
+#				student_id='".$u->username."' AND id_classes='".$u->activeClassTaken->id_classes."'" );
+		} else {
+# Take them to the start
+			$t['url'] =
+			APP_URL.'test/take/event=start/id='.$test->assessmentId;
+			$this->presentor = 'redirectPresentation';
+			return;
+		}
+	
+	}	
+
+
+}
+
+
+
+function recurse_array($arr) {
+	while ( list($k,$v) = @each($arr) ) {
+		if ( is_array($v) ) { recurse_array($v); continue; }
+		$arr[$k] = $v;
+	}
+	return $arr;
+}
+
+# questionOrder is the sesionvar array
+function getNextQuestionId($currentId, $questionOrder) {
+	$count = count($questionOrder);
+	$currentIdKey = array_search($currentId, $questionOrder);		
+	$newKey = $currentIdKey + 1;
+	if ($newKey >= $count) {
+		return false;			
+	}
+	return $questionOrder[$newKey];
+}
+
+# $questionOrder is the sesionvar array
+function getPrevQuestionId($currentId, $questionOrder) {
+	$count = count($questionOrder);
+	$currentIdKey = array_search($currentId, $questionOrder);		
+	$newKey = $currentIdKey - 1;
+	if ($newKey < 0) {
+		return false;			
+	}
+	return $questionOrder[$newKey];
+}
+
+?>
