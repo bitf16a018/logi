@@ -209,6 +209,9 @@ class ParsedClass {
 		
 		foreach ($entity->getAttributes() as $a) {
 			$class->addAttribute( new ParsedAttribute($a->name, $a->type, $a->isPrimary() ));
+			if ( $a->isPrimary() ) {
+				$class->setPkey($a->name);
+			}
 		}
 	return $class;
 	}
