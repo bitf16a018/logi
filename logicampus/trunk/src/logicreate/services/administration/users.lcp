@@ -320,7 +320,7 @@ class users extends AdminService {
 		
 		$newuser = new lcUser();
 		$newuser->username = $arg->postvars['username'];
-		$newuser->password = $arg->postvars['password'];
+		$newuser->password = md5($arg->postvars['password']);
 		$newuser->email = $arg->postvars['email'];
 		$newuser->userType = $arg->postvars['userType'];
 		$newuser->groups[] = 'reg';     //add user to register group
@@ -516,7 +516,7 @@ class users extends AdminService {
 		$user->groups = $arg->postvars['group_opt'];
 		$user->email = $arg->postvars['email'];
 		if ( $arg->postvars[password] != "") {
-			$user->password = $arg->postvars[password];
+			$user->password = md5($arg->postvars[password]);
 		}
 
 		$user->update();
@@ -729,7 +729,7 @@ $db->query($sql);
 			}
 			$newuser = new lcUser();
 			$newuser->username = $usr;
-			$newuser->password = $pwd;
+			$newuser->password = md5($pwd);
 			$newuser->email = $usr.'@'.STUDENT_EMAIL_DOMAIN;
 			$newuser->userType = USERTYPE_STUDENT;
 
@@ -874,7 +874,7 @@ ob_end_clean();
 		while ( list ($usr,$pwd) = @each($userArray) ) {
 			$newuser = new lcUser();
 			$newuser->username = $usr;
-			$newuser->password = $pwd;
+			$newuser->password = md5($pwd);
 			$newuser->email = $usr.'@'.STUDENT_EMAIL_DOMAIN;
 			$newuser->userType = USERTYPE_STUDENT;
 
@@ -1029,7 +1029,7 @@ flush();
 			$this->cleanedArray['cellPhone'] = arrayToPhoneNumber($this->cleanedArray['cellPhone']);
 			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
 			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
-
+			$this->cleanedArray['officePhone'] = arrayToPhoneNumber($this->cleanedArray['officePhone']);
 
 			$values = $this->cleanedArray;
 		} else {
@@ -1067,7 +1067,7 @@ flush();
 			$this->cleanedArray['cellPhone'] = arrayToPhoneNumber($this->cleanedArray['cellPhone']);
 			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
 			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
-
+			$this->cleanedArray['officePhone'] = arrayToPhoneNumber($this->cleanedArray['officePhone']);
 
 
 			unset($u->sessionvars['usergroups']);
