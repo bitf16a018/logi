@@ -14,6 +14,8 @@ include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
 include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
 include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
 include_once(LIB_PATH."datagrid.php");
+include_once(LIB_PATH."ClassGroup.php");
+include_once(LIB_PATH."ClassGroupMember.php");
 
 class discussion extends StudentService {
 
@@ -32,9 +34,47 @@ class discussion extends StudentService {
 	
 
 	function Run($db,&$u,&$lc,&$t) {	
+		$forum_id = (int)$lc->getvars['forum_id'];
+
 		$k = $u->activeClassTaken->id_classes;
-		$forum = LcForum::getLcForumForClass($k);
-		$t['forumChildren'] = $forum->getLcForums();
+		if ($forum_id>0) { 
+			$forum = LcForum::load(
+				array("lc_forum_numeric_link"=>$k,'lc_forum_id'=>$forum_id)
+			);
+			// check the forum to see if it's restricted to a group
+			// then find out if we're in that group
+			// this is a little backwards...
+			$group = $forum->lcForumCharLink;
+			list($g,$groupid) = split("_",$group);
+			if ($groupid>0) { 
+				$c = classGroupMember::load(
+					array("class_group_id"=>$groupid,"student_id"=>$u->username)
+				);	
+				if (!is_object($c)) { 
+					unset($forum);
+				}
+			}
+		} else { 
+			$forum = LcForum::getLcForumForClass($k);
+		}
+		if ($forum->lcForumParentId>0) { 
+			$t['forumParent'][] = LcForum::load(array("lc_forum_id"=>$forum->lcForumParentId));
+		}
+		if (is_object($forum)) { 
+			$t['forumChildren'] = $forum->getLcForums();
+		}
+
+// groups a user is a student id
+// directly assigned by a teacher (for now - adhoc self-directed groups later?)
+		$group1 = ClassGroupMemberPeer::doSelect(" student_id='".$u->username."'");
+		$group2 = ClassGroupPeer::doSelect(" class_id='".$u->activeClassTaught->id_classes."'");
+		$groups = @array_merge($group1,$group2);
+		while(list($k,$v) = @each($groups)) { 
+			$groupList[$v->classGroupId] = $v->classGroupId;
+		}
+		$studentGroupForums = $forum->getLcForumsStudentGroups($groupList);
+
+		$t['forumChildren'] = array_merge($t['forumChildren'],$studentGroupForums);
 		$t['posts'] = $forum->getLcForumPosts();
 		$nposts = $t['posts'];
 		while(list($k,$v) = @each($nposts)) {
@@ -63,6 +103,8 @@ class discussion extends StudentService {
 'lcForumFile1Name',
 'lcForumFile1SysName',
 'lcForumFile1Size',
+'lcForumFile1Count',
+'lcForumFile2Count',
 'lcForumFile1MIME',
 'lcForumFile2Name',
 'lcForumFile2SysName',

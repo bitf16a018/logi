@@ -7,6 +7,16 @@ SYNTAX:
 
 
 #########################
+
+06/06/2004 6:15 PM - michael
+Added area in 'student management' for teachers to create subgroups of students.  
+Upon creation of each subgroup, a forum in that classroom is created, and only members of that group have the ability to view that forum.  Forum navigation still needs to be cleaned up some, but it's functional.  
+setup.sql changes in forum, classmgr
+/lib now has ClassGroup.php and ClassGroupMember.php
+/classmgr has new administrative files for studentgroups
+/classroom has updated discussion* files
+
+-------------------------
 06/04/2004 10:15 PM - michael
 Added TCCD changes to the standard logicampus tree.  This set of changes is an upgrade to the forum system to allow for 2 file attachments per post.  I need to find where the PBDO is defined, as the table definitions need to change.  Changed files in /forum (pbdo objects) and classroom (discussion*.lcp files and templates)
 -------------------------

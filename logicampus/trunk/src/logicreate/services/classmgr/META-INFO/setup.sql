@@ -235,3 +235,19 @@ CREATE TABLE classdoclib_Trash (
   KEY owner (owner),
   KEY class_id (class_id)
 ) TYPE=MyISAM;
+
+CREATE TABLE `class_group` (
+  `class_group_id` int(10) unsigned NOT NULL auto_increment,
+  `class_group_name` varchar(100) NOT NULL default '',
+  `class_id` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`class_group_id`)
+) TYPE=MyISAM; 
+
+CREATE TABLE `class_group_member` (
+  `class_group_member_id` int(10) unsigned NOT NULL auto_increment,
+  `class_group_id` int(11) NOT NULL default '0',
+  `student_id` varchar(32) NOT NULL default '0',
+  PRIMARY KEY  (`class_group_member_id`)
+) TYPE=MyISAM; 
+
+

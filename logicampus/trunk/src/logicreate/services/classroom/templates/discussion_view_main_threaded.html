@@ -12,7 +12,70 @@
 	<table width="98%">
 		<tr>
 			<td align="left">
-				<h3>Classroom forum</h3>
+				<h3><?=$t['forum']->lcForumName;?></h3>
+
+
+	<?
+	if ($t['forumParent']) { 
+	?>
+		<div class='colorbar'>Parent forums</div>
+		<?
+		while(list($k,$val) = each($t['forumParent'])) {
+		?>
+			<table width='100%'>
+				<tr>
+					<td valign='top' width='70%'>
+						<a href="<?=appurl("classroom/discussion/forum_id=".$val->lcForumId);?>"><?=$val->lcForumName;?></a>
+					</td>	
+					<!--
+					<td valign='top' width='6%'>
+						<?=$val->lcRecentPoster;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumThreadCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					-->
+				</tr>
+				<tr>
+					<td colspan='4'>
+						<?=$val->lcForumDescription;?>
+					</td>
+				</tr>
+				<?  if ($t['forumChildren2'][$val->lcForumId]) { ?>
+				<tr>
+					<td colspan='4'>
+						Sub-forums: 
+						<?while(list($a,$b) = each($t['forumChildren2'][$val->lcForumId])) { ?>
+						<a href="<?=appurl("classroom/discussion_view/".$b->lcForumId);?>"><?=$b->lcForumName;?></a>
+						<? } ?>
+					</td>
+				</tr>
+				<? } ?>
+			</table>
+
+
+
+			<? } ?>
+			<? } ?>
+
+
+
+
+
+
+
+
+
+
 			</td>
 		</tr>
 		<tr>
