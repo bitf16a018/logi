@@ -132,7 +132,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		教材 和 课程
 	</message>
-	<!--Content &amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -472,6 +472,36 @@
 	</message>
 	<!--Classroom Manager-->
 	<usage id ="Classroom Manager" file="../src/logicreate/services/classmgr/announcements.lcp" line="182"/>
+
+
+	<message id ="Prev" domain="system" status="">
+		Prev
+	</message>
+	<!--Prev-->
+	<usage id ="Prev" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="5"/>
+	<usage id ="Prev" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="29"/>
+
+
+	<message id ="Next" domain="system" status="">
+		Next
+	</message>
+	<!--Next-->
+	<usage id ="Next" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="6"/>
+	<usage id ="Next" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="30"/>
+
+
+	<message id ="FAQ" domain="system" status="">
+		FAQ
+	</message>
+	<!--FAQ-->
+	<usage id ="FAQ" file="../src/logicreate/lib/pellet.php" line="527"/>
+
+
+	<message id ="File Resource Manager" domain="system" status="">
+		File Resource Manager
+	</message>
+	<!--File Resource Manager-->
+	<usage id ="File Resource Manager" file="../src/logicreate/lib/pellet.php" line="528"/>
 
 </language>
 

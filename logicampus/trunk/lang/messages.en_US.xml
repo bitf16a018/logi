@@ -68,7 +68,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Content &amp; Lesson Links
 	</message>
-	<!--Content &amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
