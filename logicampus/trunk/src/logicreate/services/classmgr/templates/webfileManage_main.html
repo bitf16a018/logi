@@ -1,0 +1,39 @@
+<h3>Web file manager (public)</h3>
+Use this area to add/edit/delete files available to any member of the public.  This will be intended primarily
+for documents/files which instructors may want to link in on pages they are making themselves (graphics/photos/public documents/etc).  If you need to assign files only to students in a particular class, use the 'fileManage' app.
+<BR><BR>
+Files uploaded here will be associated with a particular instructor.  Files uploaded in the fileManage app will be associated with a particular class/section, not a particular instructor.
+
+<h3>Add a new file</h3>
+<form method='post'>
+File description: <input type='text' name='info[description]'>
+File: <input type='file' name='info[filename]'><BR>
+<input type='submit' value='Upload'>
+</form>
+
+<h3>List of current files</h3>
+<table border='1' width='100%'>
+<tr>
+	<td></td>
+	<td>File name</td>
+	<td>Description</td>
+	<td>Size</td>
+	<td>d/ls</td>
+</tr>
+<tr class='row2'>
+	<td>del</td>
+	<td>foo.doc</td>
+	<td>Contract for Chapter 3</td>
+	<td>61 k</td>
+	<td>17</td>
+</tr>
+<tr class='row1'>
+	<td>del</td>
+	<td>mgk.pdf</td>
+	<td>PDF of Arby's menu</td>
+	<td>142 k</td>
+	<td>26</td>
+</tr>
+</table>
+
+

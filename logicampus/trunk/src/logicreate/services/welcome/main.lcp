@@ -1,0 +1,25 @@
+<?
+
+class welcome extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,&$lc,&$t) {
+		$lc->templateStyle = 'private';
+		if ( $u->isAnonymous() ) {
+			$this->presentor = 'native';
+		}
+		$lc->templateName = 'welcome_main';
+	}
+
+
+
+	function presentation (&$obj,&$t) {
+		//put the template and content together to form a 
+		// basic html page
+		include(TEMPLATE_PATH."welcome_login.html.php");
+	}
+
+
+}
+?>

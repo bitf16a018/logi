@@ -1,0 +1,158 @@
+<?php
+
+include_once(LIB_PATH.'classLessonObjectiveObj.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+
+class LessonObjectives extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+	var $applinks = array (
+		'List Objectives' => 'lessonObjectives/',
+		'Add Objective' => 'lessonObjectives/event=edit',
+		'Add a Lesson' => 'lessonManager/event=edit/'
+	);
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $inactivelinks = array( 'Objectives' );
+
+	/**
+	 * Show the main page of the lesson manager
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		if ($lc->getvars['dgorder'] == '')
+		{	$lc->getvars['dgorder'] = 'i_sort';
+		}
+
+		$lc->templateName = 'lessonObjectives_lessonObjectives';
+		if (!$u->activeClassTaught->id_classes) {
+			$t['error'] = '<p>You are not currently inside a particular class. Please go back to the <a href="'.MOD_URL.'">classroom manager</a> and try again.</p>';
+			return;
+		}
+		
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		$datagrid->column = 'objective,f_hide,class_objectives.id_class_objectives,i_sort';
+		$datagrid->table = 'class_objectives';
+		$datagrid->headers = array(
+			'objective' => 'Objective',
+			'f_hide' => 'Hidden',
+			'id_class_lessons' => 'Lesson Title',
+			'i_sort' => 'Sort Order',
+			'links' => ' '
+		);
+		$datagrid->rowsperpage = 20;
+		//$datagrid->joins = ' left join class_lesson_objectives on class_lesson_objectives.id_class_lesson=class_objectives.id_class_objectives';
+		$datagrid->where = ' class_objectives.id_classes='.$u->activeClassTaught->id_classes;
+		$datagrid->ignore = array('id_classes','title', 'id_class_objectives');
+		
+		$datagrid->sortColumns = array('objective','id_class_lessons', 'f_hide', 'i_sort');
+		$datagrid->overrideColumn('<?=($title ? "<a href=\"'.MOD_URL.'lessonManager/event=edit/id=$id_class_lessons\">$title</a>" : "<i>no lesson assigned</i>");?>', 'id_class_lessons');
+		$datagrid->postpendColumn('<a href="<?=appurl("classmgr/lessonObjectives/event=edit/id=$id_class_objectives");?>">edit</a> | <a href="<?=appurl("classmgr/lessonObjectives/event=delete/id=$id_class_objectives");?>" onclick="if (confirm(\'Are you SURE you want to delete this objective?\')) { return true; } else { return false; }">delete</a>', 'links');
+
+		$datagrid->overrideColumn('<?=($f_hide ? "Yes" : "No");?>', 'f_hide');
+		$this->sectionTitle = 'Course Objectives';
+		$this->inactivelinks[] = 'List Objectives';
+		$t['table'] = $datagrid->toHTML();
+
+	}
+
+
+	/**
+	 * show the editing page
+	 */
+	function editRun(&$db,&$u,&$lc,&$t) {
+
+		if ($lc->getvars['id'] && !$this->checkAuth($lc->getvars['id'],$db,$u,$t)) return;
+
+		$obj = classLessonObjectiveObj::_getFromDB($lc->getvars['id'], 'id_class_objectives');
+		$lessonid = $obj->id_class_lessons;
+		if (!is_object($obj)) $obj = new classLessonObjectiveObj();
+		$t['obj'] = $obj;
+
+		if ( $lc->postvars['submit'] ) {
+			$obj = classLessonObjectiveObj::_getFromDB($lc->postvars['oid'], 'id_class_objectives');
+			if (!is_object($obj)) $obj = new classLessonObjectiveObj();
+			$length = strlen($lc->postvars['objective']);
+			if ( $length < 1 || $length > 255 )
+				$t['error'] = "The objective must be between 1 and 255 characters.";
+			if (!$t['error']) {
+				$this->cleanedArray = $lc->postvars;
+				$this->cleanedArray['id_classes'] = $u->activeClassTaught->id_classes;
+				$this->cleanedArray['id_class_objectives'] = $lc->postvars['oid'];
+				$obj->_loadArray($this->cleanedArray);
+				$obj->_saveToDB();
+				$t['msg'] = 'The objective has been saved.';
+				
+				// If they want to add another one, just drop down and give them the form.
+				// MAK 8-7-03
+				// don't just drop down, redirect so we lose the getvars id=x
+				// else we will just continue to edit x even though we say 'add another'
+				if ( !preg_match("/Add Another/", $lc->postvars['submit']) ) {
+					$this->run($db,$u,$lc,$t);
+					return;
+				} else if ($lc->postvars['oid'] != '') {
+					unset($lc->getvars);
+					unset($lc->postvars);
+					$this->editRun($db,$u,$lc,$t);
+					return;
+				}
+				unset($t['obj']);
+			}
+		}
+		
+		if ($obj->id_class_objectives) {
+			$this->sectionTitle = 'Edit Objective';
+		} else {
+			$this->sectionTitle = 'Add Objective';
+			$this->inactivelinks[] = 'Add Objective';
+		}
+
+		/*
+		$f->getForm('addobjective', $obj);
+		$t['form'] = $f->toHTML();
+		*/
+
+		$lc->templateName = 'lessonObjectives_edit';
+	}
+
+	// make sure we got a valid id, and delete the entry if we did.
+	function deleteRun(&$db,&$u,&$lc,&$t)
+	{
+		if (!$this->checkAuth($lc->getvars['id'],$db,$u,$t)) return;
+
+		$lc->templateStyle = 'private';		
+
+		$obj = classLessonObjectiveObj::_getFromDB($lc->getvars['id'], 'id_class_objectives');
+		if (is_object($obj)) {
+			$obj->_deleteToDB();
+			$t['msg'] = 'Objective was deleted successfully.';
+		} else {
+			$t['error'] = 'Objective does not exist!';
+		}
+		$this->run($db,$u,$lc,$t);
+	}
+
+	function checkAuth($objectiveid,&$db,&$u,&$t) {
+		$db->queryOne("select count(id_class_objectives) as cnt
+			from class_objectives
+			where id_classes='{$u->activeClassTaught->id_classes}'
+			and id_class_objectives='{$objectiveid}'");
+		if (!$db->Record['cnt']) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to modify that objective.";
+			return false;
+		} else return true;
+	}
+
+}
+
+?>

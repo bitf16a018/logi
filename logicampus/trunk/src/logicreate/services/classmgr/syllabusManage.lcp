@@ -1,0 +1,100 @@
+<?
+/*
+ *
+ * Syllabus will pull standard information from a
+ * database - that info will be administered by CDL
+ * staff (orientation requirements, textbook info,
+ * number of on-campus exams, etc).  Faculty using
+ * this service will be able to put in one generic
+ * textarea per course they are teaching.  If there
+ * is to be a different setup (distinct fields for a
+ * syllabus) we need to know.
+ *
+ */
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'classSyllabusObj.php');
+
+class syllabusManage extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Syllabus Manager';
+	var $navlinks = array(
+		'Classroom Manager' => 'display/',
+		'Calendar' => 'cal/'
+	);
+	var $inactivelinks = array( 'Syllabus' );
+
+/*
+ *
+ * Show the main class syllabus.
+ * 
+ * Input data: classID
+ * Output data: syllabus
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='syllabusManage_main';
+
+
+			if ($lc->postvars['submit']) {
+				$syl = $lc->postvars;
+				$syl = array_map( 'stripslashes', $syl );
+			} else {
+				$syl = classSyllabusObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
+			}
+
+			$f = new SiteForm();	
+			$f->getForm('classsyllabus', $syl);
+			$t['form'] = $f->ToHTML();
+
+		}
+
+
+/*
+ *
+ * Update the syllabus info in the database.
+ * 
+ * Input data: updated syllabus info
+ * Output data: confirmation message
+ *
+ */
+		function updateRun(&$db,&$u,&$lc,&$t) {
+
+			$f = new Siteform();
+			$t['error'] = $f->validateForm('classsyllabus', $lc->postvars);
+			if ( !$f->hasErrors() && $u->activeClassTaught->id_classes ) {
+
+				$syllabus = classSyllabusObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
+				if (!is_object($syllabus)) $syllabus = new classSyllabusObj();
+				$syllabus->_loadArray($f->cleanedArray);
+				$syllabus->id_classes = $u->activeClassTaught->id_classes;
+				$syllabus->_saveToDB();
+				$t['msg'] = 'Syllabus saved.';
+			}
+
+			$this->Run($db,$u,$lc,$t);
+			
+		}
+
+/*
+ *
+ * Grab current generic syllabus for this ID, and show it in a
+ * form to update the syllabus.  Possibly 'preview' mode.  Do
+ * we integrate spelling in here (preview mode would show
+ * spelling mistakes?).
+ * 
+ * Input data: syllabus ID
+ * Output data: update form for the syllabus
+ *
+ */
+		function viewSyllabusManageRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='syllabusManage_viewSyllabusManage';
+
+		}
+
+
+
+}
+
+?>

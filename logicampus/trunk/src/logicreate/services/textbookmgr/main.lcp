@@ -1,0 +1,418 @@
+<?
+/*
+ *
+ * Default service
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+include_once(LIB_PATH.'Textbook.php');
+include_once(LIB_PATH.'TextbookClasses.php');
+
+class textbookmgr extends BasicAuth {
+
+	var $presentor = 'htmlPresentation';
+
+	var $sectionTitle = 'Textbook Manager';
+	var $navlinks = array(
+		'Text Book Manager' => 'main/',
+		
+	);
+
+	var $applinks = array(
+		'View estimates'=>'viewestimates/',
+		'Estimates'=>'estimates/',
+		'Duplicate Books' => 'dup'
+	);
+	var $inactivelinks = array(
+	);
+
+	function textbookmgr()
+	{
+		global  $lcObj;
+		$lcObj->templateStyle = 'private';
+		
+	}
+	
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'main_main';
+
+		if ($lc->postvars['semester']) { 	
+			$u->sessionvars['semesterid'] = (int)$lc->postvars['semester'];
+		}
+		$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+
+		$f = new Siteform();
+		$arr = array( 'semester' => $t['semid'] );
+		$f->getForm('semester', $arr);
+		$f->requiredMessage = '';
+		$t['semform'] = $f->toHTML();
+
+		$dg = new searchGrid($this->module, $this->serviceName);
+		$dg->table = 'textbook_classes as tc';
+		$dg->column = 'tc.id_textbook_classes, c.id_classes,
+			o.courseName, o.courseFamily, o.courseNumber,
+			CONCAT(p.lastname,", ",p.firstname) as name, tc.title,
+			tc.status, t.noTextbooks';
+		$dg->joins = 'right join classes as c on c.id_classes=tc.id_classes
+			left join textbook as t on t.id_classes=tc.id_classes
+			inner join courses as o on o.id_courses=c.id_courses
+			inner join profile as p on p.username=c.facultyId';
+		$dg->where = " c.id_semesters=".$t['semid'];
+		$dg->ignore = array( 'lastname', 'id_textbook_classes', 'courseNumber', 'courseFamily', 'noTextbooks' );
+
+		$dg->overrideColumn( '<?=$lastname.", ".$firstname;?>', 'firstname' );
+		$dg->overrideColumn( '<a href="<?=APP_URL?>textbookmgr/main/event=view/id=<?=$id_classes?>"><?=$courseName;?></a>', 'courseName' );
+		$dg->overrideColumn( '<? switch ( $status ) {
+			case 1: print "New";      break;
+			case 2: print "Pending";  break;
+			case 3: print "Approved"; break;
+			case 4: print "Waiting on instructor"; break;
+			default: print $noTextbooks ? " No Textbooks" : "-";
+		}
+		?>', 'status' );
+
+		if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 	
+		{
+			$dg->postpendColumn( '<? if ( $id_textbook_classes ) { ?><a href="<?=modurl("main/event=edit/id=$id_textbook_classes/id_classes=$id_classes");?>">Edit</a> <? } else { ?><i>N/A</i><? } ?>', ' ' );
+		}
+		$dg->headers = array(
+			'id_classes' => 'Class ID',
+			'courseName' => 'Class Title',
+			'name' => 'Instructor',
+			'status' => 'Status',
+			'title' => 'Item Name'
+		);
+		$dg->sortColumns = array('id_classes', 'courseName', 'name', 'status', 'title');
+
+		$dg->addInstructorSelectFilter('Instructor', 'p.username');
+		$dg->addCourseFamilyNumberSelectFilter('Course', 'o.id_courses');
+		$dg->add4StatusSelectFilter('Status', 'tc.status');
+		$dg->addInputFilter('Class ID', 'tc.id_classes', true);
+		$dg->addInputFilter('Item Title', 'tc.title');
+		$dg->addInputFilter('Item Author', 'tc.author');
+		$dg->addInputFilter('Item Publisher', 'tc.publisher');
+		$dg->addInputFilter('Item ISBN', 'tc.isbn');
+
+		$t['table'] = $dg->toHTML();
+
+		// stupid hack to get a feedback message
+		if ($u->sessionvars['message']) {
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
+		}
+
+		if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 	
+		{
+			$t['isadmin'] = TRUE;
+		}
+	}
+
+
+	function editRun(&$db,&$u,&$lc,&$t) {
+		if (!in_array('tbadmin', $u->groups) || !in_array('admin', $u->groups)) 
+		{
+			$t['message'] = '<h3>Permission Error</h3>Only textbook admins or administrators can modify information.';	
+			$lc->templateName = 'main_error';
+			return;
+		}
+
+		$lc->templateName = 'main_edit';
+		$this->sectionTitle = 'Edit Item';
+		
+		$id_textbook_classes = (int)$lc->getvars['id'];
+		$id_classes = (int)$lc->getvars['class'];
+
+		if ($lc->getvars['updatecampus'])
+		{
+			if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 	
+			{
+			$campusObj = Textbook::load(array('id_classes'=>$lc->getvars['id_classes']));
+			$campuses = new SiteForm();
+			$campuses->getForm('textbookcampuses', $campusObj);
+			$campuses->addHidden('id', $campusObj->idTextbook);
+			$this->sectionTitle = 'Update Campus Information';
+			$t['campusform'] = $campuses->ToHTML();					
+			} else {
+				$t['message'] = '<h3>Permission Error</h3>Only textbook admins or administrators can update campus information';
+			}
+		} else {
+			if (!$lc->postvars)
+			{
+				$book = TextbookClasses::load( $id_textbook_classes );
+		
+				if ( !is_object($book) && $id_classes ) {
+					$book = new TextbookClasses();
+					$book->set( 'id_classes', $id_classes );
+					$this->sectionTitle = 'Add Item';
+				} else if ( !is_object($book) ) {
+					$this->presentor = 'errorMessage';
+					$t['message'] = 'Unable to load or create book.';
+					return;
+				}
+			} else {
+				$book = $lc->postvars;
+			}			
+			$this->sectionTitle = 'Adding Class Material ';
+			$f = new Siteform();
+			$f->getForm('book', $book);
+			$t['form'] = $f->toHTML();
+		}
+		
+		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id_classes']."'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+
+		$t['facultyId'] = $db->Record['facultyId'];			
+
+	}
+
+	function addRun(&$db, &$u, &$lc, &$t)
+	{
+		if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 
+		{
+			$f = new SiteForm();
+			$f->getForm('book', $lc->postvars);		
+			$t['form'] = $f->ToHTML();
+			$lc->templateName = 'main_edit';
+			
+			$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id_classes']."'";
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			$this->sectionTitle = 'Adding Class Material ';
+			$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+
+			$t['facultyId'] = $db->Record['facultyId'];		
+		} else {
+			$t['message'] = '<h3>Error</h3>Only text book admins or adminstrators can add books to the system.';
+			$lc->templateName = 'main_error';
+			return;
+		}
+	}
+	
+	function updateRun(&$db,&$u,&$lc,&$t) {
+		if (!in_array('tbadmin', $u->groups) || !in_array('admin', $u->groups)) 
+		{
+			$t['message'] = '<h3>Permission Error</h3>Only textbook admins or administrators can modify information.';	
+			$lc->templateName = 'main_error';
+			return;
+		}
+
+		$f = new SiteForm();
+		$f->stripslashes = true;
+		$t['error'] = $f->validateForm('book', &$lc->postvars);
+		if ($t['error'])
+		{
+			if ($lc->getvars['event'] == 'add')
+			{
+				$this->addRun($db, $u, $lc, $t);
+				return;
+			}
+			
+			if ($lc->getvars['event'] == 'edit')
+			{
+				$this->editRun($db, $u, $lc, $t);
+				return ;
+			}
+		}
+
+		if ($lc->getvars['event'] == 'add')
+		{
+			$book = new TextbookClasses();
+			$book->idClasses = $lc->getvars['id_classes'];
+		}
+
+		if ($lc->getvars['event'] == 'edit')
+		{
+		
+			$id_textbook_classes = (int)$lc->getvars['id'];
+			$id_classes = (int)$lc->getvars['class'];
+	
+			$book = TextbookClasses::load( $id_textbook_classes );
+	
+			if ( !is_object($book) && $id_classes ) {
+				$book = new TextbookClasses();
+				$book->set( 'id_classes', $id_classes );
+			} else if ( !is_object($book) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'Unable to load or create book.';
+				return;
+			}
+		}
+	if ($lc->postvars['status'] == 3 && ($book->status == 1 || $book->status == 2 || $book->status == 3))
+	{
+		$sql = "
+		SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 
+		FROM classes AS a 
+		INNER JOIN courses as b ON a.id_courses=b.id_courses 
+		WHERE a.id_classes='".$book->idClasses."'";
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		if (is_array($db->Record))
+		{
+			$sql = '
+			INSERT INTO textbook_estimates_data
+			SET
+			id_textbook_classes='.$id_textbook_classes.',
+			textbook_estimates_key='.$lc->postvars['estimationlist'].',
+			instructor=\''.$db->Record['facultyId'].'\',
+			bundled=\''.(int)$lc->postvars['bundled'].'\',
+			isbn=\''.$lc->postvars['isbn'].'\',
+			edition=\''.$lc->postvars['edition'].'\',
+			title=\''.addslashes($lc->postvars['title']).'\',
+			courseFamily=\''.$db->Record['courseFamily'].'\',
+			courseNumber=\''.$db->Record['courseNumber'].'\',
+			author=\''.$lc->postvars['author'].'\',
+			note=\''.addslashes($lc->postvars['note']).'\',
+			type=\''.$lc->postvars['type'].'\'
+			';
+			
+			$db->query($sql);
+			
+		} else
+		{	echo 'c ould not insert into estimation table';
+		}
+	}
+	
+		# Notify instructor of change if needed
+		if ($lc->postvars['status'] != $book->status)
+		{
+			/**
+			 *	I need this information for Private messaging.
+			 *	@fix 10/17/2003 can't rely on $u->sessionvar['sessionid']
+			 *		 so we have to go the long way.
+			 */
+			$sql = '
+			SELECT CONCAT(B.semesterTerm, " ", B.semesterYear) as semesterLabel
+			FROM semesters as B
+			INNER JOIN classes as A on B.id_semesters = A.id_semesters
+			WHERE A.id_classes='.$book->idClasses. ' LIMIT 1';
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			$semester_label = $db->Record['semesterLabel'];
+			
+			$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$book->idClasses."'";
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			include_once(SERVICE_PATH."pm/privmess.php");
+			$mess = new privMess();
+			$mess->subject = $semester_label. ': Textbook status changed to '.getStatus($lc->postvars['status']).' on class '.$db->Record['courseFamily'].$db->Record['courseNumber'];
+			$mess->message = $semester_label.': '.$u->profile->get('firstname').' '.$u->profile->get('lastname'). ' has reviewed your submission and the status of the material listed below has changed to "'.getStatus($lc->postvars['status']).'" in your '.$db->Record['courseName'].' - '.$db->Record['courseFamily'].$db->Record['courseNumber'];
+			$mess->message .= "\n\nMaterial:\n".$book->title. ' - '. $book->author;
+			
+			// don't tack on this retarded statement if nothing exists.
+			if ($obj->note)
+			{	$mess->message .="\n\nThe following note was appeneded:\n\n".$obj->note;
+			}
+	
+			$mess->sentTime = time();
+	
+			$mess->messageFrom = $u->username;
+			
+			$mess->messageTo = $db->Record['facultyId'];
+			$mess->add();
+			
+		}
+		
+		// strip them slashes
+		foreach ( $lc->postvars as $index => $pv ) {
+			$lc->postvars[$index] = stripslashes($pv);
+		}
+
+		$book->setArray( $lc->postvars );
+		if ( $lc->postvars['required'] == 0 ) unset($book->required);
+		if ( $lc->postvars['bundled'] == 0 ) unset($book->bundled);
+		
+		/** 
+		 *	Since this uses setArray, when someone wants to clear out the notes
+		 *	it won't let them, so i'm applying this bandage.
+		 */
+		$book->set('note', $lc->postvars['note']);
+		
+		$book->save();
+		$t['url'] = APP_URL.'textbookmgr/main/event=view/id='.$book->idClasses;
+		$this->presentor = 'redirectPresentation';
+		return;
+			
+	}
+
+	function viewRun($db, &$u, &$lc, &$t)
+	{
+		$lc->templateName = 'main_view';
+		$t['data'] =
+		TextbookClassesPeer::doSelect("id_classes='".$lc->getvars['id']."' ORDER BY title ASC");
+		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id']."'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+		$t['id_classes'] = $lc->getvars['id'];
+		if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 
+		{
+			$this->applinks['Duplicate Books'] = 'dup';
+		}
+
+		if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 	
+		{
+			$t['isadmin'] = TRUE;
+		}
+		
+	}
+	
+	
+	function deleteRun($db, &$u, &$lc, &$t)
+	{
+		if (!in_array('tbadmin', $u->groups) || !in_array('admin', $u->groups)) 
+		{
+			$t['message'] = '<h3>Permission Error</h3>Only textbook admins or administrators can modify information.';	
+			$lc->templateName = 'main_error';
+			return;
+		}
+
+			$book = TextbookClasses::load($lc->getvars['id']);
+			TextbookClassesPeer::doDelete($book, true);
+			$t['message'] = 'Textbook entry deleted';
+			$lc->getvars['id'] = $lc->getvars['id_classes'];
+		
+		$this->viewRun($db, $u, $lc, $t);
+		return;
+	}
+	
+	function changeCampusesRun($db, &$u, &$lc, &$t)
+	{
+	
+	}
+	
+	function updateCampusesRun($db, &$u, &$lc, &$t)
+	{
+		
+		if (!$lc->postvars['id'])
+		{
+			$campus = new Textbook();
+		} else {
+			$campus = Textbook::load($lc->postvars['id']);
+		}
+			
+		
+		$campus->setArray($lc->postvars);
+		
+		$campus->idClasses = $lc->getvars['id_classes'];
+		$campus->idTextbook = $lc->postvars['id'];
+		
+		$campus->save();
+		
+		$t['url'] = APP_URL.'textbookmgr/main/event=view/id='.$lc->getvars['id_classes'];
+		$this->presentor = 'redirectPresentation';
+	}
+}
+
+?>

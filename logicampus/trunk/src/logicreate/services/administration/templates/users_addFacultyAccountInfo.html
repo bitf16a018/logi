@@ -1,0 +1,14 @@
+<?=$t['sectionheader']?>
+
+<h3>Faculty Course Families</h3>
+
+<?
+if ($t['error'])
+{ ?>
+	
+<span style="color: red"><?=$t['error'];?></span>
+<? } ?>
+
+<br>
+<b>Modifying course families for <?=$t['user']?>.<br>
+<?=$t['form']?>

@@ -1,0 +1,26 @@
+<?
+
+	if ($t[error]) { ?>
+		<h3><?=$t[error]?></h3>
+<?	} else { ?>
+
+<center><h2>User Photo Gallery</h2></center>
+
+Welcome to our user photo gallery.  The following pictures were uploaded by our registered users.  If you are a member feel free to take advantage of this feature by clicking on the link "Your Photo Gallery" in the menu.  The pictures are sorted by newest to oldest to make it easy to know what was added to the site.  <br><br>
+
+<?= $t[galleryNotes]?>
+<p>
+<table border="0" width="100%" cellpadding="4" cellspacing="1">
+	<tr>
+		<td colspan="3" class="header2" align="center">
+			<h3>Pictures</h3>
+		</td>
+	</tr>
+	<? if (!$t[gallery]) { echo "No user photos uploaded at this time."; }  else { echo $t[gallery]; } ?>
+</table>
+<p>
+<?= $t[navigation];?>
+<p>
+<a href="<?=APP_URL;?>photo" style="font-decoration:none;">back to Photo Gallery</a>
+
+<? } ?>

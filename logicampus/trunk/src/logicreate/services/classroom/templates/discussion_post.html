@@ -1,0 +1,27 @@
+<?=$t['sectionheader'];?>
+<center><table width="98%"><tr><td align="left">
+
+<h4>Post a message</h4>
+</td></tr>
+<tr>
+	<td>
+		<Form method="post" action="<?=appurl("classroom/discussion_post/event=post");?>">
+		<table>
+
+			<tr>
+				<td><b>Title</b></td>
+				<td><input type="text" name="forum[title]" size="40" maxlength="255"></td>
+			</tr>
+			<tr>
+				<td valign="top"><b>Message</b></td>
+				<td><textarea name="forum[message]" rows="10" cols="60"></textarea></td>
+			</tr>
+		</table>
+
+		<input type="submit" value="Submit">
+	</form>
+	
+	</td>
+</tr>
+
+</table>

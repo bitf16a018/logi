@@ -1,0 +1,59 @@
+<?=$t['sectionheader'];?>
+<?php
+	//debug($t['open']);
+	category
+?>
+<h5>Open issues</h5>
+
+	<table cellpadding="2" cellspacing="0" border="0" width="100%" style="border: 1px solid silver;">
+	<? if (is_array($t['open'])) { ?>
+	<tr class="tabletitle">
+		<td><B>Incident #</B></td>
+		<td><B>Type</B></td>
+		<td><B>Summary</B></td>
+		<td><B>Date Opened</B></td>
+		<td align="center"><B>Messages</B></td>
+	</tr>
+	<? while(list($k,$v) = @each($t['open'])) { $i++; ?>
+	<tr>
+		<td width="110" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>">#<?=$v['helpdesk_id'];?></td>
+		<td width="110" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=$t['categories'][$v['category']];?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><a href="<?=appurl("helpdesk/helpdeskView/".$v['helpdesk_id']);?>"><?=substr($v['summary'],0,30)."...";?></a></td>
+		<td width="150" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=date("M j, Y g:i A",$v['timedate_open']);?></td>
+		<td width="30" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" align="center"><?=$v['activity'];?></td>
+	</tr>
+	<? } ?>
+	<? } else { ?>
+	
+	<tr><td align="center"><B>No open items</B></td></tr>
+	<? } ?>
+	</table>
+
+	<br>
+
+<h5>Closed issues</h5>
+
+	<table cellpadding="2" cellspacing="0" border="0" width="100%" style="border: 1px solid silver;">
+	<? if (is_array($t['closed'])) { ?>
+	<tr style="background-color: #FFDE8B; padding: 4px;">
+		<td><B>Incident #</B></td>
+		<td><B>Type</B></td>
+		<td><B>Summary</B></td>
+		<td><B>Date Closed</B></td>
+		<td><B>Date Opened</B></td>
+		<td align="center"><B>Messages</B></td>
+	</tr>
+	<? while(list($k,$v) = @each($t['closed'])) { $i++; ?>
+	<tr>
+		<td width="110" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>">#<?=$v['helpdesk_id'];?></td>
+		<td width="110" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=$t['categories'][$v['category']];?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><a href="<?=appurl("helpdesk/helpdeskView/".$v['helpdesk_id']);?>"><?=substr($v['summary'],0,30)."...";?></a></td>
+		<td width="150" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=date("M j, Y g:i A",$v['timedate_close']);?></td>
+		<td width="150" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=date("M j, Y g:i A",$v['timedate_open']);?></td>
+		<td width="30" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" align="center"><?=$v['activity'];?></td>
+	</tr>
+	<? } ?>
+	<? } else { ?>
+	<tr><td align="center"><B>No closed items</B></td></tr>
+	<? } ?>
+	</table>

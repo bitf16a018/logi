@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<table border="0" cellpadding="0" cellspacing="0" width="650">
+      <tr><td class="selectedTab">
+
+		Mailing List Administration
+
+      </td></tr>
+
+      <tr><td width="650" class="grey">
+Mailing list are associated with "groups" in the system.  For each mailing list you create, you will need to associate it to a specific group.
+	<table border="1" width="100%"><tr>
+	<td width="50%" class="white" rowspan="2" valign="top">
+	<?=$t['msg']?>
+	Click a list below to edit or delete that list.<br>
+		<?=$t['html']?>
+	</td>
+	<td width="50%" class="white" align="middle">
+	<? if ($t['error']) { ?>
+		<div style="color: red;">
+		<ul>
+		<?=$t['error'];?>
+		</ul>
+		</div>
+		<? } ?>
+	<table width="100%">
+	<?
+	if ($t['list']['pkey'] == '')
+	{ ?>
+	<tr>
+	<td class="tab" colspan="2" >IMPORT EXISTING EMAILS</TD>
+	</tr>
+	<tr>
+	<td cass="white" valign="top">
+	Paste emails from an existing list.  Each email must be on a separate line. 
+	Example:<br>
+	foo@foo.com<br>
+	harry@harry.com<br>
+	</td>
+	<td class="white">
+		<form method="POST" enctype="multipart/form-data">
+		<textarea cols="30" rows="10" name="emails"></TEXTAREA><br>
+		or<br>
+		Upload file:  <input type="file" name="file"><br>
+		
+				Select the mail list these emails should be imported to.<br>
+		<select name="group">
+			<?=makeOptions($t['mldropdown'], $t['list']['groups']); ?>
+		</select>
+		<br>
+		
+		<input type="hidden" name="event" value="import">
+		<input type="submit" value="Import">
+		</form>
+	</TD>
+	</tr>
+	<? } ?>
+	<tr>
+	<tr>
+	<td class="tab" colspan="2" >ADD/EDIT MAILING LIST</TD>
+	</tr>
+	<tr>
+	<td>
+		<form method="POST">
+		Enter Title:<font size="-1">(ex: General Mailing List)</font> <br>
+	</td>
+	<td>
+		<input type="text" name="title" maxlength="200" value="<?=$t['list']['title']?>">
+	</td>
+	</tr>
+	</tr>
+	<tr>
+	<td class="white">	
+		Description:<br><font size="-1">(html allowed)</font>
+	</td>
+	<td class="white">
+		<TEXTAREA cols="20" rows="10" name="description"><?=$t['list']['description']?></textarea>
+		<br>
+	</td>
+	</tr>
+	<tr>
+		<td colspan="2"  class="tab">ASSIGN GROUP</td>
+	</tr>
+	<tr>
+	<td colspan="2" class="white">
+		Select a group to associate this mailing list to:<br>
+		<select name="gid">
+		<option value="none">*Select One</option>
+		<?=makeOptions($t['mlgroups'], $t['list']['gid']); ?>
+		</select>
+		<a href="<?=_APP_URL?>groups">Manage Groups</a>
+	</td>
+	</tr>
+	<tr>
+	<td colspan="2" class="tab">GROUPS / NOT GROUPS</td>
+	</tr>
+	<tr>
+		<td class="white" valign="top" colspan="2">
+		
+		Select groups:<br>
+		<select name="groups[]" multiple size="6">
+			<?=makeOptions($t['groups'], $t['list']['groups']); ?>
+		</select>
+		
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" colspan="2">
+		Select not groups:<br>
+		<select name="notgroups[]" multiple size="6">
+			<?=makeOptions($t['groups'], $t['list']['notgroups']); ?>
+		</select>
+		</td>
+	</tr>
+	
+		<?
+		if ($t['list']['pkey'] != '') { ?>
+	<tr>
+	  	<td class="white" colspan="2">	
+		<div style="color: red;">If you reassign group permissions above on a mailing list, all users will be removed from the list that do not have permission to view the list.</div>
+		</td>
+	</tr>
+		<? } ?>
+	<tr>
+		<td class="white" colspan="2">
+		<input type="submit" value="Update">
+		<input type="hidden" name="pkey" value="<?=$t['list']['pkey']?>">
+		<input type="hidden" name="event" value="addUpdate">
+		</form>
+		</td>
+	</tr>
+	<?
+	
+	if ($t['list']['pkey'] != '')
+	{ ?>
+	<tr>
+		<td colspan="2" class="tab">DELETE MAILING LIST</td>
+	</tr>
+	<tr>
+		<td colspan="2" class="white">
+			<a href="<?=_APP_URL?>maillist/event=delete/pkey=<?=$t['list']['pkey']?>">Delete mailing list</a>
+		</td>
+	</tr>
+	<? } ?>
+	</TABLE>
+	</td></tr></table>
+
+      </td></tr>
+</table>
+	<h3>ADD HELP INFO HERE</h3>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<?
+
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'LC_user.php');
+include_once(LIB_PATH.'Assessment.php');
+
+class gradesbystudent extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+
+	// links
+	var $sectionTitle = 'View Grades by Student';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => 'jack',
+	);
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Control Panel' => 'main/event=controlPanel/'
+	);
+
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'gradesbystudent_main';
+		$lc->inactivelinks[] = 'View Grades by Student';
+
+		$gradebook = ClassGradebook::load(
+			array( 'id_classes' => $u->activeClassTaught->id_classes ) );
+
+		$gradebook->getStudents();
+
+		if ( !count($gradebook->students) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'There are no students in your class. You need students to view students\' grades.';
+			return;
+		}
+
+		$t['gradebook'] = $gradebook;
+
+	}
+
+	function viewRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'gradesbystudent_view';
+		$uname = $lc->getvars['user'];
+
+		if ( $lc->getvars['print'] ) {
+			$this->presentor = 'emptyPresentation';
+		} else {
+			$this->applinks['Printer Friendly'] = 'gradesbystudent/event=view/user='.$uname.'/print=yes';
+		}
+
+
+
+
+
+
+
+
+
+
+		// load up the gradebook and tell it to do a bunch of work for me.
+		$gradebook = ClassGradebook::load( 
+			array('id_classes' => $u->activeClassTaught->id_classes ) );
+
+		if ( !is_object($gradebook) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'The gradebook for your class could not be found. Please contact
+				the help desk immediately and report this.';
+			return;
+		}
+
+
+
+		$gradebook->getEntries(false);
+		$gradebook->getStudent($lc->getvars['user']); // we only need one if we use a clever SQL statement below
+		$gradebook->getValsForStudents();
+		$gradebook->calcPossiblePointsForStudent($u->username);
+		$gradebook->calculateStudentPointsEarned();
+		
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
+
+		// check to make sure they passed a valid student id
+		if ( !is_object($gradebook->students[$uname]) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'The requested student does not exist in your class.';
+			return;
+		}
+
+
+		$db->query("	SELECT sum(score) as score,username from class_gradebook_val 
+				WHERE id_classes = ".$u->activeClassTaught->id_classes."
+				GROUP BY username
+		");
+
+		//assume rank is one, push rank down for each student that has a higher score
+		$t['rank'] = 1;
+		while ($db->next_record() ) {
+			if ($lc->getvars['user'] == $db->Record['username']) {
+				$usersScore = $db->Record['score'];
+			}
+			$scores[$db->Record['username']] = $db->Record['score'];
+		}
+		foreach ($scores as $username => $score) {
+			if ($u->username == $username) continue;
+			if ($score > $usersScore) $t['rank']++;
+			$t['totalRanks']++;
+		}
+
+
+
+		$t['categories'] = $gradebook->getAllCategories(
+			$u->activeClassTaught->id_classes );
+
+		$t['gradebook'] = $gradebook;
+		$t['username'] = $uname;
+
+		$user = lcUser::getUserByUsername($uname);
+		$t['student'] = $user->profile->values['firstname'].' '.$user->profile->values['lastname'];
+		$t['course'] = $u->activeClassTaught->courseName;
+		$t['instructor'] = $u->activeClassTaught->facultyName;
+
+	}
+
+
+}
+?>
