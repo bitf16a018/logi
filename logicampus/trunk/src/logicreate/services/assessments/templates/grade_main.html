@@ -35,11 +35,11 @@ selecting the 'Re-Grade Assessemnt" link above in the Application Links section.
 	<tr>
 		<th>Student Name</th>
 		<th>Date</th>
-		<th>Status</th>
-		<th>Attempts</th>
+		<th>Score</th>
+		<th>Attempts/Status</th>
 		<th>Actions</th>
 	</tr>
-	
+
 <?
 
 	while(list($studentId, $stuObj) = @each($t['students']))
@@ -55,28 +55,16 @@ selecting the 'Re-Grade Assessemnt" link above in the Application Links section.
 			# Print meta info
 			if ($stuObj->log->startDate)
 			{
-				echo date('l, F dS h:i A', $stuObj->log->startDate);		
+				echo date('D, M jS h:i A', $stuObj->log->startDate);		
 			} 
 		?>
 			</td>
 			<td>
 		<?
-			# Print status info
-
-			if ($stuObj->log->endDate && $stuObj->log->startDate)
-			{
-				echo '<span style="color: #FFFFFF; background: green">Completed</span>';
-			} else if($stuObj->log->startDate && !$stuObj->log->endDate) {
-				echo '<span style="color: #FFFFFF; background: blue">Started</span>';
-			} else if (!$stuObj->log->startDate) {
-				echo '<span style="color: #FFFFFF; background: red">Not Taken</span>';
-			
-			}
-
+			echo $t['scores'][$stuObj->username] .' / '.$t['possiblePoints'];
 		?>
-
 			</td>
-			<td>
+			<td align="center">
 		<?
 			# Print meta info
 			if ($stuObj->log->logCount)
@@ -87,6 +75,21 @@ selecting the 'Re-Grade Assessemnt" link above in the Application Links section.
 ;
 			}
 		?>
+		<br/>
+		<?
+			# Print status info
+
+			if ($stuObj->log->endDate < time() && $stuObj->log->endDate > 0)
+			{
+				echo '<span style="color: #FFFFFF; background: green">Completed</span>';
+			} else if($stuObj->log->startDate && $stuObj->log->endDate) {
+				echo '<span style="color: #FFFFFF; background: blue">Started</span>';
+			} else {
+				echo '<span style="color: #FFFFFF; background: red">Not Taken</span>';
+			}
+
+		?>
+
 			</td>
 			<td nowrap>
 		<?
@@ -97,7 +100,7 @@ selecting the 'Re-Grade Assessemnt" link above in the Application Links section.
 			} else { ?>
 				<a href="<?=MOD_URL?>grade/event=view/studentid=<?=$studentId?>/id=<?=$t['assessment']->assessmentId?>">Grade</a>
 		<?
-				if ($t['assessment']->numRetries == $stuObj->log->logCount)
+				if ($t['assessment']->numRetries <= $stuObj->log->logCount)
 				{
 					echo ' &bull; <a href="'.MOD_URL.'grade/event=resetRetry/id='.$t['assessment']->assessmentId.'/studentid='.$studentId.'">Reset Attempt</a>';
 

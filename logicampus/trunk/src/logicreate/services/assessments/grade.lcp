@@ -39,39 +39,61 @@ class grade extends FacultyService {
 	 */
 	function run($db,&$u,&$lc,&$t) {
 		$lc->templateName = 'grade_main';	
-		$id = $lc->getvars['id']; # assessemnt ID
+		$id = (int)$lc->getvars['id']; # assessemnt ID
 
 
 		$this->applinks['Re-Grade Assessment'] = 'grade/event=regrade/id='.$id;
 		$t['assessment'] = Assessment::load($id, $u->activeClassTaught->id_classes);
-		if(is_object($t['assessment']) )
-		{
-			$gb = ClassGradebook::load(array('id_classes' =>
-			$u->activeClassTaught->id_classes));
-	
-			## __FIX_ME__ there are no sememster IDs in
-			# class_student_sections, and this is a problem
-			$gb->getStudents();
-			$t['students'] = $gb->students;
-
-			# get other meta information
-	 		while(list($studentId, $stuObj) = @each($t['students']))
-			{
-				$log = 	$t['assessment']->getLastLogEntry($studentId);
-				if (is_object($log) )
-				{
-					$log->updateTotalCount();
-					$t['students'][$studentId]->log = $log;
-				}
-			}
-			reset($t['students']);
-		} else {
+		if(! is_object($t['assessment']) ) {
 			$lc->templateName = 'grade_error';
 			$t['message'] = '<h3>Error</h3>
 							 We were unable to load the assessment you are trying to grade.
 							 Please go back to the previous page and try again.  If this
 							 error persists then please contact the help desk.';
+			return;
 		}
+		$t['possiblePoints'] = $t['assessment']->possiblePoints;
+
+
+		$gb = ClassGradebook::load(array('id_classes' =>
+		$u->activeClassTaught->id_classes));
+
+		$gb->getStudents();
+		$t['students'] = $gb->students;
+
+		# get other meta information
+		while(list($studentId, $stuObj) = @each($t['students']))
+		{
+			/**
+			 *	Since gradebook class returns all students in a class
+			 *	without respecting the constraint of *active* or *inactive*
+			 *	status, we have to make that choice here and remove inactive students
+			 */
+			if ($stuObj->active == false)
+			{	unset($t['students'][$studentId]);
+				continue; // restart the while loop, waste to continue on
+			}
+			
+			$log = 	$t['assessment']->getLastLogEntry($studentId);
+			if (is_object($log) )
+			{
+				$log->updateTotalCount();
+				$t['students'][$studentId]->log = $log;
+			}
+		}
+		reset($t['students']);
+
+
+		// get the scores to show as well
+		$db->query("SELECT SUM(points_given - points_earned) as difference, SUM(points_earned) as earned, student_id  
+			FROM `assessment_answer`
+			WHERE assessment_id = ".$t['assessment']->getPrimaryKey()."
+			GROUP BY student_id");
+
+		while( $db->next_record() ) {
+			$t['scores'][$db->Record['student_id']] = sprintf('%.2f',$db->Record['earned'] + $db->Record['difference']);
+		}
+
 	}
 
 
@@ -128,7 +150,7 @@ class grade extends FacultyService {
 			}
 		
 			$t['percentage'] = number_format($t['total_points_earned'] / $t['questions_total_points'], 4) * 100;
-			$t['letter_grade'] = $gb->getLetterGrade($t['percentage']);
+			$t['letter_grade'] = $gb->getLetterGrade($t['percentage'],$t['questions_total_points']);
 	
 			reset ($t['questions']);
 			$t['assessmentId'] = $t['assessment']->assessmentId;
@@ -254,6 +276,7 @@ class grade extends FacultyService {
 		$asmt = Assessment::load($id, $u->activeClassTaught->id_classes);
 		$entry = $asmt->loadGradebookEntry();
 		$entryId = $entry->getPrimaryKey();
+		print "<!-- entry id = $entryId -->\n\n";
 
 
 		if (!is_object($asmt) )
@@ -362,7 +385,7 @@ class grade extends FacultyService {
 			GROUP BY student_id");
 
 		while( $db->next_record() ) {
-			$scores[$db->Record['student_id']] = $db->Record['earned'] + $db->Record['difference'];
+			$scores[$db->Record['student_id']] = (float)$db->Record['earned'] + $db->Record['difference'];
 		}
 		$numStudents = count($scores);
 
@@ -371,17 +394,20 @@ class grade extends FacultyService {
 		$keys['id_classes'] = $u->activeClassTaught->id_classes;
 		$keys['id_class_gradebook_entries'] = $entryId;
 		foreach($scores as $student=>$score) {
+			print "<!-- $student $score -->\n";
 			$keys['username']  = $student;
 			$gbvObj = ClassGradebookVal::load ($keys);
 			if (is_object($gbvObj) ) {
-				$gbvObj->score = $score;
+			print "<!-- $student has gbv of ".$gbvObj->idClassGradebookVal. "  -->\n";
+				$gbvObj->set('score', $score);
+				$gbvObj->_modified == true;
 				$gbvObj->save();
 			} else {
 				$gbvObj = new ClassGradebookVal();
 				$gbvObj->idClassGradebookEntries = $entryId;
 				$gbvObj->idClasses = $u->activeClassTaught->id_classes;
 				$gbvObj->username = $student;
-				$gbvObj->score = $score;
+				$gbvObj->set('score', $score);
 				$gbvObj->save();
 			}
 		}
