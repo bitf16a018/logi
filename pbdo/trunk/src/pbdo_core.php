@@ -78,6 +78,7 @@ if ( OLD_STYLE ) {
 }
 
 	include(PBDO_PATH.'graphdef.php');
+	include(PBDO_PATH.'graphdef_astar.php');
 	//include(PBDO_PATH.'graph/dot.php');
 	include(PBDO_PATH.'htmldef.php');
 	include(PBDO_PATH.'pbdo_plugin.php');
@@ -143,7 +144,7 @@ if ( !OLD_STYLE ) {
 	}
 }
 
-	$graph = new PBDO_GraphManager($engine);
+	$graph = new PBDO_GraphManager2($engine);
 	$graph->strokeGraph();
 	print "Writing 'projects/$projectName/graph/schema.png'...\n";
 	$graph->saveGraph();
