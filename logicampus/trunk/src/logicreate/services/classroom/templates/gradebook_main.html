@@ -127,7 +127,7 @@ foreach ( $t['categories'] as $catid => $cat )
 				if (  $t['gradebook']->entries[$val->idClassGradebookEntries]->totalPoints == 0 ) { 
 				$catRows .= 'EC';
 				} else { 
-				$catRows .=  $x.'% / '.$t['gradebook']->getLetterGradeNew($val->score,$t['gradebook']->entries[$val->idClassGradebookEntries]->totalPoints);
+				$catRows .=  $x.'% / '.$t['gradebook']->getLetterGrade($val->score,$t['gradebook']->entries[$val->idClassGradebookEntries]->totalPoints);
 			}
 		$catRows .= '</td>
 			<td width=20>&nbsp;</td>
