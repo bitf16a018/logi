@@ -1,0 +1,268 @@
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript"><!--
+
+
+function checkAll () {
+	for (x=0; x < document.forms[0].elements.length -1; x++) {
+		document.forms[0].elements[x].checked = true;
+	}
+}
+
+
+// -->
+</SCRIPT>
+
+
+<?=$t['sectionheader'];?>
+
+<u onclick="getElementById('findusersbycourse').style.display='block';">Find Users By Course</u> |
+<u onclick="getElementById('showusernamesstartingwith').style.display='block';">Show Usernames Starting With</u> | 
+<u onclick="getElementById('showuserswhere').style.display='block';">Show Users Where</u> | 
+<u onclick="getElementById('help').style.display='block';">Help</u> 
+</br>
+<div id="help" style="padding-top:5px;display: none;">
+<fieldset>
+	<legend><strong>Help (<u
+	onclick="getElementById('help').style.display='none';">Hide</u>
+	)</strong></legend>
+	<p>
+	<strong>About Student Management</strong></br>
+	Student Management allows you to locate prospective students and
+	add them to your class.  You are only allowed to search for
+	users that have existing accounts in the system.  If you need a
+	student added to the system so you can make them a member of your
+	class, please consult your LogiCampus administrator.
+	</p>
+
+	<p>
+	<strong>How-to add a student(s)</strong></br>
+	Use the built-in search tools to locate a student(s) in the system to
+	add to your class. You can search for students that are enrolled
+	in other classes, by the first letter of their username, or search
+	by email address, username and other profile information using the
+	'show users where'.  
+	</p>
+
+	<p>
+		<strong>Collecting Users</strong></br>
+		After you search for a student(s), you
+		select the appropiate checkbox next the desired accounts you
+		wish to add to your class and press the 'Collect Users'
+		button.  Collecting users allows you to search for students
+		using the various search tools and then add students all at
+		once to your class.  This feature is handy when you first
+		populate students into your class. 
+
+	</p>
+	<p>
+	<strong>Class Roster</strong</br>
+	The class roster displays all students that are enrolled in your
+	class or that were dropped from your class. Students that are
+	active students in the class are shown in green as 'Active'.
+	Students that have dropped or that have been dropped are shown in
+	red as 'Dropped'. 
+	</p>
+
+	<p>The action column provides the ability to drop students or
+	re-activate students.   Simply click the link in the action column
+	to perform that action on that student.
+	</p>
+</fieldset>
+</div>
+
+<div id="showcollectedusers" style="padding-top:5px;display: <?=$t['showcollectedusers']?>;">
+<fieldset>
+	<legend><strong>Collected Users</strong></legend>
+
+	<form method="POST" action="<?=modurl('users/event=addCollectedUsers')?>">
+	<ul>
+
+	<?
+           while(list($k, $v) = @each($t['user_collection']) )
+            {
+                echo '<li>'.$v.' &nbsp;<a
+                href="'.modurl("users/event=removecollecteduser/username=$v").'"
+>(remove)</a> Choose Section: &nbsp; <select name='.$v.'>'.$t['secNumsDropDown'].'</select></li>';
+            }
+	?>
+	</ul>
+		<input onclick="if (confirm('Once you add a student(s) to your class you cannot remove them, only drop them from the class. Are you SURE you want to add the selected student(s)?')) { return true; } else { return false; }"" type="submit" value="Add Users to Class"> 
+	</form>
+	<form method="POST" action="<?=modurl('users/event=clearCollection')?>">
+	<input type="submit" value="Clear Collected Users">
+	</form>
+
+
+</fieldset>
+</div>
+
+
+
+<div id="findusersbycourse" style="padding-top:5px;display: none;">
+<fieldset>
+    <legend><strong>Find Users By Course (<u
+	    onclick="getElementById('findusersbycourse').style.display='none';">Hide</u>)
+		</strong>
+	</legend>
+
+			<form method="POST" action="<?=modurl('users');?>">
+			<select name="coursePkey">
+				<?=$t['courses'];?>
+			</select> <br />
+      Section #: <input type="text" name="sectionNumber" size="6" maxlength="11" value="<?=$t['sectionNumber']?>" /> <i>(optional)</i>
+			<BR>
+			Semester: 
+			<select name="semesterPkey">
+				<?=$t['semesters'];?>
+			</select>
+			&nbsp;
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="classSearch">
+			</form>
+</fieldset>
+</div>
+
+<div id="showusernamesstartingwith" style="padding-top:5px;display: none;">
+<fieldset>
+    <legend><strong>Show Usernames Starting With (<u
+	    onclick="getElementById('showusernamesstartingwith').style.display='none';">Hide</u>)
+		</strong>
+	</legend>
+
+			<form method="POST" action="<?=modurl('users');?>">
+			<select name="firstletter">
+				<option>a</option>
+				<option>b</option>
+				<option>c</option>
+				<option>d</option>
+				<option>e</option>
+				<option>f</option>
+				<option>g</option>
+				<option>h</option>
+				<option>i</option>
+				<option>j</option>
+				<option>k</option>
+				<option>l</option>
+				<option>m</option>
+				<option>n</option>
+				<option>o</option>
+				<option>p</option>
+				<option>q</option>
+				<option>r</option>
+				<option>s</option>
+				<option>t</option>
+				<option>u</option>
+				<option>v</option>
+				<option>w</option>
+				<option>x</option>
+				<option>y</option>
+				<option>z</option>
+			</select>
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="firstletter">
+			</form>
+		</fieldset>
+		</div>
+
+
+<div id="showuserswhere" style="padding-top:5px;display: none;">
+<fieldset>
+    <legend><strong>Show Users Where (<u
+	    onclick="getElementById('showuserswhere').style.display='none';">Hide</u>)
+		</strong>
+	</legend>
+
+			<form method="POST" action="<?=modurl('users');?>">
+			<select name="profile_field">
+				<?=$t[profile_opt];?>
+			</select> &nbsp;&nbsp;
+			is like&nbsp; 
+			<input type="text" name="q"> 
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="profileSearch">
+
+			</form>
+	</fieldset>
+	</div>
+
+</br>
+
+<div id="showsearchresults" style="padding-top:5px;display: <?=$t['showResults'];?>;">
+<fieldset>
+    <legend><strong>Show Search Results (<u
+	    onclick="getElementById('showsearchresults').style.display='none';">Hide</u>)
+		</strong>
+	</legend>
+
+<?
+if (count($t['users']) > 0 )
+{ ?>
+<table border="2" cellpadding="10" cellspacing="0" width="100%">
+
+      <tr><td width="100%" class="grey">
+
+		      <table border="0" width="100%">
+			      <tr> 
+	<td class="white" align="center" rowspan="2" colspan="1" valign="top">
+
+	<form method="POST" action="<?=modurl('users/event=collectUsers');?>">
+		<? global $HTTP_USER_AGENT; if( strpos($HTTP_USER_AGENT,"MSIE") ) { ?>
+		<label for="user_opt">Double click a user for editing</label>
+		<? } //IE is the only browser to support this HTML4.01 standard ?>
+
+		<table width="100%" border="0">
+		<thead>
+		<tr>
+		<td class="selectedTab">Select User</td><td class="selectedTab">Lastname, Firstname</td>
+		<td class="selectedTab">username</td>
+		</tr>
+		</thead>
+
+		<? for ($x=0; $x < count($t[users]); ++$x) { $c = $t[users][$x]; $x%2? $color="#F0F0F0":$color="#E0E0F0";?>
+		<tr bgcolor="<?=$color?>">
+			<td>
+				<input type="checkbox" name="users[]" value="<?= $c['pkey']?>">
+			</td>
+			<td><?= $c['profiledata']?></td>
+			<td><?= $c['lc_username']?></td>
+		</tr>
+		<? } ?>
+		<tfoot>
+		<tr><td colspan="3" align="center">
+		<? if ($t[start] > 1) { ?>
+		<a href="<?=APP_URL?>classmgr/users/start=<?=$t['start'] - $t['PAGE_SIZE']?>/<?=$t['opt1']?>/<?=$t['opt2'];?>">&lt; Prev</a>
+		<? } ?>
+			&nbsp; &nbsp; <?= $t[current_page];?>/<?= $t[result_pages];?> &nbsp; &nbsp; 
+		<? if ( ($t[start]+$t[PAGE_SIZE]) < $t[max_results] ) { ?>
+		<a href="<?=APP_URL?>classmgr/users/start=<?=$t['start'] + $t['PAGE_SIZE']?>/<?=$t['opt1']?>/<?=$t['opt2'];?>">Next &gt;</a>
+		<? } ?>
+		</td></tr>
+		</tfoot>
+		</table>
+
+		<p>
+		<input type="submit" value="Collect checked user"><br>
+		</form>
+		<? if ($t['collectionCount']) { ?>
+		<div align="left" style="font-size: 90%">
+		Current user collection has <?= $t['collectionCount']?> users.
+		<br>
+		<a href="<?=modurl('users/event=clearCollection');?>">Clear collection</a>
+		</div>
+		<? } ?>
+	</td></tr></table>
+
+      </td></tr>
+</table>
+<? } else {
+	echo 'No results found.';
+} ?>
+</fieldset>
+</div>
+<p>
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
+<fieldset>
+	<legend>Class Roster</legend>
+<?=$t['table'];?>
+</fieldset>
+	
