@@ -1,6 +1,6 @@
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -21,7 +21,7 @@ CREATE TABLE lcCategories (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -39,7 +39,7 @@ CREATE TABLE lcConfig (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -56,7 +56,7 @@ CREATE TABLE lcConfigUser (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -93,7 +93,7 @@ CREATE TABLE lcEvents (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -114,7 +114,7 @@ CREATE TABLE lcFaqs (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -138,7 +138,7 @@ CREATE TABLE lcFiles (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -169,7 +169,7 @@ CREATE TABLE lcFormInfo (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -217,7 +217,7 @@ CREATE TABLE lcForms (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -235,7 +235,7 @@ CREATE TABLE lcGroups (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -260,7 +260,7 @@ CREATE TABLE lcHtml (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -285,7 +285,7 @@ CREATE TABLE lcLogging (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -306,7 +306,7 @@ CREATE TABLE lcNotes (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -322,7 +322,7 @@ CREATE TABLE lcPerms (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -344,7 +344,7 @@ CREATE TABLE lcRegistry (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -367,7 +367,7 @@ CREATE TABLE lcSearch (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -388,7 +388,7 @@ CREATE TABLE lcSessionTrack (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -408,7 +408,7 @@ CREATE TABLE lcSessions (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
@@ -432,7 +432,7 @@ CREATE TABLE lcUsers (
 
 -- MySQL dump 9.09
 --
--- Host: 192.168.1.5    Database: tarrant
+-- Host: 192.168.1.5    Database: logicampus
 -- ------------------------------------------------------
 -- Server version	3.23.55-log
 
