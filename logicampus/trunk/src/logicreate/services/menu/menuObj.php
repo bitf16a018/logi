@@ -444,7 +444,8 @@ class HTMLMenuItem extends MenuItem {
 // and work with that - worry about rollovers later
 // if there's an image defined, use it for the linkText
 //
-	if ($this->imgOff) {
+		$this->linkText = lct($this->linkText);
+		if ($this->imgOff) {
 			$this->linkText = "<img alt=\"\" src=\"".$this->imgOff."\" alt=\"".$this->linkText."\" border=\"0\">";
 		}
 	return '<a class="menuitem" href="'.APP_URL.'html/main/'.$this->location.'">'.$this->linkText.'</a>';
@@ -463,6 +464,7 @@ class APPMenuItem extends MenuItem {
 // if there's an image defined, use it for the linkText
 //
 
+		$this->linkText = lct($this->linkText);
 		if ($this->imgOff) {
 			$this->linkText = "<img alt=\"\" src=\"".$this->imgOff."\" alt=\"".$this->linkText."\" border=\"0\">";
 		}
@@ -481,6 +483,7 @@ class URLMenuItem extends MenuItem {
 // and work with that - worry about rollovers later
 // if there's an image defined, use it for the linkText
 //
+		$this->linkText = lct($this->linkText);
 		if ($this->imgOff) { 
 			$this->linkText = "<img alt=\"\" src=\"".$this->imgOff."\" alt=\"".$this->linkText."\" border=\"0\">";
 		}
