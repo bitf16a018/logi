@@ -272,7 +272,7 @@ class semestercopy extends FacultyService  {
 		// insert the new relation into the table with both new keys
 		// (does this logic leave orphaned data if there was a class already in 
 		//  the copy to slot?)
-
+//print "<pre>\n";
 		//class lessons
 		$lessons_old_to_new = array();
 		$db->query("DELETE FROM class_lessons WHERE id_classes = $id_classes_to");
@@ -379,7 +379,7 @@ class semestercopy extends FacultyService  {
 		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
 			$db->query("SELECT * FROM class_lesson_objectives WHERE id_class_lesson = ".$oldid);
 			while ($db->nextRecord()) {
-				$new_objective = $objectives_old_to_new[$db->record['id_class_links']];
+				$new_objective = $objectives_old_to_new[$db->record['id_class_objectives']];
 				//did this old lesson have a link?
 				if ( $new_objective > 0 ) {
 					$db->query("INSERT INTO class_lesson_objectives
@@ -456,6 +456,7 @@ class semestercopy extends FacultyService  {
 			$pbdo->save();
 		}
 
+//exit();
 	}
 
 
