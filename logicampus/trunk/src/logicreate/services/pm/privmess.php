@@ -19,13 +19,13 @@ class privMess extends PersistantObject {
 
 
 
-        function add() {
+        function add($putCopyInSent=true) {
 
 	      	$this->_save("privateMessages");
-
-		$this->sentReceived = 1;
-	      	$this->_save("privateMessages");
-
+		if ($putCopyInSent) { 
+			$this->sentReceived = 1;
+		      	$this->_save("privateMessages");
+		}
 
 		$user = lcUser::getuserByUsername($this->messageTo);
 
