@@ -117,7 +117,7 @@ class textbookmgr extends BasicAuth {
 
 
 	function editRun(&$db,&$u,&$lc,&$t) {
-		if (!in_array('tbadmin', $u->groups) || !in_array('admin', $u->groups)) 
+		if (!in_array('tbadmin', $u->groups) && !in_array('admin', $u->groups)) 
 		{
 			$t['message'] = '<h3>Permission Error</h3>Only textbook admins or administrators can modify information.';	
 			$lc->templateName = 'main_error';

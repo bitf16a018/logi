@@ -60,10 +60,27 @@ class dup extends FacultyService {
 		$button = $lc->postvars['button'];
 		$from = $lc->postvars['from'];
 		$to = $lc->postvars['to'];
+
 		$db->queryOne("select * from semesters where id_semesters=$from");
+		if ($e = ErrorStack::pullError('db') ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "There was some database error, make sure you chose all the input fields from the
+				previous page.";
+			return;
+
+		}
 		$t['fromsemester'] = $db->Record[2]." - ".$db->Record[1];
+
 		$db->queryOne("select * from semesters where id_semesters=$to");
+		if ($e = ErrorStack::pullError('db') ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "There was some database error, make sure you chose all the input fields from the
+				previous page.";
+			return;
+
+		}
 		$t['tosemester'] = $db->Record[2]." - ".$db->Record[1];
+
 
 		if (strpos($button,"all")>0) { 
 			$lc->templateName = 'dup_all';
