@@ -178,8 +178,8 @@ function initialCheck (&$arg) {
 		return false;
 	}
 	// this field is not required
-	$arg['dbcreate'] = $_POST['dbcreate'];
-	$arg['sampledata'] = $_POST['sampledata'];
+	$arg['dbcreate'] 	= $_POST['dbcreate'];
+	$arg['sampledata'] 	= $_POST['sampledata'];
 
 return true;
 }
@@ -881,6 +881,38 @@ function displayStepFour($t) {
 				 imported, their email accounts will be set to "username@mail.myschool.com".
 				</td>
 			</tr>
+			<tr><td colspan='2'>
+			<h3>Register</h2>
+		 	Please fill out the few pieces of information below to let us know 
+			more about who is using LogiCampus.  Your information will not be sold, rent or leased to anyone - 
+			this is purely informational.
+			</td></tr>
+			<tr>
+			   <td valign="top">Your name</td>
+			   <td>
+			   	<input type="text" name="yourname" value="$t[yourname]"><br>
+			   </td>
+			</tr>
+			<tr>
+			   <td valign="top">School name</td>
+			   <td>
+			   	<input type="text" name="schoolname" value="$t[schoolname]"><br>
+			   </td>
+			</tr>
+
+			<tr>
+			   <td valign="top">School location
+			   <br/>(Example: Michigan, US or Toronto, CA)</td>
+			   <td>
+			   	<input type="text" name="schoollocation" value="$t[schoollocation]"><br>
+			   </td>
+			</tr>
+			<tr>
+			<td colspan='2'>
+				We will not ask for your email address, but do ask that you join our 
+				mailing lists at sourceforge.net/projects/logicampus for more information.
+			</td>
+			</tr>
 
 		</table>
 		<br>
@@ -895,6 +927,22 @@ END;
 
 
 function displayStepFive ($t) {
+
+	// send email if we have anything to send
+	$maildata = "Your name: ".$_POST['yourname'];
+	$maildata .= "\nSchool name: ".$_POST['schoolname'];
+	$maildata .= "\nSchool location: ".$_POST['schoollocation'];
+
+	if ($_POST['yourname']!='' || $_POST['schoolname']!='' || $_POST['schoollocation']!='') { 	
+		$maildata = base64_encode($maildata);
+		$f = @fopen("http://logicampus.com/reg.php?info=$maildata","r");
+		if ($f) { 
+			@fclose($f);
+		} else {
+			@mail("info@logicampus.com","Logicampus registration",base64_decode($maildata),"From: info@logicampus.com");
+		}
+	}
+
 
 displayHeader(5);
 ?>
