@@ -1,0 +1,12 @@
+<?=$t['sectionheader'];?>
+<h2>Forums</h2>
+<h3>Post a message</h3>
+Your message was posted.  
+<? if ($t['newpost']) { ?>
+<a href="<?=appurl("classroom/discussion_view/".$t['forum_thread_id']);?>">View the new discussion thread</a>
+<? } else { ?>
+<a href="<?=appurl("classroom/discussion_view/".$t['forum_thread_id']);?>">View the thread with your post</a>
+
+<? } ?>
+<BR><BR>
+<a href="<?=appurl("classroom/discussion/");?>">Return to forum home</a>

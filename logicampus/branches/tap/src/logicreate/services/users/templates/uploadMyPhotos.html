@@ -1,0 +1,35 @@
+<? if ($t[message]) { ?>
+
+<span style="color: red; text-align: center; font-size: 120%;"><?=$t[message]?><br>Error: <?=$t[details]?></span>
+<br>
+<? } ?>
+<h3>Photo Upload</h3>
+Select a file you wish to upload from your personal computer.  The file must have a <b>.jpg</b> or a <b>.png</b> extension.  <br><br>
+
+		<table border="0" width="100%"> 
+			<tr> 
+				<td class="header2" valign="top" width="30%"> 
+ 
+		<form method="POST"  enctype="multipart/form-data"> 
+			Select Image:</td> 
+				<td class="grey" valign="top"> 
+					<input type="file" name="newphoto"><br> 
+					<i><font size="-1">Only .png and .jpg files can be uploaded.</font></i> 
+				</td> 
+			</tr> 
+			<tr> 
+				<td valign="top" class="header2" width="30%"> 
+					Add a caption:<br><i>(up to 250 characters)</i> </td> 
+				<td valign="top" class="grey"><textarea cols="25" rows="10" name="caption" maxlength="250"></textarea> 
+				</td> 
+			</tr> 
+			<tr><td valign="top" class="header2" width="30%">&nbsp;</td> 
+				<td valign="top" class="grey"> 
+				<input type="submit" value="upload"> 
+		<input type="hidden" name="event" value="save"> 
+		</form> 
+ 
+		<i><font size="-1">Note: Please be patient when uploading images.  Depending on the speed of your connection and the size of the image it could take several minutes.</font></i> 
+		</td></tr> 
+		</table> 
+	

@@ -1,0 +1,82 @@
+<?
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+class addFolder extends classdoclibService {
+
+
+	function authenticate($u,$arg) {
+		if ( ! @in_array('manager',$u->perms)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+
+
+
+	/** 
+	 * Show a for for adding a new folder
+	 */
+	function run($db,&$u,&$arg,&$t) {
+		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes,FOLDER_EDIT);
+
+
+
+		//insert an option to use no folders at the top of the tree
+		// this is tricky
+		// only tricky for trees that have nodes, simple for 0 count trees
+		if ($cat->count > 0 ) {
+			$dummyFolder = array();
+			$dummyFolder['pkey'] = 0;
+			$dummyFolder['name'] = 'NO PARENT  [top level]';
+			$dummyFolder['folderType'] = 1;
+			$dummyNode = new TreeListNode($dummyFolder);
+			$x =& $cat->rootNode;
+			$dummyNode->sibling = $x;
+			$cat->rootNode = $dummyNode;
+		} else {
+			$cat->rootNode->contents['name'] = 'NO PARENT  [top level]';
+		}
+
+		$view = new FileMGTView($cat);
+		$t['folderHTML'] = $view->renderWithRadio();
+
+
+
+	}
+
+
+	/**
+	 * proccess the input and create a new folder w/sharing
+	 */
+	function newRun($db,&$u,&$arg,&$t) {
+
+		$folder = new LC_folder();
+		$folder->name = $arg->postvars['folder']['name'];
+		$folder->notes = addslashes(stripslashes($arg->postvars['folder']['notes']));
+		$folder->owner = $u->username;
+		$folder->class_id = $u->activeClassTaught->id_classes;
+		$folder->folderType = 2;
+
+		$folder->parentKey = $arg->postvars['fid'];
+		//xxx check permissions against parent folder
+
+		$folder->_save('classdoclib_Folders');
+		$id = $db->getInsertID();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = APP_URL.'classdoclib/main/'.$id;
+	}
+
+}
+
+
+function mymicrotime(){ 
+    list($usec, $sec) = explode(" ",microtime()); 
+    return (float)$usec ; 
+} 
+
+?>

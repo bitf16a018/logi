@@ -1,0 +1,99 @@
+<?=$t['sectionheader'];?>
+
+<fieldset>
+	<legend><b>Help</b></legend>
+Below are all assessments for your class.  If the date you are suppose to take your
+assessment is active you are presented with a "Take Quiz" link.  Select this to take your
+quiz.  From this page you can also review the detailed results of your assessment once your
+instructor has published the results. You are allowed to take a quiz as many retries as the
+instructor has set.  
+</fieldset>
+<br>
+<?
+	$count = count($t['asmt']);
+	if ($count >0 )
+	{ 
+?>
+<span id="datagrid">
+<table width="100%">
+	<tr>
+		<th>Name</th>
+		<th>Attempts</th>
+		<th>Minute Limit</th>
+		<th>Results</th>
+		<th>Date Available</th>
+		<th>Action</th>
+	</tr>
+<?
+	$time = time();
+	for ($i=0; $i<$count; $i++)
+	{ 
+		$class = 'odd';
+		if ($i % 2 == 0) $class = 'even';
+		$asmt = $t['asmt'][$i];
+?>
+		<tr class="<?=$class?>">
+			<td><?=$asmt->displayName?></td>
+			<td align="center">
+		<? if (!$asmt->numRetries)
+			{
+				echo "None";
+			} else {
+				echo $asmt->numRetries;
+			}
+		?>
+			</td>
+			<td align="center"><?=$asmt->minuteLimit?></td>
+			<td align="center">
+		<?
+			# Which result do we show?
+			if ($asmt->log->endDate)
+			{
+				# Student cannot see any results
+				if ($asmt->showResultType == 0)
+				{
+					echo 'Grades not published';
+				}
+	
+				# Student is allowed only to see their grade
+				if ($asmt->showResultType == 1)
+				{
+					echo 'Score: '.$asmt->score;
+				}
+
+				# Student is allowed to see detailed results
+				if ($asmt->showResultType == 2)
+				{
+					echo '<a href="'.APP_URL.'classroom/assessments/event=view/id='.$asmt->assessmentId.'">detailed results</a>';
+				}
+
+			} else {
+				echo 'Test not completed';
+			}
+		?>
+			<td align="center">
+		<?
+			echo date('m-d-y h:i A', $asmt->dateAvailable) .' - '. date('m-d-y h:i A', $asmt->dateUnavailable);
+		?>
+			</td>
+			<td>
+		<?
+			if ($time >= $asmt->dateAvailable && $time <= $asmt->dateUnavailable &&
+			($asmt->log->logCount < $asmt->numRetries) ) 
+			{
+				echo '<a href="'.APP_URL.'classroom/assessments/event=start/id='.$asmt->assessmentId.'">Take Quiz</a>';
+			} else {
+				echo 'Not available';
+			}
+			unset($x);
+		?>
+			</td>
+		</tr>
+<?	}
+	} else {
+		echo 'No assessments found';
+	}# close if $count check
+?>
+
+</table>
+</span>

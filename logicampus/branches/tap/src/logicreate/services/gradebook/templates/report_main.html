@@ -1,0 +1,100 @@
+<?=$t['sectionheader'];?>
+
+<script>
+	var catarray = new Object();
+<?php
+
+	foreach($t['cats'] as $category)
+	{	
+		echo '
+	catarray["'.$category->idClassGradebookCategories.'"] = true;';
+	}
+
+	
+?>
+
+function invert_selection()
+{
+	var tmp_element; 
+	
+	for (field in catarray) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (tmp_element.checked)
+		{	tmp_element.checked = false;
+		} else
+		{	tmp_element.checked = true;
+		}
+		
+	}
+	
+}
+
+function select_all()
+{
+	var tmp_element; 
+	
+	for (field in catarray) 
+	{	
+		tmp_element = document.getElementById(field);
+		tmp_element.checked = true;
+	}
+	
+}
+
+function can_submit()
+{	
+	for (field in catarray) 
+	{
+		if (document.getElementById(field).checked == true)
+		{	return true;
+		}
+
+	}
+}
+</script>
+
+<form action="" method="post">
+<table width="100%" border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td valign="top" width="50%">
+		<fieldset>
+			<legend>Report Type</legend>
+			<input type="radio" name="rtype" value="fullgrid" CHECKED /> Detailed Gradebook<br />
+			<input type="radio" name="rtype" value="classStandards" /> Class Standards
+		</fieldset>
+	</td>
+	<td valign="top" width="50%">
+		<fieldset>
+			<legend>Options</legend>
+			<table border=0 cellpadding=2 cellspacing=0>
+			<tr>
+				<td colspan=2>
+					<p>
+					<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="select_all();">Select All</a>]</span>
+					&nbsp;&nbsp;
+					<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="invert_selection();">Select Inverse</a>]</span>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top"><b>Categories</b></td>
+				<td>
+					<? foreach ( $t['cats'] as $cat ) { ?>
+						<input type="checkbox" id="<?=$cat->idClassGradebookCategories;?>" name="cats[<?=$cat->idClassGradebookCategories;?>]" CHECKED /> <?=$cat->label;?><br />
+					<? } ?>
+				</td>
+			</tr>
+			</table>
+		</fieldset>
+	</td>
+</tr>
+<tr>
+	<td align="center" colspan=2>
+		<input type="submit" value="Generate Report" />
+	</td>
+</tr>
+</table>
+<input type="hidden" name="event" value="showReport" />
+</form>

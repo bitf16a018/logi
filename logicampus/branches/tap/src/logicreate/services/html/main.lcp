@@ -1,0 +1,76 @@
+<?
+
+
+class html extends BasicAuth {
+var $presentor = "htmlViewer";
+
+	function run (&$db,&$u,&$lcObj,&$t) {
+		$lcObj->templateStyle='public';
+		$info[] = $lcObj->getvars[1];
+	//	if ($lcObj->getvars[2]) { $info[] = $lcObj->getvars[2]; }
+	//	if ($lcObj->getvars[3]) { $info[] = $lcObj->getvars[3]; }
+	//	if ($lcObj->getvars[4]) { $info[] = $lcObj->getvars[4]; }
+	//	if ($lcObj->getvars[5]) { $info[] = $lcObj->getvars[5]; }
+		$file = implode("/",$info);
+
+         if (is_array($u->groups)) {
+                  $orClause = createGroupCheck($u->groups);
+                  $orNotClause = createGroupCheck($u->groups,"notgroups");
+
+         }
+         if ($orClause) { $where = " and  (($orClause) and not ($orNotClause))"; }
+
+		$db->queryOne("select * from lcHtml where filename='$file'  $where");
+
+		if ($db->Record["filename"]) {
+
+			$t["title"] = $db->Record["title"];
+			$t["_author"] = $db->Record["author"];
+			$t["_description"] = $db->Record["description"];
+                        $t["_keywords"] = $db->Record["keywords"];
+                        $t["_other"] = $db->Record["other"];
+
+			$lcObj->templateName = $db->Record[filename];
+		} else {
+			$this->presentor = "errorMessage";
+			$t[message] = "Document unavailable";
+			$t[details] = "Either this document requires that you have special privileges to view it, or the document does not exist.";
+			$t[details] .="If you feel you have gotten this page in error, contact the site webmaster.";
+		}
+		
+
+
+	}
+
+
+	/**
+	 * run the main function, then switch the presentor to 
+	 * a print handler.
+	 */
+	function printRun (&$db,&$u,&$lcObj,&$t) {
+		$this->run ($db,$u,$lcObj,$t);
+		$this->presentor = 'printPresentation';
+	}
+}
+
+/**
+ * basic HTML viewer
+ * template dependencies are guaranteed by preTemplate()
+ */
+function htmlViewer(&$obj,&$t) {
+	include_once(TEMPLATE_PATH."header.html.php");
+	include_once(CONTENT_PATH.$obj->templateName);
+	include_once(TEMPLATE_PATH."footer.html.php");
+}
+
+/**
+ * HTML viewer for printer friendly versions
+ * template dependencies are guaranteed by preTemplate()
+ */
+function printPresentation (&$obj,&$t) {
+	include_once(TEMPLATE_PATH."print_header.html.php");
+	include_once(CONTENT_PATH.$obj->templateName);
+	include_once(TEMPLATE_PATH."print_footer.html.php");
+}
+
+?>

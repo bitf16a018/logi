@@ -1,0 +1,288 @@
+<?
+/*
+ *
+ * Provides calendar view for student (only one class
+ * + master calendar).
+ *
+ */
+
+include_once(LIB_PATH."eventsObj.php");
+
+class seminarcal extends BasicAuth {
+
+	var $presentor='htmlPresentation';
+	
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	var $applinks = array(
+		'Week view' => 'seminarcal/event=viewWeek',
+		'Month view' => 'seminarcal/',
+		'Year view' => 'seminarcal/event=viewYear'
+	);
+	var $navlinks = array(
+		'List Seminar Schedule'=>'seminars',
+		'List Orientation Schedule'=>'orientations'
+		);
+	var $sectionTitle = 'ITV Seminar Scheduling Calendar';
+	var $inactivelinks = array(
+	);
+
+
+	
+
+	function seminarcal()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+		
+	}
+	
+/*
+ *
+ * Default event
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='cal_month';
+
+			/*****
+			* PULL IN A CLASS CALENDAR
+			* __FIX_ME__
+			*****/
+
+			if ($lc->getvars['m'] and $lc->getvars['y']) 
+			{
+				$mut = $lc->getvars['m'];
+				$yut = $lc->getvars['y'];
+				$dut = $lc->getvars['d'];
+				
+				$t['URLmonth'] = $lc->getvars['m'];
+				$t['URLyear'] = $lc->getvars['y'];
+				
+				$ut = strtotime("$mut/1/$yut");	// MAIN DATEKEEPER
+				
+			} else 
+			{
+				# Detecting if an UT was submitted 
+				# @@@ this could result in odd behavior if SDLFJSDFLJ was passed in the url for ut
+				if ($lc->getvars['ut']) 
+				{	$ut = $lc->getvars['ut'];
+				} else 
+				{	// no args were passed, use default time
+				
+					list($mut,$yut) = split(' ', date('m Y'));
+					$ut = mktime(0, 0, 0, 	$mut, 1, $yut); // MAIN DATEKEEPER
+				}
+				
+			}
+			
+			$c = new cali($ut,(strtotime("+1 months",$ut)-1), 'seminarscheduling', $this->getITVclassesId(), array_unique($u->groups));
+			$c->showTitle = false;
+			$c->showTimes = false;
+			$c->calWidth = '100%';
+			$c->monthReviewURL = modurl('seminarcal/d='.$lc->getvars['d']);
+			$c->showEventCount = true;
+			
+			$c->eventDayURL = modurl('seminarcal/event=viewDay');
+			$c->eventCountURL = modurl('seminarcal/event=viewDay');
+			
+			$t['calendar'] = $c->renderMonth($lc->getvars['m'], $lc->getvars['y']);
+
+		}
+
+	
+	function viewWeekRun($db,&$u,&$arg,&$t)
+	{
+		$this->inactivelinks[] = 'Week view';
+		$arg->templateName = 'cal_week';
+		
+		$mut = (is_numeric($arg->getvars['m'])) ? 
+					$arg->getvars['m'] : date('m');
+		$yut = (is_numeric($arg->getvars['y'])) ? 
+					$arg->getvars['y'] : date('Y');
+		$dut = (is_numeric($arg->getvars['d'])) ? 
+					$arg->getvars['d'] : date('d');
+		
+		$ut = strtotime("$mut/$dut/$yut");	// MAIN DATEKEEPER
+
+		$week_start_position = strtotime("-".(date('w', $ut))." day",$ut); // EPOCH date Sunday
+
+				
+		// scheduling cali object to load up with begining of weeks events to end of weeks events
+		$c = new cali($week_start_position,
+					  (strtotime("+1 week",$week_start_position)-1), 'seminarscheduling', 
+					  $this->getITVclassesId(), 
+					  array_unique($u->groups));
+
+		// setting flags
+		$c->showTitle = false;
+		$c->showTimes = false;
+		$c->showEventCount = true;
+		
+		// setting urls to be rendered
+		$c->monthReviewURL = modurl('seminarcal/');
+		$c->eventDayURL = modurl('seminarcal/event=viewDay');
+		$c->eventCountURL = modurl('seminarcal/event=viewDay');
+		
+		// oh it's time to render this baby!
+		$t['calendar'] = $c->renderWeekView();
+		
+		// creating template labels
+		$t['TX_year'] = date('Y', $ut);
+		// potential problems. when a year turns
+		$t['TX_weeknumber'] = (date('w', $ut) > 0) ? date('W', $ut) : (date('W', $ut)+1);
+				
+		// checking for the insertion of previous and next year dates
+		if (date('Y', (strtotime("+1 week",$week_start_position)-1)) <> date('Y', $week_start_position))
+		{	$t['TX_day_start_to_end'] = date('F jS Y', $week_start_position). ' - ';
+		} else
+		{	$t['TX_day_start_to_end'] = date('F jS', $week_start_position). ' - ';
+		}
+		
+		// check for month change
+		if (date('j', (strtotime("+1 week",$week_start_position)-1)) < date('j', $week_start_position))
+		{	
+			// check for year change
+			if (date('Y', (strtotime("+1 week",$week_start_position)-1)) <> date('Y', $week_start_position))
+			{	$t['TX_day_start_to_end'] .= date('F jS Y', (strtotime("+1 week",$week_start_position)-1));
+			} else
+			{	$t['TX_day_start_to_end'] .= date('F jS', (strtotime("+1 week",$week_start_position)-1));
+			}
+			
+		} else
+		{	$t['TX_day_start_to_end'] .= date('jS', (strtotime("+1 week",$week_start_position)-1));
+		}
+		
+		// creating next / prev links
+		$t['LINK_next'] = '<a href="'.modurl('seminarcal/event=viewWeek/'.date('\d=d/\m=m/\y=y', strtotime("+1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('seminarcal/event=viewWeek/'.date('\d=d/\m=m/\y=y', strtotime("-1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"></a>';
+
+	}
+	
+	
+	function viewDayRun(&$db,&$u,&$arg,&$t) 
+	{
+		$t['monthlink'] = modurl('seminarcal/');
+		
+		$mut = $arg->getvars['m'];
+		$yut = $arg->getvars['y'];
+		$dut = $arg->getvars['d'];
+		$month = $arg->getvars['m'];
+		$day = $arg->getvars['d'];
+		$year = $arg->getvars['y'];
+
+		$ut = strtotime("$mut/$dut/$yut");
+		$start = strtotime("$mut/1/$yut");
+
+		$c = new cali($start,(strtotime("+1 months",$ut)-1), 'seminarscheduling', $this->getITVclassesId(), array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->calWidth = '190';
+		$c->monthReviewURL = modurl('seminarcal/event=viewDay/d='.$arg->getvars['d']);
+		
+		$c->eventDayURL = modurl('seminarcal/event=viewDay');
+		$c->eventCountURL = modurl('seminarcal/event=viewDay');
+		
+		$t['tinyCal'] = $c->renderMonth($arg->getvars['m'], $arg->getvars['y']);
+
+		# Returns all of the events schedule for the day passed to it.
+		$dayView = new cali($ut, ($ut+86399), 'seminarscheduling', $this->getITVclassesId(), array_unique($u->groups));
+
+		# Generates an HTML table for all events on given day.
+		
+		$dayView->starttime = $this->_START_TIME;
+		$dayView->endtime = $this->_END_TIME;
+		if ($dayView->starttime == '' ) {
+			print "::UNKNOWN ERROR::";exit();
+		}
+		
+		$dayView->monthReviewURL = modurl('seminarcal/event=viewDay/d='.$arg->getvars['d']);
+		$dayView->eventDayURL = modurl('seminarcal/event=viewDay');
+		$dayView->eventCountURL = modurl('seminarcal/event=viewDay');
+		
+		$t['eventHtml'] = $dayView->renderDayFull();
+		
+		$arg->templateName = "cal_day";
+		$t[title] = "Events for $month/$day/$year";
+		$dayView->width = "100%";
+		$dayView->showEventsInDay = "N";
+		
+	}
+	
+	
+	function viewYearRun($db,&$u,&$arg,&$t) 
+	{
+		$this->inactivelinks[] = 'Year view';
+		$arg->templateName = 'cal_year';
+
+		// use passed in ?
+		if ($arg->getvars['y']) 
+		{
+			$mut = 1;
+			$dut = 1;
+			$year = $arg->getvars['y'];
+			
+			$ut = strtotime("$mut/1/$year");	// MAIN DATEKEEPER
+			
+		} else /** Default time (year) is current **/
+		{	$ut = mktime(0, 0, 0, 1, 1, date('Y')); // MAIN DATEKEEPER
+			$year = date('Y');
+		}
+		
+		$t['year'] = $year;
+		$c = new cali($ut,(strtotime("+1 years",$ut)-1), 'seminarscheduling', $this->getITVclassesId(), array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->calWidth = '200';
+		$c->monthReviewURL = modurl('seminarcal/event=viewDay/d=1');
+		
+		$c->eventDayURL = modurl('seminarcal/event=viewDay');
+				
+		for($i=1; $i <= 12; ++$i)
+		{
+			$t['calendar'][$i] = $c->renderMonth($i, $year);
+		}
+		
+		$t['title'] = "Events for Year: ".date("Y");
+
+		# Make Month and Year Options (Dropdown Creation)
+		
+		$t['LINK_next'] = '<a href="'.modurl('seminarcal/event=viewYear/'.date('\y=Y/', strtotime("+1 year", $ut))).'"><img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('seminarcal/event=viewYear/'.date('\y=Y/', strtotime("-1 year", $ut))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"></a>';
+		
+	}
+
+	
+	/**
+	 *	return the id's of classes that are ITV
+	 */
+	function getITVclassesId()
+	{
+		static $idClassesArray = array();
+		
+		if (count($idClassesArray) > 0)
+		{	return $idClassesArray;
+		}
+		
+		$db = DB::getHandle();
+		
+		$sql = '
+		SELECT id_classes
+		FROM classes
+		WHERE classType=\'ITV\'
+		';
+		
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{	$idClassesArray[] = $db->Record['id_classes'];
+		}
+	
+	return $idClassesArray;
+	}
+	
+}
+?>
