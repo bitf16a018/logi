@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 /**
  * login
@@ -19,17 +32,25 @@ var $presentor = "htmlPresentation";
 	 */
 	function lostRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
 		$email = trim($lcObj->postvars["email"]);
+		if (USE_MD5_PASSWORDS==TRUE) { 
+			$seed = "abchefghjkmnpqrstuvwxyz0123456789"; 
+			while ($i <= 7) { 
+			     $num = rand() % 33; 
+			     $pass = $pass . substr($seed,$num,1);
+			     $i++; 
+			} 
+			$db->query("update lcUsers set password=md5('$password') where email = '$email'");
+
+			$db->query("select * from lcUsers where email = '$email'");		
+		} 
 
 		$db->query("select * from lcUsers where email = '$email'");		
 		if ($db->next_record()) {
-			$message = '
-You have requested your account information:
-
-	Username: '. $db->Record['username']. '
-	Password: '. $db->Record['password']. '
-			
-If you require more indepth help, please email '.WEBMASTER_EMAIL.'
-';
+			if (USE_MD5_PASSWORDS!=TRUE) { 
+				$pass = $db->Record['password'];
+			}
+			$message = "You have requested your account information:\n\nUsername: ".$db->Record['username']."\nPassword: $pass\n-----\n";
+			$message .= "If you require more indepth help, please email ".WEBMASTER_EMAIL."\n\n";
 			$message .= " \n\nPlease visit ".DEFAULT_URL." to log in.";
 
 			mail($email,"Your account information for ".SITE_NAME,$message,"From: ".WEBMASTER_EMAIL);
@@ -37,6 +58,7 @@ If you require more indepth help, please email '.WEBMASTER_EMAIL.'
 		} else {
 			$lcTemplate["status"] = "We have no account on file with the email address $email.";
 		}
+
 
 		$lcObj->templateName="loginlost";
 		$lcTemplate["title"] = "Lost password";

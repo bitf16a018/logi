@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-06-21 02:33:27 $
+Last Updated:  $Date: 2004-06-29 02:25:56 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,10 @@ SYNTAX:
 
 
 #########################
+06/28/04 - 10:22 PM - michael
+Added option for md5() passwords in mysql database.  This shouldn't be used long-term, but rather the md5 or other hashing mechanism should be done in the app itself and send to the db for comparison so that the original isn't xmitted across the network, and to make the system more portable (mssql doesn't have md5).  I wasn't sure if md5() in PHP is the same as MySQL.  Shouldn't be a hard change to make, except for the mysql-specific INSERTS in the SQL statement files (should be redone in PBDO anyway!)
+------
+
 06/20/2004 10:30 PM - michael
 Changed contact info
 
