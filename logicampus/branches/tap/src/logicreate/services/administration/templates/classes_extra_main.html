@@ -1,0 +1,27 @@
+<?=$t['sectionheader'];?>
+<h3>Manage Extra Faculty</h3>
+Use this area to add extra faculty and observers to a class.  Note that any user ID 
+which you add must be a faculty member.
+<BR><BR>
+
+	<FIELDSET>
+	<LEGEND>View Classes by Semester</LEGEND>
+<?=$t['form'];?>
+
+	</FIELDSET>
+<br><br>
+
+<?
+	if ($t['classes']) { ?>
+	<FIELDSET>
+	<LEGEND>Select Class Below</LEGEND>
+	
+<form method='post' action='<?=modurl("classes_extra/event=show");?>'>
+	<select name='class'>
+		<?=$t['classes'];?>
+	</select>
+
+	<input type='submit' value="Next-&gt;">
+</form>
+	</FIELDSET>
+	<? } ?>

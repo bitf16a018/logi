@@ -1,0 +1,267 @@
+<?
+/*
+ *
+ * Handles adding and editing categories.
+ * Categories are assigned to each entry
+ * and weigths are applied to each category
+ *
+ */
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'datagrid.php');
+
+class category extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $permissionError = '<h3>Permission Error</h3>
+							Either the category you were trying to access is not 
+							a valid category or you do not have access to edit that 
+							category.  We suggest going back to the main classroom 
+							manager page and trying again.  If you continue to get 
+							this error feel free to contact the help desk.';
+	var $dataError = '<h3>Problem saving your information</h3>
+					  There was a problem saving your informatino to the
+					  database.  We suggest trying again.  If you get this
+					  message consistently, please contact the site administrator.';
+
+
+	// link
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Gradebook' => '',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => '%assessments',
+	);
+
+	var $applinks = array(
+		'List Categories' => 'category/',
+		'Add Category' => 'category/event=add/',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'Control Panel' => 'main/event=controlPanel/'
+	);
+
+	var $sectionTitle = 'Category';
+
+	# Holds cleaned postvar data
+	var $data = array();
+
+		function Run(&$db,&$u,&$lc,&$t) {
+
+			$this->sectionTitle = 'List Gradebook Categories';
+
+			//total points assigned
+			//weighted percentage
+
+			$gb = ClassGradebook::load( array( 'id_classes', $u->activeClassTaught->id_classes) );
+
+			$dg = new datagrid($this->module, $this->serviceName);
+			$dg->table = 'class_gradebook_categories';
+			$dg->column = 'label, weight, id_class_gradebook_categories, calculation_type';
+			$dg->ignore = array( 'calculation_type', 'id_class_gradebook_categories' );
+			if ($gb->calculation_type == 2) $dg->ignore[] = 'weight';
+			$dg->joins = 'left join class_gradebook on class_gradebook.id_classes=class_gradebook_categories.id_classes';
+			$dg->where = 'class_gradebook.id_classes='.$u->activeClassTaught->id_classes;
+			$dg->orderby = 'label';
+			$dg->headers = array( 'label' => 'Category Label', 'weight' => 'Weight', 'links' => ' ' );
+			$dg->sortColumns = array( 'label', 'weight' );
+			$dg->postpendColumn( '<a href="'.modurl('category').'/event=edit/id=<?=$id_class_gradebook_categories;?>">edit</a> | <a href="'.modurl('category').'/event=delete/id=<?=$id_class_gradebook_categories;?>" onclick="if(confirm(\'Are you sure you want to remove this category?\')) { return true; } else { return false; }">delete</a>', ' ' );
+			$dg->overrideColumn( '<?=$weight;?><?=($calculation_type == 1 ? "%" : "");?>', 'weight' );
+			$t['table'] = $dg->toHTML();
+
+
+			$lc->templateName='category_main';
+			$lc->templateStyle = 'private';
+
+
+		}
+
+		function addRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='category_add';
+			$lc->templateStyle = 'private';
+
+			# Load up the category form
+			$f = new SiteForm();
+			$f->getForm('gbcategory', $this->data);
+
+			$gradebook = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes ) );
+			if ( $gradebook->calculationType == 1 ) {
+				$t['showWeight'] = true;
+			} else {
+				$t['showWeight'] = false;
+				$f->removeFormField('weight');
+			}
+
+			$t['form'] = $f->ToHTML();
+
+		}
+
+		function editRun(&$db, &$u, &$lc, &$t)
+		{
+
+			$lc->templateName='category_add';
+			$lc->templateStyle = 'private';
+			
+			$gbCat = ClassGradebookCategories::load((int)$lc->getvars['id']);
+
+			if(!$gbCat->idClassGradebookCategories)
+			{
+				# we didn't get an object back
+				# which means they don't have access
+				# to this category for some reason
+				# let's load up the error page.
+				$lc->templateName = 'category_error';
+				$t['msg'] = $this->permissionError;
+				return;
+			}
+			
+			$f = new SiteForm();
+			$f->getForm('gbcategory', $gbCat);
+			if ( $gradebook->calculationType == 1 ) {
+				$t['showWeight'] = true;
+			} else {
+				$t['showWeight'] = false;
+				$f->removeFormField('weight');
+			}
+
+			$t['form'] = $f->ToHTML();
+
+		}
+
+		function updateRun(&$db, &$u, &$lc, &$t)
+		{
+			$f = new SiteForm();
+			$f->getForm('gbcategory');
+			$t['error'] = $f->validateForm('gbcategory', $lc->postvars);
+			if ($t['error'])
+			{
+				$this->data = $f->cleanedArray;
+				if ($lc->getvars['event'] == 'add')
+				{
+					$this->addRun($db, $u, $lc, $t);
+					return;
+				}
+
+				if ($lc->getvars['event'] == 'edit')
+				{
+					$this->editRun($db, $u, $lc, $t);
+					return;
+				}
+			} 
+			
+			# We've got this far, we are good
+			if ($lc->getvars['event'] == 'edit') {
+				$gbCat = ClassGradebookCategories::load((int)$lc->getvars['id']);
+				$gbCat->setArray($f->cleanedArray);
+			} else {
+				$gbCat = new ClassGradebookCategories();
+				$gbCat->setArray($f->cleanedArray);
+				$gbCat->set( 'idClasses', $u->activeClassTaught->id_classes );
+			}
+
+			// Make sure they aren't over 100% (if they're grading based on weight)
+			$db->queryOne('select calculation_type from class_gradebook
+				where id_classes="'.$u->activeClassTaught->id_classes.'"');
+			if ($db->Record['calculation_type'] == 1) { // weighted
+
+				$sql = "SELECT SUM(weight) as sumweight FROM class_gradebook_categories
+					WHERE id_classes='".$u->activeClassTaught->id_classes."' AND
+					id_class_gradebook_categories !='".(int)$lc->getvars['id']."'";
+				$db->queryOne($sql);
+
+				if ( ($db->Record['sumweight'] + $gbCat->weight) > 100 ) {
+					$t['error'] = 'Your current total of percentages is <b>'.$db->Record['sumweight'].'%</b>.  If we add another <b>'.$gbCat->weight.'%</b> as you requested, the total of these weights will be greater than 100%.  Please double check your calculation, or adjust another category.';
+					if ( $lc->getvars['event'] == 'edit' ) $this->editRun($db,$u,$lc,$t);
+					else $this->addRun($db,$u,$lc,$t);
+					return;
+				}
+			}
+
+			$gbCat->save();
+
+			if ( $e = ErrorStack::PullError('db') ) {
+
+				$t['error'] = 'There was an error committing your category to the database. Please try again later. If the problem persists, contact the help desk.';
+
+				if ($lc->getvars['event'] == 'add')
+				{
+					$this->addRun($db, $u, $lc, $t);
+					return;
+				}
+	
+				if ($lc->getvars['event'] == 'edit')
+				{
+					$this->editRun($db, $u, $lc, $t);
+					return;
+				}
+
+			} else {
+
+				$t['message'] = 'Category saved.';
+				$this->Run($db,$u,$lc,$t);
+				return;
+
+			}
+
+			/*
+			if ($gbCat->save()) // old object, not used anymore
+			{
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = APP_URL.'gradebook/category';
+				return;
+			} else {
+				# Could be one of several errors
+				if ($gbCat->error == '')
+				{
+					# If the function save() returned false
+					# but doesn't have an error message then that
+					# is a permission type of error or just a 
+					# problem writing to the database
+					$lc->templateName = 'category_error';
+					$t['msg'] = $this->dataError;
+				} else {
+					# There is another type of error
+					# so let's send the user back and give them the
+					# message
+					$t['error'] =  $gbCat->error;
+					if ($lc->getvars['event'] == 'add')
+					{
+						$this->addRun($db, $u, $lc, $t);
+						return;
+					}
+
+					if ($lc->getvars['event'] == 'edit')
+					{
+						$this->editRun($db, $u, $lc, $t);
+						return;
+					}
+
+				}
+			}
+			*/
+		}
+
+		function deleteRun( &$db, &$u, &$lc, &$t ) {
+
+			$keys = array( 'id_class_gradebook_categories' => (int)$lc->getvars['id'],
+				'id_classes' => $u->activeClassTaught->id_classes );
+			$cat = ClassGradebookCategories::load($keys);
+
+			if ( $cat->idClassGradebookCategories ) {
+				ClassGradebookCategoriesPeer::doDelete( $cat, true );
+				$t['message'] = 'Category deleted.';
+			} else {
+				$t['error'] = 'Could not load category for deletion. If this problem persists, please contact the help desk.';
+			}
+
+			$this->Run($db,$u,$lc,$t);
+			
+		}
+
+	}	
+	
+?>

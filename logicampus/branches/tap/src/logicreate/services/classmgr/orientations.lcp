@@ -1,0 +1,419 @@
+<?
+/*
+ *
+ * This is the main page for setting up a classroom. 
+ * Any classroom specific things that you need are done
+ * in this file and corresponding templates.
+ *
+ */
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'OrientationClasses.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+class orientations extends FacultyService 
+{
+
+   	var $presentor='htmlPresentation';
+	
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $inactivelinks = array('Orientation scheduling');
+	var $sectionTitle = 'Orientation Scheduling';
+	
+	var $inactivelinks = array();
+	
+	var $applinks = array('View schedule'=>'orientations/');
+	
+	/**
+	 * @param 	$u
+	 * @return 				int			[1 = you can view (today is greater than dateStart)] [2 = you can edit (within the two dates)] [0 = denied (before the dates)]
+	 */
+	function checkAccess($u)
+	{
+		static $semObj;
+		
+		$return_int = 0;
+		
+		if (is_object($semObj) == false)
+		{	$semObj = semesterObj::_getFromDB($u->activeClassTaught->id_semesters, 'id_semesters');
+		}
+		
+		$ut = time();
+		
+		// Can the user at least VIEW the data?
+		if (strtotime($semObj->dateStartOrientation) < $ut)
+		{	$return_int++;
+		}
+		
+		// Can the user EDIT? are we within the dooable dates to edit?
+		if ($return_int && strtotime($semObj->dateEndOrientation) > $ut)
+		{	$return_int++;
+		}
+		
+	return $return_int;
+	}
+	
+	
+	function run(&$db,&$u,&$lc,&$t) 
+	{
+		$lc->templateName = 'orientations_main';
+
+		$this->inactivelinks = array('View schedule');
+		$this->checkAccess($u);
+		$status = array(1=>'New', 2=>'Pending', 3=>'Approved', 4=>'Denied', 5=>'Waiting on your approval');
+		
+		if (!$this->checkAccess($u)) // does checkAccess return false? or 0 then goodbye.. you can't get here
+		{
+			$t['message'] = 'The date range to modify orientations is not currently active.';
+			return;
+		}
+
+		/*
+		if ($u->activeClassTaught->classType != 'Internet')
+		{	$t['message'] = 'Your class is not of type "Internet".';
+			return;
+		}
+		**/
+		
+		$u->sessionvars['semester'] = $u->activeClassTaught->id_semesters;
+//		$u->sessionvars['semester'] = $u->sessionvars['classmgr']['currentsemester'];
+		
+		$o = new OrientationClasses();
+		$x= OrientationClasses::load(array('id_classes'=>$u->activeClassTaught->id_classes));
+		if ($x != null)
+			$o =& $x;
+			
+		if ($lc->postvars['submit'] == 'Submit')
+		{
+			if ((int)$o->status != 3 && (int)$o->status != 2)
+			{	
+				if ($this->checkAccess($u) == 2)
+				{
+					$lc->postvars['firstPreferredTime']['year'] = 2003;
+					$lc->postvars['firstPreferredTime']['month'] = 1;
+					$lc->postvars['firstPreferredTime']['day'] = 1;
+					
+					$lc->postvars['firstTimeRangeStart']['year'] = 2003;
+					$lc->postvars['firstTimeRangeStart']['month'] = 1;
+					$lc->postvars['firstTimeRangeStart']['day'] = 1;
+					
+					$lc->postvars['firstTimeRangeEnd']['year'] = 2003;
+					$lc->postvars['firstTimeRangeEnd']['month'] = 1;
+					$lc->postvars['firstTimeRangeEnd']['day'] = 1;
+					
+					$lc->postvars['secondPreferredTime']['year'] = 2003;
+					$lc->postvars['secondPreferredTime']['month'] = 1;
+					$lc->postvars['secondPreferredTime']['day'] = 1;
+					
+					$lc->postvars['secondTimeRangeEnd']['year'] = 2003;
+					$lc->postvars['secondTimeRangeEnd']['month'] = 1;
+					$lc->postvars['secondTimeRangeEnd']['day'] = 1;
+					
+					$lc->postvars['secondTimeRangeStart']['year'] = 2003;
+					$lc->postvars['secondTimeRangeStart']['month'] = 1;
+					$lc->postvars['secondTimeRangeStart']['day'] = 1;
+					
+					$o->setArray($lc->postvars);
+					
+					$o->firstPreferredTime =  date('H:i:s', dateArray2TimestampFull($o->firstPreferredTime));
+					$o->firstTimeRangeStart = date('H:i:s',dateArray2TimestampFull($o->firstTimeRangeStart));
+					$o->firstTimeRangeEnd =  date('H:i:s',dateArray2TimestampFull($o->firstTimeRangeEnd));
+					$o->secondPreferredTime = date('H:i:s',dateArray2TimestampFull($o->secondPreferredTime));
+					$o->secondTimeRangeEnd =  date('H:i:s',dateArray2TimestampFull($o->secondTimeRangeEnd));
+					$o->secondTimeRangeStart = date('H:i:s',dateArray2TimestampFull($o->secondTimeRangeStart));	
+					$o->status = 1;
+					$o->idClasses = $u->activeClassTaught->id_classes;
+					if ($o->instructions == '') $o->instructions = '';
+					if ($o->notes == '') $o->notes = '';
+					if ($o->finalDateTime == '') $o->finalDateTime = '0000-00-00 00:00:00';
+					if ($o->finalSessionLength == '') $o->finalSessionLength = 0;
+					if ($o->finalCampus == '') $o->finalCampus = '';
+					$o->save();
+					
+					$message = 
+					"An orientation was added or modified in the system by a faculty member.  
+Here is the information:\n
+
+Course Modifed:  ".$u->activeClassTaught->courseName."
+Faculty:  ".$u->activeClassTaught->facultyName."
+Class ID: ".$u->activeClassTaught->id_classes."
+Review Submission: ".APP_URL."seminarorientation/orientations/event=view/id_orientation_classes=".$o->idOrientationClasses."/id_semesters=".$u->activeClassTaught->id_semesters."
+";
+					$this->mailAdmin($message);
+					
+					$lc->getvars['form'] = 'noshow';
+					unset($o);
+					
+					$o= OrientationClasses::load(array('id_classes'=>$u->activeClassTaught->id_classes));
+
+				} else 
+				{	$t['message']='You do not have permission to update this orientation schedule.';
+					$lc->getvars['form'] = 'noshow'; // setting it push them back to the listing of schedules
+				}
+				
+			} else 
+			{	
+				switch((int)$o->status)
+				{	
+					case '2':
+						$t['message']= 'Your scheduling is pending approval, you can not change it right now';
+						break;
+					case '3':
+						$t['message']= 'You can not edit this, your orientation schedule has been approved.';
+						break;
+				}
+
+			}
+			
+		} 
+		
+		$o->firstPreferredTime = '2003-04-27 '. $o->firstPreferredTime;
+		$o->firstTimeRangeStart = '2003-04-27 '. $o->firstTimeRangeStart;
+		$o->firstTimeRangeEnd = '2003-04-27 '. $o->firstTimeRangeEnd;
+		$o->secondPreferredTime = '2003-04-27 '. $o->secondPreferredTime;
+		$o->secondTimeRangeEnd = '2003-04-27 '. $o->secondTimeRangeEnd;
+		$o->secondTimeRangeStart = '2003-04-27 '. $o->secondTimeRangeStart;
+		
+		$formObj = new SiteForm($u->groups);
+		$formObj->fieldPermissions = true;
+		switch ((int)$o->status)
+		{
+			case '0':
+				$this->applinks['Schedule orientation'] = 'orientations/form=show';
+				if ($lc->getvars['form'] == 'show') $this->inactivelinks = array('Schedule orientation');
+				break;
+			case '2':
+			case '3':
+				break;
+			
+			default:
+				$this->applinks['Update schedule'] = 'orientations/form=show';
+				if ($lc->getvars['form'] == 'show') $this->inactivelinks = array('Update schedule');
+			break;
+		}
+		if ($lc->getvars['form'] == 'show')
+		{
+			$formObj->getForm('orientation_admin_ed', $o);
+			$t['form'] = $formObj->ToHTML();
+			
+		} else 
+		{
+			if ($o->idOrientationClasses)
+			{
+				$t['form'] = '';
+				
+				if ($o->status == 3) // approved
+				{
+					$t['form'] .= '
+					<fieldset>
+					<legend><B>You orientation has been scheduled for</B></legend>
+					
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td>'.
+						date('F dS, Y \f\r\o\m g:i A', strtotime($o->finalDateTime)). ' - '.
+						date('g:i A', strtotime($o->finalDateTime)+($o->finalSessionLength*60)).'
+						</td>
+					</tr>
+					</table>
+						
+					</fieldset>
+					';
+
+				}
+
+			$t['form'] .= '
+			
+			<br>
+			
+			<fieldset>
+			<legend><b>Orientation Schedule</b></legend>
+			
+			<table cellpadding="4" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td>Current Status: <B>'.$status[$o->status].'</B></td>
+				<td></td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Primary Request</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td width="40%">Session Length</td>
+						<td width="60%">'.$o->firstAllottedMinutes.' mins</td>
+					</tr>
+					<tr>
+						<td width="40%">Preferred Date</td>
+						<td width="60%">'.$this->getDate($o->firstDateId, $db).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Preferred to Start</td>
+						<td width="60%">'.date('g:i a', strtotime($o->firstPreferredTime)).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Acceptable Times</td>
+						<td width="60%">'.date('g:i a', strtotime($o->firstTimeRangeStart)).' - '. date('g:i a', strtotime($o->firstTimeRangeEnd)).'</td>
+					</tr>
+			
+					<tr>
+						<td></td>
+						<td></td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Secondary Request</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td width="40%">Session Length</td>
+						<td width="60%">'.$o->secondAllottedMinutes.' mins</td>
+					</tr>
+					<tr>
+						<td width="40%">Date</td>
+						<td width="60%">'.$this->getDate($o->secondDateId, $db).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Time to Start</td>
+						<td width="60%">'.date('g:i a', strtotime($o->secondPreferredTime)).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Acceptable Times</td>
+						<td width="60%">'.date('g:i a', strtotime($o->secondTimeRangeStart)).' - '. date('g:i a', strtotime($o->secondTimeRangeEnd)).'</td>
+					</tr>
+			
+					<tr>
+						<td></td>
+						<td></td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Special Instructions</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td>
+							'. $o->instructions .'
+						</td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			';
+			
+			if (strlen(trim($o->notes)) > 1)
+			{
+				$t['form'] .= '
+				<tr>
+					<td align="center" colspan="2">
+				
+						<fieldset>
+						<legend><B>Notes</B></legend>
+						<table cellpadding="4" cellspacing="0" border="0" width="100%">
+						<tr>
+							<td>
+								'. $o->notes .'
+							</td>
+						</tr>
+						</table>
+						</fieldset>
+					</td>
+				</tr>				
+				';
+			
+			}
+			
+			$t['form'] .= '
+			</table>
+			
+			</fieldset>
+			';
+			} else 
+			{
+				$t['form'] = '
+				<Br>
+				<fieldset>
+				<legend><b>Orientation Schedule</b></legend>
+				
+				<table cellpadding="4" cellspacing="0" border="0" width="100%">
+				<tr>
+					<td align="center">
+				No scheduled orientation exists for your classroom!
+				<br><br>
+				<a href="'.modurl('orientations/form=show').'">'. (($o->idOrientationClasses) ? 'Update form' : 'Schedule Orientation'). '</a></td>
+				</tr>
+				</table>';
+					
+			}
+			
+		}
+		
+	}
+	
+	
+	function  mailAdmin($msg)
+	{
+		$db = DB::getHandle();
+		$sql = "SELECT email FROM lcUsers where groups LIKE
+		'%|semmgr|%'";
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$emailTo .= $db->Record['email'].',';	
+		}
+		$emailTo = substr($emailTo, 0, -1);
+		mail($emailTo, "Orientation Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");
+	}
+	
+	
+	function getDate($id_date, $db)
+	{
+		$return_date = 'N/A';
+		
+		if ((int)$id_date > 0)
+		{
+			// @@@@ I would like to bind this to the current semester, buttttt.. f it. 
+			$sql = '
+				SELECT date, time_start, time_end
+				FROM orientation_dates
+				WHERE id_orientation_dates='.$id_date;
+			
+			$db->queryOne($sql);
+			
+			// making sure we have a friggin record..
+			if ($db->Record != false)
+			{	$return_date = date('F j Y', strtotime($db->Record['date'])).' '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_end'])).'';
+			}
+			
+		} 
+		
+	return $return_date;
+	}
+	
+}
+
+?>

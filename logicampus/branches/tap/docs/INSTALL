@@ -1,0 +1,142 @@
+ **********************************
+ *  LOGICAMPUS INSTALL PROCEDURE  *
+ **********************************
+
+
+ **********************************
+ *       ABOUT LOGICAMPUS         *
+ **********************************
+
+LogiCampus is an open source educational learning system developed by Tap 
+Internet, Inc. in conjunction with Tarant County College Center for Distance 
+Learning.  LogiCampus provides various tools for educators to manage online 
+courses or classroom courses.  Please visit http://www.logicampus.com for 
+more information about the specific features of LogiCampus. LogiCampus is 
+built on top of the php-based application server called LogiCreate 
+(http://www.logicreate.com) .
+
+ **********************************
+ *       SERVER REQUIREMENTS      *
+ **********************************
+
+The following requirements are needed to run LogiCampus:
+	* Apache web server  1.3 or higher (see http://www.logicreate.com 
+	  if you are using Apache 2.0)
+	* PHP 4.3.3 or higher (PHP 5 not tested)
+	* MySQL Database 3.23 or higher, 4.0 preferred
+	* Server - Linux is recommended to use setup files
+	* PHP must be compiled with the following extensions - gd 2.0, domxml, 
+	* Tidy (tidy.sourceforget.net)
+
+ **********************************
+ *  LOGICAMPUS INSTALL PROCEDURE  *
+ **********************************
+
+Copy the .tar.gz file you downloaded to the directory above the web server's 
+"document root" directory. For example, if your document root of your web 
+server is /var/www/html, copy the .tar.gz file to /var/www.  NOTICE we are 
+one directory above the document root folder. 
+
+Next, run the commands:
+
+tar -xvfz logicampus-XX.tar.gz  (where XX is your version number)
+
+The contents of the file are two directories - logicreate/ and public_html/. 
+The contents of the 'public_html' folder will need to be copied to the 
+installation's document root.  You can do this by modifying your document 
+root to point to 'public_html' or copy all of the files in 'public_html' 
+to your document root.  Here is an example of a directory layout for a 
+server install:
+/
+	var/
+		www/
+			logicreate/
+			public_html/
+			logicreate.tar.gz
+
+ *************************************
+ *       RUN PERMISSIONS SCRIPT 	 *
+ *************************************
+
+
+Adjust file permissions (Linux and Mac OS X only)
+
+The permissions.sh script will set insecure permissions with chmod
+for the installer to work properly.  You should, ideally, have root on 
+the target machine and chown those directories to your webserver user.
+
+logicreate/scripts/setpermission.sh
+
+
+Allowing multiple users to run PHP scripts on any server is inherently 
+insecure.  Adjusting the LogiCampus file permissions is just one step in 
+keeping a secure server.  Here are recommended permissions for files.
+
+LogiCreateBase/						770 user.webserver
+		logicreate/				770 user.webserver
+				services/ 		660 user.webserver
+				lib/			660 user.webserver
+				content/		770 user.webserver (set -R)
+				lcFiles/		770 user.webserver
+		public_html/				660 user.webserver
+				index.php
+				templates/		550 user.webserver
+				images/			470 user.webserver
+					photos/		470 user.webserver
+						thumbs/ 	470 user.webserver
+
+				herc/			440 user.webserver
+
+Note: Adjusting the file permissions like so may not allow you to delete 
+modules from the HCC.
+
+ *************************************
+ *     SETUP MASTER CONTROL PANEL    *
+ *************************************
+
+Setting up the Control Center
+
+The Hercules Control Center is the 'master' control panel for LogiCampus.  
+While most of the features are assessible in the administration
+interface, there are a few things that you will need to access,
+especiallhy if you are developing other applictions for LogiCampus.
+
+The Hercules Control Center requires you to define a username and password.  By 
+default it will not allow any access until the file public_html/herc/auth.php has been edited properly.  Open public_html/herc/auth.php in a text editor and you will see these lines:
+
+define(HERC_USER,'');
+define(HERC_PASSWD,'');
+//set to 1 to use md5 passwords
+define(PASSWD_IS_MD5,0);
+
+If you wanted Herc and HHH as your Control Center login you would edit the file 
+like so:
+
+define(HERC_USER,'Herc');
+define(HERC_PASSWD,'HHH');
+//set to 1 to use md5 passwords
+define(PASSWD_IS_MD5,0);
+
+Being that this file must be readable by the webserver, any other system user 
+that can program the webserver (via php, perl, or similar scripts) can open 
+the document and read it.  To bypass plain text passwords the option 
+PASSWD_IS_MD5 has been added.  To hash your chosen password, type this command 
+at a Unix command line:
+
+echo 'HHH' | md5sum
+
+The output should paste nicely into the auth.php file.  An md5 sum cannot be 
+used as a valid login, it is only a means of protecting the original password.  
+Here is a sample auth.php with has the user Herc and the password HHH but uses 
+md5 hash protection:
+
+define(HERC_USER,'Herc');
+define(HERC_PASSWD,'62f3c4ba6cfdc13a43b6fd2a68b39f5e');
+//set to 1 to use md5 passwords
+define(PASSWD_IS_MD5,1);
+
+Note: On some systems, the command line tool md5sum and php's md5() function 
+are incompatible, in such instances writing a small php script to echo the md5 
+instead of using the command line should work.
+
+

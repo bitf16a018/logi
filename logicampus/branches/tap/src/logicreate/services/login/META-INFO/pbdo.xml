@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!-- MySQL does not support foreign keys. This means   -->
+<!-- that this XML file will not reflect foreign key   -->
+<!-- relationships. You will have to do that yourself. -->
+<database name="logicampus">
+  <table  name="lc_users_last_login">
+    <column name="username"
+            required="true"
+            primaryKey="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="last_login"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+  </table>
+  <table  name="lc_users_login_attempt">
+    <column name="username"
+            required="false"
+            size="32"
+            type="VARCHAR"/>
+    <column name="login_attempt"
+            required="false"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="login_status"
+            required="false"
+            default="0"
+            size="1"
+            type="TINYINT"/>
+    <column name="os"
+            required="false"
+            size="10"
+            type="VARCHAR"/>
+    <column name="browser"
+            required="false"
+            size="10"
+            type="VARCHAR"/>
+    <column name="version"
+            required="false"
+            size="10"
+            type="VARCHAR"/>
+    <index>
+      <index-column name="username"/>
+    </index>
+  </table>
+</database>
+<!-- END OF MYSQL2TURBINE DUMP -->

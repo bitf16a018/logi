@@ -1,0 +1,43 @@
+<script language="JavaScript"> <!--
+
+	function doCancel() {
+		location='<?=modurl("users/".$t[uid]."/event=show")?>';
+	}
+	-->
+</script>
+<table bgcolor="#FFCE7B" cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr>
+	<td><h4>Delete User</h4>
+	<a href="<?=APP_URL;?>administration/">Administration Home</a> &bull;
+	<a href="<?=APP_URL;?>administration/users/">User manager</a> &bull;
+	<a href="<?=APP_URL;?>administration/groups/">Modify groups</a> &bull;
+	<a href="<?=APP_URL;?>administration/users/event=syncStudents">Sync students</a> &bull;
+	<a href="<?=APP_URL;?>administration/servicePermissions">Modify Application Permissions</a>
+	</td><td></td>
+</tr>
+</table>
+<br>
+<table border="0" cellpadding="0" width="100%" cellspacing="0">
+      
+      <tr><td width="100%" class="grey">
+
+	<table border="1" cellspacing="0" cellpadding="0" width="100%"><tr>
+	<td width="50%" class="white" align="center" rowspan="2">
+	<form method="POST">
+	<input type="hidden" value="yes" name="confirm">
+	<input type="hidden" value="<?= $t['username'];?>" name="username">
+
+		<h4>Deleting user <u><?= $t['username']; ?></u></h4> 
+		<br>
+
+		Are you sure you want to delete this user account?  This
+		action cannot be undone and is considered permanent.<br>
+		<p>
+	<input type="button" value="no" onClick="doCancel();"> - <input type="submit" value="yes">
+	<input type="hidden" name="event" value="processDelete">
+	</form>
+	</td></tr>
+	</table>
+
+	</td></tr>
+</table>

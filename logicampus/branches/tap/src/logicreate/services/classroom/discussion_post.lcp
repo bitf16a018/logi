@@ -1,0 +1,161 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(LIB_PATH."datagrid.php");
+
+class discussion_post extends StudentService {
+
+	var $presentor = "htmlPresentation";
+	var $sectionTitle = 'Post Message';
+
+	var $applinks = array(
+		'List Threads' => 'discussion/',
+		#'Start new Thread' => 'discussion_post/',
+	);
+
+	var $inactivelinks = array(
+		'Start new Thread',
+		'Discussion Board'
+	);
+	
+
+	function run(&$db,&$u,&$lc,&$t) {	
+		$forum_id = (int)$lc->getvars[1];
+		$parent_id= (int)$lc->getvars[2];
+		$thread_id= (int)$lc->getvars[3];
+
+		$forum = lcforum::load($forum_id);
+		$t['forum'] = $forum;
+		$lc->templateName = 'discussion_post';
+		$u->sessionvars['forum']['post'] = $forum_id;
+		$u->sessionvars['forum']['parent_post'] = $parent_id;
+		$u->sessionvars['forum']['thread_post'] = $thread_id;
+	}
+
+
+	function replyRun(&$db,&$u,&$lc,&$t) {	
+		$forum_id = (int)$lc->getvars[1];
+		$parent_id= (int)$lc->getvars[2];
+		$thread_id= (int)$lc->getvars[3];
+
+		$forum = lcforum::load($forum_id);
+		$t['forum'] = $forum;
+		$lc->templateName = 'discussion_post';
+		$u->sessionvars['forum']['post'] = $forum_id;
+		$u->sessionvars['forum']['parent_post'] = $parent_id;
+		$u->sessionvars['forum']['thread_post'] = $thread_id;
+
+		$t['post'] = LcForumPost::load($parent_id);
+		$lc->templateName = 'discussion_post_reply';
+	}
+
+	function deleteRun($db,&$u,&$lc,&$t) {	
+		$key= $lc->getvars[1];
+		$f = lcForum::load($key);
+		$classid = $u->activeClassTaken->id_classes;
+		if ($f->lcForumNumericLink != $classid ) { 
+			echo "You can not delete this post";	
+			exit();
+		} else { 
+			$t['perms']['dele'] = true;
+		}
+
+
+		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
+		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
+		while($db->next_record()) {
+			$t['perms'][$db->Record[0]] = true;
+		}
+		if (!$t['perms']['dele']) { 
+			echo "You can't delete this post"; exit();
+		}
+		$post = $lc->getvars[2];
+		$p = LcForumPost::load($post);
+		$p->lcForumPostStatus = 1;
+		$p->save();
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classroom/discussion_view/".$lc->getvars[3]);
+	}
+
+
+	function undeleteRun($db,&$u,&$lc,&$t) {	
+		$key= $lc->getvars[1];
+		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
+		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
+		while($db->next_record()) {
+			$t['perms'][$db->Record[0]] = true;
+		}
+		if (!$t['perms']['dele']) { 
+			echo "You can't undelete this post"; exit();
+		}
+		$post = $lc->getvars[2];
+		$p = LcForumPost::load($post);
+		$p->lcForumPostStatus = 0;
+		$p->save();
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classroom/discussion_view/".$lc->getvars[2]);
+	}
+
+
+	
+	function postRun($db,&$u,&$lc,&$t) {	
+	
+		$forum_post_to = (int)$u->sessionvars['forum']['post'];
+		$parent_post_to= (int)$u->sessionvars['forum']['parent_post'];
+		$thread_post_to = (int)$u->sessionvars['forum']['thread_post'];
+
+		$forumPost = new LcForumPost();
+		$forumPost->lcForumPostTitle = stripslashes($lc->postvars['forum']['title']);
+		$forumPost->lcForumPostMessage = stripslashes($lc->postvars['forum']['message']);
+		$forumPost->lcForumPostUsername= $u->username;
+		$forumPost->lcForumId = $forum_post_to;
+		$forumPost->lcForumPostParentId = $parent_post_to;
+		$forumPost->lcForumPostThreadId = $thread_post_to;
+		$forumPost->lcForumPostTimedate= time();
+		$forumPost->lcForumPostStatus = 0;
+		$forumPost->lcForumRecentPostTimedate = 0;
+		$forumPost->lcForumRecentPostId = 0;
+		$forumPost->lcForumReplyCount = 0;
+		$forumPost->lcForumRecentPoster = '';
+		$forumPost->save();
+
+		$t['forum_id'] = $u->sessionvars['forum']['post'];
+		$t['forum_thread_id'] = $thread_post_to;
+		if ($t['forum_thread_id']==0) { 
+			$t['forum_thread_id'] = $forumPost->getPrimaryKey();
+			$t['newpost'] = true;
+		}
+#		$t['forum_id'] = $u->sessionvars['forum']['parent_post'];
+		$u->sessionvars['forum']['post']='';
+		$u->sessionvars['forum']['parent_post']='';
+
+// update stats on parent forum
+		// adding 10/16
+		if ($forum_post_to > 0)
+		{
+			$forum = lcForum::load($forum_post_to);
+			$forum->updateStats(); 
+		}
+		if ($t['forum_thread_id'] > 0)
+		{
+			$forumPost = lcForumPost::load($t['forum_thread_id']);
+			if (is_object($forumPost)) $forumPost->updateStats(); 
+		}
+		$lc->templateName = 'discussion_posted';
+
+	}
+
+}
+?>

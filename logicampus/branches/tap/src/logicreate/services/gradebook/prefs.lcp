@@ -1,0 +1,131 @@
+<?
+/*
+ *
+ * Controls grade book preferences.
+ *
+ */
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+
+class prefs extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $cleanedArray = array();
+
+	// links
+	var $sectionTitle = 'Gradebook Preferences';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => 'jack',
+	);
+	var $inactivelinks = array( 'Assessments' );
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'Control Panel' => 'main/event=controlPanel/'
+	);
+
+/*
+ *
+ * Shows form with gradebook preferences.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='prefs_main';
+			$lc->templateStyle = 'private';
+		}
+
+		function chooseGradeOptionRun(&$db,&$u,&$lc,&$t)
+		{	$lc->templateStyle = 'private';
+			$lc->templateName='prefs_chooseGradeOption';
+
+			$gb = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if ( !is_object($gb) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'There was a problem loading your gradebook. Please contact the helpdesk.';
+				return;
+			}
+
+			if ( !$gb->roundScoresUp ) unset($gb->roundScoresUp);
+
+			$f = new Siteform();
+			$f->getForm('gboptions', $gb);
+			$t['form'] = $f->ToHTML();			
+		}
+
+		function chooseGradeOptionUpdateRun(&$db,&$u,&$lc,&$t) {
+			
+			$f = new Siteform();
+			$t['error'] = $f->validateform( 'gboptions', $lc->postvars );
+
+			if ( $t['error'] ) {
+				$this->chooseGradeOptionRun($db,$u,$lc,$t);
+				return;
+			}
+
+			$gb = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			$gb->setArray( $f->cleanedArray );
+			$gb->save();
+
+			$u->sessionvars['message'] = 'Gradebook preferences are saved.';
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = modurl('main/event=controlPanel');
+
+		}
+		
+		function chooseColorOptionRun(&$db,&$u,&$lc,&$t)
+		{	
+			$lc->templateStyle = 'private';
+			$lc->templateName='prefs_chooseColorOption';
+
+			$gb = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if ( !is_object($gb) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'There was a problem loading your gradebook. Please contact the helpdesk.';
+				return;
+			}
+
+			$t['color'] = $gb->colorMissingGrade;
+		}
+		
+		function chooseColorOptionUpdateRun(&$db,&$u,&$lc,&$t)
+		{	$lc->templateStyle = 'private';
+
+			$gb = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if ( !is_object($gb) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'There was a problem loading your gradebook. Please contact the helpdesk.';
+				return;
+			}
+
+			$gb->set( 'colorMissingGrade', $lc->postvars['color'] );
+			$gb->save();
+
+			$u->sessionvars['message'] = 'Your missing grade color has been updated.';
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = modurl('main/event=controlPanel');
+		}
+		
+}
+
+?>

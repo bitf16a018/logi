@@ -1,0 +1,68 @@
+<?
+/*
+ *
+ * Displays class members that are online.
+ *
+ */
+
+class online extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = "Who's Online";
+	var $inactivelinks = array(
+		'Who\'s Online',
+	);
+
+/*
+ *
+ * Default event
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='online_main';
+			$sections = explode("\n",
+			$u->activeClassTaken->sectionNumbers);
+			while (list($k, $v) = @each($sections) )
+			{
+				$sectionNumbers .= "sectionNumber=$v OR ";
+			}
+			$sectionNumbers = substr($sectionNumbers, 0, -3);
+
+			$allStudents = "SELECT id_student from
+			class_student_sections WHERE active=1 AND ($sectionNumbers) ";
+
+			$db->query($allStudents);
+			while($db->next_record() )
+			{
+				$sql .= "username='".$db->Record['id_student']."' OR ";
+			}
+
+			$sql = substr($sql, 0, -3);
+			
+			if ($sql == "")
+			{
+				return false;
+			}
+				$sql = "AND ($sql)";
+			$query = "select username from lcSessions where unix_timestamp((NOW() + 0 )) - unix_timestamp(gc) < 1800 $sql AND username!=''";
+
+			$db->query($query);
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			while($db->next_record()) {
+				$t['users'][]= $db->Record;
+			}
+			$t['loggedin'] = count($t['users']);
+			
+			
+
+		}
+
+
+
+}
+
+?>

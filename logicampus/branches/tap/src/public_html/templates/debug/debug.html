@@ -1,0 +1,145 @@
+<html>
+	<head>
+		<title>DEBUG: LogiCreate debug output</title>
+	<body bgcolor="#c0c0e0">
+		<table align="center" width="80%" bgcolor="white"><tr><td align="left">
+			<img src="<?=IMAGES_URL?>lc-logo.gif">
+			</td><td>
+			version: 2.9<br>
+			build date: March-2-2003
+			</td></tr>
+		</table>
+		<br>
+
+		<table width="80%" align="center" bgcolor="white">
+		<tr><th width="100%" colspan="2" bgcolor="#C0C0C0" class="heading">
+		User
+		</th></tr>
+		<? 
+		$vars = get_object_vars($obj->user);
+		while ( list($k,$v) = @each($vars) ) {
+			if ($k == 'sessionvars') {continue;}
+				echo "<tr><td bgcolor=\"lightgray\">$k</td><td bgcolor=\"#e0e0e0\">";
+				if ( is_array($v) or is_object($v) ) {
+					echo "<pre>\n";
+					print_r($v);
+					echo "</pre>\n";
+				} else
+					print $v;
+		echo "</td></tr>\n";
+		}
+		?>
+		</table>
+		<p>&nbsp;</p>
+		
+
+
+		<table width="80%" align="center" bgcolor="white">
+		<tr><th width="100%" colspan="2" bgcolor="#C0C0C0" class="heading">
+		Session
+		</th></tr>
+		<? 
+		while ( list($k,$v) = @each($obj->user->sessionvars) ) {
+				echo "<tr><td bgcolor=\"lightgray\">$k</td><td bgcolor=\"#e0e0e0\">";
+				if ( is_array($v) or is_object($v) ) {
+					echo "<pre>\n";
+					print_r($v);
+					echo "</pre>\n";
+				} else
+					print $v;
+		echo "</td></tr>\n";
+		}
+		?>
+		</table>
+		<p>&nbsp;</p>
+
+
+
+		<table width="80%" align="center" bgcolor="white">
+		<tr><th width="100%" colspan="2" bgcolor="#C0C0C0" class="heading">
+		Template
+		</th></tr>
+		<? 
+		while ( list($k,$v) = @each($t) ) {
+				echo "<tr><td bgcolor=\"lightgray\">$k</td><td bgcolor=\"#e0e0e0\">";
+				if ( is_array($v) or is_object($v) ) {
+					echo "<pre>\n";
+					print_r($v);
+					echo "</pre>\n";
+				} else
+					print nl2br(htmlspecialchars($v));
+		echo "</td></tr>\n";
+		}
+		?>
+		</table>
+		<p>&nbsp;</p>
+
+
+
+		<table width="80%" align="center" bgcolor="white">
+		<tr><th width="100%" colspan="2" bgcolor="#C0C0C0" class="heading">
+		System Object
+		</th></tr>
+		<? 
+		while ( list($k,$v) = @each($obj) ) {
+			if ($v == $obj->user or $v==$obj->menu) continue;
+				echo "<tr><td bgcolor=\"lightgray\">$k</td><td bgcolor=\"#e0e0e0\">";
+				if ( is_array($v) or is_object($v) ) {
+					echo "<pre>\n";
+					print_r($v);
+					echo "</pre>\n";
+				} else
+					print $v;
+		echo "</td></tr>\n";
+		}
+		?>
+		</table>
+		<p>&nbsp;</p>
+
+
+
+		<table width="80%" align="center" bgcolor="white">
+		<tr><th width="100%" colspan="2" bgcolor="#C0C0C0" class="heading">
+		Environment
+		</th></tr>
+		<? 
+		while ( list($k,$v) = @each($_SERVER) ) {
+				echo "<tr><td bgcolor=\"lightgray\">$k</td><td bgcolor=\"#e0e0e0\">";
+				if ( is_array($v) or is_object($v) ) {
+					echo "<pre>\n";
+					print_r($v);
+					echo "</pre>\n";
+				} else
+					print $v;
+		echo "</td></tr>\n";
+		}
+		?>
+		</table>
+		<p>&nbsp;</p>
+
+
+
+		<table width="80%" align="center" bgcolor="white">
+		<tr><th width="100%" colspan="2" bgcolor="#C0C0C0" class="heading">
+		Data Sources
+		</th></tr>
+		<? 
+		global $dsn;
+		while ( list($k,$v) = @each($dsn) ) {
+			echo "<tr><td bgcolor=\"lightgray\" rowspan=\"7\">$k</td></tr>";
+			while ( list($i,$j) = @each($v)) {
+				echo "<td bgcolor=\"#e0e0e0\">";
+					if ( $i == 'password') {
+						if ($j != '' ) {echo "password: ".str_repeat("*",strlen($j));}
+						else { echo "password: <i>blank password</i>";}
+						} else {
+						print "$i: $j";
+					}
+			echo "</td></tr>\n";
+			}
+		}
+		?>
+		</table>
+		<p>&nbsp;</p>
+	</body>
+</html>
