@@ -12,7 +12,6 @@ require_once(LIB_PATH.'User.php');
 	 * Call lcUser->bindSession() from any login script to log-in a user.
 	 */
 
-
 class lcUser {
 
 	var $username = "anonymous";
@@ -35,7 +34,11 @@ class lcUser {
 		$db = DB::getHandle();
 		$db->query("select * from lcUsers where username = '$uname'",false);
 		$db->next_record();
+
 		switch($db->Record['userType']) {
+			case USERTYPE_ADMIN:
+				$temp = new AdminUser($db->Record['username']);
+				break;
 			case USERTYPE_FACULTY:
 				$temp = new FacultyUser($db->Record['username']);
 				break;
@@ -782,7 +785,7 @@ class UserProfile {
 			$prof->keys[] = $k;
 		}
 
-		if ($type > 1 ) {
+		if ($type > 1 && strlen($prof->tableName) > 1) {
 			$db->queryOne("select * from ".$prof->tableName." where username='".$prof->username."'",false);
 			while ( list($k,$v) = @each($db->Record) ) {
 				$prof->values[$k] = $v;
