@@ -16,18 +16,19 @@
   <tr>
     <td valign="top">
 	<ol>
-	<li><a href="<?=modurl('cal/');?>"><?=lct('Calendar')?></a></li>
 
 	<li><a href="<?=modurl('classSetup');?>"><?=lct('Classroom Setup')?></a></li>
 
-	<li><a href="<?=modurl('dataexchange');?>"><?=lct('Export Class')?></a></li>
+	<li><a href="<?=APP_URL?>classmgr/textbooks"><?=lct('Textbooks')?></a></li>
+	<li><a href="<?=APP_URL?>classmgr/syllabusManage"><?=lct('Syllabus')?></a></li>
 
 	<li><a href="<?=APP_URL?>gradebook/"><?=lct('Gradebook')?></a></li>
+	<li><a href="<?=APP_URL?>classmgr/users/"><?=lct('Student Management')?></a></li>
 
-	<li><a href="<?=APP_URL?>classmgr/syllabusManage"><?=lct('Syllabus')?></a></li>
+
 	
+	<li><a href="<?=modurl('dataexchange');?>"><?=lct('Export Class')?></a></li>
 	<li><a href="<?=APP_URL?>classroom/details/id_classes=<?=$t['classObj']->id_classes?>"><?=lct('View Classroom')?></a></li>
-	<li><a href="<?=APP_URL?>classmgr/textbooks"><?=lct('Textbooks')?></a></li>
 	<li><a href="<?=APP_URL?>classmgr/examschedule/"><?=lct('Exam Scheduling')?></a></li>
 	
 	<li><a href="<?=APP_URL?>classmgr/orientations/"><?=lct('Orientation Scheduling')?></a></li>
@@ -61,6 +62,8 @@
     <td valign="top">
 
 	<ol>
+
+		<li><a href="<?=modurl('cal/');?>"><?=lct('Calendar')?></a></li>
 		<li><a href="<?=modurl('announcements/');?>"><?=lct('Announcements')?></a></li>
 
 		<li><a href="#" onClick = "window.open('<?=APP_URL?>classroom/chat/main/event=initialize/id_classes=<?=$obj->user->activeClassTaught->id_classes?>','generic2','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=790,height=500');"><?=lct('Chat')?></a></li>
