@@ -20,10 +20,13 @@ class privMess extends PersistantObject {
 
 
         function add() {
+		$user = lcUser::getuserByUsername($this->messageTo);
+		if (!$user) { 
+			return false;
+		}
 
 	      	$this->_save("privateMessages");
 
-		$user = lcUser::getuserByUsername($this->messageTo);
 
 		# By default, users will get private messages
 		# The following was commented out since certain applications rely on 
