@@ -104,7 +104,6 @@ class semestercopy extends FacultyService
 			{	$db->Record['id_classes_update'] = $db->Record['id_classes'];
 				$t['selected'] = $db->Record;
 				$fl_ismyclass = true;
-//				continue;
 			}
 			
 			$t['selections'][$db->Record['id_classes']] = $db->Record;
@@ -122,7 +121,7 @@ class semestercopy extends FacultyService
 	/**
 	 *	After hitting the list of classes to use to update the first (run) with
 	 *	We are going to try and find out if we can verify that is my class.
-	 *		
+	 *	
 	 *
 	 */
 	function selectWithRun($db, &$u, &$lc, &$t)
@@ -167,38 +166,14 @@ class semestercopy extends FacultyService
 	
 	function selectYouSureRun($db, &$u, &$lc, &$t)
 	{
-		$id_classes = (int)$lc->postvars['id_classes_update'];
-		$id_classes_with = (int)$lc->postvars['id_classes_with'];
+		$id_classes_to = (int)$lc->postvars['id_classes_update'];
+		$id_classes_from = (int)$lc->postvars['id_classes_with'];
 		$ic_sure = $lc->postvars['ic_sure'];
-		
+
 		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_selectWith';
-		
-		switch($ic_sure)
-		{	
-			case 1: 
-				$t['warning_message'] = '
-				***** Are you sure you want to do this?  You are risking data deletion<br>';
-				
-				break;
-				
-			case 2: 
-				$t['warning_message'] = '
-				<h2>***** This is your last and final warning!!!</h2>
-				<br>';
-				
-				break;
-			case 3:
-				echo 'Running update now....';
-				$this->updateOther($id_classes, $id_classes_with, $db, $u, $lc, $t);
-				break;
-			default:
-			$t['warning_message'] = '
-				Are you sure you want to do this?  You are risking data deletion<br>';
-				
-			break;
-		}
-		
+
+
 		/**
 		 *	List all classes belonging to teacher
 		 *	Only list out classes that are within or past editing phases
@@ -211,40 +186,30 @@ class semestercopy extends FacultyService
 		INNER JOIN courses as B ON A.id_courses=B.id_courses
 		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
 		WHERE 
-		(A.id_classes='.$id_classes.' OR A.id_classes='.$id_classes_with.') AND
+		(A.id_classes='.$id_classes_to.' OR A.id_classes='.$id_classes_from.') AND
 		A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
 		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC';
 		
 		$db->query($sql);
 		if ($db->getNumRows() == 2)
 		{	// pushing to template
-			$t['update'] = $this->getClass($id_classes, $u->profile->get('username'), $db);
-			$t['with'] = $this->getClass($id_classes_with, $u->profile->get('username'), $db);
+			$t['update'] = $this->getClass($id_classes_to, $u->profile->get('username'), $db);
+			$t['with'] = $this->getClass($id_classes_from, $u->profile->get('username'), $db);
 			
 		} else
 		{	// error, you didn't select a class or you didn't select one that is yours.
 		 	$this->run($db, $u, $lc, $t);
 		}
-		
+
+
+		$this->semesterCopyClass( $id_classes_from, $id_classes_to, $db);
+
+		$this->presentor = 'redirectPresentation';
+
+		$t['url'] = modurl('semestercopy/event=done/');
 	}
 	
-	function getClass($id_classes, $facultyId, $db)
-	{	
-		$sql = '
-		SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
-		FROM classes as A
-		INNER JOIN courses as B ON A.id_courses=B.id_courses
-		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
-		WHERE A.id_classes='.$id_classes.' 
-		AND A.facultyId=\''.$facultyId.'\' 
-		AND C.dateAccountActivation <= now()
-		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC';
-		
-		$db->RESULT_TYPE = MYSQL_ASSOC;
-		$db->queryOne($sql);
-		
-		return $db->Record;
-	}
+
 
 
 	/**
@@ -253,30 +218,44 @@ class semestercopy extends FacultyService
 	 *	Quick description of process:
 	 *		Wipes out selected classes information
 	 *		and imports backup file's info into it
-	 *	Questions
-	 *		Do i want to remove the images/files classdoclib
-	 *		Do i want to remove assessment answers? 
-	 *
-	 *		Do i really want to blow away this classroom before verifying the file was uploaded and
-	 *			can be parsed? 
 	 */
-	function updateOther($id_classes_update, $id_classes_with, $db,&$u,&$lc,&$t)
+	function semesterCopyClass($id_classes_from, $id_classes_to, &$db)
 	{
-		$this->id_classes = $id_classes_update;
-		$this->using_classes_id = $id_classes_update;
-		
-		$this->id_classes_with = $id_classes_with;
-		
+
+
+		//all this code sucks, needs to use PBDO
+
+		//what to update, assignments, assignments_grades, assignments_link 
+		// gradebook, gradebook_categories, gradebook_entries
+		// class_lessons class_lesson_links, class_lesson_content, class_links, class_objectives
+		// class_syllabuses
+		// classdoclib_Files, Folders, Sharing
+
+
+		//what not to update, announcements
+		// assignments_grades
+		// class_presentations 
+		// class_sections
+		// class_student_sections
+		// 
+
+
+		//need info on (syllabuses, presentations, Trash, exams, textbooks)
+
+		$this->id_classes_to = $id_classes_to;
+
+		$this->id_classes_from = $id_classes_from;
+
 		$sql = '
 		SELECT * 
 		FROM classes
-		WHERE id_classes = '.$id_classes_update;
+		WHERE id_classes = '.$id_classes_to;
 		
 		$db->queryOne($sql);
 		if (is_array($db->Record))
 		{	$classArray = $db->Record;
 		}
-		
+
 		if ($classArray['id_classes'] > 0)
 		{
 			$id_classes = $classArray['id_classes'];
@@ -380,14 +359,12 @@ class semestercopy extends FacultyService
 		
 		$this->obj_db =& $db;
 		
-		$this->current_dir = '/tmp/class_'.$this->using_classes_id.'/';
+		$this->current_dir = '/tmp/class_'.$this->id_classes_to.'/';
 		$this->home_dir = $this->current_dir;
 		exec('rm -rf '.$this->current_dir);
 		
-		$this->obj_zip = new LcZipFile('/tmp/class_'.$this->using_classes_id);
-		
-		$this->id_classes = $this->id_classes_with;
-		
+		$this->obj_zip = new LcZipFile('/tmp/class_'.$this->id_classes_to);
+
 		// back up the classroom to disk (backing up WITH id class)
 		$xmlObj = new xmlparser('<dataexchange></dataexchange>');
 		
@@ -446,7 +423,6 @@ class semestercopy extends FacultyService
 		$this->obj_zip->add_file($silly,'classroom.xml');
     
 		
-		echo '<br>';
 		// now we have a backup.. lets grqab the xml and process it!
 		
 		$root_node =& $xmlObj->getRoot();
@@ -462,12 +438,8 @@ class semestercopy extends FacultyService
 			} 
 			
 		}
-
-		$this->presentor = 'redirectPresentation';
-		
-		$t['url'] = modurl('semestercopy/event=done/');
-
 	}
+
 	
 	function doneRun($db, &$u, &$lc, &$t)
 	{
@@ -534,7 +506,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes(str_replace('\\\\', '', $field_node->value))).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -572,7 +544,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -610,7 +582,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes(stripslashes(str_replace('\\\\', '', $field_node->value)))).'\'';
 			}
 			
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -669,7 +641,7 @@ function remove_first_comma($string)
 
 			}
 			
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 
 			
 			// we need to 
@@ -747,7 +719,7 @@ function remove_first_comma($string)
 
 			}
 			// execute
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -780,7 +752,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -819,7 +791,7 @@ function remove_first_comma($string)
 				
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			$sql = $this->remove_first_comma($sql);
 			
@@ -853,7 +825,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -893,7 +865,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			$this->obj_db->query($sql);
 			$this->__errors[] = __LINE__. ' '. mysql_error();
@@ -949,7 +921,7 @@ function remove_first_comma($string)
 			
 			// get content contnets
 			$sql .= ','."\n".'txText=\''. str_replace('\'', '\'\'',stripslashes(str_replace('\\\\', '', file_get_contents($this->home_dir.'content/'.$textname)))).'\'';
-			$sql .= ', id_classes='.$this->using_classes_id;
+			$sql .= ', id_classes='.$this->id_classes_to;
 
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -991,7 +963,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1147,7 +1119,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', class_id='.$this->using_classes_id;
+			$sql .=', class_id='.$this->id_classes_to;
 		
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1242,7 +1214,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1271,7 +1243,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1314,7 +1286,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1358,7 +1330,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1395,7 +1367,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;	
+			$sql .=', id_classes='.$this->id_classes_to;	
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1431,7 +1403,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1470,7 +1442,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1508,7 +1480,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes(str_replace('\\\\', '', $field_node->value))).'\'';
 			}
 
-			$sql .=', id_classes='.$this->using_classes_id;
+			$sql .=', id_classes='.$this->id_classes_to;
 
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1558,7 +1530,7 @@ function remove_first_comma($string)
 				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
 			}
 		
-			$sql .=', class_id='.$this->using_classes_id;
+			$sql .=', class_id='.$this->id_classes_to;
 			
 			if ($this->mode == 'copy')
 			{	$sql = $this->remove_first_comma($sql);
@@ -1622,7 +1594,7 @@ function remove_first_comma($string)
 		$sql = '
 			SELECT id_class_lesson_content, txText
 			FROM class_lesson_content
-			WHERE id_classes='.$this->using_classes_id.' AND 
+			WHERE id_classes='.$this->id_classes_from.' AND 
 			txText LIKE \'%classroom/lessons/event=viewcontent/id=%\'
 			';
 		
@@ -1716,7 +1688,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM assessment
-		WHERE class_id='.$this->id_classes.'
+		WHERE class_id='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -1760,7 +1732,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM assessment_answer
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		$xml_child_node = array();
 		
@@ -1846,7 +1818,7 @@ function remove_first_comma($string)
 		SELECT * 
 		FROM assessment_log
 		WHERE assessment_id='.$assessment_id.'
-			AND id_classes='.$this->id_classes.'
+			AND id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -1879,7 +1851,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM textbook
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -1910,7 +1882,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM textbook_classes
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -1949,7 +1921,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM classdoclib_Folders
-		WHERE class_id='.$this->id_classes.'
+		WHERE class_id='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2042,7 +2014,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_lesson_content
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2077,7 +2049,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_lessons
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2164,7 +2136,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_presentations
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2196,7 +2168,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_objectives
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2226,7 +2198,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_links_categories
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2256,7 +2228,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_links
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2291,7 +2263,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_assignments
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 
 		$db = DB::getHandle();
@@ -2331,7 +2303,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM exam_schedule_classes
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 
 		$db = DB::getHandle();
@@ -2367,7 +2339,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM seminar_classes_dates
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2409,7 +2381,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM orientation_classes
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2454,7 +2426,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM lcEvents
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2499,7 +2471,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_syllabuses
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2532,7 +2504,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_announcements
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2565,7 +2537,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_faqs
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2597,7 +2569,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_gradebook
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2634,7 +2606,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_gradebook_categories
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2664,7 +2636,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_gradebook_entries
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2707,7 +2679,7 @@ function remove_first_comma($string)
 		$sql = '
 		SELECT * 
 		FROM class_gradebook_val
-		WHERE id_classes='.$this->id_classes.'
+		WHERE id_classes='.$this->id_classes_from.'
 		';
 		
 		$db = DB::getHandle();
@@ -2733,6 +2705,27 @@ function remove_first_comma($string)
 		}
 		
 	return  new xml_node('CLASS_GRADEBOOK_VAL', null, $xml_child_node);
+	}
+
+
+
+
+	function getClass($id_classes, $facultyId, $db)
+	{	
+		$sql = '
+		SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
+		FROM classes as A
+		INNER JOIN courses as B ON A.id_courses=B.id_courses
+		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+		WHERE A.id_classes='.$id_classes.' 
+		AND A.facultyId=\''.$facultyId.'\' 
+		AND C.dateAccountActivation <= now()
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		return $db->Record;
 	}
 }
 
@@ -2809,6 +2802,7 @@ class LcZipFile {
 		pack("V", strlen($data)). 
 		"\x00\x00"; 
 	} 
+
 
 }
 ?>
