@@ -12,6 +12,19 @@
  * http://www.tapinternet.com/
  ***************************************************/
 
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 define('IMAGES_URL',"./images/");
 define('TEMPLATE_URL',"./templates/default");
@@ -193,6 +206,7 @@ function initialCheck (&$arg) {
 	}
 	// this field is not required
 	$arg['dbcreate'] = $_POST['dbcreate'];
+	$arg['sampledata'] = $_POST['sampledata'];
 
 return true;
 }
@@ -348,6 +362,7 @@ define('USERTYPE_FACULTY', 3);
 define('SITE_TITLE','".$arg['sitename']."');
 define('STUDENT_EMAIL_DOMAIN', '".$arg['studentemail']."');
 define('UPDATE_MAILSERVER_DB', FALSE);
+define('MAX_COURSES', '".base64_encode(1000000)."');
 ";
 if (@exec('aspell')) { 
 	$defines .= "define('HAS_ASPELL', TRUE);\n";
@@ -378,6 +393,7 @@ function runSetup(&$arg) {
 	//use native LC driver
 	$dsn = array();
 	$arg = $_POST;
+	$sampledata = $arg['sampledata'];
 	$dsn['default'] = array(
 		'driver'=>strtolower($arg['driver']),
 		'host'=>$arg['dbserver'],
@@ -479,13 +495,25 @@ function runSetup(&$arg) {
 		}
 	
 	}
-	// grab all SQL files 
-	
-	$sqlFiles = array (
-		'profile.sql',
-		'semesters_and_classes.sql'
-	);
-$contents = '';
+
+	//
+	// grab remaining SQL files 
+	// but determine if we want to include semesters_and_classes or not
+	// ideally we would include separate sets of files 
+	// to be distributed altogether
+	//
+	if ($sampledata=='on') { 	
+		$sqlFiles = array (
+			'profile.sql',
+			'semesters_and_classes.sql'
+		);
+	} else {
+		$sqlFiles = array (
+			'profile.sql'
+		);
+	}
+
+	$contents = '';
 	while (list ($k, $v) = @each($sqlFiles) )
 	{
 		$f = @fopen(SQL_PATH.$v,'r');
@@ -836,6 +864,10 @@ function displayStepFour($t) {
 			    <td>Create database ?</td>
 			    <td><input type="checkbox" name="dbcreate" value="on" CHECKED></td>
 			  </tr>
+			  <tr>
+			    <td>Install sample data ?</td>
+			    <td><input type="checkbox" name="sampledata" value="on" CHECKED></td>
+			  </tr>
 		</table>
 		<hr>
 		<h2>Configuration Options</h2>
@@ -942,6 +974,7 @@ displayHeader(5);
 	<input type="hidden" value="<?=$t[masteremail]?>" name="masteremail">
 	<input type="hidden" value="<?=$t[studentemail]?>" name="studentemail">
 	<input type="hidden" value="<?=$t[dbcreate]?>" name="dbcreate">
+	<input type="hidden" value="<?=$t['sampledata']?>" name="sampledata">
 
 	<input type="hidden" value="processSix" name="event">
 	<input type="submit" value="Install" style="width:100px;">
