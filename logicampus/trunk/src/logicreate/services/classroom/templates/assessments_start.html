@@ -65,8 +65,8 @@ viewing.  You can also use the previous and next buttons to go through each ques
 						$answerCount = count($answer);
 						for ($x=0;$x<$answerCount; $x++)
 						{
-							echo $x + 1;
-							echo '. '.$answer[$x].'<br>';
+							echo '&bull;';
+							echo $answer[$x].'<br>';
 						}
 					} else {
 						if (strlen($t['questions'][$i]->answer->assessmentAnswerValues) >10){

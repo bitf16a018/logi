@@ -116,10 +116,21 @@ class contactStudents extends FacultyService
 			_ made it javascript friendly.. failed to do the conversion.
 	 */
 #	 debug($lc->postvars);
+		/*
 		foreach($lc->postvars as $k=>$v)
 		{
 			if (substr($k, 0, 8) == 'student_')
 			{	$my_email_to_send[substr($k, 8, (strlen($k)-8))] = $my_students[str_replace('_', '.', substr($k, 8, (strlen($k)-8)))];
+			}
+		}
+		*/
+		foreach($lc->postvars as $k=>$v)
+		{
+			if (substr($k, 0, 8) == 'student_')
+			{	
+			$short = substr($k,8);
+			$short = str_replace("_",".",$short);
+			$my_email_to_send[$short] = $my_students[str_replace('_', '.', $short)];
 			}
 		}
 		switch($lc->postvars['type'])

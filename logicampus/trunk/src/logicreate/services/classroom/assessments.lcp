@@ -107,7 +107,6 @@ class assessments extends StudentService {
 			{
 				# load up assessment log and do some checking
 				$log = AssessmentLog::loadAll($asmt->assessmentId, $u->username, $u->activeClassTaken->id_classes);
-	
 				$retries = count($log);
 				if ($retries >= $asmt->numRetries)
 				{
@@ -124,7 +123,7 @@ class assessments extends StudentService {
 				$newLog = new AssessmentLog();
 				$newLog->idStudent = $u->username;
 				$newLog->startDate = time();
-				$newLog->startDate = time()+ ($asmt->minuteLimit*60);
+				$newLog->endDate = time()+ ($asmt->minuteLimit*60);
 				$newLog->idClasses = $u->activeClassTaken->id_classes;
 				$newLog->assessmentId = $asmt->assessmentId;
 				$newLog->save();
@@ -132,6 +131,11 @@ class assessments extends StudentService {
 				# store the current log with the assessment object
 				$u->sessionvars['asmtObj']->log = $newLog;
 		
+			} else {
+				//push this back into the database, session problem
+# commenting this out per mark - 2/10/04
+#				$asmt->log->_new = true;
+#				$asmt->log->save();
 			}
 
 			# If there is no assessment object, there was a problem somewhere
@@ -150,14 +154,15 @@ class assessments extends StudentService {
 			$t['questions'] = $asmt->getQuestionsAndAnswers($u->username, $u->activeClassTaken->id_classes);
 
 			# Store the question Order in session for later use
-			if (!is_array($u->sessionvars['questionOrder']))
-			{
-				$questionCount = count($t['questions']);
-				for($i=0; $i<$questionCount; $i++)
-				{
-					$u->sessionvars['questionOrder'][] = $t['questions'][$i]->assessmentQuestionId;
-				}
+			//if (!is_array($u->sessionvars['questionOrder']))
+			//{
+			# MAK, store it everytime
+			$questionCount = count($t['questions']);
+			for($i=0; $i<$questionCount; $i++) {
+				$u->sessionvars['questionOrder'][] = $t['questions'][$i]->assessmentQuestionId;
 			}
+//			}
+			# MAK, store it everytime
 
 			$lc->templateName = 'assessments_start';
 
@@ -196,6 +201,12 @@ class assessments extends StudentService {
 		$id = (int)$lc->getvars['id'];
 		# load assessment
 		$t['assessment'] = Assessment::load($id, $u->activeClassTaken->id_classes);
+
+		if (! is_object($t['assessment']) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You are trying to access a test with an id of $id.  You do not have permission to access this test.";
+			return;
+		}
 
 		# Can the student view the results?
 		if ($t['assessment']->showResultType != 2)
@@ -334,7 +345,7 @@ class assessments extends StudentService {
 			$lc->templateName = 'assessments_stop_showgrade';
 			$t['grade'] = $score;
 			$t['possiblePoints']  = $asmt->possiblePoints;
-			$t['percentGrade'] = sprintf('%.2f%%', ( $t['grade']/$t['possiblePoints']) );
+			$t['percentGrade'] = sprintf('%.2f%%', ( $t['grade']/$t['possiblePoints'])*100 );
 		}
 
 		# Student is allowed to see detailed results
@@ -347,7 +358,7 @@ class assessments extends StudentService {
 
 	}
 
-
+// mark's notes -  we should also remove the log in a perfect world
 	function resetSessionInfo(&$u)
 	{
 		unset($u->sessionvars['asmt_date_start']);
