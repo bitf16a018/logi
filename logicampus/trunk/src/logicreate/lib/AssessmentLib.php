@@ -231,6 +231,7 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 		return false;
 	}
 
+
 	function grade(&$answerObj) {
 
 		$correct = $this->getCorrectAnswer();
@@ -283,7 +284,7 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 
 	function isCorrect() {
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($this->answer->assessmentAnswerValues) == $correct) {
+		if (strtolower($this->answer->assessmentAnswerValues) === $correct) {
 			return TRUE;
 		}
 		return FALSE;
