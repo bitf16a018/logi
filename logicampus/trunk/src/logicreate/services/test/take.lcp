@@ -289,7 +289,7 @@ class take extends StudentService {
 		$log = $u->sessionvars['testObj']->log;
 		if (!$log) {
 			# there was a serious problem
-			$t['message'] = 'There was a problem grading your test. We were unable able to locate the log entry for your test.
+			$t['message'] = 'There was a problem grading your test. We were unable to locate the log entry for your test.
 			Please contact your teacher about this error or try starting the test again.';
 			$lc->templateName = 'take_error';
 			$this->resetSessionInfo($u);
