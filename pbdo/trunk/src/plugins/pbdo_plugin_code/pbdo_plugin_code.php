@@ -1,4 +1,13 @@
 <?
+// +----------------------------------------------------------------------
+// | PHP Source                                                           
+// +----------------------------------------------------------------------
+// | Copyright (C) 2005 by mark <mark@kimsal.com>
+// +----------------------------------------------------------------------
+// |
+// | Copyright: See COPYING file that comes with this distribution
+// +----------------------------------------------------------------------
+//
 
 class PBDO_Plugin_Code extends PBDO_Plugin {
 
@@ -109,9 +118,12 @@ class PBDO_Plugin_Code extends PBDO_Plugin {
 
 
 	function destroyPlugin() {
-
+		unset($this->codeStack);
 	}
 }
+
+
+
 
 /**
  * Contains a definition of a class in memory
@@ -151,7 +163,6 @@ class ParsedClass {
 
 	//code related
 	function setOID($name) {
-//		print "*** set oid = $name\n";
 		$this->oid = convertColName($name);
 	}
 
@@ -199,34 +210,10 @@ class ParsedClass {
 		foreach ($entity->getAttributes() as $a) {
 			$class->addAttribute( new ParsedAttribute($a->name, $a->type, $a->isPrimary() ));
 		}
-//print_r($entity);exit();
-		return $class;
-
+	return $class;
 	}
 
 
-	/**
-	 * @DEPRECATED
-	 */
-	 /*
-	function createFromXMLObj($obj) {
-		switch ($obj->getAttribute('language')) {
-			case 'java':
-			include_once('objtemplates/java.php');
-			$class = new PlainJavaParsedClass( 
-						$obj->getAttribute('name'), 
-						$obj->getAttribute('package') 
-						);
-			break;
-			default:
-			$class = new ParsedClass( 
-						$obj->getAttribute('name'), 
-						$obj->getAttribute('package') 
-						);
-		}
-		return $class;
-	}
-*/
 
 	function addAttribute($a) {
 		if ( $a->isPrimary() ) {
@@ -270,6 +257,7 @@ class ParsedClass {
 		$this->attributes[$att]->complex = true;
 	}
 
+
 	function setForeignRelation($table,$fcol,$lcol) {
 		$this->relations[$table] = array($fcol,$lcol);
 	}
@@ -281,13 +269,14 @@ class ParsedClass {
 
 
 	function printRelations() {
+		$model = PBDO_Compiler::getDataModel();
 		//foreign (assume one to many)
-		reset($this->relations);
-		while ( list ($q,$col) = @each($this->relations) ) {
-			$fcol = $col[0];
-			$lcol = $col[1];
+		reset($model->relationships);
+		while ( list ($q,$rel) = @each($model->relationships) ) {
+			$fcol = $rel->getAttribB();
+			$lcol = $rel->getAttribA();
 
-			$q = convertTableName($q);
+			$q = convertTableName($rel->getEntityB());
 			if ( substr($q,-1) == 's' ) { $s = ''; } else { $s ='s'; }
 			$ret .= "\tfunction get".$q.$s."(\$dsn='default') {\n";
 			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$fcol." = \''.\$this->getPrimaryKey().'\'',\$dsn);\n";
@@ -688,22 +677,6 @@ class ParsedAttribute {
 		return $this->isPrimary;
 	}
 
-/*
-	function createFromXMLObj($obj) {
-		foreach( $obj->attributes as $k=>$v) {
-			if ($v->name == 'name') {
-				$n = ( $obj->getAttribute($k) );
-			}
-			if ($v->name == 'type') {
-				$t = ( $obj->getAttribute($k) );
-			}
-
-		}
-
-		$x = new ParsedAttribute($n,$t);
-		return $x;
-	}
-*/
 
 	function toPHP() {
 		return 'var $'.$this->name;

@@ -20,9 +20,11 @@ class PBDO_InternalModel {
 class PBDO_ParsedDataModel extends PBDO_InternalModel {
 	public $displayName = '';
 	public $entities = array();
+	public $relationships = array();
+	public $projectName = 'PBDO-Unnamed Project';
 	private $projectVersion;
 	private $currentId = 0;
-	public $projectName = 'PBDO-Unnamed Project';
+
 
 	function PBDO_ParsedDataModel() {
 	}
@@ -47,6 +49,14 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 	}
 
 
+	function addRelationship(&$r) {
+		++$this->currentId;
+		$r->setInternalId($this->currentId);
+
+		$this->relationships[$this->currentId] = $r;
+	}
+
+
 	function setVersion($v) {
 		$this->projectVersion = $v;
 	}
@@ -55,12 +65,13 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 	function getVersion() {
 		return $this->projectVersion;
 	}
-
 }
+
 
 
 class PBDO_ParsedEntity extends PBDO_InternalModel {
 	public $displayName;
+	public $name;
 	private $attributes = array();
 	public $package;
 	public $language = 'php';
@@ -68,6 +79,7 @@ class PBDO_ParsedEntity extends PBDO_InternalModel {
 
 	function PBDO_ParsedEntity($n) {
 		$this->displayName = $n;
+		$this->name = $n;
 	}
 
 
@@ -204,5 +216,90 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 
 }
 
+
+
+/**
+ * Represent an Entity Relationship
+ */
+class PBDO_ParsedRelationship extends PBDO_InternalModel {
+
+
+	public $type = 2;
+	private $entityA;
+	private $entityB;
+	private $attribA;
+	private $attribB;
+
+	public static $PBDO_ONE_TO_ONE = 1;
+	public static $PBDO_ONE_TO_MANY = 2;
+	public static $PBDO_MANY_TO_MANY = 3;
+
+	function PBDO_ParsedRelationship($a,$b) {
+		$this->setEntityA($a);
+		$this->setEntityB($b);
+	}
+
+
+	/**
+	 * Don't try to make a distinction like first or second
+	 * between the entities, because the relationship might
+	 * not give the same distinction (many to many)
+	 */
+	function setEntityA($ea) {
+		$this->entityA = $ea;
+	}
+
+
+	/**
+	 * Don't try to make a distinction like first or second
+	 * between the entities, because the relationship might
+	 * not give the same distinction (many to many)
+	 */
+	function setEntityB($eb) {
+		$this->entityB = $eb;
+	}
+
+
+	/**
+	 * Don't try to make a distinction like first or second
+	 * between the entities, because the relationship might
+	 * not give the same distinction (many to many)
+	 */
+	function setAttribA($aa) {
+		$this->attribA = $aa;
+	}
+
+
+	/**
+	 * Don't try to make a distinction like first or second
+	 * between the entities, because the relationship might
+	 * not give the same distinction (many to many)
+	 */
+	function setAttribB($ab) {
+		$this->attribB = $ab;
+	}
+
+
+
+	function getEntityA() {
+		return $this->entityA;
+	}
+
+
+	function getEntityB() {
+		return $this->entityB;
+	}
+
+
+	function getAttribA() {
+		return $this->attribA;
+	}
+
+
+	function getAttribB() {
+		return $this->attribB;
+	}
+
+}
 
 ?>
