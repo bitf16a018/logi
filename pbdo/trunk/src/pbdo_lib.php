@@ -165,6 +165,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	private $possibleValues;
 	private $codeType;
 	private $isPrimary = false;
+	public $description = '';
 
 
 	function PBDO_ParsedAttribute($n,$t) {
@@ -233,6 +234,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 			$x->setPrimary(true);
 		}
 		$x->setSize( $obj->getAttribute('size') );
+		$x->description = $obj->getAttribute('description');
 
 		return $x;
 	}
