@@ -64,16 +64,23 @@ viewing.  You can also use the previous and next buttons to go through each ques
 				<?
 				// print the given answers
 				// we'll break this up per question type
-					if ($t['questions'][$i]->questionType == QUESTION_MATCHING || $t['questions'][$i]->questionType == QUESTION_MANSWER) 
-					{
-						$answer = $t['questions'][$i]->answer->assessmentAnswerValues;
-						$answerCount = count($answer);
-						for ($x=0;$x<$answerCount; $x++)
-						{
-							echo '&bull;';
-							echo $t['questions'][$i]->questionChoices[$x]->label.'<br>';
-						}
-					} 
+                                        if ($t['questions'][$i]->questionType == QUESTION_MANSWER)  {
+                                                $answer = $t['questions'][$i]->answer->assessmentAnswerValues;
+                                                $answerCount = count($answer);
+                                                foreach($answer as $k=>$v) {
+                                                        echo '&bull;';
+                                                        echo $t['questions'][$i]->questionChoices[$v]->label.'<br>';
+                                                }
+                                        }
+
+                                        if ($t['questions'][$i]->questionType == QUESTION_MATCHING )  {
+                                                $answer = $t['questions'][$i]->answer->assessmentAnswerValues;
+                                                $answerCount = count($answer);
+                                                for ($x=0;$x<$answerCount; $x++) {
+                                                        echo '&bull;';
+                                                        echo $t['questions'][$i]->questionChoices[$x]->label.'<br>';
+                                                }
+                                        }
 
 					if ($questionType == QUESTION_MCHOICE) { 
 						$studentAnswer = $t['questions'][$i]->answer->assessmentAnswerValues;
