@@ -91,8 +91,8 @@ function lct($key,$args = "") {
 		}
 
 		echo '
-		case \''.$node->attributes['id']->value.'\':
-			return "'.$node->translation.'";
+		case \''.htmlspecialchars($node->attributes['id']->value).'\':
+			return "'.htmlspecialchars($node->translation).'";
 			break;
 ';
 
