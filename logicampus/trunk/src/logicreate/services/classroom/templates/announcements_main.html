@@ -14,10 +14,10 @@ if ( !count($t['announcements']) ) {
 
 while (list(,$a) = @each($t['announcements'])) { ?>
 	<div class="colorbar">
-		SSDFSDF<?=$a['tx_title'];?>
+		<?=$a['tx_title'];?>
 	</div>
 	<div style="padding:3px 0 0 10px;font-size:x-small;">
-		<b>Posted On:</b> <i><?=date("l jS of F Y", strtotime($a['dt_display']));?></i>
+		<b><?= lct('Posted On');?>:</b> <i><?=date("l jS of F Y", strtotime($a['dt_display']));?></i>
 	</div>
 	<div style="padding:5px 20px 20px 20px;">
 		<?=$a['tx_description'];?>

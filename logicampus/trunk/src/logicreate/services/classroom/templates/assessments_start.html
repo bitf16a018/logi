@@ -1,6 +1,6 @@
 <?=$t['sectionheader'];?>
 <?=//debug($t['answers']);?>
-<b>Teacher Instructions</b>
+<b><?=lct('Teacher Instructions');?></b>
 <br/>
 <?=$t['instructions']?>
 
@@ -84,13 +84,13 @@ viewing.  You can also use the previous and next buttons to go through each ques
 </table>
 <br>
 <FIELDSET>
-<LEGEND><b>Complete Assessment</b></LEGEND>
+<LEGEND><b><?=lct('Complete the Assessment');?></b></LEGEND>
 Once you are finished with your assessment, click the button below so your test will be submitted for a grade.
 If you do not turn in your test, you will not receive a grade.
 <form METHOD="POST">
 <center>
-<input type="submit" name="submit" value="Turn In Test">
-<input type="hidden" name="event" value="stop">
+	<input type="submit" name="submit" value="<?=lct('Turn In Test');?>">
+	<input type="hidden" name="event" value="stop">
 </center>
 </form>
 </FIELDSET>
