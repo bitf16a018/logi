@@ -57,8 +57,7 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    if ($where) { $where = " and $where"; }
    $db = DB::getHandle($dsn);
    if ($prop=='') { $prop=$this->_pkey; }
-   $sql = "select * from semesters where $prop='$pkey' $where $orderBy";
-   $db->query($sql);
+   $db->query("select * from semesters where $prop='$pkey' $where $orderBy");
    if($db->next_record()) {
       $temp = new semesterObj();
       $temp->_dsn = $dsn;

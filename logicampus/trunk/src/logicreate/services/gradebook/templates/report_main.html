@@ -64,6 +64,17 @@ function can_submit()
 			<input type="radio" name="rtype" value="fullgrid" CHECKED /> Detailed Gradebook<br />
 			<input type="radio" name="rtype" value="classStandards" /> Class Standards
 		</fieldset>
+		<fieldset>
+<legend>Section</legend>
+<input type='radio' name='section' value='' checked /> All<BR/>
+<?
+while(list($k,$v) = @each($t['sections'])) { ?>
+
+<input type='radio' name='section' value='<?=$v;?>' /> <?=$v;?><BR/>
+
+
+<? } ?>
+		</fieldset>
 	</td>
 	<td valign="top" width="50%">
 		<fieldset>
