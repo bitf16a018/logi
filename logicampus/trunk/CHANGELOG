@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-10-09 23:42:48 $
+Last Updated:  $Date: 2004-11-27 22:44:37 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,9 @@ SYNTAX:
 
 
 #########################
+11/27/04 - 5:40 - mgk
+Fixed PM system - it 'worked', but wasn't working as it should have.  :( 
+
 10/9/04 - 7:40pm - mgk
 Modified PM system to have a notion of 'sent' and 'received' so that 
 a user can view the messages they've sent.
