@@ -62,18 +62,18 @@ class ParsedClass {
 
 
 	function createFromXMLObj($obj) {
-		switch ($obj->attributes['language']->value) {
+		switch ($obj->getAttribute('language')) {
 			case 'java':
 			include_once('objtemplates/java.php');
 			$class = new PlainJavaParsedClass( 
-						$obj->attributes['name']->value, 
-						$obj->attributes['package']->value 
+						$obj->getAttribute('name'), 
+						$obj->getAttribute('package') 
 						);
 			break;
 			default:
 			$class = new ParsedClass( 
-						$obj->attributes['name']->value, 
-						$obj->attributes['package']->value 
+						$obj->getAttribute('name'), 
+						$obj->getAttribute('package') 
 						);
 		}
 		return $class;
@@ -81,7 +81,7 @@ class ParsedClass {
 
 
 	function addAttribute($a) {
-		$this->attributes[$a->colName] = $a;
+		$this->attributes[$a->colName] =  $a;
 	}
 
 
@@ -112,6 +112,8 @@ class ParsedClass {
 
 	function setForeignKey($att,$table) {
 		print " *** set for $att\n";
+		print_r($this->attributes) ; 
+		print "\n\n";
 		if ( ! is_object($this->attributes[$att]) ) { die("$this->name $att is not an object\n"); }
 		$this->attributes[$att]->type = convertTableName($table);
 		$this->attributes[$att]->complex = true;
@@ -523,12 +525,12 @@ class ParsedAttribute {
 
 
 	function createFromXMLObj($obj) {
-		while (list ($k,$v) = @each($obj->attributes) ) {
+		foreach( $obj->attributes as $k=>$v) {
 			if ($v->name == 'name') {
-				$n = ( $obj->attributes[$k]->value );
+				$n = ( $obj->getAttribute($k) );
 			}
 			if ($v->name == 'type') {
-				$t = ( $obj->attributes[$k]->value );
+				$t = ( $obj->getAttribute($k) );
 			}
 
 		}

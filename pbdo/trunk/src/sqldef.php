@@ -184,18 +184,18 @@ class PBDO_ParsedColumn {
 
 
 	function createFromXMLObj($type,$node,&$x) {
-		$x = PBDO_ParsedColumn::parsedColumnFactory($type,$node->attributes['name']->value);
-		$x->type = trim($node->attributes['type']->value);
-		$x->size = $node->attributes['size']->value;
-		$x->description = $node->attributes['description']->value;
+		$x = PBDO_ParsedColumn::parsedColumnFactory($type,$node->getAttribute('name'));
+		$x->type = trim($node->getAttribute('type'));
+		$x->size = $node->getAttribute('size');
+		$x->description = $node->getAttribute('description');
 
-		if ($node->attributes['required']->value == 'true') {
+		if ($node->getAttribute('required') == 'true') {
 			$x->null = false;
 		} else {
 			$x->null = true;
 		}
 
-		if ($node->attributes['primaryKey']->value) {
+		if ($node->getAttribute('primaryKey')) {
 			$x->primary = true;
 			$x->null = false;
 			if (eregi("int",$x->type)) { 
