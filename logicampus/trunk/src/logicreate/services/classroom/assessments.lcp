@@ -217,8 +217,15 @@ class assessments extends StudentService {
 			return;
 		}
 
-		$log = $t['assessment']->getLastLogEntry($u->username);
-		if (!$log)
+
+		//figure out which log file to use, if they are currently taking a test,
+		// use session saved log, else look up a historic log
+		$log = $u->sessionvars['testObj']->log;
+		if (!$log ) {
+			$log = $t['assessment']->getLastLogEntry($u->username);
+		}
+
+		if (!$log || $log->endDate > time() ) {
 		{
 			$lc->templateName = 'assessments_error';
 			$t['message'] = '
@@ -228,45 +235,36 @@ class assessments extends StudentService {
 			return;
 		}	
 
-		if ($log->endDate)
+		include_once(LIB_PATH.'LC_html.php');
+		include_once(LIB_PATH.'ClassGradebook.php');
+		$gb = ClassGradebook::load(array("id_classes"=>$u->activeClassTaken->id_classes));
+		$lc->templateName = 'assessments_view';
+
+		$t['questions'] = $t['assessment']->getQuestionsAndAnswers($u->username, $u->activeClassTaken->id_classes);
+		$this->sectionTitle .= ' - '.$t['assessment']->displayName;
+		$t['questions_total'] = 0;
+		$t['questions_total_points'] = 0;
+
+
+	
+		foreach($t['questions'] as $k=>$v) 
 		{
-				include_once(LIB_PATH.'LC_html.php');
-				include_once(LIB_PATH.'ClassGradebook.php');
-				$gb = ClassGradebook::load(array("id_classes"=>$u->activeClassTaken->id_classes));
-				$lc->templateName = 'assessments_view';
+			$t['questions_total_points'] += $v->questionPoints;
+				if ($v->answer->pointsGiven)
+		{
+				$t['total_points_earned'] += $v->answer->pointsGiven;
+			} else {
+				$t['total_points_earned'] += $v->answer->pointsEarned;
 
-				$t['questions'] = $t['assessment']->getQuestionsAndAnswers($u->username, $u->activeClassTaken->id_classes);
-				$this->sectionTitle .= ' - '.$t['assessment']->displayName;
-				$t['questions_total'] = 0;
-				$t['questions_total_points'] = 0;
-		
-		
-			
-				foreach($t['questions'] as $k=>$v) 
-				{
-					$t['questions_total_points'] += $v->questionPoints;
-						if ($v->answer->pointsGiven)
-				{
-						$t['total_points_earned'] += $v->answer->pointsGiven;
-					} else {
-						$t['total_points_earned'] += $v->answer->pointsEarned;
-
-					}
-					$t['questions_total']++;
-				}
-
-				$t['percentage'] = number_format($t['total_points_earned'] / $t['questions_total_points'], 4) * 100;
-				$t['letter_grade'] = $gb->getLetterGrade($t['percentage']);
-
-				reset ($t['questions']);
-
-		} else {
-			$lc->temlateName = 'assessments_error';
-			$t['message'] = '
-			<h3>Error</h3>The assessment you are trying to view was never completed therefore we cannot show
-			you the assessment. Please contact the help desk to let them know you received this error.';
-			return;
+			}
+			$t['questions_total']++;
 		}
+
+		$t['percentage'] = number_format($t['total_points_earned'] / $t['questions_total_points'], 4) * 100;
+		$t['letter_grade'] = $gb->getLetterGrade($t['percentage']);
+
+		reset ($t['questions']);
+
 	}
 
 	function stopRun($db, &$u, &$lc, &$t)
