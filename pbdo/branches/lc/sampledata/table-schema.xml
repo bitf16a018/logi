@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE project SYSTEM
+ "http://www.logicreate.com/dtd/pbdo_1_3.dtd">
+
+<project
+  name="bookstore"
+  defaultIdMethod="auto"
+  version="1.0">
+
+  <entity name="book" description="Book Table" generate="all">
+    <attribute
+      name="book_id"
+      required="true"
+      primaryKey="true"
+      type="INTEGER"
+      description="Book Id"/>
+    <attribute
+      name="title"
+      required="true"
+      editable="true"
+      form="textinput"
+      type="VARCHAR"
+      size="255"
+      description="Book Title"/>
+    <attribute
+      name="isbn"
+      required="true"
+      editable="true"
+      form="textinput"
+      type="VARCHAR"
+      size="24"
+      javaName="ISBN"
+      description="ISBN Number"/>
+    <attribute
+      name="publisher_id"
+      required="true"
+      type="INTEGER"
+      description="Foreign Key Publisher"/>
+    <attribute
+      name="author_id"
+      required="true"
+      type="INTEGER"
+      description="Foreign Key Author"/>
+    <foreign-key foreignTable="publisher">
+      <reference
+        local="publisher_id"
+        foreign="publisher_id"/>
+    </foreign-key>
+    <foreign-key foreignTable="author">
+      <reference
+        local="author_id"
+        foreign="author_id"/>
+    </foreign-key>
+    <key 
+	    attribute="isbn"
+	    name="isbn"/>
+    <key 
+	    unique="true"
+	    attribute="isbn"
+	    name="u_isbn"/>
+    <key 
+	    attribute="publisher_id"
+	    name="publisher_id"/>
+  </entity>
+  <entity name="publisher" description="Publisher Table">
+    <attribute
+      name="publisher_id"
+      required="true"
+      primaryKey="true"
+      type="INTEGER"
+      description="Publisher Id"/>
+    <attribute
+      name="name"
+      required="true"
+      type="VARCHAR"
+      size="128"
+      description="Publisher Name"/>
+  </entity>
+  <entity name="author" description="Author Table">
+    <attribute
+      name="author_id"
+      required="true"
+      primaryKey="true"
+      type="INTEGER"
+      description="Author Id"/>
+    <attribute
+      name="first_name"
+      required="true"
+      type="VARCHAR"
+      size="128"
+      description="First Name"/>
+    <attribute
+      name="last_name"
+      required="true"
+      type="VARCHAR"
+      size="128"
+      description="Last Name"/>
+  </entity>
+</project>
+

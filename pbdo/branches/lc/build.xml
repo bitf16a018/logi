@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<project name="PBDO" default="dist" basedir=".">
+	<description>
+		PHP Business Data Objects Compiler
+	</description>
+
+  <!-- set global properties for this build -->
+  <property name="pbdo.version" value="1.4" />
+  <property name="src" location="src" />
+  <property name="docs" location="docs" />
+  <property name="temp" location="temp" />
+  <property name="buildtree" location="temp/PBDO-${pbdo.version}" />
+  <property name="dist"  location="dist" />
+  <property name="lib"  location="libs" />
+
+  <target name="init" depends="cleantemp">
+    <!-- Create the time stamp -->
+    <tstamp>
+          <format property="lc.build_date" pattern="MMMM-d-yyyy" locale="en"/>
+    </tstamp>
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${temp}"/>
+    <mkdir dir="${dist}"/>
+    <mkdir dir="${buildtree}"/>
+  </target>
+
+<!--DEMO-->
+
+  <target name="dist" depends="init"
+	  description="generate a PBDO distribution package" >
+
+
+
+	  <!-- organize the dist -->
+	<antcall target="buildtree"/>
+
+	<!--  code for filtering
+	<filter token="LC_VERSION" value="${lc.version}"/>
+	<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
+	<copy file="${src}/index.php" todir="${temp}/public_html/" filtering="true"/>
+	<copy file="${src}/defines.php" todir="${temp}/public_html/" filtering="true"/>
+	<copy file="${src}/notes.php" todir="${temp}/public_html/" filtering="true"/>
+	<copy file="${src}/install.php" todir="${temp}/public_html/" filtering="true"/>
+	<copy file="${src}/setup.sql" todir="${temp}/public_html/"/>
+	<copy file="${src}/noservice.html" todir="${temp}/public_html/"/>
+	-->
+
+
+  	<!-- apply LCPL to files -->
+	<!-- uncomment when a license has been chosen 
+	<antcall target="apply_license"/>
+	-->
+
+	<!-- tar up -->
+	<antcall target="tar"/>
+
+	<!-- done -->
+	<antcall target="cleantemp"/>
+	<echo message="Archive saved in 'dist/' directory!" />
+
+  </target>
+
+
+<!--DEMO END-->
+
+
+
+	<target name="clean"
+		description="removes temp and dist directories" >
+		<!-- Delete the ${temp} and ${dist} directory trees -->
+		<delete dir="${temp}"/>
+		<delete>
+			<fileset dir="${dist}" includes="*"/>
+		</delete>
+	</target>
+
+	<target name="cleantemp"
+		description="removes temp and dist directories" >
+		<!-- Delete the ${temp} directory trees -->
+		<delete dir="${temp}"/>
+	</target>
+
+	<target name="apply_license"
+		description="uses a combination of bash and perl in the build/ dir to apply a common license to all code files" 
+		unless="forgetlicense">
+		<echo message="Applying LCPL to source files ..." />
+		<exec executable="${build}/../build/applylicense.sh" dir="${build}/../build" failonerror="true" />
+	</target>
+
+	<target name="buildtree"
+		description="copies files into the temp directory" >
+
+		<copy todir="${buildtree}">
+		  <fileset dir="${src}">
+			<include name="*.php"/>
+		  </fileset>
+		</copy>
+
+		<copy todir="${buildtree}">
+		  <fileset dir="${lib}">
+			  <include name="domhtmlphp.php"/>
+		  </fileset>
+		</copy>
+
+		<!--
+		<copy todir="${temp}/logicreate/">
+		  <fileset dir="${src}">
+			<include name="cache/**"/>
+			<exclude name="cache/**/*CVS*"/>
+			<exclude name="cache/**/*~"/>
+		  </fileset>
+		</copy>
+		-->
+	</target>
+
+	<target name="tar"
+		description="tar, gz, remove">
+
+		<tar tarfile="${dist}/PBDO-${pbdo.version}.tar" basedir="${temp}" />
+		<gzip src="${dist}/PBDO-${pbdo.version}.tar" zipfile="${dist}/PBDO-${pbdo.version}.tar.gz" />
+		<delete file="${dist}/PBDO-${pbdo.version}.tar" />
+	</target>
+
+
+	<!-- not used yet-->
+	<target name="patch"
+		description="creates a patch against cvs, patch.txt" >
+		<cvs command="-q diff -u -N src" output="patch.txt"/>
+	</target>
+
+	<target name="package"
+	   description="zip a service/module">
+	   <condition property="failNoModule" value="true">
+		   <not>
+			   <isset property="lc.module"/>
+		   </not>
+	   </condition>
+	   <fail if="failNoModule" message="you must supply a module to package [-Dlc.module=forums]"/>
+	   <zip destfile="${dist}/lc-${lc.module}.zip">
+		<zipfileset dir="${src}/services/${lc.module}" prefix="${lc.module}">
+			<exclude name="**/*CVS*"/>
+			<exclude name="**/*~"/>
+		</zipfileset>
+	   </zip>
+	</target>
+
+	<target name="cvscheck"
+		description="run -nq update on the whole tree">
+		<cvs command="-nq update" />
+	</target>
+
+	<target name="report">
+		<echoproperties/>
+	</target>
+</project>
