@@ -1,5 +1,12 @@
 <?
 
+/**
+ * Content Management Services
+ *
+ * Legacy class, not sure if it is used anymore
+ * @deprecated
+ * @package CM
+ */
 class CM_Services {
 
 
@@ -22,7 +29,13 @@ class CM_Services {
 }
 
 
-
+/**
+ * Content Management Interface
+ *
+ * Legacy class, not sure if it is used anymore
+ * @deprecated
+ * @package CM
+ */
 class CM_Interface {
 
 
@@ -67,7 +80,14 @@ class CM_Interface {
 
 
 
-
+/**
+ * Content Management Detail
+ *
+ * Legacy class, not sure if it is used anymore
+ * @deprecated
+ * @package CM
+ * @abstract
+ */
 class CM_Detail {
 
 	function showRead(&$do) {}
@@ -83,6 +103,14 @@ class CM_Detail {
 }
 
 
+/**
+ * Content Management Actions
+ *
+ * Legacy class, not sure if it is used anymore
+ * @deprecated
+ * @package CM
+ * @abstract
+ */
 class CM_Perform {
 
 	function doRead(&$db,&$do) {}
