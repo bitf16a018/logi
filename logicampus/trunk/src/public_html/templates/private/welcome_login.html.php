@@ -83,11 +83,11 @@
 <table width="100%">
 <tr>
   <td width="50%" align="right"><b><?=lct('username')?>:</b></td>
-  <td width="50%"><input type="text" size="15" maxlength="32" name="username" value="teacher" /></td>
+  <td width="50%"><input type="text" size="15" maxlength="32" name="username" value="" /></td>
 </tr>
 <tr>
   <td width="50%" align="right"><b><?=lct('password')?>:</b></td>
-  <td width="50%"><input type="password" size="15" maxlength="32" name="password" value="teacher" /></td>
+  <td width="50%"><input type="password" size="15" maxlength="32" name="password" value="" /></td>
 </tr>
 <tr>
   <td colspan="2" align="center">
