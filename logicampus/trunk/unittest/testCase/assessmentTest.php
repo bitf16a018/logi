@@ -8,7 +8,7 @@ class assessmentTest extends unitTest {
 		'Load Assessment'=> array ('name'=>'load','expected'=>1),
 		'Answer Questions'=> array ('name'=>'answer','expected'=>1), 
 		'Score Questions'=> array ('name'=>'score','expected'=>1),
-		'Save Questions'=> array ('name'=>'saveQuestions','expected'=>1),
+		'Save Answers'=> array ('name'=>'saveAnswers','expected'=>1),
 		'Save Score'=> array ('name'=>'saveScore','expected'=>1)
 		);
 
@@ -34,8 +34,9 @@ class assessmentTest extends unitTest {
 	 */
 	function loadTest() {
 		$assessment = Assessment::load($this->assessment_id,$this->class_id);
-		return get_class($assessment) == 'Assessment';
+		return strtolower(get_class($assessment)) == strtolower('Assessment');
 	}
+
 
 	/**
 	 */
@@ -64,18 +65,70 @@ class assessmentTest extends unitTest {
 		} else {
 			return false;
 		}
-
 	}
+
 
 	/**
 	 */
 	function scoreTest() {
+
+		$assessment = Assessment::load($this->assessment_id,$this->class_id);
+
+		$questions = $assessment->getAssessmentQuestions();
+
+		$answers = array();
+		$answers[0] = new AssessmentAnswer();
+		$answers[0]->assessmentAnswerValues = 0;
+
+		$answers[1] = new AssessmentAnswer();
+		$answers[1]->assessmentAnswerValues = array(0=>0,2=>2);
+
+		//assume some order, I'm sure other code does it too,
+		// probably should make a test to explicitly test the ordering
+		$q1 = $questions[0];
+		$correct1 = $q1->getCorrectAnswer();
+
+		$q2 = $questions[1];
+		$correct2 = $q2->getCorrectAnswer();
+
+		$q2->grade($answers[1]);
+		return $answers[1]->pointsEarned == $q2->questionPoints;
 	}
+
 
 	/**
 	 */
-	function saveQuestionsTest() {
+	function saveAnswersTest() {
+
+		$assessment = Assessment::load($this->assessment_id,$this->class_id);
+
+		$questions = $assessment->getAssessmentQuestions();
+
+		$answers = array();
+		$answers[0] = new AssessmentAnswer();
+		$answers[0]->assessmentAnswerValues = 0;
+
+		$answers[1] = new AssessmentAnswer();
+		$answers[1]->assessmentAnswerValues = array(0=>0,2=>2);
+		$answers[1]->idClasses = $this->class_id;
+
+		//assume some order, I'm sure other code does it too,
+		// probably should make a test to explicitly test the ordering
+		$q1 = $questions[0];
+		$correct1 = $q1->getCorrectAnswer();
+
+		$q2 = $questions[1];
+		$correct2 = $q2->getCorrectAnswer();
+
+		$q2->grade($answers[1]);
+		$answer_id = $answers[1]->assessmentAnswerId;
+
+		$db = DB::getHandle();
+		$db->query("select * from assessment_answer where assessment_answer_id = ".$answer_id);
+
+		return $db->nextRecord();
 	}
+
 
 	/**
 	 */
