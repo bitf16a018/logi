@@ -513,6 +513,26 @@ class FacultyService extends Service {
 	}
 
 
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Classroom Manager') => '%classmgr/display/',
+		lct('Announcements')=>'%classmgr/announcements/',
+		lct('Assessment Manager') => '%assessments/',
+		lct('Assignments') => '%classmgr/assignmentManage/',
+		lct('Content') => '%classmgr/lessonContent/',
+		lct('FAQ') => '%classmgr/faq/',
+		lct('File Resource Manager') => '%classdoclib/',
+		lct('Gradebook') => '%gradebook/',
+		lct('Lessons') => '%classmgr/lessonManager/',
+		lct('Objectives') => '%classmgr/lessonObjectives/',
+		lct('Webliography') => '%classmgr/lessonWebliography/'
+		);
+	}
+
 }
 
 
