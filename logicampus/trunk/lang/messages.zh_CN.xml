@@ -65,27 +65,27 @@
 
 
 	<message id ="Login" domain="system" status="">
-		发入
+		登录
 	</message>
 	<!--Login-->
 	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
 
 
 	<message id ="Logout" domain="system" status="">
-		注销
+		登出
 	</message>
 	<!--Logout-->
 	<usage id ="Logout" file="../src/public_html/templates/private/welcome_login.html.php" line="110"/>
 
 
 	<message id ="Access Denied!" domain="system" status="">
-		么有access
+		您没有授权！
 	</message>
 	<!--Access Denied!-->
 	<usage id ="Access Denied!" file="../src/logicreate/content/err_access_denied.html" line="1"/>
 
 
-	<message id ="Classroom Overview" domain="system" status="fuzzy">
+	<message id ="Classroom Overview" domain="system" status="">
 		教室概况
 	</message>
 	<!--Classroom Overview-->
@@ -97,7 +97,7 @@
 	</message>
 	<!--Classroom Portal Page-->
 	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
-
+	教室
 
 	<message id ="Thanks!" domain="system" status="">
 		多谢!
@@ -108,14 +108,14 @@
 
 
 	<message id ="You have logged in to our site successfully." domain="system" status="">
-		You have logged in to our site successfully.
+		您已经登录了！
 	</message>
 	<!--You have logged in to our site successfully.-->
 	<usage id ="You have logged in to our site successfully." file="../src/logicreate/content/loginthanks.html" line="2"/>
-
+	
 
 	<message id ="You have registered successfully with our site." domain="system" status="">
-		You have registered successfully with our site.
+		您已经注册成功！
 	</message>
 	<!--You have registered successfully with our site.-->
 	<usage id ="You have registered successfully with our site." file="../src/logicreate/content/registerthanks.html" line="2"/>
@@ -136,8 +136,8 @@
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
-	<message id ="General Class Manager" domain="system" status="fuzzy">
-		通用教室管理
+	<message id ="General Class Manager" domain="system" status="">
+		教室综合管理
 	</message>
 	<!--General Class Manager-->
 	<usage id ="General Class Manager" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="12"/>
@@ -158,7 +158,7 @@
 
 
 	<message id ="Student Communication" domain="system" status="">
-		通讯学生
+		学生交流
 	</message>
 	<!--Student Communication-->
 	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
@@ -186,14 +186,14 @@
 
 
 	<message id ="Lesson Manager" domain="system" status="fuzzy">
-		课章管理
+		课程管理
 	</message>
 	<!--Lesson Manager-->
 	<usage id ="Lesson Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="51"/>
 
 
 	<message id ="Classroom Setup" domain="system" status="">
-		教室支配
+		教室设置
 	</message>
 	<!--Classroom Setup-->
 	<usage id ="Classroom Setup" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="21"/>
@@ -214,49 +214,49 @@
 
 
 	<message id ="Export Class" domain="system" status="">
-		Export Class
+		引出所有信息
 	</message>
 	<!--Export Class-->
 	<usage id ="Export Class" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="23"/>
 
 
 	<message id ="Lessons" domain="system" status="fuzzy">
-		课章
+		课程
 	</message>
 	<!--Lessons-->
 	<usage id ="Lessons" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="54"/>
 
 
-	<message id ="Objectives" domain="system" status="">
-		目标
+	<message id ="Objectives" domain="system" status="fuzzy">
+		课程要点
 	</message>
 	<!--Objectives-->
 	<usage id ="Objectives" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="56"/>
 
 
-	<message id ="Orientation Scheduling" domain="system" status="fuzzy">
-		课程时间表
+	<message id ="Orientation Scheduling" domain="system" status="">
+		第一天时间表
 	</message>
 	<!--Orientation Scheduling-->
 	<usage id ="Orientation Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="33"/>
 
 
-	<message id ="Seminar Scheduling" domain="system" status="">
-		Seminar Scheduling
+	<message id ="Seminar Scheduling" domain="system" status="fuzzy">
+		讲座时间表
 	</message>
 	<!--Seminar Scheduling-->
 	<usage id ="Seminar Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="37"/>
 
 
 	<message id ="Student Presentation" domain="system" status="">
-		学生演出
+		学生报告
 	</message>
 	<!--Student Presentation-->
 	<usage id ="Student Presentation" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="58"/>
 
 
-	<message id ="Syllabus" domain="system" status="fuzzy">
-		教室概略
+	<message id ="Syllabus" domain="system" status="">
+		教学大纲
 	</message>
 	<!--Syllabus-->
 	<usage id ="Syllabus" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="27"/>
@@ -270,7 +270,7 @@
 
 
 	<message id ="View Classroom" domain="system" status="fuzzy">
-		看教室如同学生
+		浏览教室
 	</message>
 	<!--View Classroom-->
 	<usage id ="View Classroom" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="29"/>
@@ -298,7 +298,7 @@
 
 
 	<message id ="Contact Students" domain="system" status="">
-		通讯学生
+		联系学生
 	</message>
 	<!--Contact Students-->
 	<usage id ="Contact Students" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="70"/>
@@ -319,14 +319,14 @@
 
 
 	<message id ="Presentations" domain="system" status="">
-		Presentations
+		学生报告
 	</message>
 	<!--Presentations-->
 	<usage id ="Presentations" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1104"/>
 
 
 	<message id ="Student Management" domain="system" status="">
-		Student Management
+		学生管理
 	</message>
 	<!--Student Management-->
 	<usage id ="Student Management" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="26"/>
@@ -468,14 +468,14 @@
 
 
 	<message id ="Classroom Manager" domain="system" status="">
-		Classroom Manager
+		教室管理
 	</message>
 	<!--Classroom Manager-->
 	<usage id ="Classroom Manager" file="../src/logicreate/services/classmgr/announcements.lcp" line="182"/>
 
 
-	<message id ="Prev" domain="system" status="">
-		Prev
+	<message id ="Prev" domain="system" status="fuzzy">
+		上一个
 	</message>
 	<!--Prev-->
 	<usage id ="Prev" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="5"/>
@@ -483,7 +483,7 @@
 
 
 	<message id ="Next" domain="system" status="">
-		Next
+		下一个
 	</message>
 	<!--Next-->
 	<usage id ="Next" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="6"/>
@@ -491,7 +491,7 @@
 
 
 	<message id ="FAQ" domain="system" status="">
-		FAQ
+		常见问题
 	</message>
 	<!--FAQ-->
 	<usage id ="FAQ" file="../src/logicreate/lib/pellet.php" line="527"/>
