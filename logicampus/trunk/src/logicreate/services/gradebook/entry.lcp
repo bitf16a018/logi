@@ -50,7 +50,7 @@ class entry extends FacultyService {
 			$lc->templateStyle = 'private';
 			$this->sectionTitle = 'Gradebook Entries';
 
-			$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_entries, id_class_gradebook_categories');
+			$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_categories, title');
 
 			// Get the categories
 			$db->query("select id_class_gradebook_categories, label from class_gradebook_categories

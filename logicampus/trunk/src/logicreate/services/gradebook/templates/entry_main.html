@@ -11,6 +11,9 @@ while (list(,$entry) = @each($t['gbe'])) {
 	// handle header
 	if ($category != $entry->idClassGradebookCategories) {
 		if ($category) $tbl .= "<tr><td colspan=3>&nbsp;</td></tr>\n";
+		if ($t['cats'][$entry->idClassGradebookCategories]=='') { 
+			$t['cats'][$entry->idClassGradebookCategories]='<span style="color: red">UNCATEGORIZED</span>';
+		}
 		$tbl .= '<tr><td colspan=3><b>'.$t['cats'][$entry->idClassGradebookCategories]."</b></td></tr>\n";
 		$category = $entry->idClassGradebookCategories;
 	}
