@@ -1,0 +1,25 @@
+<?=$t['sectionheader'];?>
+<center>
+<? if ($t['search']) {?>
+<h3>Searching for: <?=$t['search'];?></h3>
+<? } ?>
+	<table width="98%">
+		<tr>
+			<td align="left">
+				<h3>Classroom forum</h3>
+			</td>
+		</tr>
+		<tr>
+			<td  align='right'>
+				<a href="<?=appurl("classroom/discussion_view/".$t['forumPost']->lcForumPostId."/mode=f");?>">View in flat mode</a>
+			</td>
+		</tr>
+	<?$t['forumPost']->url = "classroom/discussion_post";?>
+	<?=showpost($t['forumPost'],$t['perms'],$t['search']);?>
+
+
+	<? if (count($t['forumPost']->children)>0) { ?>
+	<?=$t['view'];?>
+	<? } ?>
+</center>
+

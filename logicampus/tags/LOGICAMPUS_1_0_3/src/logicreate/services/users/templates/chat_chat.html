@@ -1,0 +1,123 @@
+<html>
+<head>
+
+	<meta HTTP-EQUIV="Refresh" CONTENT="<?=$t["refresh"];?>">
+	 
+<? if (trim($obj->user->activeClassTaken->stylesheet) != '') { ?>
+	<link rel="stylesheet" type="text/css" href="<?=BASE_URL. 'templates/student/';?><?=$obj->user->activeClassTaken->stylesheet;?>">
+<? } ?>
+<script>
+	setTimeout("parent.Controls.location.reload();", 10000);
+</script>
+
+<style>
+
+TD {
+    color: #000000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.admin {
+    color: #FF0000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.titlebar {
+    background-color: #FF0000;
+}
+.title {
+    color: #FFFFFF;
+    font-style: bold;
+    font-family: arial, helvetica, san-serif;
+    font-size: 14px; 
+}
+.regname1 {
+    background-color: #CCCCCC;
+    color: #000000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px;optio
+}
+.regmess1 {
+    background-color: #DDDDDD;
+    color: #000000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.regname2 { 
+    background-color: #CCCCCC;
+    color: #0000FF;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.regmess2 {
+    background-color: #DDDDDD;
+    color: #0000FF;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.regname3 {
+    background-color: #CCCCCC;
+    color: #FF0000;
+    font-style: bold;
+    font-family: aroptioial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.regmess3 {
+    background-color: #DDDDDD;
+    color: #FF0000;
+    font-style: bold;
+    font-famioptioly: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+</style>
+
+</head>
+<body bgcolor="#FFFFFF" onload="<?=$t['popup'];?>">
+<span id="classroom">
+
+
+<div class="colorbar" style="font-size: 11px;" align="center">
+<? if ($t['showtimes']=='y') {?> 
+<a href="<?=appurl("{$obj->moduleName}/chat/event=chat/showtimes=n/time=".time());?>">hide time</a>
+<? } else { ?> 
+<a href="<?=appurl("{$obj->moduleName}/chat/event=chat/showtimes=y/time=".time());?>">show time</a>
+
+<? }?>
+ | <a href="<?=appurl("{$obj->moduleName}/chat/event=chat/time=".time());?>">refresh</a>
+
+
+ |
+ <? if ($t['chat_limit']=='last20') { ?>
+ recent 20
+ <? } else { ?>
+ <a href="<?=appurl("{$obj->moduleName}/chat/event=chat/chat_limit=last20/time=".time());?>">recent 20</a>
+ <? } ?>
+ |
+ <? if ($t['chat_limit']=='last20min') { ?>
+ 20 minutes 
+ <? } else { ?>
+ <a href="<?=appurl("{$obj->moduleName}/chat/event=chat/chat_limit=last20min/time=".time());?>">20 minutes</a>
+ <? } ?>
+
+ |
+ <? if ($t['chat_limit']=='last5min') { ?>
+ 5 minutes 
+ <? } else { ?>
+ <a href="<?=appurl("{$obj->moduleName}/chat/event=chat/chat_limit=last5min/time=".time());?>">5 minutes</a>
+ <? } ?>
+
+</div>
+
+	<div class="colorbar" style="float:right;"><?=date($t['format']);?> Central</div>
+	<div class="colorbar" style="font-size:150%;"><?=$t["title"];?></div>
+	<br/>
+
+<table width="100%" border="0" cellpadding="4" cellspacing="1">
+<tr><th class="tinthighlight" style="text-align: left;" width="100">Name</tD><th class="tinthighlight" style="text-align: left;">Comment</td></tr>
+<?=$t["table"];?>
+</table>
+
+</span>
+
+</body>
+</html>

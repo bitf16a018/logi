@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<!-- MySQL does not support foreign keys. This means   -->
+<!-- that this XML file will not reflect foreign key   -->
+<!-- relationships. You will have to do that yourself. -->
+<database name="logicampus">
+  <table  name="helpdesk_categories">
+    <column name="helpdesk_category_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="helpdesk_category_label"
+            required="true"
+            size="30"
+            type="VARCHAR"/>
+  </table>
+  <table  name="helpdesk_comments">
+    <column name="helpdesk_comments_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="userid"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="comment"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+  </table>
+  <table  name="helpdesk_status">
+    <column name="helpdesk_status_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="helpdesk_status_label"
+            required="true"
+            size="30"
+            type="VARCHAR"/>
+  </table>
+  <table  name="helpdesk_incident">
+    <column name="helpdesk_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="timedate_open"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="timedate_close"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="status"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="summary"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+    <column name="userid"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="category"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="assigned_to"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+  </table>
+  <table  name="helpdesk_incident_log">
+    <column name="helpdesk_incident_log_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="helpdesk_id"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="action"
+            required="true"
+            size="15"
+            type="VARCHAR"/>
+    <column name="timedate"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="comment"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+    <column name="userid"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+  </table>
+  <table  name="helpdesk_faq">
+    <column name="id_faq"
+            required="true"
+            primaryKey="true"
+            size="10"
+            type="INTEGER"/>
+    <column name="id_faq_category"
+            required="true"
+            default="0"
+            size="10"
+            type="INTEGER"/>
+    <column name="tx_username"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="tx_question"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <column name="tx_answer"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+    <column name="dt_submitted"
+            required="true"
+            default="0000-00-00 00:00:00"
+            size=""
+            type="DATETIME"/>
+    <column name="fl_approved"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="ic_viewed"
+            required="true"
+            default="0"
+            size="10"
+            type="INTEGER"/>
+    <index>
+      <index-column name="id_faq_category"/>
+    </index>
+  </table>
+  <table  name="helpdesk_faq_category">
+    <column name="id_faq_category"
+            required="true"
+            primaryKey="true"
+            size="10"
+            type="INTEGER"/>
+    <column name="tx_category"
+            required="true"
+            size="100"
+            type="VARCHAR"/>
+  </table>
+  <table  name="helpdesk_faq_vote">
+    <column name="username"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="id_faq"
+            required="true"
+            default="0"
+            size="10"
+            type="INTEGER"/>
+    <column name="ii_vote"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <index>
+      <index-column name="username"/>
+      <index-column name="id_faq"/>
+    </index>
+  </table>
+</database>
+<!-- END OF MYSQL2TURBINE DUMP -->

@@ -1,0 +1,37 @@
+<h2>My addressbook</h2>
+
+<table width="600">
+<tr>
+<td valign="top" width="50%">
+<h3>Add a new address</h3>
+If you'd like to add a new address to your addressbook, hit the button below.  You'll 
+be taken to a form where you can enter all the relevant information.  Don't forget to give your 
+address entry a name (maybe something like 'My office' or 'Jane's place') so you'll be 
+able to recognize it later when you want to edit it or ship products there.
+<BR><BR>
+
+<form method="post" action="<?=appurl("address//event=edit");?>">
+<input type="submit" name="button" value="Add">
+</form>
+
+</td>
+
+<td valign="top" width="50%">
+
+
+<? if ($t["aoptions"]) { ?>
+<h3>My addresses</h3>
+Below is a list of addresses currently in your addressbook.  Select the address you'd like 
+to modify, and click 'edit' or 'delete' to edit or delete that address.
+<BR><BR>
+
+<form method="post" action="<?=appurl("address//event=edit");?>">
+<?=$t["aoptions"];?>
+<input type="submit" name="button" value="Edit">
+<input type="submit" name="button" value="Delete">
+</form>
+<? } ?>
+
+
+
+

@@ -1,0 +1,12 @@
+<?
+
+class users extends RegAuth {
+	var $presentor = "htmlPresentation";
+
+	function run (&$db, &$u, &$obj, &$t)
+		{
+			
+		}
+
+}
+?>

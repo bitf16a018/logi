@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript"><!--
+function mouseOn(img, name)
+{
+if (br == "n3")
+    arguments[0].src = name + "_active.png"
+}
+
+function mouseOff(img, name)
+{
+if (br == "n3")
+    arguments[0].src = name + ".png"
+}
+
+function showGroupPerms (sel) {
+	if (sel.isSelected == false) {
+		return false;
+	}
+	mid = sel.options[sel.selectedIndex].value;
+	if ( mid ) {
+		parent.View.location = '<?= _APP_URL;?>groups/' + mid +'/event=show';
+	}
+}
+
+// -->
+</SCRIPT>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<table border="0" cellpadding="0" cellspacing="0" width="650">
+      <tr><td class="selectedTab">
+
+		Group Admin
+
+      </td></tr>
+
+      <tr><td width="650" class="grey">
+
+	<table border="1" width="100%"><tr>
+	<td width="50%" class="white" align="center" rowspan="2">
+
+		<form method="POST">
+		<select size="14" name="group_opt" onDblClick="showGroupPerms(this);">
+<?= $t["group_opt"]; ?>
+		</select>
+		<br>
+		<font size="-1">You may not delete groups with an *</font>
+		<br>
+		<input type="button" value="Set Permissions" onClick="showGroupPerms(document.forms[0].group_opt);">
+
+	</td><td width="50%" class="white"  align="center" align="middle">
+		<input type="submit" value="Delete">
+		<input type="hidden" name="event" value="delete">
+		</form>
+	</td></tr>
+	<tr><td width="50%" class="white"  align="center" align="middle">
+		<form method="POST">
+		Group Description:<br><font size="-1">(ex: Public/Anonymous)</font> <br>
+		<input type="text" name="groupName">
+		<p>
+		Group ID:<br><font size="-1">(short name, no spaces; ex: public)</font> <br>
+		<input type="text" maxlength="8" size="9" name="gid">
+		<br>
+		<input type="submit" value="New">
+		<input type="hidden" name="event" value="new">
+		</form>
+	</td></tr></table>
+
+      </td></tr>
+</table>
+	<p>
+
+	<div class="message" width="500" align="center"><?= $t["message"]; ?></div><br><br>
+	<table border="0" width="650" cellpadding="0" cellsapcing="0">
+	<tr><td><h3>Groups...</h3></td></tr>
+	<tr><td>
+		By creating multiple groups for your site you can regulate which information, content, or areas users can access.  Access to groups are defined as permissions:  read, write, update, delete, and approve.  By selecting various permissions on modules and assigning users to various groups you control access to your content and your site.	<br><br>
+	</td></tr>
+	<tr><td><b>Permissions...</b></td></tr>
+	<tr><td>
+		To control permissions on a group, highlight the desired group and press "set permissions".  Basic allow/deny access to each module can be done be turning off 'read'.  Other permissions are module specific and may not apply to all modules.<br><br>
+	</td></tr>
+	<tr><td><b>Create a new group...</b></td></tr>
+	<tr><td>
+		Give your new group a description so you can easily remember what purposes it serves.  Descriptions can be up to 32 characters.
+		Next, in the "Group ID" space enter a name or code for your group.  This name can be any numbers or letters up to eight characters.  <br><br>
+	</td></tr>
+	<tr><td><b>Delete a group...</b></td></tr>
+	<tr><td>
+		 Select the desired group and press "delete" at the top.  You will be asked to confirm this delete.  Special system required groups cannot be deleted.  Users <b>are not deleted</b> when their group is deleted.
+	</td></tr>
+	</table>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<?=$t['sectionheader'];?>
+<? if ($t['message']) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
+<? if ($t['error']) print '<span style="color:red;">'.$t['error'].'</span>'; ?>
+
+<script>
+var assarr = new Object();
+
+<?
+	foreach($t['assessments'] as $assessment)
+	{	
+		if ( $assessment->assessmentId == $t['assessmentId'] ) continue;
+		echo '	
+	assarr["assessment['.$assessment->assessmentId.']"] = false;';
+	}
+	reset($t['assessments']);
+?>
+
+function select_all()
+{
+	var tmp_element; 
+	
+	for (field in assarr) 
+	{	
+		tmp_element = document.getElementById(field);
+		tmp_element.checked = true;
+	}
+	
+}
+function invert_selection()
+{
+	var tmp_element; 
+	
+	for (field in assarr) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (tmp_element.checked)
+		{	tmp_element.checked = false;
+		} else
+		{	tmp_element.checked = true;
+		}
+		
+	}
+	
+}
+</script>
+
+<p>Please put a check next to the assessments listed below from which you would like to pull questions.</p>
+
+<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="select_all();">Select All</a>]</span>
+<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="invert_selection();">Select Inverse</a>]</span>
+
+<form action="" method="post">
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td>&nbsp;</td>
+	<td width=20>&nbsp;</td>
+	<td><b>Test Name</b></td>
+	<td width=20>&nbsp;</td>
+	<td><b>Description</b></td>
+</tr>
+<?
+	foreach ( $t['assessments'] as $assessment ) {
+
+		// they don't want to copy questions from and to the same test
+		if ( $assessment->assessmentId == $t['assessmentId'] ) continue;
+
+		print '<tr><td valign="top"><input type="checkbox" '
+			.'name="assessment['.$assessment->assessmentId.']" id="assessment['.$assessment->assessmentId.']" /></td>'
+			.'<td width=20>&nbsp;</td>'
+			.'<td valign="top">'.$assessment->displayName.'</td>'
+			.'<td width=20>&nbsp;</td>'
+			.'<td valign="top">'.$assessment->description.'</td></tr>';
+	}
+?>
+</table>
+<input type="hidden" name="event" value="pickQuestions" />
+<input type="submit" value="Select Questions from these Tests" />
+</form>
