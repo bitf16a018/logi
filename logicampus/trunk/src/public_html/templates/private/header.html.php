@@ -70,7 +70,7 @@
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td width="170" height="20" class="home">
-			<a alt="Home" href="<?=appurl('');?>"><img src="<?=TEMPLATE_URL;?>images/menu-widget.png" height="16" border="0" alt="" />Home Page</a>
+			<a alt="Home" href="<?=appurl('');?>"><img src="<?=TEMPLATE_URL;?>images/menu-widget.png" height="16" border="0" alt="" /><?=lct('Home Page')?></a>
 		</td>
 
 		<td NOWRAP><a href="<?=appurl('faq/')?>"><?=lct('FAQs')?></a></td>

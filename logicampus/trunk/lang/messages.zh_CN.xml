@@ -120,5 +120,48 @@
 	<!--You have registered successfully with our site.-->
 	<usage id ="You have registered successfully with our site." file="../src/logicreate/content/registerthanks.html" line="2"/>
 
+
+	<message id ="Gradebook" domain="system" status="fuzzy">
+		成绩书
+	</message>
+	<!--Gradebook-->
+	<usage id ="Gradebook" file="../src/logicreate/services/menu/menuObj.php" line="208"/>
+	<usage id ="Gradebook" file="../src/logicreate/services/menu/menuObj.php" line="228"/>
+
+
+	<message id ="Content &amp; Lesson Links" domain="system">
+		Content &amp; Lesson Links
+	</message>
+	<!--Content &amp; Lesson Links-->
+	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
+
+
+	<message id ="General Class Manager" domain="system" status="fuzzy">
+		通用教室管理
+	</message>
+	<!--General Class Manager-->
+	<usage id ="General Class Manager" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="12"/>
+
+
+	<message id ="Home Page" domain="system">
+		主页
+	</message>
+	<!--Home Page-->
+	<usage id ="Home Page" file="../src/public_html/templates/private/header.html.php" line="73"/>
+
+
+	<message id ="Message of the Day" domain="system" status="fuzzy">
+		今天发出言
+	</message>
+	<!--Message of the Day-->
+	<usage id ="Message of the Day" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="5"/>
+
+
+	<message id ="Student Communication" domain="system" status="fuzzy">
+		学生通讯
+	</message>
+	<!--Student Communication-->
+	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
+
 </language>
 
