@@ -679,6 +679,7 @@
 				#echo $v['sel'];
 				#echo "$optionval = ".$v['defaultValue']."<br>";
 				if ($optionval == $v['defaultValue']) { $HTML .= " SELECTED "; }
+				if ($optionval == $v['sel']) { $HTML .= " SELECTED "; }
 				if (is_array($v['defaultValue']) && @in_array($optionval,$v['defaultValue']) ) { $HTML .= " SELECTED "; }
 				$HTML .= ">$val</option>\n";
 			}
