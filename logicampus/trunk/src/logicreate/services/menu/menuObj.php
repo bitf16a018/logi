@@ -219,7 +219,7 @@ class MenuObj extends PersistantObject {
 	{
 	if ($userObj->isFaculty() ) {
 //	debug($userObj,1);
-		$ret = '<a class="menuitem" href="'.APP_URL.'classmgr">Classroom Overview</a><br/><br/>';
+		$ret = '<a class="menuitem" href="'.APP_URL.'classmgr">'.lct('Classroom Overview').'</a><br/><br/>';
 		while (list ($k, $v)  = @each($userObj->classesTaught) )
 		{
 			$ret .= '<a class="menuitem"

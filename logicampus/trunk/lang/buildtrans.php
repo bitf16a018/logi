@@ -98,6 +98,10 @@ function lct($key,$args = "") {
 
 	}
 echo '
+
+		default:
+			return $key;
+
 	}
 }
 
