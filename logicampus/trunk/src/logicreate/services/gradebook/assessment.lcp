@@ -169,7 +169,7 @@ class assessment extends FacultyService {
 					if( $ent->assignmentId != 0 ) {
 						$db->query("UPDATE class_assignments_grades
 						SET comments = '".$lc->postvars['comments'][$username]."',
-						grade = ".$lc->postvars['score'][$username]."
+						grade = ".sprintf('%.2f',$lc->postvars['score'][$username])."
 						WHERE id_class_assignments = ".$ent->assignmentId."
 						and id_student = '".$username."'");
 
