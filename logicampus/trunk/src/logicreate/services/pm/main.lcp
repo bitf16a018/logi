@@ -58,7 +58,7 @@ var $presentor = "htmlPresentation";
 	function readRun($db,&$u,&$arg,&$t) {
 		$pkey = $arg->getvars['pkey'];
 		$mess = privMess::load($pkey);
-		if (trim($mess->messageTo) != trim($u->username)) { 
+		if (trim(strtolower($mess->messageTo)) != trim(strtolower($u->username))) { 
 			$arg->templateName = 'invalid';
 		} else {
 			$user = lcUser::getUserByUsername($mess->messageFrom);
@@ -110,8 +110,12 @@ var $presentor = "htmlPresentation";
 
 		$mess->messageTo = $arg->postvars['replyto'];
 		if ($mess->messageTo != '') { 
-			$mess->add();
-			$this->run($db,$u,$arg,$t);
+			if ($mess->add()) { 
+				$this->run($db,$u,$arg,$t);
+				return;
+			}
+			$t['error'] = "The selected user does not exist.";
+			$this->composeRun($db,$u,$arg,$t);
 		} else {
 			$t['error'] = "You need to select a user to message.";
 			$this->composeRun($db,$u,$arg,$t);
