@@ -7,6 +7,19 @@ SYNTAX:
 
 
 #########################
+01/09/03 12:11 PM - zorka
+adminstration - 
+This adds the ability for an admin to manage student enrollment.  The
+main account interface was modified to display all semesters and
+classes and a user is enrolled in.  This should help helpdesk staff to
+know which classes a user is or is not enrolled in.  When you select
+the 'manage class enrollment' it shows the classes a student is
+enrolled in for the current semester.  There is a drop down to select
+another semester to view.
+
+Other features include the ability to remove a student from a class,
+suspend and active a student for a given class.
+
 01/06/03 8:45 PM - zorka
 install - fixed installer so it doesn't add all of the fake user
 accounts
