@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 /*
  * assessments
  *
@@ -62,21 +75,19 @@ class grade extends FacultyService {
 		$t['students'] = $gb->students;
 
 		# get other meta information
-		while(list($studentId, $stuObj) = @each($t['students']))
-		{
+		while(list($studentId, $stuObj) = @each($t['students']))	{
 			/**
 			 *	Since gradebook class returns all students in a class
 			 *	without respecting the constraint of *active* or *inactive*
 			 *	status, we have to make that choice here and remove inactive students
 			 */
-			if ($stuObj->active == false)
-			{	unset($t['students'][$studentId]);
+			if ($stuObj->active == false)	{
+				unset($t['students'][$studentId]);
 				continue; // restart the while loop, waste to continue on
 			}
 			
 			$log = 	$t['assessment']->getLastLogEntry($studentId);
-			if (is_object($log) )
-			{
+			if (is_object($log) )	{
 				$log->updateTotalCount();
 				$t['students'][$studentId]->log = $log;
 			}
@@ -97,12 +108,10 @@ class grade extends FacultyService {
 	}
 
 
-	function viewRun($db, &$u, &$lc, &$t)
-	{
+	function viewRun($db, &$u, &$lc, &$t)	{
 		$id = (int)$lc->getvars['id'];
 		$studentId = $lc->getvars['studentid'];
-		if (!$studentId || !$id)
-		{
+		if (!$studentId || !$id)	{
 			$t['message'] = '<h3>Error</h3>No student id and assessment id was given.
 			Please go back and try again.  If you continue to get this error, please contact
 			the help desk.';
@@ -112,16 +121,13 @@ class grade extends FacultyService {
 		$t['studentid'] = $lc->getvars['studentid'];
 		# load assessment
 		$t['assessment'] = Assessment::load($id, $u->activeClassTaught->id_classes);
-		if ($t['assessment'])
-		{
+		if ($t['assessment'])	{
 			$log = $t['assessment']->getLastLogEntry($studentId);
-			if (is_object($log) )
-			{
+			if (is_object($log) )	{
 				$log->updateTotalCount();
 			}
 	
-			if (!$log->endDate)
-			{
+			if (!$log->endDate)	{
 				$t['message'] = 'This assessment was never finished by the student.';
 			}
 	
@@ -131,20 +137,18 @@ class grade extends FacultyService {
 			$lc->templateName = 'grade_view';
 		
 			$t['questions'] = $t['assessment']->getQuestionsAndAnswers($studentId, $u->activeClassTaught->id_classes);
+			
 			$this->sectionTitle .= ' - '.$t['assessment']->displayName.' for
 			'.$studentId;
 			$t['questions_total'] = 0;
 			$t['questions_total_points'] = 0;
 				
-			foreach($t['questions'] as $k=>$v) 
-			{
+			foreach($t['questions'] as $k=>$v) 	{
 				$t['questions_total_points'] += $v->questionPoints;
-				if ($v->answer->pointsGiven == "0" || $v->answer->pointsGiven > 0)
-				{
+				if ($v->answer->pointsGiven == "0" || $v->answer->pointsGiven > 0)	{
 					$t['total_points_earned'] += $v->answer->pointsGiven;
 				} else {
 					$t['total_points_earned'] += $v->answer->pointsEarned;
-	
 				}
 				$t['questions_total']++;
 			}
@@ -162,8 +166,7 @@ class grade extends FacultyService {
 		}
 	}
 	
-	function updatePointsRun($db, &$u, &$lc, &$t)
-	{
+	function updatePointsRun($db, &$u, &$lc, &$t)	{
 		$asmt = Assessment::load($lc->getvars['id'], $u->activeClassTaught->id_classes);
 		$entry = $asmt->loadGradebookEntry();
 		$entryId = $entry->getPrimaryKey();
@@ -171,8 +174,7 @@ class grade extends FacultyService {
 		$qst = $asmt->getQuestionsAndAnswers($lc->getvars['studentid'], $u->activeClassTaught->id_classes);
 		$questionCount = count($qst);
 		
-		for($i=0; $i< $questionCount; $i++)
-		{
+		for($i=0; $i< $questionCount; $i++)	{
 			list($answerId, $points) = @each($lc->postvars['pointsGiven']);
 			
 			$answer = $qst[$i]->answer;

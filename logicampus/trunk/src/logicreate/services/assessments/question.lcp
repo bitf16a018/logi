@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 /*
  * assessments
  *
@@ -81,10 +94,8 @@ class question extends FacultyService {
 		//handle all the select boxes being submitted at once
 		while ( list($k,$v) = @each($lc->getvars['order']) ) {
 			if ($k != ($v+1) ) {
-
 				$order= $v-1;
 			}
-
 		}
 		debug($lc->getvars,1);
 
@@ -197,11 +208,9 @@ class question extends FacultyService {
 	 }
 
 
-	function saveMatchingRun($db, &$u, &$lc, &$t)
-	{
+	function saveMatchingRun($db, &$u, &$lc, &$t) {
 		stripLC($lc);
-		if ($lc->getvars['qid'])
-		{
+		if ($lc->getvars['qid']) {
 			$q = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
 		} else { 
 			$q = new AssessmentQuestionMatching();
@@ -247,10 +256,8 @@ class question extends FacultyService {
 		// Error checking
 		$t['error'] = $q->validate();
 		$t['q'] = $q;
-		if ($t['error'])
-		{
-			if($lc->getvars['qid'])
-			{
+		if ($t['error']) {
+			if($lc->getvars['qid']) {
 				$this->editRun($db, $u, $lc, $t);	
 				return;
 			} else {
@@ -260,9 +267,8 @@ class question extends FacultyService {
 		} else {
 			$q->assessmentId = $lc->getvars['id'];
 			$q->fileHash = $lc->postvars['fileHash'];
-			if ($q->questionSort == '')
-			{
-			$q->questionSort = 9999;
+			if ($q->questionSort == '') {
+				$q->questionSort = 9999;
 			}
 			$q->save();
 		}
@@ -279,8 +285,7 @@ class question extends FacultyService {
 	 * template
 	 */
 	 function editRun(&$db,&$u,&$lc,&$t) {
-	 	if (!$t['q'])
-		{
+	 	if (!$t['q']) {
 			$t['q'] = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
 		}
 		# Load the assessment and check the log
@@ -330,10 +335,8 @@ class question extends FacultyService {
 	 */
 	 function saveRun(&$db,&$u,&$lc,&$t) {
 		stripLC($lc);
-		if (!$lc->getvars['qid'])
-		{
-			switch($lc->getvars['type']) 
-			{
+		if (!$lc->getvars['qid']) {
+			switch($lc->getvars['type'])  {
 
 				case 'Multiple Choice':
 					$x = 'MChoice';
@@ -366,8 +369,7 @@ class question extends FacultyService {
 			}
 		}
 
-		if ($lc->getvars['qid'])
-		{
+		if ($lc->getvars['qid']) {
 			$q = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
 			//MAK 10-09-2003 in order to edit in-process tests we must only change the correct answer
 			// so get the parent assessment of this question, if isTaken() only change the correct 
@@ -398,16 +400,13 @@ class question extends FacultyService {
 			$q->resetLabels($lc->postvars);
 		}
 
-
 		/*
 			Need error checking for the form
 		*/
 		$t['error'] = $q->validate();
-		if ($t['error'])
-		{
+		if ($t['error']) {
 			$t['q'] = $q;
-			if($lc->getvars['qid'])
-			{
+			if($lc->getvars['qid']) {
 				$this->editRun($db, $u, $lc, $t);	
 				return;
 			} else {
@@ -429,8 +428,7 @@ class question extends FacultyService {
 
 	 }
 	 
-	 function moveRun($db, &$u, &$lc, &$t)
-	 {
+	 function moveRun($db, &$u, &$lc, &$t) {
 	 		$t['list'] = AssessmentPeer::doSelect("class_id='".$u->activeClassTaught->id_classes."' AND assessment_id != '".$lc->getvars['id']."'");
 	 		$q = AssessmentQuestion::load($lc->getvars['qid'], $u->activeClassTaught->id_classes);
 	 		$t['question'] = $q->questionText;
@@ -438,8 +436,7 @@ class question extends FacultyService {
 	 		#debug($t['list']);
 	 }
 
- 	 function processMoveRun($db, &$u, &$lc, &$t)
-	 {
+ 	 function processMoveRun($db, &$u, &$lc, &$t) {
 	 		$q = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
 	 		$q->assessmentId = $lc->getvars['id'];
 	 		$q->save();
@@ -447,16 +444,14 @@ class question extends FacultyService {
 	 		$this->presentor = 'redirectPresentation';
 	 }
 
-	 function copyRun($db, &$u, &$lc, &$t)
-	 {
+	 function copyRun($db, &$u, &$lc, &$t) {
 	 		$t['list'] = AssessmentPeer::doSelect("class_id='".$u->activeClassTaught->id_classes."' AND assessment_id != '".$lc->getvars['id']."'");
 	 		$t['qid'] = $lc->getvars['qid'];
 	 		$q = AssessmentQuestion::load($lc->getvars['qid'], $u->activeClassTaught->id_classes);
 	 		$t['question'] = $q->questionText;
 	 }
 
-	 function processCopyRun($db, &$u, &$lc, &$t)
-	 {
+	 function processCopyRun($db, &$u, &$lc, &$t) {
 	 		$q = AssessmentQuestion::load($lc->getvars['qid'], $u->activeClassTaught->id_classes);
 	 		$q->_new = true;
 	 		$q->assessmentId = $lc->getvars['id'];
