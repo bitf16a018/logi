@@ -127,7 +127,7 @@ class cal extends FacultyService {
 		$c->monthHeader1 = 'monthlybar';
 		$c->monthTableClass2 = 'monthtable';
 		
-		$c->monthReviewURL = modurl('cal/');
+		$c->monthReviewURL = modurl('cal');
 		$c->eventDayURL = modurl('cal/event=viewDay');
 		$c->eventCountURL = modurl('cal/event=viewDay');
 		
@@ -220,7 +220,7 @@ class cal extends FacultyService {
 		$c->showEventCount = true;
 		
 		// setting urls to be rendered
-		$c->monthReviewURL = modurl('cal/');
+		$c->monthReviewURL = modurl('cal');
 		$c->eventDayURL = modurl('cal/event=viewDay');
 		$c->eventCountURL = modurl('cal/event=viewDay');
 		
