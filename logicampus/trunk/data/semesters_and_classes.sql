@@ -36,6 +36,9 @@ INSERT INTO `class_gradebook` (`id_class_gradebook`, `id_classes`, `a_upper`, `a
 INSERT INTO `class_gradebook` (`id_class_gradebook`, `id_classes`, `a_upper`, `a_lower`, `b_lower`, `c_lower`, `d_lower`, `calculation_type`, `color_missing_grade`, `roundScoresUp`, `total_points`) VALUES (2, 2, 0, 0, 0, 0, 0, 0, 'FFC2CD', 0, 0);
   
 
+INSERT INTO `class_gradebook_categories` (`id_class_gradebook_categories`, `id_classes`, `label`, `weight`, `drop_count`) VALUES (1, 2, 'TESTS', NULL, NULL);
+        
+
 INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (1111, 1);
 INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (1112, 1);
 INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (2111, 2);
