@@ -27,39 +27,28 @@ INSERT INTO courses (id_courses, courseFamily, courseNumber, courseName, courseD
 INSERT INTO courses (id_courses, courseFamily, courseNumber, courseName, courseDescription, preReq1, preReq2, preReq3, preReq4, coReq1, coReq2, coReq3, coReq4) VALUES (8, 'COSC', 1420, 'C Programming', 'Structured programming technique using the C language.', '', '', '', '', '', '', '', '');
 
 
-INSERT INTO classes VALUES (1, 6, 1, '1111\n1112', 'Internet', 'teacher1', 'BUSG', 1315, 'BUSG1315', '', 0, 0);
+
+INSERT INTO `classes` (`id_classes`, `id_courses`, `id_semesters`, `sectionNumbers`, `classType`, `facultyId`, `courseFamily`, `courseNumber`, `courseFamilyNumber`, `stylesheet`, `id_class_resource`, `noexam`) VALUES (1, 6, 1, '', 'Internet', 'teacher1', 'BUSG', 1315, 'BUSG1315', '', 1, 0);
+INSERT INTO `classes` (`id_classes`, `id_courses`, `id_semesters`, `sectionNumbers`, `classType`, `facultyId`, `courseFamily`, `courseNumber`, `courseFamilyNumber`, `stylesheet`, `id_class_resource`, `noexam`) VALUES (2, 1, 1, '', 'Internet', 'teacher1', 'ENGL', 1401, 'ENGL1401', '', 0, 0);
+
+
+INSERT INTO `class_gradebook` (`id_class_gradebook`, `id_classes`, `a_upper`, `a_lower`, `b_lower`, `c_lower`, `d_lower`, `calculation_type`, `color_missing_grade`, `roundScoresUp`, `total_points`) VALUES (1, 1, 0, 0, 0, 0, 0, 0, 'FFC2CD', 0, 0);
+INSERT INTO `class_gradebook` (`id_class_gradebook`, `id_classes`, `a_upper`, `a_lower`, `b_lower`, `c_lower`, `d_lower`, `calculation_type`, `color_missing_grade`, `roundScoresUp`, `total_points`) VALUES (2, 2, 0, 0, 0, 0, 0, 0, 'FFC2CD', 0, 0);
+  
+
+INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (1111, 1);
+INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (1112, 1);
+INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (2111, 2);
+INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (2112, 2);
 
 
 
-INSERT INTO class_gradebook VALUES (1, 1, '0', '0', '0', '0', '0', 0, '', 0, 0);
+INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (1111, 'bart.simpson', 1, 1, NULL);
+INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (2111, 'lisa.simpson', 1, 1, NULL);
+INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (1112, 'nelson.muntz', 1, 1, NULL);
+INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (2112, 'ralph.wiggum', 1, 1, NULL);
 
 
-INSERT INTO class_sections VALUES (1111, 1);
-
-INSERT INTO class_sections VALUES (1112, 1);
-
-INSERT INTO class_sections VALUES (1111, 2);
-
-INSERT INTO class_sections VALUES (1112, 2);
-
-
-
-
-INSERT INTO class_student_sections VALUES (1111, 'student', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1111, 'student1', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1112, 'student2', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1112, 'student3', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1111, 'student6', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1112, 'student7', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1112, 'student8', 1, 1, null);
-
-INSERT INTO class_student_sections VALUES (1111, 'student9', 1, 1, null);
 
 INSERT INTO exam_schedule_dates VALUES (1, 1, CONCAT(YEAR(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',MONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',DAYOFMONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),' 14:00:00'), CONCAT(YEAR(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',MONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',DAYOFMONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),' 18:00:00'));
 
