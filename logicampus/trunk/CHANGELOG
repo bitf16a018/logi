@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-06-30 03:03:14 $
+Last Updated:  $Date: 2004-07-30 03:40:32 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,10 @@ SYNTAX:
 
 
 #########################
+07/29/04 - 10:40 - michael
+Lots of small updates to the test taking procedure.  It's broken up into a separate service (test) and some of the supporting libraries have been modified to get rid of some apparently premature optimizations.  Also, the system should be storing the test option values, not the answer values specifically (storing "2" instead of "The red rabbit fell down")
+
+
 06/29/04 - 10:40 - michael
 Updated classroom chat system.  Smoother refreshing.  Not 100% sure how well it works with IE yet, but it's running on tccd right now.  If all goes well, it'll be rolled out to general school chat too.
 

@@ -25,7 +25,7 @@
 			<td><b>*Answers</b></td>
 			<td>(check boxes to indicate the correct responses)</td>
 		</tr>
-		<? //debug($t['q']); ?>
+		<?// debug($t['q']); ?>
 		<? 
 		
 		$count = count($t['q']->questionChoices);
@@ -35,9 +35,8 @@
 		
 		<tr>
 			<td align="right">
-				<? if (in_array($qc[$x]->label, $answers)) $checked = 'checked'; ?>
-				<input name="answer[]" value="<?=$qc[$x]->label;?>" type="checkbox" <?=$checked?>>
-
+				<? if (in_array($x, $answers)) $checked = 'checked'; ?>
+				<input name="answer[<?=$x;?>]" value="<?=$x;?>" type="checkbox" <?=$checked?>>
 			</td>
 			<td>
 				<? printf('%d',$x+1);?>.

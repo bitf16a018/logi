@@ -201,29 +201,28 @@ class question extends StudentService {
 		$answer = AssessmentAnswerPeer::doSelect("assessment_question_id='$questionID' AND
 		student_id='".$u->username."' AND id_classes='".$u->activeClassTaken->id_classes."'" );
 
+
 		$hasOldAnswer = FALSE;
 		if ($answer) {
 			$hasOldAnswer = TRUE;
 		}
 
-
 		# Student is re-answering a previous question
 		# Take current qst ID and move to the next one
 		if ($hasOldAnswer) {
+
 			$answer = $answer[0];
 			if ($qst->questionType == QUESTION_MATCHING || $qst->questionType == QUESTION_MANSWER) {
 				$answer->assessmentAnswerValues = serialize($lc->postvars['answer']);
 			} else {
 				$answer->assessmentAnswerValues = $lc->postvars['answer'];	
 			}
-
 			// MAK 10-15-2003 question->grade() calls save on the passed in
 			// answer, need we save twice in a row?
 			// $answer->save();
 
 			# Grade the answer
 			$qst->grade($answer);
-
 			unset($answer);
 		} else {
 			$answer = new AssessmentAnswer();
@@ -234,7 +233,7 @@ class question extends StudentService {
 			}
 
 			//__FIXME__ make database column accept nulls for points_earned
-			$answer->assessmentQuestionId = $lc->getvars['qid'];
+			$answer->assessmentQuestionId = $questionID;
 			$answer->studentId = $u->username;
 			$answer->idClasses = $u->activeClassTaken->id_classes;
 			$answer->assessmentId = $test->assessmentId;

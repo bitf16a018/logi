@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 class AssessmentQuestionBase {
 
@@ -366,6 +379,7 @@ class AssessmentQuestion extends AssessmentQuestionBase {
 		}
 
 
+
 		if( $superObj->assessmentQuestionId )
 			$subObj->_new = false;
 		else
@@ -385,7 +399,6 @@ class AssessmentQuestion extends AssessmentQuestionBase {
 		// Adam added this here.. it seemed necessary
 		//$subObj->questionChoices = unserialize(base64_decode($subObj->questionChoices));
 		// Commented out by Keith since this needs to be in row2Obj above
-
 
 	return $subObj;
 	}

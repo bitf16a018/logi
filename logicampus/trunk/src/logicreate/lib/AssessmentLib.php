@@ -1,5 +1,21 @@
 <?php
 
+/*
+ * COMMENT ON CHANGES - 7/29/04 - MGK
+ *
+ * There were many instances of 
+ * if (condition) { $answerObj->save(); }
+ *
+ * I've taken out the condition and the grade() methods should
+ * now save answerObjs all the time.  I think this was done
+ * earlier as an optimization, but seems to cause problems in 
+ * some cases.  This change *may* cause problems if people 
+ * were hoping that retaking a test would only recount newly submitted 
+ * correct answers, as it'll now count all resubmitted answers, 
+ * and lower your grade if you get it wrong the second time
+ *
+ */
+ 
 define( QUESTION_TRUEFALSE, 1 );
 define( QUESTION_MCHOICE, 2 );
 define( QUESTION_MANSWER, 3 );
@@ -66,47 +82,38 @@ class AssessmentQuestionTrueFalse extends AssessmentQuestion {
 		return false;
 	}
 
-	function grade(&$answerObj)
-	{
+	function grade(&$answerObj) {
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($answerObj->assessmentAnswerValues) == $correct)
-		{
+		if (strtolower($answerObj->assessmentAnswerValues) == $correct) {
 			if ($answerObj->pointsEarned != $this->questionPoints ) {
 				$answerObj->set('pointsEarned',$this->questionPoints);
-				$answerObj->save();
 			}
 		} else {
 				//they got it wrong, if it's new then insert a 0,
 				// if it's old && different, then save
 				if ( $answerObj->isNew() ) {
 					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
 				}
 				if ( $answerObj->pointsEarned != $this->questionPoints ) {
 					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
 				}
 		}
+		$answerObj->save();
 	}
 
-	function getCorrectAnswer()
-	{
+	function getCorrectAnswer() {
 		$count = count($this->questionChoices);
-		for ($i=0; $i<$count; $i++)
-		{
-			if ($this->questionChoices[$i]->correct)
-			{
+		for ($i=0; $i<$count; $i++) {
+			if ($this->questionChoices[$i]->correct) {
 				return strtolower($this->questionChoices[$i]->label);	
 			}
 		}
 	}
 
 
-	function isCorrect()
-	{
+	function isCorrect() {
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($this->answer->assessmentAnswerValues) == $correct)
-		{
+		if (strtolower($this->answer->assessmentAnswerValues) == $correct) {
 			return TRUE;
 		}
 		return FALSE;
@@ -176,91 +183,94 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 	function validate() {
 		# Check the question
 		$this->questionText = trim(strip_tags($this->questionText));
-		if ($this->questionText == '')
-		{
+		if ($this->questionText == '') { 
 			$error = '<li>Please enter a question.</li>';
 		}
 
 		$count = count($this->questionChoices);
-		for ($i=0; $i<$count; $i++)
-		{
+		for ($i=0; $i<$count; $i++) {
 			$this->questionChoices[$i]->label =	trim(strip_tags($this->questionChoices[$i]->label));
-			if ($this->questionChoices[$i]->label != '')
-			{
+			if ($this->questionChoices[$i]->label != '') {
 				++$labels;
 			}
 
-			if ($this->questionChoices[$i]->correct)
-			{
+			if ($this->questionChoices[$i]->correct) {
 				++$correct;
 			}
 		}
 
-		if ($labels< 2)
-		{
+		if ($labels< 2) {
 			$error .= '<li>You must specify at least two possible answers.</li>';
 		}
 
-		if ($correct < 1)
-		{
+		if ($correct < 1) {
 			$error .= '<li>You must choose at least one correct answer.</li>';
 		}
 
-		if ($correct > 1)
-		{
+		if ($correct > 1) {
 			$error .= '<li>You can only select one answer for this type of question.</li>';
 		}
 
 		# Return error if there is one.
-		if ($error)
-		{
+		if ($error) {
 			return '<ul style="color: red;">'.$error.'</ul>';
 		}
 		return false;
 	}
 
-	function grade(&$answerObj)
-	{
+	function grade(&$answerObj) {
+
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($answerObj->assessmentAnswerValues) == $correct)
-		{
-			if ($answerObj->pointsEarned != $this->questionPoints ) {
+		if (strtolower($answerObj->assessmentAnswerValues) == $correct) {
+			// mgk - 7/10/04
+			// this doesn't make any sense
+			// why would points earned NOT be the questionpoints for a multiple choice?
+			// may make sense for situations where you can have partial points - 
+		        // can't tell here.  going to test without this check.	
+			#	if ($answerObj->pointsEarned != $this->questionPoints ) {
 				$answerObj->set('pointsEarned',$this->questionPoints);
-				$answerObj->save();
-			}
+			#}
 		} else {
 				//they got it wrong, if it's new then insert a 0,
 				// if it's old && different, then save
 				if ( $answerObj->isNew() ) {
 					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
 				}
-				if ( $answerObj->pointsEarned != $this->questionPoints ) {
+				// see above
+				#if ( $answerObj->pointsEarned != $this->questionPoints ) {
 					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
-				}
+				#}
 		}
+		$answerObj->save();
 	}
 
-	function getCorrectAnswer()
-	{
+	// 7/10/04 - mgk
+	// changed to deal with numeric value of option rather than full 'label' value
+	// part of this is a size issue - perhaps we can optimize the database tables
+	// because of this
+	// but it's more an issue of data corruption when weird values are multiple choice options
+	// example
+	// Which is correct?
+	// 1. I'm going to "hit" you.
+	// 2. I'm going to 'hit' you.
+	// 3. I am a gonna' "hit" you.
+	// Storing quotes is awkward.
+
+	function getCorrectAnswer() {
 		$count = count($this->questionChoices);
-		for ($i=0; $i<$count; $i++)
-		{
-			if ($this->questionChoices[$i]->correct)
-			{
-				return strtolower($this->questionChoices[$i]->label);	
+		for ($i=0; $i<$count; $i++) {
+			// __FIXME__ - is 1/0 binary checking here for 'correct' good enough?
+			if ($this->questionChoices[$i]->correct) {
+				return $i;
 			}
 		}
 
 		return false;
 	}
 
-	function isCorrect()
-	{
+	function isCorrect() {
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($this->answer->assessmentAnswerValues) == $correct)
-		{
+		if (strtolower($this->answer->assessmentAnswerValues) == $correct) {
 			return TRUE;
 		}
 		return FALSE;
@@ -279,7 +289,6 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 			$this->questionChoices[] = new AssessmentChoice('');
 		}
 		$this->questionInput = AssessmentInput::getInput('multiple',$this);
-
 		$this->questionDisplay = 'Multiple Answer';
 	}
 
@@ -300,90 +309,96 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 
 
 
-	function validate()
-	{
+	function validate() {
 		# Check the question
 		$this->questionText = trim(strip_tags($this->questionText));
-		if ($this->questionText == '')
-		{
+		if ($this->questionText == '') {
 			$error = '<li>Please enter a question.</li>';
 		}
 
 		$count = count($this->questionChoices);
-		for ($i=0; $i<$count; $i++)
-		{
+		for ($i=0; $i<$count; $i++) {
 			$this->questionChoices[$i]->label =	trim(strip_tags($this->questionChoices[$i]->label));
-			if ($this->questionChoices[$i]->label != '')
-			{
+			if ($this->questionChoices[$i]->label != '') {
 				++$labels;
 			}
 
-			if ($this->questionChoices[$i]->correct)
-			{
+			if ($this->questionChoices[$i]->correct) {
 				++$correct;
 			}
 		}
 
-		if ($labels< 2)
-		{
+		if ($labels< 2) {
 			$error .= '<li>You must specify at least two possible answers.</li>';
 		}
 
-		if ($correct < 1)
-		{
+		if ($correct < 1) {
 			$error .= '<li>You must choose at least one correct answer.</li>';
 		}
 
 
 		# Return error if there is one.
-		if ($error)
-		{
+		if ($error) {
 			return '<ul style="color:red;">'.$error.'</ul>';
 		}
 		return false;
 	}
 
 
-	function grade(&$answerObj)
-	{
+	function grade(&$answerObj) {
 		$correct = $this->getCorrectAnswer();
 		$answers = unserialize($answerObj->assessmentAnswerValues);
 		$numCorrect = 0;
+		$definedCorrect= count($correct);
+
+		#foreach ($answers as $k => $answer) {
+		#	$answers[$k] = stripslashes($answer);
+		#}
+		#	for ($x=0; $x<$c_count; $x++) {
+		#	$correct[$x] = strtolower($correct[$x]);
+		#}
+		#$a_count = count($answers);
+		#for ($x=0; $x<$a_count; $x++) {
+		#	$answers[$x] = strtolower($answers[$x]);
+		#}
 
 
-		foreach ($answers as $k => $answer) {
-			$answers[$k] = stripslashes($answer);
-		}
-		$c_count = count($correct);
-		for ($x=0; $x<$c_count; $x++) {
-			$correct[$x] = strtolower($correct[$x]);
-		}
-		$a_count = count($answers);
-		for ($x=0; $x<$a_count; $x++) {
-			$answers[$x] = strtolower($answers[$x]);
-		}
-
-
+		
 		//array diff doesn't work
 		// add one to num correct for every answer that is right
 		// subtract one to num correct for every answer that is not right
-		for ($x=0; $x<$a_count; $x++)
-		{
+/*
+		for ($x=0; $x<$a_count; $x++) {
 			if ( in_array($answers[$x],$correct) )
 			$numCorrect++;
 			else
 			$numCorrect--;
 		}
+*/
+		// mgk 7/11/04
+		// array diff DOES work - or can be made to 
+		//
+		$diffCount = count(array_diff($answers,$correct));
+				
+		// mgk 7/11/04
+		// __FIXME__ do we give partial credit for only some right, 
+		// or if they get all right but a fudge-factor wrong?  
+		// for 2 choices out of 4, allowing 3 guesses woudln't make sense,
+		// but what about choosing 8 out of 24, for example?  If 9 were chosen, 
+		// and 8 were correct with 1 extra wrong, should the whole question be 'wrong'?
 
-		// the number of corret answers exactly matches the 
-		// number of defined correct answers, IT'S RIGHT
-		if ($numCorrect == $c_count) {
+		// if the diffCount ==0, we have a perfect match		
+		if ($diffCount==0) {
 			//we don't want to save all the time so...
-			if ( $answerObj->pointsEarned != $this->questionPoints )
+//			if ( $answerObj->pointsEarned != $this->questionPoints )
+// mgk - 7/11/04 - WHY NOT SAVE ALL THE TIME?
+// premature optimization, it seems, here, and until it's all 110% tested, 
+// why not be sure and save it every time?
 			$answerObj->set('pointsEarned',$this->questionPoints);
 		} else {
 			// WRONG
-			if ( $answerObj->pointsEarned != 0 )
+			// why bother checking here? mgk 7/11/04
+//			if ( $answerObj->pointsEarned != 0 )
 			$answerObj->set('pointsEarned',0);
 		}
 
@@ -391,21 +406,17 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 	}
 
 
-	function getCorrectAnswer()
-	{
+	function getCorrectAnswer() {
 		$count = count($this->questionChoices);
-		for ($i=0; $i<$count; $i++)
-		{
-			if ($this->questionChoices[$i]->correct)
-			{
-				$x[] =  stripslashes(strtolower($this->questionChoices[$i]->label));
+		for ($i=0; $i<$count; $i++) {
+			if ($this->questionChoices[$i]->correct!='') {
+				$x[$i] = $i; 
 			}
 		}
 		return $x;
 	}
 
-	function isCorrect()
-	{
+	function isCorrect() {
 		$correct = $this->getCorrectAnswer();
 		$answer = $this->answer->assessmentAnswerValues;
 
@@ -420,14 +431,12 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		}
 
 
-		for ($x=0; $x<$c_count; $x++)
-		{
+		for ($x=0; $x<$c_count; $x++) {
 			if (! in_array($correct[$x],$answer) )
 			return FALSE;
 		}
 
-		for ($x=0; $x<$a_count; $x++)
-		{
+		for ($x=0; $x<$a_count; $x++) {
 			if (! in_array($answer[$x],$correct) )
 			return FALSE;
 		}
@@ -516,24 +525,21 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 			$this->questionChoices[$key]->correct =  $answer;
 		}
 
-		shuffle( $randomAnswers );
+		// mgk 7/29/04 - commented out
+#		shuffle( $randomAnswers );
 	
 		$this->questionChoices['randomAnswers'] = $randomAnswers;
 	}
 
 
-	function grade(&$answerObj)
-	{
-
+	function grade(&$answerObj) {
 
 		$correct = $this->getCorrectAnswer();
 		$answers = unserialize($answerObj->assessmentAnswerValues);
 		$count = count ($correct);
 
-		for($i=0; $i<$count; $i++)
-		{
-			if ($correct[$i] == $answers[$i])
-			{
+		for($i=0; $i<$count; $i++) {
+			if ($correct[$i] == $answers[$i]) {
 				$num_correct++;
 			}
 		}
@@ -541,24 +547,21 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 
 		if ($num_correct == $this->questionPoints ) {
 			$answerObj->set('pointsEarned',$this->questionPoints);
-			$answerObj->save();
 		} else {
 
 			//they got it wrong, insert a 0,
 			$score = floor($this->questionPoints * ($num_correct/$count));
 			$answerObj->set('pointsEarned',$score);
-			$answerObj->save();
 		}
+		
+		$answerObj->save();
 
 	}
 
-	function getCorrectAnswer()
-	{
+	function getCorrectAnswer() {
 		$count = count($this->questionChoices);
-		for ($i=0; $i<$count; $i++)
-		{
-			if ($this->questionChoices[$i]->label)
-			{
+		for ($i=0; $i<$count; $i++) {
+			if ($this->questionChoices[$i]->label) {
 					$x[$i] =  $this->questionChoices[$i]->correct;	
 			}
 		}
@@ -608,77 +611,60 @@ class AssessmentQuestionFill extends AssessmentQuestion {
 	function validate() {
 		# Check the question
 		$this->questionText = trim(strip_tags($this->questionText));
-		if ($this->questionText == '')
-		{
+		if ($this->questionText == '') {
 			$error = '<li>Please enter a question.</li>';
 		}
 
 		$this->questionChoices[0]->label  = trim(strip_tags($this->questionChoices[0]->label));
-		if ($this->questionChoices[0]->label  == '')
-		{
+		if ($this->questionChoices[0]->label  == '') {
 			$error .= '<li>You must specify an answer.</li>';
 		}
 
 		# Return error if there is one.
-		if ($error)
-		{
+		if ($error) {
 			return '<div style="color: red;"><ul>'.$error.'</ul></div>';
 		}
+		
+		// mgk - 07/25/04 - what the heck?  return false or an error string???
 		return false;
 	}
 
 
-	function grade(&$answerObj)
-	{
+	function grade(&$answerObj) {
 		//this is an ARRAY!!
 		$correct = $this->getCorrectAnswer();
+		// mgk 7/25/04 - both getCorrectAnswer and this guess are strtolower just to be sure
+		// this would prevent someone from checking capitalization as an aspect of the test
+		// just should be documented - I don't think this is a big drawback at this time.
 		$guess = strtolower($answerObj->assessmentAnswerValues);
 
 		$gotItRight = false;
 		foreach($correct as $blank=>$c) {
 			if( $guess == $c ) { $gotItRight = true; }
 		}
-		if ($gotItRight)
-		{
-			if ($answerObj->pointsEarned != $this->questionPoints ) {
-				$answerObj->set('pointsEarned',$this->questionPoints);
-				$answerObj->save();
-			}
+		if ($gotItRight) {
+			$answerObj->set('pointsEarned',$this->questionPoints);
 		} else {
-				//they got it wrong, if it's new then insert a 0,
-				// if it's old && different, then save
-				if ( $answerObj->isNew() ) {
-					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
-				}
-				if ( $answerObj->pointsEarned != $this->questionPoints ) {
-					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
-				}
+			$answerObj->set('pointsEarned',0);
 		}
-
+		$answerObj->save();
 	}
 
 
-	function getCorrectAnswer()
-	{
+	function getCorrectAnswer() {
 		$count = count($this->questionChoices);
 		$x = array();
-		for ($i=0; $i<$count; $i++)
-		{
-			if ($this->questionChoices[$i]->label)
-			{
+		for ($i=0; $i<$count; $i++) {
+			if ($this->questionChoices[$i]->label) {
 				$x[] = strtolower($this->questionChoices[$i]->label);	
 			}
 		}
 		return $x;
 	}
 
-	function isCorrect()
-	{
+	function isCorrect() {
 		$correct = $this->getCorrectAnswer();	
-		if (in_array(strtolower($this->answer->assessmentAnswerValues), $correct))
-		{
+		if (in_array(strtolower($this->answer->assessmentAnswerValues), $correct)) {
 			return TRUE;
 		}
 		return FALSE;
@@ -701,34 +687,25 @@ class AssessmentQuestionEssay extends AssessmentQuestion {
 		$this->questionDisplay = 'Short Essay';
 	}
 
-	function validate()
-	{
+	function validate() {
 		# Check the question
 		$this->questionText = trim(strip_tags($this->questionText));
-		if ($this->questionText == '')
-		{
+		if ($this->questionText == '') {
 			$error = '<li>Please enter a question.</li>';
 		}
 
 		# Return error if there is one.
-		if ($error)
-		{
+		if ($error) {
 			return '<div style="color: red;"><ul>'.$error.'</ul></div>';
 		}
 		return false;
 	}
 
-	function grade(&$answerObj)
-	{
+	function grade(&$answerObj) {
 		// teacher needs to grade this one by hand
 		$answerObj->pointsEarned = 0;
-		if ($answerObj->isNew() ) {
-			$answerObj->save();
-		} else {
-			if ($answerObj->pointsEarned != 0 ) {
-				$answerObj->save();
-			}
-		}
+		$answerObj->save();
+
 	}
 
 
@@ -811,7 +788,7 @@ class AssessmentInput {
 				$x= new AssessmentInputText();
 		}
 
-		$x->question = &$z;
+		#		$x->question = &$z;
 	return $x;
 	}
 }

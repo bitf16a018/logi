@@ -37,13 +37,16 @@
 		 for ($x=0;$x<$count; ++$x) { ?>
 		<? $qc = $t['q']->questionChoices; ?>
 		<? if ($qc[$x]->label!='') { // mgk 10/19/03 ?>
-		<?//  debug($qc); ?>
 		
 		<tr>
 			<td align="right">
-				<? if ($qc[$x]->label == $t['answer']->assessmentAnswerValues) $checked = 'checked'; ?>
+				<? 
+				if ($x == $t['answer']->assessmentAnswerValues) {
+				$checked = ' checked'; 
+				}
+				?>
 
-				<input name="answer" value="<?=$qc[$x]->label;?>" type="radio" <?=$checked?>>
+				<input name="answer" value="<?=$x;?>" type="radio"<?=$checked?>>
 			</td>
 			<td>
 				<? printf('%d',$x+1);?>.
