@@ -1,13 +1,11 @@
-
-
 <?
-	/* 
-	 * Create by Keith Elder
-	 * Description:  Tells how many users are currently logged into the site and who they are.
-	 * Last Modified 9/12/02
-	 */
+/* 
+ * Create by Keith Elder
+ * Description:  Tells how many users are currently logged into the site and who they are.
+ * Last Modified 9/12/02
+ */
 	
-	class online extends  RegAuth {
+class online extends  RegAuth {
 		
 		var $presentor = "htmlPresentation";
 		
