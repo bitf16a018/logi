@@ -324,7 +324,8 @@ repeat types
 				case "0":
 					$loopVar = strtotime(date("m/d/Y 00:00:00",$eventStart));
 					$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
-					$edateObj->events[strtotime(date("m/d/Y 00:00:00",$eventEnd))][$eventPkey] = $edateObj->events[$loopVar][$eventPkey];
+					$loopEnd = strtotime(date("m/d/Y 00:00:00",$eventEnd));
+					$edateObj->events[$loopEnd][$eventPkey] = edate::_load($db->Record);
 				break;
 
 // repeat every X days
@@ -597,13 +598,11 @@ $dayText = array(1=>'Sunday', 2=>'Monday', 4=>'Tuesday', 8=>'Wednesday', 16=>'Th
 		while(list($k,$v) = @each($edateObj->events)) 
 		{		$new[$k] = $v;
 		}
-		
-		$edateObj->events = $new;
-		
+
 		return $new;
 	}
-
 }
+
 
 class cali {
 
@@ -733,11 +732,11 @@ class cali {
 	function renderDayFull() {
 		
 		$allday_events = array();
-		
+
 		while(list($ekey,$e) = @each($this->events)) {
 			$events = array_merge($events,$e);
 		}
-		
+
 		list($m,$d,$y) = split(" ",date("m d Y",$this->start));
 		$startTime = strtotime("$m/$d/$y ".$this->START_HOUR);
 		$endTime = strtotime("$m/$d/$y ".$this->END_HOUR);
@@ -748,16 +747,16 @@ class cali {
 		while(list($k,$v) = @each($events)) {
 			$e[$v->startdate][$v->pkey] = $v;
 		}
-		
+
 		$events = $e;
 		$loopTime = $startTime;
-		
+
 		while($loopTime < $endTime ) {
 			$row .= date("h:i A",$loopTime). " -   ";
 			$tempcount =0;
 			$loopcount = intval($interval/$miniinterval);
 			$inside = '';
-			
+
 			// @@ this area scares me.. 
 			while($tempcount < $loopcount) 
 			{	$rowString = date("h:i A",$loopTime);
@@ -773,16 +772,16 @@ class cali {
 							// is it just an ordinary calendar type? (world viewable) or specialized ? '' = world
 							if (trim($val->calendarType) != '')
 							{	
-								// customized
 								$classname = $val->calendarType;
+								// customized
 								if (class_exists($classname))	// making sure class exists before initializing
 								{
 									$tmp = new $val->calendarType;
 									
+									//__FIXME__ why don't any of these work?
 									if ($tmp->autoLoad($val) && $tmp->cansee($loopTime, true))
 									{
-										
-										//debug($tmp);
+									//debug($tmp);
 										if ($tmp->f_allday)
 										{
 											$allday_events[] = $tmp->get_brief_display($loopTime);
@@ -796,9 +795,10 @@ class cali {
 										// prevention from reiterating overandoverandover
 										unset($events[$tkey][$key]);
 									
-									}
+									} 
+
 									
-																	
+											
 								}
 								//debug($tmp);
 							} else 
@@ -876,19 +876,19 @@ class cali {
 // style 2 = large
 		$this->display_style_for_this_friggin_day = true;
 		$events = $this->events[$timestamp];
-		
+
 		$month = date("n",$timestamp);
 		$day = date("j",$timestamp);
 		$year = date("Y",$timestamp);
 
 		$c = count($events);
-		if (is_array($events)) {	
+		if (is_array($events)) {
 		foreach($events as $null=>$event)
-		{	// doublechecking classbased events	
+		{	// doublechecking classbased events
 			if (trim($event->calendarType) != '')
 			{
 				// customized
-			
+
 				$classname = $event->calendarType;
 				if (class_exists($classname))	// making sure class exists before initializing
 				{
@@ -912,20 +912,20 @@ class cali {
 					 *	is beuase i'm assuming everything is alright above.. if we're here
 					 *	
 					 */
-					
+
 					if ($c)
 					{	$temp .= "<a href='{$this->eventCountURL}/m=$month/d=$day/y=$year'>$c events</a>".$this->eventSeparator;
 					} else
 					{	$this->display_style_for_this_friggin_day = false;
 					}
-					
+
 				} else {
 					if ($c==0 && $this->monthDisplayZeroEvents) {
 						$temp .= $c.$this->eventSeparator;
 					}
 				}
 			}
-			
+
 			@reset($events);
 			while(list($k,$v) = @each($events)) {
 				$output = '';
@@ -944,10 +944,9 @@ class cali {
 				} else {
 					$temp .= $output;
 				}
-
 			}
-			
 		}
+
 
 		if ($this->showDate) 
 		{
@@ -1040,23 +1039,23 @@ class cali {
 		{	$year = date('Y', $this->start); 		// current year
 		}
 		
-		$rendered_html  = $this->renderDaysofWeek();
+		$rendered_html  = $this->renderDaysOfWeek();
 		$rendered_html .= '<tr>';
 		
 		$start_day_position = date('w', $this->start);
 		for ($i=$start_day_position; $i <= 6; ++$i)
 		{
 			$epoch_cycled_date = strtotime("+".(date('w', $this->start)+$i)." days",$this->start);
-			
+
 			$style_day = $this->getMonthDayCSS($epoch_cycled_date);
-			
+
 			$ret_rendered_day = $this->renderDay($epoch_cycled_date);
 			if ($ret_rendered_day) 
 			{	$tmp_render = $ret_rendered_day;
 			} else 
 			{	$tmp_render = "&nbsp;";
 			}
-			
+
 			// this is set within renderDay()
 			if ($this->display_style_for_this_friggin_day == false)
 			{	
@@ -1126,12 +1125,11 @@ class cali {
 				if ($inMonth) 
 				{	
 					$dayStyle = $this->getMonthDayCSS($dayTime);
-					$temp = $this->renderDay($dayTime);
-					
-					if ($temp) 
-					{	$tmp_render .= $temp;
-					} else 
-					{	$tmp_render .= "&nbsp;";
+					$tmp_render = $this->renderDay($dayTime);
+
+					if (!$tmp_render) 
+					{	
+						$tmp_render .= "&nbsp;";
 					}
 					++$dayInMonth;
 				}
@@ -1176,7 +1174,7 @@ class cali {
 	
 		$final = $this->renderMonthHeader($month, $year);
 		$final .="<table width='{$this->calWidth}' class='{$this->monthTableClass}'>";
-		$final .= $this->renderDaysofWeek().$render."</table>";
+		$final .= $this->renderDaysOfWeek().$render."</table>";
 		
 	return $final;
 	}
@@ -1826,17 +1824,17 @@ class examscheduling extends eventItem
 	}
 	
 	
-	function cansee($timestamp, $request_label_for_dayview=false)
+	function cansee($timestamp, $request_label_for_dayview=false, $showitanyway=false)
 	{	//echo 'Testing exam date viewable? [';
 		//debug($this);
 		//echo date('y-M-d h:i:s', $timestamp);
 		if ($request_label_for_dayview)
 		{
-			if ($this->startdate == $timestamp)
+			if ($this->startdate == $timestamp || $this->enddate == $timestamp)
 				return true;
 		} else 
 		{
-			
+
 			// month views will hit this
 			$begintoday = mktime(0,0,0, date('m', $this->startdate), date('d', $this->startdate), date('y', $this->startdate));
 			//echo date('y-M-d h:i:s', $begintoday);
@@ -1844,8 +1842,19 @@ class examscheduling extends eventItem
 			if ($timestamp == $begintoday)
 			{	return true;
 			}
+
+			$beginsecond = mktime(0,0,0, date('m', $this->enddate), date('d', $this->enddate), date('y', $this->enddate));
+			//echo date('y-M-d h:i:s', $begintoday);
+			//echo $begintoday.'|'.$timestamp.'<br>';
+			if ($timestamp == $beginsecond)
+			{	return true;
+			}
+
 		}
-		
+
+		if ($showitanyway)
+		{	return true;
+		}
 	return false;
 	}
 	
@@ -1932,7 +1941,7 @@ class assessmentscheduling extends eventItem
 		{	
 			// when to show the label
 			// only when teh start day has beeen passed or = to right now! can we show this label// OR mark it on the calendar
-			if ($start_day <= time())
+			if ($start_day <= time() || $end_day <= $time() )
 			{	
 				// because it's an all day thing
 				// we dont have to worry about hours
@@ -1943,7 +1952,8 @@ class assessmentscheduling extends eventItem
 			}
 			
 		} else
-		{	return true;
+		{	if ($start_day <= time())
+			return true;
 		}
 		
 
