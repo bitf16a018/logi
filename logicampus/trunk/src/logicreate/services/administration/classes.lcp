@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 /*
  * 
@@ -47,8 +60,7 @@ class classes extends AdminService
 	/**
 	 *	rebuildng exam entries
 	 */
-	function rebuildAssessmentCalendarDatesRun($db,&$u,&$lc,&$t)
-	{
+	function rebuildAssessmentCalendarDatesRun($db,&$u,&$lc,&$t) {
 		echo 'You may not execute this';
 		return;
 		
@@ -69,8 +81,7 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{
+		while ($db->next_record()) {
 			$ast_calendar = new assessmentscheduling();
 			$ast_calendar->set_id_item($db->Record['assessment_id']);
 			$ast_calendar->set_id_class($db->Record['class_id']);
@@ -89,8 +100,7 @@ class classes extends AdminService
 	/**
 	 *	rebuildng exam entries
 	 */
-	function rebuildExamCalendarDatesRun($db,&$u,&$lc,&$t)
-	{
+	function rebuildExamCalendarDatesRun($db,&$u,&$lc,&$t) {
 		$campus_array = array(1=>'Northwest', 2=>'Northeast', 3=>'South', 4=>'Southeast');				
 		
 		echo 'You may not execute this';
@@ -114,8 +124,7 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{
+		while ($db->next_record()) { 
 			$exam_calendar = new examscheduling();
 			
 			$exam_calendar->set_id_class($db->Record['id_classes']);
@@ -141,8 +150,7 @@ class classes extends AdminService
 	/**
 	 *	rebuildng exam entries
 	 */
-	function buildExamDatesRun($db,&$u,&$lc,&$t)
-	{
+	function buildExamDatesRun($db,&$u,&$lc,&$t) {
 		// I needs what I need mofo!
 		include_once(LIB_PATH.'ExamScheduleClasses.php');
 		
@@ -157,8 +165,7 @@ class classes extends AdminService
 
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{
+		while ($db->next_record()) {
 			// roll throw and create new gradebook entries for all these friggin classes
 			
 			$esc = new ExamScheduleClasses();
@@ -173,8 +180,8 @@ class classes extends AdminService
 			$esc->note = '';
 			$esc->save();
 			
-        	if ($esc->idExamScheduleClasses == false)
-        	{	echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->Record['id_classes'].'"*';
+        	if ($esc->idExamScheduleClasses == false) { 
+        		echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->Record['id_classes'].'"*';
         		break;
         	}
 			
@@ -182,15 +189,13 @@ class classes extends AdminService
 			
 		}
 		
-		
 	}
 	
 	
 	/**
 	 *	Will build up gradebooks for classes that do not have gradebooks
 	 */
-	function buildClassGradebooksRun($db,&$u,&$lc,&$t)
-	{
+	function buildClassGradebooksRun($db,&$u,&$lc,&$t) { 
 		// I needs what I need mofo!
 		include_once(LIB_PATH.'ClassGradebook.php');
 		
@@ -204,31 +209,26 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{
+		while ($db->next_record()) {
 			// roll throw and create new gradebook entries for all these friggin classes
 			
         	$gradebookObj = new ClassGradebookBase();
         	$gradebookObj->set('idClasses', $db->Record['id_classes']);
         	$gradebookObj->save();
-        	if ($gradebookObj->idClassGradebook == false)
-        	{	echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->Record['id_classes'].'"*';
+        	if ($gradebookObj->idClassGradebook == false) {
+        		echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->Record['id_classes'].'"*';
         		break;
         	}
 			
         	unset($gradebookObj);
-			
 		}
-		
-		
 	}
 	
 	
 	/*
 	 * Builds folders for classes that don't contain any folders ( some error happened that folders weren't created for classes so i can rebuild them)
 	 */
-	function rebuildClassFoldersRun($db,&$u,&$lc,&$t)
-	{
+	function rebuildClassFoldersRun($db,&$u,&$lc,&$t) {
 		$sql = '
 		SELECT A.id_classes, A.facultyId
 		FROM classes as A
@@ -237,8 +237,7 @@ class classes extends AdminService
 		WHERE B.class_id IS NULL';
 		$db->query($sql);
 
-		while ($db->next_record())
-		{
+		while ($db->next_record()) { 
 			$new_id_class = $db->Record['id_classes'];
 			$facultyId = trim($db->Record['facultyId']);
 			echo $new_id_class . '|'. $facultyId. '<br>';
@@ -288,26 +287,22 @@ class classes extends AdminService
 		        $folderObj->_save('classdoclib_Folders');
 					
 	                unset($folderObj);
-
 	
 	*/
-	
 		}
-		
 		
 	}
 	
 	# Displays Classes by default (chooses current semster by default)	
-	function Run($db,&$u,&$lc,&$t)
-	{
+	function Run($db,&$u,&$lc,&$t) {
 		$lc->templateStyle='private';
 		$lc->templateName = 'classes_main';
 		
-		if ((int)$lc->postvars['semester'] > 0)
-		{	$u->sessionvars['administration']['classes']['currentsemester'] = (int)$lc->postvars['semester'];
+		if ((int)$lc->postvars['semester'] > 0) {
+			$u->sessionvars['administration']['classes']['currentsemester'] = (int)$lc->postvars['semester'];
 		}
-		if ((int)$u->sessionvars['administration']['classes']['currentsemester'] <= 0)
-		{
+		if ((int)$u->sessionvars['administration']['classes']['currentsemester'] <= 0) {
+		
 			// @@@ we need to load up the current semester
 			$u->sessionvars['administration']['classes']['currentsemester']= semesterObj::getCurrentID();
 
@@ -316,8 +311,7 @@ class classes extends AdminService
 		# __FIX_ME__ when there is no semester it cannot figure out
 		# what to load up
 		if
-		($u->sessionvars['administration']['classes']['currentsemester'])
-		{
+		($u->sessionvars['administration']['classes']['currentsemester']) {
 		$semesterObj = semesterObj::_getFromDB((int)$u->sessionvars['administration']['classes']['currentsemester'], 'id_semesters');	
 		$t['semesterDisplay'] = $semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
 		} else {
@@ -338,14 +332,13 @@ class classes extends AdminService
 		$datagrid->where = 'a.id_semesters='. (int)$u->sessionvars['administration']['classes']['currentsemester'];
 		$datagrid->joins = 'left join profile as b on a.facultyId=b.username INNER JOIN courses as c ON a.id_courses=c.id_courses';
 		
-		if ($lc->getvars[$this->sortVar])
-		{	
-			if ($lc->getvars[$datagrid->sortVar] == 'Faculty')
-			{	$datagrid->orderby = 'b.lastname';
-			}elseif($lc->getvars[$datagrid->sortVar] == 'courseName')
-			{	$datagrid->orderby = 'c.courseName';	
-			}else
-			{	$datagrid->orderby = 'a.'.$lc->getvars[$datagrid->sortVar];
+		if ($lc->getvars[$this->sortVar]) {
+			if ($lc->getvars[$datagrid->sortVar] == 'Faculty') {
+				$datagrid->orderby = 'b.lastname';
+			}elseif($lc->getvars[$datagrid->sortVar] == 'courseName') {
+				$datagrid->orderby = 'c.courseName';	
+			}else {
+				$datagrid->orderby = 'a.'.$lc->getvars[$datagrid->sortVar];
 			}
 			// add whatever other custom sortables here (outside tables)
 		}
@@ -390,8 +383,7 @@ class classes extends AdminService
 	}
 
 	
-	function addRun($db,&$u,&$lc,&$t)
-	{
+	function addRun($db,&$u,&$lc,&$t) {
 		$t['myEvizent'] = 'add';
 		
 		$lc->templateName = 'classes_add';
@@ -401,12 +393,11 @@ class classes extends AdminService
 		$cf = 0;
 		// course family but really it's course ID and i will retrieve the course family from it and the 
 		// teachers that have added it as a preference
-		if ((int)$lc->getvars['cf'] > 0)
-		{	$cf = (int)$lc->getvars['cf'];
+		if ((int)$lc->getvars['cf'] > 0) {
+			$cf = (int)$lc->getvars['cf'];
 		}
 		
-		if ($lc->postvars['submit'])
-		{
+		if ($lc->postvars['submit']) {
 			$t['error'] = $f->validateForm('adminclassinfo', $lc->postvars);
 			$this->cleanedArray = $f->cleanedArray;
 			
@@ -415,10 +406,9 @@ class classes extends AdminService
 			$this->cleanedArray['sectionNumbers'] = ''; //clearing
 			// trying to find out already existing section numbers
 			$sectionnumbers_processed = 0;
-			foreach($a_sec_numbers as $pointer=>$snum)
-			{
-				if ((int)$snum == 0)
-				{	continue;
+			foreach($a_sec_numbers as $pointer=>$snum) {
+				if ((int)$snum == 0) {
+					continue;
 				}
 				
 				$sectionnumbers_processed ++;
@@ -430,23 +420,22 @@ class classes extends AdminService
 				WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$snum;
 				
 				$db->queryOne($sql);
-				if ($db->Record['SECTION_exists'])
-				{	// deny the adding of the class, inform them that section number exists already
+				if ($db->Record['SECTION_exists']) {
+					// deny the adding of the class, inform them that section number exists already
 					$t['error'] .= 'Section #'. (int)$snum. ' exists<br>';
 					$f->error = true;
 				}
 				
 			}
 			
-			if ($sectionnumbers_processed == 0)
-			{	$t['error'] .= 'You must have at least 1 section number for a class<br>';
+			if ($sectionnumbers_processed == 0) {
+				$t['error'] .= 'You must have at least 1 section number for a class<br>';
 				$f->error = true;
 			}
 			
 			$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
 			
-			if ($f->hasErrors() == false)
-			{	
+			if ($f->hasErrors() == false) {
 				$a_course = courseObj::_getFromDB($this->cleanedArray['id_courses'], 'id_courses');
 				$this->cleanedArray['courseFamily'] = $a_course->courseFamily;
 				$this->cleanedArray['courseNumber'] = $a_course->courseNumber;
@@ -456,14 +445,14 @@ class classes extends AdminService
 				$classObj = new classObj();
 				$classObj->_loadArray($this->cleanedArray);
 				$classObj->_saveToDB();
+			
+// __FIXME__ - use db driver last insert
+				if ($new_id_class = mysql_insert_id()) {
 				
-				if ($new_id_class = mysql_insert_id())
-				{
 					// add section numbers
-					foreach ($a_sec_numbers as $pointer=>$snum)
-					{	
-						if ((int)$snum <= 0)
-						{	continue;
+					foreach ($a_sec_numbers as $pointer=>$snum) {
+						if ((int)$snum <= 0) {
+							continue;
 						}
 						
 						$sql = '
@@ -538,8 +527,8 @@ class classes extends AdminService
 		        	$gradebookObj->save();
 		        
 	
-		        	if ($gradebookObj->idClassGradebook == false)
-		        	{	echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
+		        	if ($gradebookObj->idClassGradebook == false) {
+		        		echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
 		        	}
 
 					// Insert an entry for the Exam Scheduler Application
@@ -566,8 +555,7 @@ class classes extends AdminService
 				$this->run($db, $u, $lc, $t);
 				return;
 
-			} else
-			{
+			} else {
 				$t['error'] .= '<br>Failed to add class, please check your information and try again';
 			}
 			
@@ -575,8 +563,8 @@ class classes extends AdminService
 		
 		$f->getForm('adminclassinfo', $this->cleanedArray);
 		
-		if ($cf > 0)
-		{	// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
+		if ($cf > 0) {
+			// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
 			// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
 			$f->modFormValue('facultyId', 'CHANGEFAMILY'.$cf);
 			$f->modFormValue('id_courses', $cf);
@@ -586,8 +574,7 @@ class classes extends AdminService
 	}
 	
 	
-	function editRun($db,&$u,&$lc,&$t)
-	{
+	function editRun($db,&$u,&$lc,&$t) {
 		$t['myEvizent'] = 'edit/id='.$lc->getvars['id'];
 		$this->sectionTitle = 'Edit a Class';
 		$lc->templateName = 'classes_add';
@@ -639,8 +626,7 @@ class classes extends AdminService
 		
 		$classObj = classObj::_getFromDB($lc->getvars['id'], 'id_classes');
 		
-		if ($lc->postvars['submit'] && is_object($classObj))
-		{	
+		if ($lc->postvars['submit'] && is_object($classObj)) {
 			$t['error'] = $f->validateForm('adminclassinfo', $lc->postvars);
 			$this->cleanedArray = $f->cleanedArray;
 			
@@ -665,13 +651,12 @@ class classes extends AdminService
 			
 			// trying to find out already existing section numbers
 			$sectionnumbers_processed = 0;
-			foreach($a_sec_numbers as $pointer=>$snum)
-			{
-				if ((int)$snum == 0)
-				{	unset($a_sec_numbers[$pointer]);
+			foreach($a_sec_numbers as $pointer=>$snum) {
+				if ((int)$snum == 0) {
+					unset($a_sec_numbers[$pointer]);
 					continue;
-				} else
-				{	$a_sec_numbers[$pointer] = (int)trim($snum);
+				} else{
+					$a_sec_numbers[$pointer] = (int)trim($snum);
 				}
 				
 				$sectionnumbers_processed ++;
@@ -679,8 +664,8 @@ class classes extends AdminService
 
 			}
 			
-			if ($sectionnumbers_processed == 0)
-			{	$t['error'] .= 'You must have at least 1 section number for a class<br>';
+			if ($sectionnumbers_processed == 0) {
+				$t['error'] .= 'You must have at least 1 section number for a class<br>';
 				$f->error = true;
 			}
 			
@@ -694,24 +679,23 @@ class classes extends AdminService
 				
 				$a_db_sec_numbers = array();
 				$db->query($sql);
-				while ($db->next_record())
-				{	$a_db_sec_numbers[] = $db->Record['sectionNumber'];
+				while ($db->next_record()) {
+					$a_db_sec_numbers[] = $db->Record['sectionNumber'];
 					
 				}
 				
-				foreach($a_db_sec_numbers as $k)
-				{	
+				foreach($a_db_sec_numbers as $k) {
+					
 					$k = trim($k);
 					// these are the new numbers
-					if (in_array($k, $a_sec_numbers))
-					{	
+					if (in_array($k, $a_sec_numbers)) {
+						
 						$s = array_keys($a_sec_numbers, $k);
-						if (is_integer($s[0]))
-						{	unset($a_sec_numbers[$s[0]]);
+						if (is_integer($s[0])) {
+							unset($a_sec_numbers[$s[0]]);
 						}
 						
-					} else
-					{	
+					} else {
 						// remove it from the database
 						$sql = '
 						DELETE FROM class_sections 
@@ -720,14 +704,11 @@ class classes extends AdminService
 						$db->query($sql);
 						
 					}
-					
 				}
 				
-				if (count($a_sec_numbers) > 0)
-				{	
+				if (count($a_sec_numbers) > 0) {
 					// now i've got to make sure the new ones don't exist in the ENTIRE section# db
-					foreach($a_sec_numbers as $number)
-					{
+					foreach($a_sec_numbers as $number) {
 						// does it exist already? if os.. nuke it from $a_sec_numbers
 						// else lets add dat Numba!?
 						$sql = '
@@ -736,8 +717,8 @@ class classes extends AdminService
 						WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$number;
 
 						$db->queryOne($sql);
-						if ($db->Record['SECTION_exists'])
-						{	// deny the adding of the class, inform them that section number exists already
+						if ($db->Record['SECTION_exists']) {
+							// deny the adding of the class, inform them that section number exists already
 							$t['error'] .= 'Section #'. (int)$number. ' exists<br>';
 							$f->error = true;
 						}
@@ -747,19 +728,15 @@ class classes extends AdminService
 				}
 				
 			
-			if ($f->hasErrors() == false)
-			{	
+			if ($f->hasErrors() == false) {
 				$a_sec_numbers;
-				foreach($a_sec_numbers as $number)
-				{	
+				foreach($a_sec_numbers as $number) {
 					// i'm to worried about a screwed up object that didnt' load
-					if ($classObj->id_classes > 0)
-					{
+					if ($classObj->id_classes > 0) {
 						$sql = '
 						INSERT INTO class_sections 
 						SET sectionNumber='.(int)$number. ',
 						id_classes='.$classObj->id_classes;
-						
 						$db->query($sql);
 					}
 				}
@@ -777,8 +754,7 @@ class classes extends AdminService
 				
 				$new_facultyId = $classObj->facultyId;
 				
-				if ($old_facultyId != $new_facultyId)
-				{
+				if ($old_facultyId != $new_facultyId) {
 					/*
 						I am taking it upon myself to update the classdoclib_folders
 						becuase the object is to friggin whacky 
@@ -809,41 +785,37 @@ class classes extends AdminService
 				$this->run($db, $u, $lc, $t);
 				return;
 
-			} else
-			{
+			} else {
 				$t['error'] .= '<br>Failed to add class, please check your information and try again';
 			}
 			
 		}
 		$cf = 0;
-		if ($lc->postvars['submit'] == false && $lc->getvars['cf'] > 0 && $classObj->id_courses != $this->getvars['cf'])
-		{	$classObj->id_courses = (int)$lc->getvars['cf'];
+		if ($lc->postvars['submit'] == false && $lc->getvars['cf'] > 0 && $classObj->id_courses != $this->getvars['cf']) {
+			$classObj->id_courses = (int)$lc->getvars['cf'];
 			$cf = (int)$lc->getvars['cf'];
 		}
 		
 		$f->getForm('adminclassinfo', object2array($classObj));
 		$f->modFormValue('submit', 'Update Class');
 		
-		if ($cf > 0)
-		{	// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
+		if ($cf > 0) {
+			// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
 			// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
 			$f->modFormValue('facultyId', 'CHANGEFAMILY'.$cf);
 			$f->modFormValue('id_courses', $cf);
 		}
 		
 		$t['form'] = $f->ToHTML();
-		
 	}
 
 	// MIssing forums for assignments and
 	// possibly classroom forums?  I think that's it.
 	
-	function deleteRun($db,&$u,&$lc,&$t)
-	{
+	function deleteRun($db,&$u,&$lc,&$t) {
 		$classObj = classObj::_getFromDB($lc->getvars['id'], 'id_classes');
 		
-		if (is_object($classObj) && $classObj->id_classes > 0)
-		{
+		if (is_object($classObj) && $classObj->id_classes > 0) { 
 			$id_classes = $classObj->id_classes;
 			
 			$sql[] = 'DELETE FROM class_announcements WHERE id_classes='.$id_classes;
@@ -852,8 +824,7 @@ class classes extends AdminService
 			
 			$sql_string = 'SELECT id_class_assignments FROM class_assignments WHERE id_classes='.$id_classes;
 			$db->query($sql_string);
-			while ($db->next_record())
-			{
+			while ($db->next_record()) {
 				$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->Record['id_class_assignments'];
 				$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->Record['id_class_assignments'];
 				$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->Record['id_class_assignments'];
@@ -869,8 +840,7 @@ class classes extends AdminService
 			
 			$sql_string = 'SELECT id_class_lessons FROM class_lessons WHERE id_classes='.$id_classes;
 			$db->query($sql_string);
-			while ($db->next_record())
-			{
+			while ($db->next_record()) {
 				$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->Record['id_class_lessons'];
 				$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->Record['id_class_lessons'];
 			}
@@ -903,8 +873,7 @@ class classes extends AdminService
 			
 			$sql_string = 'SELECT assessment_id FROM assessment WHERE id_class='.$id_classes;
 			$db->query($sql_string);
-			while ($db->next_record())
-			{
+			while ($db->next_record()) {
 				$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->Record['assessment_id'];
 			}
 			
@@ -916,15 +885,13 @@ class classes extends AdminService
 			$sql_string = 'SELECT pkey FROM classdoclib_Folders WHERE class_id='.$id_classes;
 			$db->query($sql_string);
 			
-			while ($db->next_record())
-			{	
+			while ($db->next_record()) {
 				$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->Record['pkey'];
 			}
 			
 			$sql[] = 'DELETE FROM classdoclib_Folders WHERE class_id='.$id_classes;
 			
-			foreach($sql as $sql_exec)
-			{
+			foreach($sql as $sql_exec) {
 				$db->query($sql_exec);
 				if (mysql_errno()) echo 'Err: '. mysql_error(). '<br>';
 			}
@@ -1005,18 +972,16 @@ $tables = array("class_announcements",
 
 
 */
-		} else
-		{	$t['error'] = '<blockquote><b>Error:</b> Could not find the requested class to remove.</blockquote>';
+		} else {
+			$t['error'] = '<blockquote><b>Error:</b> Could not find the requested class to remove.</blockquote>';
 		}
 		
 		$lc->templateName = 'classes_main';
 		$this->run($db, $u, $lc, $t);
-
 	}
 	
 	
-	function scheduleRun($db,&$u,&$lc,&$t)
-	{
+	function scheduleRun($db,&$u,&$lc,&$t) {
 		$lc->templateName = 'classes_schedule';
 	}
 
