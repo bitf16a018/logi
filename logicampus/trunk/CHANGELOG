@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-12-17 05:08:28 $
+Last Updated:  $Date: 2004-12-20 00:26:10 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,9 @@ SYNTAX:
 
 
 #########################
+12/19/04 7:20 - mgk
+Added registration info to installer - trying to determine usage/installation numbers.  :)  Also, mark didn't mention it, but some more translation work has been done (primarily in chinese) and we've also put in some new sample user data.
+
 12/17/04 - 12:00 - gelali
 Fixed PM system, it is finally working fine.
 
