@@ -80,8 +80,11 @@
             type="VARCHAR"/>
     <column name="weight"
             required="false"
-            size=""
             type="FLOAT"/>
+	   <column
+	      name = "drop_count"
+	      type = "tinyint"
+	      size = "4" />
     <index>
       <index-column name="id_classes"/>
     </index>

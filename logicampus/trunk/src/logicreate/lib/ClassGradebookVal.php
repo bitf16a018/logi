@@ -134,7 +134,6 @@ class ClassGradebookValPeerBase {
 		$st->fields['date_modified'] = 'date_modified';
 
 		$st->key = $this->key;
-
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = ClassGradebookValPeer::row2Obj($db->record);
@@ -234,6 +233,8 @@ class ClassGradebookValPeerBase {
 //You can edit this class, but do not change this next line!
 class ClassGradebookVal extends ClassGradebookValBase {
 
+	var $disqualified = false;
+
 	/*
 	// Given an entry id, I will return an array of ClassGradebookVal objects, ordered
 	// by the students' last names.
@@ -260,6 +261,12 @@ class ClassGradebookVal extends ClassGradebookValBase {
 
 	}
 	*/
+
+
+	function isDisqualified() {
+		return $this->disqualified;
+	}
+
 
 	// given a student username, I will return an array of ClassGradebookVal objects
 	function getValsByStudent($username) {
@@ -398,13 +405,13 @@ http://dl.tccd.edu/index.php/classroom/gradebook/id_classes=".$this->idClasses;
     
 			mail($this->username.'@dl.tccd.edu','Gradebook Value Changed',$msg, "From: ".WEBMASTER_EMAIL);
 */
-			mylog("/tmp/email_".$this->username,$msg);
+			//mylog("/tmp/email_".$this->username,$msg);
 		} else {
-			$msg = "originalScore = ".$this->_originalScore."\n";
-			$msg .= "score = ".$this->score."\n";
-			$msg .= "originalComments = ".$this->_originalComments."\n";
-			$msg .= "comments = ".$this->comments."\n";
-			mylog("/tmp/failed_email_".$this->username,$msg);
+			//$msg = "originalScore = ".$this->_originalScore."\n";
+			//$msg .= "score = ".$this->score."\n";
+			//$msg .= "originalComments = ".$this->_originalComments."\n";
+			//$msg .= "comments = ".$this->comments."\n";
+			//mylog("/tmp/failed_email_".$this->username,$msg);
 		}
 		$this->set('dateModified',time());
 		if ( $this->isNew() ) {

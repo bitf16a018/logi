@@ -78,11 +78,11 @@ class gradesbystudent extends FacultyService {
 
 
 
+		$gradebook->loadCategories();
+		$gradebook->loadVals();
 		$gradebook->getEntries(false);
 		$gradebook->getStudent($lc->getvars['user']); // we only need one if we use a clever SQL statement below
-		$gradebook->getValsForStudents();
-		$gradebook->calcPossiblePointsForStudent($u->username);
-		$gradebook->calculateStudentPointsEarned();
+		$gradebook->setStudentVals();
 		
 		$gradebook->calculateWeightedAverages();
 		$gradebook->calculatePercentScores();
@@ -109,18 +109,38 @@ class gradesbystudent extends FacultyService {
 			$scores[$db->Record['username']] = $db->Record['score'];
 		}
 		foreach ($scores as $username => $score) {
-			if ($u->username == $username) continue;
+			if ($lc->getvars['user'] == $username) continue;
 			if ($score > $usersScore) $t['rank']++;
 			$t['totalRanks']++;
 		}
 
 
+		//loop through all categories and all vals for this one student,
+		// build up all info to pass to template
+		foreach ( $gradebook->categories as $catid => $cat ) {
 
-		$t['categories'] = $gradebook->getAllCategories(
-			$u->activeClassTaught->id_classes );
+			$t['categories'][$catid]['possible'] = 0;
+			$t['categories'][$catid]['earned'] = 0;
+			$t['categories'][$catid]['letter'] = 'N/A';
+			$t['categories'][$catid]['label'] = $cat->label;
 
+			foreach ( $gradebook->students[$lc->getvars['user']]->vals as $valid => $val ) {
+				if ( $gradebook->entries[$valid]->idClassGradebookCategories != $catid )
+				continue;
+				if ( $val->isDisqualified() )
+				continue;
+
+				$t['categories'][$catid]['possible'] += $gradebook->entries[$valid]->totalPoints;
+				$t['categories'][$catid]['earned'] += $val->score;
+			}
+
+			$t['categories'][$catid]['letter'] = $gradebook->getLetterGrade(
+				$t['categories'][$catid]['earned'],
+				$t['categories'][$catid]['possible']);
+	
+		}
 		$t['gradebook'] = $gradebook;
-		$t['username'] = $uname;
+		$t['username'] = $lc->getvars['user'];
 
 		$user = lcUser::getUserByUsername($uname);
 		$t['student'] = $user->profile->values['firstname'].' '.$user->profile->values['lastname'];

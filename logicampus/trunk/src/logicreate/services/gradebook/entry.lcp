@@ -280,6 +280,7 @@ class entry extends FacultyService {
 
 		}
 
+
 		function deleteRun(&$db,&$u,&$lc,&$t) {
 
 			$entry = ClassGradebookEntries::load( array(
@@ -293,16 +294,14 @@ class entry extends FacultyService {
 				return;
 			}
 
-			// delete associated vals
-			$db->query('delete from class_gradebook_val
-				where id_class_gradebook_entries="'.(int)$lc->getvars['id'].'"');
-
 			$u->sessionvars['message'] = $entry->title.' has been deleted.';
+
+			// delete associated vals
 			ClassGradebookEntriesPeer::doDelete($entry, true);
 			$this->presentor = 'redirectPresentation';
 			$t['url'] = MOD_URL;
-
 		}
+
 
 		// displays a form for editing a single student/entry. for use in a pop-up
 		function editSingleRun(&$db,&$u,&$lc,&$t) {
@@ -388,7 +387,7 @@ class entry extends FacultyService {
 				} else {
 
 					// There was a score, but they just removed it.
-					ClassGradebookValPeer::doDelete($val, true);
+					ClassGradebookValPeer::doDelete($val, false);
 					$u->sessionvars['message'] = 'The score record has been removed.';
 				}
 

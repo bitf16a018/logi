@@ -255,7 +255,7 @@ class category extends FacultyService {
 			$cat = ClassGradebookCategories::load($keys);
 
 			if ( $cat->idClassGradebookCategories ) {
-				ClassGradebookCategoriesPeer::doDelete( $cat, true );
+				ClassGradebookCategoriesPeer::doDelete( $cat, false );
 				$t['message'] = 'Category deleted.';
 			} else {
 				$t['error'] = 'Could not load category for deletion. If this problem persists, please contact the help desk.';

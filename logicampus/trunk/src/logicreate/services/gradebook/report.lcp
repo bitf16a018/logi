@@ -27,6 +27,7 @@ class report extends FacultyService {
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
 		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
 		'Control Panel' => 'main/event=controlPanel/'
 	);
 
@@ -45,6 +46,12 @@ class report extends FacultyService {
 			'id_classes="'.$u->activeClassTaught->id_classes.'"'
 		);
 
+		// get sections
+		$c = $u->activeClassTaught->id_classes;
+		$sql = "select sectionNumbers from classes where id_classes=$c";
+		$db->queryOne($sql);
+		$s = explode("\n",$db->Record[0]);
+		$t['sections'] = $s;
 	}
 
 	// Page that Run posts to. calls the chosen report function
@@ -81,15 +88,36 @@ class report extends FacultyService {
 			'id_classes' => $u->activeClassTaught->id_classes,
 		) );
 
+		//pull in all students no matter what
+		// put a W next to non-active students
+		
+		// filterActive needs to be null to get aeverything, not 0
+		#$gradebook->filterActive = 0;
+		$gradebook->filterBySection = $lc->postvars['section'];
+
 		// tell the gradebook object to do a bunch of work
+
+		$gradebook->loadCategories();
 		$gradebook->getEntries();
 		$gradebook->getStudents();
+		$gradebook->loadVals();
+
+
 		if ( count($gradebook->students) == 0 )
 		{
 			$t['table'] = 'There are no students in your class. You must have students to view the gradebook.';
 			return;
 		}
-		$gradebook->getValsForStudents();
+
+
+		//associate vals and students based on a number of criteria
+		// (dropped, due date ...)
+		$gradebook->setStudentVals();
+
+
+		$gradebook->calculateEntryWeights();
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
 
 		// filter out categories that were not requested
 		reset($gradebook->entries);
@@ -97,6 +125,8 @@ class report extends FacultyService {
 			if ( in_array($entry->idClassGradebookCategories, $cats) ) continue;
 			unset($gradebook->entries[$entid]);
 		}
+
+/*
 		foreach ( $gradebook->students as $user => $student ) {
 			foreach ( $student->vals as $entid => $val ) {
 				if ( in_array($gradebook->entries[$val->idClassGradebookEntries]->idClassGradebookCategories,
@@ -104,16 +134,8 @@ class report extends FacultyService {
 				unset($gradebook->students[$user]->vals[$entid]);
 			}
 		}
+*/
 
-		if ($gradebook->calculationType == 1)
-		{
-			// calculate weighetd point totals for each entry
-			$gradebook->calculateWeights();
-		}
-		$gradebook->calcPossiblePoints();
-		$gradebook->calculateStudentPointsEarned();
-		$gradebook->updateEntryWeights();
-		$gradebook->calculateWeightedAverages();
 
 		// set some stuff up
 		// (the +1 is for the totals column at the end)
@@ -144,24 +166,48 @@ class report extends FacultyService {
 		while ( list($username,$stud) = @each($gradebook->students) ) {
 			reset($gradebook->entries);
 			for ( $x=0; $x<$tableCount; $x++ ) {
-				$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname;
+				if ($stud->isWithdrawn() ) {
+					$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname . ' W';
+				} else { 
+					$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname;
+				}
+
 				$counter--;
 				while ( $counter != 0 && list($entid,$entry) = @each($gradebook->entries) ) {
-					$tables[$x][$curRow][]
-						= !isset($stud->vals[$entid]->score) ? '?' : (int)$stud->vals[$entid]->score;
+					unset($text);
+					if ( strtolower(get_class($stud->vals[$entid])) != 'classgradebookval') {
+						$tables[$x][$curRow][] = '?';
+						$counter--;
+						continue;
+					}
+
+					$text = !isset($stud->vals[$entid]->score) ? '?' : (int)$stud->vals[$entid]->score;
+					if ( $stud->vals[$entid]->isDisqualified() ) {
+						$text = 'd '.$text;
+					}
+
+					$tables[$x][$curRow][] = $text;
 					$counter--;
 				}
 				$counter = $columnsPerPage;
 			}
 
-			// push on the total in the total column
-			if ( $gradebook->calculationType == 1 ) {
-				$tot = $stud->weightedAverage.'% / '
-					.$gradebook->getLetterGrade($stud->weightedAverage);
+
+
+
+			if ( $stud->isWithdrawn() ) {
+				$tot = 'Withdrawn';
 			} else {
-				$tot = $stud->totalPointsEarned.' / '
-					.sprintf( "%0.2f", $stud->totalPointsEarned / $gradebook->possiblePoints * 100).'% / '
-					.$gradebook->getLetterGrade($stud->totalPointsEarned / $gradebook->possiblePoints * 100);
+
+				// push on the total in the total column
+				if ( $gradebook->calculationType == 1 ) {
+					$tot = $stud->weightedAverage.'% / '
+						.$gradebook->getLetterGrade($stud->weightedAverage, $stud->possiblePoints);
+				} else {
+					$tot = $stud->totalPointsEarned.' / '
+						.sprintf( "%0.2f", $stud->totalPointsEarned / $stud->possiblePoints * 100).'% / '
+						.$gradebook->getLetterGrade($stud->totalPointsEarned, $stud->possiblePoints);
+				}
 			}
 
 			if ( $counter == 0 ) {       $tables[$x][$curRow][] = $tot; }
@@ -223,8 +269,16 @@ class report extends FacultyService {
 				$t['table'] .= "</tr>\n";
 			}
 			$t['table'] .= "</table>\n";
-			$t['table'] .= "<p style=\"font-size:8pt;\"><i>This document was generated on "
-				.date('M j, Y \a\t g:i A', time()).".</i></p>";
+if (!is_array($tables[($pagenum+1)])) {  // done
+$t['table'] .= "<br/>";
+$t['table'] .= "<p style='font-size:8pt;'>Signature:<u>";for ($x=0;$x<100;++$x) { $t['table'] .="&nbsp;";}
+$t['table'] .= "<br/>";
+$t['table'] .= "<br/>";
+$t['table'] .= "<p style='font-size:8pt;'>Date:   <u>";for ($x=0;$x<100;++$x) { $t['table'] .="&nbsp;";}
+$t['table'] .="</u></p>";
+$t['table'] .= "<p style='font-size:8pt;'><i>This document was generated on ".date('M j, Y \a\t g:i A', time())."</i></p>";
+
+}
 			$t['table'] .= "</div>\n";
 		}
 
@@ -242,8 +296,10 @@ class report extends FacultyService {
 			'id_classes' => $u->activeClassTaught->id_classes,
 		) );
 
+		$gradebook->filterBySection = $lc->postvars['section'];
+
 		// tell the gradebook object to do a bunch of work
-		$gradebook->getAllCategories();
+		$gradebook->loadCategories();
 		$gradebook->getEntries();
 
 		// filter out categories that were not requested
@@ -253,13 +309,6 @@ class report extends FacultyService {
 			unset($gradebook->entries[$entid]);
 		}
 
-		if ($gradebook->calculationType == 1)
-		{
-			// calculate weighetd point totals for each entry
-			$gradebook->calculateWeights();
-		}
-		$gradebook->calcPossiblePoints();
-		$gradebook->updateEntryWeights();
 		$gradebook->calculateWeightedAverages();
 
 		$t['gradebook'] = $gradebook;

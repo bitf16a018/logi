@@ -4,16 +4,20 @@ class ClassGradebookCategoriesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.3';	//PBDO version number
+	var $_entityVersion = '0.0';	//Source version number
 	var $idClassGradebookCategories;
 	var $idClasses;
 	var $label;
 	var $weight;
+	var $dropCount;
 
 	var $__attributes = array(
 	'idClassGradebookCategories'=>'int',
 	'idClasses'=>'Classes',
 	'label'=>'varchar',
-	'weight'=>'float');
+	'weight'=>'float',
+	'dropCount'=>'tinyint');
 
 	function getClassGradebookEntries() {
 		$array = ClassGradebookEntriesPeer::doSelect('id_class_gradebook_categories = \''.$this->getPrimaryKey().'\'');
@@ -58,6 +62,11 @@ class ClassGradebookCategoriesBase {
 		return $array[0];
 	}
 
+	function delete($deep=false) {
+		ClassGradebookCategoriesPeer::doDelete($this,$deep);
+	}
+
+
 	function isNew() {
 		return $this->_new;
 	}
@@ -87,6 +96,8 @@ class ClassGradebookCategoriesBase {
 			$this->label = $array['label'];
 		if ($array['weight'])
 			$this->weight = $array['weight'];
+		if ($array['dropCount'])
+			$this->dropCount = $array['dropCount'];
 
 		$this->_modified = true;
 	}
@@ -112,9 +123,11 @@ class ClassGradebookCategoriesPeerBase {
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['label'] = 'label';
 		$st->fields['weight'] = 'weight';
+		$st->fields['drop_count'] = 'drop_count';
 
 		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = ClassGradebookCategoriesPeer::row2Obj($db->record);
@@ -130,6 +143,7 @@ class ClassGradebookCategoriesPeerBase {
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['label'] = $this->label;
 		$st->fields['weight'] = $this->weight;
+		$st->fields['drop_count'] = $this->dropCount;
 
 		$st->key = 'id_class_gradebook_categories';
 		$db->executeQuery($st);
@@ -149,6 +163,7 @@ class ClassGradebookCategoriesPeerBase {
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['label'] = $obj->label;
 		$st->fields['weight'] = $obj->weight;
+		$st->fields['drop_count'] = $obj->dropCount;
 
 		$st->key = 'id_class_gradebook_categories';
 		$db->executeQuery($st);
@@ -167,14 +182,14 @@ class ClassGradebookCategoriesPeerBase {
 
 
 
-	function doDelete(&$obj,$shallow=false) {
+	function doDelete(&$obj,$deep=false) {
 		//use this tableName
 		$db = lcDB::getHandle();
 		$st = new LC_DeleteStatement("class_gradebook_categories","id_class_gradebook_categories = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 			$st = new LC_DeleteStatement("class_gradebook_entries","id_class_gradebook_categories = '".$obj->getPrimaryKey()."'");
 			$db->executeQuery($st);
@@ -193,6 +208,7 @@ class ClassGradebookCategoriesPeerBase {
 		$x->idClasses = $row['id_classes'];
 		$x->label = $row['label'];
 		$x->weight = $row['weight'];
+		$x->dropCount = $row['drop_count'];
 
 		$x->_new = false;
 		return $x;

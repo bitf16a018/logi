@@ -20,6 +20,7 @@ CREATE TABLE class_gradebook_categories (
   id_classes int(10) unsigned NOT NULL default '0',
   label varchar(255) NOT NULL default '',
   weight float default NULL,
+  drop_count tinyint(4) default NULL,
   PRIMARY KEY  (id_class_gradebook_categories),
   KEY id_classes (id_classes)
 ) TYPE=MyISAM;
