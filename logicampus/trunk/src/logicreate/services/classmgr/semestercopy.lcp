@@ -404,6 +404,7 @@ class semestercopy extends FacultyService  {
 			$pbdo->_new = true;
 			$pbdo->idClassLessonContent = '';
 			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->set('idClassLessons', $lessons_old_to_new[$pbdo->idClassLessons]);
 			$pbdo->save();
 		}
 
