@@ -8,6 +8,11 @@ SYNTAX:
 
 #########################
 
+12/09/03 2:00 PM - mark
+gradebook - Added a feature to the gradebook where you can drop
+a number of low grades from any gradebook category.  Patched some
+security holes.
+
 12/01/03 12:00 PM - zorka
 adminstration/classes - Removed text on the 'assignments folder' that says this
 is where to find assignments that have been uploaded by students.
