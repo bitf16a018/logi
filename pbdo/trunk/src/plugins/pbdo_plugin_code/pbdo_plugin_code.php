@@ -235,7 +235,7 @@ class ParsedClass {
 	}
 
 
-	function  printPea() {
+	function  printAttribArray() {
 		$ret .="\tvar \$__attributes = array(\n";
 		reset ($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -330,8 +330,8 @@ class '.$this->codeName.'Base {
 	var $_modified;		//set() called
 	var $_version = \''.PBDO_VERSION.'\';	//PBDO version number
 	var $_entityVersion = \''.$this->sourceVersion.'\';	//Source version number
-'. $this->printAttribs().'
-'.$this->printPea().'
+'.$this->printAttribs().'
+'.$this->printAttribArray().'
 '.$this->printRelations().'
 
 	function getPrimaryKey() {
@@ -385,58 +385,6 @@ class '.$this->codeName.'Base {
 		$this->_modified = true;
 		$this->{$key} = $val;
 
-	}
-
-	/**
-	 * set all properties of an object that aren\'t
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
-	 */
-	function setArray($array) {
-';
-		@reset($this->attributes);
-		while ( list ($k,$v) = @each($this->attributes) ) {
-			$skip = false;
-			//don't print pkey
-			if ($k == $this->getPkey() ) {
-				$skip = true;
-			}
-
-			//don't one to manys
-			reset($this->relations);
-			while ( list ($kk,$vv) = each($this->relations) ) {
-				if ($vv == $k) { 
-					$skip = true;
-				}
-			}
-
-			//don't one to ones
-			reset($this->localRelations);
-			while ( list ($kk,$vv) = each($this->localRelations) ) {
-				if ($kk == $k) { 
-					$skip = true;
-				}
-			}
-
-			if (!$skip) {
-			$ret .="\t\t";
-			//this is the best way of checking for an empty value
-			// if (empty($s) && strlen($s) == 0)
-			$ret .= 'if ( empty($array[\''.$v->codeName.'\']) && strlen($array[\''.$v->codeName.'\']) == 0 )';
-			$ret .="\n";
-			$ret .="\t\t\t";
-			$ret .= '$this->'.$v->codeName.' = $array[\''.$v->codeName.'\'];';
-			$ret .="\n";
-			}
-		}
-		$ret .='
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
 	}
 
 }
