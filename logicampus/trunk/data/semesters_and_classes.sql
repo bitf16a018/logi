@@ -5,6 +5,7 @@ INSERT INTO semesters (id_semesters, semesterId, semesterTerm, dateCensus, dateF
 
 INSERT INTO semesters_course_info (id_semesters, campusClosings, lateGuidelines, noChildren, withdrawalPolicy, gradeVerify, examInfo, gradeChallenge, leaseKit, campusViewing, testingLocations, itvGrades, cable, textbooks, helpdesk, syllabusDisclaimer, specialInfo, testHours, accessClassSite, emailGuidelines, studentConduct) VALUES (1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
+INSERT INTO semesters_course_info (id_semesters, campusClosings, lateGuidelines, noChildren, withdrawalPolicy, gradeVerify, examInfo, gradeChallenge, leaseKit, campusViewing, testingLocations, itvGrades, cable, textbooks, helpdesk, syllabusDisclaimer, specialInfo, testHours, accessClassSite, emailGuidelines, studentConduct) VALUES (2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO lcEvents (pkey, calendarID, calendarType, username, title, description, location, startdate, enddate, groups, notgroups, lastmodified, repeatType, repeatCount, repeatData, repeatExclude, repeatUntil, id_item, id_item_sub, id_classes, f_allday, f_showwhenactive) VALUES (1, '', '', 'admin', '<font color="MediumBlue">Thanksgiving Day</font>', 'Happy Thanks Giving!!!', '', 1069977600, 1069977600, '|public|', '', 20031118155605, 0, 0, '', '', -1, 0, 0, 0, 1, 0);
 
@@ -28,6 +29,8 @@ INSERT INTO courses (id_courses, courseFamily, courseNumber, courseName, courseD
 
 INSERT INTO classes VALUES (1, 6, 1, '1111\n1112', 'Internet', 'teacher', 'BUSG', 1315, 'BUSG1315', '', 0, 0);
 
+INSERT INTO classes VALUES (2, 6, 2, '1111\n1112', 'Internet', 'teacher', 'BUSG', 1315, 'BUSG1315', '', 0, 0);
+
 
 INSERT INTO class_gradebook VALUES (1, 1, '0', '0', '0', '0', '0', 0, '', 0, 0);
 
@@ -35,6 +38,11 @@ INSERT INTO class_gradebook VALUES (1, 1, '0', '0', '0', '0', '0', 0, '', 0, 0);
 INSERT INTO class_sections VALUES (1111, 1);
 
 INSERT INTO class_sections VALUES (1112, 1);
+
+INSERT INTO class_sections VALUES (1111, 2);
+
+INSERT INTO class_sections VALUES (1112, 2);
+
 
 
 
