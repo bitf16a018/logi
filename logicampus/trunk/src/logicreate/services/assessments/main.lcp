@@ -23,13 +23,22 @@ class assessments extends FacultyService {
 		'List Assessments' => 'main',
 		'Add Assessment' => 'main/event=add'
 		);
-	var $navlinks = array(
-		'Calendar' => '%classmgr/cal',
-		'Grade book' => '%gradebook'
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Announcements'=>'%classmgr/announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Content' => '%classmgr/lessonContent/',
+		'FAQ' => '%classmgr/faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => '%classmgr/lessonManager/',
+		'Objectives' => '%classmgr/lessonObjectives/',
+		'Webliography' => '%classmgr/lessonWebliography/'
 	);
-
 	var $inactivelinks = array (
-		'Add Assessment' => 'main/event=add'
+		'Add Assessment' => 'main/event=add',
+		'Assessment Manager'
 	);
 
 
@@ -49,8 +58,38 @@ class assessments extends FacultyService {
 
 		$dg->postpendColumn( '<? if (time() >= $date_available && time() <= $date_unavailable) { echo "Yes";} else if ( $date_unavailable == 0 ) { echo "No Date Set"; } else if (time() >= $date_unavailable) { echo "Done"; }  else { echo "No";} ?>', 'Available Now?' );
 
-		$dg->postpendColumn( '<a href="'.modurl('main/event=view/id=<?=$assessment_id;?>').'">Edit</a> &bull; <a href="'.modurl('main/event=setAvailability/id=<?=$assessment_id;?>').'">Set Availability</a> &bull; <a href="'.modurl('main/event=remove/id=<?=$assessment_id?>').'">Remove</a> &bull; <a href="'.modurl('grade/id=<?=$assessment_id?>').'">Grade</a>', 'Actions' );
+		$dg->postpendColumn( '
+			<a href="'.modurl('grade/id=<?=$assessment_id?>').'">Students</a>'
+			, 'Grade');
+
+		$dg->setCellWidth('Grade',80);
+		$dg->setCellAlign('Grade','center');
+
+		$dg->postpendColumn( '
+			<a href="'.modurl('main/event=view/id=<?=$assessment_id;?>').'">Change</a>'
+			 , 'Questions' );
+
+		$dg->setCellWidth('Questions',80);
+		$dg->setCellAlign('Questions','center');
+
+		$dg->postpendColumn( '
+			<a href="'.modurl('edit/event=edit/id=<?=$assessment_id;?>').'">Edit</a> 
+			&bull;
+			<a href="'.modurl('main/event=setAvailability/id=<?=$assessment_id;?>').'">Availability</a> 
+			&bull; 
+			<a href="'.modurl('main/event=remove/id=<?=$assessment_id?>').'">Remove</a>', 
+			'Actions' );
+		$dg->setCellWidth('Actions',200);
+		$dg->setCellAlign('Actions','center');
+
 		$dg->overrideColumn('<? if (!$num_retries) { echo "None";} else { echo $num_retries; }?>', 'num_retries');
+		$dg->overrideColumn('<? echo $display_name ."<br/><br/>
+		<a href=\"".appurl(\'assessments/backup/id=\'.$assessment_id)."\">backup...</a>"; ?>', 'display_name');
+
+
+		$dg->setCellAlign('possible_points','center');
+		$dg->setCellAlign('num_retries','center');
+
 		$dg->sortColumns = 	array('display_name');
 	
 		/*
@@ -179,6 +218,8 @@ class assessments extends FacultyService {
 		$this->viewRun($db, $u, $lc, $t);
 		return;
 	}
+
+
 
 	function viewRun($db,&$u,&$lc,&$t) {
 
@@ -313,6 +354,8 @@ $t['assessment']->save();
 		
 	}
 
+
+
 	function setAvailabilityRun($db,&$u,&$lc,&$t) {
 
 		# Check if their are questions, if no questions, error
@@ -324,7 +367,6 @@ $t['assessment']->save();
 			$lc->templateName = 'main_error';
 			return;
 		}
-
 		$this->sectionTitle = 'Set Assessment Availability';
 		$lc->templateName = 'main_setAvailability';
 		if (!$lc->postvars)
@@ -337,6 +379,8 @@ $t['assessment']->save();
 		$t['form'] = $f->ToHTML();
 	
 	}
+
+
 
 	function processAvailabilityRun($db,&$u,&$lc,&$t) {
 	
@@ -463,15 +507,19 @@ $t['assessment']->save();
 			$t['dropDownData'][$i] = $i;
 		}
 
-		reset ($t['questions']);
-
-		# See if a student has started taking the test
-		# Pass this to the template to disable certain features
+		/**
+		 *	Added 11.20.03 RS
+		 *		Needed the block below because this logic needs to be there
+		 */
 		$t['canAddQuestions'] = true;
 		if ($t['assessment']->isTaken() )
 		{
 			$t['canAddQuestions'] = false;
 		}
+
+
+		reset ($t['questions']);
+
 
 		$lc->templateName = 'main_view';
 	}
@@ -499,6 +547,7 @@ $t['assessment']->save();
 				$updown = ($k > $o)? true:false;
 				$question = $questions[$k];
 				$key = $k;
+				break; // we no longer need to sort through the rest, it will just cause problems.
 			}
 		}
 		//don't allow move onto self
