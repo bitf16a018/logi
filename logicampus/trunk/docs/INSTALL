@@ -2,6 +2,10 @@
  *  LOGICAMPUS INSTALL PROCEDURE  *
  **********************************
 
+Overview:
+1.  Check your server requirements
+2.  Follow web-based install procedure below
+3.  Set certain file permissions as mentioned below
 
  **********************************
  *       ABOUT LOGICAMPUS         *
@@ -22,15 +26,15 @@ built on top of the php-based application server called LogiCreate
 The following requirements are needed to run LogiCampus:
 	* Apache web server  1.3 or higher (see http://www.logicreate.com 
 	  if you are using Apache 2.0)
-	* PHP 4.3.3 or higher (PHP 5 not tested)
+	* PHP 4.3.1 or higher (PHP 5 not tested)
 	* MySQL Database 3.23 or higher, 4.0 preferred
-	* Server - Linux is recommended to use setup files
-	* PHP must be compiled with the following extensions - gd 2.0, domxml, 
-	* Tidy (tidy.sourceforget.net)
+	* Server - Linux is recommended to use setup scripts
+	* PHP must be compiled with the following extensions - gd 2.0  
+	* Tidy (tidy.sourceforge.net) - needed for importing of content
 
- **********************************
- *  LOGICAMPUS INSTALL PROCEDURE  *
- **********************************
+ ********************************************
+ *  LOGICAMPUS WEB-BASED INSTALL PROCEDURE  *
+ ********************************************
 
 Copy the .tar.gz file you downloaded to the directory above the web server's 
 "document root" directory. For example, if your document root of your web 
@@ -41,7 +45,9 @@ Next, run the commands:
 
 tar -xvfz logicampus-XX.tar.gz  (where XX is your version number)
 
-The contents of the file are two directories - logicreate/ and public_html/. 
+The contents of the file are two directories - logicreate/ and public_html/ 
+and other help files. 
+
 The contents of the 'public_html' folder will need to be copied to the 
 installation's document root.  You can do this by modifying your document 
 root to point to 'public_html' or copy all of the files in 'public_html' 
@@ -53,6 +59,32 @@ server install:
 			logicreate/
 			public_html/
 			logicreate.tar.gz
+
+For install purposes only so the web-based installer can write to the
+file system set the following on the public_html directory:
+
+chmod 777 public_html
+
+DO NOT LEAVE THE PERMISSIONS THIS WAY
+THIS IS JUST FOR THE INSTALL
+
+Next, change the permissions on public_html/defines.php so the web
+server can write to this file.  Note:  the defines.php file must be a
+zero byte file for the installer to run.  
+
+chmod 777 public_html/defines.php
+
+Next, run the web-based installer.  Example: 
+
+http://yourdomain.com/public_html/install.php
+
+or
+
+http://yourdomain.com/install.php
+
+Adjust the above url based on your document root of your web server
+and where you installed LogiCampus.  After the install runs you will
+be given further instructions on how to setup your server permissions. 
 
  *************************************
  *       RUN PERMISSIONS SCRIPT 	 *
