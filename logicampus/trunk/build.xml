@@ -8,6 +8,7 @@
   <property name="src" location="src/public_html/" />
   <property name="lcsrc" location="src/logicreate/" />
   <property name="docs" location="docs" />
+  <property name="data" location="data" />
   <property name="build" location="temp" />
   <property name="dist"  location="dist" />
   <property name="scripts" location="scripts" />
@@ -68,6 +69,13 @@
 	<copy todir="${build}">
 	  <fileset dir="${docs}">
 	  	<include name="INSTALL" />
+	  </fileset>
+	</copy>
+	<!-- readme and license -->
+	<copy todir="${build}">
+		<fileset dir="./">
+			<include name="README" />
+			<include name="LICENSE" />
 	  </fileset>
 	</copy>
 	<copy todir="${build}/public_html/">
@@ -144,12 +152,12 @@
 	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite='true'/>
 
 
+	<!-- move the data files to where the installer can get them -->
+	<antcall target="copy_data"/>
 
 
   	<!-- apply LCPL to files -->
-	<echo message="Applying LCPL to source files ..." />
-	<exec executable="${build}/../build/applylicense.sh" dir="${build}/../build" failonerror="true" />
-
+	<antcall target="apply_license"/>
 
 	<!-- After license is applied, copy defines.php over -->
 	<copy todir="${build}/public_html/" overwrite='true'>
@@ -170,6 +178,25 @@
 
 
 <!--DEMO END-->
+
+
+	<target name="copy_data"
+		description="move data/*sql to src/logicreate/data/ for the install.php script" >
+
+		<mkdir dir="${build}/src/logicreate/data"/>
+		<copy todir="${build}/src/logicreate/data" overwrite='true'>
+			<fileset dir="${data}">
+				<include name="*.sql"/>
+			</fileset>
+		</copy> 
+	</target>
+
+	<target name="apply_license"
+		description="uses a combination of bash and perl in the build/ dir to apply a common license to all code files" 
+		unless="forgetlicense">
+		<echo message="Applying LCPL to source files ..." />
+		<exec executable="${build}/../build/applylicense.sh" dir="${build}/../build" failonerror="true" />
+	</target>
 
 
 
