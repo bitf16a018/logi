@@ -20,11 +20,11 @@
 	/* 
 		Students Dump
 		username, passwd, ssn, section number
-		"william.k","k1393","xxxxxxxxxx","26536"
-		"william.p","p8874","xxxxxxxxxx","16585"
-		"william.y","y4926","xxxxxxxxxx","36634"
-		"william.y","y4926","xxxxxxxxxx","36678"
-		"w.y","y2910","xxxxxxxxxx","26670"
+		"william.k","k1393","xxxxxxxx","26536"
+		"william.p","p8874","xxxxxxxx","16585"
+		"william.y","y4926","xxxxxxxx","36634"
+		"william.y","y4926","xxxxxxxx","36678"
+		"wing.y","y2910","xxxxxxxx","26670"
 	*/	
 
 
