@@ -93,11 +93,11 @@
 
 
 	<message id ="Classroom Portal Page" domain="system" status="">
-		Classroom Portal Page
+		教室
 	</message>
 	<!--Classroom Portal Page-->
 	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
-	教室
+
 
 	<message id ="Thanks!" domain="system" status="">
 		多谢!
@@ -112,7 +112,7 @@
 	</message>
 	<!--You have logged in to our site successfully.-->
 	<usage id ="You have logged in to our site successfully." file="../src/logicreate/content/loginthanks.html" line="2"/>
-	
+
 
 	<message id ="You have registered successfully with our site." domain="system" status="">
 		您已经注册成功！
@@ -132,7 +132,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		教材 和 课程
 	</message>
-	<!--Content &amp;amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -502,6 +502,13 @@
 	</message>
 	<!--File Resource Manager-->
 	<usage id ="File Resource Manager" file="../src/logicreate/lib/pellet.php" line="528"/>
+
+
+	<message id ="You can not change this unless you uncheck [Has no due date]" domain="system" status="">
+		You can not change this unless you uncheck [Has no due date]
+	</message>
+	<!--You can not change this unless you uncheck [Has no due date]-->
+	<usage id ="You can not change this unless you uncheck [Has no due date]" file="../src/logicreate/services/classmgr/templates/assignmentManage_editAssignment.html" line="12"/>
 
 </language>
 

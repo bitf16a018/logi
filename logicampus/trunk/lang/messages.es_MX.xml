@@ -134,7 +134,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Contenido &amp; Links de la lección
 	</message>
-	<!--Content &amp;amp;amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -504,6 +504,13 @@
 	</message>
 	<!--File Resource Manager-->
 	<usage id ="File Resource Manager" file="../src/logicreate/lib/pellet.php" line="528"/>
+
+
+	<message id ="You can not change this unless you uncheck [Has no due date]" domain="system" status="">
+		You can not change this unless you uncheck [Has no due date]
+	</message>
+	<!--You can not change this unless you uncheck [Has no due date]-->
+	<usage id ="You can not change this unless you uncheck [Has no due date]" file="../src/logicreate/services/classmgr/templates/assignmentManage_editAssignment.html" line="12"/>
 
 </language>
 
