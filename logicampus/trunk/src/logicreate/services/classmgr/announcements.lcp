@@ -185,16 +185,5 @@ class announcements extends FacultyService
 		
 		$this->run($db, $u, $lc, $t);
 	}
-	
-
-	/**
-	 * translate the navlinks
-	 */
-	function buildNavLinks() {
-		$this->navLinks = array(
-			lct('Classroom Manager') => 'display/',
-			lct('Announcements') => 'announcements/',
-		);
-	}
 }
 ?>
