@@ -20,9 +20,9 @@ class PBDO_InternalModel {
 class PBDO_ParsedDataModel extends PBDO_InternalModel {
 	public $displayName = '';
 	public $entities = array();
-	private $version;
+	private $projectVersion;
 	private $currentId = 0;
-	public $projectName = '';
+	public $projectName = 'PBDO-Unnamed Project';
 
 	function PBDO_ParsedDataModel() {
 	}
@@ -34,6 +34,11 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 	}
 
 
+	function getProjectName() {
+		return $this->projectName;
+	}
+
+
 	function addEntity($e) {
 		++$this->currentId;
 		$e->setInternalId($this->currentId);
@@ -41,6 +46,15 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 		$this->entities[$this->currentId] = $e;
 	}
 
+
+	function setVersion($v) {
+		$this->projectVersion = $v;
+	}
+
+
+	function getVersion() {
+		return $this->projectVersion;
+	}
 
 }
 

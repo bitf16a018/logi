@@ -34,15 +34,10 @@ function extractNodes($node,&$struct) {
 
 static $loop = 0;
 
-if ($loop > 2004 ) {print_r($struct); exit();}
+if ($loop > 2004 ) {print_r($struct); echo "Exceeded internal memory limit in compiler.php\n"; exit();}
 
 	if ( strtolower(get_class($node)) != 'domelement'  ) return;
-	/*
-	$attr = $node->attributes;
-	while ( list (,$v)  = @each($attr) ){
-		$node->attributes[$v->name] = $v;
-	}
-	*/
+
 	$struct[$loop] = PBDO_NodeFactory::wrapNode($node);
 $loop++;
 
@@ -57,7 +52,7 @@ $loop++;
 
 class PBDO_Compiler {
 	public $version 	= 1.3;
-	public $projectName	= 'PBDO-Project';
+
 
 	///deprecated
 	public $classes 		= array();
@@ -66,9 +61,6 @@ class PBDO_Compiler {
 	public $database;
 	///deprecated
 
-	public $dataModel;
-
-	public $workingTable;
 	public $workingIndex;
 	public $workingColumn;
 	public $workingEntity;
@@ -92,28 +84,6 @@ class PBDO_Compiler {
 		return PBDO_Compiler::$model;
 	}
 
-	/**
-	 * Ctor
-	 */
-	function PBDO_Compiler() {
-		$this->dataModel = new PBDO_ParsedDataModel();
-		$this->projectName = $projectName;
-		PBDO_Compiler::$model =& $this->dataModel;
-
-		//if ( function_exists('domxml_open_file') ){
-		//	$this->hasPDOM = true;
-		//}
-	}
-	
-	function setProjectName($pn) {
-		PBDO_Compiler::$model->setProjectName($pn);
-	}
-	
-
-
-	function getProjectName() {
-		return PBDO_Compiler::$model->projectName;
-	}
 
 
 	/**
@@ -125,9 +95,9 @@ class PBDO_Compiler {
 
 
 	/**
-	 * Do the actual compilation
+	 * Parse the XML nodes into Node Wrappers (PBDO concept)
 	 */
-	function compile() {
+	function parse() {
 
 		list ($name,$ext) = explode(".",$this->filename);
 		$name = ucfirst($name);
@@ -150,17 +120,37 @@ class PBDO_Compiler {
 			$x[(int)$count] = $v;
 			++$count;
 		}
-		$staticNodes = $x;
-		$projectNode = $staticNodes[0];
 
-		$this->setProjectName($projectNode->xmlnode->getAttribute('name'));
+		return $x;
+	}
 
-		print "*****************".str_repeat('*',strlen($this->projectName))."**\n";
-		print "* Project Name = $this->projectName *\n";
-		print "*****************".str_repeat('*',strlen($this->projectName))."**\n";
+
+	/**
+	 * Run a visitor pattern on the PBDO Node Wrappers
+	 */
+	function compile() {
+	
+		$staticNodes = $this->parse();
+		foreach($staticNodes as $k=>$v) { 
+			$node = $staticNodes[$k];
+			$node->accept($this);
+		}
+	
+		//done parsing and compiling
 
 		return $staticNodes;
 	}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -172,19 +162,15 @@ class PBDO_Compiler {
 		//php stuff
 		unset($this->workingEntity);
 		unset($this->workingForm);
-		unset($this->workingTable);
+//unset($this->workingTable);
 
 		//php stuff
 		if ( strstr($table->xmlnode->getAttribute('generate'),'code') ||
 		     strstr($table->xmlnode->getAttribute('generate'), 'all') ) {
 			$this->workingEntity = PBDO_ParsedEntity::createFromXMLObj($table->xmlnode);
-			$this->workingEntity->setVersion($this->database->version);
-
-//$this->workingClass = ParsedClass::createFromXMLObj($table->xmlnode);
-//$this->workingClass->setVersion($this->database->version);
-			$this->dataModel->addEntity($this->workingEntity);
-//			$this->classes[$this->workingClass->tableName] =& $this->workingClass;
-			print "Found one table (".$this->workingEntity->displayName.")...\n";
+			$this->workingEntity->setVersion(PBDO_Compiler::$model->getVersion());
+			PBDO_Compiler::$model->addEntity($this->workingEntity);
+			//print "Found one table (".$this->workingEntity->displayName.")...\n";
 		}
 
 
@@ -209,15 +195,11 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 		//php stuff
 		if ($this->workingEntity) {
 			$att = PBDO_ParsedAttribute::createFromXMLObj($col->xmlnode);
-//$this->workingClass->addAttribute($att);
 			$this->workingEntity->addAttribute($att);
-			if ($col->xmlnode->getAttribute('primaryKey') == 'true') {
-//				$this->workingEntity->setOID($col->xmlnode->getAttribute('name'));
-//				$this->workingClass->setPkey($col->xmlnode->getAttribute('name'));
-			}
 		}
 
 		//sql stuff
+/* DEPRECATED
 		if ($this->workingTable) {
 			unset($this->workingColumn);
 			unset($this->workingIndex);
@@ -228,11 +210,13 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 						$this->workingColumn);
 			$this->workingTable->addColumn($this->workingColumn);
 			$this->workingTable->addIndex($this->workingIndex);
+		
 		}
-
+		*/
 
 		//form stuff
 
+		/* TODO: NEED TO MAKE PLUGIN FOR THIS
 		if ($this->hasPDOM) {
 			if ($this->workingForm) {
 				if ($col->xmlnode->attributes['editable']->value == "true" ) {
@@ -248,6 +232,7 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 				}
 			}
 		}
+		*/
 	}
 
 
@@ -284,8 +269,16 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 
 
 	function visitProjectNode(&$p) {
+	
+		$dataModel = new PBDO_ParsedDataModel();
+		$dataModel->projectName = $p->xmlnode->getAttribute('name');
+		$dataModel->setVersion( $p->xmlnode->getAttribute('version') );
+
+		PBDO_Compiler::$model =& $dataModel;
+	/* TODO: fix this
 		$this->database = PBDO_ParsedDatabase::parsedDatabaseFactory($this->dbtype,$this->projectName);
 		$this->database->setVersion($p->xmlnode->getAttribute('version'));
+		*/
 	}
 
 
@@ -332,8 +325,6 @@ class PBDO_NodeFactory {
 				$v = new PBDO_KeyNode($n);
 				break;
 			case 'project':
-				$v = new PBDO_ProjectNode($n);
-				break;
 			case 'database':
 				$v = new PBDO_ProjectNode($n);
 				break;
@@ -372,7 +363,6 @@ class PBDO_EntityNode extends PBDO_NodeBase {
 
 	function PBDO_EntityNode($n) {
 		$this->PBDO_NodeBase($n);
-//		print get_class($this);exit();
 		//set the default generate tag to 'all'
 		$attrs =& $this->xmlnode->attributes->getNamedItem('generate');
 		if ( ! strlen($attrs->nodeValue) ) { 
