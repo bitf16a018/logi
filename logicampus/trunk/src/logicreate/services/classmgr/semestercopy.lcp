@@ -252,7 +252,7 @@ class semestercopy extends FacultyService
 
 		//USE PBDO
 		include_once(LIB_PATH.'PBDO/ClassAssignments.php');
-		include_once(LIB_PATH.'PBDO/ClassAssignmentsLink.php');
+		#include_once(LIB_PATH.'PBDO/ClassAssignmentsLink.php');
 		include_once(LIB_PATH.'PBDO/ClassLessonContent.php');
 		include_once(LIB_PATH.'PBDO/ClassLessons.php');
 		include_once(LIB_PATH.'PBDO/ClassLinks.php');
@@ -282,8 +282,9 @@ class semestercopy extends FacultyService
 		//class lessons
 		$lessons_old_to_new = array();
 		$db->query("DELETE FROM class_lessons WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassLessons::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassLessonsPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$oldid = $pbdo->idClassLessons;
 			$lessons_old_to_new[$oldid] = 0;
 			$pbdo->_new = true;
@@ -298,8 +299,9 @@ class semestercopy extends FacultyService
 		//class assignments
 		$assignments_old_to_new = array();
 		$db->query("DELETE FROM class_assignments WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassAssignments::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassAssignmentsPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$oldid = $pbdo->idClassAssignments;
 			$assignments_old_to_new[$oldid] = 0;
 			$pbdo->_new = true;
@@ -331,8 +333,9 @@ class semestercopy extends FacultyService
 		//class links
 		$links_old_to_new = array();
 		$db->query("DELETE FROM class_links WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassLinks::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassLinksPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$oldid = $pbdo->idClassLinks;
 			$links_old_to_new[$oldid] = 0;
 			$pbdo->_new = true;
@@ -364,8 +367,9 @@ class semestercopy extends FacultyService
 		//class objectives
 		$objectives_old_to_new = array();
 		$db->query("DELETE FROM class_objectives WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassObjectives::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassObjectivesPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$oldid = $pbdo->idClassObjectives;
 			$links_old_to_new[$oldid] = 0;
 			$pbdo->_new = true;
@@ -375,10 +379,11 @@ class semestercopy extends FacultyService
 			$objectives_old_to_new[$oldid] = $pbdo->getPrimaryKey();
 		}
 
+
 		//class lesson links (many to many table)
 		@reset($lessons_old_to_new);
 		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
-			$db->query("SELECT * FROM class_lesson_objectives WHERE id_class_lessons = ".$oldid);
+			$db->query("SELECT * FROM class_lesson_objectives WHERE id_class_lesson = ".$oldid);
 			while ($db->nextRecord()) {
 				$new_objective = $objectives_old_to_new[$db->record['id_class_links']];
 				//did this old lesson have a link?
@@ -399,8 +404,9 @@ class semestercopy extends FacultyService
 
 		//class lesson content
 		$db->query("DELETE FROM class_lesson_content WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassLessonContent::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassLessonContentPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$pbdo->_new = true;
 			$pbdo->idClassLessonContent = '';
 			$pbdo->set('idClasses', $id_classes_to);
@@ -410,8 +416,9 @@ class semestercopy extends FacultyService
 
 		//class syllabuses
 		$db->query("DELETE FROM class_syllabuses WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassSyllabuses::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassSyllabusesPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$pbdo->_new = true;
 			$pbdo->idClassSyllabuses = '';
 			$pbdo->set('idClasses', $id_classes_to);
@@ -421,8 +428,9 @@ class semestercopy extends FacultyService
 
 		//class gradebook
 		$db->query("DELETE FROM class_gradebook WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassGradebook::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassGradebookPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$pbdo->_new = true;
 			$pbdo->idClassGradebook = '';
 			$pbdo->set('idClasses', $id_classes_to);
@@ -432,8 +440,9 @@ class semestercopy extends FacultyService
 
 		//class gradebook categories
 		$db->query("DELETE FROM class_gradebook_categories WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassGradebookCategories::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassGradebookCategoriesPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$pbdo->_new = true;
 			$pbdo->idClassGradebookCategories = '';
 			$pbdo->set('idClasses', $id_classes_to);
@@ -443,8 +452,9 @@ class semestercopy extends FacultyService
 
 		//class gradebook entries
 		$db->query("DELETE FROM class_gradebook_entries WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassGradebookEntries::doSelect(' id_classes = '.$id_classes_from);
+		$pbdoArray = ClassGradebookEntriesPeer::doSelect(' id_classes = '.$id_classes_from);
 		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
 			$pbdo->_new = true;
 			$pbdo->idClassGradebookEntries = '';
 			$pbdo->set('idClasses', $id_classes_to);
