@@ -2,8 +2,8 @@
 
 <table border=0 width="100%" style="font-weight:bold;">
 <tr>
-	<td><? if ($t['showprev']) { ?><a href="<?=modurl('announcements/limit='.$t['prev']);?>">&lt;-- Prev 5</a><? } ?></td>
-	<td align="right"><? if ($t['shownext']) { ?><a href="<?=modurl('announcements/limit='.$t['next']);?>">Next 5 --&gt;</a><? } ?></td>
+	<td><? if ($t['showprev']) { ?><a href="<?=modurl('announcements/limit='.$t['prev']);?>">&lt;-- <?=lct('Prev');?> 5</a><? } ?></td>
+	<td align="right"><? if ($t['shownext']) { ?><a href="<?=modurl('announcements/limit='.$t['next']);?>"><?=lct('Next');?> 5 --&gt;</a><? } ?></td>
 </tr>
 </table>
 
@@ -26,7 +26,7 @@ while (list(,$a) = @each($t['announcements'])) { ?>
 
 <table border=0 width="100%" style="font-weight:bold;">
 <tr>
-	<td><? if ($t['showprev']) { ?><a href="<?=modurl('announcements/limit='.$t['prev']);?>">&lt;-- Prev 5</a><? } ?></td>
-	<td align="right"><? if ($t['shownext']) { ?><a href="<?=modurl('announcements/limit='.$t['next']);?>">Next 5 --&gt;</a><? } ?></td>
+	<td><? if ($t['showprev']) { ?><a href="<?=modurl('announcements/limit='.$t['prev']);?>">&lt;-- <?=lct('Prev');?> 5</a><? } ?></td>
+	<td align="right"><? if ($t['shownext']) { ?><a href="<?=modurl('announcements/limit='.$t['next']);?>"><?=lct('Next');?> 5 --&gt;</a><? } ?></td>
 </tr>
 </table>
