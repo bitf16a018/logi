@@ -240,35 +240,50 @@ class assignments extends StudentService {
 						// multiple files
 						// upload files?
 						
-						if ((int)@$lc->uploads['uploadassignment']['size'] > 0)
-						{
-
-							$file = $lc->uploads['uploadassignment'];
-							$newfilename = $u->username."_".time();
-							$copy = copy($file['tmp_name'],CONTENT_PATH."/uploads/$newfilename");
-							if ( !$copy ) {
-								trigger_error('couldnt copy file');
-								return;
+						//this is fatal, die here, don't send confirmations
+						if ((int)@$lc->uploads['uploadassignment']['size'] < 1)	{
+							switch($lc->uploads['uploadassignment']['error']) {
+								case UPLOAD_ERR_INI_SIZE:
+								case UPLOAD_ERR_FORM_SIZE:
+								$t['details'] = 'File is too big.';
+								break;
+								case UPLOAD_ERR_PARTIAL:
+								case UPLOAD_ERR_NO_FILE:
+								$t['details'] = 'Incomplete or no file uploaded.';
+								break;
+								default:
+								$t['details'] = 'Unspecified error.';
 							}
-
-							$sql = '
-							INSERT INTO class_assignments_turnin
-							SET 
-							dateTurnin=NOW(),
-							id_class_assignments='. (int)$lc->getvars['id'].', 
-							id_student=\''. $u->username.'\',
-							assign_type=1,
-							assign_file_size='. $file['size']. ',
-							assign_file_name=\''. str_replace("'", '\'\'', stripslashes($file['name'])). '\',
-							assign_file_mime=\''. $file['type']. '\',
-							assign_file_blob=\''.$newfilename.'\'
-							';
-							$db->query($sql);
-							#assign_file_blob=\''. base64_encode(file_get_contents($file['tmp_name'])).'\'
-							
+							$t['message'] = "There was an error uploading your assignment, try again.";
+							$t['message'] .="<br/>No assignment information was saved.";
+							$this->presentor = 'errorMessage';
+							return;
 						}
-						if ($db->Record['responseType'] != 3)
-						{	break;
+
+						$file = $lc->uploads['uploadassignment'];
+						$newfilename = $u->username."_".time();
+						$copy = copy($file['tmp_name'],CONTENT_PATH."/uploads/$newfilename");
+						if ( !$copy ) {
+							trigger_error('couldnt copy file');
+							return;
+						}
+
+						$sql = '
+						INSERT INTO class_assignments_turnin
+						SET 
+						dateTurnin=NOW(),
+						id_class_assignments='. (int)$lc->getvars['id'].', 
+						id_student=\''. $u->username.'\',
+						assign_type=1,
+						assign_file_size='. $file['size']. ',
+						assign_file_name=\''. str_replace("'", '\'\'', stripslashes($file['name'])). '\',
+						assign_file_mime=\''. $file['type']. '\',
+						assign_file_blob=\''.$newfilename.'\'
+						';
+						$db->query($sql);
+
+						if ($tx_assignment_information['responseType'] != 3) {
+							break;
 						}
 					
 					case 2:		// text
@@ -337,11 +352,12 @@ class assignments extends StudentService {
 	$p->messageTo = $u->activeClassTaken->facultyId;
 	$p->add();
 	$p = new privmess();
-	$p->messageFrom = "systemAdmin"; 	// __FIX_ME
+	$p->messageFrom = "systemAdmin"; 	// __FIX_ME // <-- DUMB COMMENT, WHATS TO FIX???
 	$p->sentTime = time();
 	$p->subject = "Assignment: ".$tx_assignment_information['title']." - Confirmation ".$u->username." ";
 	$p->message = "Assignment: ".$tx_assignment_information['title']."\n";
 	$p->message .= "You turned in your assignment at ".date("m/d/Y h:i A");
+	$p->message = "\n*** Please print this message out for your records.\nIf you delete this private message, it can not be retrieved.\n";
 	//$p->message .= "You turned in your assignment at ".date("m/d/Y h:i A")." for assignment #".$lc->getvars['id'];
 	//$p->message.= "\n(This is a system generated assignment # and does not correspond to the number of assignments in your particular class)";
 	$p->messageTo = $u->username;
