@@ -988,21 +988,23 @@ function displayFinalInstructions() {
     public_html/images/photos <br>
     public_html/images/photos/thumb <br>
 
-
+	<!--
     <br>
 	Locate the <strong>setpermissions.sh</strong> script in the
 	logicreate/scripts/ directory and run it:
 
+	
 	<br><br>
 	Example:  ./setpermission.sh  (should be run as root)
+	-->
 
 	<br><br>
-	You can also set these permissions by hand if you are in a hosted
-	environment.  There are several options to do this depending on how your server is setup.  Example:<br>
+
+	There are several options to do this depending on how your server is setup.  Example:<br>
     <br>
     chown -R nobody logicreate/content<br>
     chmod -R 755 logicreate/content<br>
-	ect.....<br>
+	etc.....<br>
     <br>
     Please consult your system admin for the best solution to make these directories writable by the web server.<br>
   </li>

@@ -10,8 +10,9 @@
   <property name="docs" location="docs" />
   <property name="build" location="temp" />
   <property name="dist"  location="dist" />
-  <property name="lib"  location="lib" />
-  <property name="lc.version" value="2.9" />
+  <property name="scripts" location="scripts" />
+  <property name="builddir" location="build" />
+  <property name="lc.version" value="1.0" />
   <target name="init" depends="cleantemp">
     <!-- Create the time stamp -->
     <tstamp>
@@ -35,16 +36,24 @@
 	  <fileset dir="${lcsrc}">
 		<include name="classLibrary/**"/>
 		<exclude name="classLibrary/*CVS*"/>
+		<include name="cache/**"/>
+		<exclude name="cache/*CVS*"/>
 		<include name="data/**"/>
 		<exclude name="data/*CVS*"/>
+		<include name="lib/**"/>
+		<exclude name="lib/*CVS*"/>
 		<include name="services/**"/>
 		<exclude name="services/*CVS*"/>
 		<include name="content/**"/>
 		<exclude name="content/*CVS*"/>
-		<include name="lib/**"/>
-		<exclude name="lib/**/*CVS*"/>
 		<exclude name="**/*~"/>
 	  </fileset>
+	</copy>
+	<copy todir="${build}/logicreate/scripts/">
+		<fileset dir="${scripts}">
+			<include name="**"/>
+			<exclude name="*CVS*"/>
+	  	</fileset>
 	</copy>
 	<copy todir="${build}">
 		<fileset dir="${docs}"> 
@@ -54,14 +63,11 @@
 	</copy>
 	<copy todir="${build}/public_html/docs/">
 	  <fileset dir="${docs}">
-		<include name="dev/**"/>
-		<include name="README"/>
-		<include name="index.php"/>
-		<exclude name="dev/**/*CVS*"/>
-		<exclude name="dev/**/*~"/>
-		<include name="herc/**"/>
-		<exclude name="herc/**/*CVS*"/>
-		<exclude name="herc/**/*~"/>
+	  </fileset>
+	</copy>
+	<copy todir="${build}">
+	  <fileset dir="${docs}">
+	  	<include name="INSTALL" />
 	  </fileset>
 	</copy>
 	<copy todir="${build}/public_html/">
@@ -92,8 +98,8 @@
 		<filter token="LC_VERSION" value="${lc.version}"/>
 	  </filterset>
 	  <fileset dir="${src}">
-		  <include name="license.txt"/>
-		  <include name="ua.js"/>
+		<include name="license.txt"/>
+		<include name="ua.js"/>
 		<include name="templates/**"/>
 		<include name="templates/private/**"/>
 		<include name="templates/default/**"/>
@@ -121,7 +127,6 @@
 	<filter token="LC_VERSION" value="${lc.version}"/>
 	<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
 	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/defines.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/install.php" todir="${build}/public_html/" filtering="true"/>
 
 
@@ -134,6 +139,14 @@
   	<!-- apply LCPL to files -->
 	<echo message="Applying LCPL to source files ..." />
 	<exec executable="${build}/../build/applylicense.sh" dir="${build}/../build" failonerror="true" />
+
+
+	<!-- After license is applied, copy defines.php over -->
+	<copy todir="${build}/public_html/" overwrite='true'>
+		<fileset dir="${builddir}">
+			<include name="defines.php"/>
+		</fileset>
+	</copy> 
 
 	<!-- tar up -->
 	<tar tarfile="${dist}/logicampus-OSS.tar" basedir="${build}" />
