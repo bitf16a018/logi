@@ -147,14 +147,14 @@ class PBDO_GraphManager {
 			$this->gdColors[$cname] = imageColorAllocate($this->canvas,$rgb[0],$rgb[1],$rgb[2]);
 		}
 
-		$tableList = $this->engine->project->tables;
-
+		$tableList = PBDO_Compiler::$model->entities;
+//print_r($this->widgets);exit();
 	
 		foreach($this->widgets as $name=>$w) { 
-
-
 			if (!$name) {continue;}
-			$this->drawWidget($name,$w,$tableList[$name]);
+			$this->drawWidget($name,$w,
+				$this->model->getNodeByName($name)
+			);
 		}
 
 		$this->drawEdges();
@@ -166,6 +166,7 @@ class PBDO_GraphManager {
 
 
 	function drawWidget($name,$w) {
+
 		imagefilledrectangle($this->canvas,$w->x-$this->widget_border,$w->y-$this->widget_border,
 				$w->x+$w->w+$this->widget_border,$w->y+$w->h+$this->widget_border,$this->gdColors['widgetBorder']);
 		imagefilledrectangle($this->canvas,$w->x,$w->y,
@@ -181,8 +182,10 @@ class PBDO_GraphManager {
 					$w->y+$this->widget_border+$this->fontRatio*2,$this->gdColors['font']);
 
 
+		reset($w->ports);
 		while (list($k,$portId) = @each($w->ports) ) {
 			$port = $this->model->ports[$portId];
+
 			$z = 2 * ($k+1);
 			imagestring($this->canvas,3,
 					$w->x+$this->widget_border,$w->y + $this->fontRatio*($z)+$this->widget_border,
@@ -226,7 +229,7 @@ class PBDO_GraphManager {
 			$source = $this->widgets[$sourceNode->tableName];
 			$sport = $this->model->ports[$edge->sourcePort];
 			$tport = $this->model->ports[$edge->targetPort];
-			print_r($tport);
+			//print_r($tport);
 
 			//find which way to stick the lines
 			// if the source's left side is to the right of the target's right side, flip variables
@@ -310,8 +313,8 @@ imagestring($this->canvas,3,$line_t_x-20,$line_t_y+20,$tport->z,$this->gdColors[
 
 
 	function saveGraph() {
-		@mkdir("projects/".$this->engine->projectName."/graph");
-		imagePng($this->canvas,"projects/".$this->engine->projectName."/graph/schema.png");
+		@mkdir("projects/".PBDO_Compiler::$model->projectName."/graph");
+		imagePng($this->canvas,"projects/".PBDO_Compiler::$model->projectName."/graph/schema.png");
 	}
 
 
@@ -319,16 +322,19 @@ imagestring($this->canvas,3,$line_t_x-20,$line_t_y+20,$tport->z,$this->gdColors[
 
 		$this->model = new PBDO_GraphModel();
 
-		$tableList = $this->engine->database->tables;
-		foreach($tableList as $name=>$tableObj) { 
+		$tableList = PBDO_Compiler::$model->entities;
+
+		foreach($tableList as $tableObj) { 
 			unset($n);
 			$n = new PBDO_GraphNode();
-			$n->tableName = $name;
+			$n->tableName = $tableObj->name;
 			$this->model->addNode($n);
 		}
 
-		foreach($this->engine->database->tables as $name=>$tableObj) { 
-			foreach($tableObj->columns as $colName=>$column) { 
+		foreach($tableList as $tableObj) { 
+			$name = $tableObj->name;
+			foreach($tableObj->attributes as $column) { 
+				$colName = $column->name;
 //				$source = $this->model->getNodeByName($tableObj->name);
 				unset($p);
 				$p = new PBDO_GraphPort();
@@ -344,11 +350,14 @@ imagestring($this->canvas,3,$line_t_x-20,$line_t_y+20,$tport->z,$this->gdColors[
 			}
 		}
 
-		foreach($this->engine->classes as $name=>$tableObj) { 
 
+		foreach($tableList as $tableObj) { 
+			$name = $tableObj->name;
 
 			//do edges
-			$relations = $tableObj->localRelations;
+			//$relations = $tableObj->localRelations;
+			$relations = PBDO_Compiler::$model->relationships;
+//			print_r($relations);exit();
 
 		    foreach($relations as $localCol=>$columns) { 
 				$relatedName = $columns[0];
@@ -531,7 +540,7 @@ class PBDO_SugiyamaLayout extends PBDO_LayoutManager {
 	 */
 	function shuffleLevels() {
 		for ($y=0; $y < count($this->levels); ++$y) {
-		unset($currentLevel);
+		$currentLevel = array();
 		$level = $this->levels[$y];
 
 		for ($x=0; $x < count($level); ++$x) {
@@ -542,12 +551,13 @@ class PBDO_SugiyamaLayout extends PBDO_LayoutManager {
 		}
 
 		//sort the level based on the node count
-		arsort($currentLevel);
+		@arsort($currentLevel);
 		unset($newLevel);
 		unset($count);
 		$lsize = count($currentLevel);
 		$insertAt = ceil($lsize/2);
 		$middle = ceil($lsize/2);
+		$newLevel = array();
 		foreach ($currentLevel as $nid=>$pcount) {
 //			print "insert at = $insertAt ".$nodeStore[$nid]->tableName ."\n";
 			$newLevel[$insertAt] = $nodeStore[$nid];
