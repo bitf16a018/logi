@@ -146,7 +146,9 @@ button{
 		background-color:#003062;
 	}
 		
-	
+	#applinks a.visited {
+		color: blue;
+	}	
 	
 	/**
 	 *	Calendar Styles
