@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-09-20 05:31:00 $
+Last Updated:  $Date: 2004-10-09 23:42:48 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,10 @@ SYNTAX:
 
 
 #########################
+10/9/04 - 7:40pm - mgk
+Modified PM system to have a notion of 'sent' and 'received' so that 
+a user can view the messages they've sent.
+
 9/20/04 - 1:30am - mark
 Fixed a major bug that would allow students to check their grades of 
 assessments as they worked if the result type was set to show grades and
