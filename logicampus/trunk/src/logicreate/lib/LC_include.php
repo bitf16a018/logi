@@ -235,7 +235,6 @@ class lcSystem {
                #  Shopping cart includes
                #include_once(INSTALLED_SERVICE_PATH."shop/main.lcp"); #CART
                #include_once(INSTALLED_SERVICE_PATH."shop/lcshop.lcp"); #CART
-
 		include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
 		$obj->user =& lcUser::getCurrentUser();
 		$obj->menu = menuObj::getVisibleCached($obj->user->groups);
@@ -288,7 +287,7 @@ class lcSystem {
 				echo <<<END
 
 		<form id="errorbox">
-			<div style="position:absolute;top:80px;left:70px;padding:3px;width:500px;background-color:#C0C0C0;border-style:outset">
+			<div style="position:absolute;top:80px;left:70px;padding:3px;width:40em;background-color:#C0C0C0;border-style:outset">
 			<table width="100%" cellpadding="5" cellspacing="0" border="0">
 				<tr>
 					<td valign="top">

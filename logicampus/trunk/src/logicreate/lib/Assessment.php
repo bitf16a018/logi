@@ -315,7 +315,7 @@ class Assessment extends AssessmentBase {
 	var $idClassGradebookEntries= '';
 
 	function load($id,$class_id) {
-		if ( $class_id == '' ) { trigger_error('load with empty key'); return false; }
+		if ( $class_id == '' ) { trigger_error('load with empty class id'); return false; }
 		$array = AssessmentPeer::doSelect("class_id = $class_id and assessment_id = $id");
 		if (!is_array($array) ) { trigger_error('No permission to load assessment '.$id); return false; }
 		return $array[0];
@@ -380,6 +380,8 @@ class Assessment extends AssessmentBase {
 				case QUESTION_ESSAY:
 					$subObj = new AssessmentQuestionEssay();
 					break;
+				default:
+					trigger_error("Cannot find appropriate class for question.  Question type was ".$superObj->questionType);
 			}
 
 			if( $superObj->assessmentQuestionId )
