@@ -1,87 +1,105 @@
 <?
-$host = $argv[1];
-$user = $argv[2];
-$pass = $argv[3];
-$db = $argv[4];
-$project = $argv[5];
 
-if (count($argv)<6) { 
-	echo "\nUSE: php export2xml.php host username password database projectname > outputfile.xml \n\n";
+# where id ADODB?
+$pathToADODB = "./adodb/";
+
+if ($pathToADODB=='') { 
+	die("Can't find path to ADODB\n");
+}
+
+# load the adodb library file
+
+if(!@include_once($pathToADODB."/adodb.inc.php")) { 
+	die("Sorry - I can't find ADODB\n");
+}
+
+
+$type = $argv[1];
+$host = $argv[2];
+$user = $argv[3];
+$pass = $argv[4];
+$database = $argv[5];
+$project = $argv[6];
+
+if (count($argv)<7) { 
+	echo "\nUSE: php export2xml.php dbtype host username password database projectname > outputfile.xml \n\n";
 	exit();
 }
+
+
+$db =&ADONewConnection($type);
+$db->pconnect($host, $user, $pass, $database);
 
 echo '<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE database SYSTEM
  "http://jakarta.apache.org/turbine/dtd/database_3_1.dtd">
 ';
-
-$link = mysql_connect($host, $user, $pass);
-
-
-mysql_select_db($db,$link);
-
 ?>
-WARNING!
-YOU NEED TO ADD RELATIONS AND PRIMARY KEYS TO THIS XML.
-THIS SHOULD ONLY BE USED ONCE PER TABLE.
+
 <project 
   name="<?=$project;?>"
   defaultIdMethod="idbroker">
 <?
 
-$key = "Tables_in_".$db;
-$res = mysql_query('show tables');
-while ( $row = mysql_fetch_assoc($res) ){
-
-	$tables[] = $row[$key];
-}
+$tables = $db->MetaTables('TABLES');
 
 
 while ( list($k,$table) = @each($tables) ) {
 
-	echo '   <entity name="'.$table.'">';
+	echo '   <entity name="'.$table.'" generate="all">';
 	echo "\n";
+	
+	$columns = $db->MetaColumns($table);
 
-	$res = mysql_query('describe '.$table);
+/*
+ADODB column values - should we use all of them?
+            [name] => mydata
+            [max_length] => 100
+            [type] => varchar
+            [not_null] => 1
+            [has_default] =>
+            [default_value] =>
+            [scale] =>
+            [primary_key] =>
+            [auto_increment] =>
+            [binary] =>
+            [unsigned] =>
+*/
+	foreach($columns as $col) { 
+		$type = $col->type;
+		$primary_key = $col->primary_key;
+		$size = $col->max_length;
+		$name = $col->name;
 
-	while ( $row = mysql_fetch_assoc($res) ){
-		//split out size from Type field; integer(11), or varchar(25)
-		$type = $row['Type'];
-		$firstP = strpos($type,'(');
-		$lastP = strpos($type,')');
-		$diffP = $lastP - $firstP -1;
-
-		if ($firstP) {
-			$size = substr($type,$firstP+1,$diffP);
-			$type = substr($type,0,$firstP);
-		}
+		if ($type=='text') { $size=''; }
 
 		echo '	   <attribute 
-	      name = "'.$row['Field'].'"
-	      type = "'.$type.'"';
+	      name = "'.strtolower($name).'"
+	      type = "'.strtolower($type).'"
+	      required="true"';
 	      if ($size ) { echo "\n"; echo '	      size = "'.$size.'" '; }
-	      if ($row['Key'] == 'PRI') { echo "\n"; echo '	      primaryKey  = "true" ';}
+	      if ($primary_key) { echo "\n"; echo '	      primaryKey  = "true" ';}
 	      echo '/>';
 		echo "\n";
 	}
 	echo '   </entity>';
 	echo "\n";
 
-	$res = mysql_query("select * from $table");
-	$temp = "";
-	while($row=mysql_fetch_assoc($res)) { 
-	#	$temp.="insert into $table (";
-	#	$keys = implode(",",array_keys($row));
-	#	$vals=array();
-		$temp.="<row>\n";
-		foreach($row as $rkey=>$rval) { 
-			$temp.= "\t<$rkey>$rval</$rkey>\n";
-	#		$vals[] = "'".addslashes(stripslashes($rval))."'";
+/*
+# do the data dump??? - taken from adodb-xmlschema file
+	$rs = $this->db->Execute( 'SELECT * FROM ' . $table );
+	
+	if( is_object( $rs ) ) {
+		$schema .= '		<data>' . "\n";
+		while( $row = $rs->FetchRow() ) {
+			foreach( $row as $key => $val ) {
+				$row[$key] = htmlentities($val);
+			}
+			$schema .= '	<row><f>' . implode( '</f><f>', $row ) . '</f></row>' . "\n";
 		}
-	#	$vals = implode(',',$vals);
-	#	$temp.= $keys.") values ($vals)\n";
-		$temp.="</row>\n";
+		$schema .= '		</data>' . "\n";
 	}
+*/
 	$t[$table] =$temp;
 
 }
