@@ -46,11 +46,7 @@ INSERT INTO class_student_sections VALUES (1112, 'student3', 1, 1);
 
 INSERT INTO class_student_sections VALUES (1111, 'student6', 1, 1);
 
-INSERT INTO class_student_sections VALUES (1111, 'student6', 1, 1);
-
 INSERT INTO class_student_sections VALUES (1112, 'student7', 1, 1);
-
-INSERT INTO class_student_sections VALUES (1112, 'student6', 1, 1);
 
 INSERT INTO class_student_sections VALUES (1112, 'student8', 1, 1);
 
