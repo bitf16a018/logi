@@ -178,6 +178,15 @@ class formMgr extends AdminService{
 					if ($k == 'message') {
 						$v = htmlspecialchars($v);
 					}
+					// AI - Update
+					// If any $v is an Array, we serialize it to make sure we don't loose the information
+					// in it. (This is assuming you don't acutally want to store 'Array' in your DB table).
+					if ( is_array($v) ) {
+
+							$v = serialize( $v );
+
+						}
+
 				
 					# for the date drop down to work
 					# we need to add up the total number of 
@@ -265,7 +274,7 @@ class formMgr extends AdminService{
 		}
 		#echo $action;	
 		#debug($values);
-	
+		$values['groups']= unserialize($values['groups']);
 		# End building up form values
 		
 		$f = new SiteForm();
