@@ -77,6 +77,8 @@
 		<fileset dir="./">
 			<include name="README" />
 			<include name="LICENSE" />
+			<include name="CHANGELOG" />
+			<include name="UPGRADE" />
 	  </fileset>
 	</copy>
 	<copy todir="${build}/public_html/">
