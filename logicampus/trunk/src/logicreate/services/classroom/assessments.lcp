@@ -226,7 +226,6 @@ class assessments extends StudentService {
 		}
 
 		if (!$log || $log->endDate > time() ) {
-		{
 			$lc->templateName = 'assessments_error';
 			$t['message'] = '
 			<h3>Error</h3>
@@ -247,11 +246,9 @@ class assessments extends StudentService {
 
 
 	
-		foreach($t['questions'] as $k=>$v) 
-		{
+		foreach($t['questions'] as $k=>$v) {
 			$t['questions_total_points'] += $v->questionPoints;
-				if ($v->answer->pointsGiven)
-		{
+			if ($v->answer->pointsGiven) {
 				$t['total_points_earned'] += $v->answer->pointsGiven;
 			} else {
 				$t['total_points_earned'] += $v->answer->pointsEarned;
@@ -264,8 +261,8 @@ class assessments extends StudentService {
 		$t['letter_grade'] = $gb->getLetterGrade($t['percentage']);
 
 		reset ($t['questions']);
-
 	}
+
 
 	function stopRun($db, &$u, &$lc, &$t)
 	{
@@ -273,7 +270,7 @@ class assessments extends StudentService {
 		if (!$log)
 		{
 			# there was a serious problem
-			$t['message'] = 'There was a problem grading your test. We were unable able to locate the log entry for your test.
+			$t['message'] = 'There was a problem grading your test. We were unable to locate the log entry for your test.
 			Please contact your teacher about this error or try starting the test again.';
 			$lc->templateName = 'assessments_error';
 			$this->resetSessionInfo($u);
