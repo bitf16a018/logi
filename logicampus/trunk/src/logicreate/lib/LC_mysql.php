@@ -28,7 +28,7 @@ class mysql extends DB {
 				$this->halt();
 			}
 		}
-		mysql_query("use ".$this->database,$this->driverID);
+		mysql_select_db($this->database,$this->driverID);
 	}
 
 
