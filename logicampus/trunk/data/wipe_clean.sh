@@ -41,3 +41,4 @@ echo '***********************'
 echo 'POPULATING with dummy data'
 mysql -u $1 -p$2 $db < ../data/semesters_and_classes.sql
 mysql -u $1 -p$2 $db < ../data/profile.sql 
+mysql -u $1 -p$2 $db < ../data/assessments.sql 
