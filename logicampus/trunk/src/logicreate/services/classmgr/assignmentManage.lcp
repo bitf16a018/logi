@@ -32,13 +32,9 @@ class assignmentManage extends FacultyService {
 	// links
 
 	var $inactivelinks = array( 'Assignments' );
-	var $applinks = array(
-		'List Assignments' => 'assignmentManage/',
-		'Add Assignment' => 'assignmentManage/event=editAssignment/',
-		'Add a Lesson' => 'lessonManager/event=edit/'
-	);
 
-	
+
+
 	function rebuildClassDocLibHashesRun($db,&$u,&$lc,&$t)
 	{
 		$db_saver = DB::getHandle();
@@ -1091,7 +1087,6 @@ class assignmentManage extends FacultyService {
 
 
 
-	//__FIXME__
 	function buildNavLinks() {
 
 		$this->navlinks = array ();
@@ -1106,6 +1101,12 @@ class assignmentManage extends FacultyService {
 
 	}
 
-
+	function buildAppLinks() {
+		$this->applinks = array(
+			lct('List Assignments') => 'assignmentManage/',
+			lct('Add Assignment') => 'assignmentManage/event=editAssignment/',
+			lct('Add a Lesson') => 'lessonManager/event=edit/'
+		);
+	}
 }
 ?>

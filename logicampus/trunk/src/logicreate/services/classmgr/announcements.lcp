@@ -9,10 +9,6 @@ class announcements extends FacultyService
 	var $presentor = 'HTMLPresentation';
 
 	// links
-	var $navlinks = array(
-		'Classroom Manager' => 'display/',
-		'Announcements' => 'announcements/',
-	);
 	var $applinks = array(
 		'List Announcements' => 'announcements/',
 		'Add Announcement' => 'announcements/#edit'
@@ -178,5 +174,14 @@ class announcements extends FacultyService
 	}
 	
 
+	/**
+	 * translate the navlinks
+	 */
+	function buildNavLinks() {
+		$this->navLinks = array(
+			lct('Classroom Manager') => 'display/',
+			lct('Announcements') => 'announcements/',
+		);
+	}
 }
 ?>
