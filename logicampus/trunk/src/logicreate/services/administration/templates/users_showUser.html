@@ -59,13 +59,37 @@
 		<table border="0" width="100%">
 		<tr>
 			<td class="tabletitle" align="left" valign="top" width="100%">
-			User Profile
+			User Information (<a style="color: white;" href="<?=modurl('users/event=editProfile/username='.$t['user_info']['username']);?>">Edit Profile</a>)</br></br>
+
 			</td>
 		</tr>
 		<tr>
 			<td>
-			<a href="<?=modurl('users/event=editProfile/username='.$t['user_info']['username'].'');?>">Edit Profile</a><br>
+			<fieldset>
+			<legend>
+			<a href="<?=modurl('enrollment/username='.$t['user_info']['username']);?>">Manage Class Enrollment</a></br> 
+			</legend>
 			<?
+			$count = count($t['classlist']);
+			if ($count > 0)
+			{
+
+				while (list ($semesterID, $classArray) = @each($t['classlist']))
+				{
+					echo '<ul><li>'.$semesterID.'</li><ul>';
+					while(list ($void, $classInfo) = @each($classArray))
+						{
+						echo $classInfo;	
+					}
+					echo '</ul></ul>';
+				}
+			} else {
+				echo 'User is not enrolled in any classes.';
+			}
+			?>	
+			</fieldset>
+			</br></br>
+<?
 				if ($t['user']->isFaculty() )
 				{ ?>
 			<a href="<?=modurl('users/event=editCourseFamilyInfo/username='.$t['user_info']['username'].'');?>">Edit Faculty Course Families</a><br>
@@ -73,15 +97,21 @@
 			<? } ?>
 
 		
-			<h5>Login As User</h5>
+			<fieldset>
+			<legend><strong>Login As User</strong></legend>
 			If you wish to login as this user, click the link below.<br>
 			<a href="<?= APP_URL .'administration/users/'.$t[user_info][username];?>/event=loginAs">Login as <i><?= $t[user_info][username];?></i></a>
+			</fieldset>
+
+		</br></br>	
+		<fieldset>
+		<legend><strong>Additional Information</strong></legend>	
+		<?include(INSTALLED_SERVICE_PATH."helpdesk/templates/history_main.html");?>
+		</fieldset>
 			</td>
 		</tr>
 		</table>
 
-	
-		<?include(INSTALLED_SERVICE_PATH."helpdesk/templates/history_main.html");?>
 	</td>
 	</tr>
 </table>

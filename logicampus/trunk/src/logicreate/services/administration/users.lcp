@@ -450,8 +450,16 @@ class users extends AdminService {
 			return;
 		}
 
+		# Build up a list of classes the user is enrolled in
 		$user = lcUser::getUserByUsername($arg->getvars['username']);
 
+		$classCount = count($user->classesTaken);
+		for ($i=0; $i<$classCount; $i++)
+		{
+			$t['classlist'][$user->classesTaken[$i]->semesterID][] = 
+			'<li>'.$user->classesTaken[$i]->courseFamilyNumber.' -
+			'.$user->classesTaken[$i]->courseName.'</li>';
+		}
 		$t['user_info']['username'] = $user->username;
 		$t['user_info']['email'] = $user->email;
 
