@@ -979,8 +979,8 @@ function displayFinalInstructions() {
 
 
     <br>
-	Locate the <strong>setpermissions.sh</strong> script in the logicampus/build
-	directory and run it:
+	Locate the <strong>setpermissions.sh</strong> script in the
+	logicreate/scripts/ directory and run it:
 
 	<br><br>
 	Example:  ./setpermission.sh  (should be run as root)
