@@ -139,6 +139,7 @@ class ParsedClass {
 			$q = convertTableName($q);
 			if ( substr($q,-1) == 's' ) { $s = ''; } else { $s ='s'; }
 			$ret .= "\tfunction get".$q.$s."(\$dsn='default') {\n";
+			$ret .= "\t\tinclude_once(PBDO_PATH.'$q.php');\n";
 			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$fcol." = \''.\$this->getPrimaryKey().'\'',\$dsn);\n";
 			$ret .= "\t\treturn \$array;\n";
 			$ret .= "\t}\n\n";
@@ -151,6 +152,7 @@ class ParsedClass {
 			$fcol = $qs[1];
 			$q = convertTableName($q);
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
+			$ret .= "\t\tinclude_once(PBDO_PATH.'$q.php');\n";
 			$ret .= "\t\tif ( \$this->".convertColName($col)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
 			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$col." = \''.\$this->".convertColName($fcol).".'\'',\$dsn);\n";
 			$ret .= "\t\tif ( count(\$array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }\n";
@@ -287,6 +289,25 @@ class '.$this->name.'Base {
 		return $p;
 	}
 
+	function showRelations($dsn) { 
+		$list = get_class_methods(get_class($this));
+		foreach($list as $method) { 
+			if (substr($method,0,3)=="get") { 
+				if ($method!="getPea" && $method!="getPrimaryKey") { 
+					$methods[] = $method;
+				}
+			}
+		}
+		foreach($methods as $method) { 
+			echo "doing method $method<BR>";
+			$array = $this->$method($dsn);
+			debug($array);
+			echo "<HR>";
+		}	
+		
+	}
+	
+
 }
 
 
@@ -296,8 +317,8 @@ class '.$this->name.'PeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("'.$this->tableName.'",$where);
+		$db = ADONewConnection($dsn);
+		$st = new SQL_SelectStatement("'.$this->tableName.'",$where);
 ';
 		@reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -310,17 +331,18 @@ class '.$this->name.'PeerBase {
 		$st->key = $this->key;
 
 		$array = array();
-		$db->executeQuery($st);
-		while($db->nextRecord() ) {
-			$array[] = '.$this->name.'Peer::row2Obj($db->record);
+		$res = $db->execute($st->toString());
+		while(!$res->EOF ) {
+			$array[] = '.$this->name.'Peer::row2Obj($res->fields);
+			$res->movenext();
 		}
 		return $array;
 	}
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("'.$this->tableName.'");
+		$db = ADONewConnection($dsn);
+		$st = new SQL_InsertStatement("'.$this->tableName.'");
 ';
 		@reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -332,19 +354,19 @@ class '.$this->name.'PeerBase {
 
 		$ret .='
 		$st->key = \''.$this->getPkey().'\';
-		$db->executeQuery($st);
+		$db->execute($st->toString());
 
 		$obj->_new = false;
 		$obj->_modified = false;
-		$id =  $db->getInsertID();
+		$id =  $db->Insert_ID();
 		return $id;
 
 	}
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("'.$this->tableName.'");
+		$db = ADONewConnection($dsn);
+		$st = new SQL_UpdateStatement("'.$this->tableName.'");
 ';
 		reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -355,18 +377,18 @@ class '.$this->name.'PeerBase {
 
 		$ret .='
 		$st->key = \''.$this->getPkey().'\';
-		$db->executeQuery($st);
+		$db->execute($st->toString());
 		$obj->_modified = false;
 
 	}
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = ADONewConnection($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->execute(new SQL_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->execute(new SQL_UpdateStatement($criteria));
 		}
 	}
 
@@ -376,11 +398,11 @@ class '.$this->name.'PeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("'.$this->tableName.'","'.$this->getPkey().' = \'".$obj->getPrimaryKey()."\'");
+		$db = ADONewConnection($dsn);
+		$st = new SQL_DeleteStatement("'.$this->tableName.'","'.$this->getPkey().' = \'".$obj->getPrimaryKey()."\'");
 ';
 		$ret .='
-		$db->executeQuery($st);
+		$db->execute($st->toString());
 
 		if ( $deep ) {
 ';
@@ -388,15 +410,15 @@ class '.$this->name.'PeerBase {
 		@reset($this->relations);
 		while ( list ($k,$v) = @each($this->relations) ) {
 		$ret .='
-			$st = new LC_DeleteStatement("'.$k.'","'.$v[1].' = \'".$obj->getPrimaryKey()."\'");
-			$db->executeQuery($st);';
+			$st = new SQL_DeleteStatement("'.$k.'","'.$v[1].' = \'".$obj->getPrimaryKey()."\'");
+			$db->execute($st->toString);';
 		}
 		$ret .='
 		}
 
 		$obj->_new = false;
 		$obj->_modified = false;
-		$id =  $db->getInsertID();
+		$id =  $db->Insert_ID();
 		return $id;
 
 	}
@@ -408,10 +430,10 @@ class '.$this->name.'PeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = ADONewConnection($dsn);
 ';
 		$ret .='
-		$db->query($sql);
+		$db->execute($sql);
 
 	  	return;
 	}

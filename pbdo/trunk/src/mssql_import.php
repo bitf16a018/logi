@@ -1,4 +1,7 @@
 <?
+// takes the sql files in a project directory and executes them.
+// not pretty
+
 // get parameters
 $host = $argv[1];
 $user = $argv[2];
@@ -14,6 +17,8 @@ if (count($argv)<6) {
 $link = mssql_connect($host,$user,$pass);
 mssql_select_db($db,$link);
 
+
+// import all .sql files
 $path = "./projects/$project/sql/";
 $dir = dir($path);
 while($file = $dir->read()) {
@@ -27,6 +32,26 @@ while($file = $dir->read()) {
 	mssql_query($data,$link);
 	#echo "query\n-----\n$data\n===============\n";
 }
+
+
+// import all .sql.constraint files
+
+$path = "./projects/$project/sql/";
+$dir = dir($path);
+while($file = $dir->read()) {
+	if (substr($file,-22)!='.mssql.sql.constraints') { 
+		continue;
+	}
+	$table = str_replace(".mssql.sql.constraints","",$file);
+	$data = file_get_contents($path.$file);
+	mssql_query($data,$link);
+	#	echo "table=$table\n";
+	#echo "query\n-----\n$data\n===============\n";
+}
+
+
+
+// import all .data.sql files
 
 $path = "./projects/$project/sql/";
 $dir = dir($path);
