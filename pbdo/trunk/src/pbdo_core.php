@@ -77,7 +77,7 @@ if ( OLD_STYLE ) {
 	include(PBDO_PATH.'compiler.php');
 }
 
-	//include(PBDO_PATH.'graphdef.php');
+	include(PBDO_PATH.'graphdef.php');
 	//include(PBDO_PATH.'graph/dot.php');
 	include(PBDO_PATH.'htmldef.php');
 	include(PBDO_PATH.'pbdo_plugin.php');
@@ -114,73 +114,7 @@ if (MSSQL) {
 print "\n";
 print_r(PBDO_Compiler::$model->relationships);
 
-/*
-if (!NO_PHP) {
-	//print to files
-	foreach($engine->classes as $k=>$v) {
-		//find out if file already exists
-		unset($saved);
-		if ( file_exists("projects/".$projectName."/".$v->codeName."/".$v->name.".".$v->codeName) ) {
-			$file = fopen("projects/".$projectName."/".$v->codeName."/".$v->name.".".$v->codeName,'r+');
-			//search for line that defines custom class
-			while ($line = fgets($file,4096) ) {
-				if ( strpos($line, $v->name." extends ".$v->name."Base {\n")  ) {
-					//save from here to end
-					while ( $line = fgets($file,4096) ) 
-					$saved .= $line;
-				}
-			}
-			//write out everything but custom class
-			print "Re-Writing 'projects/$projectName/".$v->codeName."/".$v->name.".".$v->codeName."'...\n";
 
-			//append found custom class definition to end of $file
-			$output = $v->toCode(false);
-			$output .=  $saved;
-			fclose($file);
-			$file = fopen('projects/'.$projectName.'/'.$v->codeName.'/'.$v->name.'.'.$v->codeName,'w+');
-			fputs($file,$output,strlen($output));
-			fclose($file);
-		} else {
-			if ($v->codeName != 'java') {
-			  $file = fopen('projects/'.$projectName.'/'.$v->codeName.'/'.$v->name.'.'.$v->codeName,'w+');
-			  print "Writing 'projects/$projectName/".$v->codeName."/".$v->name.".".$v->codeName."'...\n";
-			  $output = $v->toCode();
-			  fputs($file,$output,strlen($output));
-			  fclose($file);
-			} else {
-			  //do all 4 parts in one call, store internal to the object
-			  $v->toCode();
-
-			  $file = fopen('projects/'.$projectName.'/'.$v->codeName.'/'.$v->name.'Base.'.$v->codeName,'w+');
-			  print "Writing 'projects/$projectName/".$v->codeName."/".$v->name."Base.".$v->codeName."'...\n";
-			  $output = $v->baseClass;
-			  fputs($file,$output,strlen($output));
-			  fclose($file);
-
-			  $file = fopen('projects/'.$projectName.'/'.$v->codeName.'/'.$v->name.'PeerBase.'.$v->codeName,'w+');
-			  print "Writing 'projects/$projectName/".$v->codeName."/".$v->name."PeerBase.".$v->codeName."'...\n";
-			  $output = $v->basePeer;
-			  fputs($file,$output,strlen($output));
-			  fclose($file);
-
-			  $file = fopen('projects/'.$projectName.'/'.$v->codeName.'/'.$v->name.'Peer.'.$v->codeName,'w+');
-			  print "Writing 'projects/$projectName/".$v->codeName."/".$v->name."Peer.".$v->codeName."'...\n";
-			  $output = $v->peer;
-			  fputs($file,$output,strlen($output));
-			  fclose($file);
-
-			  $file = fopen('projects/'.$projectName.'/'.$v->codeName.'/'.$v->name.'.'.$v->codeName,'w+');
-			  print "Writing 'projects/$projectName/".$v->codeName."/".$v->name.".".$v->codeName."'...\n";
-			  $output = $v->class;
-			  fputs($file,$output,strlen($output));
-			  fclose($file);
-
-
-			}
-		}
-	}
-}
-*/
 /*
 if (!NO_SQL) {
 	$type = 'mysql';
@@ -209,10 +143,10 @@ if ( !OLD_STYLE ) {
 	}
 }
 
-	//$graph = new PBDO_DotGraphManager($engine);
-	//$graph->strokeGraph();
-	//print "Writing 'projects/$projectName/graph/schema.png'...\n";
-	//$graph->saveGraph();
+	$graph = new PBDO_GraphManager($engine);
+	$graph->strokeGraph();
+	print "Writing 'projects/$projectName/graph/schema.png'...\n";
+	$graph->saveGraph();
 
 //	$graph = new PBDO_HTMLManager($engine);
 //	$graph->generateHTML();
@@ -297,6 +231,9 @@ if ( !OLD_STYLE ) {
 		} else {
 			print "Project directory already exists (projects/".$projectName.")\n";
 		}
+		print "Making graph dir\n";
+		@mkdir ("projects/".$projectName."/graph/");
+
 /* deprecated
 		if ($this->generateSQL 
 			&& ! file_exists("projects/".$this->projectName."/sql") ) {
