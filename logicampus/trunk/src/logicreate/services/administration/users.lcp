@@ -942,7 +942,7 @@ flush();
 					VALUES
 					('%s','%s',%d)";
 				$dbmail = DB::getHandle('mail');
-				$db->query('select * from class_student_sections where active = 0');
+				$db->query('select * from class_student_sections where active = 0 and semester_id='.$semester_id);
 				while ( $db->next_record() ) {
 					$dbmail->query(
 					sprintf( $mailSQL,
