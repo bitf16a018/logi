@@ -1,75 +1,73 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<language locale="en_US" charset="UTF-8">
+<?xml version="1.0" encoding="GB2312"?>
+<language locale="zh_CN" charset="UTF-8">
 
 	<message id ="Calendar" domain="system">
-		Calendar
+		日历
 	</message>
 	<!--Calendar-->
 	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
 
 
 	<message id ="FAQs" domain="system">
-		FAQs
+		常见问题
 	</message>
 	<!--FAQs-->
 	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
 
 
 	<message id ="Help Desk" domain="system">
-		Help Desk
+		帮助
 	</message>
 	<!--Help Desk-->
 	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
 
 
-	<message id ="Messages" domain="system">
-		Messages
+	<message id ="Messages" domain="system" status="fuzzy">
+		文本
 	</message>
 	<!--Messages-->
 	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
 
 
 	<message id ="classroom manager" domain="system">
-		classroom manager
+		教室管理
 	</message>
 	<!--classroom manager-->
-	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="136"/>
-
-
-	<message id ="Login" domain="system">
-		Login
-	</message>
-	<!--Login-->
-	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
+	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="135"/>
 
 
 	<message id ="my classes" domain="system">
-		my classes
+		自己的课
 	</message>
 	<!--my classes-->
-	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="144"/>
+	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="143"/>
 
 
 	<message id ="password" domain="system">
-		password
+		密码
 	</message>
 	<!--password-->
-	<usage id ="password" file="../src/public_html/templates/private/header.html.php" line="122"/>
-	<usage id ="password" file="../src/public_html/templates/private/welcome_login.html.php" line="89"/>
+	<usage id ="password" file="../src/public_html/templates/private/header.html.php" line="121"/>
 
 
 	<message id ="username" domain="system">
-		username
+		用户名
 	</message>
 	<!--username-->
-	<usage id ="username" file="../src/public_html/templates/private/header.html.php" line="119"/>
-	<usage id ="username" file="../src/public_html/templates/private/welcome_login.html.php" line="85"/>
+	<usage id ="username" file="../src/public_html/templates/private/header.html.php" line="118"/>
 
 
 	<message id ="welcome" domain="system">
-		welcome
+		欢迎, $name
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
+
+
+	<message id ="Login" domain="system">
+		发入
+	</message>
+	<!--Login-->
+	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
 
 </language>

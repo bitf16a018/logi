@@ -1,0 +1,21 @@
+Translation files go here.  Two methods of internationalization are planned to 
+be supported: GNU Gettext and a custom LogiCreate system.  Original and 
+translated works will go into a custom XML format developed for LogiCreate and
+other PHP projects.  These XML files can then be compiled into a custom PHP 
+solution or converted into GNU Gettext's .po file format, and then from there 
+into .mo files.  The potential also exists to compile the XML directly to .mo 
+file format, but duplicating GNU Gettext's msgformat command is not high 
+priority.
+
+
+To complete a translation:
+===============================================================================
+Copy the messages.en_US.xml to a new file, replace the 'en_US' with your
+chosen language and country abbreviation.  Translate only the text inside the 
+<message> tags of the XML.  Make sure to change the charset and locale 
+attributes of the language tag at the top.  After that you can compile the 
+translated file into a LogiCreate translation file with the following line:
+
+php ./buildtrans.php [en_US] > ../src/logicreate/lang/lct.php
+
+That will place the resulting translation file it the proper place.
