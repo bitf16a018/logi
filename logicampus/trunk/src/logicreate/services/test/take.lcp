@@ -92,7 +92,7 @@ class take extends StudentService {
 			$test = $u->sessionvars['testObj'];
 			$t['instructions'] = $test->instructions;
 			$t['description'] = $test->description;
-
+			
 			if (!$test) {
 				$lc->templateName = 'take_error';
 				$t['message'] = '<h3>Error</h3>The test you are trying to reach cannot be loaded.';
@@ -286,8 +286,7 @@ class take extends StudentService {
 		# if it is a blank one
 		$questionCount = count($qst);
 		for($i=0; $i< $questionCount; $i++) {
-			$answer = $qst[$i]->answer; 
-			{
+			$answer = $qst[$i]->answer; 	{
 				if (is_object($answer) ) {
 					continue;
 				} else {

@@ -31,7 +31,6 @@
 <form method="POST" ACTION="<?=APP_URL?>assessments/grade/event=updatePoints/studentid=<?=$t['studentid']?>/id=<?=$t['assessmentId']?>">
 
 <? foreach($t['questions'] as $k=>$v) { 
-
 # Which grade do we print, pointsEarned or pointsGiven?
 $points = $v->answer->pointsEarned;
 if ($v->answer->pointsGiven>0) $points = $v->answer->pointsGiven;
@@ -48,18 +47,16 @@ if ($v->answer->pointsGiven>0) $points = $v->answer->pointsGiven;
 		</td>
 	</tr>
 	<?
-	if ( $v->questionType != QUESTION_MATCHING)
-	{ ?>
+	if ( $v->questionType != QUESTION_MATCHING)	{ 
+	?>
 	<tr>
 		<td colspan="1">
 			&nbsp;
 		</td>
 		<td colspan="2">
 			<? 
-			if ($v->questionType != QUESTION_ESSAY) 
-			{
-				 if ($v->isCorrect() )
-				{
+			if ($v->questionType != QUESTION_ESSAY) {
+				 if ($v->isCorrect() )	{
 					echo '<span style="color: #FFFFFF; background: green;">Correct</span> ';
 				} else {
 					echo '<span style="color: #FFFFFF; background: red;">Incorrect</span> ';
@@ -74,12 +71,10 @@ if ($v->answer->pointsGiven>0) $points = $v->answer->pointsGiven;
 			<b><?=$t['studentid']?>'s Answer</b>:  
 			 &nbsp;  
 			 <?
-			  	if ($v->questionType == QUESTION_MANSWER)
-				{
-					echo $v->returnCorrectAnswers();	
+			  	if ($v->questionType == QUESTION_MANSWER || $v->questionType==QUESTION_MCHOICE)	{
+					echo $v->returnStudentAnswer();	
 				} else { 
-				
-				echo $v->answer->assessmentAnswerValues;
+					echo $v->answer->assessmentAnswerValues;
 				}	
 				?> &nbsp; &nbsp;
 		</td>

@@ -509,7 +509,6 @@ class Assessment extends AssessmentBase {
 	function updateGradebookScore($studentId, $id_classes) {
 		$answer = AssessmentAnswerPeer::doSelect("student_id='$studentId' AND id_classes='$id_classes' AND assessment_id='".$this->assessmentId."'");
 		$count = count($answer);
-		debug($answer,1);
 		for ($i=0; $i<$count; $i++) { 
 			if ($answer[$i]->pointsGiven) { 
 				$totalPoints += $answer[$i]->pointsGiven;

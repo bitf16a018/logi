@@ -15,7 +15,7 @@
  * and lower your grade if you get it wrong the second time
  *
  */
- 
+
 define( QUESTION_TRUEFALSE, 1 );
 define( QUESTION_MCHOICE, 2 );
 define( QUESTION_MANSWER, 3 );
@@ -276,6 +276,17 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 		return FALSE;
 
 	}
+	
+	// mgk 8/14/04
+	// for some reason the 'grade' template was calling 
+	// returnCorrectAnswers for what the student submitted???
+	function returnStudentAnswer() {
+		$answer = $this->answer->assessmentAnswerValues;
+		$str = chr($answer+65);
+		return $str;
+	}
+
+	
 }
 
 class AssessmentQuestionMAnswer extends AssessmentQuestion {
@@ -379,7 +390,7 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		// array diff DOES work - or can be made to 
 		//
 		$diffCount = count(array_diff($answers,$correct));
-				
+		
 		// mgk 7/11/04
 		// __FIXME__ do we give partial credit for only some right, 
 		// or if they get all right but a fudge-factor wrong?  
@@ -448,8 +459,22 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 
 	function returnCorrectAnswers() {
 		$correct = $this->getCorrectAnswer();
-		$count = count($correct);
-		$str = implode(", ", $correct);
+		foreach($correct as $k=>$v) { 
+			$temp[] = chr($v+65);
+		}
+		$str = implode(", ", $temp);
+		return $str;
+	}
+	
+	// mgk 8/14/04
+	// for some reason the 'grade' template was calling 
+	// returnCorrectAnswers for what the student submitted???
+	function returnStudentAnswer() {
+		$answer = $this->answer->assessmentAnswerValues;
+		foreach($answer as $k=>$v) { 
+			$temp[] = chr($v+65);
+		}
+		$str = implode(", ", $temp);
 		return $str;
 	}
 
