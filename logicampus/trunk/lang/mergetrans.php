@@ -16,6 +16,7 @@ if ($oldfile == '' || $newfile == '') {
 function printHelp() {
 echo <<<END
 Usage php ./mergetrans.php [old.xml] [new.xml]
+
 END;
 
 }

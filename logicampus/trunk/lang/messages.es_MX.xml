@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <language locale="es_MX" charset="UTF-8">
 
 	<message id ="Calendar" domain="system" status="">
@@ -15,7 +15,7 @@
 	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
 
 
-	<message id ="Help Desk" domain="system">
+	<message id ="Help Desk" domain="system" status="">
 		Ayuda en linea
 	</message>
 	<!--Help Desk-->
@@ -30,7 +30,7 @@
 
 
 	<message id ="classroom manager" domain="system" status="">
-		Administrador del salón
+		Administrador del salÃ³n
 	</message>
 	<!--classroom manager-->
 	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="136"/>
@@ -81,14 +81,14 @@
 
 
 	<message id ="Classroom Overview" domain="system" status="">
-		Descripción del Salón
+		DescripciÃ³n del SalÃ³n
 	</message>
 	<!--Classroom Overview-->
 	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
 
 
 	<message id ="Classroom Portal Page" domain="system" status="">
-		Portal del Salón
+		Portal del SalÃ³n
 	</message>
 	<!--Classroom Portal Page-->
 	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
@@ -132,38 +132,39 @@
 
 
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
-		Contenido &amp; Links de la lección
+		Contenido &amp; Links de la lecciÃ³n
 	</message>
-	<!--Content &amp; Lesson Links-->
+	<!--Content &amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
 	<message id ="General Class Manager" domain="system" status="">
-		Administración General de la Clase
+		AdministraciÃ³n General de la Clase
 	</message>
 	<!--General Class Manager-->
 	<usage id ="General Class Manager" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="12"/>
 
 
 	<message id ="Home Page" domain="system" status="">
-		Página Principal
+		PÃ¡gina Principal
 	</message>
 	<!--Home Page-->
 	<usage id ="Home Page" file="../src/public_html/templates/private/header.html.php" line="73"/>
 
 
 	<message id ="Message of the Day" domain="system" status="">
-		Mensaje del día
+		Mensaje del dÃ­a
 	</message>
 	<!--Message of the Day-->
 	<usage id ="Message of the Day" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="5"/>
 
 
 	<message id ="Student Communication" domain="system" status="">
-		Comuncación con los estudiantes
+		ComuncaciÃ³n con los estudiantes
 	</message>
 	<!--Student Communication-->
 	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
+
 
 	<message id ="Assessment Manager" domain="system" status="">
 		Administrador de pruebas
@@ -194,7 +195,7 @@
 
 
 	<message id ="Classroom Setup" domain="system" status="">
-		Confirguración del salón
+		ConfirguraciÃ³n del salÃ³n
 	</message>
 	<!--Classroom Setup-->
 	<usage id ="Classroom Setup" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="21"/>
@@ -208,7 +209,7 @@
 
 
 	<message id ="Exam Scheduling" domain="system" status="">
-		Programación de Exámenes
+		ProgramaciÃ³n de ExÃ¡menes
 	</message>
 	<!--Exam Scheduling-->
 	<usage id ="Exam Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="31"/>
@@ -250,21 +251,21 @@
 
 
 	<message id ="Seminar Scheduling" domain="system" status="">
-		Programación de Seminarios
+		ProgramaciÃ³n de Seminarios
 	</message>
 	<!--Seminar Scheduling-->
 	<usage id ="Seminar Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="37"/>
 
 
 	<message id ="Student Presentation" domain="system" status="">
-		Presentación de los Estudiantes
+		PresentaciÃ³n de los Estudiantes
 	</message>
 	<!--Student Presentation-->
 	<usage id ="Student Presentation" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="58"/>
 
 
 	<message id ="Syllabus" domain="system" status="">
-		Información de la Clase
+		InformaciÃ³n de la Clase
 	</message>
 	<!--Syllabus-->
 	<usage id ="Syllabus" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="27"/>
@@ -278,14 +279,14 @@
 
 
 	<message id ="View Classroom" domain="system" status="">
-		Ver Portal del Salón
+		Ver Portal del SalÃ³n
 	</message>
 	<!--View Classroom-->
 	<usage id ="View Classroom" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="29"/>
 
 
 	<message id ="Webliography" domain="system" status="">
-		Webliografía
+		WebliografÃ­a
 	</message>
 	<!--Webliography-->
 	<usage id ="Webliography" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="60"/>
@@ -313,7 +314,7 @@
 
 
 	<message id ="Discussion Forums" domain="system" status="">
-		Foros de Discusión
+		Foros de DiscusiÃ³n
 	</message>
 	<!--Discussion Forums-->
 	<usage id ="Discussion Forums" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="72"/>
@@ -323,5 +324,28 @@
 		Perfil del Estudiante
 	</message>
 	<!--Student Profile-->
-	<usage id ="Student Profile" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="76"/>	
+	<usage id ="Student Profile" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="76"/>
+
+
+	<message id ="Presentations" domain="system" status="">
+		Presentations
+	</message>
+	<!--Presentations-->
+	<usage id ="Presentations" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1104"/>
+
+
+	<message id ="Student Management" domain="system" status="">
+		Student Management
+	</message>
+	<!--Student Management-->
+	<usage id ="Student Management" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="26"/>
+
+
+	<message id ="Semester Copy" domain="system" status="">
+		Semester Copy
+	</message>
+	<!--Semester Copy-->
+	<usage id ="Semester Copy" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="36"/>
+
 </language>
+
