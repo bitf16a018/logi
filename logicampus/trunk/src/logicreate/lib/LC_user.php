@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 require_once(LIB_PATH.'User.php');
 
 	/**
@@ -710,14 +723,11 @@ class UserProfile {
 	var $values = array();
 	var $dirty;
 	var $specific = true;
-	//start of changed lines for self register module
-	//added the extra fields for inserting profile data
-	var $common_attribs = array('title','firstname','lastname','dob','emailAlternate','homePhone',
+	var $common_attribs = array('firstname','lastname','emailAlternate','homePhone',
 			'workPhone','faxPhone','cellPhone','pagerPhone','photo','address','address2',
-			'city','state','zip','country','hphone','education','lastinstitute','showaddinfo','url','icq','aim',
+			'city','state','zip','showaddinfo','url','icq','aim',
 			'yim','msn','showonlineinfo','occupation','gender','sig','bio',
 			'showbioinfo','emailNotify');
-	//end of changed lines for self register module
 	var $specific_attribs = array();
 	var $student_attribs = array( 'isp', 'operatingSystem', 'connectionType' );
 	var $faculty_attribs = array(
