@@ -9,7 +9,7 @@
 
 
 //requirements
-include ('codedef.php');
+//include ('codedef.php');
 include ('sqldef.php');
 
 list ($name,$ext) = explode(".",$filename);
@@ -48,42 +48,73 @@ $loop++;
 
 	$kids = $node->childNodes;
 
-	foreach( $kids as $k=>$v ) {
+	//foreach( $kids as $k=>$v ) {
+	foreach( $kids as $v ) {
 		extractNodes($v,$struct);
 	}
 }
 
 
 class PBDO_Compiler {
-	var $version 		= 1.3;
-	var $projectName	= 'PBDO-Project';
-	var $classes 		= array();
-	var $foreignKeys 	= array();
-	var $forms 		= array();
-	var $database;
-	var $workingTable;
-	var $workingIndex;
-	var $workingColumn;
-	var $workingClass;
-	var $workingForm;
-	var $workingConstraint;
-	var $hasPDOM 		= false;
-	var $dbtype 		= '';
-	var $filename 		= '';
-	var $generateCode 	= true;
-	var $generateSQL 	= true;
-	var $generateGraph 	= true;
+	public $version 	= 1.3;
+	public $projectName	= 'PBDO-Project';
 
+	///deprecated
+	public $classes 		= array();
+	public $foreignKeys 	= array();
+	public $forms 		= array();
+	public $database;
+	///deprecated
+
+	public $dataModel;
+
+	public $workingTable;
+	public $workingIndex;
+	public $workingColumn;
+	public $workingEntity;
+	public $workingForm;
+	public $workingConstraint;
+
+	public $hasPDOM 		= false;
+	public $dbtype 		= '';
+	public $filename 		= '';
+	public $generateCode 	= true;
+	public $generateSQL 	= true;
+	public $generateGraph 	= true;
+	
+	static public $model;
+
+
+	/**
+	 * Make singleton data model available to other parts of the code
+	 */
+	function getDataModel() {
+		return PBDO_Compiler::$model;
+	}
 
 	/**
 	 * Ctor
 	 */
-	function PBDO_Compiler($projectName='PBDO-Project') {
+	function PBDO_Compiler() {
+		$this->dataModel = new PBDO_ParsedDataModel();
 		$this->projectName = $projectName;
+		PBDO_Compiler::$model =& $this->dataModel;
+
 		//if ( function_exists('domxml_open_file') ){
 		//	$this->hasPDOM = true;
 		//}
 	}
+	
+	function setProjectName($pn) {
+		PBDO_Compiler::$model->setProjectName($pn);
+	}
+	
+
+
+	function getProjectName() {
+		return PBDO_Compiler::$model->projectName;
+	}
+
 
 	/**
 	 * XML file to parse
@@ -114,6 +145,7 @@ class PBDO_Compiler {
 
 
 		reset($staticNodes);
+		$count = 0;
 		foreach($staticNodes as $k=>$v) { 
 			$x[(int)$count] = $v;
 			++$count;
@@ -121,53 +153,16 @@ class PBDO_Compiler {
 		$staticNodes = $x;
 		$projectNode = $staticNodes[0];
 
-		$this->projectName = $projectNode->xmlnode->getAttribute('name');
+		$this->setProjectName($projectNode->xmlnode->getAttribute('name'));
+
 		print "*****************".str_repeat('*',strlen($this->projectName))."**\n";
 		print "* Project Name = $this->projectName *\n";
 		print "*****************".str_repeat('*',strlen($this->projectName))."**\n";
-
-		$this->createDirs();
 
 		return $staticNodes;
 	}
 
 
-	/**
-	 * Create necassary directories
-	 */
-	function createDirs() { 
-
-		if (! file_exists("projects/".$this->projectName) ) {
-			echo "making php dir\n";
-			mkdir ("projects/".$this->projectName);
-		} else {
-			print "Project directory already exists (projects/".$this->projectName.")\n";
-		}
-
-		if ($this->generateCode
-			&& ! file_exists("projects/".$this->projectName."/php") ) {
-
-			echo "making php dir\n";
-			mkdir ("projects/".$this->projectName."/php/");
-
-			echo "making java dir\n";
-			mkdir ("projects/".$this->projectName."/java/");
-		}
-
-		if ($this->generateSQL 
-			&& ! file_exists("projects/".$this->projectName."/sql") ) {
-
-			echo "making sql dir\n";
-			mkdir ("projects/".$this->projectName."/sql/");
-		}
-
-		if ($this->generateSQL 
-			&& ! file_exists("projects/".$this->projectName."/graph") ) {
-
-			print "Making graph dir\n";
-			mkdir ("projects/".$this->projectName."/graph/");
-		}
-	}
 
 
 	/**
@@ -175,51 +170,50 @@ class PBDO_Compiler {
 	 */
 	function visitEntityNode(&$table) {
 		//php stuff
-		unset($this->workingClass);
+		unset($this->workingEntity);
 		unset($this->workingForm);
 		unset($this->workingTable);
 
 		//php stuff
 		if ( strstr($table->xmlnode->getAttribute('generate'),'code') ||
 		     strstr($table->xmlnode->getAttribute('generate'), 'all') ) {
-			$this->workingClass = ParsedClass::createFromXMLObj($table->xmlnode);
-			$this->workingClass->setVersion($this->database->version);
-			$this->classes[$this->workingClass->tableName] =& $this->workingClass;
-			print "Found one table (".$this->workingClass->name.")...\n";
+			$this->workingEntity = PBDO_ParsedEntity::createFromXMLObj($table->xmlnode);
+			$this->workingEntity->setVersion($this->database->version);
+
+//$this->workingClass = ParsedClass::createFromXMLObj($table->xmlnode);
+//$this->workingClass->setVersion($this->database->version);
+			$this->dataModel->addEntity($this->workingEntity);
+//			$this->classes[$this->workingClass->tableName] =& $this->workingClass;
+			print "Found one table (".$this->workingEntity->displayName.")...\n";
 		}
 
-		//form stuff
-		if ($this->hasPDOM) {
-			if ( strstr($table->xmlnode->attributes['generate']->value,'form') ||
-			     strstr($table->xmlnode->attributes['generate']->value, 'all') ) {
-				$this->workingForm = new PDOM_Form();
-				$this->forms[$this->workingClass->tableName] =& $this->workingForm;
-			}
-		}
 
-		//sql stuff
-		if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
-		     strstr($table->xmlnode->getAttribute('generate'), 'all') ) {
-			$this->workingTable = PBDO_ParsedTable::parsedTableFactory(
-						$this->dbtype,
-						$table->xmlnode->getAttribute('name'),
-						$table->xmlnode->getAttribute('package')
-						);
+//sql stuff
+/*
+if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
+     strstr($table->xmlnode->getAttribute('generate'), 'all') ) {
+	$this->workingTable = PBDO_ParsedTable::parsedTableFactory(
+				$this->dbtype,
+				$table->xmlnode->getAttribute('name'),
+				$table->xmlnode->getAttribute('package')
+				);
 
-			$this->database->addTable($this->workingTable);
-		}
+	$this->database->addTable($this->workingTable);
+}
+//*/
 	}
 
 
 
 	function visitAttributeNode(&$col) {
 		//php stuff
-		if ($this->workingClass) {
-			$att = ParsedAttribute::createFromXMLObj($col->xmlnode);
-			$this->workingClass->addAttribute($att);
+		if ($this->workingEntity) {
+			$att = PBDO_ParsedAttribute::createFromXMLObj($col->xmlnode);
+//$this->workingClass->addAttribute($att);
+			$this->workingEntity->addAttribute($att);
 			if ($col->xmlnode->getAttribute('primaryKey') == 'true') {
-				$this->workingClass->setOID($col->xmlnode->getAttribute('name'));
-				$this->workingClass->setPkey($col->xmlnode->getAttribute('name'));
+//				$this->workingEntity->setOID($col->xmlnode->getAttribute('name'));
+//				$this->workingClass->setPkey($col->xmlnode->getAttribute('name'));
 			}
 		}
 
@@ -268,7 +262,7 @@ class PBDO_Compiler {
 					$this->workingTable->name,
 					$fkey->xmlnode->getAttribute('foreignTable')
 					);
-		$this->workingTable->addConstraint($this->workingConstraint);
+		$this->workingEntity->addConstraint($this->workingConstraint);
 	}
 
 
@@ -359,7 +353,7 @@ class PBDO_NodeFactory {
 
 class PBDO_NodeBase {
 
-	var $xmlnode;
+	public $xmlnode;
 
 	function PBDO_NodeBase($n) {
 		$this->xmlnode = $n;
@@ -382,7 +376,7 @@ class PBDO_EntityNode extends PBDO_NodeBase {
 		//set the default generate tag to 'all'
 		$attrs =& $this->xmlnode->attributes->getNamedItem('generate');
 		if ( ! strlen($attrs->nodeValue) ) { 
-			$owner = $this->xmlnode->ownerDocument;
+			//$owner = $this->xmlnode->ownerDocument;
 			$this->xmlnode->setAttribute('generate', 'all' );
 		}
 	}

@@ -3,6 +3,8 @@
 $temp = pathinfo(__FILE__);
 define('PBDO_PATH',$temp['dirname'].'/');
 
+include('pbdo_lib.php');
+
 // core processing for pbdo
 // should be able to be included by any library
 // whether it's a pbdo_cli or gui or anything else
@@ -75,9 +77,10 @@ if ( OLD_STYLE ) {
 	include(PBDO_PATH.'compiler.php');
 }
 
-	include(PBDO_PATH.'graphdef.php');
-	include(PBDO_PATH.'graph/dot.php');
+	//include(PBDO_PATH.'graphdef.php');
+	//include(PBDO_PATH.'graph/dot.php');
 	include(PBDO_PATH.'htmldef.php');
+	include(PBDO_PATH.'pbdo_plugin.php');
 	@include (PBDO_PATH.'./domhtmlphp.php');
 
 
@@ -87,12 +90,14 @@ $engine = new PBDO_Compiler();
 $engine->setFilename($filename);
 $staticNodes = $engine->compile();
 
-global $projectName;
-$projectName = $engine->projectName;;
+//deprecated
+//global $projectName;
+$projectName = $engine->getProjectName();
 print "*****************".str_repeat('*',strlen($projectName))."**\n";
 print "* Project Name = $projectName *\n";
 print "*****************".str_repeat('*',strlen($projectName))."**\n";
 
+createDirs($projectName);
 
 
 //do the parsing and compiling
@@ -236,13 +241,20 @@ if ( !OLD_STYLE ) {
 
 	//$graph = new PBDO_DotGraphManager($engine);
 	//$graph->strokeGraph();
-//	print "Writing 'projects/$projectName/graph/schema.png'...\n";
-//	$graph->saveGraph();
+	//print "Writing 'projects/$projectName/graph/schema.png'...\n";
+	//$graph->saveGraph();
 
 //	$graph = new PBDO_HTMLManager($engine);
 //	$graph->generateHTML();
 //	print "Writing 'projects/$projectName/html/'...\n";
 //	$graph->saveHTML();
+
+	$pluginManager = new PBDO_PluginManager();
+	
+	$pluginManager->createNewPlugin('pbdo_plugin_code');
+	
+	
+	$pluginManager->runPlugins();
 
 	/*
 	try to do the same .data.xml file as well
@@ -297,5 +309,48 @@ if ( !OLD_STYLE ) {
 	}
 
 
+
 } // 6048199 - bill rice	
+
+
+
+
+
+	/**
+	 * Create necassary directories
+	 */
+	function createDirs($projectName) { 
+
+		if (! file_exists("projects/".$projectName) ) {
+			echo "making php dir\n";
+			mkdir ("projects/".$projectName);
+		} else {
+			print "Project directory already exists (projects/".$projectName.")\n";
+		}
+/* deprecated
+		if ($this->generateCode
+			&& ! file_exists("projects/".$this->projectName."/php") ) {
+
+			echo "making php dir\n";
+			mkdir ("projects/".$this->projectName."/php/");
+
+			echo "making java dir\n";
+			mkdir ("projects/".$this->projectName."/java/");
+		}
+
+		if ($this->generateSQL 
+			&& ! file_exists("projects/".$this->projectName."/sql") ) {
+
+			echo "making sql dir\n";
+			mkdir ("projects/".$this->projectName."/sql/");
+		}
+
+		if ($this->generateSQL 
+			&& ! file_exists("projects/".$this->projectName."/graph") ) {
+
+			print "Making graph dir\n";
+			mkdir ("projects/".$this->projectName."/graph/");
+		}
+*/
+	}
 ?>
