@@ -81,7 +81,7 @@ instructor has set.
 			if ($time >= $asmt->dateAvailable && $time <= $asmt->dateUnavailable &&
 			($asmt->log->logCount < $asmt->numRetries) ) 
 			{
-				echo '<a href="'.APP_URL.'test/assessments/event=start/id='.$asmt->assessmentId.'">Take Quiz</a>';
+				echo '<a href="'.APP_URL.'test/take/event=start/id='.$asmt->assessmentId.'">Take Quiz</a>';
 			} else {
 				echo 'Not available';
 			}
