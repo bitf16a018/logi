@@ -121,6 +121,9 @@ class category extends FacultyService {
 			
 			$f = new SiteForm();
 			$f->getForm('gbcategory', $gbCat);
+
+			$gradebook = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes ) );
 			if ( $gradebook->calculationType == 1 ) {
 				$t['showWeight'] = true;
 			} else {
