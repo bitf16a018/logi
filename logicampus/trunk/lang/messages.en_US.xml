@@ -1,0 +1,65 @@
+<language locale="en_US">
+
+	<message id ="Calendar" domain="system">
+		Calendar
+	</message>
+	<!--Calendar-->
+	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
+
+
+	<message id ="FAQs" domain="system">
+		FAQs
+	</message>
+	<!--FAQs-->
+	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
+
+
+	<message id ="Help Desk" domain="system">
+		Help Desk
+	</message>
+	<!--Help Desk-->
+	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
+
+
+	<message id ="Messages" domain="system">
+		Messages
+	</message>
+	<!--Messages-->
+	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
+
+
+	<message id ="classroom manager" domain="system">
+		classroom manager
+	</message>
+	<!--classroom manager-->
+	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="135"/>
+
+
+	<message id ="my classes" domain="system">
+		my classes
+	</message>
+	<!--my classes-->
+	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="143"/>
+
+
+	<message id ="password" domain="system">
+		password
+	</message>
+	<!--password-->
+	<usage id ="password" file="../src/public_html/templates/private/header.html.php" line="121"/>
+
+
+	<message id ="username" domain="system">
+		username
+	</message>
+	<!--username-->
+	<usage id ="username" file="../src/public_html/templates/private/header.html.php" line="118"/>
+
+
+	<message id ="welcome" domain="system">
+		welcome
+	</message>
+	<!--welcome-->
+	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
+
+</language>
