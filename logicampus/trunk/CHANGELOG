@@ -7,6 +7,12 @@ SYNTAX:
 
 
 #########################
+01/09/03 2:28 PM - zorka
+data/sql - 
+The ability to give certain groups permission to be able to update
+enrollments.  Note:  If someone is given access to the enrollment,
+they have to have access to users.
+
 01/09/03 12:11 PM - zorka
 adminstration - 
 This adds the ability for an admin to manage student enrollment.  The
