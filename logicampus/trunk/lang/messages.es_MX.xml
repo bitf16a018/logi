@@ -134,7 +134,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Contenido &amp; Links de la lección
 	</message>
-	<!--Content &amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -374,6 +374,113 @@
 	</message>
 	<!--Classroom Manager-->
 	<usage id ="Classroom Manager" file="../src/logicreate/services/classmgr/announcements.lcp" line="182"/>
+
+
+	<message id ="Name" domain="system" status="">
+		Name
+	</message>
+	<!--Name-->
+	<usage id ="Name" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="20"/>
+
+
+	<message id ="Attempts" domain="system" status="">
+		Attempts
+	</message>
+	<!--Attempts-->
+	<usage id ="Attempts" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="21"/>
+
+
+	<message id ="Minute Limit" domain="system" status="">
+		Minute Limit
+	</message>
+	<!--Minute Limit-->
+	<usage id ="Minute Limit" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="22"/>
+
+
+	<message id ="Results" domain="system" status="">
+		Results
+	</message>
+	<!--Results-->
+	<usage id ="Results" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="23"/>
+
+
+	<message id ="Date Available" domain="system" status="">
+		Date Available
+	</message>
+	<!--Date Available-->
+	<usage id ="Date Available" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="24"/>
+
+
+	<message id ="Action" domain="system" status="">
+		Action
+	</message>
+	<!--Action-->
+	<usage id ="Action" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="25"/>
+
+
+	<message id ="Posted On" domain="system" status="">
+		Posted On
+	</message>
+	<!--Posted On-->
+	<usage id ="Posted On" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="20"/>
+	<usage id ="Posted On" file="../src/logicreate/services/classroom/templates/announcements_view.html" line="7"/>
+
+
+	<message id ="Teacher Instructions" domain="system" status="">
+		Teacher Instructions
+	</message>
+	<!--Teacher Instructions-->
+	<usage id ="Teacher Instructions" file="../src/logicreate/services/classroom/templates/assessments_start.html" line="3"/>
+
+
+	<message id ="Complete the Assessment" domain="system" status="">
+		Complete the Assessment
+	</message>
+	<!--Complete the Assessment-->
+	<usage id ="Complete the Assessment" file="../src/logicreate/services/classroom/templates/assessments_start.html" line="87"/>
+
+
+	<message id ="Turn In Test" domain="system" status="">
+		Turn In Test
+	</message>
+	<!--Turn In Test-->
+	<usage id ="Turn In Test" file="../src/logicreate/services/classroom/templates/assessments_start.html" line="92"/>
+
+
+	<message id ="Assessment Graded" domain="system" status="">
+		Assessment Graded
+	</message>
+	<!--Assessment Graded-->
+	<usage id ="Assessment Graded" file="../src/logicreate/services/classroom/templates/assessments_stop_showgrade.html" line="4"/>
+
+
+	<message id ="Your Score: $grade out of $possiblePoints - $percentGrade" domain="system" status="">
+		Your Score: $grade out of $possiblePoints - $percentGrade
+	</message>
+	<!--Your Score: $grade out of $possiblePoints - $percentGrade-->
+	<usage id ="Your Score: $grade out of $possiblePoints - $percentGrade" file="../src/logicreate/services/classroom/templates/assessments_stop_showgrade.html" line="14"/>
+
+
+	<message id ="Return to Assessments" domain="system" status="">
+		Return to Assessments
+	</message>
+	<!--Return to Assessments-->
+	<usage id ="Return to Assessments" file="../src/logicreate/services/classroom/templates/assessments_stop_showgrade.html" line="15"/>
+	<usage id ="Return to Assessments" file="../src/logicreate/services/classroom/templates/assessments_stop.html" line="15"/>
+
+
+	<message id ="Assessment Completed" domain="system" status="">
+		Assessment Completed
+	</message>
+	<!--Assessment Completed-->
+	<usage id ="Assessment Completed" file="../src/logicreate/services/classroom/templates/assessments_stop.html" line="4"/>
+
+
+	<message id ="Assessments" domain="system" status="">
+		Assessments
+	</message>
+	<!--Assessments-->
+	<usage id ="Assessments" file="../src/logicreate/services/classroom/templates/assessments_stop.html" line="9"/>
 
 </language>
 
