@@ -1,4 +1,17 @@
 <?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 include_once(LIB_PATH."documentLibraryLib.php");
 include_once(LIB_PATH."LC_html.php");
@@ -16,8 +29,7 @@ class wysiwygimages extends classdoclibService {
 	var $presentor = 'emptyPresentation';
 	
 
-	function viewimageRun(&$db,&$u,&$lcObj,&$t)
-	{
+	function viewimageRun(&$db,&$u,&$lcObj,&$t) {
 		$pkey = $lcObj->getvars["pkey"];
 		$x = LC_file::getSingle($pkey, $u->activeClassTaught->id_classes);
 
@@ -56,10 +68,9 @@ class wysiwygimages extends classdoclibService {
 	}
 	
 	
-	function get_webimages_folder_id($id_class)
-	{
+	function get_webimages_folder_id($facultyId) {
 		$db = DB::getHandle();
-		$db->queryOne("select pkey from classdoclib_Folders where (class_id=".(int)$id_class." and name='Web Images') order by pkey ASC");
+		$db->queryOne("select pkey from classdoclib_Folders where (owner='$facultyId' and name like 'Web Images%') order by pkey ASC");
 		return $db->Record['pkey'];
 		
 	}
@@ -78,23 +89,23 @@ class wysiwygimages extends classdoclibService {
 		if (($openFolder=='') && ($openFolder != 0)) {  
 			$openFolder=$u->sessionvars["openFolder"]; 
 			if ($openFolder=='') {
-				$db->queryOne("select pkey from classdoclib_Folders where order by pkey ASC");
+				$db->queryOne("select pkey from classdoclib_Folders  order by pkey ASC");
 				$openFolder = $db->Record[0]; 
 			}
 		}
 		
-		if ($openFolder == '')
-		{	$openFolder = $this->get_webimages_folder_id($u->activeClassTaught->id_classes);//$lcObj->getvars[2];
+		if ($openFolder == '') {
+			$openFolder = $this->get_webimages_folder_id($u->activeClassTaught->facultyId);//$lcObj->getvars[2];
 		}
 		$openFolder = addSlashes($openFolder);
-
+		
 		if ($lcObj->getvars["order"]) { $u->sessionvars["filesorder"] = $lcObj->getvars["order"]; }
 
 
 		// get file categories (folders)
 		//$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes, 1, $lcObj->getvars[2]);
 		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes);
-
+		
 		while ($cat->traverse() ) {
 			if ($cat->p_CurrentNode->contents['pkey'] == $openFolder) {
 
@@ -111,14 +122,14 @@ class wysiwygimages extends classdoclibService {
 		$view = new FileWYSView($cat);
 		$view->id_of_folder = $lcObj->getvars[2];
 		$t['id_folder'] = intval($categoryKey);
-
+		
 		//grab files in this folder
 		$filearray = LC_file::getFromFolder($t['id_folder'],$lcObj->getvars["order"]);
-
+		
 		//data formatting
 		while(list($k,$v) = @each($filearray)) {
-			if (substr($v->mime, 0, 5) != 'image')
-			{	unset($filearray[$k]);
+			if (substr($v->mime, 0, 5) != 'image') {
+				unset($filearray[$k]);
 			}
 			$v->filedate = date("m/d/Y",strtotime($v->filedate));
 			if ($v->size > 999999) { $v->size = sprintf("%.1f",$v->size/1000000). '&nbsp;Mb'; }
@@ -155,17 +166,16 @@ class FileWYSView extends ListView{
 	 */
 	function renderAsExplorer($open='',$withControls=0, $a_files= '') {
 
-		if (is_array($a_files))
-		{	$this->a_filearray = $a_files;
+		if (is_array($a_files)) {
+			$this->a_filearray = $a_files;
 		}
 	
 		$ret = "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
 		$this->tree->reset();
 
-		while ($this->tree->traverse())
-		{
+		while ($this->tree->traverse()) {
 			/* shows specific and children folder*/
-			if ($this->tree->p_CurrentNode->contents['name'] != 'Web Images' && 
+			if ( !eregi("Images",$this->tree->p_CurrentNode->contents['name']) && 
 				$this->tree->p_CurrentNode->contents['parentKey'] == 0) {
 				$this->tree->p_CurrentNode->expanded = false;
 				continue;

@@ -1,4 +1,17 @@
 <?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 include_once(LIB_PATH."documentLibraryLib.php");
 include_once(LIB_PATH."LC_html.php");
@@ -33,20 +46,20 @@ class wysiwygcontentlinks extends classdoclibService {
 		$openFolder =  $lcObj->getvars[1];
 		
 		if (($openFolder=='') && ($openFolder != 0)) {  
-			$openFolder=$u->sessionvars["openFolder"]; 
+#			$openFolder=$u->sessionvars["openFolder"]; 
 			if ($openFolder=='') {
-				$db->queryOne("select pkey from classdoclib_Folders where order by pkey ASC");
+				$db->queryOne("select pkey from classdoclib_Folders order by pkey ASC");
 				$openFolder = $db->Record[0]; 
 			}
 		}
 		
 		$openFolder = addSlashes($openFolder);
-
+		
 		if ($lcObj->getvars["order"]) { $u->sessionvars["filesorder"] = $lcObj->getvars["order"]; }
 
 		//$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes, 1, $lcObj->getvars[2]);
 		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes);
-
+		
 		while ($cat->traverse() ) {
 			if ($cat->p_CurrentNode->contents['pkey'] == $openFolder) {
 
@@ -103,17 +116,15 @@ class FileWYSView extends ListView{
 	 * @return	String	HTML output
 	 */
 	function renderAsExplorer($open='',$withControls=0, $a_files= '') {
-
-		if (is_array($a_files))
-		{	$this->a_filearray = $a_files;
+		
+		if (is_array($a_files)) {
+			$this->a_filearray = $a_files;
 		}
 	
 		$ret = "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
 		$this->tree->reset();
-
 		
-		while ($this->tree->traverse())
-		{
+		while ($this->tree->traverse()) {
 			/* shows specific and children folder*/
 			/**
 			 // removed becuase assignments changed and now we are allowing linkage
@@ -122,7 +133,7 @@ class FileWYSView extends ListView{
 			
 			*/
 			//debug($this->tree->p_CurrentNode->contents);
-			if (($this->tree->p_CurrentNode->contents['name'] == 'Web Images' && 
+			if ( (ereg("Images",$this->tree->p_CurrentNode->contents['name']) && 
 				$this->tree->p_CurrentNode->contents['parentKey'] == 0) || 				
 				($this->tree->p_CurrentNode->contents['name'] == 'Trash' && 
 				$this->tree->p_CurrentNode->contents['parentKey'] == 0)
