@@ -132,8 +132,8 @@ class cal extends FacultyService {
 		$c->eventCountURL = modurl('cal/event=viewDay');
 		
 		
-		$t['cal'] = $c->renderMonth($mut, $yut);
-		$t['calendar'] = $t['cal'];
+		$t['calendar'] = $c->renderMonth($mut, $yut);
+//		$t['calendar'] = $t['cal'];
 
 		$t['title'] = "Events for ".date("F Y");
 
@@ -146,6 +146,7 @@ class cal extends FacultyService {
 
 	function viewDayRun(&$db,&$u,&$arg,&$t) 
 	{
+
 		$mut = $arg->getvars['m'];
 		$yut = $arg->getvars['y'];
 		$dut = $arg->getvars['d'];
@@ -156,6 +157,7 @@ class cal extends FacultyService {
 		$ut = strtotime("$mut/$dut/$yut");
 		$start = strtotime("$mut/1/$yut");
 
+/*
 		$c = new cali($start,(strtotime("+1 months",$ut)-1), '', $u->activeClassTaught->id_classes, array_unique($u->groups));
 		$c->showTitle=false;
 		$c->showTimes = false;
@@ -166,10 +168,10 @@ class cal extends FacultyService {
 		$c->eventCountURL = modurl('cal/event=viewDay');
 		
 		$t['tinyCal'] = $c->renderMonth($arg->getvars['m'], $arg->getvars['y']);
+*/
 
 		# Returns all of the events schedule for the day passed to it.
 		$dayView = new cali($ut, ($ut+86399), '', $u->activeClassTaught->id_classes, array_unique($u->groups));
-
 		# Generates an HTML table for all events on given day.
 		$dayView->starttime = $this->_START_TIME;
 		$dayView->endtime = $this->_END_TIME;
