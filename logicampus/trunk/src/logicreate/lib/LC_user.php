@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 require_once(LIB_PATH.'User.php');
 
 	/**
@@ -485,7 +498,21 @@ class lcUser {
 	 */
 
 	function validateLogin($db) {
-	   $sql = "select count(username) from lcUsers where username='".$this->username."' and password='".$this->password."'";
+		/*
+		include(LIB_PATH."imap.php");
+		$j = new imap(array("username"=>$this->username,"password"=>$this->password));
+		if ($j->testConnectionOnly()) { 
+			$this->groups = array("pub","public","student");
+			return true;
+		} else { 
+			return false;
+		}
+		*/
+		if(USE_MD5_PASSWORDS==TRUE) { 
+		   	$sql = "select count(username) from lcUsers where username='".$this->username."' and password=md5('".$this->password."')";
+	   	} else { 
+			$sql = "select count(username) from lcUsers where username='".$this->username."' and password='".$this->password."'";
+		}
 	   $db->query($sql,false);
 
 	   $db->next_record();

@@ -230,6 +230,7 @@ define('LOGICAMPUS_VERSION','1.0.4');
 define('LOGICAMPUS_VERSION_STATUS','gamma');
 define('SITE_NAME','logicampus');
 define('SITE_DISPLAY_NAME','LogiCampus');
+define('USE_MD5_PASSWORDS',TRUE);
 
 
 //	http://www.foo.com/~user/home/
