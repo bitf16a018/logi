@@ -379,11 +379,11 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		// number of defined correct answers, IT'S RIGHT
 		if ($numCorrect == $c_count) {
 			//we don't want to save all the time so...
-			if ( $naswerObj->pointsEarned != $this->questionPoints )
-			$naswerObj->set('pointsEarned',$this->questionPoints);
+			if ( $answerObj->pointsEarned != $this->questionPoints )
+			$answerObj->set('pointsEarned',$this->questionPoints);
 		} else {
 			// WRONG
-			if ( $naswerObj->pointsEarned != 0 )
+			if ( $answerObj->pointsEarned != 0 )
 			$answerObj->set('pointsEarned',0);
 		}
 
