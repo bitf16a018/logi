@@ -997,8 +997,8 @@ class cali {
 		$temp = "<tr class='{$this->monthHeader1}'>";
 		
 		if ($this->noNextPrev == false)
-		{	$temp .= "<td id=\"prevnext\" width=\"8%\"><a href='{$this->monthReviewURL}/m=$month/y=".($year-1)."'><img src=\"".IMAGES_URL."prevprev.gif\" border=\"0\"></a></td>";
-			$temp .= "<td id=\"prevnext\" width=\"8%\"><a href='{$this->monthReviewURL}/m=$prevMonth/y=$prevYear'><img src=\"".IMAGES_URL."prev.gif\" border=\"0\"></a></td>";
+		{	$temp .= "<td id=\"prevnext\" width=\"8%\"><a href='{$this->monthReviewURL}m=$month/y=".($year-1)."'><img src=\"".IMAGES_URL."prevprev.gif\" border=\"0\"></a></td>";
+			$temp .= "<td id=\"prevnext\" width=\"8%\"><a href='{$this->monthReviewURL}m=$prevMonth/y=$prevYear'><img src=\"".IMAGES_URL."prev.gif\" border=\"0\"></a></td>";
 		}
 		
 		if ($this->linkMonthName)
