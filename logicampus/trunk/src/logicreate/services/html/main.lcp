@@ -5,7 +5,7 @@ class html extends BasicAuth {
 var $presentor = "htmlViewer";
 
 	function run (&$db,&$u,&$lcObj,&$t) {
-		$lcObj->templateStyle='public';
+		$lcObj->templateStyle='private';
 		$info[] = $lcObj->getvars[1];
 	//	if ($lcObj->getvars[2]) { $info[] = $lcObj->getvars[2]; }
 	//	if ($lcObj->getvars[3]) { $info[] = $lcObj->getvars[3]; }
