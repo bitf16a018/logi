@@ -716,7 +716,7 @@ $db->query($sql);
 			$newuser = new lcUser();
 			$newuser->username = $usr;
 			$newuser->password = $pwd;
-			$newuser->email = $usr.STUDENT_EMAIL_DOMAIN;
+			$newuser->email = $usr.'@'.STUDENT_EMAIL_DOMAIN;
 			$newuser->userType = USERTYPE_STUDENT;
 
 			$newuser->profile = new UserProfile($newuser->username,USERTYPE_STUDENT);
@@ -861,7 +861,7 @@ ob_end_clean();
 			$newuser = new lcUser();
 			$newuser->username = $usr;
 			$newuser->password = $pwd;
-			$newuser->email = $usr.STUDENT_EMAIL_DOMAIN;
+			$newuser->email = $usr.'@'.STUDENT_EMAIL_DOMAIN;
 			$newuser->userType = USERTYPE_STUDENT;
 
 			$newuser->profile = new UserProfile($newuser->username,USERTYPE_STUDENT);
