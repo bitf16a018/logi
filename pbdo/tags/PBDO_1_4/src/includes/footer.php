@@ -1,0 +1,6 @@
+<?
+
+
+include('templates/'.$templateName);
+
+?>
