@@ -227,8 +227,9 @@ class MenuObj extends PersistantObject {
 			$ret .= '&nbsp;&nbsp;&bull;<a class="menuitem"
 			href="'.APP_URL.'gradebook/main/id_classes='.$v->id_classes.'">Gradebook</a><hr>';
 		}
-		
-		$ret = substr($ret,0,-4);
+		if (substr($ret,0,-4)=='<hr>') { 	
+			$ret = substr($ret,0,-4);
+		}
 		return $ret;
 	}
 	}
