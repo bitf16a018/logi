@@ -38,8 +38,7 @@ class semestercopy extends FacultyService  {
 	var $__errors = array();
 	
 	# Displays Classes by default (chooses current semster by default)	
-	function Run($db,&$u,&$lc,&$t)
-	{
+	function Run($db,&$u,&$lc,&$t) {
 		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_main';
 
@@ -126,8 +125,8 @@ class semestercopy extends FacultyService  {
 	function selectWithRun($db, &$u, &$lc, &$t) {
 		$fl_ismyclass = false;
 		
-		$id_classes = (int)$lc->postvars['id_classes_update'];
-		$id_classes_with = (int)$lc->postvars['id_classes_with'];
+		$id_classes = (int)$lc->postvars['id_classes_update_to'];
+		$id_classes_with = (int)$lc->postvars['id_classes_update_from'];
 		
 		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_selectWith';
