@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 // this is different from the documentLibraryLib.php file
 // that one deals with classdoclib_ table names, this one 
 // with standard doclib stuff.  unfortunately, the 
@@ -89,7 +102,7 @@ class LC_file extends PersistantObject{
 		$ret = array();
 		$db = DB::getHandle();
 		$sql = "select * from ".$this->prefix."doclib_Files where folder='$folder' order by file";
-
+		
 		if ($order) 
 			$sql .= "order by $order";
 		$db->RESULT_TYPE = MYSQL_ASSOC;

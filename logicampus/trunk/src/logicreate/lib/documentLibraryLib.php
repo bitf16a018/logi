@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 include_once(LIB_PATH."LC_Categories.php");
 
@@ -33,6 +46,10 @@ class classdoclibService extends FacultyService {
 	function preTemplate(&$obj,&$t) {
 		//handle trash display
 		$db = DB::getHandle();
+		
+		// __FIXME__ - mgk 8/18/04 -
+		// need to remove references to class_id - 
+		// doclib stuff should be teacher-based, not class-based.
 		$db->query('select count(class_id) from classdoclib_Trash where owner = \''.$obj->user->username.'\'
 		and class_id = '.$obj->user->activeClassTaught->id_classes);
 		$db->next_record();
@@ -112,9 +129,9 @@ FROM
 LEFT JOIN 
 	classdoclib_Folders ON (classdoclib_Folders.pkey = classdoclib_Files.folder) 
 WHERE 
-	(classdoclib_Files.pkey = '.$pkey.'
-	AND class_id = '.sprintf('%d',$class).')
+	(classdoclib_Files.pkey = '.$pkey.')
 ';
+#	AND class_id = '.sprintf('%d',$class).')
 
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
@@ -264,15 +281,18 @@ SELECT
 	classdoclib_Folders.* 
  FROM
  	classdoclib_Folders
- WHERE
-	class_id = '.sprintf('%d',$class).'
+ WHERE 1
 	AND (classdoclib_Folders.owner = "'.$u->username.'"'.
 		(((int)$id_specific_folder > 0) ? ' and pkey='.(int)$id_specific_folder : '')
 		.')
  ORDER BY
 	parentKey,
  	name';
-
+	
+	// mgk 8/18/04 - getting rid of class-specific content folders
+	// will be only teacher-based
+//	class_id = '.sprintf('%d',$class).'
+		
 		$db = DB::getHandle();
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
@@ -342,7 +362,7 @@ SELECT
 	function copyFolder($newfid) {
 
 		$db = DB::getHandle();
-		$db->query("insert into classdoclib_Folders (name,parentKey,owner,notes,class_id) VALUES ('$this->name','$newfid','$this->owner','$this->notes',$this->class)");
+		$db->query("insert into classdoclib_Folders (name,parentKey,owner,notes) VALUES ('$this->name','$newfid','$this->owner','$this->notes')");
 		$newFolderID = $db->getInsertID();
 
 		$this->getContents();
@@ -567,7 +587,7 @@ class FileMGTView extends ListView{
 	function renderAsExplorer($open='',$withControls=0) {
 		$ret = "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
 		$this->tree->reset();
-
+		
 		while ($this->tree->traverse() ) {
 			//keep folders closed by default
 			if ($this->tree->p_CurrentNode->expanded != true) { $this->tree->p_CurrentNode->expanded = false; }
