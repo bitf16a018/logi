@@ -1,4 +1,17 @@
 <?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'SiteForms.php');
@@ -29,11 +42,11 @@ Class LessonContent extends FacultyService
 	var $inactivelinks = array( 'Content' );
 	var $sectionTitle = 'Lesson Content';
 
-	function LessonContent()
-	{
-		if (HAS_TIDY)
-		{
+	function LessonContent() {
+		if (HAS_TIDY) { 
 			$this->applinks['Import Content'] = 'lessonContent/event=import';	
+
+			$this->applinks['Import Content - NO TIDY'] = 'lessonContent/event=import';	
 		}
 		$this->applinks['Add a Lesson'] = 'lessonManager/event=edit/';
 
@@ -247,7 +260,8 @@ Class LessonContent extends FacultyService
 		$this->inactivelinks[] = 'Upload Content';
 		if (!HAS_TIDY)
 		{
-			$lc->templateName = 'lessonContent_notidy';
+		#	$lc->templateName = 'lessonContent_notidy';
+			$t['notidy'] = true;
 		}
 
 	}
@@ -272,8 +286,12 @@ Class LessonContent extends FacultyService
 		}
 
 		// HTML Tidy
-		$tidied = shell_exec( "cat {$lc->uploads['thefile']['tmp_name']} | "
+		if (HAS_TIDY) { 
+			$tidied = shell_exec( "cat {$lc->uploads['thefile']['tmp_name']} | "
 			.DOCUMENT_ROOT."/../logicreate/bin/tidy" );
+		} else { 
+			$tidied = file_get_contents($lc->uploads['thefile']['tmp_name']);
+		}
 
 		// strip the body tags and everything outside of them
 		$tidied = preg_replace('/^.*?<\s*body[^>]*>/is', '', $tidied);
