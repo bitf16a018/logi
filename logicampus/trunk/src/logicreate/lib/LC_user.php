@@ -458,7 +458,12 @@ class lcUser {
 			$this->_sessionKey = $PHPSESSID;
 		}
 		$this->sessionvars[_username] = $this->username;
-		$val = base64_encode(gzcompress(serialize($this->sessionvars)));
+		if (function_exists("gzcompress")) { 
+			$val = base64_encode(gzcompress(serialize($this->sessionvars)));
+		} else {
+			$val = base64_encode((serialize($this->sessionvars)));
+
+		}
 		$this->_origSessionData = crc32($val);
 		$sessid = $this->_sessionKey;
 
