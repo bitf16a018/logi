@@ -44,6 +44,9 @@ class users extends AdminService {
 		$arg->templateStyle = 'private';
 		$this->sectionTitle = 'Adding a New User';
 
+		//fix for a bug in the searching
+		$t['opt1'] = 'opt1=blank';
+
                 $this->where = '1=1';
                 $this->order = " lc.username";
                 $this->table = " lcUsers";
@@ -52,11 +55,11 @@ class users extends AdminService {
 
 	}
 
+
 	/**
 	 * Search for users based on any criteria
 	 *
-   */ 
-
+	 */ 
 	function anySearchRun(&$db, &$u, &$arg, &$t) {
 		
 		$arg->templateName = 'users_main';
@@ -134,6 +137,9 @@ class users extends AdminService {
 			$s[$db->Record['id_semesters']] = $db->Record['semesterId'];
 		}
 		$t['semesters'] = makeOptions($s, (int)$this->semester);
+
+		//fix for search bug
+		$t['opt1'] = 'opt1=blank';
 
 	}
 
