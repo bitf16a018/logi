@@ -86,7 +86,7 @@
 
 
 	<message id ="Classroom Overview" domain="system" status="fuzzy">
-		教室概况 | 教室综观
+		教室概况
 	</message>
 	<!--Classroom Overview-->
 	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
@@ -157,8 +157,8 @@
 	<usage id ="Message of the Day" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="5"/>
 
 
-	<message id ="Student Communication" domain="system" status="fuzzy">
-		学生通讯
+	<message id ="Student Communication" domain="system" status="">
+		通讯学生
 	</message>
 	<!--Student Communication-->
 	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
@@ -200,7 +200,7 @@
 
 
 	<message id ="Content" domain="system" status="">
-		书言 | 书面
+		教材内容
 	</message>
 	<!--Content-->
 	<usage id ="Content" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="47"/>
@@ -249,7 +249,7 @@
 
 
 	<message id ="Student Presentation" domain="system" status="">
-		Student Presentation
+		学生演出
 	</message>
 	<!--Student Presentation-->
 	<usage id ="Student Presentation" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="58"/>
@@ -277,7 +277,7 @@
 
 
 	<message id ="Webliography" domain="system" status="">
-		Webliography
+		参考网页
 	</message>
 	<!--Webliography-->
 	<usage id ="Webliography" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="60"/>
@@ -304,8 +304,8 @@
 	<usage id ="Contact Students" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="70"/>
 
 
-	<message id ="Discussion Forums" domain="system" status="fuzzy">
-		商量板 | 商量牌
+	<message id ="Discussion Forums" domain="system" status="">
+		论坛板
 	</message>
 	<!--Discussion Forums-->
 	<usage id ="Discussion Forums" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="72"/>
