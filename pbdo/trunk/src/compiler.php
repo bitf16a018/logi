@@ -65,7 +65,7 @@ class PBDO_Compiler {
 	public $workingColumn;
 	public $workingEntity;
 	public $workingForm;
-	public $workingConstraint;
+	public $workingRelationship;
 
 	public $hasPDOM 		= false;
 	public $dbtype 		= '';
@@ -170,7 +170,6 @@ class PBDO_Compiler {
 			$this->workingEntity = PBDO_ParsedEntity::createFromXMLObj($table->xmlnode);
 			$this->workingEntity->setVersion(PBDO_Compiler::$model->getVersion());
 			PBDO_Compiler::$model->addEntity($this->workingEntity);
-			//print "Found one table (".$this->workingEntity->displayName.")...\n";
 		}
 
 
@@ -237,17 +236,22 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 
 
 	function visitForeignKeyNode(&$fkey) {
-		$this->foreignKeys[] = array($fkey->xmlnode,$staticNodes[++$x],$this->workingTable->name);
-		//the code above is a little old, it just passes the dom node
-		// along to the class
-		unset($this->workingConstraint);
-		$this->workingConstraint = 
-			PBDO_ParsedConstraint::ParsedConstraintFactory(
-					$this->dbtype,
-					$this->workingTable->name,
-					$fkey->xmlnode->getAttribute('foreignTable')
+		unset($this->workingRelationship);
+		$this->workingRelationship = new PBDO_ParsedRelationship(
+						$this->workingEntity->name,
+						$fkey->xmlnode->getAttribute('foreignTable')
 					);
-		$this->workingEntity->addConstraint($this->workingConstraint);
+		PBDO_Compiler::$model->addRelationship($this->workingRelationship);
+	}
+
+
+	function visitReferenceNode(&$ref) {
+		$this->workingRelationship->setAttribA( 
+			$ref->xmlnode->getAttribute('local')
+			);
+		$this->workingRelationship->setAttribB( 
+			$ref->xmlnode->getAttribute('foreign')
+			);
 	}
 
 
@@ -275,30 +279,20 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 		$dataModel->setVersion( $p->xmlnode->getAttribute('version') );
 
 		PBDO_Compiler::$model =& $dataModel;
-	/* TODO: fix this
-		$this->database = PBDO_ParsedDatabase::parsedDatabaseFactory($this->dbtype,$this->projectName);
-		$this->database->setVersion($p->xmlnode->getAttribute('version'));
-		*/
 	}
 
 
-	function visitReferenceNode(&$ref) {
-		$top = count($this->foreignKeys)-1;
-		$this->foreignKeys[$top][1] = $ref->xmlnode;
-		$this->workingConstraint->localColumn = 
-			$ref->xmlnode->getAttribute('local');
-		$this->workingConstraint->foreignColumn = 
-			$ref->xmlnode->getAttribute('foreign');
-//		print_r($ref);
-	}
-
-
+	/*
+	Move to a form plugin?
+	TODO: Decide if this should be part of the XML
+	
 	function visitFormNode(&$form) {
 		$panel = new PDOM_Panel();
 		$panel->appendChild(new PDOM_Label($form->xmlnode->attributes['name']->value));
 		$panel->appendChild(new PDOM_TextInput());
 		$this->workingForm->appendChild($panel);
 	}
+	*/
 
 }
 

@@ -16,12 +16,15 @@ class PBDO_PluginManager {
 			ob_end_flush();
 			flush();
 			flush();
+			echo "=================================================================\n";
 			echo "Plugin Manager: Initializing Plugin (".$plugin->displayName.")\n";
 			$plugin->initPlugin();
 			echo "Plugin Manager: Starting Plugin (".$plugin->displayName.")\n";
 			$plugin->startPlugin();
 			echo "Plugin Manager: Destroying Plugin (".$plugin->displayName.")\n";
 			$plugin->destroyPlugin();
+			echo "=================================================================\n\n";
+
 		}
 	}
 }

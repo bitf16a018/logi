@@ -112,7 +112,10 @@ if (MSSQL) {
 
 //print output
 print "\n";
-
+print_r(PBDO_Compiler::$model->relationships);
+/*
+DEPRECATED
+TODO: move to relevant plugins
 //set foreign keys and one-to-many relations
 foreach($engine->foreignKeys as $k => $v) {
 	$foreignTable = $v[0]->getAttribute('foreignTable');
@@ -135,7 +138,7 @@ foreach($engine->foreignKeys as $k => $v) {
 	}
 	print "\n";
 }
-
+*/
 
 if (!NO_PHP) {
 	//print to files
@@ -243,7 +246,7 @@ if ( !OLD_STYLE ) {
 	$pluginManager = new PBDO_PluginManager();
 	
 	$pluginManager->createNewPlugin('pbdo_plugin_code');
-	
+	$pluginManager->createNewPlugin('pbdo_plugin_sql');
 	
 	$pluginManager->runPlugins();
 
