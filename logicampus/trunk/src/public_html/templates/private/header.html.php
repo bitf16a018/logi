@@ -103,11 +103,11 @@
 		 	if ($obj->user->username != 'anonymous')
 			{ ?>
 			<p>
-			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>$obj->user->profile)) ?></div>
+			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>$obj->user->profile->values['firstname'])) ?></div>
 			</p>
 
 			<p>
-			<a href="<?=appurl('login/out/');?>">Logout</a>
+			<a href="<?=appurl('login/out/');?>"><?=lct('Logout')?></a>
 			</p>
 			</td></tr>
 			</table>
@@ -122,7 +122,7 @@
 				<strong><?=lct('password')?>:</strong><br/> 
 				 <input type="password" size="10" maxlength="32" name="password" /><br>
 				<input type="hidden" name="event" value="login"/>
-				<input type="submit" value="Login"/>
+				<input type="submit" value="<?=lct('Login')?>"/>
 				</form>
 			</td></tr>
 			</table>

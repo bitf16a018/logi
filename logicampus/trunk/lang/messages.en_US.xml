@@ -67,9 +67,60 @@
 
 
 	<message id ="welcome" domain="system">
-		welcome
+		Welcome, %s
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
 
+
+	<message id ="Access Denied!" domain="system">
+		Access Denied!
+	</message>
+	<!--Access Denied!-->
+	<usage id ="Access Denied!" file="../src/logicreate/content/err_access_denied.html" line="1"/>
+
+
+	<message id ="Classroom Overview" domain="system">
+		Classroom Overview
+	</message>
+	<!--Classroom Overview-->
+	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
+
+
+	<message id ="Classroom Portal Page" domain="system">
+		Classroom Portal Page
+	</message>
+	<!--Classroom Portal Page-->
+	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
+
+
+	<message id ="Logout" domain="system">
+		Logout
+	</message>
+	<!--Logout-->
+	<usage id ="Logout" file="../src/public_html/templates/private/header.html.php" line="110"/>
+
+
+	<message id ="Thanks!" domain="system">
+		Thanks!
+	</message>
+	<!--Thanks!-->
+	<usage id ="Thanks!" file="../src/logicreate/content/registerthanks.html" line="1"/>
+	<usage id ="Thanks!" file="../src/logicreate/content/loginthanks.html" line="1"/>
+
+
+	<message id ="You have logged in to our site successfully." domain="system">
+		You have logged in to our site successfully.
+	</message>
+	<!--You have logged in to our site successfully.-->
+	<usage id ="You have logged in to our site successfully." file="../src/logicreate/content/loginthanks.html" line="2"/>
+
+
+	<message id ="You have registered successfully with our site." domain="system">
+		You have registered successfully with our site.
+	</message>
+	<!--You have registered successfully with our site.-->
+	<usage id ="You have registered successfully with our site." file="../src/logicreate/content/registerthanks.html" line="2"/>
+
 </language>
+

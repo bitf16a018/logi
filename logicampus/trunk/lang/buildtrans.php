@@ -12,7 +12,7 @@ if ($filename == '') {
 	$locale = $argv[2];
 }
 if ($locale == '') {
-	$locale = 'en_US';
+	$locale = $filename;
 }
 
 function printHelp() {
@@ -72,12 +72,14 @@ foreach ($staticNodes as $id=>$node) {
 
 
 //STEP 5: print nodes as switch function
+ob_start();
 echo '<?
 
 header("Content-type:text/html; charset='.$staticNodes[0]->attributes['charset']->value.'");
 
 function lct($key,$args = "") {
 
+	extract($args);
 	switch($key) {
 ';
 	foreach ($staticNodes as $id=>$node) {
@@ -99,6 +101,19 @@ echo '
 	}
 }
 
-
 ?>';
+
+$contents = ob_get_contents();
+ob_end_clean();
+
+$xml = fopen("./lct.$locale.php",'w+');
+fwrite($xml,$contents,strlen($contents));
+fclose($xml);
+
+
+//STEP 6: print message to user
+?>
+Good, now you can move the file '<?="lct.$locale.php";?>'
+to the logicreate/lang/ directory.
+<?
 ?>

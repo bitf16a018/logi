@@ -19,3 +19,13 @@ translated file into a LogiCreate translation file with the following line:
 php ./buildtrans.php [en_US] > ../src/logicreate/lang/lct.php
 
 That will place the resulting translation file it the proper place.
+
+
+If you are updating a translation:
+===============================================================================
+Use the mergetrans.php to merge the latest messages.en_US.xml with your 
+locale's translation XML file.
+
+php ./mergetrans.php messages.my_LANG.xml messages.en_US.xml
+
+(this assumes that en_US will have words that are not in the my_LANG file)
