@@ -2,27 +2,27 @@
 <?
 	if ($t['motd']) {
 	?>
-	<div width="100%" style="border:1px solid #999999;background-color:#dddddd;margin:0 100px 15px 100px;padding:5px;"><b>Message of the Day:</b><p style="padding-left:20px;"><?=$t['motd'];?></p></div>
+	<div width="100%" style="border:1px solid #999999;background-color:#dddddd;margin:0 100px 15px 100px;padding:5px;"><b><?=lct('Message of the Day')?>:</b><p style="padding-left:20px;"><?=$t['motd'];?></p></div>
 	<?
 	}
 ?>
 
 <table width="100%" border="0" cellspacing="10" cellpadding="2">
   <tr> 
-    <td width="33%" valign="top" class="coursemaintitle">General Class Manager<br></td>
-    <td width="33%" valign="top" class="coursemaintitle">Content &amp; Lesson Links</td>
-    <td width="33%" valign="top" class="coursemaintitle">Student Communication</td>
+    <td width="33%" valign="top" class="coursemaintitle"><?=lct('General Class Manager')?><br></td>
+    <td width="33%" valign="top" class="coursemaintitle"><?=lct('Content &amp; Lesson Links')?></td>
+    <td width="33%" valign="top" class="coursemaintitle"><?=lct('Student Communication')?></td>
   </tr>
   <tr>
     <td valign="top">
 	<ol>
-	<li><a href="<?=modurl('cal/');?>">Calendar</a></li>
+	<li><a href="<?=modurl('cal/');?>"><?=lct('Calendar')?></a></li>
 
 	<li><a href="<?=modurl('classSetup');?>">Classroom Setup</a></li>
 
 	<li><a href="<?=modurl('dataexchange');?>">Export Class</a></li>
 
-	<li><a href="<?=APP_URL?>gradebook/">Gradebook</a></li>
+	<li><a href="<?=APP_URL?>gradebook/"><?=lct('Gradebook')?></a></li>
 
 	<li><a href="<?=APP_URL?>classmgr/syllabusManage">Syllabus</a></li>
 	

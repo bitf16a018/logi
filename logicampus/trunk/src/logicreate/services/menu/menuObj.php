@@ -205,7 +205,7 @@ class MenuObj extends PersistantObject {
 			href="'.APP_URL.'classroom/details/id_classes='.$v->id_classes.'">'.$v->courseFamily.$v->courseNumber.'</a><br>';
 			}
 			$ret .= '&nbsp;&nbsp;&bull;<a class="menuitem"
-			href="'.APP_URL.'classroom/gradebook/id_classes='.$v->id_classes.'">Gradebook</a><hr>';
+			href="'.APP_URL.'classroom/gradebook/id_classes='.$v->id_classes.'">'.lct('Gradebook').'</a><hr>';
 
 		}
 
@@ -225,7 +225,7 @@ class MenuObj extends PersistantObject {
 			$ret .= '<a class="menuitem"
 			href="'.APP_URL.'classmgr/display/id_classes='.$v->id_classes.'">'.$v->courseFamily.$v->courseNumber.' ('.$v->semesterID.')</a><br>';
 			$ret .= '&nbsp;&nbsp;&bull;<a class="menuitem"
-			href="'.APP_URL.'gradebook/main/id_classes='.$v->id_classes.'">Gradebook</a><hr>';
+			href="'.APP_URL.'gradebook/main/id_classes='.$v->id_classes.'">'.lct('Gradebook').'</a><hr>';
 		}
 		if (substr($ret,0,-4)=='<hr>') { 	
 			$ret = substr($ret,0,-4);

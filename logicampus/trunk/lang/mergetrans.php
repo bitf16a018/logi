@@ -170,7 +170,7 @@ function node2XML($m) {
 
 	echo "\n";
 	echo "\t";
-	echo '<message id ="'.$m->attributes['id']->value.'" domain="'.$m->attributes['domain']->value.'">';
+	echo '<message id ="'.$m->attributes['id']->value.'" domain="'.$m->attributes['domain']->value.'" status="'.$m->attributes['status']->value.'">';
 	echo "\n";
 	echo "\t\t";
 	echo $m->translation;
