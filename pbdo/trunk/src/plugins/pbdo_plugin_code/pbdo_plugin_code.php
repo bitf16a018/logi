@@ -197,7 +197,7 @@ class ParsedClass {
 		}
 		
 		foreach ($entity->getAttributes() as $a) {
-			$class->addAttribute( new ParsedAttribute($a->name,$a->type));
+			$class->addAttribute( new ParsedAttribute($a->name, $a->type, $a->isPrimary() ));
 		}
 //print_r($entity);exit();
 		return $class;
@@ -228,6 +228,9 @@ class ParsedClass {
 
 
 	function addAttribute($a) {
+		if ( $a->isPrimary() ) {
+			$this->setOID($a->colName);
+		}
 		$this->attributes[$a->colName] =  $a;
 	}
 
@@ -644,9 +647,10 @@ class ParsedAttribute {
 	var $complex = false;
 	var $possibleValues;
 	var $codeType;
+	private $isPrimary = false;
 
 
-	function ParsedAttribute($n,$t) {
+	function ParsedAttribute($n, $t, $pk=false) {
 		$t = strtolower($t);
 		$this->name = convertColName($n);
 		$this->colName = $n;
@@ -668,9 +672,22 @@ class ParsedAttribute {
 		  	$this->codeType = 'int';
 			break;
 		}
+
+		$this->setPrimary($pk);
 	}
 
 
+
+	function setPrimary($pk) {
+		$this->isPrimary = $pk;
+	}
+
+
+	function isPrimary() {
+		return $this->isPrimary;
+	}
+
+/*
 	function createFromXMLObj($obj) {
 		foreach( $obj->attributes as $k=>$v) {
 			if ($v->name == 'name') {
@@ -685,7 +702,7 @@ class ParsedAttribute {
 		$x = new ParsedAttribute($n,$t);
 		return $x;
 	}
-
+*/
 
 	function toPHP() {
 		return 'var $'.$this->name;
