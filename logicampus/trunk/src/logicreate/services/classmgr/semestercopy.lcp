@@ -4,8 +4,7 @@
 include_once(LIB_PATH.'xmlparser.php');
 
 
-class semestercopy extends FacultyService 
-{
+class semestercopy extends FacultyService  {
 	
 	// form stuff
 	var $cleanedArray = array();
@@ -58,10 +57,12 @@ class semestercopy extends FacultyService
 		
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		while ($db->next_record())
-		{	$t['selections'][$db->Record['id_classes']] = $db->Record;
+		while ($db->next_record()) {
+		//	$t['selections'][$db->Record['id_classes']] = $db->Record;
+			$class[$db->Record['id_classes']] = $db->Record['courseFamilyNumber']." ".
+			htmlentities($db->Record['courseName'],ENT_QUOTES)." (".$db->Record['semesterId'].")";
 		}
-
+		$t['options'] = makeOptions($class);
 	}
 	
 	
@@ -72,8 +73,7 @@ class semestercopy extends FacultyService
 	 *	out the previous selected semester in run() to show which one is going to be
 	 *	updated
 	 */
-	function selectClassRun($db, &$u, &$lc, &$t)
-	{
+	function selectClassRun($db, &$u, &$lc, &$t)  {
 		$fl_ismyclass = false;
 		$id_classes = (int)$lc->postvars['id_classes_update'];
 		
@@ -98,10 +98,9 @@ class semestercopy extends FacultyService
 	
 		$db->query($sql);
 
-		while ($db->next_record())
-		{	
-			if ($id_classes == $db->Record['id_classes'])
-			{	$db->Record['id_classes_update'] = $db->Record['id_classes'];
+		while ($db->next_record()) {
+			if ($id_classes == $db->Record['id_classes']) {
+				$db->Record['id_classes_update'] = $db->Record['id_classes'];
 				$t['selected'] = $db->Record;
 				$fl_ismyclass = true;
 			}
@@ -110,8 +109,8 @@ class semestercopy extends FacultyService
 			
 		}
 		
-		if ($fl_ismyclass == false)
-		{	// error, you didn't select a class or you didn't select one that is yours.
+		if ($fl_ismyclass == false) {
+			// error, you didn't select a class or you didn't select one that is yours.
 		 	$this->run($db, $u, $lc, $t);
 		}
 		
@@ -124,8 +123,7 @@ class semestercopy extends FacultyService
 	 * We are going to try and find out if we can verify that is my class.
 	 *
 	 */
-	function selectWithRun($db, &$u, &$lc, &$t)
-	{
+	function selectWithRun($db, &$u, &$lc, &$t) {
 		$fl_ismyclass = false;
 		
 		$id_classes = (int)$lc->postvars['id_classes_update'];
@@ -151,21 +149,20 @@ class semestercopy extends FacultyService
 		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 		
 		$db->query($sql);
-		if ($db->getNumRows() == 2)
-		{	// pushing to template
+		if ($db->getNumRows() == 2) {
+			// pushing to template
 			$t['update'] = $this->getClass($id_classes, $u->profile->get('username'), $db);
 			$t['with'] = $this->getClass($id_classes_with, $u->profile->get('username'), $db);
 			
-		} else
-		{	// error, you didn't select a class or you didn't select one that is yours.
+		} else {
+			// error, you didn't select a class or you didn't select one that is yours.
 		 	$this->run($db, $u, $lc, $t);
 		}
 		
 	}
 	
 	
-	function selectYouSureRun($db, &$u, &$lc, &$t)
-	{
+	function selectYouSureRun($db, &$u, &$lc, &$t) {
 		$id_classes_to = (int)$lc->postvars['id_classes_update'];
 		$id_classes_from = (int)$lc->postvars['id_classes_with'];
 		$ic_sure = $lc->postvars['ic_sure'];
@@ -192,13 +189,13 @@ class semestercopy extends FacultyService
 		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 		
 		$db->query($sql);
-		if ($db->getNumRows() == 2)
-		{	// pushing to template
+		if ($db->getNumRows() == 2) {
+			// pushing to template
 			$t['update'] = $this->getClass($id_classes_to, $u->profile->get('username'), $db);
 			$t['with'] = $this->getClass($id_classes_from, $u->profile->get('username'), $db);
 			
-		} else
-		{	// error, you didn't select a class or you didn't select one that is yours.
+		} else {
+			// error, you didn't select a class or you didn't select one that is yours.
 		 	$this->run($db, $u, $lc, $t);
 		}
 
@@ -220,9 +217,7 @@ class semestercopy extends FacultyService
 	 *		Wipes out selected classes information
 	 *		and imports backup file's info into it
 	 */
-	function semesterCopyClass($id_classes_from, $id_classes_to, &$db)
-	{
-
+	function semesterCopyClass($id_classes_from, $id_classes_to, &$db) {
 
 		//all this code sucks, needs to use PBDO
 

@@ -1,37 +1,24 @@
 <?=$t['sectionheader'];?>
 
+<form method="post" action='<?=modurl("semestercopy/event=selectWith");?>'>
 
-<h4>Which course would you like to copy TO?</h4>
-
-<form method="post">
-
-<table cellpadding="3" cellspacing="1" border="0" width="100%">
-<tr class="tabletitle">
-	<td></td>
-	<td><B>Semester ID</B></td>
-	<td><B>Course</B></td>
-	<td><B>Course Name</B></td>
-	<td><B>Class ID</B></td>
+<table>
+<tr>
+<td valign='top'>
+<h4>FROM course</h4>
+<select name='id_classes_update_from' size='10'>
+<?=$t['options'];?>
+</select>
+</td>
+<td valign='top'>
+<h4>TO course</h4>
+<select name='id_classes_update_to' size='10'>
+<?=$t['options'];?>
+</select>
+</td>
 </tr>
-<?php
-
-	foreach($t['selections'] as $class)
-	{
-		echo '
-		<tr>
-			<td><input type="radio" name="id_classes_update" value="'.$class['id_classes'].'"
-				/></td>
-			<td>'.$class['semesterId'].'</td>
-			<td>'.$class['courseFamilyNumber'].'</td>
-			<td>'.$class['courseName'].'</td>
-			<td>'.$class['id_classes'].'</td>
-		</tr>';
-		
-	}
-
-?>
 </table>
 
-<input type="hidden" name="event" value="selectClass">
 <input type="submit" value="Continue >>">
 </form>
+
