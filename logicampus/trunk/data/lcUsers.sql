@@ -1,7 +1,7 @@
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (1, 'admin', md5('admin'), 'admin@admin.com', '|admin|public|reg|', '2003-11-06 14:55:54', 1);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (3, 'teacher', md5('teacher'), 'teacher@email.com', '|public|reg|faculty|', '2003-11-06 15:12:19', 3);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (99, 'student', md5('student'), 'student@email.com', '|public|reg|student|', '2003-11-06 15:13:40', 2);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (4, 'student1', md5('student1)', 'student1@email.com', '|public|reg|student|', '2003-11-06 15:13:40', 2);
+INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (4, 'student1', md5('student1'), 'student1@email.com', '|public|reg|student|', '2003-11-06 15:13:40', 2);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (5, 'staff', md5('staff'), 'staff@email.com', '|hdadmin|hdstaff|public|reg|', '2003-11-06 15:14:22', 1);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (6, 'student2', md5('student2'), 'stu2@email.com', '|public|reg|student|', '2003-11-06 16:20:26', 2);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (7, 'student3', md5('student3'), 'stu3@email.com', '|public|reg|student|', '2003-11-06 16:21:55', 2);
