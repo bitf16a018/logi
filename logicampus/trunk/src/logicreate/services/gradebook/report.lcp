@@ -163,6 +163,7 @@ class report extends FacultyService {
 		// get all students' grades and populate the tables
 		$counter = $columnsPerPage;
 		$curRow = 1; // start on the second row
+		reset($gradebook->students);
 		while ( list($username,$stud) = @each($gradebook->students) ) {
 			reset($gradebook->entries);
 			for ( $x=0; $x<$tableCount; $x++ ) {
