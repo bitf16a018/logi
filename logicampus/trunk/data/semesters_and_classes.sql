@@ -27,9 +27,8 @@ INSERT INTO courses (id_courses, courseFamily, courseNumber, courseName, courseD
 INSERT INTO courses (id_courses, courseFamily, courseNumber, courseName, courseDescription, preReq1, preReq2, preReq3, preReq4, coReq1, coReq2, coReq3, coReq4) VALUES (8, 'COSC', 1420, 'C Programming', 'Structured programming technique using the C language.', '', '', '', '', '', '', '', '');
 
 
-INSERT INTO classes VALUES (1, 6, 1, '1111\n1112', 'Internet', 'teacher', 'BUSG', 1315, 'BUSG1315', '', 0, 0);
+INSERT INTO classes VALUES (1, 6, 1, '1111\n1112', 'Internet', 'teacher1', 'BUSG', 1315, 'BUSG1315', '', 0, 0);
 
-INSERT INTO classes VALUES (2, 6, 2, '1111\n1112', 'Internet', 'teacher', 'BUSG', 1315, 'BUSG1315', '', 0, 0);
 
 
 INSERT INTO class_gradebook VALUES (1, 1, '0', '0', '0', '0', '0', 0, '', 0, 0);
