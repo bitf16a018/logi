@@ -680,7 +680,7 @@ function remove_first_comma($string)
 						{	$sql = $this->remove_first_comma($sql);
 						}
 						
-						$this->obj_db->query($sql);
+						$this->obj_db->query(addslashes($sql));
 						//execute query 
 						$this->__errors[] = __LINE__. ' '. mysql_error();
 						break;
