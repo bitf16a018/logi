@@ -1,0 +1,12 @@
+The scripts directory contains different shell scripts to handle
+different things.  Any files that are added to this directory need to
+be updated in this README.
+
+
+setpermissions.sh
+	Description:
+		Used during installation to set permissions.  
+	Example Usage:  
+		sh setpermission.sh   or  ./setpermission.sh
+	Status:
+		Beta
