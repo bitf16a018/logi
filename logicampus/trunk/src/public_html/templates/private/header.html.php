@@ -103,7 +103,7 @@
 		 	if ($obj->user->username != 'anonymous')
 			{ ?>
 			<p>
-			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>ucfirst($obj->user->profile->get('firstname')) )?></div>
+			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>$obj->user->profile)) ?></div>
 			</p>
 
 			<p>
@@ -115,10 +115,11 @@
 
 			<? } else { ?>
 			<p>
-				<strong><?=lct('username')?>:</strong><br>
 				<form method="POST" action="<?=APP_URL?>login/main">
+				<strong><?=lct('username')?>:</strong><br/>
 				 <input type="text" size="10" maxlength="32" name="username" />
-				<strong><?=lct('password')?>:</strong><br> 
+				 <br/>
+				<strong><?=lct('password')?>:</strong><br/> 
 				 <input type="password" size="10" maxlength="32" name="password" /><br>
 				<input type="hidden" name="event" value="login"/>
 				<input type="submit" value="Login"/>
