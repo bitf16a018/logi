@@ -74,9 +74,28 @@ include(LIB_PATH."LC_db.php");
 include_once(LIB_PATH."LC_registry.php");
 include_once(LIB_PATH."lc_SQL.php");
 include_once(LIB_PATH."LC_html.php");
-if (!@include_once(LANG_PATH."lct.php") ) {
+
+
+
+// ************* I18N ******************************
+//if get vars, switchlocale, then set a cookie
+if ( strlen($_GET['switchlocale']) == 5 || strlen($_GET['switchlocale']) == 3) {
+	$_COOKIE['locale'] = $_GET['switchlocale'];
+	setcookie('locale',$_GET['switchlocale'],0);
+}
+//determind language choice from cookie
+if ( strlen($_COOKIE['locale']) == 5 || strlen($_COOKIE['locale']) == 3) {
+	define('LOCALE', $_COOKIE['locale']);
+} else {
+	define('LOCALE', 'en_US');
+}
+
+if (!@include_once(LANG_PATH."lct.".LOCALE.".php") ) {
 	include_once(LANG_PATH."fallback.php");
 }
+// ************* I18N ******************************
+
+
 
 $lcObj = new lcSystem();
 $lcTemplate = array('cssFile'=>'site.css');
