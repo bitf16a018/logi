@@ -55,30 +55,30 @@ class PBDO_Plugin_Code extends PBDO_Plugin {
 		foreach($this->codeStack as $v) {
 			//find out if file already exists
 			unset($saved);
-			if ( @file_exists($codePath.$v->name.".".$v->codeName) ) {
-				$file = 	fopen($codePath.$v->name.".".$v->codeName,'r+');
+			if ( @file_exists($codePath.$v->codeName.".".$v->codeExt) ) {
+				$file = 	fopen($codePath.$v->codeName.".".$v->codeExt,'r+');
 				//search for line that defines custom class
 				while ($line = fgets($file,4096) ) {
-					if ( strpos($line, $v->name." extends ".$v->name."Base {\n")  ) {
+					if ( strpos($line, $v->codeName." extends ".$v->codeName."Base {\n")  ) {
 						//save from here to end
 						while ( $line = fgets($file,4096) ) 
 						$saved .= $line;
 					}
 				}
 				//write out everything but custom class
-				print "Re-Writing '".$codePath.$v->name.".".$v->codeName."'...\n";
+				print "Re-Writing '".$codePath.$v->codeName.".".$v->codeExt."'...\n";
 	
 				//append found custom class definition to end of $file
 				$output = $v->toCode(false);
 				$output .=  $saved;
 				fclose($file);
-				$file = fopen($codePath.$v->name.'.'.$v->codeName,'w+');
+				$file = fopen($codePath.$v->codeName.'.'.$v->codeExt,'w+');
 				fputs($file,$output,strlen($output));
 				fclose($file);
 			} else {
-				if ($v->codeName != 'java') {
-				  $file = fopen($codePath.$v->name.'.'.$v->codeName,'w+');
-				  print "Writing '".$codePath.$v->name.".".$v->codeName."'...\n";
+				if ($v->codeExt != 'java') {
+				  $file = fopen($codePath.$v->codeName.'.'.$v->codeExt,'w+');
+				  print "Writing '".$codePath.$v->codeName.".".$v->codeExt."'...\n";
 				  $output = $v->toCode();
 				  fputs($file,$output,strlen($output));
 				  fclose($file);
@@ -86,26 +86,26 @@ class PBDO_Plugin_Code extends PBDO_Plugin {
 				  //do all 4 parts in one call, store internal to the object
 				  $v->toCode();
 	
-				  $file = fopen($codePath.$v->name.'Base.'.$v->codeName,'w+');
-				  print "Writing '".$codePath.$v->name."Base.".$v->codeName."'...\n";
+				  $file = fopen($codePath.$v->codeName.'Base.'.$v->codeExt,'w+');
+				  print "Writing '".$codePath.$v->codeName."Base.".$v->codeExt."'...\n";
 				  $output = $v->baseClass;
 				  fputs($file,$output,strlen($output));
 				  fclose($file);
 	
-				  $file = fopen($codePath.$v->name.'PeerBase.'.$v->codeName,'w+');
-				  print "Writing '".$codePath.$v->name."PeerBase.".$v->codeName."'...\n";
+				  $file = fopen($codePath.$v->codeName.'PeerBase.'.$v->codeExt,'w+');
+				  print "Writing '".$codePath.$v->codeName."PeerBase.".$v->codeExt."'...\n";
 				  $output = $v->basePeer;
 				  fputs($file,$output,strlen($output));
 				  fclose($file);
 	
-				  $file = fopen($codePath.$v->name.'Peer.'.$v->codeName,'w+');
-				  print "Writing '".$codePath.$v->name."Peer.".$v->codeName."'...\n";
+				  $file = fopen($codePath.$v->codeName.'Peer.'.$v->codeExt,'w+');
+				  print "Writing '".$codePath.$v->codeName."Peer.".$v->codeExt."'...\n";
 				  $output = $v->peer;
 				  fputs($file,$output,strlen($output));
 				  fclose($file);
 	
-				  $file = fopen($codePath.$v->name.'.'.$v->codeName,'w+');
-				  print "Writing '".$codePath.$v->name.".".$v->codeName."'...\n";
+				  $file = fopen($codePath.$v->codeName.'.'.$v->codeExt,'w+');
+				  print "Writing '".$codePath.$v->codeName.".".$v->codeExt."'...\n";
 				  $output = $v->class;
 				  fputs($file,$output,strlen($output));
 				  fclose($file);
@@ -131,8 +131,8 @@ class PBDO_Plugin_Code extends PBDO_Plugin {
  */
 class ParsedClass {
 
+	var $codeName;
 	var $name;
-	var $tableName;
 	var $methods = array();
 	var $attributes = array();
 	var $relations = array();
@@ -142,16 +142,16 @@ class ParsedClass {
 	var $sourceVersion;
 	var $package;
 
-	var $codeName = 'php';
+	var $codeExt = 'php';
 
 
 	function ParsedClass($name,$package='') {
-		$this->name = convertTableName($name);
+		$this->codeName = convertTableName($name);
 		$this->tableName = $name;
 
 		if ($package != '') {
 			$this->package = ucfirst($package);
-			$this->name = $this->package.'_'.$this->name;
+			$this->codeName = $this->package.'_'.$this->codeName;
 			$this->tableName = $package.'_'.$this->tableName;
 		}
 	}
@@ -237,9 +237,9 @@ class ParsedClass {
 		reset ($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			if ($v->complex) {
-			$ret .= "\t'".$v->name."'=>'".$v->type."',\n";
+			$ret .= "\t'".$v->codeName."'=>'".$v->type."',\n";
 			} else {
-			$ret .= "\t'".$v->name."'=>'".$v->type."',\n";
+			$ret .= "\t'".$v->codeName."'=>'".$v->type."',\n";
 			}
 		}
 		$ret = substr($ret,0,-2);
@@ -252,7 +252,7 @@ class ParsedClass {
 		print " *** set for $att\n";
 		print_r($this->attributes) ; 
 		print "\n\n";
-		if ( ! is_object($this->attributes[$att]) ) { die("$this->name $att is not an object\n"); }
+		if ( ! is_object($this->attributes[$att]) ) { die("$this->codeName $att is not an object\n"); }
 		$this->attributes[$att]->type = convertTableName($table);
 		$this->attributes[$att]->complex = true;
 	}
@@ -273,10 +273,14 @@ class ParsedClass {
 		//foreign (assume one to many)
 		reset($model->relationships);
 		while ( list ($q,$rel) = @each($model->relationships) ) {
+			//not a foreign key
+			if ( $rel->getEntityA() != $this->tableName ) { 
+				continue;
+			}
 			$fcol = $rel->getAttribB();
 			$lcol = $rel->getAttribA();
-
 			$q = convertTableName($rel->getEntityB());
+
 			if ( substr($q,-1) == 's' ) { $s = ''; } else { $s ='s'; }
 			$ret .= "\tfunction get".$q.$s."(\$dsn='default') {\n";
 			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$fcol." = \''.\$this->getPrimaryKey().'\'',\$dsn);\n";
@@ -285,11 +289,16 @@ class ParsedClass {
 		}
 
 		//local (assume one to one)
-		@reset($this->localRelations);
-		while ( list ($col,$qs) = @each($this->localRelations) ) {
-			$q = $qs[0];
-			$fcol = $qs[1];
-			$q = convertTableName($q);
+		@reset($model->relationships);
+		while ( list ($q,$rel) = @each($model->relationships) ) {
+			//is a foreign key
+			if ( $rel->getEntityB() != $this->tableName ) { 
+				continue;
+			}
+			$fcol = $rel->getAttribB();
+			$col = $rel->getAttribA();
+			$q = convertTableName($rel->getEntityB());
+
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
 			$ret .= "\t\tif ( \$this->".convertColName($col)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
 			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$col." = \''.\$this->".convertColName($fcol).".'\'',\$dsn);\n";
@@ -312,7 +321,7 @@ class ParsedClass {
 
 
 		$ret = '
-class '.$this->name.'Base {
+class '.$this->codeName.'Base {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
@@ -332,9 +341,9 @@ class '.$this->name.'Base {
 	
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey('.$this->name.'Peer::doInsert($this,$dsn));
+			$this->setPrimaryKey('.$this->codeName.'Peer::doInsert($this,$dsn));
 		} else {
-			'.$this->name.'Peer::doUpdate($this,$dsn);
+			'.$this->codeName.'Peer::doUpdate($this,$dsn);
 		}
 	}
 
@@ -347,12 +356,12 @@ class '.$this->name.'Base {
 		} else {
 			$where = "'.$this->getPkey().'=\'".$key."\'";
 		}
-		$array = '.$this->name.'Peer::doSelect($where,$dsn);
+		$array = '.$this->codeName.'Peer::doSelect($where,$dsn);
 		return $array[0];
 	}
 
 	function delete($deep=false,$dsn="default") {
-		'.$this->name.'Peer::doDelete($this,$deep,$dsn);
+		'.$this->codeName.'Peer::doDelete($this,$deep,$dsn);
 	}
 
 
@@ -410,10 +419,10 @@ class '.$this->name.'Base {
 			$ret .="\t\t";
 			//this is the best way of checking for an empty value
 			// if (empty($s) && strlen($s) == 0)
-			$ret .= 'if ( empty($array[\''.$v->name.'\']) && strlen($array[\''.$v->name.'\']) == 0 )';
+			$ret .= 'if ( empty($array[\''.$v->codeName.'\']) && strlen($array[\''.$v->codeName.'\']) == 0 )';
 			$ret .="\n";
 			$ret .="\t\t\t";
-			$ret .= '$this->'.$v->name.' = $array[\''.$v->name.'\'];';
+			$ret .= '$this->'.$v->codeName.' = $array[\''.$v->codeName.'\'];';
 			$ret .="\n";
 			}
 		}
@@ -430,7 +439,7 @@ class '.$this->name.'Base {
 }
 
 
-class '.$this->name.'PeerBase {
+class '.$this->codeName.'PeerBase {
 
 	var $tableName = \''.$this->tableName.'\';
 
@@ -452,7 +461,7 @@ class '.$this->name.'PeerBase {
 		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
-			$array[] = '.$this->name.'Peer::row2Obj($db->record);
+			$array[] = '.$this->codeName.'Peer::row2Obj($db->record);
 		}
 		return $array;
 	}
@@ -465,7 +474,7 @@ class '.$this->name.'PeerBase {
 		@reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			$ret .="\t\t";
-			$ret .= '$st->fields[\''.$v->colName.'\'] = $this->'.$v->name.';';
+			$ret .= '$st->fields[\''.$v->colName.'\'] = $this->'.$v->codeName.';';
 			$ret .="\n";
 		}
 
@@ -489,7 +498,7 @@ class '.$this->name.'PeerBase {
 		reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			$ret .="\t\t";
-			$ret .= '$st->fields[\''.$v->colName.'\'] = $obj->'.$v->name.';';
+			$ret .= '$st->fields[\''.$v->colName.'\'] = $obj->'.$v->codeName.';';
 			$ret .="\n";
 		}
 
@@ -559,12 +568,12 @@ class '.$this->name.'PeerBase {
 
 
 	function row2Obj($row) {
-		$x = new '.$this->name.'();
+		$x = new '.$this->codeName.'();
 ';
 		reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			$ret .="\t\t";
-			$ret .= '$x->'.$v->name.' = $row[\''.$v->colName.'\'];';
+			$ret .= '$x->'.$v->codeName.' = $row[\''.$v->colName.'\'];';
 			$ret .="\n";
 		}
 		$ret .='
@@ -577,7 +586,7 @@ class '.$this->name.'PeerBase {
 
 
 //You can edit this class, but do not change this next line!
-class '.$this->name.' extends '.$this->name.'Base {
+class '.$this->codeName.' extends '.$this->codeName.'Base {
 ';
 if ($extended) {
 $ret .= '
@@ -587,7 +596,7 @@ $ret .= '
 
 
 
-class '.$this->name.'Peer extends '.$this->name.'PeerBase {
+class '.$this->codeName.'Peer extends '.$this->codeName.'PeerBase {
 
 }
 ';
@@ -618,7 +627,7 @@ class ParsedMethod {
 	var $description;
 
 	function ParsedMethod($n) {
-		$this->name = $n;
+		$this->codeName = $n;
 	}
 }
 
@@ -642,7 +651,7 @@ class ParsedAttribute {
 
 	function ParsedAttribute($n, $t, $pk=false) {
 		$t = strtolower($t);
-		$this->name = convertColName($n);
+		$this->codeName = convertColName($n);
 		$this->colName = $n;
 		$this->type = $t;
 		switch($t) {
@@ -679,12 +688,12 @@ class ParsedAttribute {
 
 
 	function toPHP() {
-		return 'var $'.$this->name;
+		return 'var $'.$this->codeName;
 	}
 
 
 	function toJava() {
-		return 'public '.$this->codeType.' '.$this->name;
+		return 'public '.$this->codeType.' '.$this->codeName;
 	}
 }
 

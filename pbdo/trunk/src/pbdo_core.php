@@ -113,33 +113,8 @@ if (MSSQL) {
 //print output
 print "\n";
 print_r(PBDO_Compiler::$model->relationships);
+
 /*
-DEPRECATED
-TODO: move to relevant plugins
-//set foreign keys and one-to-many relations
-foreach($engine->foreignKeys as $k => $v) {
-	$foreignTable = $v[0]->getAttribute('foreignTable');
-	$localTable = $v[2];
-	$localColumn = $v[1]->getAttribute('local');
-	$foreignColumn = $v[1]->getAttribute('foreign');
-	print "found FOREIGN table \t\t". $foreignTable . " ($foreignColumn)\n";
-	print "relates to LOCAL table \t\t". $localTable . "\n";
-	print "via LOCAL column \t\t". $localColumn . "\n\n";
-
-	if ( is_object($engine->classes[$localTable]) ) {
-		$engine->classes[$localTable]->setForeignKey($localColumn,$foreignTable);
-	}
-	if ( is_object ($engine->classes[$foreignTable]) ) {	//sometimes we reference DBs not in the XML
-		$engine->classes[$foreignTable]->setForeignRelation($localTable,$foreignColumn,$localColumn);
-	}
-
-	if ( is_object($engine->classes[$localTable]) ) {
-		$engine->classes[$localTable]->setLocalRelation($foreignTable,$localColumn,$foreignColumn);
-	}
-	print "\n";
-}
-*/
-
 if (!NO_PHP) {
 	//print to files
 	foreach($engine->classes as $k=>$v) {
@@ -205,6 +180,7 @@ if (!NO_PHP) {
 		}
 	}
 }
+*/
 /*
 if (!NO_SQL) {
 	$type = 'mysql';
@@ -322,16 +298,6 @@ if ( !OLD_STYLE ) {
 			print "Project directory already exists (projects/".$projectName.")\n";
 		}
 /* deprecated
-		if ($this->generateCode
-			&& ! file_exists("projects/".$this->projectName."/php") ) {
-
-			echo "making php dir\n";
-			mkdir ("projects/".$this->projectName."/php/");
-
-			echo "making java dir\n";
-			mkdir ("projects/".$this->projectName."/java/");
-		}
-
 		if ($this->generateSQL 
 			&& ! file_exists("projects/".$this->projectName."/sql") ) {
 
