@@ -7,6 +7,39 @@ SYNTAX:
 
 
 #########################
+01/11/03 8:27 PM - zorka
+administration/formmgr -
+Export sql didn't have template.  Added template, fixed.
+
+
+01/11/03 8:22 PM - zorka
+classmgr/users -
+FACULTY STUDENT MANAGEMENT
+
+This update adds the ability for faculty to manage student accounts for their class.  The features include:
+
+* ability to search existing accounts and colllect users to add them to the class
+* drop active students
+* re-activate dropped students
+* view profile and other information on one screen
+
+The following is the built-in help information:
+
+ About Student Management
+Student Management allows you to locate prospective students and add them to your class. You are only allowed to search for users that have existing accounts in the system. If you need a student added to the system so you can make them a member of your class, please consult your LogiCampus administrator.
+
+How-to add a student(s)
+Use the built-in search tools to locate a student(s) in the system to add to your class. You can search for students that are enrolled in other classes, by the first letter of their username, or search by email address, username and other profile information using the 'show users where'.
+
+Collecting Users
+After you search for a student(s), you select the appropiate checkbox next to the desired accounts you wish to add to your class and press the 'Collect Users' button. Collecting users allows you to search for students using the various search tools and then add students all at once to your class. This feature is handy when you first populate students into your class.
+
+Class Roster
+The class roster displays all students that are enrolled in your class or that were dropped from your class. Students that are active students in the class are shown in green as 'Active'. Students that have dropped or that have been dropped are shown in red as 'Dropped'.
+
+The action column provides the ability to drop students or re-activate students. Simply click the link in the action column to perform that action on that student.
+
+
 01/09/03 2:28 PM - zorka
 data/sql - 
 The ability to give certain groups permission to be able to update
