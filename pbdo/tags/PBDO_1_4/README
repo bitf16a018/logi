@@ -1,0 +1,64 @@
+BASICS
+===================================================================
+go into src/ directory
+make sure there's a projects/ directory
+
+php -q parse.php /path/to/schema.xml
+
+example:
+php -q parse.php ../sampeldata/table-schema.xml
+
+code goes into
+projects/databasename/php/Table.php
+
+all SQL statements go into
+projects/databasename/sql/databasename.sql
+
+MAKE YOUR OWN XML FILE
+
+
+THE EXPORT SCRIPT
+===================================================================
+The export2xml.php is there to help bootstrap your existing table
+structures into data objects.  Edit the script to add your own
+database connection and list of tables.  Run it and 
+redirect the output to an xml file.
+
+php -q export2xml.php > myschema.xml
+
+WARNING:
+The export script does not make relations between tables.  You 
+should edit the resulting file and add <foreign-key> tags to 
+it.
+
+    <foreign-key foreignTable="publisher">
+      <reference
+        local="publisher_id"
+        foreign="publisher_id"/>
+    </foreign-key>
+
+This assumes a one to many relationship to the publisher
+table.
+
+
+SAVE YOUR OUTPUT
+===================================================================
+Once you have made your database tables and PHP code, you can 
+add the resultant files plus the source xml to your version
+control system of choice.  Regeneration of the object files will 
+not overwrite previously modified subclasses.  This gives you 
+the benefit of getting better performing base objects without
+losing your custom changes.
+
+
+POINTERS:
+===================================================================
+	use singular tables names (example, store_item rather than store_items)
+
+	keep order of tags similar to sample table-schema.xml
+		(column before foreign-key tags)
+
+	DOCTYPE is not necassary, xml parser is non-validating
+
+	if you get PHP errors, make sure you've spelled foreign-key attributes
+		correctly.
