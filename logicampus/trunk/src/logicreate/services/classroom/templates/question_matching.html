@@ -1,7 +1,6 @@
 <?=$t['sectionheader'];?>
 	
 <?
-	$t['q']->randomizeAnswers();
 	$choices = $t['q']->questionChoices;
 	$randomAnswers = $choices['randomAnswers'];
 	unset($choices['randomAnswers']);
@@ -11,12 +10,13 @@
 
 # unserialize answers
 $answers = unserialize($t['answer']->assessmentAnswerValues);
+//debug($t['q'],1);
 
 $numAnswers = count($randomAnswers);
 $left = $right = array();
 
 $z = 0;
-for ($i=0; $i<$numAnswers-1; $i++)
+for ($i=0; $i<$numAnswers; $i++)
 {
 		$val = array_keys($randomAnswers[$i]);
 		if ($val['randomAnswers']) continue;

@@ -12,7 +12,7 @@ include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'ClassGradebook.php');
 include_once(LIB_PATH.'ClassGradebookEntries.php');
 
-class assessments extends FacultyService {
+class restore extends FacultyService {
 
 
 	var $presentor = 'htmlPresentation';

@@ -459,22 +459,6 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 		$this->questionDisplay = 'Matching';
 	}
 
-	/**
-	 * rearranges the answers so that it is not one to one
-	 * question => answer
-	 */
-	function randomizeAnswers() {
-		$newkey = 0;
-		foreach ( $this->questionChoices as $key => $answer) {
-			if ( trim($answer) == '' ) continue;
-			// store this for later use in the template
-			$this->questionChoices['randomAnswers'][$newkey][$key] = $answer;
-			$ithis->questionChoices[$key]->correct =  $answer;
-			$newkey++;
-		}
-		shuffle( $this->questionChoices['randomAnswers']);
-		shuffle( $this->questionChoices['randomAnswers']);
-	}
 
 	function validate() {
 
