@@ -1,31 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
-
 define('IMAGES_URL',"./images/");
 define('TEMPLATE_URL',"./templates/default");
 define('REQ_PHP_VERSION','4.3.1');
@@ -276,6 +249,7 @@ extract(\$_SERVER);
 
 define('DOCUMENT_ROOT',\$doc);
 define('LIB_PATH',DOCUMENT_ROOT.\$relpath.'lib/');
+define('LANG_PATH',DOCUMENT_ROOT.\$relpath.'lang/');
 define('SERVICE_PATH',DOCUMENT_ROOT.\$relpath.'services/');
 define('BASE_URL','http://'.\$base.\$tail);
 define('SECURE_BASE_URL','https://'.\$base.\$tail);
