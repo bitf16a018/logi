@@ -1,0 +1,34 @@
+<style type="text/css">
+	.PASS {
+		background-color: silver;
+	}
+	.FAIL {
+		background-color: #FCC0C0;
+	}
+</style>
+
+<h3>Unit test results</h3>
+<table width="100%" border="1">
+	<tr>
+		<td>
+			name
+		</td>
+		<td>
+			result
+		</td>
+	</tr>
+	<? while ( list($k,$v) = @each($t['results']) ) { ?>
+	<tr class="<?=$v;?>">
+		<td>
+			<a href="<?=appurl('testCase/main/event=inspect/m='.$t['m'].'/s='.$t['s'].'/#'.$k);?>"><?= $k;?></a>
+		</td>
+		<td>
+			<?= $v;?>
+		</td>
+	</tr>
+	<? } ?>
+</table>
+Click on the test name to see the source code for that test.
+<br/>
+All tests should PASS because that indicates the test's output
+matches its expected output.

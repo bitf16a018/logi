@@ -1,0 +1,44 @@
+<?=$t['sectionheader'];?>
+<center>
+	<h2>Create a new folder</h2>
+	<form method="post" action="<?=APP_URL?>classdoclib/addFolder/">
+			<table width="500">
+				<tr><td colspan="2" class="menu_head">
+						Title
+				</td></tr>
+				<tr><td>
+						Make a name for this folder
+				</td><td>
+						<input type="text" name="folder[name]" value="new folder">
+				</td></tr>
+				<tr><td colspan="2">
+						&nbsp;
+				</td></tr>
+				<tr><td colspan="2" class="menu_head">
+						Notes
+				</td></tr>
+				<tr><td valign="top">
+						Enter a description of this folder.
+				</td><td>
+						<textarea name="folder[notes]" cols="37" rows="7"></textarea>
+				</td></tr>
+				<tr><td colspan="2">
+						&nbsp;
+				</td></tr>
+				<tr><td colspan="2" class="menu_head">
+						Placement
+				</td></tr>
+				<tr><td valign="top">
+						Choose a the place where this folder will go
+				</td><td>
+<?= $t['folderHTML']?>
+				</td></tr>
+				</table>
+
+<input type="submit" value="New Folder">
+<input type="hidden" name="event" value="new">
+</form>
+
+
+<p>&nbsp;</p>
+</center>

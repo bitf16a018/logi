@@ -1,0 +1,32 @@
+<h2>Textbook Manager</h2>
+Selecting a return by (deadline) for this form to be submitted by.<br>
+hint: this form deadline can not be set past semesters start date.
+<?php
+	if (is_array($t['errors']))
+	{
+		echo '<br><br><font color="red"><b>Errors:</b><br><br>';
+		
+		echo implode($t['errors'], '<br><br>');
+		
+		echo '</font>';
+	}
+?>
+<Br><br>
+Semester: <?=$t['semester_description'];?><br>
+<br>
+<form action="<?=modurl('adminScheduleForm');?>" method="POST">
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+
+<tr>
+	<td>Deadline</td>
+	<td>
+	<?=dateDropDown($t['date_deadline']['month']. '/'. $t['date_deadline']['day']. '/'.$t['date_deadline']['year'], 'date_deadline');?>
+	</td>
+</tr>
+
+</table>
+<br>
+<input type="submit" value="Submit Textbook form deadline">
+<input type="hidden" name="event" value="selectReturnByDate">
+<input type="hidden" name="semesterId" value="<?=$t['semesterId'];?>">
+</forM>

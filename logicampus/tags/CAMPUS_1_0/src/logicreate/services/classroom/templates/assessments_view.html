@@ -1,0 +1,197 @@
+<?=$t['message'];?>
+<?=$t['sectionheader'];?>
+
+<?=$t['testover'];?>
+<FIELDSET>
+<LEGEND><b>Stat Information</b></LEGEND>
+			Total Points for this assessment: <?= $t['questions_total_points']?><br>
+			Total Questions for this assessment: <?= $t['assessment']->questionCount;?><br>
+			Total Points Earned: <?=$t['total_points_earned']?><br>
+			Letter Grade: <?=$t['letter_grade'];?><br>
+			Percentage: <?=$t['percentage'];?>%
+</FIELDSET>
+<p>&nbsp;</p>
+
+<table width="100%" border="0">
+	<tr>
+		<td>
+			<span style="color: #FFFFFF; background: green;">Green Text</span> = Correct
+			Answer
+		</td>
+		<td align="right">
+		<span style="color: #FFFFFF;background: red;">Red Text</span> = Incorrect Answer
+		</td>
+	</tr>
+</table>
+<p>&nbsp;</p>
+
+<? foreach($t['questions'] as $k=>$v) { 
+
+# Which grade do we print, pointsEarned or pointsGiven?
+$points = $v->answer->pointsEarned;
+if ($v->answer->pointsGiven) $points = $v->answer->pointsGiven;
+?>
+<FIELDSET>
+<LEGEND><?=$k + 1;?>. <b>Points Assigned: <?=$points?></b> &ndash; <?=$v->questionDisplay;?> &mdash; </LEGEND>
+<table width="100%" border="0">
+	<tr>
+		<td colspan="1">
+			&nbsp;
+		</td>
+		<td colspan="2">
+			<b>Question:</b> <?= $v->questionText; ?></b>
+		</td>
+	</tr>
+	<?
+	if ( $v->questionType != QUESTION_MATCHING)
+	{ ?>
+	<tr>
+		<td colspan="1">
+			&nbsp;
+		</td>
+		<td colspan="2">
+			<? 
+			if ($v->questionType != QUESTION_ESSAY) 
+			{
+				 if ($v->isCorrect() )
+				{
+					echo '<span style="color: #FFFFFF; background: green;">Correct</span> ';
+				} else {
+					echo '<span style="color: #FFFFFF; background: red;">Incorrect</span> ';
+				
+				}
+			} else {
+				# call nl2br function
+				$v->answer->assessmentAnswerValues = nl2br($v->answer->assessmentAnswerValues);
+			}
+			?>
+
+			<b>Your Answer</b>:  
+			 &nbsp;  
+			 <?
+			  	if ($v->questionType == QUESTION_MANSWER)
+				{
+					echo implode(", ", $v->answer->assessmentAnswerValues);
+				} else {
+					# not a matching nor multiple answer question that can
+					# have multiple answer values
+					echo $v->answer->assessmentAnswerValues;
+				}
+				?> &nbsp; &nbsp;
+		</td>
+	</tr>
+	<? } else { ?>
+	
+	<tr>
+		
+		<td colspan="3">
+		<span id="datagrid">
+		<table width="100%" border="0">
+			<tr>
+				<th>&nbsp;</th>
+				<th><b>Your Answer</b></th>
+				<th><b>Correct Answer</b></th>
+				<th><b>Question</b></th>
+			</tr>
+<?
+	$count = count($v->questionChoices);
+	for ($i=0; $i<$count; $i++)
+	{
+		$class = 'even';
+		if($i % 2 == 0 ) $class = 'odd';
+		if ($v->questionChoices[$i]->label)
+		{ ?>
+			
+		<tr class="<?=$class?>">
+		<? 
+			if ($v->answer->assessmentAnswerValues[$i] == $v->questionChoices[$i]->correct)
+			{ 
+				$text = '<span style="color: #FFFFFF; background: green;">correct</span>';	
+			} else {
+				$text = '<span style="color: #FFFFFF; background: red;">incorrect</span>';	
+
+			}
+		?>
+
+		<td><?=$text?></td>
+		<td><?=$v->answer->assessmentAnswerValues[$i]?></td>
+		<td><?=$v->questionChoices[$i]->correct?></td>
+		<td><?=$v->questionChoices[$i]->label?></td>
+		</tr>
+<?		}
+	}
+	?>
+		</table>
+		</span>
+	</td>
+<?
+	
+	 }
+
+	$count = $v->questionChoices;  // neeed to know total
+	while (list ($cc,$c) = @each($v->questionChoices) ) {
+
+		// matching questions have this data in here.
+		# We've already printed the matching question 
+		# so we can move on
+		if ($v->questionType == QUESTION_MATCHING) 
+		{
+			continue;
+		}
+
+	?>
+	<tr>
+		<td colspan="1">
+			&nbsp;
+		</td>
+		<td colspan="1" align="right">
+			<?=chr($cc+65);?>.
+		</td>
+		<td colspan="1" align="left">
+			<?
+			# ALL FIB answers are considered to be good answers
+			# but we need to print them a little different and print
+			# the alternate answers separate
+			if ($v->questionType == QUESTION_FILLINBLANK)
+			{
+					if ($cc == 0)
+					{
+					?>
+						
+						<?= $c->label;?>
+						<i> (correct answer)</i>
+					<?
+					if ($count >= 2)
+						{
+							echo '<br><b>Alternate Answers</b>';
+						}
+					continue;
+
+					} else {
+					echo $c->label;
+					continue;
+					}
+			} 			
+			
+			if ($c->correct) { ?>
+
+			<?= $c->label;?>
+			<i>
+			(correct answer)
+			</i>
+
+			<? } else { ?>
+				<?=$c->label;?>
+		<?	}  ?>
+		</td>
+	</tr>
+<? } ?> 
+</table>
+</FIELDSET>
+<br>
+<? } ?>
+
+<h3><a href="<?=APP_URL?>classroom/assessments">Return To Assessments</a></h3>
+
+
+

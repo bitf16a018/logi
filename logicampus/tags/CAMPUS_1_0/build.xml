@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<project name="LogiCampus" default="dist" basedir=".">
+	<description>
+		LogiCreate php app server and associated services/modules.
+	</description>
+
+  <!-- set global properties for this build -->
+  <property name="src" location="src/public_html/" />
+  <property name="lcsrc" location="src/logicreate/" />
+  <property name="docs" location="docs" />
+  <property name="build" location="temp" />
+  <property name="dist"  location="dist" />
+  <property name="lib"  location="lib" />
+  <property name="lc.version" value="2.9" />
+  <target name="init" depends="cleantemp">
+    <!-- Create the time stamp -->
+    <tstamp>
+          <format property="lc.build_date" pattern="MMMM-d-yyyy" locale="en"/>
+    </tstamp>
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${dist}"/>
+    <mkdir dir="${build}/logicreate/"/>
+    <mkdir dir="${build}/public_html/"/>
+    <mkdir dir="${build}/public_html/docs/"/>
+    <mkdir dir="${build}/public_html/images/"/>
+  </target>
+
+<!--DEMO-->
+
+  <target name="dist" depends="init"
+	  description="generate an LC dist for Logicampus">
+	<copy todir="${build}/logicreate/">
+	  <fileset dir="${lcsrc}">
+		<include name="classLibrary/**"/>
+		<exclude name="classLibrary/*CVS*"/>
+		<include name="data/**"/>
+		<exclude name="data/*CVS*"/>
+		<include name="services/**"/>
+		<exclude name="services/*CVS*"/>
+		<include name="content/**"/>
+		<exclude name="content/*CVS*"/>
+		<include name="lib/**"/>
+		<exclude name="lib/**/*CVS*"/>
+		<exclude name="**/*~"/>
+	  </fileset>
+	</copy>
+	<copy todir="${build}">
+		<fileset dir="${docs}"> 
+			<include name="README"/> 
+			<include name="license.txt"/>
+		</fileset> 
+	</copy>
+	<copy todir="${build}/public_html/docs/">
+	  <fileset dir="${docs}">
+		<include name="dev/**"/>
+		<include name="README"/>
+		<include name="index.php"/>
+		<exclude name="dev/**/*CVS*"/>
+		<exclude name="dev/**/*~"/>
+		<include name="herc/**"/>
+		<exclude name="herc/**/*CVS*"/>
+		<exclude name="herc/**/*~"/>
+	  </fileset>
+	</copy>
+	<copy todir="${build}/public_html/">
+		<fileset dir="${docs}"> 
+			<include name="license.txt"/>
+		</fileset> 
+	</copy> 
+	<copy todir="${build}/public_html/">
+	  <fileset dir="${src}">
+		<include name="herc/**"/>
+		<include name="htmlarea/**"/>
+		<exclude name="herc/**/*CVS*"/>
+		<exclude name="herc/wysiwyg"/>
+		<exclude name="herc/content.php" />
+		<exclude name="**/*~"/>
+	  </fileset>
+	</copy>
+	<copy todir="${build}/public_html/">
+	  <fileset dir="${src}">
+		<include name="images/**"/>
+		<exclude name="images/**/*CVS*"/>
+		<exclude name="images/**/*~"/>
+	  </fileset>
+	</copy>
+	<copy todir="${build}/public_html/">
+	  <filterset>
+		<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
+		<filter token="LC_VERSION" value="${lc.version}"/>
+	  </filterset>
+	  <fileset dir="${src}">
+		  <include name="license.txt"/>
+		  <include name="ua.js"/>
+		<include name="templates/**"/>
+		<include name="templates/private/**"/>
+		<include name="templates/default/**"/>
+		<include name="templates/debug/**"/>
+		<exclude name="templates/**/*CVS*"/>
+		<exclude name="templates/**/*~"/>
+	  </fileset>
+	</copy>
+	<copy todir="${build}/logicreate/">
+	  <fileset dir="${src}">
+		<include name="content/**"/>
+		<exclude name="content/**/*CVS*"/>
+		<exclude name="content/**/*~"/>
+	  </fileset>
+	</copy>
+
+	<copy todir="${build}/logicreate/">
+	  <fileset dir="${src}">
+		<include name="cache/**"/>
+		<exclude name="cache/**/*CVS*"/>
+		<exclude name="cache/**/*~"/>
+	  </fileset>
+	</copy>
+
+	<filter token="LC_VERSION" value="${lc.version}"/>
+	<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
+	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/defines.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/install.php" todir="${build}/public_html/" filtering="true"/>
+
+
+
+	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite='true'/>
+
+
+
+
+  	<!-- apply LCPL to files -->
+	<echo message="Applying LCPL to source files ..." />
+	<exec executable="${build}/../build/applylicense.sh" dir="${build}/../build" failonerror="true" />
+
+	<!-- tar up -->
+	<tar tarfile="${dist}/logicampus-OSS.tar" basedir="${build}" />
+	<gzip src="${dist}/logicampus-OSS.tar" zipfile="${dist}/logicampus-OSS.tar.gz" />
+	<delete file="${dist}/logicampus-OSS.tar" />
+  </target>
+
+
+<!--DEMO END-->
+
+
+
+	<target name="clean"
+		description="removes temp and dist directories" >
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}"/>
+		<delete>
+			<fileset dir="${dist}" includes="*"/>
+		</delete>
+	</target>
+
+	<target name="cleantemp"
+		description="removes temp and dist directories" >
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}"/>
+	</target>
+
+	<target name="patch"
+		description="creates a patch against cvs, patch.txt" >
+		<cvs command="-q diff -u -N src" output="patch.txt"/>
+	</target>
+
+	<target name="package"
+	   description="zip a service/module">
+	   <condition property="failNoModule" value="true">
+		   <not>
+			   <isset property="lc.module"/>
+		   </not>
+	   </condition>
+	   <fail if="failNoModule" message="you must supply a module to package [-Dlc.module=forums]"/>
+	   <zip destfile="${dist}/lc-${lc.module}.zip">
+		<zipfileset dir="${src}/services/${lc.module}" prefix="${lc.module}">
+			<exclude name="**/*CVS*"/>
+			<exclude name="**/*~"/>
+		</zipfileset>
+	   </zip>
+	</target>
+
+	<target name="cvscheck"
+		description="run -nq update on the whole tree">
+		<cvs command="-nq update" />
+	</target>
+
+	<target name="report">
+		<echoproperties/>
+	</target>
+</project>

@@ -1,0 +1,21 @@
+<center><table width="98%"><tr><td align="left">
+
+<h3>Forums</h3>
+</td></tr>
+<tr><td>
+
+								<? if ($t["forumlist"]) { ?>
+
+<table width="100%" border="0" cellpadding="4" cellspacing="1">
+		<tr><td class="forum_head">Forum name</td><td class="forum_head">Threads</td><td class="forum_head">Posts</td><td class="forum_head">Recent post</td></tr>
+<?=$t["forumlist"];?>
+</table>
+<? } else {?> 
+There are no forums for you to view at this time.  
+<BR><BR>
+<? if ($obj->user->username=="anonymous" || $obj->user->username=="") { ?>
+You may need to <a href="<?=APP_URL?>login">register / sign-in</a> before you can use the forums.
+<? } ?>
+<? } ?>
+
+</td></tr></table></center>

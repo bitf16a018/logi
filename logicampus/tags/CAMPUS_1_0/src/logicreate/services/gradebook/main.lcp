@@ -1,0 +1,379 @@
+<?
+/*
+ *
+ * The main view for the gradebook.  By default the
+ * gradebook will display a roster of all students
+ * on the left and columns will represent
+ * assessments.
+ *
+ */
+
+include_once(LIB_PATH."gradeBookObj.php");
+include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH.'ClassGradebook.php');
+
+class gradebook extends FacultyService {
+
+	var $presentor='htmlPresentation';
+
+	// links
+	var $sectionTitle = 'Gradebook';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => '%assessments/',
+	);
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Control Panel' => 'main/event=controlPanel/'
+	);
+
+/*
+ *
+ * Displays the spreadsheet view of the gradebook.  This is the
+ * default view.
+ * 
+ * Input data: course ID
+ * Output data: display spreadsheet view
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='main_main';
+			$lc->templateStyle = 'private';
+			$this->inactivelinks[] = 'Gradebook Home';
+
+			$filter['filteractive'] =
+				$lc->postvars['filteractive'] ? $lc->postvars['filteractive'] : 'Active';
+			$filter['filterletter'] = $lc->postvars['filterletter'];
+			$filter['filtercat'] = $lc->postvars['filtercat'];
+			$u->sessionvars['filter'] = $filter;
+			$t = array_merge( $t, $filter );
+
+			# Load up all categories for the class
+			$t['gbCats'][0] = 'All Categories';
+			$t['gbCats'] = $t['gbCats'] + ClassGradebook::getAllCategories($u->activeClassTaught->id_classes);
+
+			// get the semester name
+			$db->queryOne('select semesterTerm, semesterYear from semesters
+				where id_semesters='.$u->activeClassTaught->id_semesters);
+			$t['semester'] = $db->Record['semesterTerm'].' '.$db->Record['semesterYear'];
+
+			// stupid hack to get a feedback message
+			if ($u->sessionvars['message']) {
+				$t['message'] = $u->sessionvars['message'];
+				unset($u->sessionvars['message']);
+			}
+
+		}
+
+/*
+ *
+ * Displays the control panel for the gradebook 
+ # this is an interface to other things like import, export and prefs
+ * 
+ * Input data: class ID
+ * Output data: display static template
+ *
+ */
+		function controlPanelRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='main_controlpanel';
+			$lc->templateStyle = 'private';
+
+			$this->sectionTitle = 'Gradebook Control Panel';
+
+			if ($u->sessionvars['message']) {
+				$t['message'] = $u->sessionvars['message'];
+				unset($u->sessionvars['message']);
+			}
+
+		}
+
+
+/*
+ *
+ * shows the table that sits in the iframe
+ * iframe should be scrollable in 800x600 but also fully
+ * visible.  No browser scrolling.  Repeat student names column
+ * every (X) columns
+ * 
+ * chop off student names at 23 characters, add nowrap
+ * Input data: class ID
+ * Output data: display static template
+ *
+ */
+		function IFrameRun(&$db,&$u,&$lc,&$t) {
+
+			$lc->templateName='main_iframe';
+			$this->presentor = 'EmptyPresentation';
+			$lc->templateStyle = 'private';
+
+			// repeat student names every ? columns
+			$printNamesEvery = 8;
+			$printHeadersEvery = 13;
+			$droppedStudentRowColor = '#ffa6a6';
+
+			// Get the filters from the session
+			$filter = $u->sessionvars['filter'];
+
+			// pull in gradebook preferences
+			$gradebook = ClassGradebook::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes,
+			) );
+
+			// apply filters
+			switch ( $filter['filteractive'] ) {
+				case 'Active': $gradebook->filterActive = 1; break;
+				case 'Dropped': $gradebook->filterActive = 0; break;
+			}
+			if ( $filter['filterletter'] && $filter['filterletter'] != 'All' )
+				$gradebook->filterLastname = $filter['filterletter'];
+			if ( $filter['filtercat'] )
+				$gradebook->filterCategory = $filter['filtercat'];
+
+			// tell the gradebook object to do a bunch of work
+			$gradebook->getEntries();
+			
+			$gradebook->getStudents();
+
+
+			if ( count($gradebook->students) == 0 )
+			{
+				$t['table'] = 'There are no students in your class. You must have students to view the gradebook.';
+				return;
+			}
+
+			$gradebook->getValsForStudents();
+
+			if ($gradebook->calculationType == 1)
+			{
+				// calculate weighetd point totals for each entry
+				$gradebook->calculateWeights();
+			}
+			$gradebook->calcPossiblePoints();
+			$gradebook->calculateStudentPointsEarned();
+			$gradebook->updateEntryWeights();
+			$gradebook->calculateWeightedAverages();
+			$gradebook->calculatePercentScores();
+
+			$counter = $printNamesEvery;  // this will count down in the code
+			// $table is an array of arrays representing the content for all cells, including
+			// blank ones and repeating names.
+			$table = array();
+			$counter--;
+
+
+
+			//ADD CLOUMN HEADERS TO THE GRADEBOOK TABLE
+			// we need to repeat this every 12 rows or so  (13?)
+			if ( $gradebook->calculationType == 1 ) {
+				$columnFooter = array( 'Weighted %' );
+			} else {
+				$columnFooter = array( 'Total Points' );
+			}
+			$columnHeaders = array();
+
+			reset($gradebook->entries);
+			while ( list($entid, $entry) = @each($gradebook->entries) ) {
+				$columnHeaders[] = '<a target="_parent" href="'.modurl('assessment/event=editAsmt/id='
+					.$entid).'">'.$entry->gradebookCode.'</a>';
+				$counter--;
+				if ( $counter == 0 ) {
+					$columnHeaders[] = '&nbsp;';
+				}
+
+
+
+			//ADD CLOUMN FOOTERS TO THE GRADEBOOK TABLE
+				// Push on totals for each entry
+				if ( $gradebook->calculationType == 1 ) {
+					$columnFooter[] = $entry->weightedPercent;
+					if ( $counter == 0 ) {
+						$columnFooter[] = 'Weighted %';
+					}
+				} else {
+					$columnFooter[] = $entry->totalPoints;
+					if ( $counter == 0 ) {
+						$columnFooter[] = 'Total Points';
+					}
+				}
+				if ( $counter == 0 ) {
+					$counter = $printNamesEvery;  // reset counter
+				}
+			}
+
+			//FINISH the header and footer arrays
+			if ( $gradebook->calculationType == 1 ) {
+				$columnFooter[] = '&nbsp;'; // for the "total" column
+			} else {
+				$columnFooter[] = '<b>'.$gradebook->possiblePoints.'</b>'; // for the "total" column
+			}
+
+			$columnHeaders[] = 'Total';
+
+
+			// Get each student grades while finishing up the table data
+			reset($gradebook->students);
+			while ( list($username,$stud) = @each($gradebook->students) ) {
+
+
+				$row = array();  // array of cells to be pushed onto table[]
+
+
+				// build the student's row. start with their name.
+				$counter = $printNamesEvery;
+				$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
+					.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+				$counter--;
+
+				reset($gradebook->entries);
+				while ( list($entid,$entry) = @each($gradebook->entries) ) {
+				// index.php/assessments/grade/event=view/studentid=adam/id=5
+					//use proper decimal places, none for whole integers, one place for fractions
+                                        if ( isset($stud->vals[$entid]->score) ) {
+                                                if ( intval($stud->vals[$entid]->score) == $stud->vals[$entid]->score ) {                                                                                                                                                               $stud->vals[$entid]->score = (int)$stud->vals[$entid]->score;
+                                                } else {
+                                                        $stud->vals[$entid]->score = sprintf('%.1f',$stud->vals[$entid]->score);
+                                                }
+                                        }
+
+					if ( !isset($stud->vals[$entid]->score) && !$entry->publishFlag ) {
+						$text = '<i>???-*</i>';
+					} else if ( !isset($stud->vals[$entid]->score) && $entry->publishFlag ) {
+						$text = '???';
+					} else if ( isset($stud->vals[$entid]->score) && !$entry->publishFlag ) {
+						$text = '<i>'.$stud->vals[$entid]->score.'-*</i>';
+					} else {
+						//if the score is "failing" make the font red
+						// david wissore, 10-22-2003
+
+						if ( $entry->totalPoints == 0 ) {
+							$text = $stud->vals[$entid]->score.' / EC';
+						} else { 
+							$pct = sprintf('%.2f',$stud->vals[$entid]->score / $entry->totalPoints * 100);
+							$text = $stud->vals[$entid]->score.' / '.$pct.'%';
+						}
+
+						$letter = $gradebook->getLetterGradeNew($stud->vals[$entid]->score,$entry->totalPoints);
+						if ( $letter == 'F' ) {
+							$text = "<font color=red>$text</font>";
+						}
+					}
+
+
+					if ( $entry->assessmentId ) {
+						$row[] = '<a target="PARENT"  href="'.appurl('assessments/grade/event=view/studentid='
+							.$username.'/id='.$entry->assessmentId).'">'.$text.'</a>';
+					} else {
+						$row[] = popup( modurl('entry/').'event=editSingle/entid='
+							.$entid.'/user='.$username, 200, 400, $text );
+					}
+
+					$counter--;
+					if ( $counter == 0 ) {
+						$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
+							.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+						$counter = $printNamesEvery;  // reset counter
+					}
+				}
+
+/**
+ *
+ 	I am putting in a hack here that basically says this
+	If you have 0 points. You are probably not THAT dumb
+	to get 0 points and have taken a test/quiz.. so we
+	won't show any grade
+
+	note: i'm usinga terany if block becuase its inline.
+ */
+				// push on the total points
+				if ( $gradebook->calculationType == 1 ) {
+					$row[] = $stud->weightedAverage.'% '
+						.
+						(($stud->totalPossiblePoints) ?
+						'/ '.$gradebook->getLetterGrade($stud->weightedAverage) 
+						: '');
+				} else {
+					$row[] = $stud->totalPointsEarned.' / '
+						.sprintf( "%0.2f", $stud->totalPointsEarned / $stud->totalPossiblePoints * 100).'% '
+						.
+						(($stud->totalPossiblePoints) ? 	
+						'/ '.$gradebook->getLetterGrade($stud->totalPointsEarned / $stud->totalPossiblePoints * 100)
+						: '');
+				}
+				
+				if ( !$stud->active ) {
+					$row['inactive'] = true;
+				}
+
+				$table[] = $row;  // BAM
+			}
+
+
+			// Render the table
+			$commoncolor = '#FFFBE4';  // to alternate between white and #FFFBE4 per row
+
+			$currentRow = 1;
+			$t['table'] = "<table cellpadding=5 cellspacing=1 border=0 bgcolor=\"silver\">\n";
+			while ( list($rownum,$row) = @each($table) )
+			{
+				$t['table'] .= "<tr>\n";
+				while ( list($cellnum,$cell) = @each($row) )
+				{
+					if ( $cellnum === 'inactive' ) continue;
+
+					// determine the cell's background color
+					if ( $cell == '&nbsp;' 
+						|| $cell == 'Total Points'
+						|| $cell == 'Weighted %' ) {
+							$bgcol = 'white';
+					} else if ( $table[$rownum][0] == '&nbsp;'
+						|| $table[$rownum][0] == 'Total Points'
+						|| $table[$rownum][0] == 'Weighted %' ) {
+							$bgcol = '#E7E8E7';
+					} else if ( strstr($cell,'*') ) {
+						$bgcol = '#A2CFEF'; 
+					} else if ( $table[$rownum]['inactive'] ) {
+						$bgcol = $droppedStudentRowColor;
+					} else {
+						$bgcol = $commoncolor;
+					}
+
+
+					if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
+						$t['table'] .= "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnHeaders[$cellnum-1]."</th>\n";
+					} else {
+						$t['table'] .= "\t<td bgcolor=\"$bgcol\" NOWRAP>$cell</td>\n";
+					}
+				}
+				$t['table'] .= "</tr>\n";
+				$commoncolor = $commoncolor == 'white' ? '#FFFBE4' : 'white';
+				//rewind the table when we hit a 'header' row
+				// __FIXME__ don't do this
+				if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
+					prev($table);
+				}
+
+			$currentRow++;
+			}
+			//ADD FOOTER TO TEMPLATE VARIABLE
+			while ( list($cellnum,$cell) = @each($columnFooter) ) {
+				$t['table'] .= "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnFooter[$cellnum]."</th>\n";
+			}
+
+			$t['table'] .= "</table>\n";
+
+			// stupid hack to get a feedback message
+			if ($u->sessionvars['message']) {
+				$t['message'] = $u->sessionvars['message'];
+				unset($u->sessionvars['message']);
+			}
+		}
+
+}
+
+?>

@@ -1,0 +1,112 @@
+<?php
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'presentationObj.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class studentPresentation extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';	
+
+	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $inactivelinks = array( 'Presentations' );
+	var $sectionTitle = 'Student Presentations';
+
+	/**
+	 * Show the main page of the lesson manager
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'studentPresentation_main';
+		$lc->templateStyle = 'private';
+
+		$datagrid = new SearchGrid($this->module,$this->serviceName);
+		$datagrid->column = 'class_presentations.*, CONCAT(profile.lastname, ", ", profile.firstname) as fullname';
+		$datagrid->table = 'class_presentations';
+		$datagrid->joins = ' LEFT JOIN profile ON class_presentations.author=profile.username';
+		$datagrid->ignore = array( 'id_presentations', 'id_classes', 'lesson', 'createdOn', 'approvedOn', 'content', 'author' );
+		$datagrid->overrideColumn('<?=($status==2 ? "Approved" : "Pending");?>', 'status');
+		$datagrid->where = 'class_presentations.id_classes='.$u->activeClassTaught->id_classes;
+		$datagrid->headers = array(
+			'title' => 'Title',
+			'fullname' => 'Full Name',
+			'status' => 'Status',
+			'links' => ' '
+		);
+		$datagrid->postpendColumn('<a href="<?=appurl("classmgr/studentPresentation/event=editPresentation/id=$id_presentations");?>">edit</a> | <a href="<?=appurl("classmgr/studentPresentation/event=deletePresentation/id=$id_presentations");?>" onclick="if (confirm(\'Are you SURE you want to delete this presentation?\')) { return true; } else { return false; }">delete</a>', 'links');
+
+		$datagrid->class = 'datagrid';
+	
+		$datagrid->addInputFilter( 'Student Name', 'fullname' );
+		$datagrid->add2StatusSelectFilter( 'Status', 'class_presentations.status' );
+
+		$t['table'] = $datagrid->toHTML();
+
+	}
+
+	// display the teacher the form so they can edit a presentation
+	function editPresentationRun(&$db,&$u,&$lc,&$t) {
+
+		$f = new Siteform();
+		$pres = presentationObj::_getFromDB($lc->getvars['id'], 'id_presentations', 'id_classes='.$u->activeClassTaught->id_classes);
+
+		$db->queryOne("select firstname,lastname from profile where username='{$pres->author}'");
+		$name = $db->Record;
+		$t['author'] = $name['firstname'].' '.$name['lastname'];
+		$t['createdOn'] = $pres->createdOn;
+
+		if ( $lc->postvars['submit'] ) {
+			$t['error'] = $f->validateForm('facultypresentation', $lc->postvars);
+			if (!$f->hasErrors) {
+				$auth0r = $pres->author;
+				$oldStatus = $pres->status;
+				$oldCreatedOn = $pres->createdOn;
+				$pres->_loadArray($f->cleanedArray);
+				if ( $oldStatus == 1 && $f->cleanedArray['status'] == 2 ) {
+					$pres->approvedOn = date('Y-m-d H:i:s');
+				}
+				$pres->createdOn = $oldCreatedOn;
+				$pres->id_classes = $u->activeClassTaught->id_classes;
+				$pres->author = $auth0r;
+				$pres->_saveToDB();
+				$t['msg'] = 'The presentation has been saved.';
+				$this->Run($db,$u,$lc,$t);
+				return;
+			}
+		}
+		
+		$f->getForm('facultypresentation', $pres);
+		$t['form'] = $f->toHTML();
+		$this->sectionTitle = 'Presentation: '.$pres->title;
+		$lc->templateName = 'studentPresentation_edit';
+	}
+
+	// make sure we got a valid id, and delete the entry if we did.
+	function deletePresentationRun(&$db,&$u,&$lc,&$t)
+	{
+		$lc->templateStyle = 'private';		
+
+		$pres = presentationObj::_getFromDB($lc->getvars['id'], 'id_presentations');
+		if (is_object($pres)) {
+			$pres->_deleteToDB();
+			$t['msg'] = 'Presentation was deleted successfully.';
+		} else {
+			$t['error'] = 'Presentation does not exist!';
+		}
+		$this->run($db,$u,$lc,$t);
+	}
+
+
+}
+
+?>
