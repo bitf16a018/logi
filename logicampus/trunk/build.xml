@@ -184,8 +184,8 @@
 		description="move data/*sql to logicreate/data/ for the install.php script" >
 
 		<mkdir dir="${build}/logicreate/data"/>
-		<copy todir="${build}/logicreate/data" file="${data}/wipe_clean.sh"/>
-		<copy todir="${build}/logicreate/data" file="${data}/install_metainfo.sh"/>
+		<copy todir="${build}/logicreate/scripts" file="${data}/wipe_clean.sh"/>
+		<copy todir="${build}/logicreate/scripts" file="${data}/install_metainfo.sh"/>
 		<copy todir="${build}/logicreate/data" overwrite="true">
 			<fileset dir="${data}">
 				<include name="*.sql"/>
