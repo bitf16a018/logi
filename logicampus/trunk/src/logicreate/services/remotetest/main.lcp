@@ -1,0 +1,59 @@
+<?
+/*
+ *
+ *  App to manage remote user access to uploaded test files
+ *
+ */
+include_once(LIB_PATH."datagrid.php");
+
+class remotetest extends RegAuth {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Remote Test Administration';
+	var $navlinks = array();
+	var $applinks = array(
+		'List tests' => 'main',
+		'Submit new test' => 'newTest'
+	);
+	var $inactivelinks = array();
+	
+	function remotetest()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+
+/*
+ *
+ * nothing.. it's all template links(icons)
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$tests = new datagrid('remotetest','main');
+			$tests->table = "remote_test_files";
+			$tests->ignore = array('pkey','mime','displayname','hash');
+			$tests->headers = array("email"=>"Email",
+			"file"=>"File",
+			"description"=>"Description",
+			"filedate"=>"Date",
+			"size"=>"Size",
+			"clicks"=>"Views", "action"=>" ");
+			$tests->sortColumns = array("description","email","file","filedate","size","clicks");
+			$tests->prependColumn('<a href="<?=modurl("main/event=delete/key=$pkey");?>">del</a>','action');
+			$tests->overrideColumn('<?=date("m/d/Y h:i",strtotime($filedate));?>','filedate');
+			$t['table'] = $tests->toHTML();
+			$lc->templateName='main_main';
+		}
+
+		function deleteRun(&$db,&$u,&$lc,&$t) {
+			$db->query("delete from remote_test_files where pkey=".(int)$lc->getvars['key']);
+			$this->run($db,$u,$lc,$t);
+		}
+
+
+}
+
+?>

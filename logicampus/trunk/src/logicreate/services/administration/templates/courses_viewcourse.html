@@ -1,0 +1,71 @@
+<?=$t['sectionheader'];?>
+<table border=0 cellpadding=0 cellspacing=0 width="100%">
+<tr>
+	<td colspan=2 valign="top">
+
+<table border=0 cellpadding=2 cellspacing=0 width="100%">
+<tr bgcolor="#FFCE7B">
+	<td colspan=4 align="center"><b>General Course Info</b></td>
+</tr>
+<tr>
+	<td valign=top width=120><b>Course:</b></td>
+	<td valign=top><?=$t['courseFamilyNumber'];?></td>
+	<td valign=top width=200 rowspan=2><b>Prerequisites:</b><br><?=$t['preReqs'];?></td>
+	<td valign=top width=200 rowspan=2><b>Corequisites:</b><br><?=$t['coReqs'];?></td>
+</tr>
+<tr>
+	<td valign="top" nowrap><b>Course Title:</b></td>
+	<td valign="top"><?=$t['courseData']['courseName'];?></td>
+</tr>
+<tr>
+	<td valign="top"><b>Description:</b></td>
+	<td valign="top" colspan=3><?=$t['courseData']['courseDescription'];?></td>
+</tr>
+<tr>
+	<td colspan=4 align="center"><a href="<?=$t['editlink'];?>">Edit this course</a></td>
+</tr>
+</table>
+
+	</td>
+</tr>
+<tr>
+	<td width="50%" valign="top">
+
+<table border=0 cellpadding=2 cellspacing=0 width="100%">
+<tr bgcolor="#FFCE7B">
+	<td colspan=2 align="center"><b>Faculty Teaching <?=$t['courseFamilyNumber'];?></b></td>
+</tr>
+<?php while ( list(,$val) = @each($t['faculty']) ) { ?>
+<tr>
+	<td style="padding:5px;"><?=$val['firstname'].' '.$val['lastname'];?> (<?=$val['username'];?>)</td>
+</tr>
+<?php } ?>
+</table>
+
+	</td>
+	<td width="50%" valign="top">
+
+<table width="100%" border=0 cellpadding=2 cellspacing=0>
+<tr bgcolor="#FFCE7B">
+	<td colspan=3 align="center"><b>Class Listing for <?=$t['courseFamilyNumber'];?></b></td>
+</tr>
+<tr bgcolor="#FFEE9B">
+	<td><b>Professor</b></td>
+	<td><b>Class Type</b></td>
+	<td><b>Sections</b></td>
+</tr>
+<?php
+if ( $t['classes'] ) {
+while ( list(,$val) = @each($t['classes']) ) { ?>
+<tr>
+	<td><?=$val['firstname'].' '.$val['lastname'];?></td>
+	<td><?=$val['classType'];?></td>
+	<td><?=$val['sectionNumbers'];?></td>
+</tr>
+<?php }
+} ?>
+</table>
+
+	</td>
+</tr>
+</table>

@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+
+
+<style type="text/css">
+TABLE#tblCoolbar { 
+	background-color:buttonface; padding:1px; color:menutext; 
+	border-width:1px; border-style:solid; 
+	border-color:threedhighlight threedshadow threedshadow threedhighlight;
+	}
+.cbtn{
+	BORDER-LEFT: threedface 1px solid;
+	BORDER-RIGHT: threedface 1px solid;
+	BORDER-TOP: threedface 1px solid;
+	BORDER-BOTTOM: threedface 1px solid; 
+	}
+.starter{
+	background-color: buttonface; 
+	border-left: buttonhighlight solid 1px; 
+	border-right: buttonshadow solid 1px;
+	border-top: buttonhighlight solid 1px; 
+	font-size: 1px;
+	top: 1px; 
+	height: 22px; 
+	width: 3px;
+	}
+.separator{
+	border-left: buttonshadow solid 1px; 
+	border-right: buttonhighlight solid 1px; 
+	font-size: 0px; 
+	top: 1px;
+	height: 22px; 
+	width: 1px; 
+	}
+.dropdown{
+	height: 22px; 
+	top:2;
+	font:8pt verdana,arial,sans-serif
+	}
+.arrow {cursor:default;}
+</style>
+
+<script LANGUAGE="JavaScript">
+
+//ForeGround and background color picking
+var ground = "";	
+
+function changeColor(wcolour) {
+
+if (ground=="bg"){
+	document.all["pickbgcolour"].style.backgroundColor = '#' + wcolour;		
+	document.all["colorbox"].style.visibility = 'hidden';	
+	idContent.document.body.bgColor = wcolour;
+} else {
+	document.all["pickfgcolour"].style.backgroundColor = '#' + wcolour;		
+	document.all["colorbox"].style.visibility = 'hidden';	
+	cmdExec("ForeColor",wcolour);	
+	}
+}
+	
+function showColor(posX,posY,what){	
+	e = window.event;		
+	with (document.all["colorbox"]){			
+		style.left = e.clientX+4;			
+		style.top  = e.clientY-18;			
+		style.visibility = 'visible';		
+	}
+ground = what;
+}
+
+//3 dimensional button stuff
+
+function button_over(eButton){
+	eButton.style.borderBottom = "buttonshadow solid 1px";
+	eButton.style.borderLeft = "buttonhighlight solid 1px";
+	eButton.style.borderRight = "buttonshadow solid 1px";
+	eButton.style.borderTop = "buttonhighlight solid 1px";
+	}
+function button_out(eButton){
+	eButton.style.borderColor = "threedface";
+	}
+function button_down(eButton){
+	eButton.style.borderBottom = "buttonhighlight solid 1px";
+	eButton.style.borderLeft = "buttonshadow solid 1px";
+	eButton.style.borderRight = "buttonhighlight solid 1px";
+	eButton.style.borderTop = "buttonshadow solid 1px";
+	}
+function button_up(eButton){
+	eButton.style.borderBottom = "buttonshadow solid 1px";
+	eButton.style.borderLeft = "buttonhighlight solid 1px";
+	eButton.style.borderRight = "buttonshadow solid 1px";
+	eButton.style.borderTop = "buttonhighlight solid 1px";
+	eButton = null; 
+	}
+
+//Rich text editor stuff
+	
+var isHTMLMode=false
+
+function document.onreadystatechange(){
+  	idContent.document.designMode="On"
+	}
+function cmdExec(cmd,opt) {
+  	if (isHTMLMode){alert("Please uncheck 'Edit HTML'");return;}
+	idContent.focus();
+  	idContent.document.execCommand(cmd,"",opt);idContent.focus();
+	}
+function setMode(bMode){
+	var sTmp;
+  	isHTMLMode = bMode;
+  	if (isHTMLMode){sTmp=idContent.document.body.innerHTML;idContent.document.body.innerText=sTmp;} 
+	else {sTmp=idContent.document.body.innerText;idContent.document.body.innerHTML=sTmp;}
+  	idContent.focus();
+	}
+function createLink(){
+	if (isHTMLMode){alert("Please uncheck 'Edit HTML'");return;}
+	cmdExec("CreateLink");
+	}
+
+//Form stuff
+function fninit()
+	{
+	for(i=0;i<document.all.length;i++) document.all(i).unselectable = "on";
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Add Form Field here and set unselectable property to "off"
+	// This is used to protect the entire page controls from being edited
+	// by DHTML Edit commands 
+	// (http://msdn.microsoft.com/workshop/c-frame.htm?/workshop/author/default.asp)
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Form1.txtTitle.unselectable = "off";
+	idContent.unselectable = "off";
+	}
+function Save() 
+	{
+	if (isHTMLMode){alert("Please uncheck 'Edit HTML'");return;}
+  	Form1.file.value = idContent.document.body.innerHTML;
+	if (Form1.file.value.length > 25000)
+		{
+		alert("Document Content too long");
+		return ;
+		}	
+	window.opener.sendNewFile(Form1.file.value);
+	window.close();
+	}	
+
+function prepopIFrame() {
+	s = window.opener.getContent();
+	idContent.document.body.innerHTML = s;
+}
+</script>
+
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<form method="post" name="SaveForm" ID=Form1>
+<input type="hidden" name="event" value="up">
+<input type="hidden" name="pkey" value="<?=$t["pkey"];?>">
+
+
+	<!-- Content Edit hidden input form -->
+	<input type="hidden" name="file"  value="" ID=Hidden1>
+	
+	<input type="hidden" name="txtDocumentID"  value="<%=intDocumentID%>" ID=Hidden1>
+	
+	<!-- Add additional input form here -->
+</form>
+<table name="horizontal" width="720" border="1">
+<tr><td valign="top">
+
+<!-- CONTENT EDITOR START -->
+<table id="tblCoolbar" cellpadding="0" cellspacing="0" width="550" border="5">
+<tr>
+<td><div class="starter"></div></td>
+<td><div class="cbtn" onClick="cmdExec('cut')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Cut.gif" alt="Cut" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('copy')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Copy.gif" alt="Copy" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('paste')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Paste.gif" alt="Paste" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="separator"></div></td>
+<td><div class="cbtn" onClick="cmdExec('justifyleft')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_left.gif" alt="Justify Left" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('justifycenter')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Center.gif" alt="Center" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('justifyright')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img hspace="1" vspace="1" align="absmiddle" src="<?=_PICS_URL;?>w_right.gif" alt="Justify Right" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="separator"></div></td>
+<td><div class="cbtn" onClick="cmdExec('insertorderedlist')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_numlist.gif" alt="Ordered List" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('insertunorderedlist')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_bullist.gif" alt="Unordered List" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('outdent')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_deindent.gif" alt="Decrease Indent" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('indent')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_inindent.gif" alt="Increase Indent" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="separator"></div></td>
+<td><div class="cbtn" onClick="cmdExec('createLink')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Link.gif" alt="Link" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('InsertHorizontalRule')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_hr.gif" alt="Horizontal Rule" WIDTH="22" HEIGHT="22"></div></td>
+<td><div class="separator"></div></td>
+
+<td>
+	<div class="cbtn" id="pickfgcolour" 
+	style="background-color:#FFFFFF;width:16;height:17;" 
+	onmouseover="button_over(this);" 
+	onmouseout="button_out(this);" 
+	onmousedown="button_down(this);" 
+	onmouseup="button_up(this);">
+	<a class="arrow" href="#" onClick="showColor(this.x,this.y,'fg');">
+	<img align="absmiddle" src="<?=_PICS_URL;?>w_fgcolor.gif" alt="Forecolor" border="0" WIDTH="23" HEIGHT="22">
+	</a></div>
+	<!-- --Colour drop down box-- -->
+	
+	<div id="colorbox" style="position:absolute;visibility:hidden">
+		<table border="0" cellpadding="0" cellspacing="0" width="252" bgcolor="#000000">
+		<tr>
+		<td>     
+				<table border="0" bordercolor="#000000" cellpadding="0" cellspacing="1">
+				<tbody>
+				<tr>
+				<script language="JavaScript">
+				c = new Array();								
+				c[1] = "FF";				
+				c[2] = "CC";				
+				c[3] = "99";				
+				c[4] = "66";				
+				c[5] = "33";				
+				c[6] = "00";				
+				d = 0;								
+				for (i=1;i <=6;i++)
+					{					
+					if (i >1)
+						{					
+						document.write( "</tr>\n<tr>\n");					
+						}					
+					for (m=1;m <=6;m++)
+						{								
+						for (n=1;n <=6;n++)
+							{								
+							d++;							
+							colour = c[i] + c[m] + c[n];	
+									 
+							document.write("<td bgcolor=\"#"+colour+"\" width=7 class=\"text\"><a href=\"#\" onClick=\"changeColor('"+colour+"')\"><img src=\"<?=_PICS_URL;?>w_pixel.gif\" width=7 height=7 name=\"a"+d+"\" border=0></td>\n");
+							}					
+						}				
+					}	
+				</script>        
+				</tr>        
+				</tbody>       
+				</table>
+		</td>
+		</tr>
+		</table>
+	</div>	
+</td>
+
+<!--
+<td width="100%">
+	<div class="cbtn" id="pickbgcolour" 
+	style="background-color:#FFFFFF;width:16;height:17;" 
+	onmouseover="button_over(this);" 
+	onmouseout="button_out(this);" 
+	onmousedown="button_down(this);" 
+	onmouseup="button_up(this);">
+	<a class="arrow" href="#" onClick="showColor(this.x,this.y,'bg');">
+	<img src="<?=_PICS_URL;?>w_bgcolor.gif" name="colorimage" border="0" alt="Background Color" WIDTH="23" HEIGHT="22">
+	</a></div>
+-->
+</td>
+<td><div class="separator"></div></td>
+<td>&nbsp;</td>
+
+</tr>
+</table>
+
+<table id="tblCoolbar" cellpadding="0" cellspacing="0" width="550">
+<tr valign="middle" height="25">
+<td><div class="starter"></div></td>
+<td><select class="dropdown" onchange="cmdExec('formatBlock',this[this.selectedIndex].value);this.selectedIndex=0" id=select1 name=select1>
+	<option selected>Style</option>
+	<option value="Normal">Normal</option>
+	<option value="Heading 1">Heading 1</option>
+	<option value="Heading 2">Heading 2</option>
+	<option value="Heading 3">Heading 3</option>
+	<option value="Heading 4">Heading 4</option>
+	<option value="Heading 5">Heading 5</option>
+	<option value="Address">Address</option>
+	<option value="Formatted">Formatted</option>
+	<option value="Definition Term">Definition Term</option>
+</select><select class="dropdown" onchange="cmdExec('fontname',this[this.selectedIndex].value);" id=select2 name=select2>
+	<option selected>Font</option>
+	<option value="Arial">Arial</option>
+	<option value="Arial Black">Arial Black</option>
+	<option value="Arial Narrow">Arial Narrow</option>
+	<option value="Comic Sans MS">Comic Sans MS</option>
+	<option value="Courier New">Courier New</option>
+	<option value="System">System</option>
+	<option value="Tahoma">Tahoma</option>
+	<option value="Times New Roman">Times New Roman</option>
+	<option value="Verdana">Verdana</option>
+	<option value="Wingdings">Wingdings</option>
+</select><select class="dropdown" onchange="cmdExec('fontsize',this[this.selectedIndex].value);" id=select3 name=select3>
+	<option selected>Size</option>
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	<option value="5">5</option>
+	<option value="6">6</option>
+	<option value="7">7</option>
+	<option value="8">8</option>
+	<option value="10">10</option>
+	<option value="12">12</option>
+	<option value="14">14</option>
+</select></td>
+<td><div class="separator"></div></td>
+<td><div class="cbtn" onClick="cmdExec('bold')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Bold.gif" alt="Bold" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('italic')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_Italic.gif" alt="Italic" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="cbtn" onClick="cmdExec('underline')" onmouseover="button_over(this);" onmouseout="button_out(this);" onmousedown="button_down(this);" onmouseup="button_up(this);"><img align="absmiddle" src="<?=_PICS_URL;?>w_under.gif" alt="Underline" WIDTH="23" HEIGHT="22"></div></td>
+<td><div class="separator"></div></td>
+<td valign="middle"><input type="checkbox" onclick="setMode(this.checked)" id=checkbox2 name=checkbox2></td><td width="100%" style="font:8pt verdana,arial,sans-serif" valign="middle" nowrap>Edit HTML</td>
+</tr>
+</table>
+
+
+<iframe width="550" id="idContent" height="350"  onload="prepopIFrame();"></iframe>
+<!-- CONTENT EDITOR END -->
+<!-- save button-->
+<table id="tblCoolbar" width="550" cellpadding=0 cellspacing=0>
+<tr bgcolor=threedface>
+	<td align=right>
+		<INPUT type="button" value="Save" onClick="Save()" id=button2 name=button2>
+	</td>
+</tr>
+</table>
+
+
+</td><td valign="top">
+Insert a picture by clicking the <-- arrow<p>
+
+<? while (list ($k,$v) = @each($t[images] ) ) { ?>
+	<a href="#" onclick="cmdExec('InsertImage','<?= IMAGES_URL.$v?>');">&lt;--</a> <?= $v; ?><br>
+<? } if ( count($t[images]) == 0 ) { ?>
+	<i>Sorry, no images uploaded</i>
+<? } ?>
+
+</td></tr></table>
+
+
+</body>
+
+</html>

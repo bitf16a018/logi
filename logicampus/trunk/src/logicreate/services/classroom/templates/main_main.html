@@ -1,0 +1,117 @@
+<h2>Classroom Portal Page</h2>
+<?if($t['error']){?><span style="color:red;"><?=$t['error'];?></span><?}?>
+<?if($t['msg']){?><span style="color:blue;"><?=$t['msg'];?></span><?}?>
+<table cellpadding="2" cellspacing="0" width="100%">
+<tr>
+
+	<td width="30%" valign="top">
+
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">Class Calendar</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="scalendar">
+					<?=$t['calendar'];?>
+				</div>
+			</td>
+		</tr>
+		</table>
+		
+		<br>
+		
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">Lessons</td>
+		</tr>
+		<tr>
+			<td>(newest lesson is first)</td>
+		</tr>
+		<tr>
+			<td>
+					<?=$t['lessons']?>
+			</td>
+		</tr>
+		</table>
+<br>
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">Assignments</td>
+		</tr>
+		<tr>
+			<td>(closest due date is first)</td>
+		</tr>
+		<tr>
+			<td>
+				<?=$t['assignments']?>
+			</td>
+		</tr>
+		</table>
+
+<br>
+<!--
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr bgcolor="#9ccecd">
+			<td><b>Students Online</b></td>
+		</tr>
+		<tr>
+			<td style="font-size: 9px;">
+				<br>
+				<li><a href="#">billyj</a></li>
+				<li><a href="#">elvisp</a></li>
+				<li><a href="#">michaelj</a></li>
+				<li><a href="#">hankw</a></li>
+				<br>
+			</td>
+		</tr>
+		</table>
+
+-->
+
+	</td>
+	<td width="10">&nbsp;</td>
+	<td valign="top">
+	
+<? while (list ($k,$class) = @each($obj->user->classesTaken) ) { ?>
+<h4><a href="<?=modurl('details/id_classes='.$class->id_classes);?>"><?=$class->courseFamilyNumber;?> - <?=$class->courseName?></a></h4>
+<?=$t['classdata'][$class->id_classes]?>
+<br>
+<? } ?>
+
+	</td>
+	<td width="10">&nbsp;</td>
+	<td width="25%" valign="top">
+		
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">System Message</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<?=$t['motd'];?>
+			</td>
+		</tr>
+		</table>
+<!--<br>
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr bgcolor="#9ccecd">
+			<td><b>Announcements</b></td>
+		</tr>
+		<tr>
+			<td style="font-size: 9px;" align="center">
+				&nbsp;<br>
+				Schools out, everyone gets an A+
+				<br>&nbsp;
+			</td>
+		</tr>
+		</table>
+
+-->
+<br>
+
+
+	</td>
+
+</tr>
+</table>

@@ -1,0 +1,107 @@
+<?
+/*
+ *
+ * This is the main page for setting up a classroom. 
+ * Any classroom specific things that you need are done
+ * in this file and corresponding templates.
+ *
+ */
+
+include_once(LIB_PATH.'classObj.php');
+include_once(LIB_PATH.'LC_html.php');
+
+class classSetup extends FacultyService {
+
+
+        var $presentor='htmlPresentation';
+	var $cleanedArray = array();
+
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $inactivelinks = array( 'Select Classroom Style' );
+	var $sectionTitle = 'Select Classroom Style';
+	
+	
+	function run(&$db,&$u,&$lc,&$t) 
+	{
+		$lc->templateName='classsetup_main';
+		$lc->templateStyle = 'private';
+
+		$classObj = classObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
+
+		$t['stylesheet_inuse'] = $classObj->stylesheet;
+		$t['stylesheet_array'] = $this->get_stylesheet_array();
+
+		# LOAD UP THE CURRENT CLASS RESOURCE
+
+		$sql = "SELECT id_class_resource FROM classes WHERE
+		id_classes='".$u->activeClassTaught->id_classes."'";
+		$db->queryOne($sql);
+		$current_id_class_resource = $db->Record['id_class_resource'];
+
+		# GRAB ALL CONTENT FOR THE CLASS
+		$sql = "SELECT id_class_lesson_content, id_classes, txTitle FROM 
+				class_lesson_content where
+				id_classes='".$u->activeClassTaught->id_classes."' ORDER
+				BY txTitle";
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$options[$db->Record['id_class_lesson_content']] = $db->Record['txTitle']; 	
+		}
+
+		$t['classresourceoptions'] = makeOptions($options, $current_id_class_resource);	
+	}
+
+	function saveClassResourceRun(&$db, &$u, &$lc, &$t)
+	{
+		$classObj = classObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
+		$classObj->id_class_resource = $lc->postvars['content'];
+		$classObj->_saveToDB();
+		$this->run($db, $u, $lc, $t);
+		return;
+	}
+
+	function saveClassStyleRun(&$db, &$u, &$lc, &$t)
+	{
+		$classObj = classObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
+		$classObj->stylesheet = $lc->postvars['usestyle'];
+		$u->activeClassTaken->stylesheet = $lc->postvars['usestyle'];
+		$classObj->_saveToDB();
+		$this->run($db, $u, $lc, $t);
+		return;
+	}
+
+
+	function get_stylesheet_array()
+	{
+		$a_styles = array();
+		
+		$dir = dir('./templates/private/');
+		
+		while ($f = $dir->read())
+		{	
+			if (substr($f, 0, 9) == 'classroom')
+			{	
+				if (substr($f,-3)=='css') {
+					$a_styles[$f] = str_replace("_"," ",$f);
+				}
+			}
+		}
+		
+		$dir->close();
+		ksort($a_styles);
+	return $a_styles;
+	}
+	
+}
+
+?>

@@ -1,0 +1,241 @@
+<?
+/*
+ *
+ * This is the main page for setting up a classroom. 
+ * Any classroom specific things that you need are done
+ * in this file and corresponding templates.
+ *
+ */
+ // MGK - 10/16/03 - changed textbook table to accept NULLs
+ // fixed problem in update method too
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'Textbook.php');
+include_once(LIB_PATH.'TextbookClasses.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+class textbooks extends FacultyService {
+
+
+   	var $presentor='htmlPresentation';
+	var $cleanedArray = array();
+
+	var $navlinks = array (
+		'Classroom Manager' => 'display'
+		
+	);
+	var $inactivelinks = array( 'Select Classroom Style' );
+	var $sectionTitle = 'Textbook Materials';
+	var $applinks = array('View Materials'=>'textbooks/event=view','Add New Material'=> 'textbooks/event=add');
+	
+
+	function oldrun($db, &$u, &$lc, &$t)
+	{
+		$t['url'] = APP_URL.'classmgr/textbooks/event=view';
+		$this->presentor = 'redirectPresentation';
+	}
+	
+	function addRun(&$db,&$u,&$lc,&$t) 
+	{
+		if (!$this->checkAccess($u) )
+		{
+			$lc->templateName = 'textbooks_error';
+			$t['message'] = 'The date range to modify textbook materials is not currently active.';
+			return;
+		}
+			
+		$lc->templateName = 'textbooks_edit';
+		
+		$f = new SiteForm($u->groups);
+		
+		$f->fieldPermissions = true;
+		$f->getForm('book', $lc->postvars);
+		$t['form'] = $f->ToHTML();
+	}
+	
+
+	function viewRun($db, &$u, &$lc, &$t){
+		$this->run($db,$u,$lc,$t);
+	}
+	function Run($db, &$u, &$lc, &$t)
+	{
+#	echo'ww';
+		$lc->templateName = 'textbooks_view';	
+
+		if ( $lc->getvars['noTextbooks'] == 1 ) {
+			$tb = Textbook::load( array( 'id_classes' => $u->activeClassTaught->id_classes ) );
+			if ( !is_object($tb) ) {
+				$tb = new Textbook();
+				$tb->idClasses = $u->activeClassTaught->id_classes;
+			}
+			$tb->noTextbooks = 1;
+			$tb->save();
+			$t['noTextbooks'] = 1;
+		} else {
+			$db->queryOne("select noTextbooks from textbook where id_classes='{$u->activeClassTaught->id_classes}'");
+			$t['noTextbooks'] = $db->Record['noTextbooks'];
+		}
+		
+		$t['data'] =
+		TextbookClassesPeer::doSelect("id_classes='".$u->activeClassTaught->id_classes."' ORDER BY title ASC");
+
+		$t['checkAccess'] = $this->checkAccess($u);
+	}
+
+	function editRun($db, &$u, &$lc, &$t)
+	{
+		if (!$this->checkAccess($u) )
+		{
+			$lc->templateName = 'textbooks_error';
+			$t['message'] = 'The date range to modify textbook material is not currently active.';
+			return;
+		}
+		
+		if (!$lc->getvars['id'])
+		{
+			$t['message'] = 'There was no ID passed.  Please start
+			over.';
+			$lc->templateName = 'textbooks_error';
+			return;
+		}
+
+	
+		$t['entry'] = TextbookClasses::load($lc->getvars['id']);
+		# __FIX_ME__ add sememster checking
+		if ($t['entry']->status == 3 || $t['entry']->status == 2)
+		{
+			$t['message'] = 'This entry has marked either <b>Pending</b> or <b>Approved</b> and cannot be modified at this time.  Please contact DL staff if you need assistance.';	
+			$lc->templateName = 'textbooks_error';
+			return;
+		}
+		$lc->templateName = 'textbooks_edit';
+		$f = new SiteForm($u->groups);
+		$f->fieldPermissions = true;
+		$f->getForm('book', $t['entry']);
+		$t['form'] = $f->ToHTML();
+	}
+
+	function updateRun($db, &$u, &$lc, &$t)
+	{
+
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('book', $lc->postvars);
+		
+		if ($t['error'])
+		{
+			if ($lc->getvars['event'] == 'add')
+			{
+				$this->addRun($db, $u, $lc, $t);
+				return;
+			}
+			
+			if ($lc->getvars['event'] == 'edit')
+			{
+				$this->editRun($db, $u, $lc, $t);
+				return;
+			}
+		}
+		
+		if (!$this->checkAccess($u) )
+		{
+			$lc->templateName = 'textbooks_error';
+			$t['message'] = 'The date range to modify textbooks is not currently active.';
+			return;
+		}
+		
+		if ($lc->getvars['event'] == 'add')
+		{
+			$book = new TextbookClasses();
+			$book->idClasses = $u->activeClassTaught->id_classes;
+		}	
+	
+		if ($lc->getvars['event'] == 'edit')
+		{
+			$book = TextbookClasses::load($lc->getvars['id']);	
+			# make sure they are not trying to edit an entry with status of 3
+			if ($book->status == 3 || $book->status == 2)
+			{
+				$lc->templatename = 'textbooks_error';
+				$t['message'] = 'This material has already been approved or is pending review and cannot be modified.  If you need to modify this entry, please contact the help desk.';
+				return;
+			}	
+		}
+		
+		$book->setArray($lc->postvars);
+
+		# since entrystatus can be blank, push it onto the object
+		# seperately
+		$book->status = 1;
+		$book->save();
+
+		# make sure they aren't flagged as not having any textbooks -- they just added/edited one!
+		$tb = Textbook::load( array( 'id_classes' => $u->activeClassTaught->id_classes ) );
+		if ( !is_object($tb) ) {
+			$tb = new Textbook();
+			$tb->idClasses = $u->activeClassTaught->id_classes;
+		}
+		$tb->noTextbooks = 0;
+		$tb->save();
+		
+		# Send the ADMIN an email alert
+		
+		$book->mailAdmin(
+			"A new textbook was added or modified in the system by a faculty member.  
+			Here is the information:\n\n 
+			
+			Course Modifed:  ".$u->activeClassTaught->coursename."\n
+			Faculty:  ".$u->activeClassTaught->facultyName."\n
+			Class ID: ".$u->activeClassTaught->id_classes."\n
+			Review Submission: ".APP_URL."textbookmgr/main/event=view/id=".$u->activeClassTaught->id_classes."
+			");
+// also, take this text and send a PM to the instructor confirming reciept of the submission
+// suggested by David R on 10/16/03 - not actually done yet - mgk 10/16/03
+if (0) { 
+/*
+		"A new textbook was added or modified in the system by a faculty member.  
+			Here is the information:\n\n 
+			
+			Course Modifed:  ".$u->activeClassTaught->coursename."\n
+			Faculty:  ".$u->activeClassTaught->facultyName."\n
+			Class ID: ".$u->activeClassTaught->id_classes."\n
+			Review Submission: ".APP_URL."textbookmgr/main/event=view/id=".$u->activeClassTaught->id_classes."
+		"
+*/			
+}
+		/*
+		$t['url'] =
+		APP_URL.'classmgr/textbooks/event=view';
+		$this->presentor = 'redirectPresentation';
+		*/
+		$this->viewRun($db,$u,$lc,$t);
+	}
+
+	function deleteRun(&$db,&$u,&$lc,&$t) {
+		
+		$tbc = TextbookClasses::load($lc->getvars['id']);
+		if ( !is_object($tbc) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'Invalid Textbook id';
+			return;
+		}
+
+		TextbookClassesPeer::doDelete( $tbc, true );
+		$t['message'] = 'Textbook deleted successfully.';
+		$this->viewRun($db,$u,$lc,$t);
+	}
+
+	
+	# Checks to make sure the user can modify the entries
+	function checkAccess($u)
+	{
+			$semObj = semesterObj::_getFromDB($u->activeClassTaught->id_semesters, 'id_semesters');
+			$ut = time();
+			if ( (strtotime($semObj->dateStartTextbook) < $ut) and  ($ut < strtotime($semObj->dateEndTextbook) ) )
+			{
+				return true;
+			}
+			return false;
+	}
+}
+
+?>
