@@ -83,11 +83,11 @@
 <table width="100%">
 <tr>
   <td width="50%" align="right"><b><?=lct('username')?>:</b></td>
-  <td width="50%"><input type="text" size="15" maxlength="32" name="username" /></td>
+  <td width="50%"><input type="text" size="15" maxlength="32" name="username" value="teacher" /></td>
 </tr>
 <tr>
   <td width="50%" align="right"><b><?=lct('password')?>:</b></td>
-  <td width="50%"><input type="password" size="15" maxlength="32" name="password" /></td>
+  <td width="50%"><input type="password" size="15" maxlength="32" name="password" value="teacher" /></td>
 </tr>
 <tr>
   <td colspan="2" align="center">
@@ -110,6 +110,12 @@
 </div>
 <br />
 <a href="<?=APP_URL?>welcome/about">[ABOUT THIS DEMO]</a>
+<p>&nbsp;</p>
+
+Choose your language:<br/>
+<a href="?switchlocale=en_US">English (US)</a>
+<a href="?switchlocale=es_MX">Spanish (MX)</a>
+<a href="?switchlocale=zh_CN">Chinese (PRC)</a>
 </center>
 <script language="JavaScript">
 	document.forms[0].elements[0].focus();
