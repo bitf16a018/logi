@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?
 //STEP 1: parse arguments
 $argv = $_SERVER['argv'];
@@ -18,6 +19,8 @@ if ($locale == '') {
 function printHelp() {
 echo <<<END
 Usage php ./buildtrans.php [ja_JP]
+
+
 END;
 
 }

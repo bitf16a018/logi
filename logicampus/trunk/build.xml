@@ -24,6 +24,7 @@
     <mkdir dir="${build}"/>
     <mkdir dir="${dist}"/>
     <mkdir dir="${build}/logicreate/"/>
+    <mkdir dir="${build}/logicreate/lang/"/>
     <mkdir dir="${build}/public_html/"/>
     <mkdir dir="${build}/public_html/docs/"/>
     <mkdir dir="${build}/public_html/images/"/>
@@ -155,6 +156,8 @@
 	<!-- move the data files to where the installer can get them -->
 	<antcall target="copy_data"/>
 
+	<!-- build translation files and install -->
+	<antcall target="translate"/>
 
   	<!-- apply LCPL to files -->
 	<antcall target="apply_license"/>
@@ -202,6 +205,34 @@
 
 
 
+	<target name="translate"
+		description="uses php to build translation tables out of XML files">
+		<echo message="Translating [english,spanish,chinese] ..." />
+		<exec executable="php" dir="${build}/../lang/" failonerror="true">
+			<arg value="buildtrans.php"/>
+			<arg value="en_US"/>
+		</exec>
+		<exec executable="php" dir="${build}/../lang/" failonerror="false">
+			<arg value="buildtrans.php"/>
+			<arg value="es_MX"/>
+		</exec>
+		<exec executable="php" dir="${build}/../lang/" failonerror="false">
+			<arg value="buildtrans.php"/>
+			<arg value="zh_CN"/>
+		</exec>
+
+
+		<copy todir="${build}/logicreate/lang/" file="${build}/../lang/lct.en_US.php"/>
+		<copy todir="${build}/logicreate/lang/" file="${build}/../lang/lct.es_MX.php"/>
+		<copy todir="${build}/logicreate/lang/" file="${build}/../lang/lct.zh_CN.php"/>
+		<copy todir="${build}/logicreate/lang/" file="${lcsrc}/lang/fallback.php"/>
+
+	</target>
+
+
+
+
+
 	<target name="clean"
 		description="removes temp and dist directories" >
 		<!-- Delete the ${build} and ${dist} directory trees -->
@@ -222,6 +253,8 @@
 		description="creates a patch against cvs, patch.txt" >
 		<cvs command="-q diff -u -N src" output="patch.txt"/>
 	</target>
+
+
 
 	<target name="package"
 	   description="zip a service/module">
