@@ -4,11 +4,32 @@
 
 <FIELDSET>
 <LEGEND><b>Stat Information</b></LEGEND>
-			Total Points for this assessment: <?= $t['questions_total_points']?><br>
-			Total Questions for this assessment: <?= $t['assessment']->questionCount;?><br>
-			Total Points Earned: <?=$t['total_points_earned']?><br>
-			Letter Grade: <?=$t['letter_grade'];?><br>
-			Percentage: <?=$t['percentage'];?>%
+
+	<div style="float:right">
+		<b>Attempt Log</b><br/>
+		<select size="5">
+			<option>Attempt #1</option>
+			<option>&nbsp;&nbsp;&nbsp;Dec 5 2004</option>
+			<option>&nbsp;&nbsp;&nbsp;started 2:51pm</option>
+			<option>&nbsp;&nbsp;&nbsp;finished 2:51pm</option>
+			<option>===================</option>
+			<option>Attempt #2</option>
+			<option>&nbsp;&nbsp;&nbsp;Dec 6 2004</option>
+			<option>&nbsp;&nbsp;&nbsp;started 2:51pm</option>
+			<option>&nbsp;&nbsp;&nbsp;finished 2:51pm</option>
+			<option>===================</option>
+		</select>
+	</div>
+
+	<div style="alignment:left">
+		Total Points for this assessment: <?= $t['questions_total_points']?><br>
+		Total Questions for this assessment: <?= $t['assessment']->questionCount;?><br>
+		Total Points Earned: <?=$t['total_points_earned']?><br>
+		Letter Grade: <?=$t['letter_grade'];?><br>
+		Percentage: <?=$t['percentage'];?>%
+	</div>
+
+	<div style="clear:both"></div>
 </FIELDSET>
 <p>&nbsp;</p>
 
