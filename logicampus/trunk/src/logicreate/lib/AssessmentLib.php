@@ -125,7 +125,7 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 		}
 		$this->questionInput = AssessmentInput::getInput('multiple',$this);
 
-		$this->questionDisplay = 'Mulitple Choice';
+		$this->questionDisplay = 'Multiple Choice';
 	}
 
 
@@ -140,6 +140,8 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 		$this->questionChoices = array();
 
 		while (list ($k,$v) = each($postvars['labels']) ) {
+		// added per phone with mark 10/18/03 10:55pm 
+			if ( trim(strip_tags($v)) == '' ) continue;
 			$qc = new AssessmentChoice();
 			$qc->label = stripslashes($v);
 
@@ -250,6 +252,8 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 				return strtolower($this->questionChoices[$i]->label);	
 			}
 		}
+
+		return false;
 	}
 
 	function isCorrect()
@@ -276,7 +280,7 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		}
 		$this->questionInput = AssessmentInput::getInput('multiple',$this);
 
-		$this->questionDisplay = 'Mulitple Answer';
+		$this->questionDisplay = 'Multiple Answer';
 	}
 
 
@@ -339,31 +343,53 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		return false;
 	}
 
+
 	function grade(&$answerObj)
 	{
-
-
 		$correct = $this->getCorrectAnswer();
 		$answers = unserialize($answerObj->assessmentAnswerValues);
-		if (!array_diff($answers, $correct))
-		{
-			if ($answerObj->pointsEarned != $this->questionPoints ) {
-				$answerObj->set('pointsEarned',$this->questionPoints);
-				$answerObj->save();
-			}
-		} else {
-				//they got it wrong, if it's new then insert a 0,
-				// if it's old && different, then save
-				if ( $answerObj->isNew() ) {
-					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
-				}
-				if ( $answerObj->pointsEarned != $this->questionPoints ) {
-					$answerObj->set('pointsEarned',0);
-					$answerObj->save();
-				}
+		$numCorrect = 0;
+
+
+		foreach ($answers as $k => $answer) {
+			$answers[$k] = stripslashes($answer);
 		}
+		$c_count = count($correct);
+		for ($x=0; $x<$c_count; $x++) {
+			$correct[$x] = strtolower($correct[$x]);
+		}
+		$a_count = count($answers);
+		for ($x=0; $x<$a_count; $x++) {
+			$answers[$x] = strtolower($answers[$x]);
+		}
+
+
+		//array diff doesn't work
+		// add one to num correct for every answer that is right
+		// subtract one to num correct for every answer that is not right
+		for ($x=0; $x<$a_count; $x++)
+		{
+			if ( in_array($answers[$x],$correct) )
+			$numCorrect++;
+			else
+			$numCorrect--;
+		}
+
+		// the number of corret answers exactly matches the 
+		// number of defined correct answers, IT'S RIGHT
+		if ($numCorrect == $c_count) {
+			//we don't want to save all the time so...
+			if ( $naswerObj->pointsEarned != $this->questionPoints )
+			$naswerObj->set('pointsEarned',$this->questionPoints);
+		} else {
+			// WRONG
+			if ( $naswerObj->pointsEarned != 0 )
+			$answerObj->set('pointsEarned',0);
+		}
+
+		$answerObj->save();
 	}
+
 
 	function getCorrectAnswer()
 	{
@@ -372,7 +398,7 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		{
 			if ($this->questionChoices[$i]->correct)
 			{
-				$x[] =  strtolower($this->questionChoices[$i]->label);	
+				$x[] =  stripslashes(strtolower($this->questionChoices[$i]->label));
 			}
 		}
 		return $x;
@@ -381,12 +407,31 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 	function isCorrect()
 	{
 		$correct = $this->getCorrectAnswer();
-		$answer = $this->answers->assessmentAnswerValues;
-		array_walk($answer, 'strtolower');
-		if (array_diff($answer, $correct))
+		$answer = $this->answer->assessmentAnswerValues;
+
+		//array walk doesn't work with built in functions
+		$c_count = count($correct);
+		for ($x=0; $x<$c_count; $x++) {
+			$correct[$x] = strtolower($correct[$x]);
+		}
+		$a_count = count($answer);
+		for ($x=0; $x<$a_count; $x++) {
+			$answer[$x] = strtolower($answer[$x]);
+		}
+
+
+		for ($x=0; $x<$c_count; $x++)
 		{
+			if (! in_array($correct[$x],$answer) )
 			return FALSE;
 		}
+
+		for ($x=0; $x<$a_count; $x++)
+		{
+			if (! in_array($answer[$x],$correct) )
+			return FALSE;
+		}
+
 		return TRUE;
 	
 	}
@@ -603,9 +648,15 @@ class AssessmentQuestionFill extends AssessmentQuestion {
 
 	function grade(&$answerObj)
 	{
-
+		//this is an ARRAY!!
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($answerObj->assessmentAnswerValues) == $correct)
+		$guess = strtolower($answerObj->assessmentAnswerValues);
+
+		$gotItRight = false;
+		foreach($correct as $blank=>$c) {
+			if( $guess == $c ) { $gotItRight = true; }
+		}
+		if ($gotItRight)
 		{
 			if ($answerObj->pointsEarned != $this->questionPoints ) {
 				$answerObj->set('pointsEarned',$this->questionPoints);
@@ -626,9 +677,11 @@ class AssessmentQuestionFill extends AssessmentQuestion {
 
 	}
 
+
 	function getCorrectAnswer()
 	{
 		$count = count($this->questionChoices);
+		$x = array();
 		for ($i=0; $i<$count; $i++)
 		{
 			if ($this->questionChoices[$i]->label)
@@ -829,7 +882,7 @@ class AssessmentInputCheckbox extends AssessmentInput {
 	function render() {
 		for ($x=0; $x< count($this->question->questionChoices); $x++) {
 			$choice = $this->question->questionChoices[$x];	
-			$ret .='<input type="checkbox" name="'.$this->question->assessmentQuestionId.'[]" value="'.$x.'">&nbsp;';
+			$ret .='<input type="checkbox" name="'.$this->question->assessmentQuestionId.'[]" value="'.htmlspecialchars($x,ENT_QUOTES).'">&nbsp;';
 			$ret .= $choice->label.' <br>';
 		}
 	return $ret;
