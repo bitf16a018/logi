@@ -90,9 +90,8 @@ $engine = new PBDO_Compiler();
 $engine->setFilename($filename);
 $staticNodes = $engine->compile();
 
-//deprecated
-//global $projectName;
-$projectName = $engine->getProjectName();
+$projectName = PBDO_Compiler::$model->getProjectName();
+
 print "*****************".str_repeat('*',strlen($projectName))."**\n";
 print "* Project Name = $projectName *\n";
 print "*****************".str_repeat('*',strlen($projectName))."**\n";
@@ -110,14 +109,6 @@ if (MSSQL) {
 	$engine->dbtype = 'ms';
 	include(PBDO_PATH.'./sql_mssql.php');
 }
-foreach($staticNodes as $k=>$v) { 
-	#for ($x=0; $x<count($staticNodes); ++$x) {
-	$node = $staticNodes[$k];
-//	$node->xmlnode->tagname =  strtolower($node->xmlnode->tagname);
-	$node->accept($engine);
-}
-
-//done parsing and compiling
 
 //print output
 print "\n";
@@ -211,7 +202,7 @@ if (!NO_PHP) {
 		}
 	}
 }
-
+/*
 if (!NO_SQL) {
 	$type = 'mysql';
 	if (MSSQL) { 
@@ -225,7 +216,7 @@ if (!NO_SQL) {
 		fclose($file);
 	}
 }
-
+*/
 if ( !OLD_STYLE ) {
 	foreach($engine->forms as $k=>$v) {
 		if ( count($v->widgets) < 1 ) {

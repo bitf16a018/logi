@@ -208,6 +208,7 @@ class ParsedClass {
 	/**
 	 * @DEPRECATED
 	 */
+	 /*
 	function createFromXMLObj($obj) {
 		switch ($obj->getAttribute('language')) {
 			case 'java':
@@ -225,7 +226,7 @@ class ParsedClass {
 		}
 		return $class;
 	}
-
+*/
 
 	function addAttribute($a) {
 		if ( $a->isPrimary() ) {
