@@ -155,7 +155,7 @@ Where</u>
 		<table width="100%" border="0">
 		<thead>
 		<tr>
-		<td class="selectedTab">&nbsp;</td><td class="selectedTab">Lastname, Firstname</td>
+		<td class="selectedTab">Lastname, Firstname</td>
 		<td class="selectedTab">username</td>
 		<td class="selectedTab">actions</td>
 		</tr>
@@ -163,9 +163,6 @@ Where</u>
 
 		<? for ($x=0; $x < count($t[users]); ++$x) { $c = $t[users][$x]; $x%2? $color="#F0F0F0":$color="#E0E0F0";?>
 		<tr bgcolor="<?=$color?>">
-			<td>
-				<input type="checkbox" name="users[]" value="<?= $c['pkey']?>">
-			</td>
 			<td><?= $c['profiledata']?></td>
 			<td><a href="<?=modurl('users/event=showUser/username='.$c['lc_username']);?>"><?= $c['lc_username']?></a></td>
 		<td>
