@@ -287,8 +287,10 @@ if (trim($this->filterBySection)!='') {
 
 		$sql .= ' order by p.lastname, p.firstname';
 		$db->query($sql);
-		while ($db->next_record())
+		while ($db->next_record()) {
+			$db->Record['username'] = strtolower($db->Record['username']);
 			$this->students[$db->Record['username']] = ClassGradeBookStudent::load($db->Record);
+		}
 	}
 
 	// This was added for classroom/gradebook to load up a SINGLE student
@@ -297,8 +299,15 @@ if (trim($this->filterBySection)!='') {
 		//__FIXME__ make sure this uses proper constraints against class/semester/section
 		$db = DB::getHandle();
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		$sql = "select firstname, lastname, username from profile
-			where username='$username'";
+
+		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.dateWithdrawn from profile as p
+			left join class_student_sections as ss on ss.id_student=p.username
+			left join class_sections as s on s.sectionNumber=ss.sectionNumber
+			left join classes as cls on cls.id_semesters=ss.semester_id
+			where s.id_classes="'.$this->idClasses.'"
+			and cls.id_classes="'.$this->idClasses.'" 
+			and p.username="'.$username.'" ';
+
 		$db->queryOne($sql);
 		if ( $db->Record['username'] == '' ) return false;
 		$this->students[$db->Record['username']] = ClassGradebookStudent::load($db->Record);
@@ -427,7 +436,6 @@ if (trim($this->filterBySection)!='') {
 		}
 		//we don't need this for the other type of calculations anymore
 		// kevin said we shouldn't adjust each cat wieght based on the total weights
-		echo "<!--otalWeights = $totalWeights-->\n";
 		$this->categoryWeightRatio = 100/$totalWeights;
 		reset($this->categoryWeights);
 	}
@@ -468,6 +476,7 @@ if (trim($this->filterBySection)!='') {
 	function setStudentVals() {
 		$now = time();
 
+
 		foreach($this->vals as $valId=>$valObj) {
 
 			$entry = $this->entries[$valObj->idClassGradebookEntries];
@@ -476,12 +485,22 @@ if (trim($this->filterBySection)!='') {
 				continue;
 			}
 
+
+			if ( $entry->publishFlag == 0 ) {
+				$this->students[$valObj->username]->vals[$entry->idClassGradebookEntries] = $valObj;
+				continue;
+			}
 			if (($entry->dateDue > 0 && $entry->dateDue < $now) || strlen($valObj->score) > 0 ) {
 				//date due is passed, assign points or 0 to student
-				if ($student->dateWithdrawn > 0 && $student->dateWithdrawn < $entry->dateDue ) {
-					continue;
+				// fixed - mgk 12/9/03
+#				if ($student->dateWithdrawn > 0 && $student->dateWithdrawn < $entry->dateDue ) {
+#					continue;
+#				}
+// per kevin's AIM
+// wants any recorded grade to be shown, regardless of drop date.
+				if (isset($valObj->score)) { 
+					if ( $valObj->score == 0 ) { $valObj->score = 0; }
 				}
-				if ( $valObj->score == 0 ) { $valObj->score = 0; }
 				$this->students[$valObj->username]->vals[$entry->idClassGradebookEntries] = $valObj;
 				$this->students[$valObj->username]->possiblePoints += $entry->totalPoints;
 				$this->students[$valObj->username]->totalPointsEarned += $valObj->score;
@@ -548,7 +567,7 @@ if (trim($this->filterBySection)!='') {
 		// for the lowest grade in each category.
 		$dropList = array();
 		foreach($this->categories as $catId=>$catObj) {
-			for ($x=0; $x < $catObj->dropCount; ++$x) {
+			for ($x=0; $x < ($catObj->dropCount); $x++) {
 				$dropList[$catId][$x] = 0;
 			}
 		}
@@ -611,6 +630,13 @@ if (trim($this->filterBySection)!='') {
 				}
 
 
+				$this->students[$username]->possiblePoints = 
+					($this->students[$username]->possiblePoints < 0) ?
+					0 : $this->students[$username]->possiblePoints;
+
+				$this->students[$username]->totalPointsEarned = 
+					($this->students[$username]->totalPointsEarned < 0) ?
+					0 : $this->students[$username]->totalPointsEarned;
 			}
 			reset($dropList);
 		}
@@ -624,6 +650,7 @@ if (trim($this->filterBySection)!='') {
 	 * @return boolean
 	 */
 	function requiresDrop() {
+		return false;
 		return $this->hasDropCount;
 	}
 
@@ -742,14 +769,14 @@ if (trim($this->filterBySection)!='') {
 			print "\n\n<!-- ".$username."-->\n";
 			$categoryPercentSums = array();
 			$totalWeight =0;	// mgk 12/05/03
+
 			foreach ($stuObj->vals AS $valId=>$valObj)
 			{
 
 				$entryObj = $this->entries[$valObj->idClassGradebookEntries];
-				echo "<!--".$valObj->idClassGradebookEntries. " -- ".$valObj->score." - ".$entryObj->weightedPercent."-->\n";
 				if ( $valObj->isDisqualified() ) continue;
+				if ( $entryObj->publishFlag == 0 ) continue;
 
-				#$entryObj = $this->entries[$valObj->idClassGradebookEntries];
 
 				// don't count due dates that haven't passed yet, and have no score
 				//if ( $entryObj->dateDue > $stamp && $valObj->score == 0 && $entryObj->dateDue > 0) { print "<!-- skipped grade -->\n"; continue; }
