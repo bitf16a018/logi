@@ -278,7 +278,7 @@ class semestercopy extends FacultyService
 			$sql[] = 'DELETE FROM class_gradebook WHERE id_classes='.$id_classes;
 			$sql[] = 'DELETE FROM class_gradebook_categories WHERE id_classes='.$id_classes;
 			$sql[] = 'DELETE FROM class_gradebook_entries WHERE id_classes='.$id_classes;
-			$sql[] = 'DELETE FROM class_gradebook_val WHERE id_classes='.$id_classes;
+			//$sql[] = 'DELETE FROM class_gradebook_val WHERE id_classes='.$id_classes;
 
 			$sql[] = 'DELETE FROM class_lesson_content WHERE id_classes='.$id_classes;
 			
@@ -395,7 +395,7 @@ class semestercopy extends FacultyService
 		$application_nodes[] = $this->get_links_nodes();
 		$application_nodes[] = $this->get_objectives_nodes();
 		$application_nodes[] = $this->get_documentlibrary_nodes();
-		$application_nodes[] = $this->get_textbook_nodes();
+		//$application_nodes[] = $this->get_textbook_nodes();
 		$application_nodes[] = $this->get_calendar_nodes();	// needs to be last, becuase it links
 		$application_nodes[] = $this->get_lessons_nodes();
 		$application_nodes[] = $this->get_content_nodes();
