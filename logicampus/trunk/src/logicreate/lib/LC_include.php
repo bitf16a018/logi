@@ -645,7 +645,7 @@ function closepage($logUsage = true) {
 // remove later 0 debugging
 $d = date("Ymd");
 global $PHPSESSID;
-mylog("/tmp/query_$d"."_$PHPSESSID","==========================\nEND PAGE\n=======================");
+//mylog("/tmp/query_$d"."_$PHPSESSID","==========================\nEND PAGE\n=======================");
 
 	exit();
 }

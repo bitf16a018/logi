@@ -50,7 +50,7 @@ class mysql extends DB {
 		*/
 		global $PHPSESSID;
 		$d = date("Ymd");
-		mylog("/tmp/query_$d"."_$PHPSESSID",$queryString);
+//		mylog("/tmp/query_$d"."_$PHPSESSID",$queryString);
 		if ($this->driverID == 0 ) {$this->connect();}
 
 		$resSet = mysql_query($queryString,$this->driverID);
