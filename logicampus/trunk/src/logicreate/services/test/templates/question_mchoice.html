@@ -49,7 +49,12 @@
 				<input name="answer" value="<?=$x;?>" type="radio"<?=$checked?>>
 			</td>
 			<td>
-				<? printf('%d',$x+1);?>.
+				<?
+				// make this A, B, C, etc) - adding 64+1 = 65 (A). 
+				// what effect for foreign character sets? 
+				// mgk - 8/14/04
+				?>
+				<? printf('%d',char($x+1+64));?>.
 				<?=$qc[$x]->label;?>
 			</td>
 		</tr>

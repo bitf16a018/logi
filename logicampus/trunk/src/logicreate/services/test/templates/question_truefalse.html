@@ -39,7 +39,12 @@
 		<?$checked = '';?>
 		<tr>
 			<td width=100 align="right">
-				<? printf('%d',$x+1);?>.
+				<?
+				// make this A, B, C, etc) - adding 64+1 = 65 (A). 
+				// what effect for foreign character sets? 
+				// mgk - 8/14/04
+				?>
+				<? printf('%d',char($x+1+64));?>.
 			</td>
 			<td width=50><?=$qc->label;?></td>
 			<td>
