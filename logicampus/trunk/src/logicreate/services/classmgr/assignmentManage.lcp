@@ -30,16 +30,7 @@ class assignmentManage extends FacultyService {
 	var $presentor = 'htmlPresentation';
 
 	// links
-	var $navlinks = array (
-		'Classroom Manager' => 'display/',
-		'Lessons' => 'lessonManager/',
-		'Webliography' => 'lessonWebliography/',
-		'FAQ' => 'faq/',
-		'Assignments' => 'assignmentManage/',
-		'Content' => 'lessonContent/',
-		'Presentations' => 'studentPresentation',
-		'Objectives' => 'lessonObjectives/'
-	);
+
 	var $inactivelinks = array( 'Assignments' );
 	var $applinks = array(
 		'List Assignments' => 'assignmentManage/',
@@ -1097,5 +1088,24 @@ class assignmentManage extends FacultyService {
 		exit();
 
 	}
+
+
+
+	//__FIXME__
+	function buildNavLinks() {
+
+		$this->navlinks = array ();
+		$this->navlinks[ lct('Classroom Overview') ] = 'display/';
+		$this->navlinks[ lct('Lessons') ] = 'lessonManager/';
+		$this->navlinks[ lct('Webliography') ] = 'lessonWebliography/';
+		$this->navlinks[ lct('FAQs') ] = 'faq/';
+		$this->navlinks[ lct('Assignments') ] = 'assignmentManage/';
+		$this->navlinks[ lct('Content') ] = 'lessonContent/';
+		$this->navlinks[ lct('Presentations') ] = 'studentPresentation';
+		$this->navlinks[ lct('Objectives') ] = 'lessonObjectives/';
+
+	}
+
+
 }
 ?>

@@ -132,7 +132,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		教材 和 课程
 	</message>
-	<!--Content &amp; Lesson Links-->
+	<!--Content &amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -316,6 +316,27 @@
 	</message>
 	<!--Student Profile-->
 	<usage id ="Student Profile" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="76"/>
+
+
+	<message id ="Presentations" domain="system" status="">
+		Presentations
+	</message>
+	<!--Presentations-->
+	<usage id ="Presentations" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1104"/>
+
+
+	<message id ="Student Management" domain="system" status="">
+		Student Management
+	</message>
+	<!--Student Management-->
+	<usage id ="Student Management" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="26"/>
+
+
+	<message id ="Semester Copy" domain="system" status="">
+		Semester Copy
+	</message>
+	<!--Semester Copy-->
+	<usage id ="Semester Copy" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="36"/>
 
 </language>
 

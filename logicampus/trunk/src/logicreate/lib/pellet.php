@@ -94,7 +94,7 @@ class Service {
 
 
 	//__FIXME__
-	function translateNavLinks() {
+	function buildNavLinks() {
 
 		if ( !is_array($this->navlinks) ) return;
 		$newlinks = array();
@@ -106,7 +106,7 @@ class Service {
 	}
 
 	//__FIXME__
-	function translateAppLinks() {
+	function buildAppLinks() {
 
 		if ( !is_array($this->navlinks) ) return;
 		$newlinks = array();
@@ -135,8 +135,8 @@ class BasicAuth extends Service {
 	function preTemplate (&$obj,&$t) {
 
 		//__FIXME__ translation
-		$this->translateNavLinks();
-		$this->translateAppLinks();
+		$this->buildNavLinks();
+		$this->buildAppLinks();
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
@@ -198,8 +198,8 @@ class RegAuth extends Service {
 	function preTemplate (&$obj,&$t) {
 
 		//__FIXME__ translation
-		$this->translateNavLinks();
-		$this->translateAppLinks();
+		$this->buildNavLinks();
+		$this->buildAppLinks();
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
@@ -365,8 +365,8 @@ class AdminService extends Service {
 	function preTemplate (&$obj,&$t) {
 
 		//__FIXME__ translation
-		$this->translateNavLinks();
-		$this->translateAppLinks();
+		$this->buildNavLinks();
+		$this->buildAppLinks();
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
@@ -461,8 +461,8 @@ class FacultyService extends Service {
 	function preTemplate (&$obj,&$t) {
 
 		//__FIXME__ translation
-		$this->translateNavLinks();
-		$this->translateAppLinks();
+		$this->buildNavLinks();
+		$this->buildAppLinks();
 
 		if ($obj->getvars['print']) {
 			$t['sectionheader']  .= '<h3>'.$this->sectionTitle;
@@ -511,7 +511,8 @@ class FacultyService extends Service {
 		}
 		$t['sectionheader'] .= '<br>';
 	}
-	
+
+
 }
 
 
@@ -591,8 +592,8 @@ class StudentService extends Service {
 	function preTemplate(&$obj,&$t) {
 
 		//__FIXME__ translation
-		$this->translateNavLinks();
-		$this->translateAppLinks();
+		$this->buildNavLinks();
+		$this->buildAppLinks();
 
 		if ($obj->getvars['print']) {
 			$t['sectionheader']  .= '<h3>'.$this->sectionTitle;
