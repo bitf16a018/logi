@@ -3,6 +3,7 @@ CREATE TABLE class_student_sections (
   id_student varchar(75) NOT NULL default '',
   semester_id int(11) unsigned NOT NULL default '0',
   active tinyint(1) NOT NULL default '0',
+  dateWithdrawn date default NULL,
   UNIQUE KEY section_student_semester (sectionNumber,id_student,semester_id),
   KEY id_student (id_student),
   KEY semester_id (semester_id),
