@@ -10,7 +10,7 @@
 
 //requirements
 //include ('codedef.php');
-include ('sqldef.php');
+//include ('sqldef.php');
 
 list ($name,$ext) = explode(".",$filename);
 $name = ucfirst($name);
@@ -256,6 +256,7 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 
 
 	function visitKeyNode(&$key) {
+		/*
 		unset($this->workingIndex);
 		$this->workingIndex = PBDO_ParsedIndex::parsedIndexFactory(
 					$this->dbtype,
@@ -269,6 +270,7 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 		if ($this->workingTable) {
 			$this->workingTable->addIndex($this->workingIndex);
 		}
+		//*/
 	}
 
 
