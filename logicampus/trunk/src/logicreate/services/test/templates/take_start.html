@@ -30,8 +30,10 @@ viewing.  You can also use the previous and next buttons to go through each ques
 <?
 	$count = count ($t['questions']);
 
-	for ($i=0; $i<$count; $i++)
-	{ 
+	for ($i=0; $i<$count; $i++) {
+	$questionType = $t['questions'][$i]->questionType;
+	$questionDisplay = $t['questions'][$i]->questionDisplay;
+
 		$class = 'even';	
 		if ($i % 2 == 0) $class = 'odd';	
 	?>
@@ -49,6 +51,7 @@ viewing.  You can also use the previous and next buttons to go through each ques
 				<?=$t['questions'][$i]->questionDisplay?>
 			</td>
 			<td valign="top">
+			<?#=debug($t['questions'][$i]);?>
 				<? if (trim($t['questions'][$i]->answer->assessmentAnswerValues) == '')
 				{ ?>
 
@@ -59,6 +62,8 @@ viewing.  You can also use the previous and next buttons to go through each ques
 			</td>
 			<td valign="top">
 				<?
+				// print the given answers
+				// we'll break this up per question type
 					if ($t['questions'][$i]->questionType == QUESTION_MATCHING || $t['questions'][$i]->questionType == QUESTION_MANSWER) 
 					{
 						$answer = $t['questions'][$i]->answer->assessmentAnswerValues;
@@ -66,15 +71,44 @@ viewing.  You can also use the previous and next buttons to go through each ques
 						for ($x=0;$x<$answerCount; $x++)
 						{
 							echo '&bull;';
-							echo $answer[$x].'<br>';
+							echo $t['questions'][$i]->questionChoices[$x]->label.'<br>';
 						}
-					} else {
+					} 
+
+					if ($questionType == QUESTION_MCHOICE) { 
+						$studentAnswer = $t['questions'][$i]->answer->assessmentAnswerValues;
+						$answerText = $t['questions'][$i]->questionChoices[$studentAnswer]->label;
+						if (strlen($answerText) >10){
+							$end = '. . .';
+						}
+						echo substr($answerText, 0, 25).$end;
+
+					}
+					if ($questionType == QUESTION_TRUEFALSE) { 
+
 						if (strlen($t['questions'][$i]->answer->assessmentAnswerValues) >10){
 							$end = '. . .';
 						}
 						echo substr($t['questions'][$i]->answer->assessmentAnswerValues, 0, 25).$end;
 
 					}
+					if ($questionType == QUESTION_FILLINBLANK) { 
+
+						if (strlen($t['questions'][$i]->answer->assessmentAnswerValues) >10){
+							$end = '. . .';
+						}
+						echo substr($t['questions'][$i]->answer->assessmentAnswerValues, 0, 25).$end;
+
+					}
+					if ($questionType == QUESTION_ESSAY) { 
+
+						if (strlen($t['questions'][$i]->answer->assessmentAnswerValues) >10){
+							$end = '. . .';
+						}
+						echo substr($t['questions'][$i]->answer->assessmentAnswerValues, 0, 25).$end;
+
+					}
+
 					unset($end);
 				?>
 			</td>

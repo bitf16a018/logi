@@ -322,13 +322,13 @@ class take extends StudentService {
 		# Let's figure out which result to show them
 
 		# Student cannot see any results
-		if ($test->showResultType == 0) {
+		if ($test->showResultType == 3) {
 			$lc->templateName = 'take_stop';
 			return;
 		}
 
 		# Student is allowed only to see their grade
-		if ($test->showResultType == 1) {
+		if ($test->showResultType == 0) {
 			$lc->templateName = 'take_stop_showgrade';
 			$t['grade'] = $score;
 			$t['possiblePoints']  = $test->possiblePoints;

@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 class AssessmentBase {
 
@@ -463,14 +476,11 @@ class Assessment extends AssessmentBase {
 		 #debug($answers,1);
 		$this->questionCount = count($questions);
 		$answerCount = count($answers);
-		for ($i=0; $i<$this->questionCount; $i++)
-		{
+		for ($i=0; $i<$this->questionCount; $i++) {
 			$num = $i +1;
 			$questionId = $questions[$i]->assessmentQuestionId;
-			for($x=0; $x<$answerCount; $x++)
-			{
-				if ($answers[$x]->assessmentQuestionId == $questionId)
-				{
+			for($x=0; $x<$answerCount; $x++) {
+				if ($answers[$x]->assessmentQuestionId == $questionId) {
 					#$questions[$i]->grade($answers[$x]);
 					$questions[$i]->answer = $answers[$x];
 #					debug($questions[$i],1);
@@ -496,26 +506,22 @@ class Assessment extends AssessmentBase {
 	# Normally called in assessements/grade/event=updatePoints
 	# MAK added 9/4/03
 	# always update gradebook scores in entries table to fix previous problem	
-	function updateGradebookScore($studentId, $id_classes)
-	{
+	function updateGradebookScore($studentId, $id_classes) {
 		$answer = AssessmentAnswerPeer::doSelect("student_id='$studentId' AND id_classes='$id_classes' AND assessment_id='".$this->assessmentId."'");
 		$count = count($answer);
-		for ($i=0; $i<$count; $i++)
-		{
-			if ($answer[$i]->pointsGiven)
-			{
+		debug($answer,1);
+		for ($i=0; $i<$count; $i++) { 
+			if ($answer[$i]->pointsGiven) { 
 				$totalPoints += $answer[$i]->pointsGiven;
 			} else {
 				$totalPoints += $answer[$i]->pointsEarned;
 			}
 		}
 		$entry = $this->loadGradebookEntry($studentId);
-		if (is_object($entry) )
-		{
+		if (is_object($entry) ) { 
 			$entryId = $entry->getPrimaryKey();
 			$val = $this->loadGradebookVal($entryId, $studentId);
-			if (is_object($val) )
-			{
+			if (is_object($val) ) { 
 				$val->score = $totalPoints;
 				$val->save();
 				return $totalPoints;
@@ -537,8 +543,7 @@ class Assessment extends AssessmentBase {
 		return $totalPoints;
 	}
 
-	function loadGradebookEntry($studentId)
-	{
+	function loadGradebookEntry($studentId) { 
 		include_once(LIB_PATH.'ClassGradebookEntries.php');
 		$entry =
 		ClassGradebookEntriesPeer::doSelect("assessment_id='".$this->assessmentId."'");
@@ -546,8 +551,7 @@ class Assessment extends AssessmentBase {
 		return $entry[0];
 	}
 
-	function loadGradebookVal($entryId, $studentId)
-	{
+	function loadGradebookVal($entryId, $studentId) { 
 		include_once(LIB_PATH.'ClassGradebookVal.php');
 		$val = ClassGradebookValPeer::doSelect("id_class_gradebook_entries='".$entryId."'
 		AND username='".$studentId."'");
