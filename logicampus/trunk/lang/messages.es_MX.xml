@@ -134,7 +134,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Contenido &amp; Links de la lección
 	</message>
-	<!--Content &amp;amp;amp;amp;amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp;amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -511,6 +511,28 @@
 	</message>
 	<!--You can not change this unless you uncheck [Has no due date]-->
 	<usage id ="You can not change this unless you uncheck [Has no due date]" file="../src/logicreate/services/classmgr/templates/assignmentManage_editAssignment.html" line="12"/>
+
+
+	<message id ="Click here" domain="system" status="">
+		Click here
+	</message>
+	<!--Click here-->
+	<usage id ="Click here" file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="12"/>
+	<usage id ="Click here" file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="14"/>
+
+
+	<message id ="to setup &lt;i&gt;gradebook categories&lt;/i&gt;." domain="system" status="">
+		to setup &lt;i&gt;gradebook categories&lt;/i&gt;.
+	</message>
+	<!--to setup &amp;lt;i&amp;gt;gradebook categories&amp;lt;/i&amp;gt;.-->
+	<usage id ="to setup &lt;i&gt;gradebook categories&lt;/i&gt;." file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="12"/>
+
+
+	<message id ="to add a &lt;i&gt;gradebook entry&lt;/i&gt; into a category." domain="system" status="">
+		to add a &lt;i&gt;gradebook entry&lt;/i&gt; into a category.
+	</message>
+	<!--to add a &amp;lt;i&amp;gt;gradebook entry&amp;lt;/i&amp;gt; into a category.-->
+	<usage id ="to add a &lt;i&gt;gradebook entry&lt;/i&gt; into a category." file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="14"/>
 
 </language>
 
