@@ -1,0 +1,4 @@
+This program requires you to have PHP's DOM-XML extension
+available.  Consult your php.ini file or php.net for 
+instructions on enabling the DOM-XML extensions for your 
+platform.
