@@ -21,9 +21,9 @@ define('SITE_DISPLAY_NAME','LogiCampus');
 
 $relpath='../logicreate/';
 extract($HTTP_SERVER_VARS);
-$PHPSESSID = $HTTP_COOKIE_VARS['PHPSESSID'];
+$PHPSESSID = @$_COOKIE['PHPSESSID'];
 
-$base = $HTTP_SERVER_VARS[HTTP_HOST];
+$base = $HTTP_SERVER_VARS['HTTP_HOST'];
 $script = substr($SCRIPT_FILENAME,strrpos($SCRIPT_FILENAME,'/')+1); 
 $tail = str_replace($script,'',$SCRIPT_NAME);
 $tail = str_replace('herc/','',$tail);
@@ -44,11 +44,11 @@ define('SECURE_APP_URL',SECURE_BASE_URL.'index.php/');
 define('DEFAULT_SERVICE','welcome');
 define('DEFAULT_URL',APP_URL.DEFAULT_SERVICE);
 define('UNAUTHORIZED_SERVICE','welcome/login');
-define('COOKIE_HOST',$HTTP_SERVER_VARS[HTTP_HOST]);
+define('COOKIE_HOST',$HTTP_SERVER_VARS['HTTP_HOST']);
 
 //Templates, images, html content
 DEFINE('TEMPLATE_PATH_PARTIAL',DOCUMENT_ROOT.'templates/');
-if ($HTTP_SERVER_VARS['HTTPS']=='on') {
+if (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS']=='on') {
 	DEFINE('IMAGES_URL',SECURE_BASE_URL.'images/');
 	DEFINE('PICS_URL',SECURE_BASE_URL.'templates/');
 	DEFINE('IMAGES_PATH',DOCUMENT_ROOT.'images/');
@@ -63,7 +63,6 @@ if ($HTTP_SERVER_VARS['HTTPS']=='on') {
 define('CONTENT_PATH',DOCUMENT_ROOT.$relpath.'content/');
 define('HTML_PATH',DOCUMENT_ROOT.'lchtml/');	//legacy
 define('CACHE_PATH',DOCUMENT_ROOT.$relpath.'cache/');
-define('SITE_NAME','TCCD');
 define('WEBMASTER_EMAIL','Email@address.com');
 define('LOG_USAGE_DB',true);
 define('LOG_EXECUTION_TIME',true);
@@ -88,10 +87,10 @@ $dsn = array();
 $dsn['default'] = array(
         'driver'=>'mysql',
         'host'=>'localhost',
-        'user'=>'root',
-        'password'=>'mysql',
-        'database'=>'logicampus',
-        'persistent'=>'y');
+        'user'=>'campus',
+        'password'=>'campus',
+        'database'=>'campus',
+        'persistent'=>'n');
 
 
 #logusagedb_define(LOG_USAGE_DB,<!--logusagedb-->);

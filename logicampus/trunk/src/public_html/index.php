@@ -41,7 +41,7 @@ $execution_time=get_microtime();
 		 * Start session handling
 		 */
 	//keep the login as feature in a seperate cookie so that people can logout
-	if ( $_COOKIE['LOGINAS'] != '' ) {
+	if ( @$_COOKIE['LOGINAS'] != '' ) {
 		$PHPSESSID= $_COOKIE['LOGINAS'];
 	}
 	if ( $PHPSESSID=="" )  {		//if no cookie was passed, set a new one
@@ -79,12 +79,12 @@ include_once(LIB_PATH."LC_html.php");
 
 // ************* I18N ******************************
 //if get vars, switchlocale, then set a cookie
-if ( strlen($_GET['switchlocale']) == 5 || strlen($_GET['switchlocale']) == 3) {
+if ( strlen(@$_GET['switchlocale']) == 5 || strlen(@$_GET['switchlocale']) == 3) {
 	$_COOKIE['locale'] = $_GET['switchlocale'];
 	setcookie('locale',$_GET['switchlocale'],0);
 }
 //determind language choice from cookie
-if ( strlen($_COOKIE['locale']) == 5 || strlen($_COOKIE['locale']) == 3) {
+if ( strlen(@$_COOKIE['locale']) == 5 || strlen(@$_COOKIE['locale']) == 3) {
 	define('LOCALE', $_COOKIE['locale']);
 } else {
 	define('LOCALE', 'en_US');
