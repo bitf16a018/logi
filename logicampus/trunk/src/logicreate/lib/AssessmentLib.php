@@ -14,6 +14,8 @@
  * correct answers, as it'll now count all resubmitted answers, 
  * and lower your grade if you get it wrong the second time
  *
+ * @package Assessments
+ *
  */
 
 define( QUESTION_TRUEFALSE, 1 );
@@ -23,6 +25,12 @@ define( QUESTION_MATCHING, 4 );
 define( QUESTION_FILLINBLANK, 5 );
 define( QUESTION_ESSAY, 6 );
 
+
+/**
+ * True or False Type Questions
+ * 
+ * @package Assessments
+ */
 class AssessmentQuestionTrueFalse extends AssessmentQuestion {
 
 	var $questionType = 1;
@@ -121,6 +129,11 @@ class AssessmentQuestionTrueFalse extends AssessmentQuestion {
 }
 
 
+/**
+ * Multiple Choice Type Questions
+ * 
+ * @package Assessments
+ */
 class AssessmentQuestionMChoice extends AssessmentQuestion {
 
 	var $questionType = 2;
@@ -289,6 +302,12 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 	
 }
 
+
+/**
+ * Multiple Answer Type Questions
+ * 
+ * @package Assessments
+ */
 class AssessmentQuestionMAnswer extends AssessmentQuestion {
 
 	var $allowMultiple = true;
@@ -481,6 +500,11 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 }
 
 
+/**
+ * Matching Type Questions
+ * 
+ * @package Assessments
+ */
 class AssessmentQuestionMatching extends AssessmentQuestion {
 
 	var $questionType = 4;
@@ -604,6 +628,11 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 }
 
 
+/**
+ * Fill in the Blank Type Questions
+ * 
+ * @package Assessments
+ */
 class AssessmentQuestionFill extends AssessmentQuestion {
 
 	var $questionType = 5;
@@ -705,6 +734,11 @@ class AssessmentQuestionFill extends AssessmentQuestion {
 }
 
 
+/**
+ * Essay Type Questions
+ * 
+ * @package Assessments
+ */
 class AssessmentQuestionEssay extends AssessmentQuestion {
 
 	var $questionType = 6;
@@ -741,6 +775,14 @@ class AssessmentQuestionEssay extends AssessmentQuestion {
 
 
 }
+
+
+/**
+ * Test for Automatic Validation
+ * 
+ * @package Assessments
+ * @deprecated
+ */
 class AssessmentQuestionConstraint {
 
 	var $minVal;
@@ -761,6 +803,11 @@ class AssessmentQuestionConstraint {
 }
 
 
+/**
+ * Choice Type Question
+ * 
+ * @package Assessments
+ */
 class AssessmentChoice {
 
 	var $rank;
@@ -786,7 +833,10 @@ class AssessmentChoice {
 }
 
 /**
+ * Define Interface for Assessment Input
+ * 
  * @abstract
+ * @package Assessments
  */
 class AssessmentInput {
 
@@ -824,6 +874,11 @@ class AssessmentInput {
 	}
 }
 
+
+/**
+ * Input Widgest for Input Boxes
+ * @package Assessments
+ */
 class AssessmentInputText extends AssessmentInput {
 
 	function render() {
@@ -838,6 +893,10 @@ class AssessmentInputText extends AssessmentInput {
 }
 
 
+/**
+ * Input Widgest for Dropdowns
+ * @package Assessments
+ */
 class AssessmentInputSelect extends AssessmentInput {
 
 	function render() {
@@ -856,6 +915,11 @@ class AssessmentInputSelect extends AssessmentInput {
 	}
 }
 
+
+/**
+ * Input Widgest for Essays
+ * @package Assessments
+ */
 class AssessmentInputArea extends AssessmentInput {
 	function render() {
 		for ($x=0; $x< count($this->question->questionChoices); $x++) {
@@ -868,6 +932,10 @@ class AssessmentInputArea extends AssessmentInput {
 }
 
 
+/**
+ * Input Widget for Checkboxes
+ * @package Assessments
+ */
 class AssessmentInputCheckbox extends AssessmentInput {
 	function render() {
 		for ($x=0; $x< count($this->question->questionChoices); $x++) {
@@ -880,6 +948,10 @@ class AssessmentInputCheckbox extends AssessmentInput {
 }
 
 
+/**
+ * Input Widget for Radio Buttons
+ * @package Assessments
+ */
 class AssessmentInputRadio extends AssessmentInput {
 	function render() {
 		for ($x=0; $x< count($this->question->questionChoices); $x++) {
@@ -891,6 +963,11 @@ class AssessmentInputRadio extends AssessmentInput {
 	}
 }
 
+
+/**
+ * Input Widget for Matching Questions
+ * @package Assessments
+ */
 class AssessmentInputMatching extends AssessmentInput {
 	function render() {
 		for ($x=0; $x< count($this->question->questionChoices); $x++) {
