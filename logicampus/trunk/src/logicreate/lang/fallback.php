@@ -5,3 +5,4 @@ function lct($key,$args="") {
 
 	return "$key";
 }
+?>
