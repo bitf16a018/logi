@@ -67,7 +67,7 @@ class semestercopy extends FacultyService
 		INNER JOIN courses as B ON A.id_courses=B.id_courses
 		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
 		WHERE A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
-		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC,A.id_classes';
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 		
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
@@ -104,10 +104,10 @@ class semestercopy extends FacultyService
 		INNER JOIN courses as B ON A.id_courses=B.id_courses
 		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
 		WHERE A.facultyId=\''.$u->username.'\' 
-		/**AND ((C.dateStart < NOW() **/
 		AND
 		((C.dateAccountActivation <= now()) OR (A.id_classes='.$id_classes.'))
-		ORDER BY C.semesterYear ASC, A.courseFamilyNumber ASC, A.id_classes';
+		AND A.id_classes >= '.$id_classes.'
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 	
 		$db->query($sql);
 
@@ -161,7 +161,7 @@ class semestercopy extends FacultyService
 		WHERE 
 		(A.id_classes='.$id_classes.' OR A.id_classes='.$id_classes_with.') AND
 		A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
-		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC';
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 		
 		$db->query($sql);
 		if ($db->getNumRows() == 2)
@@ -201,7 +201,7 @@ class semestercopy extends FacultyService
 		WHERE 
 		(A.id_classes='.$id_classes_to.' OR A.id_classes='.$id_classes_from.') AND
 		A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
-		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC';
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 		
 		$db->query($sql);
 		if ($db->getNumRows() == 2)
@@ -650,7 +650,7 @@ function remove_first_comma($string)
 					$field_node->value = '::ITEMSUB::';
 				}
 				
-				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. addslashes($field_node->value).'\'';
 
 			}
 			
@@ -693,7 +693,7 @@ function remove_first_comma($string)
 						{	$sql = $this->remove_first_comma($sql);
 						}
 						
-						$this->obj_db->query(addslashes($sql));
+						$this->obj_db->query($sql);
 						//execute query 
 						$this->__errors[] = __LINE__. ' '. mysql_error();
 						break;
@@ -2733,7 +2733,7 @@ function remove_first_comma($string)
 		WHERE A.id_classes='.$id_classes.' 
 		AND A.facultyId=\''.$facultyId.'\' 
 		AND C.dateAccountActivation <= now()
-		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC';
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
 		
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
