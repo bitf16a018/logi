@@ -43,6 +43,8 @@ Class LessonContent extends FacultyService
 	var $sectionTitle = 'Lesson Content';
 
 	function LessonContent() {
+		//run parent to get style info
+		parent::FacultService();
 		if (HAS_TIDY) { 
 			$this->applinks['Import Content'] = 'lessonContent/event=import';	
 
