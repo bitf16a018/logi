@@ -7,6 +7,10 @@ SYNTAX:
 
 
 #########################
+06/04/2004 10:15 PM - michael
+Added TCCD changes to the standard logicampus tree.  This set of changes is an upgrade to the forum system to allow for 2 file attachments per post.  I need to find where the PBDO is defined, as the table definitions need to change.  Changed files in /forum (pbdo objects) and classroom (discussion*.lcp files and templates)
+-------------------------
+
 04/18/2004 11:45 PM - mark
 Lots of bug fixes and small layout changes.
 Fixed bug where students were invisible to classes with enrollment as a
