@@ -108,6 +108,16 @@
 		<exclude name="templates/**/*~"/>
 	  </fileset>
 	</copy>
+	<!-- need to recopy images because they shouldn't be filtered by the filterset tag -->
+	<copy todir="${build}/public_html/" overwrite="true">
+	  <fileset dir="${src}">
+		<include name="templates/private/images/**"/>
+		<include name="templates/default/images/**"/>
+		<exclude name="templates/**/*CVS*"/>
+		<exclude name="templates/**/*~"/>
+	  </fileset>
+	</copy>
+
 	<copy todir="${build}/logicreate/">
 	  <fileset dir="${src}">
 		<include name="content/**"/>
@@ -149,9 +159,13 @@
 	</copy> 
 
 	<!-- tar up -->
-	<tar tarfile="${dist}/logicampus-OSS.tar" basedir="${build}" />
-	<gzip src="${dist}/logicampus-OSS.tar" zipfile="${dist}/logicampus-OSS.tar.gz" />
-	<delete file="${dist}/logicampus-OSS.tar" />
+	<tar tarfile="${dist}/logicampus-${lc.version}.tar" basedir="${build}" />
+	<gzip src="${dist}/logicampus-${lc.version}.tar" zipfile="${dist}/logicampus-${lc.version}.tar.gz" />
+	<delete file="${dist}/logicampus-${lc.version}.tar" />
+
+	<!-- clean up temp-->
+	<antcall target="cleantemp"/>
+	<echo message="Archive saved in 'dist/' directory!" />
   </target>
 
 
