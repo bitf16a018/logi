@@ -1,0 +1,84 @@
+<?
+/*
+ *
+ * Displays current grades for a student in a class.
+ *
+ */
+
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
+
+class gradebook extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Student Summary';
+	var $inactivelinks = array(
+		'Gradebook',
+	);
+
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName='gradebook_main';
+
+		if ( $lc->getvars['print'] ) {
+			$this->presentor = 'emptyPresentation';
+		} else {
+			$this->applinks['Printer Friendly'] = 'gradebook/print=yes';
+		}
+
+		// load up the gradebook and tell it to do a bunch of work for me.
+		$gradebook = ClassGradebook::load( 
+			array('id_classes' => $u->activeClassTaken->id_classes ) );
+
+		if ( !is_object($gradebook) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'The gradebook for your class could not be found. Please contact
+				the help desk immediately and report this.';
+			return;
+		}
+
+		$gradebook->getEntries(false);
+		$gradebook->getStudent($u->username); // we only need one if we use a clever SQL statement below
+		$gradebook->getValsForStudents();
+		$gradebook->calcPossiblePointsForStudent($u->username);
+		$gradebook->calculateStudentPointsEarned();
+		
+		$gradebook->updateEntryWeights();
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
+
+
+		$db->query("	SELECT sum(score) as score,username from class_gradebook_val 
+				WHERE id_classes = ".$u->activeClassTaken->id_classes."
+				GROUP BY username
+		");
+
+		//assume rank is one, push rank down for each student that has a higher score
+		$t['rank'] = 1;
+		while ($db->next_record() ) {
+			if ($u->username == $db->Record['username']) {
+				$usersScore = $db->Record['score'];
+			}
+			$scores[$db->Record['username']] = $db->Record['score'];
+		}
+
+		foreach ($scores as $username => $score) {
+			if ($u->username == $username) continue;
+			if ($score > $usersScore) $t['rank']++;
+			$t['totalRanks']++;
+		}
+
+		$t['categories'] = $gradebook->getAllCategories(
+			$u->activeClassTaken->id_classes );
+
+		$t['gradebook'] = $gradebook;
+		$t['username'] = $u->username;
+		$t['user'] = $u;
+		$t['totalRanks']++;
+	}
+
+}
+
+?>

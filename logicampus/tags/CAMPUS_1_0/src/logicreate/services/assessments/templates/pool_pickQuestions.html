@@ -1,0 +1,53 @@
+<?=$t['sectionheader'];?>
+
+<?=$t['message'];?>
+
+<script>
+var qids = new Object();
+
+<?
+	global $qids;
+
+	foreach($qids as $qid)
+	{	
+		echo '	
+	qids["question['.$qid.']"] = false;';
+	}
+	reset($qids);
+?>
+
+function select_all()
+{
+	var tmp_element; 
+	
+	for (field in qids) 
+	{	
+		tmp_element = document.getElementById(field);
+		tmp_element.checked = true;
+	}
+	
+}
+function invert_selection()
+{
+	var tmp_element; 
+	
+	for (field in qids) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (tmp_element.checked)
+		{	tmp_element.checked = false;
+		} else
+		{	tmp_element.checked = true;
+		}
+		
+	}
+	
+}
+</script>
+
+<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="select_all();">Select All</a>]</span>
+<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="invert_selection();">Select Inverse</a>]</span>
+
+<?=$t['table'];?>
+

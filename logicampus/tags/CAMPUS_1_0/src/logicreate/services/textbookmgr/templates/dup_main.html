@@ -1,0 +1,25 @@
+<?=$t['sectionheader'];?>
+<h2>Options</h2>
+
+Select which semester you want to move book info from and to using the form below:
+<BR>
+<form action='<?=appurl("textbookmgr/dup/event=choose");?>' method='post'>
+<table>
+<tr><td valign='top'>
+<h3>From semester</h3>
+<select name='from'>
+<?=$t['sem'];?>
+</select>
+
+</td><td valign='top'>
+<h3>To semester</h3>
+<select name='to'>
+<?=$t['sem'];?>
+</select>
+
+
+</td></tr>
+</table>
+<input type='submit' name='button' value='Copy single class from semester 1 to semester 2'>
+
+</form>

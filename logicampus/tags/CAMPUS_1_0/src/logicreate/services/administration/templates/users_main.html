@@ -1,0 +1,212 @@
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript"><!--
+
+
+
+function showDelete (sel) {
+	if (sel.selectedIndex > -1 ) {
+	mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' ) {
+			parent.View.location = '<?= APP_URL;?>users/' + mid +'/event=showDelete';
+		}
+	}
+}
+
+function checkAll () {
+	for (x=0; x < document.forms[0].elements.length -1; x++) {
+		document.forms[0].elements[x].checked = true;
+	}
+}
+// -->
+</SCRIPT>
+
+<?=$t['sectionheader'];?>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td colspan="2" valign="top">
+			Show users in group:<br>
+			<form method="POST" action="<?=modurl('users');?>">
+			<select name="gid">
+				<?=$t['group_opt'];?>
+				<option value=''>No Groups (suspended/canceled)
+			</select>
+			&nbsp;
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="groupSearch">
+			</form>
+<hr>
+			<form method="POST" action="<?=modurl('users');?>">
+			Course:
+			<select name="coursePkey">
+				<?=$t['courses'];?>
+			</select> <br />
+      Section #: <input type="text" name="sectionNumber" size="6" maxlength="11" value="<?=$t['sectionNumber']?>" /> <i>(optional)</i>
+			<BR>
+			Semester: 
+			<select name="semesterPkey">
+				<?=$t['semesters'];?>
+			</select>
+			&nbsp;
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="classSearch">
+			</form>
+
+		</td>
+		<td colspan="1" valign="top">
+
+			<!-- table for searching by username and profile -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td align="right">
+			Show username(s) starting with:
+		</td>
+		<td align="right">
+			<form method="POST" action="<?=appurl('administration/users');?>">
+			<select name="firstletter">
+				<option>a</option>
+				<option>b</option>
+				<option>c</option>
+				<option>d</option>
+				<option>e</option>
+				<option>f</option>
+				<option>g</option>
+				<option>h</option>
+				<option>i</option>
+				<option>j</option>
+				<option>k</option>
+				<option>l</option>
+				<option>m</option>
+				<option>n</option>
+				<option>o</option>
+				<option>p</option>
+				<option>q</option>
+				<option>r</option>
+				<option>s</option>
+				<option>t</option>
+				<option>u</option>
+				<option>v</option>
+				<option>w</option>
+				<option>x</option>
+				<option>y</option>
+				<option>z</option>
+			</select>
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="firstletter">
+			</form>
+			<p>
+		</td></tr>
+		<tr><td align="right" colspan="2">
+					<p>
+		</td></tr>
+		<tr><td align="right">
+			Show users where:
+		</td>
+		<td align="right">
+			<form method="POST" action="<?=modurl('users');?>">
+			<select name="profile_field">
+				<?=$t[profile_opt];?>
+			</select> <br/>
+			is like  <br/>
+			<input type="text" name="q"> <br>
+			<input type="submit" value="go">
+			<input type="hidden" name="event" value="profileSearch">
+
+			</form>
+		</td></tr></table>
+
+
+
+
+
+
+
+		</td>
+	</tr>
+	</table>
+
+<table border="2" cellpadding="10" cellspacing="0" width="100%">
+
+      <tr><td width="100%" class="grey">
+
+		      <table border="0" width="100%">
+			      <tr> 
+	<td class="white" align="center" rowspan="2" colspan="1" valign="top">
+
+	<form method="POST" action="<?=modurl('users/event=showTab/tab=altergroups');?>">
+		<? global $HTTP_USER_AGENT; if( strpos($HTTP_USER_AGENT,"MSIE") ) { ?>
+		<label for="user_opt">Double click a user for editing</label>
+		<? } //IE is the only browser to support this HTML4.01 standard ?>
+
+		<table width="100%" border="0">
+		<thead>
+		<tr>
+		<td class="selectedTab">&nbsp;</td><td class="selectedTab">Lastname, Firstname</td>
+		<td class="selectedTab">username</td>
+		<td class="selectedTab">actions</td>
+		</tr>
+		</thead>
+
+		<? for ($x=0; $x < count($t[users]); ++$x) { $c = $t[users][$x]; $x%2? $color="#F0F0F0":$color="#E0E0F0";?>
+		<tr bgcolor="<?=$color?>">
+			<td>
+				<input type="checkbox" name="users[]" value="<?= $c['pkey']?>">
+			</td>
+			<td><?= $c['profiledata']?></td>
+			<td><a href="<?=modurl('users/event=showUser/username='.$c['lc_username']);?>"><?= $c['lc_username']?></a></td>
+		<td>
+			<a href="<?=modurl('users/event=editProfile/username='.$c['lc_username'].'');?>">profile</a> /
+			<a href="<?=modurl('users/'.$c['lc_username'].'/event=loginAs');?>">login-as</a>
+		</td>
+		</tr>
+		<? } ?>
+		<tfoot>
+<!--
+		<tr><td colspan="3" align="left">&nbsp;&nbsp;^<a href="#" onclick="checkAll(); return false;">Check all</a>
+		</td><td align="right">Total users: <?=$t['totalCount']?>&nbsp;&nbsp;</td></tr>
+-->
+
+		<tr><td colspan="3" align="center">
+		<? if ($t[start] > 1) { ?>
+		<a href="<?=APP_URL?>administration/users/start=<?=$t['start'] - $t['PAGE_SIZE']?>/<?=$t['opt1']?>/<?=$t['opt2'];?>">&lt; Prev</a>
+		<? } ?>
+			&nbsp; &nbsp; <?= $t[current_page];?>/<?= $t[result_pages];?> &nbsp; &nbsp; 
+		<? if ( ($t[start]+$t[PAGE_SIZE]) < $t[max_results] ) { ?>
+		<a href="<?=APP_URL?>administration/users/start=<?=$t['start'] + $t['PAGE_SIZE']?>/<?=$t['opt1']?>/<?=$t['opt2'];?>">Next &gt;</a>
+		<? } ?>
+		</td></tr>
+		</tfoot>
+		</table>
+
+		<p>
+		<!--
+		<input type="submit" value="Collect checked user"> [ NOT WORKING ]<br>
+		-->
+		</form>
+		<? if ($t['collectionCount']) { ?>
+		<div align="left" style="font-size: 90%">
+		Current user collection has <?= $t['collectionCount']?> users.
+		<br>
+		<a href="<?=modurl('users/event=clearCollection');?>">Clear collection</a>
+		</div>
+		<? } ?>
+	</td></tr></table>
+
+      </td></tr>
+</table>
+
+	<hr>
+		<a href="<?=modurl('users/event=new');?>">Create New User</a>
+	<center><h3>New User</h3></center>
+		Adding a new user <u>requires</u> 3 fields:
+		<ul>
+		<li>Username
+		<li>Password
+		<li>email
+		</ul>
+		Other fields are optional and are considered part of the
+		user's <i>profile</i>
+
+
+
+	<hr>
+
+	<p>
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>

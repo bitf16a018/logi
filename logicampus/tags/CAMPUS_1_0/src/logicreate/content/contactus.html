@@ -1,0 +1,26 @@
+<h3>Contact us</h3>
+<? if (!$t["error"]) { ?>
+
+If you wish to contact us, please complete the following form below.
+
+<br><br>
+<? } ?>
+<form method="post" action="<?=APP_URL?>html/formToEmail">
+<table width="95%">
+	<tr><td class="reglogin">Name</td><td class="reglogin"><input type="text" name="req[name]" value="<?=$t["req"]["name"];?>"></td></tr>
+<tr><td class="reglogin">Company name</td><td class="reglogin"><input type="text" name="opt[company]" value="<?=$t["opt"]["company"];?>"></td></tr>
+<tr><td class="reglogin">Email</td><td class="reglogin"><input type="text" name="req[email]" value="<?=$t["req"]["email"];?>"></td></tr>
+<tr><td class="reglogin">Phone</td><td class="reglogin"><input type="text" name="opt[phone]" value="<?=$t["opt"]["phone"];?>"></td></tr>
+<tr><td class="reglogin" valign="top">Comments/questions</td>
+	<td class="reglogin"><textarea name="req[comments]" rows="7" cols="40"><?=$t["req"]["comments"];?></textarea></td></tr>
+<tr><td>&nbsp;</td><td>
+<input type="submit" value="Contact us">
+<input type="hidden" name="req[return_page]" value="contactus.html">
+<input type="hidden" name="req[thankyou_page]" value="<?=APP_URL?>html/main/thankyou.html">
+</form>
+</td>
+</tr>
+</table>
+<script>
+document.forms[0].elements[0].focus();
+</script >

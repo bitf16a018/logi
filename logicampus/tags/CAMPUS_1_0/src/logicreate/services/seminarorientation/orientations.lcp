@@ -1,0 +1,729 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *  Statuses:  new=1,pending=2,approved=3,denied=4,waiting on
+ *  instructor approval=5
+ */
+ 
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'OrientationClasses.php');
+
+
+class orientations extends BasicAuth 
+{
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Seminar And Orientation';
+	var $navlinks = array('List Seminar Schedule'=>'seminars/','List Orientation Schedule'=>'orientations/'
+	);
+	var $applinks = array(
+		'List schedules'=>'orientations/',
+		'Administrate date & times'=>'orientations/event=schedule/',
+		'Add new date & times' => 'orientations/event=scheduleNew/',
+		'Orientation Calendar'=>'orientationcal/'
+	);
+	var $inactivelinks = array(
+	);
+
+	var $authorizer = 'basicAuth';
+
+	
+	# Constructor
+	function orientations()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+		
+	}
+
+	
+	function validateAccessCheck()
+	{
+		global $lcUser, $lcObj;
+		
+		return true; // temporarily disabling this  by returning true.
+		
+		if ( !(in_array('semmgr', $lcUser->groups) || in_array('admin', $lcUser->groups))
+		  || $lcUser->sessionvars['semester'] == false)
+		{
+			$lcObj->templateName = 'orientations_error';
+			return false;
+		}
+		
+	return true;
+	}
+	
+	
+	# data grid of all orientations
+	function Run($db,&$u,&$lc,&$t) 
+	{
+		$this->inactivelinks[] = 'List schedules';
+		// here's the permission aspect
+		if ($this->validateAccessCheck() == false)
+		{	return;
+		}
+		
+		$lc->templateName = 'orientations_main';
+		
+		// show datagrid of teacher filled in classes
+		$datagrid = new searchGrid($this->module,$this->serviceName);
+		
+		$datagrid->headerClass = 'classheader';
+		$datagrid->class = 'datagrid';
+		
+		$datagrid->column = '
+			concat(c.lastname, ", ", c.firstname) AS Faculty, b.courseFamilyNumber, r.courseName as classtitle,
+			a.id_orientation_classes, b.id_classes,
+		
+			x.date, x.time_start, x.time_end, 
+			a.first_campus_location, a.first_allotted_minutes, a.first_preferred_time, a.first_time_range_start, a.first_time_range_end,
+			
+			y.date as ydate, y.time_start as ytime_start, y.time_end as ytime_end,
+			a.second_campus_location, a.second_allotted_minutes, a.second_preferred_time, a.second_time_range_start, a.second_time_range_end,
+
+			status,
+			
+			b.id_semesters
+			';
+		
+		$datagrid->table = 'orientation_classes';
+		$datagrid->joins = 'as a RIGHT JOIN classes AS b ON a.id_classes = b.id_classes INNER JOIN courses as r ON b.id_courses=r.id_courses INNER JOIN profile AS c ON b.facultyId = c.username LEFT JOIN orientation_dates as x ON a.first_date_id = x.id_orientation_dates LEFT JOIN orientation_dates as y ON a.second_date_id = y.id_orientation_dates';
+		$datagrid->where = 'b.id_semesters='. (int)$u->sessionvars['semester'];
+		//$datagrid->orderby = 'b.id_semesters';
+		
+		$datagrid->ignore = array('id_orientation_classes', 'id_classes', 'id_semesters', 'instructions', 'first_date_id', 'second_date_id',
+			'first_time_range_end', 'second_time_range_end',
+			'time_start', 'time_end',
+			'ytime_start', 'ytime_end',
+			'second_campus_location',
+			'second_preferred_time',
+			'second_time_range_start',
+			'second_allotted_minutes',
+			'ydate',
+			'first_allotted_minutes',
+			'first_preferred_time',
+			'first_time_range_start',
+			'date',
+			'first_campus_location',
+			'id_classes'
+			
+		);
+
+		$datagrid->headers = array(
+			'courseFamilyNumber' => 	'Course',
+			'Faculty' => 				'Teacher',
+			'classtitle'=>				'Class Title',
+			'status' => 				'Status',
+			'first_campus_location'=>	'Campus',
+			'first_preferred_time'=>	'Time',
+			'first_time_range_start'=>	'Acceptable Time',
+			'first_allotted_minutes'=>	'Session Length',
+			'second_campus_location'=>	'Secondary Preferred Campus',
+			'second_preferred_time'=>	'Secondary Preferred Time',
+			'second_time_range_start'=>	'Secondary Acceptable Time Start',
+			'second_allotted_minutes'=>	'Secondary Session Length',
+			'date'=>					'Slotted Date',
+			'ydate'=>					'Secondary Slotted Date',
+			'courseNumber'=>			'Course #',
+			'end'=>' ');
+		
+		$datagrid->sortColumns = array('Faculty', 'courseFamilyNumber', 'classtitle',
+			'date',
+			'ydate',
+			'status',
+			'first_campus_location'
+		);
+		
+		$datagrid->overrideColumn('<nobr><?=$first_time_range_start. \' - \'. $first_time_range_end;?></nobr>','first_time_range_start');
+		$datagrid->overrideColumn('<nobr><?=$second_time_range_start. \' - \'. $second_time_range_end;?></nobr>','second_time_range_start');
+		$datagrid->overrideColumn('<nobr><?=$Faculty;?></nobr>','Faculty');
+		$datagrid->overrideColumn('<nobr><?=$classtitle;?></nobr>','classtitle');
+		
+		/* FANCY STATUS 
+		$datagrid->overrideColumn('<nobr><? $sniffme = array(1=>\'<b style="color: yellow; background-color: maroon;"><blink>New</blink></b>\', 2=>\'<b style="color: purple;">Pending</b>\', 3=>\'<b style="color: green;">Approved<b>\', 4=>\'<b style="color: red;">Denied</b>\', 5=>\'<b style="color: pink;">Waiting on instructor for approval</b>\'); echo $sniffme[$status];?></nobr>','status');
+		*/
+		// boring status
+		$datagrid->overrideColumn('<nobr><? switch ($status) {
+			case 1: print "New"; break;
+			case 2: print "Pending"; break;
+			case 3: print "Approved"; break;
+			
+			case 5: print "Waiting on Instructor"; break;
+			default: print "<i>N/A</i>"; break;
+		} ?></nobr>', 'status');
+		
+		$datagrid->overrideColumn('<nobr><? $sniffme = array(\'SE\'=>\'Southeast Campus\', \'SO\'=>\'South Campus\',\'NE\'=>\'Northeast Campus\',\'NW\'=>\'Northwest Campus\'); echo $sniffme[$first_campus_location];?></nobr>','first_campus_location');
+		
+		$datagrid->overrideColumn('<nobr><?=$date. \'<br>\'. $time_start.\' - \'.$time_end;?></nobr>','date');
+		$datagrid->overrideColumn('<nobr><?=$ydate. \'<br>\'. $ytime_start.\' - \'.$ytime_end;?></nobr>','ydate');
+
+	
+		$datagrid->postpendColumn('<? if ($id_orientation_classes != null) { ?><a href="<?=modurl("orientations/event=edit/id_orientation_classes=".$id_orientation_classes);?>">edit</a> <? } else { echo ""; } ?>','end');
+		/*
+		//$datagrid->overrideColumn('<a href="<?=modurl("orientations/event=view/".($id_orientation_classes ? "id_orientation_classes=".$id_orientation_classes));?>"><?=$classtitle;?></a>','classtitle');
+		*/
+		$datagrid->overrideColumn('<a href="<?=modurl("orientations/event=view/".(($id_orientation_classes) ? "id_orientation_classes=".$id_orientation_classes : "idClasses=".$id_classes));?>"><?=$classtitle;?></a>','classtitle');
+		
+		$datagrid->setCellWidth('Faculty', '120');
+
+		$datagrid->addInstructorSelectFilter('Instructor', 'b.facultyId'); 
+		$datagrid->add4StatusSelectFilter('Status', 'status'); 
+
+		$datagrid->addInputFilter('Class ID', 'b.id_classes', true);
+		$datagrid->addInputFilter('Course Title', 'r.courseName');
+		
+		$t['table'] = $datagrid->toHTML();
+		
+	}
+
+
+	function viewRun($db,&$u,&$lc,&$t)
+	{
+		$fl_showme = true;	// should i show the view? or no becuase it doens't exist!
+		$extra_class_info = '';	// if it's a new class.. we seed this var with the extra getvars we need to created the schedule from this admin
+
+		$lc->templateName = 'orientations_edit';
+		
+		if ($lc->postvars['submit'] == 'Schedule' && $lc->getvars['id_orientation_classes'])
+		{	
+			$o = new OrientationClasses();
+			$o= OrientationClasses::load((int)$lc->getvars['id_orientation_classes']);
+			$lc->postvars['finalDateTime'] =date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['finalDateTime']));
+			
+			$o->setArray($lc->postvars);
+			$o->status = 3; // auto setting to approved!
+			
+			// now i have to determine if this was an update (exists already in the calendar
+			// or if it's new. and act accordingly in the calendar
+			
+			$o->save();
+			
+			// damn queries, i should restructure this event so its a bit more efficent. fighting time.... ugh
+			$sql = "
+			SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName, concat(c.lastname, ', ', c.firstname) AS Faculty
+			FROM classes AS a 
+			INNER JOIN courses as b ON a.id_courses=b.id_courses 
+			INNER JOIN profile as c ON a.facultyId=c.username
+			WHERE a.id_classes='".$o->idClasses."'";
+		
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			$db_temp = $db->Record;
+			
+			if ($o->idOrientationClasses)
+			{
+				// get date
+				include_once(LIB_PATH.'eventsObj.php');
+				
+				$addevent = new orientationsscheduling();
+				$addevent->set_id_class($o->idClasses);
+				$addevent->set_id_item($o->idOrientationClasses);
+				$addevent->dbLoad(); // if it exists, it'll be loaded up
+				
+				$addevent->set_owner($db_temp['facultyId']);
+				$addevent->set_title('['.$db_temp['courseFamily'].$db_temp['courseNumber'].'] '.$db_temp['courseName']);
+				$addevent->set_description(addslashes(stripslashes($o->instructions)));
+				
+				$addevent->set_date_start($lc->postvars['finalDateTime']);
+				$addevent->set_date_end(date('Y-m-d H:i:s', strtotime($lc->postvars['finalDateTime']) + ($lc->postvars['finalSessionLength']*60)));
+				
+				$addevent->save(); // this updates/adds all by it's lonesome.. no need to wrroy about it here
+			}
+
+			$t['message'] = 'Your orientation has been scheduled/updated in the calendar.';
+			
+			unset($o); // kill it
+			
+		} else 
+		{
+			// if submitted but no id_orientation_class.. f'er, you can't do that.!!!
+			if ($lc->postvars['submit'] == 'Schedule')
+				$t['message'] = 'You must created the schedule for this classroom before issuing a finalized schedule';
+				
+		}
+		
+		if ((int)$lc->getvars['id_semesters'] > 0)
+		{	// Should I validate the semester id? it's going to be veeery select people that
+			// will be able to hit this area. should i worry about this at all? 
+			$u->sessionvars['semester'] = (int)$lc->getvars['id_semesters'];
+		}
+		
+		$o = new OrientationClasses();
+		$o= OrientationClasses::load((int)$lc->getvars['id_orientation_classes']);
+		
+		if ((int)$lc->getvars['idClasses'] > 0 && $o == null)
+		{
+			unset($o);
+			// try and find this classes schedule.. 
+			$o = new OrientationClasses();
+			$o= OrientationClasses::load(array('id_classes', (int)$lc->getvars['idClasses']));
+			
+			if ($o == null)
+			{	// trying to seed the section header
+				$o->idClasses = (int)$lc->getvars['idClasses'];
+				$extra_class_info = '/idClasses='.(int)$lc->getvars['idClasses'];
+			}
+			
+			$fl_showme = false; // don't show it.. nothing to show, couldn't find it.. 
+			
+		}
+		
+		$sql = "
+			SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName, concat(c.lastname, ', ', c.firstname) AS Faculty
+			FROM classes AS a 
+			INNER JOIN courses as b ON a.id_courses=b.id_courses 
+			INNER JOIN profile as c ON a.facultyId=c.username
+			WHERE a.id_classes='".$o->idClasses."'";
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].') '.$db->Record['Faculty'];
+		
+		$t['form'] = ''; // cleaned
+		
+		$formObj = new SiteForm();
+		$formObj->getForm('orientationadmin', $o);
+		
+		if ($fl_showme)
+		{	
+			$t['form'] = '
+			<br>
+			
+			<fieldset>
+			<legend><b>Final Scheduling for Orientation</b></legend>
+			
+			<table cellpadding="4" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td>'.$formObj->ToHTML(). '</td>
+			</tr>
+			</table>
+			</fieldset>';
+		}	
+		
+		$t['form'] .= '
+		<br>
+		
+		<fieldset>
+		<legend><b>Schedule View</b> - <a href="'.modurl('orientations/event=edit/id_orientation_classes='.(int)$o->idOrientationClasses).$extra_class_info.'">'.(($extra_class_info) ? 'add' : 'modify' ).'</a></legend>
+		';
+		
+		if ($fl_showme)
+		{	$t['form'] .= '
+			<table cellpadding="4" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td>Current Status: <B>'.$this->getStatus($o->status).'</B></td>
+				<td></td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Primary Request</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td width="40%">Session Length</td>
+						<td width="60%">'.$o->firstAllottedMinutes.' mins</td>
+					</tr>
+					<tr>
+						<td width="40%">Preferred Date</td>
+						<td width="60%">'.$this->getDate($o->firstDateId, $db).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Preferred to Start</td>
+						<td width="60%">'.date('g:i a', strtotime($o->firstPreferredTime)).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Acceptable Times</td>
+						<td width="60%">'.date('g:i a', strtotime($o->firstTimeRangeStart)).' - '. date('g:i a', strtotime($o->firstTimeRangeEnd)).'</td>
+					</tr>
+			
+					<tr>
+						<td></td>
+						<td></td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Secondary Request</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td width="40%">Session Length</td>
+						<td width="60%">'.$o->secondAllottedMinutes.' mins</td>
+					</tr>
+					<tr>
+						<td width="40%">Date</td>
+						<td width="60%">'.$this->getDate($o->secondDateId, $db).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Time to Start</td>
+						<td width="60%">'.date('g:i a', strtotime($o->secondPreferredTime)).'</td>
+					</tr>
+					<tr>
+						<td width="40%">Acceptable Times</td>
+						<td width="60%">'.date('g:i a', strtotime($o->secondTimeRangeStart)).' - '. date('g:i a', strtotime($o->secondTimeRangeEnd)).'</td>
+					</tr>
+			
+					<tr>
+						<td></td>
+						<td></td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Special Instructions</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td>
+							'. $o->instructions .'
+						</td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Notes</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td>
+							'. $o->notes .'
+						</td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			</table>
+			';
+		}
+	
+		if ($fl_showme == false)
+		{
+			$t['form'] .= '
+			<table cellpadding="4" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td align="center" colspan="2">
+			
+					<fieldset>
+					<legend><B>Notes</B></legend>
+					<table cellpadding="4" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td align="center">
+							No schedule available for this classroom
+						</td>
+					</tr>
+					</table>
+					</fieldset>
+				</td>
+			</tr>
+			
+			</table>
+			';
+		}		
+		
+		$t['form'] .= '
+		</fieldset>
+		';
+		
+	}
+	
+	
+	function editRun($db,&$u,&$lc,&$t) 
+	{
+		// must have id.. MUST.. I NEEEED it!
+		
+		// oh ya.. we need to make sure you're allowed to edit this!
+		if ($this->validateAccessCheck() == false)
+		{	return;
+		}
+		
+		include_once(LIB_PATH.'OrientationClasses.php');
+		$orientationClass = OrientationClassesPeer::doSelect('id_orientation_classes='. $lc->getvars['id_orientation_classes']);
+		$orientationClass = array_shift($orientationClass);
+		
+		
+		if ((int)$lc->getvars['idClasses'] > 0 && $orientationClass == null)
+		{
+			unset($orientationClass);
+			// try and find this classes schedule.. 
+			$orientationClass = new OrientationClasses();
+			$orientationClass= OrientationClasses::load(array('id_classes' =>(int)$lc->getvars['idClasses']));
+			
+			if ($orientationClass == null)
+			{	// trying to seed the section header and seed the object with the correct class
+				$orientationClass = new OrientationClasses();
+				$orientationClass->set('idClasses',(int)$lc->getvars['idClasses']);
+			}
+			
+		}
+		
+		$sql = "
+			SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName, concat(c.lastname, ', ', c.firstname) AS Faculty
+			FROM classes AS a 
+			INNER JOIN courses as b ON a.id_courses=b.id_courses 
+			INNER JOIN profile as c ON a.facultyId=c.username
+			WHERE a.id_classes='".$orientationClass->idClasses."'";
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].') '.$db->Record['Faculty'];
+		$db_temp = $db->Record;
+		
+		$formObj = new SiteForm();
+		$orientationClass->firstPreferredTime = '2003-04-27 '. $orientationClass->firstPreferredTime;
+		$orientationClass->firstTimeRangeStart = '2003-04-27 '. $orientationClass->firstTimeRangeStart;
+		$orientationClass->firstTimeRangeEnd = '2003-04-27 '. $orientationClass->firstTimeRangeEnd;
+		$orientationClass->secondPreferredTime = '2003-04-27 '. $orientationClass->secondPreferredTime;
+		$orientationClass->secondTimeRangeEnd = '2003-04-27 '. $orientationClass->secondTimeRangeEnd;
+		$orientationClass->secondTimeRangeStart = '2003-04-27 '. $orientationClass->secondTimeRangeStart;
+		
+		$p = $orientationClass; // getform will tear this object up.. badbad
+		$formObj->getForm('orientation_admin_ed', $p);
+		$t['form'] = $formObj->ToHTML();
+		
+		if ($lc->postvars['submit'])
+		{
+			$formObj->validateForm('orientation_admin_ed', $lc->postvars);
+			
+			if ($formObj->hasErrors())
+			{	echo 'You have errors<br>';
+			} else
+			{
+				if ($lc->postvars['status'] != $orientationClass->status)
+				{
+					$sql = "
+						SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 
+						FROM classes AS a 
+						INNER JOIN courses as b ON a.id_courses=b.id_courses 
+						WHERE a.id_classes='".$orientationClass->idClasses."'";
+					
+					$db->RESULT_TYPE = MYSQL_ASSOC;
+					$db->queryOne($sql);
+					
+					include_once(SERVICE_PATH."pm/privmess.php");
+					
+					$mess = new privMess();
+					$mess->subject = '['.$db->Record['courseFamily'].$db->Record['courseNumber'].'] Your scheduled orientation has been updated to: '.$this->getStatus($lc->postvars['status']);
+					$mess->message = 'There was a change to your orientation schedule *status* on: '.$db->Record['courseName'].' - '.$db->Record['courseFamily'].$db->Record['courseNumber'].' class.';
+					
+					$mess->sentTime = time();
+					$mess->messageFrom = $u->username;
+					
+					$mess->messageTo = $db->Record['facultyId'];
+					$mess->add();
+				
+				}
+				
+				$formObj->cleanedArray['firstPreferredTime'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['firstPreferredTime']['hours'].':'.$formObj->cleanedArray['firstPreferredTime']['minutes'].' '.$formObj->cleanedArray['firstPreferredTime']['ampm']) );
+				$formObj->cleanedArray['firstTimeRangeStart'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['firstTimeRangeStart']['hours'].':'.$formObj->cleanedArray['firstTimeRangeStart']['minutes'].' '.$formObj->cleanedArray['firstTimeRangeStart']['ampm']) );
+				$formObj->cleanedArray['firstTimeRangeEnd'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['firstTimeRangeEnd']['hours'].':'.$formObj->cleanedArray['firstTimeRangeEnd']['minutes'].' '.$formObj->cleanedArray['firstTimeRangeEnd']['ampm']) );
+				$formObj->cleanedArray['secondPreferredTime'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['secondPreferredTime']['hours'].':'.$formObj->cleanedArray['secondPreferredTime']['minutes'].' '.$formObj->cleanedArray['secondPreferredTime']['ampm']) );
+				$formObj->cleanedArray['secondTimeRangeEnd'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['secondTimeRangeEnd']['hours'].':'.$formObj->cleanedArray['secondTimeRangeEnd']['minutes'].' '.$formObj->cleanedArray['secondTimeRangeEnd']['ampm']) );
+				$formObj->cleanedArray['secondTimeRangeStart'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['secondTimeRangeStart']['hours'].':'.$formObj->cleanedArray['secondTimeRangeStart']['minutes'].' '.$formObj->cleanedArray['secondTimeRangeStart']['ampm']) );
+				$orientationClass->setArray($formObj->cleanedArray);
+				
+				$orientationClass->finalDateTime = '';
+				$orientationClass->finalDateTime = '';
+				$orientationClass->finalCampus = '';
+				$orientationClass->finalSessionLength = '';
+				if ($orientationClass->notes == '') $orientationClass->notes = '';
+				if ($orientationClass->instructions == '') $orientationClass->instructions = '';
+				
+				$orientationClass->save();				
+				
+				$this->run($db, $u, $lc, $t);
+			}
+			
+		}
+		
+		
+	}
+	
+	
+	function scheduleRun($db,&$u,&$lc,&$t)
+	{
+		$this->inactivelinks[] = 'Administrate date & times';
+		$lc->templateName = 'orientations_main';
+		
+		// gradebook
+		if ($this->validateAccessCheck() == false)
+		{	return;
+		}
+		
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		
+		$datagrid->headerClass = 'classheader';
+		$datagrid->class = 'datagrid';
+		
+		$datagrid->table = 'orientation_dates';
+		$datagrid->where = 'id_semesters='. (int)$u->sessionvars['semester'];
+		
+		$datagrid->ignore = array('id_semesters', 'id_orientation_dates');
+			
+		$datagrid->headers = array(
+			'date' => 					'Chosen Date',
+			'time_end' => 				'Time End',
+			'time_start'=>				'Time Start',
+			'end'=>' ');
+
+		$datagrid->sortColumns = array('date', 'time_start', 'time_end');
+		
+		$datagrid->overrideColumn('<nobr><?=date(\'F j, Y\', strtotime($date));?></nobr>','date');
+		$datagrid->overrideColumn('<nobr><?=date(\'g:i A\', strtotime(\'2003-01-01 \'.$time_end));?></nobr>','time_end');
+		$datagrid->overrideColumn('<nobr><?=date(\'g:i A\', strtotime(\'2003-01-01 \'.$time_start));?></nobr>','time_start');
+		
+		$datagrid->postpendColumn('<a href="<?=modurl("orientations/event=scheduleEdit/id_orientation_dates=".$id_orientation_dates);?>">edit</a>','end');
+		
+		$datagrid->setCellWidth('time_start', '120');
+		$datagrid->setCellWidth('time_end', '120');
+		$datagrid->setCellWidth('end', '50');
+		$datagrid->setCellAlign('end', 'center');
+		$datagrid->setCellAlign('time_start', 'right');
+		$datagrid->setCellAlign('time_end', 'right');
+		$datagrid->extra_url = '/event=schedule';
+		$datagrid->_id = 'orientations_scheduling';
+		$t['table'] = $datagrid->toHTML();
+		
+		
+	}
+	
+	
+	function scheduleUpdateRun($db,&$u,&$lc,&$t)
+	{
+		// will route to scheduleRun
+
+		// updating/adding the shiz		
+		if ($this->validateAccessCheck() == false)
+		{	return;
+		}
+
+		$formObj = new SiteForm();
+		
+		if ($lc->postvars['Submit'])
+		{
+			$formObj->validateForm('orientation_admin_dt', $lc->postvars);
+			
+			$formObj->cleanedArray['timeStart'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['timeStart']['hours'].':'.$formObj->cleanedArray['timeStart']['minutes'].' '.$formObj->cleanedArray['timeStart']['ampm']) );
+			$formObj->cleanedArray['timeEnd'] = date('H:i:s', strtotime('2003-04-27 '.$formObj->cleanedArray['timeEnd']['hours'].':'.$formObj->cleanedArray['timeEnd']['minutes'].' '.$formObj->cleanedArray['timeEnd']['ampm']) );
+			$formObj->cleanedArray['date'] = date('Y-m-d', strtotime($formObj->cleanedArray['date']['year'].'-'.$formObj->cleanedArray['date']['month'].'-'.$formObj->cleanedArray['date']['day']. ' 00:00:00') );
+						
+			include_once(LIB_PATH.'OrientationDates.php');
+			
+			if ($lc->getvars['id_orientation_dates'])
+			{	$orientationDates = array_shift(OrientationDatesPeer::doSelect('id_orientation_dates='. $lc->getvars['id_orientation_dates']));
+			} else
+			{	$orientationDates = new OrientationDates();
+				$orientationDates->set('idSemesters', $u->sessionvars['semester']);
+				
+			}
+
+			$orientationDates->setArray($formObj->cleanedArray);
+			$orientationDates->save();
+		
+		}
+		
+		
+		$this->scheduleRun($db, $u, $lc, $t);
+
+	}
+	
+	
+	function scheduleNewRun($db,&$u,&$lc,&$t)
+	{
+		$this->inactivelinks[] = 'Add new date & times';
+		$t['message'] = '<h4>New Scheduled Date/Time</h4>';
+		
+		$lc->templateName = 'orientations_dates_form';
+		
+		if ($this->validateAccessCheck() == false)
+		{	return;
+		}
+		
+		$formObj = new SiteForm();
+		$formObj->getForm('orientation_admin_dt', $orientationDates);
+		
+		$t['form'] = $formObj->ToHTML();
+	
+	}
+	
+	function scheduleEditRun($db,&$u,&$lc,&$t)
+	{
+		$t['message'] = '<h4>Editing Scheduled Date/Time</h4>';
+		
+		$lc->templateName = 'orientations_dates_form';
+		
+		if ($this->validateAccessCheck() == false)
+		{	return;
+		}
+	
+		include_once(LIB_PATH.'OrientationDates.php');
+		$orientationDates = array_shift(OrientationDatesPeer::doSelect('id_orientation_dates='. $lc->getvars['id_orientation_dates']));
+		
+		$orientationDates->timeStart 	= '2003-04-27 '. $orientationDates->timeStart;
+		$orientationDates->timeEnd 		= '2003-04-27 '. $orientationDates->timeEnd;
+		
+		$formObj = new SiteForm();
+		$formObj->getForm('orientation_admin_dt', $orientationDates);
+		
+		$t['form'] = $formObj->ToHTML();
+		
+	}
+	
+	function getStatus($opt)
+	{	
+		$status = array(1=>'New', 2=>'Pending', 3=>'Approved', 4=>'Denied', 5=>'Waiting on your approval');
+		
+	return $status[$opt];
+	}	
+	
+	
+	
+	function getDate($id_date, $db)
+	{
+		$return_date = 'N/A';
+		
+		if ((int)$id_date > 0)
+		{
+			// @@@@ I would like to bind this to the current semester, buttttt.. f it. 
+			$sql = '
+				SELECT date, time_start, time_end
+				FROM orientation_dates
+				WHERE id_orientation_dates='.$id_date;
+			
+			$db->queryOne($sql);
+			
+			// making sure we have a friggin record..
+			if ($db->Record != false)
+			{	$return_date = date('F j Y', strtotime($db->Record['date'])).' '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_end'])).'';
+			}
+			
+		} 
+		
+	return $return_date;
+	}
+	
+	
+}
+
+
+?>

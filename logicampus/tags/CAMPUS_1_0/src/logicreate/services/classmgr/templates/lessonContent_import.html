@@ -1,0 +1,22 @@
+<?
+print $t['sectionheader'];
+if($t['error']){?><span style="color:red"><?=$t['error']?></span><?}
+if($t['msg']){?><span style="color:blue"><?=$t['msg']?></span><?}
+?>
+<p>This page allows you to upload an HTML file for use as content for your class.</p>
+<form action="" method="post" enctype="multipart/form-data">
+<table border=0 cellpadding=3 cellspacing=0>
+<tr>
+	<td><b>Title:</b></td>
+	<td><input type="text" name="title" maxlength=255 size=35 /></td>
+</tr>
+<tr>
+	<td><b>HTML File:</b></td>
+	<td><input type="file" name="thefile" size=35 /></td>
+</tr>
+<tr>
+	<td colspan=2 align="center"><input type="submit" value="Upload File"/></td>
+</tr>
+</table>
+<input type="hidden" name="event" value="uploadProcess"/>
+</form>

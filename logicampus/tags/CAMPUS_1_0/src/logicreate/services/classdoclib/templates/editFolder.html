@@ -1,0 +1,36 @@
+<?=$t['sectionheader'];?>
+
+<form method="post" action="<?=APP_URL?>classdoclib/editFolder/event=updateFolder">
+<input type="hidden" name="fid" value="<?=$t['folder']->pkey;?>">
+	<table width="100%" align="center" border="0">
+		<tr>
+		<td class="menu_head">
+			<center><img src="<?=IMAGES_URL?>folder-open.gif" border="0" width="17" height="15" valign="bottom"> 
+				<h2 style="display:inline;padding-bottom:1px;"><?=$t['folder']->name;?></h2></center>
+		</td></tr>
+
+		</td>
+		<td valign="top" align="left">
+			<table width="100%">
+			<tr><td><b>Folder Name:</b></td>
+			<td>
+			<input type="text" size="30" name="name" value="<?=$t['folder']->name;?>"/>
+			</td></tr>
+			<tr><td><b>Folder Notes:</b></td>
+			<td>
+			<textarea name="notes" cols="32" rows="5"><?=$t['folder']->notes;?></textarea>
+			</td></tr>
+			</table>
+		</td></tr>
+		<tr><td colspan="2" align="center" valign="top">
+				<input type="submit" name='_button' value="update">
+				<input type="submit" name='_button' value="cancel"><br/><br/>
+		</td></tr>
+		<tr><td colspan="2" valign="top">
+				<a href="<?=modurl('editFolder/event=trash/fid='.$t['folder']->pkey);?>">Move to Trash</a>
+		</td></tr>
+	</table>
+</form>
+
+
+
