@@ -25,13 +25,13 @@ done
 
 echo '***********************'
 echo 'INSTALLING base LC data'
-mysql -u $1 -p$2 $db < setup.sql 
-mysql -u $1 -p$2 $db < lcRegistry.sql 
-mysql -u $1 -p$2 $db < lcUsers.sql 
-mysql -u $1 -p$2 $db < lcPerms.sql 
-mysql -u $1 -p$2 $db < lcForms_and_lcFormInfo.sql 
-mysql -u $1 -p$2 $db < lcConfig.sql
-mysql -u $1 -p$2 $db < lcGroups.sql
+mysql -u $1 -p$2 $db < ../data/setup.sql 
+mysql -u $1 -p$2 $db < ../data/lcRegistry.sql 
+mysql -u $1 -p$2 $db < ../data/lcUsers.sql 
+mysql -u $1 -p$2 $db < ../data/lcPerms.sql 
+mysql -u $1 -p$2 $db < ../data/lcForms_and_lcFormInfo.sql 
+mysql -u $1 -p$2 $db < ../data/lcConfig.sql
+mysql -u $1 -p$2 $db < ../data/lcGroups.sql
 echo '***********************'
 echo 'INSTALLING base modules'
 sh ./install_metainfo.sh $1 $2 $db
@@ -39,5 +39,5 @@ sh ./install_metainfo.sh $1 $2 $db
 
 echo '***********************'
 echo 'POPULATING with dummy data'
-mysql -u $1 -p$2 $db < semesters_and_classes.sql
-mysql -u $1 -p$2 $db < profile.sql 
+mysql -u $1 -p$2 $db < ../data/semesters_and_classes.sql
+mysql -u $1 -p$2 $db < ../data/profile.sql 
