@@ -36,21 +36,21 @@ INSERT INTO class_sections VALUES (1112, 1);
 
 
 
-INSERT INTO class_student_sections VALUES (1111, 'student', 1, 1);
+INSERT INTO class_student_sections VALUES (1111, 'student', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1111, 'student1', 1, 1);
+INSERT INTO class_student_sections VALUES (1111, 'student1', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1112, 'student2', 1, 1);
+INSERT INTO class_student_sections VALUES (1112, 'student2', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1112, 'student3', 1, 1);
+INSERT INTO class_student_sections VALUES (1112, 'student3', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1111, 'student6', 1, 1);
+INSERT INTO class_student_sections VALUES (1111, 'student6', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1112, 'student7', 1, 1);
+INSERT INTO class_student_sections VALUES (1112, 'student7', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1112, 'student8', 1, 1);
+INSERT INTO class_student_sections VALUES (1112, 'student8', 1, 1, null);
 
-INSERT INTO class_student_sections VALUES (1111, 'student9', 1, 1);
+INSERT INTO class_student_sections VALUES (1111, 'student9', 1, 1, null);
 
 INSERT INTO exam_schedule_dates VALUES (1, 1, CONCAT(YEAR(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',MONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',DAYOFMONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),' 14:00:00'), CONCAT(YEAR(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',MONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',DAYOFMONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),' 18:00:00'));
 
