@@ -34,7 +34,7 @@ mysql -u $1 -p$2 $db < lcConfig.sql
 mysql -u $1 -p$2 $db < lcGroups.sql
 echo '***********************'
 echo 'INSTALLING base modules'
-./install_metainfo.sh $1 $2 $db
+sh ./install_metainfo.sh $1 $2 $db
 
 
 echo '***********************'

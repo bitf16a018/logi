@@ -14,10 +14,28 @@ else
 	db=$3;
 fi
 
-for x in `find ../src/logicreate/services/ -name 'META-INFO'`
+if [ -d '../src/' ] 
+then
+	location='../src/logicreate/services/'
+fi
+
+
+if [ -d '../services/' ] 
+then
+	location='../services/'
+fi
+
+if [ ! $location ]
+then
+	echo 'you need to run this from either the cvs/data dir or'
+	echo 'src/logicreate/scripts/'
+	exit 1
+fi
+
+
+for x in `find $location -name 'META-INFO'`
 do
 	echo 'installing setup.sql in '$x;
 	mysql -u $1 -p$2 $db < $x/setup.sql;
 done
-
 
