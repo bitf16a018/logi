@@ -6,9 +6,11 @@
 
 	<? if (($t['hasSidebar']) || ($t['hasSponsor']))  { ?>
 		<FRAMESET COLS="*,150" border="0">
-			<FRAMESET ROWS="*,120" border="0">
+			<FRAMESET ROWS="50,*,120,0" border="0">
+			<frame name="Title" scrolling='no' src="<?=appurl("{$obj->moduleName}/chat/event=chatTitle/fresh=".$t["fresh"]."/chatThread=".$t["chatThread"]."/title=".base64_encode($t['title']));?>">
 				<frame name="Controls" src="<?=appurl("{$obj->moduleName}/chat/event=chat/fresh=".$t["fresh"]."/chatThread=".$t["chatThread"]);?>">
 				<frame name="View" src="<?=appurl("{$obj->moduleName}/chat/event=start1/ttt=".time()."/chatThread=".$t["chatThread"]);?>">
+			<frame name="reload" src="<?=appurl("{$obj->moduleName}/chat/event=reload/fresh=".$t["fresh"]."/chatThread=".$t["chatThread"]);?>">
 			</FRAMESET>
 			<? if ( ($t['hasSidebar']) && (!$t['hasSponsor'])) { ?>
 				<frame name="users" src="<?=appurl("{$obj->moduleName}/chat/event=userlist");?>">
@@ -26,6 +28,7 @@
 			<? } ?>
 
 
+			</FRAMESET>
 
 	<? } else { ?>
 		<FRAMESET ROWS="*,80" border="0">
