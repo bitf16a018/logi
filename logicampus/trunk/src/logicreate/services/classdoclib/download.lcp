@@ -1,4 +1,17 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
 
 include_once(LIB_PATH."documentLibraryLib.php");
 include_once(LIB_PATH."LC_html.php");
@@ -39,26 +52,32 @@ class download extends classdoclibService {
 		
 		// moved out of loop
 		if (!$u->activeClassTaught) {
-			$class_id = (int)$u->activeClassTaken->id_classes;
+#			$class_id = (int)$u->activeClassTaken->id_classes;
+			$facultyId = (int)$u->activeClassTaken->facultyId;
 		} else {
-			$class_id = (int)$u->activeClassTaught->id_classes;
+#			$class_id = (int)$u->activeClassTaught->id_classes;
+			$facultyId = (int)$u->activeClassTaught->facultyId;
 		}
 
+		// mgk - 8/21/04
+		// owner is the facultyId
+		// instead of mapping to the class you're in, we map to the 
+		// teacher of the class you're in.  this allows the content to be 
+		// tied to a teacher, not a class
+		
 		// START FHASH // I'm allowing this to be backwards compatible for now
-		if (strlen($fhash) == 32)
-		{	
+		if (strlen($fhash) == 32)	{	
 
 			$sql = '
 			SELECT A.pkey 
 			FROM classdoclib_Files as A
 			INNER JOIN classdoclib_Folders as B
 				ON A.folder=B.pkey
-			WHERE (B.class_id='.$class_id.'
+			WHERE (B.owner='.$facultyId.'
 			AND A.daHasha=\''.$fhash.'\')
 			';
 			$db->queryOne($sql);
-			if ($db->Record == false)
-			{
+			if ($db->Record == false) {
 				//no permission to view this file
 				$this->presentor = 'errorMessage';
 				$t['message'] = "You do not have permission to view this content.";
