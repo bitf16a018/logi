@@ -13,3 +13,10 @@ adminstration/classes - Removed text on the 'assignments folder' that says this
 is where to find assignments that have been uploaded by students.
 This was the original way it was planned to work, but the workflow was
 change to make it easier to teachers to grade assignments.
+
+12/07/03 3:05 - mgkimsal
+unknown/install	- Change to add define for MAX_COURSES
+unknown/install - Change to put in 'include sample data' in installer
+administration/courses - Change to check for MAX_COURSES
+
+
