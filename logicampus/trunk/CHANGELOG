@@ -7,6 +7,14 @@ SYNTAX:
 
 
 #########################
+04/18/2004 11:45 PM - mark
+Lots of bug fixes and small layout changes.
+Fixed bug where students were invisible to classes with enrollment as a
+multiple of 13.
+Fixed bug in answer multiple choice questions.
+Started on assessment backup feature for easier testing of problem tests.
+
+
 01/11/03 8:27 PM - zorka
 administration/formmgr -
 Export sql didn't have template.  Added template, fixed.
