@@ -229,7 +229,7 @@ class semestercopy extends FacultyService
 		//what to update: 
 		// assignments, assignments_link 
 		// gradebook, gradebook_categories, gradebook_entries
-		// class_lessons class_lesson_links, class_lesson_content, class_links, class_objectives
+		// class_lessons, class_lesson_links, class_lesson_content, class_links, class_objectives, class_lesson_objectives
 		// class_syllabuses
 
 		// don't do this anymore
@@ -254,7 +254,6 @@ class semestercopy extends FacultyService
 		include_once(LIB_PATH.'PBDO/ClassAssignments.php');
 		include_once(LIB_PATH.'PBDO/ClassAssignmentsLink.php');
 		include_once(LIB_PATH.'PBDO/ClassLessonContent.php');
-		include_once(LIB_PATH.'PBDO/ClassLessonLinks.php');
 		include_once(LIB_PATH.'PBDO/ClassLessons.php');
 		include_once(LIB_PATH.'PBDO/ClassLinks.php');
 		include_once(LIB_PATH.'PBDO/ClassObjectives.php');
@@ -263,6 +262,7 @@ class semestercopy extends FacultyService
 		include_once(LIB_PATH.'ClassGradebook.php');
 		include_once(LIB_PATH.'ClassGradebookCategories.php');
 		include_once(LIB_PATH.'ClassGradebookEntries.php');
+
 		// wipe table of new id_classes or class_id (id_classes_to)
 		// load an objecti (id_classes_from)
 		// set _new to true (to force an insert)
@@ -271,19 +271,13 @@ class semestercopy extends FacultyService
 		// update relationships (if any)
 		// save
 
-		//class assignments
-		$assignments_old_to_new = array();
-		$db->query("DELETE FROM class_assignments WHERE id_classes = $id_classes_to");
-		$pbdoArray = ClassAssignments::doSelect(' id_classes = '.$id_classes_from);
-		for ($x = 0; $x < count($pbdoArray); $x++) {
-			$oldid = $pbdo->idClassAssignments;
-			$assignments_old_to_new[$oldid] = 0;
-			$pbdo->_new = true;
-			$pbdo->idClassAssignments = '';
-			$pbdo->set('idClasses', $id_classes_to);
-			$pbdo->save();
-			$assignments_old_to_new[$oldid] = $pbdo->getPrimaryKey();
-		}
+		// if it's a many to many table,
+		// cycle through array of old to new mappings for the lesson
+		// select the old relationshp from the table via the old id
+		// if the the related data via the old key just pulled from the table
+		// insert the new relation into the table with both new keys
+		// (does this logic leave orphaned data if there was a class already in 
+		//  the copy to slot?)
 
 		//class lessons
 		$lessons_old_to_new = array();
@@ -297,6 +291,22 @@ class semestercopy extends FacultyService
 			$pbdo->set('idClasses', $id_classes_to);
 			$pbdo->save();
 			$lessons_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+
+
+		//class assignments
+		$assignments_old_to_new = array();
+		$db->query("DELETE FROM class_assignments WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassAssignments::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$oldid = $pbdo->idClassAssignments;
+			$assignments_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassAssignments = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$assignments_old_to_new[$oldid] = $pbdo->getPrimaryKey();
 		}
 
 		//class assignments link (many to many table)
@@ -314,6 +324,101 @@ class semestercopy extends FacultyService
 			}
 		}
 
+
+
+
+
+		//class links
+		$links_old_to_new = array();
+		$db->query("DELETE FROM class_links WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLinks::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$oldid = $pbdo->idClassLinks;
+			$links_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassLinks = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$links_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+		//class lesson links (many to many table)
+		@reset($lessons_old_to_new);
+		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
+			$db->query("SELECT * FROM class_lesson_links WHERE id_class_lessons = ".$oldid);
+			while ($db->nextRecord()) {
+				$new_link = $links_old_to_new[$db->record['id_class_links']];
+				//did this old lesson have a link?
+				if ( $new_link > 0 ) {
+					$db->query("INSERT INTO class_lesson_links
+					(id_class_lessons,id_class_links)
+					VALUES
+					(".$newid.",".$new_link.")");
+				}
+			}
+		}
+
+
+
+
+		//class objectives
+		$objectives_old_to_new = array();
+		$db->query("DELETE FROM class_objectives WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassObjectives::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$oldid = $pbdo->idClassObjectives;
+			$links_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassObjectives = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$objectives_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+		//class lesson links (many to many table)
+		@reset($lessons_old_to_new);
+		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
+			$db->query("SELECT * FROM class_lesson_objectives WHERE id_class_lessons = ".$oldid);
+			while ($db->nextRecord()) {
+				$new_objective = $objectives_old_to_new[$db->record['id_class_links']];
+				//did this old lesson have a link?
+				if ( $new_objective > 0 ) {
+					$db->query("INSERT INTO class_lesson_objectives
+					(id_class_lesson,id_class_objectives)
+					VALUES
+					(".$newid.",".$new_objective.")");
+				}
+			}
+		}
+
+
+		//no more many to many relationships
+		// basically no more lesson data
+
+
+
+		//class lesson content
+		$db->query("DELETE FROM class_lesson_content WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLessonContent::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo->_new = true;
+			$pbdo->idClassLessonContent = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+		}
+
+
+		//class syllabuses
+		$db->query("DELETE FROM class_syllabuses WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassSyllabuses::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo->_new = true;
+			$pbdo->idClassSyllabuses = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+		}
+
+
 		//class gradebook
 		$db->query("DELETE FROM class_gradebook WHERE id_classes = $id_classes_to");
 		$pbdoArray = ClassGradebook::doSelect(' id_classes = '.$id_classes_from);
@@ -324,6 +429,7 @@ class semestercopy extends FacultyService
 			$pbdo->save();
 		}
 
+
 		//class gradebook categories
 		$db->query("DELETE FROM class_gradebook_categories WHERE id_classes = $id_classes_to");
 		$pbdoArray = ClassGradebookCategories::doSelect(' id_classes = '.$id_classes_from);
@@ -333,6 +439,7 @@ class semestercopy extends FacultyService
 			$pbdo->set('idClasses', $id_classes_to);
 			$pbdo->save();
 		}
+
 
 		//class gradebook entries
 		$db->query("DELETE FROM class_gradebook_entries WHERE id_classes = $id_classes_to");
