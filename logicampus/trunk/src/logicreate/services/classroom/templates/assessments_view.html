@@ -69,9 +69,8 @@ if ($v->answer->pointsGiven) $points = $v->answer->pointsGiven;
 			<b>Your Answer</b>:  
 			 &nbsp;  
 			 <?
-			  	if ($v->questionType == QUESTION_MANSWER)	{
+			  	if ($v->questionType == QUESTION_MANSWER || $v->questionType==QUESTION_MCHOICE)	{
 				echo $v->returnStudentAnswer();
-#					echo implode(", ", $v->answer->assessmentAnswerValues);
 				} else {
 					# not a matching nor multiple answer question that can
 					# have multiple answer values
