@@ -1,4 +1,5 @@
 <?
+
 require_once(LIB_PATH.'User.php');
 
 	/**
