@@ -89,7 +89,7 @@ n']['classes']));
 			'semesterID'=>'Semester',
 			'courseNumber'=>'Course Number'
 			);
-		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("managestudedents/event=remove/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>">remove</a>',"del");
+		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>">remove</a>',"del");
 		$d->prependColumn('<?$name="'.$name.'"; if ($active==1) { $activate="suspend"; $act=0; } else { $activate="activate"; $act=1; } ?><a href="<?=modurl("enrollment/event=activate/active=$act/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>"><?=$activate;?></a>',"activate");
 		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
 		$d->setRows($classes);
