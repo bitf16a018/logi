@@ -48,7 +48,7 @@ INSERT INTO lcConfig VALUES ('forum', '_wordWrap', '60', 'text', '');
 INSERT INTO lcConfig VALUES ('classmgr', '_postsPerPage', '20', 'text', '');
 INSERT INTO lcConfig VALUES ('administration', '_serviceFiles', 'classes.lcp=Classes Administration,courses.lcp=Courses Administration,groups.lcp=Group Administration,mod.lcp=Message of the Day,semesters.lcp=Manage Semesters,servicePermissions.lcp=Manage group permissions,users.lcp=User Administration', 'textarea', '');
 INSERT INTO lcConfig VALUES ('classmgr', '_default_datagrid_num_rows', '', 'options', '5\r\n10\r\n15\r\n20\r\n25\r\n30\r\n35\r\n40\r\n45\r\n50');
-INSERT INTO lcConfig VALUES ('administration', '_servicesAdministration', 'classes=Manage Classes,courses=Manage Courses,groups=Group Administration,mod=Message of the Day,semesters=Manage Semesters,servicePermissions=Manage Group Permissions,users=Manage Users', 'textarea', '');
+INSERT INTO lcConfig VALUES ('administration', '_servicesAdministration', 'groups=Group Administration,classes=Manage Classes,enrollment=Manage Class Enrollment,courses=Manage Courses,servicePermissions=Manage Group Permissions,mod=Message of the Day,semesters=Manage Semesters,users=Manage Users', 'textarea', '');
 INSERT INTO lcConfig VALUES ('classroom', '_PortalNumOfLessons', '5', 'options', '5\r\n10\r\n15\r\n20');
 INSERT INTO lcConfig VALUES ('classroom', '_PortalNumOfAssignments', '5', 'options', '5\r\n10\r\n15\r\n20');
 INSERT INTO lcConfig VALUES ('c6b29012536501c29bc35376b773498a', '', '', '', '');

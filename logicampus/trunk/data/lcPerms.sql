@@ -90,6 +90,7 @@ INSERT INTO lcPerms VALUES ('dlstaff', 'classroom', 'access');
 INSERT INTO lcPerms VALUES ('admin', 'administration', 'groups');
 INSERT INTO lcPerms VALUES ('admin', 'administration', 'servicePermissions');
 INSERT INTO lcPerms VALUES ('admin', 'administration', 'mod');
+INSERT INTO lcPerms VALUES ('admin', 'administration', 'enrollment');
 INSERT INTO lcPerms VALUES ('admin', 'administration', 'semesters');
 INSERT INTO lcPerms VALUES ('admin', 'administration', 'users');
 INSERT INTO lcPerms VALUES ('dlstaff', 'administration', 'cal');
