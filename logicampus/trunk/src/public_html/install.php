@@ -446,7 +446,7 @@ function runSetup(&$arg) {
 
 	}
 
-	$contents = str_replace("\r","\n",$contents);
+	$contents = str_replace("\r","",$contents);
 	$contents = str_replace("\n\n ","\n",$contents);
 	$contents = str_replace(",\n",", ",$contents);
 	$contents = str_replace("\n)"," ) ",$contents);
@@ -467,7 +467,7 @@ function runSetup(&$arg) {
 			if ($f) { 
 				$contents = fread($f,filesize('../logicreate/services/'.$k.'/META-INFO/setup.sql'));
 				fclose($f);
-				$contents = str_replace("\r","\n",$contents);
+				$contents = str_replace("\r","",$contents);
 				$contents = str_replace("\n\n ","\n",$contents);
 				$contents = str_replace("(\n","(",$contents);
 				$contents = str_replace("\n)"," ) ",$contents);
