@@ -21,9 +21,9 @@ fi
 if [ ! $1 ]
 then
   echo 
-  echo "Please supply the path to your LogiCampus installtion"
+  echo "Please supply the path to your LogiCampus installation"
   echo "Example: /var/www  (no trailing slash)"
-  echo "Example Usaage:  sh setpermissions.sh [path] [www-server-username]"
+  echo "Example Usage:  sh setpermissions.sh [path] [www-server-username]"
   echo
   exit 1
 fi
@@ -32,7 +32,7 @@ if [ ! $2 ]
 then
 	echo
 	echo "Please supply the username your web server is running as"
-    echo "Example Usaage:  sh setpermissions.sh [path] [www-server-username]"
+    echo "Example Usage:  sh setpermissions.sh [path] [www-server-username]"
 	echo
 	exit 1
 fi

@@ -6,7 +6,27 @@ be updated in this README.
 setpermissions.sh
 	Description:
 		Used during installation to set permissions.  
-	Example Usage:  
-		sh setpermission.sh   or  ./setpermission.sh
+	Example Usage:  sh setpermissions.sh [path] [www-server-username]
+		sh setpermission.sh  
 	Status:
 		Beta
+	
+install_metainfo.sh
+	Description:
+		Called by wipe_clean.sh.
+	Examples Usage:
+		not application
+	Status:
+		Production
+
+wipe_clean.sh
+	Description:
+		When run this file will drop and reset all of your database
+		tables of the database you specify.  It creates all tables
+		neded for logicampus as well as populates the system with
+		dummy data.  If no database is specified, it defaults to
+		logicampus. 
+	Example Usage:
+		sh wipe_clean.sh [db-username] [db-password] [database]
+	Status:
+		Production
