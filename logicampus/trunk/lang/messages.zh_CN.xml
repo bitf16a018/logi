@@ -1,73 +1,124 @@
-<?xml version="1.0" encoding="GB2312"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <language locale="zh_CN" charset="UTF-8">
 
 	<message id ="Calendar" domain="system">
-		日历
+		鏃ュ巻
 	</message>
 	<!--Calendar-->
 	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
 
 
 	<message id ="FAQs" domain="system">
-		常见问题
+		甯歌闂
 	</message>
 	<!--FAQs-->
 	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
 
 
 	<message id ="Help Desk" domain="system">
-		帮助
+		甯姪
 	</message>
 	<!--Help Desk-->
 	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
 
 
-	<message id ="Messages" domain="system" status="fuzzy">
-		文本
+	<message id ="Messages" domain="system">
+		鐣欒█
 	</message>
 	<!--Messages-->
 	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
 
 
 	<message id ="classroom manager" domain="system">
-		教室管理
+		鏁欏绠＄悊
 	</message>
 	<!--classroom manager-->
 	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="135"/>
 
 
 	<message id ="my classes" domain="system">
-		自己的课
+		鑷繁鐨勮
 	</message>
 	<!--my classes-->
 	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="143"/>
 
 
 	<message id ="password" domain="system">
-		密码
+		瀵嗙爜
 	</message>
 	<!--password-->
 	<usage id ="password" file="../src/public_html/templates/private/header.html.php" line="121"/>
 
 
 	<message id ="username" domain="system">
-		用户名
+		鐢ㄦ埛鍚�
 	</message>
 	<!--username-->
 	<usage id ="username" file="../src/public_html/templates/private/header.html.php" line="118"/>
 
 
 	<message id ="welcome" domain="system">
-		欢迎, $name
+		娆㈣繋, $name
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
 
 
 	<message id ="Login" domain="system">
-		发入
+		鍙戝叆
 	</message>
 	<!--Login-->
 	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
 
+
+	<message id ="Logout" domain="system">
+		娉ㄩ攢
+	</message>
+	<!--Logout-->
+	<usage id ="Logout" file="../src/public_html/templates/private/welcome_login.html.php" line="110"/>
+
+
+	<message id ="Access Denied!" domain="system">
+		涔堟湁access
+	</message>
+	<!--Access Denied!-->
+	<usage id ="Access Denied!" file="../src/logicreate/content/err_access_denied.html" line="1"/>
+
+
+	<message id ="Classroom Overview" domain="system">
+		Classroom Overview
+	</message>
+	<!--Classroom Overview-->
+	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
+
+
+	<message id ="Classroom Portal Page" domain="system">
+		Classroom Portal Page
+	</message>
+	<!--Classroom Portal Page-->
+	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
+
+
+	<message id ="Thanks!" domain="system">
+		澶氳阿!
+	</message>
+	<!--Thanks!-->
+	<usage id ="Thanks!" file="../src/logicreate/content/registerthanks.html" line="1"/>
+	<usage id ="Thanks!" file="../src/logicreate/content/loginthanks.html" line="1"/>
+
+
+	<message id ="You have logged in to our site successfully." domain="system">
+		You have logged in to our site successfully.
+	</message>
+	<!--You have logged in to our site successfully.-->
+	<usage id ="You have logged in to our site successfully." file="../src/logicreate/content/loginthanks.html" line="2"/>
+
+
+	<message id ="You have registered successfully with our site." domain="system">
+		You have registered successfully with our site.
+	</message>
+	<!--You have registered successfully with our site.-->
+	<usage id ="You have registered successfully with our site." file="../src/logicreate/content/registerthanks.html" line="2"/>
+
 </language>
+

@@ -1,6 +1,6 @@
-<h3>Access Denied!</h3>
+<h3><?=lct('Access Denied!')?></h3>
 
-You have reached a page that either you do not have permission to view based on the current system settings.  If you feel you have reached this page in error, contact the <a href="<?=APP_URL?>helpdesk">Help Desk</a>.
+<?=lct('You have reached a page that either you do not have permission to view based on the current system settings.  If you feel you have reached this page in error, contact the <a href="<?=APP_URL?>helpdesk">Help Desk</a>.')?>
 
 <h2><?=$lcTemplate['reason'];?></h2>
 <? if ($lcTemplate['reason']) {
@@ -34,7 +34,7 @@ If none of the above reasons match then you may want to contact the Help Desk.
 	</tr>
 	<tr class="menu_item">
 		<td>
-			Username:
+			<?=lct('username')?>:
 		</td>
 		<td>
 			<input name="username">
@@ -42,7 +42,7 @@ If none of the above reasons match then you may want to contact the Help Desk.
 	</tr>
 	<tr class="menu_item">
 		<td>
-			Password:
+			<?=lct('password')?>:
 		</td>
 		<td>
 			<input name="password" type="password">
@@ -50,7 +50,7 @@ If none of the above reasons match then you may want to contact the Help Desk.
 	</tr>
 	<tr>
 		<td colspan="2">
-			<input type="submit" value="Login">
+			<input type="submit" value="<?=lct('Login')?>">
 		</td>
 	</tr>
 

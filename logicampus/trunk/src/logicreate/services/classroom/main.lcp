@@ -1,10 +1,8 @@
 <?
-/*
- *
+/**
  * Show overview information and links to classroom
  * activities. Shows last 5 lessons, last 5
  * assignments, calendar, dictionary, thesarus, etc.
- *
  */
 include_once(LIB_PATH."eventsObj.php");
 
@@ -14,13 +12,11 @@ class classroom extends StudentService {
 	var $presentor='htmlPresentation';
 	var $authorizer = 'takesClassesAuth';
 
-/*
- *
+/**
  * Default event
  * 
  * Input data: 
  * Output data: 
- *
  */
 		function Run(&$db,&$u,&$lc,&$t) {
 				$ut = time();
@@ -220,7 +216,7 @@ class classroom extends StudentService {
 				/**
 				 *	marking this so the mastercalendar knows to display ALL classes 
 				 *	this student is taken within it's view.
-				*/		
+				 */		
 				$u->sessionvars['mastercalendar']['overallviews'] = 'vtaken';
 				
 				$c->monthReviewURL = appurl('mastercalendar/d='.$lc->getvars['d']);
