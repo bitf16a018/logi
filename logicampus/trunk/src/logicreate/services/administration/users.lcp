@@ -42,7 +42,7 @@ class users extends AdminService {
 		$this->inactivelinks[] = 'List Users';
 		$arg->templateName = 'users_main';
 		$arg->templateStyle = 'private';
-		$this->sectionTitle = 'Adding a New User';
+		$this->sectionTitle = 'List Users';
 
 		//fix for a bug in the searching
 		$t['opt1'] = 'opt1=blank';
