@@ -902,6 +902,7 @@ class ClassGradebookStudent {
 	 * return true if the student has a withdrawn date
 	 */
 	function isWithdrawn() {
+		if ($this->active == 0) { return false; }
 		return $this->dateWithdrawn > 0;
 	}
 
