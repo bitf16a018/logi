@@ -1,3 +1,22 @@
+BUILD FROM CVS
+================================================================================
+You will need "ant" to create a LogiCampus build from a CVS checkout.  
+The build.xml is an ant script. Visit the ant website for more information.
+http://jakarta.apache.org/ant/
+
+Make sure "build/applylicense.sh" is executable.  
+
+Example:  chmod 755 ./build/applylicense.sh
+
+Once ant is installed and in your path, from the top level CVS
+directory type:
+
+ant
+
+A logicampus-OSS.tar.gz file will be built and placed in ./dist/.
+Once you have this file, just follow docs/INSTALL.
+
+
 INSTALLATION
 ================================================================================
 Read docs/INSTALL for more information on installation.
@@ -9,13 +28,6 @@ permissions.sh will set insecure permissions with chmod
 for the installer to work properly.  You should, ideally,
 have root on the target machine and chown those directories 
 to your webserver user.
-
-
-BUILD FROM CVS
-================================================================================
-You might need ant to build from a CVS checkout.  The build.xml is an ant 
-script. Visit the ant website for more information.
-http://jakarta.apache.org/ant/
 
 
 DUMMY DATA FOR DEMO CD
