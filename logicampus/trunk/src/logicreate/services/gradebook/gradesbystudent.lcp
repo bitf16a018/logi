@@ -46,7 +46,6 @@ class gradesbystudent extends FacultyService {
 	}
 
 	function viewRun(&$db,&$u,&$lc,&$t) {
-
 		$lc->templateName = 'gradesbystudent_view';
 		$uname = $lc->getvars['user'];
 

@@ -155,7 +155,7 @@ class category extends FacultyService {
 					return;
 				}
 			} 
-			
+
 			# We've got this far, we are good
 			if ($lc->getvars['event'] == 'edit') {
 				$gbCat = ClassGradebookCategories::load((int)$lc->getvars['id']);

@@ -78,6 +78,17 @@ class prefs extends FacultyService {
 				'id_classes' => $u->activeClassTaught->id_classes
 			) );
 
+			/**
+			 *	This is because the form manager is unable
+			 *	to assign a straight value to a checked box
+			 */
+			if ($f->cleanedArray['roundScoresUp'] == 'on')
+			{	$f->cleanedArray['roundScoresUp'] = 1;
+			} else
+			{	// This is because this dataobjects are weird
+				$gb->set('roundScoresUp', 0);
+			}
+
 			$gb->setArray( $f->cleanedArray );
 			$gb->save();
 
