@@ -68,7 +68,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Content &amp; Lesson Links
 	</message>
-	<!--Content &amp;amp;amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -532,6 +532,13 @@
 	</message>
 	<!--Add a Lesson-->
 	<usage id ="Add a Lesson" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1108"/>
+
+
+	<message id ="You can not change this unless you uncheck [Has no due date]" domain="system" status="">
+		You can not change this unless you uncheck [Has no due date]
+	</message>
+	<!--You can not change this unless you uncheck [Has no due date]-->
+	<usage id ="You can not change this unless you uncheck [Has no due date]" file="../src/logicreate/services/classmgr/templates/assignmentManage_editAssignment.html" line="12"/>
 
 </language>
 
