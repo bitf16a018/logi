@@ -2,91 +2,91 @@
 <language locale="zh_CN" charset="UTF-8">
 
 	<message id ="Calendar" domain="system" status="">
-		ÈÕÀú
+		æ—¥åŽ†
 	</message>
 	<!--Calendar-->
 	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
 
 
 	<message id ="FAQs" domain="system" status="">
-		³£¼ûÎÊÌâ
+		å¸¸è§é—®é¢˜
 	</message>
 	<!--FAQs-->
 	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
 
 
 	<message id ="Help Desk" domain="system" status="">
-		°ïÖú
+		å¸®åŠ©
 	</message>
 	<!--Help Desk-->
 	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
 
 
 	<message id ="Messages" domain="system" status="">
-		ÁôÑÔ
+		ç•™è¨€
 	</message>
 	<!--Messages-->
 	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
 
 
 	<message id ="classroom manager" domain="system" status="">
-		½ÌÊÒ¹ÜÀí
+		æ•™å®¤ç®¡ç†
 	</message>
 	<!--classroom manager-->
 	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="135"/>
 
 
 	<message id ="my classes" domain="system" status="">
-		×Ô¼ºµÄ¿Î
+		è‡ªå·±çš„è¯¾
 	</message>
 	<!--my classes-->
 	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="143"/>
 
 
 	<message id ="password" domain="system" status="">
-		ÃÜÂë
+		å¯†ç 
 	</message>
 	<!--password-->
 	<usage id ="password" file="../src/public_html/templates/private/header.html.php" line="121"/>
 
 
 	<message id ="username" domain="system" status="">
-		ÓÃ»§Ãû
+		ç”¨æˆ·å
 	</message>
 	<!--username-->
 	<usage id ="username" file="../src/public_html/templates/private/header.html.php" line="118"/>
 
 
 	<message id ="welcome" domain="system" status="">
-		»¶Ó­, $name
+		æ¬¢è¿Ž, $name
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
 
 
 	<message id ="Login" domain="system" status="">
-		·¢Èë
+		å‘å…¥
 	</message>
 	<!--Login-->
 	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
 
 
 	<message id ="Logout" domain="system" status="">
-		×¢Ïú
+		æ³¨é”€
 	</message>
 	<!--Logout-->
 	<usage id ="Logout" file="../src/public_html/templates/private/welcome_login.html.php" line="110"/>
 
 
 	<message id ="Access Denied!" domain="system" status="">
-		Ã´ÓÐaccess
+		ä¹ˆæœ‰access
 	</message>
 	<!--Access Denied!-->
 	<usage id ="Access Denied!" file="../src/logicreate/content/err_access_denied.html" line="1"/>
 
 
 	<message id ="Classroom Overview" domain="system" status="fuzzy">
-		½ÌÊÒ¸Å¿ö | ½ÌÊÒ×Û¹Û
+		æ•™å®¤æ¦‚å†µ | æ•™å®¤ç»¼è§‚
 	</message>
 	<!--Classroom Overview-->
 	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
@@ -100,7 +100,7 @@
 
 
 	<message id ="Thanks!" domain="system" status="">
-		¶àÐ»!
+		å¤šè°¢!
 	</message>
 	<!--Thanks!-->
 	<usage id ="Thanks!" file="../src/logicreate/content/registerthanks.html" line="1"/>
@@ -122,7 +122,7 @@
 
 
 	<message id ="Gradebook" domain="system" status="fuzzy">
-		³É¼¨Êé
+		æˆç»©ä¹¦
 	</message>
 	<!--Gradebook-->
 	<usage id ="Gradebook" file="../src/logicreate/services/menu/menuObj.php" line="208"/>
@@ -130,84 +130,84 @@
 
 
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
-		½Ì²Ä ºÍ ¿Î³Ì
+		æ•™æ å’Œ è¯¾ç¨‹
 	</message>
 	<!--Content &amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
 	<message id ="General Class Manager" domain="system" status="fuzzy">
-		Í¨ÓÃ½ÌÊÒ¹ÜÀí
+		é€šç”¨æ•™å®¤ç®¡ç†
 	</message>
 	<!--General Class Manager-->
 	<usage id ="General Class Manager" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="12"/>
 
 
 	<message id ="Home Page" domain="system" status="">
-		Ö÷Ò³
+		ä¸»é¡µ
 	</message>
 	<!--Home Page-->
 	<usage id ="Home Page" file="../src/public_html/templates/private/header.html.php" line="73"/>
 
 
 	<message id ="Message of the Day" domain="system" status="fuzzy">
-		½ñÈÕÍ¨¸æ
+		ä»Šæ—¥é€šå‘Š
 	</message>
 	<!--Message of the Day-->
 	<usage id ="Message of the Day" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="5"/>
 
 
 	<message id ="Student Communication" domain="system" status="fuzzy">
-		Ñ§ÉúÍ¨Ñ¶
+		å­¦ç”Ÿé€šè®¯
 	</message>
 	<!--Student Communication-->
 	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
 
 
 	<message id ="Assessment Manager" domain="system" status="">
-		¿¼ÊÔ¹ÜÀí
+		è€ƒè¯•ç®¡ç†
 	</message>
 	<!--Assessment Manager-->
 	<usage id ="Assessment Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="47"/>
 
 
 	<message id ="Assignments" domain="system" status="">
-		×÷Òµ
+		ä½œä¸š
 	</message>
 	<!--Assignments-->
 	<usage id ="Assignments" file="../src/logicreate/services/classmgr/templates/main_main.html" line="53"/>
 
 
 	<message id ="File Manager" domain="system" status="">
-		ÎÄ¼þ¹ÜÀí
+		æ–‡ä»¶ç®¡ç†
 	</message>
 	<!--File Manager-->
 	<usage id ="File Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="48"/>
 
 
 	<message id ="Lesson Manager" domain="system" status="fuzzy">
-		¿ÎÕÂ¹ÜÀí
+		è¯¾ç« ç®¡ç†
 	</message>
 	<!--Lesson Manager-->
 	<usage id ="Lesson Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="51"/>
 
 
 	<message id ="Classroom Setup" domain="system" status="">
-		½ÌÊÒÖ§Åä
+		æ•™å®¤æ”¯é…
 	</message>
 	<!--Classroom Setup-->
 	<usage id ="Classroom Setup" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="21"/>
 
 
 	<message id ="Content" domain="system" status="">
-		ÊéÑÔ | ÊéÃæ
+		ä¹¦è¨€ | ä¹¦é¢
 	</message>
 	<!--Content-->
 	<usage id ="Content" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="47"/>
 
 
 	<message id ="Exam Scheduling" domain="system" status="">
-		¿¼ÊÔÊ±¼ä±í
+		è€ƒè¯•æ—¶é—´è¡¨
 	</message>
 	<!--Exam Scheduling-->
 	<usage id ="Exam Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="31"/>
@@ -221,21 +221,21 @@
 
 
 	<message id ="Lessons" domain="system" status="fuzzy">
-		¿ÎÕÂ
+		è¯¾ç« 
 	</message>
 	<!--Lessons-->
 	<usage id ="Lessons" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="54"/>
 
 
 	<message id ="Objectives" domain="system" status="">
-		Ä¿±ê
+		ç›®æ ‡
 	</message>
 	<!--Objectives-->
 	<usage id ="Objectives" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="56"/>
 
 
 	<message id ="Orientation Scheduling" domain="system" status="fuzzy">
-		¿Î³ÌÊ±¼ä±í
+		è¯¾ç¨‹æ—¶é—´è¡¨
 	</message>
 	<!--Orientation Scheduling-->
 	<usage id ="Orientation Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="33"/>
@@ -256,21 +256,21 @@
 
 
 	<message id ="Syllabus" domain="system" status="fuzzy">
-		½ÌÊÒ¸ÅÂÔ
+		æ•™å®¤æ¦‚ç•¥
 	</message>
 	<!--Syllabus-->
 	<usage id ="Syllabus" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="27"/>
 
 
 	<message id ="Textbooks" domain="system" status="">
-		¿Î±¾
+		è¯¾æœ¬
 	</message>
 	<!--Textbooks-->
 	<usage id ="Textbooks" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="30"/>
 
 
 	<message id ="View Classroom" domain="system" status="fuzzy">
-		¿´½ÌÊÒ¿´µÃÑ§ÉúÒ»Ñù
+		çœ‹æ•™å®¤å¦‚åŒå­¦ç”Ÿ
 	</message>
 	<!--View Classroom-->
 	<usage id ="View Classroom" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="29"/>
@@ -284,35 +284,35 @@
 
 
 	<message id ="Announcements" domain="system" status="">
-		Í¨¸æ
+		é€šå‘Š
 	</message>
 	<!--Announcements-->
 	<usage id ="Announcements" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="66"/>
 
 
 	<message id ="Chat" domain="system" status="">
-		ÁÄÌì¶ù
+		èŠå¤©å„¿
 	</message>
 	<!--Chat-->
 	<usage id ="Chat" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="68"/>
 
 
 	<message id ="Contact Students" domain="system" status="">
-		Í¨Ñ¶Ñ§Éú
+		é€šè®¯å­¦ç”Ÿ
 	</message>
 	<!--Contact Students-->
 	<usage id ="Contact Students" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="70"/>
 
 
 	<message id ="Discussion Forums" domain="system" status="fuzzy">
-		ÉÌÁ¿°å | ÉÌÁ¿ÅÆ
+		å•†é‡æ¿ | å•†é‡ç‰Œ
 	</message>
 	<!--Discussion Forums-->
 	<usage id ="Discussion Forums" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="72"/>
 
 
 	<message id ="Student Profile" domain="system" status="">
-		Ñ§Éú×ÜÔò
+		å­¦ç”Ÿæ€»åˆ™
 	</message>
 	<!--Student Profile-->
 	<usage id ="Student Profile" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="76"/>
