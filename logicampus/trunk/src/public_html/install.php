@@ -1,16 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCampus Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicampus.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
 
 define('IMAGES_URL',"./images/");
 define('TEMPLATE_URL',"./templates/default");
