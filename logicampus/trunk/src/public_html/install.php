@@ -412,7 +412,6 @@ function runSetup(&$arg) {
  		'lcRegistry.sql',
 		'lcForms_and_lcFormInfo.sql',
 		'lcUsers.sql',
-		'profile.sql',
 		'lcGroups.sql',
 		'lcPerms.sql'
 	);
@@ -483,6 +482,7 @@ function runSetup(&$arg) {
 	// grab all SQL files 
 	
 	$sqlFiles = array (
+		'profile.sql',
 		'semesters_and_classes.sql'
 	);
 $contents = '';
