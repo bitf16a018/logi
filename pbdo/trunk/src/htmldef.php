@@ -92,8 +92,8 @@ echo "========================================-----------------------\n";
 				foreach($this->engine->foreignKeys as $k=>$array) {
 					$foreign = $array[0];
 					$joint = $array[1];
-					$j = $foreign->parent_node();
-					$tableName = $j->get_attribute("name");
+					$j = $foreign->ownerElement;
+					$tableName = $j->getAttribute("name");
 					$foreignTable = $foreign->attributes['foreignTable']->value;
 					$localColumn = $joint->attributes['local']->value;
 					$foreignColumn = $joint->attributes['foreign']->value;
@@ -428,7 +428,7 @@ class PBDO_SugiyamaLayout2 extends PBDO_LayoutManager2 {
 
 
 
-
+/*
 class PBDO_WidgetWrapper2 {
 
 	var $widget;
@@ -445,6 +445,7 @@ class PBDO_WidgetWrapper2 {
 	}
 
 }
+*/
 
 class htmlpage  {
 

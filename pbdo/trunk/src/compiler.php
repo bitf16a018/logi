@@ -14,17 +14,18 @@ include ('sqldef.php');
 
 list ($name,$ext) = explode(".",$filename);
 $name = ucfirst($name);
-$document = domxml_open_file($filename);
+$document = DOMDocument::load($filename);
 if (!$document) {
 	die("ERROR: cannot parse $filename\n");
 }
 
 
-
-$root = $document->document_element();
+/*
+$root = $document->firstChild;
 $staticNodes = array();
 
 extractNodes($root,$staticNodes);
+*/
 
 
 define('PBDO_VERSION',1.4);
@@ -33,21 +34,22 @@ function extractNodes($node,&$struct) {
 
 static $loop = 0;
 
-if ($loop > 2003 ) {print_r($struct); exit();}
+if ($loop > 2004 ) {print_r($struct); exit();}
 
-	if ($node->type ==3 ) return;
-	$attr = $node->attributes();
+	if ( strtolower(get_class($node)) != 'domelement'  ) return;
+	/*
+	$attr = $node->attributes;
 	while ( list (,$v)  = @each($attr) ){
 		$node->attributes[$v->name] = $v;
 	}
+	*/
 	$struct[$loop] = PBDO_NodeFactory::wrapNode($node);
 $loop++;
 
-	$kids = $node->child_nodes();
+	$kids = $node->childNodes;
 
-	while ( list($k,$v) = each($kids) ) {
+	foreach( $kids as $k=>$v ) {
 		extractNodes($v,$struct);
-
 	}
 }
 
@@ -78,9 +80,9 @@ class PBDO_Compiler {
 	 */
 	function PBDO_Compiler($projectName='PBDO-Project') {
 		$this->projectName = $projectName;
-		if ( function_exists('domxml_open_file') ){
+		//if ( function_exists('domxml_open_file') ){
 		//	$this->hasPDOM = true;
-		}
+		//}
 	}
 
 	/**
@@ -98,14 +100,14 @@ class PBDO_Compiler {
 
 		list ($name,$ext) = explode(".",$this->filename);
 		$name = ucfirst($name);
-		$document = domxml_open_file($this->filename);
+		$document = DOMDocument::load($this->filename);
 		if (!$document) {
 			echo ("ERROR: cannot parse $this->filename\n");
 			return false;
 		}
 
 
-		$root = $document->document_element();
+		$root = $document->documentElement;
 		$staticNodes = array();
 
 		extractNodes($root,$staticNodes);
@@ -119,7 +121,7 @@ class PBDO_Compiler {
 		$staticNodes = $x;
 		$projectNode = $staticNodes[0];
 
-		$this->projectName = $projectNode->xmlnode->attributes['name']->value;
+		$this->projectName = $projectNode->xmlnode->getAttribute('name');
 		print "*****************".str_repeat('*',strlen($this->projectName))."**\n";
 		print "* Project Name = $this->projectName *\n";
 		print "*****************".str_repeat('*',strlen($this->projectName))."**\n";
@@ -178,8 +180,8 @@ class PBDO_Compiler {
 		unset($this->workingTable);
 
 		//php stuff
-		if ( strstr($table->xmlnode->attributes['generate']->value,'code') ||
-		     strstr($table->xmlnode->attributes['generate']->value, 'all') ) {
+		if ( strstr($table->xmlnode->getAttribute('generate'),'code') ||
+		     strstr($table->xmlnode->getAttribute('generate'), 'all') ) {
 			$this->workingClass = ParsedClass::createFromXMLObj($table->xmlnode);
 			$this->workingClass->setVersion($this->database->version);
 			$this->classes[$this->workingClass->tableName] =& $this->workingClass;
@@ -196,12 +198,12 @@ class PBDO_Compiler {
 		}
 
 		//sql stuff
-		if ( strstr($table->xmlnode->attributes['generate']->value, 'sql') ||
-		     strstr($table->xmlnode->attributes['generate']->value, 'all') ) {
+		if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
+		     strstr($table->xmlnode->getAttribute('generate'), 'all') ) {
 			$this->workingTable = PBDO_ParsedTable::parsedTableFactory(
 						$this->dbtype,
-						$table->xmlnode->attributes['name']->value,
-						$table->xmlnode->attributes['package']->value
+						$table->xmlnode->getAttribute('name'),
+						$table->xmlnode->getAttribute('package')
 						);
 
 			$this->database->addTable($this->workingTable);
@@ -215,9 +217,9 @@ class PBDO_Compiler {
 		if ($this->workingClass) {
 			$att = ParsedAttribute::createFromXMLObj($col->xmlnode);
 			$this->workingClass->addAttribute($att);
-			if ($col->xmlnode->attributes['primaryKey']->value == 'true') {
-				$this->workingClass->setOID($col->xmlnode->attributes['name']->value);
-				$this->workingClass->setPkey($col->xmlnode->attributes['name']->value);
+			if ($col->xmlnode->getAttribute('primaryKey') == 'true') {
+				$this->workingClass->setOID($col->xmlnode->getAttribute('name'));
+				$this->workingClass->setPkey($col->xmlnode->getAttribute('name'));
 			}
 		}
 
@@ -264,7 +266,7 @@ class PBDO_Compiler {
 			PBDO_ParsedConstraint::ParsedConstraintFactory(
 					$this->dbtype,
 					$this->workingTable->name,
-					$fkey->xmlnode->attributes['foreignTable']->value
+					$fkey->xmlnode->getAttribute('foreignTable')
 					);
 		$this->workingTable->addConstraint($this->workingConstraint);
 	}
@@ -274,11 +276,11 @@ class PBDO_Compiler {
 		unset($this->workingIndex);
 		$this->workingIndex = PBDO_ParsedIndex::parsedIndexFactory(
 					$this->dbtype,
-					$key->xmlnode->attributes['attribute']->value,
-					$key->xmlnode->attributes['name']->value,
+					$key->xmlnode->getAttribute('attribute'),
+					$key->xmlnode->getAttribute('name'),
 					$this->workingTable->name);
 
-		if ($key->xmlnode->attributes['unique']->value == 'true') {
+		if ($key->xmlnode->getAttribute('unique') == 'true') {
 			$this->workingIndex->unique = true;
 		}
 		if ($this->workingTable) {
@@ -289,7 +291,7 @@ class PBDO_Compiler {
 
 	function visitProjectNode(&$p) {
 		$this->database = PBDO_ParsedDatabase::parsedDatabaseFactory($this->dbtype,$this->projectName);
-		$this->database->setVersion($p->xmlnode->attributes['version']->value);
+		$this->database->setVersion($p->xmlnode->getAttribute('version'));
 	}
 
 
@@ -297,9 +299,9 @@ class PBDO_Compiler {
 		$top = count($this->foreignKeys)-1;
 		$this->foreignKeys[$top][1] = $ref->xmlnode;
 		$this->workingConstraint->localColumn = 
-			$ref->xmlnode->attributes['local']->value;
+			$ref->xmlnode->getAttribute('local');
 		$this->workingConstraint->foreignColumn = 
-			$ref->xmlnode->attributes['foreign']->value;
+			$ref->xmlnode->getAttribute('foreign');
 //		print_r($ref);
 	}
 
@@ -319,8 +321,8 @@ class PBDO_NodeFactory {
 
 	function wrapNode($n) {
 
-		$n->tagname = strtolower($n->tagname);
-		switch ($n->tagname) {
+		$nodeName = strtolower($n->localName);
+		switch ($nodeName) {
 			case 'entity':
 			case 'table':
 				$v = new PBDO_EntityNode($n);
@@ -378,9 +380,10 @@ class PBDO_EntityNode extends PBDO_NodeBase {
 		$this->PBDO_NodeBase($n);
 //		print get_class($this);exit();
 		//set the default generate tag to 'all'
-		if ( ! strlen($this->xmlnode->attributes['generate']) ) { 
-			$owner = $this->xmlnode->owner_document();
-			$this->xmlnode->attributes['generate'] = $owner->create_attribute('generate','all');
+		$attrs =& $this->xmlnode->attributes->getNamedItem('generate');
+		if ( ! strlen($attrs->nodeValue) ) { 
+			$owner = $this->xmlnode->ownerDocument;
+			$this->xmlnode->setAttribute('generate', 'all' );
 		}
 	}
 	

@@ -9,7 +9,7 @@ define('PBDO_PATH',$temp['dirname'].'/');
 
 
 // check for domxml extension
-if (! function_exists('domxml_open_file') ) {
+if (! class_exists('DOMDocument') ) {
 	include (PBDO_PATH.'dom-error.txt');
 	exit();
 }
@@ -76,8 +76,9 @@ if ( OLD_STYLE ) {
 }
 
 	include(PBDO_PATH.'graphdef.php');
+	include(PBDO_PATH.'graph/dot.php');
 	include(PBDO_PATH.'htmldef.php');
-	include (PBDO_PATH.'./domhtmlphp.php');
+	@include (PBDO_PATH.'./domhtmlphp.php');
 
 
 
@@ -107,7 +108,7 @@ if (MSSQL) {
 foreach($staticNodes as $k=>$v) { 
 	#for ($x=0; $x<count($staticNodes); ++$x) {
 	$node = $staticNodes[$k];
-	$node->xmlnode->tagname =  strtolower($node->xmlnode->tagname);
+//	$node->xmlnode->tagname =  strtolower($node->xmlnode->tagname);
 	$node->accept($engine);
 }
 
@@ -118,10 +119,10 @@ print "\n";
 
 //set foreign keys and one-to-many relations
 foreach($engine->foreignKeys as $k => $v) {
-	$foreignTable = $v[0]->attributes['foreignTable']->value;
+	$foreignTable = $v[0]->getAttribute('foreignTable');
 	$localTable = $v[2];
-	$localColumn = $v[1]->attributes['local']->value;
-	$foreignColumn = $v[1]->attributes['foreign']->value;
+	$localColumn = $v[1]->getAttribute('local');
+	$foreignColumn = $v[1]->getAttribute('foreign');
 	print "found FOREIGN table \t\t". $foreignTable . " ($foreignColumn)\n";
 	print "relates to LOCAL table \t\t". $localTable . "\n";
 	print "via LOCAL column \t\t". $localColumn . "\n\n";
@@ -233,15 +234,15 @@ if ( !OLD_STYLE ) {
 	}
 }
 
-	$graph = new PBDO_GraphManager($engine);
-	$graph->strokeGraph();
-	print "Writing 'projects/$projectName/graph/schema.png'...\n";
-	$graph->saveGraph();
+	//$graph = new PBDO_DotGraphManager($engine);
+	//$graph->strokeGraph();
+//	print "Writing 'projects/$projectName/graph/schema.png'...\n";
+//	$graph->saveGraph();
 
-	$graph = new PBDO_HTMLManager($engine);
-	$graph->generateHTML();
-	print "Writing 'projects/$projectName/html/'...\n";
-	$graph->saveHTML();
+//	$graph = new PBDO_HTMLManager($engine);
+//	$graph->generateHTML();
+//	print "Writing 'projects/$projectName/html/'...\n";
+//	$graph->saveHTML();
 
 	/*
 	try to do the same .data.xml file as well

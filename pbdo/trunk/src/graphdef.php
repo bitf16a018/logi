@@ -619,6 +619,7 @@ class PBDO_SugiyamaLayout extends PBDO_LayoutManager {
 
 
 
+/*
 class PBDO_WidgetWrapper {
 
 	var $widget;
@@ -635,5 +636,5 @@ class PBDO_WidgetWrapper {
 	}
 
 }
-
+*/
 ?>
