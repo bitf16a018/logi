@@ -74,6 +74,9 @@ include(LIB_PATH."LC_db.php");
 include_once(LIB_PATH."LC_registry.php");
 include_once(LIB_PATH."lc_SQL.php");
 include_once(LIB_PATH."LC_html.php");
+if (!@include_once(LANG_PATH."lct.php") ) {
+	include_once(LANG_PATH."fallback.php");
+}
 
 $lcObj = new lcSystem();
 $lcTemplate = array('cssFile'=>'site.css');

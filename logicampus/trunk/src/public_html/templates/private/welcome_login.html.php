@@ -82,17 +82,17 @@
 <br />
 <table width="100%">
 <tr>
-  <td width="50%" align="right"><b>Username:</b></td>
+  <td width="50%" align="right"><b><?=lct('username')?>:</b></td>
   <td width="50%"><input type="text" size="15" maxlength="32" name="username" /></td>
 </tr>
 <tr>
-  <td width="50%" align="right"><b>Password:</b></td>
+  <td width="50%" align="right"><b><?=lct('password')?>:</b></td>
   <td width="50%"><input type="password" size="15" maxlength="32" name="password" /></td>
 </tr>
 <tr>
   <td colspan="2" align="center">
     <input type="hidden" name="event" value="login"/>
-    <input type="submit" value="Login"/>
+    <input type="submit" value="<?=lct('Login')?>"/>
   </td>
 </tr>
 </table>

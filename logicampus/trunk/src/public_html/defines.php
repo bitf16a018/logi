@@ -33,6 +33,7 @@ $doc = str_replace('herc/','',$doc);
 
 define('DOCUMENT_ROOT',$doc);
 define('LIB_PATH',DOCUMENT_ROOT.$relpath.'lib/');
+define('LANG_PATH',DOCUMENT_ROOT.$relpath.'lang/');
 define('SERVICE_PATH',DOCUMENT_ROOT.$relpath.'services/');
 define('BASE_URL','http://'.$base.$tail);
 define('SECURE_BASE_URL','https://'.$base.$tail);
