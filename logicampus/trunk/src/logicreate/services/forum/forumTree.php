@@ -191,6 +191,7 @@ class ForumView extends ListView {
 	}
 			$ret .= '<table width="100%"><tr><td width="'.$indent.'">&nbsp;</td><td valign="top">';
 			$this->tree->p_CurrentNode->contents->url = $this->url;
+			$this->tree->p_CurrentNode->contents->dlurl = $this->dlurl;
 			$ret .= showPost($this->tree->p_CurrentNode->contents, $this->tree->perms, $this->tree->highlight);
 			$ret .= '</td></tr></table>';
 		}
@@ -218,6 +219,10 @@ ob_start();
 		<table width="100%" style="border:1px solid <?=$bg;?>;margin-bottom:5px;" border="0">
 		<tr class="forumsection" style="text-align: left;">
 			<td>
+			<? if (trim($f->lcForumPostTitle)=='') { 
+
+				$f->lcForumPostTitle = ' NO TITLE ';
+			}?>
 				<b>"<?=$f->lcForumPostTitle;?>"</b><br />
 				<small>By: <a href="<?=appurl('pm/main/event=compose/sendto='.$f->lcForumPostUsername);?>"><?=$f->lcForumPostUsername;?></a> &nbsp;&nbsp;-&nbsp;&nbsp; On: <?=date('M j, Y @ g:i a', $f->lcForumPostTimedate);?></small>
 			</td>
@@ -229,6 +234,20 @@ ob_start();
 		</tr>
 		<tr>
 		<td  align="right">
+		<? if ($f->lcForumFile1Name) { ?>
+			File attachment: 
+			<a href="<?=appurl($f->dlurl."/".$f->lcForumPostId."/".$f->lcForumPostThreadId."/fileid=1");?>"><?=$f->lcForumFile1Name;?></a>
+			<?=$f->lcForumFile1Size;?> bytes | <?=$f->lcForumFile1Count;?> views
+		<br/>
+		<? } ?>
+		<? if ($f->lcForumFile2Name) { ?>
+			File attachment: 
+			<a href=""><?=$f->lcForumFile1Name;?></a> 
+			<a href="<?=appurl($f->dlurl."/".$f->lcForumPostId."/".$f->lcForumPostThreadId."/fileid=2");?>"><?=$f->lcForumFile2Name;?></a>
+			<?=$f->lcForumFile2Size;?> bytes | <?=$f->lcForumFile2Count;?> views
+		<br/>
+		<? } ?>
+
 		<? if ($perms['post']) { ?>
 
 				<a href="<?=appurl($f->url."/".$f->lcForumId."/".$f->lcForumPostId."/".$f->lcForumPostThreadId."/event=reply");?>">Reply to this</a>
@@ -250,7 +269,10 @@ $x = ob_get_contents();
 ob_end_clean();
 if ($highlight) {
 	$x = preg_replace("/$highlight/i","<span style='background-color: red'>$0</span>",$x);
+	# removed things highlighted in red
+	#$x = preg_replace("/$highlight/i","",$x);
 }
+
 return $x;
 }
 	
