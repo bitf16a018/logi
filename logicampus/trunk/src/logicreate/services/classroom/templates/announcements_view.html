@@ -4,7 +4,7 @@
 	<?=$t['announcement_title'];?>
 </div>
 <div style="padding:3px 0 0 10px;font-size:x-small;">
-	<b>Posted On:</b> <i><?=date("l jS of F Y", strtotime($t['announcement_posted']));?></i>
+	<b><?=lct('Posted On')?>:</b> <i><?=date("l jS of F Y", strtotime($t['announcement_posted']));?></i>
 </div>
 <div style="padding:5px 20px 20px 20px;">
 	<?=$t['announcement_text'];?>
