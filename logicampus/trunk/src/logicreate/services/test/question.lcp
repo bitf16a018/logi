@@ -30,6 +30,29 @@ class question extends StudentService {
 	var $data = array();  # cleaned form data
 	var $sectionTitle = 'Class Assessments';
 
+        // these are the same for all pages
+        var     $navlinks = array(
+                'Classroom Home' => '%classroom/details/',
+                'Announcements' => '%classroom/announcements/',
+                'Assessments' => '%classroom/assessments',
+                'Assignments' => '%classroom/assignments/',
+                'Calendar' => '%classroom/classCalendar/',
+                'Chat' => '%classroom/chat/',
+                'Classmates' => '%classroom/classmates/',
+                'Contact Classmates' => '%classroom/contactStudents/',
+                'Discussion Board' => '%classroom/discussion/',
+                'FAQs' => '%classroom/faq/',
+                'Faculty Profile' => '%classroom/facultyProfile/',
+                'Gradebook' => '%classroom/gradebook/',
+                'Lessons' => '%classroom/lessons/',
+                'Presentations' => '%classroom/presentations/',
+                'Syllabus' => '%classroom/syllabus/',
+                'Who\'s Online' => '%classroom/online/',
+                'Webliography' => '%classroom/webliography/',
+                'Dictionary / Thesaurus' =>'%classroom/details/event=showtools'
+        );
+
+
 	/*
 	 * Main function which handles test taking for students. Students are brought to here from
 	 * test/take/event=start/id=$assessmentId
