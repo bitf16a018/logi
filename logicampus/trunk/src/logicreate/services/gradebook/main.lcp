@@ -19,12 +19,17 @@ class gradebook extends FacultyService {
 	var $sectionTitle = 'Gradebook';
 	var $navlinks = array (
 		'Classroom Manager' => '%classmgr/display/',
-		'Calendar' => '%classmgr/cal/',
+		'Announcements'=>'%classmgr/announcements/',
+		'Assessment Manager' => '%assessments/',
 		'Assignments' => '%classmgr/assignmentManage/',
-		'Contact Students' => '%classmgr/contactStudents/',
-		'Assessments' => '%assessments/',
-	);
-	var $applinks = array(
+		'Content' => '%classmgr/lessonContent/',
+		'FAQ' => '%classmgr/faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => '%classmgr/lessonManager/',
+		'Objectives' => '%classmgr/lessonObjectives/',
+		'Webliography' => '%classmgr/lessonWebliography/'
+	);var $applinks = array(
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
@@ -33,6 +38,7 @@ class gradebook extends FacultyService {
 		'Control Panel' => 'main/event=controlPanel/'
 	);
 
+	var $inactivelinks = array('Gradebook');
 	/**
 	 * Displays the spreadsheet view of the gradebook.  This is the
 	 * default view.
@@ -137,8 +143,10 @@ class gradebook extends FacultyService {
 		$gradebook->getEntries();
 		$gradebook->getStudents();
 		$gradebook->loadVals();
-
-
+		// FIX THIS SO STUDENTS DO NOT DISAPPEAR
+if (count($gradebook->students)%$printHeadersEvery ==0) { 
+	$printHeadersEvery +=1;
+}
 		if ( count($gradebook->students) == 0 )
 		{
 			$t['table'] = 'There are no students in your class. You must have students to view the gradebook.';
@@ -163,6 +171,7 @@ class gradebook extends FacultyService {
 
 
 
+#debug($gradebook,1);
 		//ADD CLOUMN HEADERS TO THE GRADEBOOK TABLE
 		// we need to repeat this every 12 rows or so  (13?)
 		if ( $gradebook->calculationType == 1 ) {
@@ -215,14 +224,13 @@ class gradebook extends FacultyService {
 		reset($gradebook->students);
 		while ( list($username,$stud) = @each($gradebook->students) ) {
 
-
 			$row = array();  // array of cells to be pushed onto table[]
 
 
 			// build the student's row. start with their name.
 			$counter = $printNamesEvery;
-			$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
-				.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+			#$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
+			$row[] = $stud->lastname.', '.$stud->firstname;
 			$counter--;
 
 			reset($gradebook->entries);
@@ -236,8 +244,9 @@ class gradebook extends FacultyService {
 					}
 				}
 
-
-
+#echo $entid;
+#echo "<HR>";
+#debug($stud->vals);
 				//print the score to the row
 				if ( !isset($stud->vals[$entid]->score) && !$entry->publishFlag ) {
 					$text = '<i>???-*</i>';
@@ -289,8 +298,9 @@ class gradebook extends FacultyService {
 
 				$counter--;
 				if ( $counter == 0 ) {
-					$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
-						.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+			#		$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
+			#			.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+					$row[] = $stud->lastname.', '.$stud->firstname;
 					$counter = $printNamesEvery;  // reset counter
 				}
 			}

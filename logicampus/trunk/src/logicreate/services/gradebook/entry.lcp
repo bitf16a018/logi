@@ -231,13 +231,11 @@ class entry extends FacultyService {
 		function showGrdByStuUpdateRun(&$db,&$u,&$lc,&$t) {
 
 			while ( list($entid, $score) = @each($lc->postvars['score']) ) {
-
 				$val = ClassGradebookVal::load( array(
 					'id_classes' => $u->activeClassTaught->id_classes,
 					'id_class_gradebook_entries' => $entid,
 					'username' => $lc->postvars['user']
 				) );
-
 				if ( !is_object($val) ) {
 					// There isn't a val in the db for this user, let's make them one!
 					$val = new ClassGradebookVal();
@@ -256,7 +254,8 @@ class entry extends FacultyService {
 				}
 				*/
 
-				$flag = false;  // do an update?
+				$flag = true;  // do an update?
+				// yes we always do
 
 				if ($val->score != $score) {
 					$val->set( 'score', $score );
@@ -273,7 +272,6 @@ class entry extends FacultyService {
 				}
 
 			}
-
 			$u->sessionvars['message'] = $t['message'];
 			$this->presentor = 'redirectPresentation';
 			$t['url'] = MOD_URL;

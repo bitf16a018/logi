@@ -95,6 +95,10 @@ class report extends FacultyService {
 		#$gradebook->filterActive = 0;
 		$gradebook->filterBySection = $lc->postvars['section'];
 
+		// need to pass this to report page for printing.
+		
+		$t['section'] = $lc->postvars['section'];
+
 		// tell the gradebook object to do a bunch of work
 
 		$gradebook->loadCategories();
@@ -108,7 +112,6 @@ class report extends FacultyService {
 			$t['table'] = 'There are no students in your class. You must have students to view the gradebook.';
 			return;
 		}
-
 
 		//associate vals and students based on a number of criteria
 		// (dropped, due date ...)
@@ -165,6 +168,7 @@ class report extends FacultyService {
 		$curRow = 1; // start on the second row
 		reset($gradebook->students);
 		while ( list($username,$stud) = @each($gradebook->students) ) {
+
 			reset($gradebook->entries);
 			for ( $x=0; $x<$tableCount; $x++ ) {
 				if ($stud->isWithdrawn() ) {
@@ -182,7 +186,7 @@ class report extends FacultyService {
 						continue;
 					}
 
-					$text = !isset($stud->vals[$entid]->score) ? '?' : (int)$stud->vals[$entid]->score;
+					$text = !isset($stud->vals[$entid]->score) ? '?' : sprintf("%0.2f",$stud->vals[$entid]->score);
 					if ( $stud->vals[$entid]->isDisqualified() ) {
 						$text = 'd '.$text;
 					}
@@ -240,12 +244,13 @@ class report extends FacultyService {
 
 
 		// render the table
+		if ($t['section']) { $section = " - ".$t['section']; }
 		foreach ( $tables as $pagenum => $table )
 		{
 			$t['table'] .= "<div style=\"page-break-after:always;margin-top:20px;\">\n";
 			$t['table'] .= "<table width=\"100%\" border=0><tr><td>Gradebook for "
 				.$u->activeClassTaught->courseName."<br />".$u->activeClassTaught->facultyName
-				."</td><td valign=\"bottom\" align=\"right\">Page ".($pagenum+1)." of ".$tableCount
+				." $section</td><td valign=\"bottom\" align=\"right\">Page ".($pagenum+1)." of ".$tableCount
 				."</td></tr></table>\n";
 			$t['table'] .= "<table width=\"100%\" cellpadding=2 cellspacing=0 border=0 style=\"font-size:8pt;border:1px solid black;\">\n";
 
