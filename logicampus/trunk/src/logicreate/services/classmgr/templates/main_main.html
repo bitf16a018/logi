@@ -43,14 +43,14 @@ down and press "Go".')?>
 				</tr>
 				<tr>
 					<td valign="top">
-						&nbsp;<a href="<?=appurl("gradebook/main");?>/id_classes=<?=$class_record['id_classes'];?>">Gradebook</a></br>
-						&nbsp;<a href="<?=appurl("assessments/main");?>/id_classes=<?=$class_record['id_classes'];?>">Assessment Manager</a><br>
-						&nbsp;<a href="<?=appurl("classdoclib/main");?>/id_classes=<?=$class_record['id_classes'];?>">File Manager</a><br>&nbsp;
+						&nbsp;<a href="<?=appurl("gradebook/main");?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Gradebook')?></a></br>
+						&nbsp;<a href="<?=appurl("assessments/main");?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Assessment Manager')?></a><br>
+						&nbsp;<a href="<?=appurl("classdoclib/main");?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('File Manager')?></a><br>&nbsp;
 					</td>
 					<td colspan="2" valign="top">
-						<a href="<?=MOD_URL?>lessonManager/id_classes=<?=$class_record['id_classes'];?>/">Lesson Manager</a><br>
-						<a href="<?=modurl('cal');?>/id_classes=<?=$class_record['id_classes'];?>">Calendar</a><br>
-						<a href="<?=APP_URL?>classmgr/assignmentManage/id_classes=<?=$class_record['id_classes'];?>">Assignments</a>
+						<a href="<?=MOD_URL?>lessonManager/id_classes=<?=$class_record['id_classes'];?>/"><?=lct('Lesson Manager')?></a><br>
+						<a href="<?=modurl('cal');?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Calendar')?></a><br>
+						<a href="<?=APP_URL?>classmgr/assignmentManage/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Assignments')?></a>
 			
 					</td>
 				</tr>

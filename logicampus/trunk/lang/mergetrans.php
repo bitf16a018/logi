@@ -170,21 +170,21 @@ function node2XML($m) {
 
 	echo "\n";
 	echo "\t";
-	echo '<message id ="'.$m->attributes['id']->value.'" domain="'.$m->attributes['domain']->value.'" status="'.$m->attributes['status']->value.'">';
+	echo '<message id ="'.htmlspecialchars($m->attributes['id']->value).'" domain="'.$m->attributes['domain']->value.'" status="'.$m->attributes['status']->value.'">';
 	echo "\n";
 	echo "\t\t";
-	echo $m->translation;
+	echo htmlspecialchars($m->translation);
 	echo "\n";
 	echo "\t";
 	echo '</message>';
-	echo "\n\t<!--".$m->original."-->";
+	echo "\n\t<!--".htmlspecialchars($m->original)."-->";
 
 	if (!is_array($m->attributes) ) { echo "\n\n"; print_r($m);exit(); }
 	foreach ($m->usages as $blank=>$att) {
 		if ($att->type == 'usage' ) {
 			echo "\n";
 			echo "\t";
-			echo '<usage id ="'.$m->attributes['id']->value.'" file="'.$att->file.'" line="'.$att->line.'"/>';
+			echo '<usage id ="'.htmlspecialchars($m->attributes['id']->value).'" file="'.$att->file.'" line="'.$att->line.'"/>';
 		}
 	}
 	echo "\n";

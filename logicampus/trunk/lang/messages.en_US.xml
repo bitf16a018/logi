@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <language locale="en_US" charset="UTF-8">
 
-	<message id ="Calendar" domain="system">
+	<message id ="Calendar" domain="system" status="">
 		Calendar
 	</message>
 	<!--Calendar-->
 	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
 
 
-	<message id ="FAQs" domain="system">
+	<message id ="FAQs" domain="system" status="">
 		FAQs
 	</message>
 	<!--FAQs-->
 	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
 
 
-	<message id ="Help Desk" domain="system">
+	<message id ="Help Desk" domain="system" status="">
 		Help Desk
 	</message>
 	<!--Help Desk-->
 	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
 
 
-	<message id ="Messages" domain="system">
+	<message id ="Messages" domain="system" status="">
 		Messages
 	</message>
 	<!--Messages-->
 	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
 
 
-	<message id ="classroom manager" domain="system">
+	<message id ="classroom manager" domain="system" status="">
 		classroom manager
 	</message>
 	<!--classroom manager-->
 	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="136"/>
 
 
-	<message id ="Login" domain="system">
+	<message id ="Login" domain="system" status="">
 		Login
 	</message>
 	<!--Login-->
 	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
 
 
-	<message id ="my classes" domain="system">
+	<message id ="my classes" domain="system" status="">
 		my classes
 	</message>
 	<!--my classes-->
 	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="144"/>
 
 
-	<message id ="password" domain="system">
+	<message id ="password" domain="system" status="">
 		password
 	</message>
 	<!--password-->
@@ -58,7 +58,7 @@
 	<usage id ="password" file="../src/public_html/templates/private/welcome_login.html.php" line="89"/>
 
 
-	<message id ="username" domain="system">
+	<message id ="username" domain="system" status="">
 		username
 	</message>
 	<!--username-->
@@ -66,42 +66,42 @@
 	<usage id ="username" file="../src/public_html/templates/private/welcome_login.html.php" line="85"/>
 
 
-	<message id ="welcome" domain="system">
+	<message id ="welcome" domain="system" status="">
 		Welcome, $name
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
 
 
-	<message id ="Access Denied!" domain="system">
+	<message id ="Access Denied!" domain="system" status="">
 		Access Denied!
 	</message>
 	<!--Access Denied!-->
 	<usage id ="Access Denied!" file="../src/logicreate/content/err_access_denied.html" line="1"/>
 
 
-	<message id ="Classroom Overview" domain="system">
+	<message id ="Classroom Overview" domain="system" status="">
 		Classroom Overview
 	</message>
 	<!--Classroom Overview-->
 	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
 
 
-	<message id ="Classroom Portal Page" domain="system">
+	<message id ="Classroom Portal Page" domain="system" status="">
 		Classroom Portal Page
 	</message>
 	<!--Classroom Portal Page-->
 	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
 
 
-	<message id ="Logout" domain="system">
+	<message id ="Logout" domain="system" status="">
 		Logout
 	</message>
 	<!--Logout-->
 	<usage id ="Logout" file="../src/public_html/templates/private/header.html.php" line="110"/>
 
 
-	<message id ="Thanks!" domain="system">
+	<message id ="Thanks!" domain="system" status="">
 		Thanks!
 	</message>
 	<!--Thanks!-->
@@ -109,21 +109,21 @@
 	<usage id ="Thanks!" file="../src/logicreate/content/loginthanks.html" line="1"/>
 
 
-	<message id ="You have logged in to our site successfully." domain="system">
+	<message id ="You have logged in to our site successfully." domain="system" status="">
 		You have logged in to our site successfully.
 	</message>
 	<!--You have logged in to our site successfully.-->
 	<usage id ="You have logged in to our site successfully." file="../src/logicreate/content/loginthanks.html" line="2"/>
 
 
-	<message id ="You have registered successfully with our site." domain="system">
+	<message id ="You have registered successfully with our site." domain="system" status="">
 		You have registered successfully with our site.
 	</message>
 	<!--You have registered successfully with our site.-->
 	<usage id ="You have registered successfully with our site." file="../src/logicreate/content/registerthanks.html" line="2"/>
 
 
-	<message id ="Gradebook" domain="system">
+	<message id ="Gradebook" domain="system" status="">
 		Gradebook
 	</message>
 	<!--Gradebook-->
@@ -131,39 +131,200 @@
 	<usage id ="Gradebook" file="../src/logicreate/services/menu/menuObj.php" line="228"/>
 
 
-	<message id ="Content &amp; Lesson Links" domain="system">
+	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Content &amp; Lesson Links
 	</message>
-	<!--Content &amp; Lesson Links-->
+	<!--Content &amp;amp;amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
-	<message id ="General Class Manager" domain="system">
+	<message id ="General Class Manager" domain="system" status="">
 		General Class Manager
 	</message>
 	<!--General Class Manager-->
 	<usage id ="General Class Manager" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="12"/>
 
 
-	<message id ="Home Page" domain="system">
+	<message id ="Home Page" domain="system" status="">
 		Home Page
 	</message>
 	<!--Home Page-->
 	<usage id ="Home Page" file="../src/public_html/templates/private/header.html.php" line="73"/>
 
 
-	<message id ="Message of the Day" domain="system">
+	<message id ="Message of the Day" domain="system" status="">
 		Message of the Day
 	</message>
 	<!--Message of the Day-->
 	<usage id ="Message of the Day" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="5"/>
 
 
-	<message id ="Student Communication" domain="system">
+	<message id ="Student Communication" domain="system" status="">
 		Student Communication
 	</message>
 	<!--Student Communication-->
 	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
+
+
+	<message id ="Assessment Manager" domain="system" status="">
+		Assessment Manager
+	</message>
+	<!--Assessment Manager-->
+	<usage id ="Assessment Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="47"/>
+
+
+	<message id ="Assignments" domain="system" status="">
+		Assignments
+	</message>
+	<!--Assignments-->
+	<usage id ="Assignments" file="../src/logicreate/services/classmgr/templates/main_main.html" line="53"/>
+
+
+	<message id ="File Manager" domain="system" status="">
+		File Manager
+	</message>
+	<!--File Manager-->
+	<usage id ="File Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="48"/>
+
+
+	<message id ="Lesson Manager" domain="system" status="">
+		Lesson Manager
+	</message>
+	<!--Lesson Manager-->
+	<usage id ="Lesson Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="51"/>
+
+
+	<message id ="Classroom Setup" domain="system" status="">
+		Classroom Setup
+	</message>
+	<!--Classroom Setup-->
+	<usage id ="Classroom Setup" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="21"/>
+
+
+	<message id ="Content" domain="system" status="">
+		Content
+	</message>
+	<!--Content-->
+	<usage id ="Content" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="47"/>
+
+
+	<message id ="Exam Scheduling" domain="system" status="">
+		Exam Scheduling
+	</message>
+	<!--Exam Scheduling-->
+	<usage id ="Exam Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="31"/>
+
+
+	<message id ="Export Class" domain="system" status="">
+		Export Class
+	</message>
+	<!--Export Class-->
+	<usage id ="Export Class" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="23"/>
+
+
+	<message id ="FAQ" domain="system" status="">
+		FAQ
+	</message>
+	<!--FAQ-->
+	<usage id ="FAQ" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="51"/>
+
+
+	<message id ="Lessons" domain="system" status="">
+		Lessons
+	</message>
+	<!--Lessons-->
+	<usage id ="Lessons" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="54"/>
+
+
+	<message id ="Objectives" domain="system" status="">
+		Objectives
+	</message>
+	<!--Objectives-->
+	<usage id ="Objectives" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="56"/>
+
+
+	<message id ="Orientation Scheduling" domain="system" status="">
+		Orientation Scheduling
+	</message>
+	<!--Orientation Scheduling-->
+	<usage id ="Orientation Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="33"/>
+
+
+	<message id ="Seminar Scheduling" domain="system" status="">
+		Seminar Scheduling
+	</message>
+	<!--Seminar Scheduling-->
+	<usage id ="Seminar Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="37"/>
+
+
+	<message id ="Student Presentation" domain="system" status="">
+		Student Presentation
+	</message>
+	<!--Student Presentation-->
+	<usage id ="Student Presentation" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="58"/>
+
+
+	<message id ="Syllabus" domain="system" status="">
+		Syllabus
+	</message>
+	<!--Syllabus-->
+	<usage id ="Syllabus" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="27"/>
+
+
+	<message id ="Textbooks" domain="system" status="">
+		Textbooks
+	</message>
+	<!--Textbooks-->
+	<usage id ="Textbooks" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="30"/>
+
+
+	<message id ="View Classroom" domain="system" status="">
+		View Classroom
+	</message>
+	<!--View Classroom-->
+	<usage id ="View Classroom" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="29"/>
+
+
+	<message id ="Webliography" domain="system" status="">
+		Webliography
+	</message>
+	<!--Webliography-->
+	<usage id ="Webliography" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="60"/>
+
+
+	<message id ="Announcements" domain="system" status="">
+		Announcements
+	</message>
+	<!--Announcements-->
+	<usage id ="Announcements" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="66"/>
+
+
+	<message id ="Chat" domain="system" status="">
+		Chat
+	</message>
+	<!--Chat-->
+	<usage id ="Chat" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="68"/>
+
+
+	<message id ="Contact Students" domain="system" status="">
+		Contact Students
+	</message>
+	<!--Contact Students-->
+	<usage id ="Contact Students" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="70"/>
+
+
+	<message id ="Discussion Forums" domain="system" status="">
+		Discussion Forums
+	</message>
+	<!--Discussion Forums-->
+	<usage id ="Discussion Forums" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="72"/>
+
+
+	<message id ="Student Profile" domain="system" status="">
+		Student Profile
+	</message>
+	<!--Student Profile-->
+	<usage id ="Student Profile" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="76"/>
 
 </language>
 
