@@ -478,7 +478,7 @@
 
 
 	<message id ="welcome" domain="system">
-		welcome
+		welcome, $name
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
