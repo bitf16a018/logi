@@ -331,9 +331,12 @@ imagestring($this->canvas,3,$line_t_x-20,$line_t_y+20,$tport->z,$this->gdColors[
 			$this->model->addNode($n);
 		}
 
+
+		reset($tableList);
 		foreach($tableList as $tableObj) { 
 			$name = $tableObj->name;
 			foreach($tableObj->attributes as $column) { 
+
 				$colName = $column->name;
 //				$source = $this->model->getNodeByName($tableObj->name);
 				unset($p);
@@ -351,44 +354,38 @@ imagestring($this->canvas,3,$line_t_x-20,$line_t_y+20,$tport->z,$this->gdColors[
 		}
 
 
-		foreach($tableList as $tableObj) { 
-			$name = $tableObj->name;
+	    $relations = PBDO_Compiler::$model->relationships;
+	    foreach($relations as $blank=>$columns) { 
+			$localName = $columns->getEntityA();
+			$localCol = $columns->getAttribA();
+			$relatedName = $columns->getEntityB();
+			$relatedCol = $columns->getAttribB();
 
-			//do edges
-			//$relations = $tableObj->localRelations;
-			$relations = PBDO_Compiler::$model->relationships;
-//			print_r($relations);exit();
-
-		    foreach($relations as $localCol=>$columns) { 
-				$relatedName = $columns[0];
-				$relatedCol = $columns[1];
-
-				//ports
-				unset($source);
-				unset($sourcePort);
-				$source = $this->model->getNodeByName($name);
-				$sourcePort = $source->getPortByName($localCol,$this->model);
+			//ports
+			unset($source);
+			unset($sourcePort);
+			$source = $this->model->getNodeByName($localName);
+			$sourcePort = $source->getPortByName($localCol,$this->model);
 
 
-				//target port
-				unset($target);
-				unset($targetPort);
-				$target = $this->model->getNodeByName($relatedName);
-				if(!$target)continue;
-				$targetPort = $target->getPortByName($relatedCol,$this->model);
+			//target port
+			unset($target);
+			unset($targetPort);
+			$target = $this->model->getNodeByName($relatedName);
+			if(!$target)continue;
+			$targetPort = $target->getPortByName($relatedCol,$this->model);
 
 
-				//edges
-				unset($e);
-				$e = new PBDO_GraphEdge();
-				$e->source = $source->id;
-				$e->target = $target->id;
-				$e->targetPort = $targetPort->id;
-				$e->sourcePort = $sourcePort->id;
-				$this->model->addEdge($e);
+			//edges
+			unset($e);
+			$e = new PBDO_GraphEdge();
+			$e->source = $source->id;
+			$e->target = $target->id;
+			$e->targetPort = $targetPort->id;
+			$e->sourcePort = $sourcePort->id;
+			$this->model->addEdge($e);
 
-		    }
-		}
+	    }
 	}
 }
 
