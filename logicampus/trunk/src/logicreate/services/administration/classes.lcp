@@ -517,7 +517,9 @@ class classes extends AdminService
 	                $folderObj->parentKey = 0;
 	                $folderObj->owner = $this->cleanedArray['facultyId'];
 	                $folderObj->class_id = $new_id_class;
-	                $folderObj->notes = 'When a student submits homework it will be stored here.';
+	                $folderObj->notes = 'Use this folder to hold
+					assignments for students that were not uploaded
+					via the assignment manager.';
 		        	$folderObj->_save('classdoclib_Folders');
 					
 					// Insert an entry for the Gradeboko Application

@@ -1,0 +1,15 @@
+LOGICAMPUS CHANGE LOG
+Last Updated:  12/01/03 11:58 EST
+
+SYNTAX:  
+<Date: m/d/y h:i> - <username>
+<Module / Library> - <Description>
+
+
+#########################
+
+12/01/03 12:00 PM - zorka
+adminstration/classes - Removed text on the 'assignments folder' that says this
+is where to find assignments that have been uploaded by students.
+This was the original way it was planned to work, but the workflow was
+change to make it easier to teachers to grade assignments.

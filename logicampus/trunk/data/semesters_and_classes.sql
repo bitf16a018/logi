@@ -74,4 +74,4 @@ INSERT INTO classdoclib_Folders VALUES (2527, 'Classroom', 0, 'teacher', 1, 'Pla
 
 INSERT INTO classdoclib_Folders VALUES (2528, 'Web Images', 0, 'teacher', 1, 'Place images for your lesson web pages here.', '', 0, 1);
 
-INSERT INTO classdoclib_Folders VALUES (2529, 'Assignments', 0, 'teacher', 1, 'When a student submits homework it will be stored here.', '', 0, 1);
+INSERT INTO classdoclib_Folders VALUES (2529, 'Assignments', 0, 'teacher', 1, 'Use this folder to store assignments for students that are not uploaded via the assignments manager.', '', 0, 1);
