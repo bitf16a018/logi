@@ -10,14 +10,6 @@ INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userTyp
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (10, 'student6', 'student6', 'st6@email.com', '|public|reg|student|', '2003-11-06 16:24:03', 2);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (11, 'student7', 'student7', 'stu7@email.com', '|public|reg|student|', '2003-11-06 16:24:42', 2);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (12, 'student8', 'student8', 'stu8@email.com', '|public|reg|student|', '2003-11-06 16:25:14', 2);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (13, 'teacher1', 'teacher1', 'teacher1@email.com', '|public|reg|faculty|', '2003-11-11 11:53:15', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (14, 'teacher2', 'teacher2', 'teacher2@email.com', '|public|reg|faculty|', '2003-11-11 11:53:39', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (15, 'teacher3', 'teacher3', 'teacher3@email.com', '|public|reg|faculty|', '2003-11-11 11:54:03', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (16, 'teacher4', 'teacher4', 'teacher4@email.com', '|public|reg|faculty|', '2003-11-11 11:54:27', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (17, 'teacher5', 'teacher5', 'teacher5@email.com', '|public|reg|faculty|', '2003-11-11 11:54:51', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (18, 'teacher6', 'teacher6', 'teacher6@email.com', '|public|reg|faculty|', '2003-11-11 11:55:16', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (19, 'teacher7', 'teacher7', 'teacher7@email.com', '|public|reg|faculty|', '2003-11-11 11:55:39', 3);
-INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (20, 'teacher8', 'teacher8', 'teacher8@email.com', '|public|reg|faculty|', '2003-11-11 11:56:10', 3);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (21, 'admin1', 'admin1', 'admin1@email.com', '|admin|faculty|public|reg|', '2003-11-11 11:56:47', 3);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (22, 'admin2', 'admin2', 'admin2@email.com', '|public|reg|admin|', '2003-11-11 11:58:20', 1);
 INSERT INTO lcUsers (pkey, username, password, email, groups, createdOn, userType) VALUES (23, 'admin3', 'admin3', 'admin3@email.com', '|public|reg|admin|', '2003-11-11 11:59:56', 1);
