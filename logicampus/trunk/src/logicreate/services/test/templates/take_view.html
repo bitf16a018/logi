@@ -69,14 +69,12 @@ if ($v->answer->pointsGiven) $points = $v->answer->pointsGiven;
 			<b>Your Answer</b>:  
 			 &nbsp;  
 			 <?
-			  	if ($v->questionType == QUESTION_MANSWER)
-				{
-					echo implode(", ", $v->answer->assessmentAnswerValues);
-				} else {
-					# not a matching nor multiple answer question that can
-					# have multiple answer values
+			  	if ($v->questionType == QUESTION_MANSWER || $v->questionType==QUESTION_MCHOICE)	{
+					echo $v->returnStudentAnswer();	
+				} else { 
 					echo $v->answer->assessmentAnswerValues;
-				}
+				}	
+
 				?> &nbsp; &nbsp;
 		</td>
 	</tr>
@@ -94,22 +92,27 @@ if ($v->answer->pointsGiven) $points = $v->answer->pointsGiven;
 				<th><b>Question</b></th>
 			</tr>
 <?
+#debug($v,1);
+	
+#	foreach($v->answer->assessmentAnswerValues as $key=>$val) { 
+#		$newval = ord($val)-65;
+#		$newval = $v->questionChoices[$newval]->correct;
+#		$v->answer->assessmentAnswerValues[$key] = stripslashes($val);
+#	}
+	
 	$count = count($v->questionChoices);
-	for ($i=0; $i<$count; $i++)
-	{
+	for ($i=0; $i<$count; $i++)	{
 		$class = 'even';
 		if($i % 2 == 0 ) $class = 'odd';
-		if ($v->questionChoices[$i]->label)
-		{ ?>
+		if ($v->questionChoices[$i]->label) { 
+		?>
 			
 		<tr class="<?=$class?>">
 		<? 
-			if ($v->answer->assessmentAnswerValues[$i] == $v->questionChoices[$i]->correct)
-			{ 
+			if ($v->answer->assessmentAnswerValues[$i] == $v->questionChoices[$i]->correct)	{ 
 				$text = '<span style="color: #FFFFFF; background: green;">correct</span>';	
 			} else {
 				$text = '<span style="color: #FFFFFF; background: red;">incorrect</span>';	
-
 			}
 		?>
 

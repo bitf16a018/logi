@@ -190,7 +190,7 @@ class question extends StudentService {
 
 
 	function answerRun($db,&$u,&$lc,&$t) {  
-
+		stripLC($lc);
 		$test = $u->sessionvars['testObj'];
 
 		// pull the question ID from the submitted form info
@@ -206,21 +206,28 @@ class question extends StudentService {
 		if ($answer) {
 			$hasOldAnswer = TRUE;
 		}
-
 		# Student is re-answering a previous question
 		# Take current qst ID and move to the next one
 		if ($hasOldAnswer) {
 
 			$answer = $answer[0];
 			if ($qst->questionType == QUESTION_MATCHING || $qst->questionType == QUESTION_MANSWER) {
-				$answer->assessmentAnswerValues = serialize($lc->postvars['answer']);
+				if ($qst->questionType==QUESTION_MATCHING) { 
+					$temp = $lc->postvars['answer'];
+					foreach($temp as $k=>$v) { 
+						$temp[$k] = htmlentities($v, ENT_QUOTES);
+					}
+					$answer->assessmentAnswerValues = serialize($temp);
+				} else { 
+					$answer->assessmentAnswerValues = serialize($lc->postvars['answer']);	
+				}
 			} else {
 				$answer->assessmentAnswerValues = $lc->postvars['answer'];	
 			}
 			// MAK 10-15-2003 question->grade() calls save on the passed in
 			// answer, need we save twice in a row?
 			// $answer->save();
-
+			
 			# Grade the answer
 			$qst->grade($answer);
 			unset($answer);
@@ -310,4 +317,31 @@ function getPrevQuestionId($currentId, $questionOrder) {
 	return $questionOrder[$newKey];
 }
 
+function stripLC(&$lc) {
+		if (!ini_get('magic_quotes_gpc') ) {
+			return false;
+		}
+		foreach($lc->postvars as $k=>$p) {
+			if (!is_array($p)) {
+			$lc->postvars[$k] = stripslashes($p);
+			} else {
+			$lc->postvars[$k] = recurse_array2($p);
+			}
+		}
+		foreach($lc->getvars as $k=>$g) {
+			if (!is_array($g)) {
+			$lc->getvars[$k] = trim(stripslashes($g));
+			} else {
+			$lc->getvars[$k] = recurse_array2($g);
+			}
+		}
+		return true;
+}
+function recurse_array2($arr) {
+	while ( list($k,$v) = @each($arr) ) {
+		if ( is_array($v) ) { recurse_array2($v); continue; }
+		$arr[$k] = stripslashes($v);
+	}
+	return $arr;
+}
 ?>

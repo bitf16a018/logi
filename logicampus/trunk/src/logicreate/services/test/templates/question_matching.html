@@ -21,31 +21,38 @@ for ($i=0; $i<$numAnswers; $i++)
 		$val = array_keys($randomAnswers[$i]);
 		if ($val['randomAnswers']) continue;
 		$key = $val[0];
-		$ans = $randomAnswers[$i][$key];
-		$arrayHash[$ans] = chr($z+65) ;
+ 		$ans = $randomAnswers[$i][$key];
+		$j = chr($z+65);
+		$arrayHash[$ans] = $ans;
+		$answerHash[$j] = $ans;
+#		echo stripslashes($randomAnswers[$i][$key]);
+#		$arrayHash[$ans] = chr($z+65) ;
 		++$z;
-
 }
 $z = 0;
 reset($randomAnswers);
 
 $count = count($choices);
-for ($i=0; $i<$count; $i++)
+for ($i=0; $i<=$count; $i++)
 {
 	$x = '<select name="answer['.$i.']">';
+	reset($answers[$i]);
+#	foreach($answers[$i] as $k=>$v) { 
+#		$answers[$i][$k] = stripslashes($v);
+#	}
 	$x .= makeOptions($arrayHash, $answers[$i]);
+#	$x .= makeOptions($answers[$i]);
 	$x .= '</select>&nbsp;&nbsp;';
-	$x .= $i+1;
+	$x .= chr($i+65);
 	$x .= '. '.$choices[$i]->label;
 	$left[]  = $x;
 }
 
 
-
-while(list($answer, $letter) = @each($arrayHash))
-{ 
-	++$z;
-	$right[] = chr($z+64).'. '.$answer;
+#while(list($letter, $answer) = @each($answerHash)) { 
+while(list($letter, $answer) = @each($arrayHash)) { 
+	$right[] = $letter.'. '.$answer;
+// __FIXME__ mgk - 8/15/04 - should be $right[$letter], but $left above doesn't have it
 }
 ?>
 

@@ -497,7 +497,7 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 	function validate() {
 
 		$questionCount = $answerCount = 0;
-
+		
 		// make sure they put in a Question/Instructions
 		$this->questionText = trim(strip_tags($this->questionText));
 		if ($this->questionText == '') $error = '<li>Please enter a question.</li>';
@@ -522,20 +522,19 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 
 
 	function resetLabels($postvars) {
-
 		foreach ( $postvars['labels'] as $key => $question) {
 
 			if ( trim(strip_tags($question)) == '' ) continue;
-
+#debug($postvars['correct'],1);
 			$qc = new AssessmentChoice();
-			$qc->label = stripslashes($question);
-			$qc->correct = $postvars['correct'][$key];
-			$this->questionChoices[] = $qc;
+			$qc->label = htmlentities(stripslashes($question), ENT_QUOTES);
+			$qc->correct = htmlentities(stripslashes($postvars['correct'][$key]), ENT_QUOTES);
+			
+#			$this->questionChoices[] = $qc;
 
 			// update object
 			$this->questionChoices[$key] = $qc;
 		}
-
 		$this->setCorrectChoice($postvars);
 	}
 
@@ -544,6 +543,8 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 		foreach ( $postvars['correct'] as $key => $answer) {
 			++$newkey;
 			if ( trim($answer) == '' ) continue;
+			
+			$answer = htmlentities(stripslashes($answer),ENT_QUOTES);
 			// store this for later use in the template
 			$randomAnswers[$newkey][$key] = $answer;
 
@@ -551,24 +552,29 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 		}
 
 		// mgk 7/29/04 - commented out
-#		shuffle( $randomAnswers );
+		// mgk - 8/15/04 - commented in for matching ????
+		shuffle( $randomAnswers );
 	
 		$this->questionChoices['randomAnswers'] = $randomAnswers;
 	}
 
 
 	function grade(&$answerObj) {
+#	debug($answerObj);
+#	debug($this,1);
 
 		$correct = $this->getCorrectAnswer();
 		$answers = unserialize($answerObj->assessmentAnswerValues);
 		$count = count ($correct);
 
+#debug($this);
+#debug($answers);
+#debug($correct,1);
 		for($i=0; $i<$count; $i++) {
 			if ($correct[$i] == $answers[$i]) {
 				$num_correct++;
 			}
 		}
-
 
 		if ($num_correct == $this->questionPoints ) {
 			$answerObj->set('pointsEarned',$this->questionPoints);
