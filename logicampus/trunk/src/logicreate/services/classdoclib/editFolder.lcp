@@ -80,8 +80,10 @@ class editFolder extends classdoclibService {
 	 */
 	function pasteRun(&$db,&$u,&$lc,&$t) {
 		while ( list(,$v) = @each($u->sessionvars['classdoclib']['copy']) ) {
-			if (is_object($v) )
-			$v->copyFolder($lc->getvars['id']);
+			if (is_object($v) ) {
+				$v->class = $u->activeClassTaught->id_classes;
+				$v->copyFolder($lc->getvars['id']);
+			}
 		}
 
 		while ( list(,$v) = @each($u->sessionvars['classdoclib']['cut']) ) {
