@@ -412,6 +412,7 @@ class Assessment extends AssessmentBase {
 	# the email, this does update the students grades for points_earned in the database
 	function emailTeacher($questions, $stuUserObj, $logObj, $grade=0)
 	{
+			$u = $stuUserObj;
 
 			$qstans .= "Student ID: ".$stuUserObj->username."\n";
 			$qstans .= "Name: ".$stuUserObj->profile->values['firstname']." ".$stuUserObj->profile->values['lastname']."\n";
@@ -434,7 +435,12 @@ class Assessment extends AssessmentBase {
 							for ($y=0;$y<$answerCount; $y++)
 							{
 								$ansnum = $y + 1;
-								$qstans .= "\t $ansnum. ".$answer[$y]."\n";
++                                                               //$qstans .= "\t $ansnum. ".$answer[$y]."\n";
++                                                               //trying out a fix for a bug where the teacher just
++                                                               //gets the index of the correct answer
++                                                               //MAK 11-03-04
++                                                               $qstans .= "\t $ansnum. ".$questions[$i]->questionChoices[$y]->label ." " .$answer[$y]."\n";
+ 
 							}
 						} else {
 							$qstans .= "Answer: ".$questions[$i]->answer->assessmentAnswerValues."\n\n";
