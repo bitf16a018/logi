@@ -377,38 +377,26 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 
 	function grade(&$answerObj) {
 		$correct = $this->getCorrectAnswer();
-		$answers = unserialize($answerObj->assessmentAnswerValues);
+
+		//the AssessmentAnswerObject should be unserializing for us
+		// why is this unserialize here?  Unit tests aren't pulling
+		// from the DB so they are already unserialized
+		if ( is_array($answerObj->assessmentAnswerValues) ) {
+			$answers = $answerObj->assessmentAnswerValues;
+			$answerObj->assessmentAnswerValues = serialize($answers);
+		} else {
+			$answers = unserialize($answerObj->assessmentAnswerValues);
+		}
+
 		$numCorrect = 0;
 		$definedCorrect= count($correct);
 
-		#foreach ($answers as $k => $answer) {
-		#	$answers[$k] = stripslashes($answer);
-		#}
-		#	for ($x=0; $x<$c_count; $x++) {
-		#	$correct[$x] = strtolower($correct[$x]);
-		#}
-		#$a_count = count($answers);
-		#for ($x=0; $x<$a_count; $x++) {
-		#	$answers[$x] = strtolower($answers[$x]);
-		#}
 
-
-		
-		//array diff doesn't work
-		// add one to num correct for every answer that is right
-		// subtract one to num correct for every answer that is not right
-/*
-		for ($x=0; $x<$a_count; $x++) {
-			if ( in_array($answers[$x],$correct) )
-			$numCorrect++;
-			else
-			$numCorrect--;
-		}
-*/
 		// mgk 7/11/04
 		// array diff DOES work - or can be made to 
 		//
 		$diffCount = count(array_diff($answers,$correct));
+		
 		
 		// mgk 7/11/04
 		// __FIXME__ do we give partial credit for only some right, 
