@@ -20,29 +20,27 @@ class privMess extends PersistantObject {
 
 
         function add() {
-		$user = lcUser::getuserByUsername($this->messageTo);
-		if (!$user) { 
-			return false;
-		}
 
 	      	$this->_save("privateMessages");
 
+		$this->sentReceived = 1;
+	      	$this->_save("privateMessages");
 
-		# By default, users will get private messages
-		# The following was commented out since certain applications rely on 
-		# private message notifications to work.  Depending on your schools work
-		# flow you may want to re-enable this feature.
-		#if ($user->profile['emailNotify']=='Y') {
 
-				if ( ! $this->dontMail ) {
-					mail($user->email,"Message from ".BASE_URL,"There is a message addressed to you at ".BASE_URL." website.  Please login to that site to view your message as soon as possible.  You can view the message after logging in by visiting the site here:
-				
-				".APP_URL."pm
-		","From: ".WEBMASTER_EMAIL."\nReply-To: ".WEBMASTER_EMAIL."");
+		$user = lcUser::getuserByUsername($this->messageTo);
 
-				}
-		#	}
+		# Commented this out to not check email notifies, we are always going to send emails to the
+		# user no matter what.
+		# call("string.lower",array("name"=>"foo"); //  ha ha
+		if (strtolower($user->profile->values['emailNotify'])=='y') { 
+		#if ( ! $this->dontMail ) {
+			mail($user->email,"Message from ".BASE_URL,"There is a message addressed to you at ".BASE_URL." website.  Please login to that site to view your message as soon as possible.  You can view the message after logging in by visiting the site here:
+		
+		".APP_URL."pm
+","From: ".WEBMASTER_EMAIL."\nReply-To: ".WEBMASTER_EMAIL."");
+
 		}
+	}
 
 	function _getTransient() {
 		return array('dontMail');
