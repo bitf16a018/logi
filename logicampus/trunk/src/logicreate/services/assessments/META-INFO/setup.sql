@@ -64,7 +64,7 @@ CREATE TABLE assessment_grade (
   assessment_grade_id int(11) NOT NULL auto_increment,
   assessment_id int(11) default NULL,
   student_id varchar(32) NOT NULL,
-  comments LONGVARCHAR() default NULL,
+  comments text default NULL,
   points float(10,2) default NULL,
   points_override float(10,2) default NULL,
   PRIMARY KEY  (assessment_grade_id)
