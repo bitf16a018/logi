@@ -73,12 +73,12 @@
 			<a alt="Home" href="<?=appurl('');?>"><img src="<?=TEMPLATE_URL;?>images/menu-widget.png" height="16" border="0" alt="" />Home Page</a>
 		</td>
 
-		<td NOWRAP><a href="<?=appurl('faq/');?>">FAQs</a></td>
-		<td NOWRAP><a href="<?=appurl('mastercalendar/');?>">Calendar</a></td>
-		<td NOWRAP><a href="<?=appurl('helpdesk/');?>">Help Desk</a></td>
+		<td NOWRAP><a href="<?=appurl('faq/')?>"><?=lct('FAQs')?></a></td>
+		<td NOWRAP><a href="<?=appurl('mastercalendar/')?>"><?=lct('Calendar')?></a></td>
+		<td NOWRAP><a href="<?=appurl('helpdesk/')?>"><?=lct('Help Desk')?></a></td>
 
 		<td class="last_tab" NOWRAP>
-			<a style="color: white;" href="<?=APP_URL?>pm/">Messages [<?=(int)$t['_privMsgs']?>]</a>&nbsp;&nbsp;
+			<a style="color: white;" href="<?=APP_URL?>pm/"><?=lct('Messages')?>[<?=(int)$t['_privMsgs']?>]</a>&nbsp;&nbsp;
 		</td>
 		<td class="end_cap" background="<?=TEMPLATE_URL?>images/tab-end-cap-bg.png" width="250" valign="top">
 			<img src="<?=TEMPLATE_URL?>images/tab-end-cap.png" border="0" style="float:left;">
@@ -103,7 +103,7 @@
 		 	if ($obj->user->username != 'anonymous')
 			{ ?>
 			<p>
-			<div style="color:#036;font-weight:bold;">Welcome, <?=ucfirst($obj->user->profile->get('firstname'));?>!</div>
+			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>ucfirst($obj->user->profile->get('firstname')) )?></div>
 			</p>
 
 			<p>
@@ -115,10 +115,10 @@
 
 			<? } else { ?>
 			<p>
-				<strong>Username:</strong><br>
+				<strong><?=lct('username')?>:</strong><br>
 				<form method="POST" action="<?=APP_URL?>login/main">
 				 <input type="text" size="10" maxlength="32" name="username" />
-				<strong>Password:</strong><br> 
+				<strong><?=lct('password')?>:</strong><br> 
 				 <input type="password" size="10" maxlength="32" name="password" /><br>
 				<input type="hidden" name="event" value="login"/>
 				<input type="submit" value="Login"/>
@@ -132,7 +132,7 @@
 			/* Display facutly classes they teach */
 			if ($t['_classesTaught'] != '') { ?>
 	<table border="0" width="100%" class="menutable" cellpadding="0" cellspacing="0">
-		<tr><td NOWRAP class="menu_head"><b>Classroom Manager</b></td></tr>
+		<tr><td NOWRAP class="menu_head"><b><?=lct('classroom manager')?></b></td></tr>
 		<tr><td NOWRAP class="menu_item"> <?=$t['_classesTaught']?></td></tr>
 	</table>
 <p>
@@ -140,7 +140,7 @@
 
 			if ($t['_classesTaken']) { ?>
 	<table border="0" width="100%" class="menutable" cellpadding="0" cellspacing="0">
-		<tr><td NOWRAP class="menu_head"><b>My Classes</b></td></tr>
+		<tr><td NOWRAP class="menu_head"><b><?=lct('my classes')?></b></td></tr>
 		<tr><td NOWRAP class="menu_item"><?=$t['_classesTaken'];?></td></tr>
 	</table>
 <p>
