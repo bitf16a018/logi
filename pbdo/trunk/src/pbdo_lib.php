@@ -1,6 +1,9 @@
 <?php
 
-//consistent way to use IDs
+/**
+ * Provide a consisten way to keep track
+ * of internal IDs and version numbers
+ */
 class PBDO_InternalModel {
 	private $internalId;
 	private $sourceVersion;
@@ -68,7 +71,9 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 }
 
 
-
+/**
+ * Represent an Entity of a Data Model
+ */
 class PBDO_ParsedEntity extends PBDO_InternalModel {
 	public $displayName;
 	public $name;
@@ -146,7 +151,9 @@ class PBDO_ParsedEntity extends PBDO_InternalModel {
 }
 
 
-
+/**
+ * Represent an Attribute of an Entity
+ */
 class PBDO_ParsedAttribute extends PBDO_InternalModel {
 
 	public $name;
@@ -219,7 +226,10 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 
 
 /**
- * Represent an Entity Relationship
+ * Represent a Relationship of one Entity to another
+ *
+ * Refer to entities as A and B instead of Primary and Secondary
+ * or parent and child.
  */
 class PBDO_ParsedRelationship extends PBDO_InternalModel {
 
