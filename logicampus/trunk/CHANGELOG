@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-08-17 02:01:04 $
+Last Updated:  $Date: 2004-08-21 21:40:07 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,10 @@ SYNTAX:
 
 
 #########################
+8/21/03 - 5:30pm - michael
+Changes to how images/files are stored and reused.  Well, reused.  Previously, references to images and files inside of the content pages had hashlinks in them, which were used to verify the class you were taking.  For example, an image file foo.jpg tied to class 5 would only be viewable by people in class 5.  This is problematic when you want to copy content to new semesters, because the hash still points to class 5, but the new class in the new semester may be class 24.  A change was made to check the teacher of the class instead of the class #.  So now teacher3 can have content copied between semesters and classes which references hash XPJ59.  Hash XPJ59 will verify that the teacher of the class you're in is the same as the teacher who owns the file you're trying to look at.  This may cause some problems in that you *might* be able to see something you shouldn't, but it's still locked down to students of a teacher.  This also exists in the analogue world to the extent that I can get a copy of Mr. H's ECON301 lessons even though I only take Mr. H's ECON102 class.  This was a tradeoff made to make copy/backups much simpler. 
+
+
 8/16/04 - 10:00 - michael
 Changes to how test taking works some more.  Backed out storage change and modified 'matching' creation and storage code to use htmlentities(stripslashes())'d version of questions and answers for matching.  Changing it to anything else was too complex for right now.
 
