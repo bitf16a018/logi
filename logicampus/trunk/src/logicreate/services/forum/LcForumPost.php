@@ -17,6 +17,17 @@ class LcForumPostBase {
 	var $lcForumRecentPostId;
 	var $lcForumRecentPostTimedate;
 	var $lcForumRecentPoster;
+	var $lcForumFile1Name;
+	var $lcForumFile1SysName;
+	var $lcForumFile1Size;
+	var $lcForumFile1MIME;
+	var $lcForumFile2Name;
+	var $lcForumFile2SysName;
+	var $lcForumFile2Size;
+	var $lcForumFile2MIME;
+	var $lcForumFile1Count;
+	var $lcForumFile2Count;
+
 
 	var $__attributes = array(
 	'lcForumPostId'=>'integer',
@@ -31,7 +42,19 @@ class LcForumPostBase {
 	'lcForumReplyCount'=>'int',
 	'lcForumRecentPostId'=>'int',
 	'lcForumRecentPostTimedate'=>'int',
-	'lcForumRecentPoster'=>'varchar');
+	'lcForumRecentPoster'=>'varchar',
+	'lcForumFile1Name'=>'varchar',
+	'lcForumFile1SysName'=>'varchar',
+	'lcForumFile1Size'=>'varchar',
+	'lcForumFile1MIME'=>'varchar',
+
+	'lcForumFile2Name'=>'varchar',
+	'lcForumFile2SysName'=>'varchar',
+	'lcForumFile2Size'=>'varchar',
+	'lcForumFile2MIME'=>'varchar',
+	'lcForumFile1Count'=>'int',
+	'lcForumFile2Count'=>'int',
+	);
 
 	function getLcForumPosts() {
 		$array = LcForumPostPeer::doSelect('lc_forum_post_thread_id = \''.$this->getPrimaryKey().'\' order by lc_forum_post_id, lc_forum_post_thread_id, lc_forum_id,lc_forum_post_parent_id, lc_forum_post_id');
@@ -130,6 +153,29 @@ class LcForumPostBase {
 			$this->lcForumRecentPostTimedate = $array['lcForumRecentPostTimedate'];
 		if ($array['lcForumRecentPoster'])
 			$this->lcForumRecentPoster = $array['lcForumRecentPoster'];
+		if ($array['lcForumFile1Name'])
+			$this->lcForumFile1Name= $array['lcForumFile1Name'];
+		if ($array['lcForumFile1SysName'])
+			$this->lcForumFile1SysName= $array['lcForumFile1SysName'];
+		if ($array['lcForumFile1Size'])
+			$this->lcForumFile1Size= $array['lcForumFile1Size'];
+		if ($array['lcForumFile1MIME'])
+			$this->lcForumFile1MIME= $array['lcForumFile1MIME'];
+
+		if ($array['lcForumFile2Name'])
+			$this->lcForumFile2Name= $array['lcForumFile2Name'];
+		if ($array['lcForumFile2SysName'])
+			$this->lcForumFile2SysName= $array['lcForumFile2SysName'];
+		if ($array['lcForumFile2Size'])
+			$this->lcForumFile2Size= $array['lcForumFile2Size'];
+		if ($array['lcForumFile2MIME'])
+			$this->lcForumFile2MIME= $array['lcForumFile2MIME'];
+
+		if ($array['lcForumFile1Count'])
+			$this->lcForumFile1Count= $array['lcForumFile1Count'];
+
+		if ($array['lcForumFile2Count'])
+			$this->lcForumFile2Count= $array['lcForumFile2Count'];
 
 		$this->_modified = true;
 	}
@@ -165,6 +211,18 @@ class LcForumPostPeerBase {
 		$st->fields['lc_forum_recent_post_timedate'] = 'lc_forum_recent_post_timedate';
 		$st->fields['lc_forum_recent_poster'] = 'lc_forum_recent_poster';
 
+		$st->fields['lc_forum_file1_name'] = 'lc_forum_file1_name';
+		$st->fields['lc_forum_file1_sys_name'] = 'lc_forum_file1_sys_name';
+		$st->fields['lc_forum_file1_size'] = 'lc_forum_file1_size';
+		$st->fields['lc_forum_file1_mime'] = 'lc_forum_file1_mime';
+		$st->fields['lc_forum_file1_count'] = 'lc_forum_file1_count';
+		$st->fields['lc_forum_file2_count'] = 'lc_forum_file2_count';
+
+		$st->fields['lc_forum_file2_name'] = 'lc_forum_file2_name';
+		$st->fields['lc_forum_file2_sys_name'] = 'lc_forum_file2_sys_name';
+		$st->fields['lc_forum_file2_size'] = 'lc_forum_file2_size';
+		$st->fields['lc_forum_file2_mime'] = 'lc_forum_file2_mime';
+
 		$st->key = $this->key;
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
@@ -190,6 +248,17 @@ class LcForumPostPeerBase {
 		$st->fields['lc_forum_recent_post_id'] = $this->lcForumRecentPostId;
 		$st->fields['lc_forum_recent_post_timedate'] = $this->lcForumRecentPostTimedate;
 		$st->fields['lc_forum_recent_poster'] = $this->lcForumRecentPoster;
+		$st->fields['lc_forum_file1_name'] = $this->lcForumFile1Name;
+		$st->fields['lc_forum_file1_sys_name'] = $this->lcForumFile1SysName;
+		$st->fields['lc_forum_file1_size'] = $this->lcForumFile1Size;
+		$st->fields['lc_forum_file1_mime'] = $this->lcForumFile1MIME;
+		$st->fields['lc_forum_file2_name'] = $this->lcForumFile2Name;
+		$st->fields['lc_forum_file2_sys_name'] = $this->lcForumFile2SysName;
+		$st->fields['lc_forum_file2_size'] = $this->lcForumFile2Size;
+		$st->fields['lc_forum_file2_mime'] = $this->lcForumFile2MIME;
+		$st->fields['lc_forum_file1_count'] = $this->lcForumFile1Count;
+		$st->fields['lc_forum_file2_count'] = $this->lcForumFile2Count;
+
 
 		$st->key = 'lc_forum_post_id';
 		$db->executeQuery($st);
@@ -218,6 +287,19 @@ class LcForumPostPeerBase {
 		$st->fields['lc_forum_recent_post_id'] = $obj->lcForumRecentPostId;
 		$st->fields['lc_forum_recent_post_timedate'] = $obj->lcForumRecentPostTimedate;
 		$st->fields['lc_forum_recent_poster'] = $obj->lcForumRecentPoster;
+
+		$st->fields['lc_forum_file1_name'] = $obj->lcForumFile1Name;
+		$st->fields['lc_forum_file1_sys_name'] = $obj->lcForumFile1SysName;
+		$st->fields['lc_forum_file1_size'] = $obj->lcForumFile1Size;
+		$st->fields['lc_forum_file1_mime'] = $obj->lcForumFile1MIME;
+		$st->fields['lc_forum_file1_count'] = $obj->lcForumFile1Count;
+		$st->fields['lc_forum_file2_count'] = $obj->lcForumFile2Count;
+
+		$st->fields['lc_forum_file2_name'] = $obj->lcForumFile2Name;
+		$st->fields['lc_forum_file2_sys_name'] = $obj->lcForumFile2SysName;
+		$st->fields['lc_forum_file2_size'] = $obj->lcForumFile2Size;
+		$st->fields['lc_forum_file2_mime'] = $obj->lcForumFile2MIME;
+
 
 		$st->key = 'lc_forum_post_id';
 		$db->executeQuery($st);
@@ -272,6 +354,18 @@ class LcForumPostPeerBase {
 		$x->lcForumRecentPostTimedate = $row['lc_forum_recent_post_timedate'];
 		$x->lcForumRecentPoster = $row['lc_forum_recent_poster'];
 
+		$x->lcForumFile1Name= $row['lc_forum_file1_name'];
+		$x->lcForumFile1SysName= $row['lc_forum_file1_sys_name'];
+		$x->lcForumFile1Size= $row['lc_forum_file1_size'];
+		$x->lcForumFile1MIME= $row['lc_forum_file1_mime'];
+		$x->lcForumFile2Name= $row['lc_forum_file2_name'];
+		$x->lcForumFile2SysName= $row['lc_forum_file2_sys_name'];
+		$x->lcForumFile2Size= $row['lc_forum_file2_size'];
+		$x->lcForumFile2MIME= $row['lc_forum_file2_mime'];
+		$x->lcForumFile1Count= $row['lc_forum_file1_count'];
+		$x->lcForumFile2Count= $row['lc_forum_file2_count'];
+
+
 		$x->_new = false;
 		return $x;
 	}
@@ -294,15 +388,15 @@ class LcForumPost extends LcForumPostBase {
                 // check 'status' in here too eventually?
 
                 // how many replies
-                $db->queryOne("select count(lc_forum_post_id) from lc_forum_post where (lc_forum_post_thread_id=".$this->lcForumPostId . ") and (lc_forum_post_status IS NULL or lc_forum_post_status=0)");
+                $db->queryOne("select count(lc_forum_post_id) from lc_forum_post where (lc_forum_post_thread_id=".$this->lcForumPostId . ") and lc_forum_post_status=0");
                 $this->lcForumReplyCount= $db->Record[0];
-                $db->queryOne("select max(lc_forum_post_id) as foo from lc_forum_post where (lc_forum_post_id=".$this->lcForumPostId." or lc_forum_post_thread_id=".$this->lcForumPostId.") and (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
-                $max = (int)$db->Record['foo'];
-                $db->queryOne("select * from lc_forum_post where lc_forum_post_id=$max and (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
+                $db->queryOne("select max(lc_forum_post_id) as foo from lc_forum_post where (lc_forum_post_id=".$this->lcForumPostId." or lc_forum_post_thread_id=".$this->lcForumPostId.") and lc_forum_post_status=0");
+                $max = $db->Record['foo'];
+                $db->queryOne("select * from lc_forum_post where lc_forum_post_id=$max and lc_forum_post_status=0");
                 $this->lcForumRecentPostTimedate= $db->Record['lc_forum_post_timedate'];
                 $this->lcForumRecentPoster = $db->Record['lc_forum_post_username'];
                 $this->lcForumRecentPostId = $max;
-		#                debug($this);exit();
+                #debug($this);exit();
                 $this->save();  
 
         }
