@@ -134,7 +134,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Contenido &amp; Links de la lección
 	</message>
-	<!--Content &amp;amp; Lesson Links-->
+	<!--Content &amp;amp;amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -346,6 +346,34 @@
 	</message>
 	<!--Semester Copy-->
 	<usage id ="Semester Copy" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="36"/>
+
+
+	<message id ="List Assignments" domain="system" status="">
+		List Assignments
+	</message>
+	<!--List Assignments-->
+	<usage id ="List Assignments" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1106"/>
+
+
+	<message id ="Add Assignment" domain="system" status="">
+		Add Assignment
+	</message>
+	<!--Add Assignment-->
+	<usage id ="Add Assignment" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1107"/>
+
+
+	<message id ="Add a Lesson" domain="system" status="">
+		Add a Lesson
+	</message>
+	<!--Add a Lesson-->
+	<usage id ="Add a Lesson" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1108"/>
+
+
+	<message id ="Classroom Manager" domain="system" status="">
+		Classroom Manager
+	</message>
+	<!--Classroom Manager-->
+	<usage id ="Classroom Manager" file="../src/logicreate/services/classmgr/announcements.lcp" line="182"/>
 
 </language>
 

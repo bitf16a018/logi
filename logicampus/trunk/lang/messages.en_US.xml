@@ -72,7 +72,7 @@
 	</message>
 	<!--Classroom Overview-->
 	<usage id ="Classroom Overview" file="../src/logicreate/services/menu/menuObj.php" line="222"/>
-	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1098"/>
+	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1093"/>
 	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
 
 
@@ -87,7 +87,7 @@
 		Lessons
 	</message>
 	<!--Lessons-->
-	<usage id ="Lessons" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1099"/>
+	<usage id ="Lessons" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1094"/>
 	<usage id ="Lessons" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="57"/>
 
 
@@ -95,7 +95,7 @@
 		Webliography
 	</message>
 	<!--Webliography-->
-	<usage id ="Webliography" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1100"/>
+	<usage id ="Webliography" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1095"/>
 	<usage id ="Webliography" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="61"/>
 
 
@@ -103,7 +103,7 @@
 		FAQs
 	</message>
 	<!--FAQs-->
-	<usage id ="FAQs" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1101"/>
+	<usage id ="FAQs" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1096"/>
 	<usage id ="FAQs" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="54"/>
 	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
 
@@ -112,7 +112,7 @@
 		Assignments
 	</message>
 	<!--Assignments-->
-	<usage id ="Assignments" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1102"/>
+	<usage id ="Assignments" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1097"/>
 	<usage id ="Assignments" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="48"/>
 	<usage id ="Assignments" file="../src/logicreate/services/classmgr/templates/main_main.html" line="53"/>
 
@@ -121,7 +121,7 @@
 		Content
 	</message>
 	<!--Content-->
-	<usage id ="Content" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1103"/>
+	<usage id ="Content" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1098"/>
 	<usage id ="Content" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="50"/>
 
 
@@ -129,15 +129,51 @@
 		Presentations
 	</message>
 	<!--Presentations-->
-	<usage id ="Presentations" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1104"/>
+	<usage id ="Presentations" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1099"/>
 
 
 	<message id ="Objectives" domain="system">
 		Objectives
 	</message>
 	<!--Objectives-->
-	<usage id ="Objectives" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1105"/>
+	<usage id ="Objectives" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1100"/>
 	<usage id ="Objectives" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="59"/>
+
+
+	<message id ="List Assignments" domain="system">
+		List Assignments
+	</message>
+	<!--List Assignments-->
+	<usage id ="List Assignments" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1106"/>
+
+
+	<message id ="Add Assignment" domain="system">
+		Add Assignment
+	</message>
+	<!--Add Assignment-->
+	<usage id ="Add Assignment" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1107"/>
+
+
+	<message id ="Add a Lesson" domain="system">
+		Add a Lesson
+	</message>
+	<!--Add a Lesson-->
+	<usage id ="Add a Lesson" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1108"/>
+
+
+	<message id ="Classroom Manager" domain="system">
+		Classroom Manager
+	</message>
+	<!--Classroom Manager-->
+	<usage id ="Classroom Manager" file="../src/logicreate/services/classmgr/announcements.lcp" line="182"/>
+
+
+	<message id ="Announcements" domain="system">
+		Announcements
+	</message>
+	<!--Announcements-->
+	<usage id ="Announcements" file="../src/logicreate/services/classmgr/announcements.lcp" line="183"/>
+	<usage id ="Announcements" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="69"/>
 
 
 	<message id ="Message of the Day" domain="system">
@@ -261,13 +297,6 @@
 	<usage id ="Calendar" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="68"/>
 	<usage id ="Calendar" file="../src/logicreate/services/classmgr/templates/main_main.html" line="52"/>
 	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
-
-
-	<message id ="Announcements" domain="system">
-		Announcements
-	</message>
-	<!--Announcements-->
-	<usage id ="Announcements" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="69"/>
 
 
 	<message id ="Chat" domain="system">
