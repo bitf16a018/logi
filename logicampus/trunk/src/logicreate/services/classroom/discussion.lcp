@@ -57,10 +57,20 @@ class discussion extends StudentService {
 		// for easier paging
 		$grid = new datagrid('classroom','discussion');
 		$grid->datarows = $posts;
+		$grid->rowsPerPage = 500;
 		$grid->_totalRows = count($posts);
-		$grid->ignore = array("_new","_modified","lcForumId","lcForumPostStatus",'lcForumRecentPoster',"lcForumPostParentId","__attributes","lcForumPostMessage","lcForumPostThreadId","lcForumPostId",'lcForumThreadCount','lcForumPostTimedate','lcForumRecentPostId','lcForumRecentPostTimedate');
+		$grid->ignore = array("_new","_modified","lcForumId","lcForumPostStatus",'lcForumRecentPoster',"lcForumPostParentId","__attributes","lcForumPostMessage","lcForumPostThreadId","lcForumPostId",'lcForumThreadCount','lcForumPostTimedate','lcForumRecentPostId','lcForumRecentPostTimedate',
+'lcForumFile1Name',
+'lcForumFile1SysName',
+'lcForumFile1Size',
+'lcForumFile1MIME',
+'lcForumFile2Name',
+'lcForumFile2SysName',
+'lcForumFile2Size',
+'lcForumFile2MIME'
+);
 		$grid->headers= array('lcForumPostUsername'=>'Thread starter','lcForumPostTitle'=>"Thread",'lcForumReplyCount'=>"Replies");
-		$grid->overrideColumn('<a href="<?=appurl("classroom/discussion_view/".$lcForumPostId);?>"><?=$lcForumPostTitle;?></a>','lcForumPostTitle');
+		$grid->overrideColumn('<a href="<?=appurl("classroom/discussion_view/".$lcForumPostId);?>"><?=$lcForumPostTitle;?><?if ($lcForumPostTitle=="") { echo "No Subject";}?></a>','lcForumPostTitle');
 		$t['table'] = $grid->toHTML();
 		$this->applinks['Start new Thread'] = "discussion_post/".$forum->lcForumId;
 		$lc->templateName = 'discussion_view';

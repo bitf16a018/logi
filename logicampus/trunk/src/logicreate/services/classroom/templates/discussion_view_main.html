@@ -1,4 +1,9 @@
 <?=$t['sectionheader'];?>
+<style type='text/css'>
+	.forumsection {
+		background-color: #9ccecd;
+	}
+</style>
 
 <center>
 <? if ($t['search']) {?>
@@ -19,10 +24,12 @@
 		</table>
 
 		<? $t['forumPost']->url = "classroom/discussion_post";?>
+		<? $t['forumPost']->dlurl = "classroom/discussion_view";?>
 		<? echo stripslashes(showPost($t['forumPost'],$t['perms'], $t['search'])); ?>
 	<?
 	while(list($k,$v) = @each($t['forumPost']->children)) { 
 	$v->url = "classroom/discussion_post";
+	$v->dlurl = "classroom/discussion_view";
 		 echo stripslashes(showPost($v ,$t['perms'], $t['search'])); 
 		 }
 		 ?>
