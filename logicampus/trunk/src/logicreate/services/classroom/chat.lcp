@@ -16,6 +16,11 @@ class chat extends StudentService {
 	var $_lines = 20;
 	var $_refresh = 10;
 	var $sectionTitle = 'Online Chat';
+	var $_immediatePost = false;
+	var $_allowURL = true;
+
+	var $_postformat = "<table width='100%'><tr><td valign='top' width='100'>_NAME_<BR><div style='font-size: 7px'>_DATE_</div></td><td valign='top'>_MESSAGE_</td></tr></table>";
+
     var $inactivelinks = array(
 			'Chat'
 		);
@@ -40,7 +45,7 @@ class chat extends StudentService {
 	// students need to download transcripts..
 	function transcriptRun($db,&$u,&$lcObj,&$t)
 	{
-		// this is a strange thing, the postvars
+		// this is a strange thing, on tarrant the postvars
 		// are being obliterated if they're arrays
 		// so here's my fix for transcripts
 		$lcObj->postvars = $_POST;
@@ -109,12 +114,19 @@ class chat extends StudentService {
 				</tr>';
 				$i_posting = 0;
 				while ($db->next_record())
-				{	$i_posting ++;
+				{	
+			$temp = $db->Record;
+			unset($temp['pkey']);
+			$check = md5(serialize($temp));
+			if ($check!=$lastcheck) { 
+				$i_posting ++;
 					$t['output'] .= '<tr style="background-color: '.(($i_posting%2) ? '#e7e7e7': '').'">
 						<td valign="top"><a target="_blank" href="'.appurl('users/view/'.$db->Record['username']).'">'.$db->Record['username'].'</a></td>
 						<td valign="top">'.date('g:i A', $db->Record['timeint']). '</td>
 						<td valign="top">'.stripslashes($db->Record['message']). '</td>
 					</tr>';
+			}
+			$lastcheck = $check;
 						
 				}
 				$t['output'] .= '<tr style="background-color: silver">
@@ -163,6 +175,42 @@ class chat extends StudentService {
 		$t['archiveList'] = 0;
 
 	}
+
+	function chatTitleRun($db,&$u,&$lcObj,&$t) {
+		$this->presentor='emptyPresentation';
+		$t['title'] = base64_decode($lcObj->getvars['title']);
+		if ($t['title'] =='' ) {
+			$t['title'] = $this->_title;
+		}
+		$lcObj->templateName = "chat_title";
+	}
+
+	function reloadRun($db,&$u,&$lcObj,&$t) {	
+		$this->presentor = 'reloadPresentation';
+		$t['time'] = 2;
+		$key = 'last_chat_key'.$this->chat_id;
+		$last = $u->sessionvars[$key];
+		if ($last==0) { 
+			$db->query("select * from chat where chat_id=".$this->chat_id." and timeint>".(time()-300)." order by timeint");
+		} else { 
+// mgk 11/28/03
+// don't choose our own posts because the javascript should post our stuff to the 
+// chat window immediately.  if it's not, then javascript isn't working 
+// and the whole things is hosed anyway
+			$db->query("select * from chat where chat_id=".$this->chat_id." and pkey>$last order by timeint");
+		}
+		while($db->next_record()) { 
+			$t['rows'][] = $db->Record;
+			$max = $db->Record['pkey'];
+		}
+		if ($max>0) { 
+			$u->sessionvars[$key] = $max;
+			$u->saveSession();
+		}
+		$t['postformat'] = $this->_postformat;
+	}
+
+
 
 	function initializeRun($db,&$u,&$lcObj,&$t) {
 		if (trim($this->_isChatAvailable)=="Y") { 
@@ -370,6 +418,7 @@ class chat extends StudentService {
 	}
 	
 	function inputRun($db,&$u,&$lcObj,&$t) {
+		$t['postformat'] = $this->_postformat;
 		if (trim($this->_isChatAvailable)=="Y") { 
 			$t["username"] = trim($u->username);
 			if ( ($t["username"]=="") || (strtolower(trim($t['username']))=='anonymous')) { 
@@ -384,6 +433,13 @@ class chat extends StudentService {
 		} else {
 			$lcObj->templateName = "chat_empty";
 		}
+		$t['immediatePost'] = true;
+		if (!$this->_immediatePost) { 
+			$t['immediatePost'] = false;
+		}
+		if ($this->_allowURL) { 
+			$t['allowURL'] = true;
+		}
 		$this->presentor = "emptyPresentation";
 	}
 
@@ -391,8 +447,14 @@ class chat extends StudentService {
 		$lcObj->postvars['url'] = strip_tags($lcObj->postvars['url']);
 		$lcObj->postvars['text'] = strip_tags($lcObj->postvars['text']);
 
+		if (!$this->_allowURL) {
+			$lcObj->postvars['url']=='';
+		}
+
+
+
 		$this->presentor = "emptyPresentation";
-		if (trim($lcObj->postvars['text'])=='' and trim($lcObj->postvars['url']=='') ) { $this->inputRun($db,$u,$lcObj,$t); return; }
+		if (trim($lcObj->postvars['text'])=='' and trim($lcObj->postvars['url']=='') ) { $this->inputRun(&$db,&$u,&$lcObj,&$t); return; }
 
 		$text = $lcObj->postvars['text'];
 		$url = $lcObj->postvars['url'];
@@ -409,7 +471,10 @@ class chat extends StudentService {
 			$message = $lcObj->postvars["text"];
 
 		// URL->link
-			$message = url2links($message);
+		//	$message = url2links($message);
+			if ($url) { 
+				$url = "<!--URL-->POSTED URL: ".url2links($url);
+			}
 
 			$message = addslashes($message);
 			$username = addslashes($username);
@@ -441,9 +506,10 @@ class chat extends StudentService {
 			}
 
 			}
-		}
 
-		$this->inputRun($db,$u,$lcObj,$t);
+		}
+		$lcObj->templateName = 'chat_input';
+		$this->inputRun(&$db,&$u,&$lcObj,&$t);
 	}
 
 	function adminpostRun($db,&$u,&$lcObj,&$t) {	
@@ -542,5 +608,11 @@ $j = "window.open('$url','popup','".$extras."width=$width,height=$height');";
 return $j;
 }
 
+// used just in chat
+function reloadPresentation($obj,$t) {
+echo "<html><meta http-equiv='refresh' content='".$t['time']."; ".$t['url']."'>";
+include($obj->module_root."templates/".$obj->templateName.".html");
+echo "</html>";
+}
 
 ?>
