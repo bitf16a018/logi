@@ -1,0 +1,49 @@
+<?=$t['sectionheader'];?>
+
+
+<h4>
+You chose the 
+<?=$t['selected']['semesterId']. ' - '.$t['selected']['courseFamilyNumber']. ' '.$t['selected']['courseName'];?> 
+ course to update.
+<br><br>
+Which course would you like to copy FROM?
+</h4>
+
+<form method="post">
+
+<table cellpadding="3" cellspacing="1" border="0" width="100%">
+<tr class="tabletitle">
+	<td></td>
+	<td><B>Semester ID</B></td>
+	<td><B>Course</B></td>
+	<td><B>Course Name</B></td>
+	<td><B>Class ID</B></td>
+</tr>
+<?php
+	foreach($t['selections'] as $class)
+	{
+		echo '
+		<tr
+			'.(($class['id_classes'] == $t['selected']['id_classes']) ? 'style="background: silver;"' : '').'>
+			<td>';
+		if ( $class['id_classes'] == $t['selected']['id_classes'] ) {
+			echo '<i>Copy to</i>';
+		} else {
+			echo '<input type="radio" name="id_classes_with" value="'.$class['id_classes'].'"/>';
+		}
+		echo '</td>
+			<td>'.$class['semesterId'].'</td>
+			<td>'.$class['courseFamilyNumber'].'</td>
+			<td>'.$class['courseName'].'</td>
+			<td>'.$class['id_classes'].'</td>
+		</tr>';
+	}
+
+
+
+?>
+</table>
+<input type="hidden" name="id_classes_update" value="<?=$t['selected']['id_classes'];?>">
+<input type="hidden" name="event" value="selectWith">
+<input type="submit" value="Continue >>">
+</form>
