@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0.1"?>
 <project name="LogiCampus" default="dist" basedir=".">
 	<description>
 		LogiCreate php app server and associated services/modules.
@@ -13,7 +13,7 @@
   <property name="dist"  location="dist" />
   <property name="scripts" location="scripts" />
   <property name="builddir" location="build" />
-  <property name="lc.version" value="1.0" />
+  <property name="lc.version" value="1.0.1" />
   <target name="init" depends="cleantemp">
     <!-- Create the time stamp -->
     <tstamp>
