@@ -206,7 +206,47 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 	return $ret;
 	}
 
+/**
+	 * get all classes someone is taking, regardless of active/not
+	 * or semester dates: Geleli added to accomodate gradebookall
+	 */
+	function getOverAllClassesTaken($uname) {
+		$ret = array();
+		$db = DB::getHandle();
+		$sql = "SELECT
+                        classes.*, semesters.semesterID,courses.courseName, 
+		
+						CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profile.firstname, ' ', profile.lastname) as facultyName
+/**
+		Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
+						CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+ **/
+                        FROM class_student_sections as css
+                        LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
+                        LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
+                        LEFT JOIN courses ON classes.id_courses = courses.id_courses
+			LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
+			LEFT JOIN profile on classes.facultyId=profile.username
+			LEFT JOIN profile_faculty on profile_faculty.username=profile.username
 
+                        WHERE css.id_student = '$uname'
+		";		
+	
+		$db->query($sql);
+		$db->RESULT_TYPE=MYSQL_ASSOC;
+#		ob_start();
+		while ($db->next_record() ) {
+			$temp = PersistantObject::createFromArray('classObj',$db->Record);
+			$temp->_dsn = $dsn;
+			$temp->__loaded = true; 
+			$ret[] = $temp;
+#			debug($temp);
+		}
+#		$x = ob_get_contents();
+#		ob_end_clean();
+#		mail("michael@tapinternet.com","Classes for $uname",$x,"From: ".WEBMASTER_EMAIL);
+	return $ret;
+	}
 	/**
 	 * get all classes someone is teaching
 	 */

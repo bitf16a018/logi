@@ -161,6 +161,9 @@
 	class StudentUser extends lcUser {
 
 		var $classesTaken = array();
+		//Beg. Geleli added for gradebookall
+		var $overAllClassesTaken = array();
+		//end of Gelali add
 		var $type = 'student';
 		var $userType = USERTYPE_STUDENT;
 		
@@ -169,6 +172,9 @@
 		function StudentUser ($userid)
 		{
 			$this->classesTaken = classObj::getClassesTaken($userid);
+			//Geleli added for gradebookall
+			$this->overAllClassesTaken = classObj::getOverAllClassesTaken($userid);
+			//end of gelali add
 			
 		}
 
