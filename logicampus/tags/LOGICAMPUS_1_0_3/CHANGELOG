@@ -1,0 +1,51 @@
+LOGICAMPUS CHANGE LOG
+Last Updated:  12/09/03 11:58 EST
+
+SYNTAX:  
+<Date: m/d/y h:i> - <username>
+<Module / Library> - <Description>
+
+
+#########################
+01/09/03 12:11 PM - zorka
+adminstration - 
+This adds the ability for an admin to manage student enrollment.  The
+main account interface was modified to display all semesters and
+classes and a user is enrolled in.  This should help helpdesk staff to
+know which classes a user is or is not enrolled in.  When you select
+the 'manage class enrollment' it shows the classes a student is
+enrolled in for the current semester.  There is a drop down to select
+another semester to view.
+
+Other features include the ability to remove a student from a class,
+suspend and active a student for a given class.
+
+01/06/03 8:45 PM - zorka
+install - fixed installer so it doesn't add all of the fake user
+accounts
+install - added LANG_PATH to the defines so the translation things
+mark added work
+
+12/20/03 1:00 PM - mark
+core system - added translation system, spanish and chinese has been
+started
+
+12/17/03 7:00 PM - mgkimsal
+users/blog - Added the ability for users to have their own blog (not
+stable, still needs testing)
+
+12/09/03 2:00 PM - mark
+gradebook - Added a feature to the gradebook where you can drop
+a number of low grades from any gradebook category.  Patched some
+security holes.
+
+12/07/03 3:05 - mgkimsal
+unknown/install	- Change to add define for MAX_COURSES
+unknown/install - Change to put in 'include sample data' in installer
+administration/courses - Change to check for MAX_COURSES
+
+12/01/03 12:00 PM - zorka
+adminstration/classes - Removed text on the 'assignments folder' that says this
+is where to find assignments that have been uploaded by students.
+This was the original way it was planned to work, but the workflow was
+changed to make it easier to teachers to grade assignments.

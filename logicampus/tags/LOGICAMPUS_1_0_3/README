@@ -1,0 +1,41 @@
+BUILD FROM CVS
+================================================================================
+You will need "ant" to create a LogiCampus build from a CVS checkout.  
+The build.xml is an ant script. Visit the ant website for more information.
+http://jakarta.apache.org/ant/
+
+Make sure "build/applylicense.sh" is executable.  
+
+Example:  chmod 755 ./build/applylicense.sh
+
+Once ant is installed and in your path, from the top level CVS
+directory type:
+
+ant
+
+A logicampus-OSS.tar.gz file will be built and placed in ./dist/.
+Once you have this file, just follow docs/INSTALL.
+
+
+INSTALLATION
+================================================================================
+Read docs/INSTALL for more information on installation.
+
+
+WEB SERVER WRITE ACCESS TO DIRECTORIES
+================================================================================
+permissions.sh will set insecure permissions with chmod
+for the installer to work properly.  You should, ideally,
+have root on the target machine and chown those directories 
+to your webserver user.
+
+
+DUMMY DATA FOR DEMO CD
+================================================================================
+The script wipe_clean.sh in the data/ dir will erase all
+tables in your chosen database and insert starting data.
+
+Run "sh ./wipe_clean.sh user pass (db)" to install or 
+re-install the database for demo purposes.
+
+This file is required for the demo CD to run properly.

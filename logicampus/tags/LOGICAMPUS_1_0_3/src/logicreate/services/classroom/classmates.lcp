@@ -1,0 +1,56 @@
+<?
+
+include_once(LIB_PATH.'LC_html.php');
+
+class classmates extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Classmates';
+	var $inactivelinks = array(
+		'Classmates'
+	);
+/*
+ *
+ * Display a list of all users online.
+ * 
+ * Input data: 
+ * Output data: list of users
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='classmates_main';
+
+			$sql = "select username,firstname,lastname,photo from profile as p
+				left join class_student_sections as ss on ss.id_student=p.username
+				left join class_sections as s on s.sectionNumber=ss.sectionNumber
+				where s.id_classes='{$u->activeClassTaken->id_classes}' and ss.active=1
+				order by lastname";
+			$db->query($sql);
+	
+			$tbl = array();
+	
+			while ($db->next_record()) {
+	
+				$photo = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
+					? 'photos/'.$db->Record['photo']
+					: 'noimage.png';
+	
+				$tbl[] = '<a href="'.appurl('users/view/'.$db->Record['username']).'">'
+					.'<img border="0" src="'.IMAGES_URL.$photo.'" alt="'
+					.$db->Record['lastname'].', '.$db->Record['firstname'].'" /><br/>'
+					.$db->Record['lastname'].', '.$db->Record['firstname'].'</a>';
+			}
+	
+			if (count($tbl))
+				$t['table'] = htmlTable( $tbl, 4, '100%', '', 5, 2, 0, 'center' );
+			else
+				$t['table'] = '<i>Sorry, it seems that there aren\'t any students enrolled in this class. If you believe this not to be true, please contact the help desk.</i>';
+	
+		}
+
+
+
+}
+
+?>

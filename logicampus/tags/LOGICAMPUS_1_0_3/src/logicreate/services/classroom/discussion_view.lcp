@@ -1,0 +1,96 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(INSTALLED_SERVICE_PATH."forum/forumTree.php");
+include_once(LIB_PATH."datagrid.php");
+
+class discussion_view extends StudentService {
+
+	var $presentor = "htmlPresentation";
+	var $sectionTitle = 'Class Discussion';
+
+	var $applinks = array(
+		'List Threads' => 'discussion/',
+		'Start new Thread' => 'discussion_post/',
+	);
+
+	var $inactivelinks = array(
+		'Discussion Board'
+	);
+	
+
+	function Run($db,&$u,&$lc,&$t) {	
+		$t['search'] = $lc->getvars[2];
+		$mode = $lc->getvars['mode'];
+		if ($mode) { $t['search']=''; }
+		if ($mode=='t') { 
+			$u->sessionvars['forum']['view_mode'] = 't';
+		}
+		if ($mode=='f') { 
+			$u->sessionvars['forum']['view_mode'] = 'f';
+		}
+		$mode = $u->sessionvars['forum']['view_mode'];
+		if ($mode!='t') { $mode=='f'; }
+
+		$key = (int)$lc->getvars[1];
+
+		$forumPost = lcForumPost::load($key);
+		$forumPost->children = $forumPost;
+		$forumPost->children = $forumPost->getLcForumPosts();
+		#$forumPost->children = array_merge($forumPost->children,$forumPost->getLcForumPosts());
+
+		$id= $forumPost->lcForumId;
+		$f = lcForum::load($id);
+		$classid = $u->activeClassTaken->id_classes;
+		if ($f->lcForumNumericLink != $classid ) { 
+			$t['message'] =  "You can not view this forum";	
+			$this->presentor = 'errorMessage';
+			return;
+		} else {
+			$t['perms']['read'] = true;
+			$t['perms']['post'] = true;
+			// __FIX_ME
+			// Poor security - needs better checking
+			if ($u->isFaculty()) { 
+				$t['perms']['dele'] = true;
+			}
+		}
+
+		
+		$t['forumPost'] = $forumPost;
+		$lc->templateName = 'discussion_view_main';
+
+// threaded mode, not flat
+		if ($mode=='t') { 		
+			$tree = new ForumTreeList();
+			$tree->keyName = 'lcForumPostId';
+			$tree->keyParentName = 'lcForumPostParentId';
+			$tree->loadObjects($forumPost->children);
+			$tree->perms = $t['perms'];
+			$tree->highlight = $t['search'];
+#			debug($forumPost->children);
+
+			$view = new ForumView($tree);
+			$view->url = "classroom/discussion_post";
+			$t['view'] = $view->renderAsTable();
+#debug($view); exit();
+			$lc->templateName = 'discussion_view_main_threaded';
+		}
+	$this->applinks['Start new Thread'] = "discussion_post/".$forumPost->lcForumId;
+		
+	}
+
+}
+?>

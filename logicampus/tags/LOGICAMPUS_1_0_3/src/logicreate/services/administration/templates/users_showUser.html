@@ -1,0 +1,121 @@
+<?=$t['sectionheader'];?>
+<table border="1" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td width="100%" colspan="2" class="tabletitle">
+      Account Information for <u><?=$t['user_info']['username']?></u>
+      </td>
+     </tr>
+     <tr>
+     <td width="50%" valign='top'>
+	<form method="POST">
+	<input type="hidden" name="event" value="update">
+
+	<table border="0" width="100%" cellpadding="2">
+		<tr class="tabletitle">
+			<td valign="top" width="100%">
+				Editing Username: <u><?=$t['user_info']['username']?></u>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<b>Group Membership</b><br>
+				<select size="14" name="group_opt[]" MULTIPLE>
+			<?= $t["group_opt"]; ?>
+				</select>
+				<br>
+				<i>(press ctrl to select more than one group)</i>
+				<br>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			Username: <br>
+			<i><?= $t[user_info][username];?></i>
+			<p>
+	
+			Email: <br>
+			<input type="text" name="email" value="<?= $t[user_info][email];?>">
+			<p>
+	
+			New-Password: <br>
+			<input type="password" name="password" value="">
+			<br>
+			(replaces old one if filled in)
+	
+			<p>
+	
+			<input type="submit" value="update user">
+			<p>
+			<div align="right">
+			<a href="<?= modurl('users/'.$obj->getvars[1].'/event=ShowDelete/username='.$t['user_info']['username'])?>"><img src="<?= IMAGES_URL;?>edittrash.gif" alt="delete user" border="0"></a><br>[Del]
+			</div>
+			
+			<br>
+			</td>
+		</tr>
+		</table>
+	</td>
+	<td valign="top" width="50%">
+		<table border="0" width="100%">
+		<tr>
+			<td class="tabletitle" align="left" valign="top" width="100%">
+			User Information (<a style="color: white;" href="<?=modurl('users/event=editProfile/username='.$t['user_info']['username']);?>">Edit Profile</a>)</br></br>
+
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<fieldset>
+			<legend>
+			<a href="<?=modurl('enrollment/username='.$t['user_info']['username']);?>">Manage Class Enrollment</a></br> 
+			</legend>
+			<?
+			$count = count($t['classlist']);
+			if ($count > 0)
+			{
+
+				while (list ($semesterID, $classArray) = @each($t['classlist']))
+				{
+					echo '<ul><li>'.$semesterID.'</li><ul>';
+					while(list ($void, $classInfo) = @each($classArray))
+						{
+						echo $classInfo;	
+					}
+					echo '</ul></ul>';
+				}
+			} else {
+				echo 'User is not enrolled in any classes.';
+			}
+			?>	
+			</fieldset>
+			</br></br>
+<?
+				if ($t['user']->isFaculty() )
+				{ ?>
+			<a href="<?=modurl('users/event=editCourseFamilyInfo/username='.$t['user_info']['username'].'');?>">Edit Faculty Course Families</a><br>
+
+			<? } ?>
+
+		
+			<fieldset>
+			<legend><strong>Login As User</strong></legend>
+			If you wish to login as this user, click the link below.<br>
+			<a href="<?= APP_URL .'administration/users/'.$t[user_info][username];?>/event=loginAs">Login as <i><?= $t[user_info][username];?></i></a>
+			</fieldset>
+
+		</br></br>	
+		<fieldset>
+		<legend><strong>Additional Information</strong></legend>	
+		<?include(INSTALLED_SERVICE_PATH."helpdesk/templates/history_main.html");?>
+		</fieldset>
+			</td>
+		</tr>
+		</table>
+
+	</td>
+	</tr>
+</table>
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+

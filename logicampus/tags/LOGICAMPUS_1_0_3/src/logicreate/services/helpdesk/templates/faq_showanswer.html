@@ -1,0 +1,112 @@
+<?=$t['sectionheader'];?>
+<?php
+echo '<a href="'.modurl('faq/event=showquestions/'.$t['a_answer']['id_faq_category']).'">Back to listing</a>';
+
+echo '<h4>'. $t['a_answer']['tx_category']. '</h4>';
+
+	$vote_avg = $t['a_answer']['user_vote_average'];
+	?>
+	<hr size="1">
+	
+	<?php
+	if (LC_FAQ_USE_COMMUNITY_VOTING)
+	{
+	?>
+		<table cellpadding="2" cellspacing="0" border="1" width="150" align="right">
+		<tr>
+		<td>
+		<table cellpadding="2" cellspacing="0" border="0" width="150" align="right">
+		<form method="POST">
+		<tr>
+			<td bgcolor="#d7d7d7" colspan="2">
+			<?php
+				if ($t['a_answer']['has_user_voted'] == false)
+				{
+			?>
+					Please help us bring quality answers to you by voting on a scale
+					1-5; 5 being the most helpful and 1 being the least helpful to you.
+			<?php
+				} else
+				{
+			?>
+					Thank you for your input on this FAQ. The following is 
+					the average amongst users that this has been helpful to.
+			<?php
+				}
+			?>
+			</td>
+		</tr>
+		<tr>
+			<td width="25%" align="right"><input type="radio"<?=(($vote_avg == 1) ? ' checked' : '')?> name="faqvote" value="1"></td>
+			<td>1</td>
+		</tr>
+		<tr>
+			<td align="right"><input type="radio" name="faqvote"<?=(($vote_avg == 2) ? ' checked' : '')?> value="2"></td>
+			<td>2</td>
+		</tr>
+		<tr>
+			<td align="right"><input type="radio" name="faqvote"<?=(($vote_avg == 3 || $vote_avg == 0) ? ' checked' : '')?> value="3"></td>
+			<td>3</td>
+		</tr>
+		<tr>
+			<td align="right"><input type="radio" name="faqvote"<?=(($vote_avg == 4) ? ' checked' : '')?> value="4"></td>
+			<td>4</td>
+		</tr>
+		<tr>
+			<td align="right"><input type="radio" name="faqvote"<?=(($vote_avg == 5) ? ' checked' : '')?> value="5"></td>
+			<td>5</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+			<?php
+				if ($t['a_answer']['has_user_voted'] == false)
+				{
+			?>
+				<input type="submit" value="Vote!">
+				<input type="hidden" value="vote" name="event">
+			<?php
+				}
+			?>
+			</td>
+		</tr>
+		</form>
+		</table>
+		</td>
+		</tr>
+		</table>
+	<?
+	}
+	
+if ($t['a_answer']['is_admin'])
+{
+	echo 
+	'<a href="'.modurl('faq/event=reviewquestion/'.$t['a_answer']['id_faq']).'">Edit this FAQ</a>
+	<br>
+	Created On: '.date('F dS, Y g:i A', strtotime($t['a_answer']['dt_submitted'])).' <br>By: 
+	<a target="_blank" href="'.appurl('users/view/'.$t['a_answer']['tx_username']).'">
+	'.$t['a_answer']['tx_username'].'</a><br>
+	';
+	
+	if (LC_FAQ_USE_COMMUNITY_VOTING)
+	{
+		echo '
+		'.(int)$t['a_answer']['users_voted'].' people voted for this FAQ with an avg rating of 
+		'.$t['a_answer']['user_vote_average'].' / 5<br>';
+	}
+	echo '
+	<br>';
+}
+
+echo '<i>Question:</i> <br><B>'.$t['a_answer']['tx_question']. '</B><br><br><br>';
+
+echo '<i>Answer:</i> <br>';
+echo $t['a_answer']['tx_answer'];
+
+echo '<br>';
+echo '<br>';
+
+//debug($t['a_answer']);
+
+
+
+?>

@@ -1,0 +1,80 @@
+<?=$t['sectionheader'];?>
+<?php
+
+$a_display_category = array();
+
+foreach($t['a_faq'] as $category)
+{	$a_display_category[] = '<h3><a href="'.modurl('faq/event=showquestions/'.$category['id_faq_category']).'">'.$category['tx_category'].'</a> ('.$category['total_faqs_in_this_category']. ')</h3>';
+}
+
+// if you're a staff member and no categories are listed (no faqs or cats around)
+if (count($a_display_category) == 0 && count($t['a_faq_categoryless']) == 0 && $t['is_staff'])
+{	
+	echo '<center><br>As an administrator, you need to go to "Manage FAQ categories" or "Submit FAQ" to start entering information.</center>';
+	echo '<br>';
+	
+} else
+{	// lets display what we've got here
+	if (count($a_display_category) > 0)
+	{	
+		echo '<center>';
+		echo htmlTable($a_display_category, 2, '90%');
+		echo '</center>';
+		echo '<br>';
+	}
+	
+}
+
+
+// Non categorized Faqs
+$a_display_question = array();
+
+
+if (count($t['a_faq_categoryless']) > 0)
+{
+	foreach($t['a_faq_categoryless'] as $question)
+	{	
+		$a_display_question[] = '<a href="'.
+			modurl('faq/event=showanswer/'.$question['id_faq']).'">'.
+			$question['tx_question'].'</a>';
+	}
+
+	if (count($a_display_category) > 0)
+	{	echo '<h4>Uncategorized Questions</h4>';
+	}
+	
+	echo '<ul type="square">';
+
+	foreach($a_display_question as $q)
+	{	echo '<li>'.$q.'</li>';
+	}
+
+	echo '</ul>';
+
+}
+
+
+
+// managment
+if ($t['is_staff'])
+{
+	
+	echo '<h4>Unapproved Questions ('.count($t['a_faq_notapproved']).')</h4>';
+	
+	if (count($t['a_faq_notapproved']) == 0)
+	{	echo '<center>No FAQs are waiting approval</center>';
+	} else
+	{	
+		echo '<ul type="square">';
+		/**	$question is an array of attributes for a single question
+		 */
+		foreach($t['a_faq_notapproved'] as $question)
+		{
+			echo '<li>'.date('F, dS g:i A', strtotime($question['dt_submitted'])).' By: '.'<a target="_blank" href="'.appurl('users/view/'.$question['tx_username']).'">'.$question['tx_username'].'</a>'.'<br>'.'<a href="'.modurl('faq/event=reviewquestion/'.$question['id_faq']).'">'.$question['tx_question'].'</a><br><br>'.'</li>'."\n";
+			
+		}
+		echo '</ul>';
+		
+	}
+}
+?>

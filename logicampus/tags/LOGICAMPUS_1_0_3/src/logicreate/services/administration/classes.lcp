@@ -1,0 +1,1038 @@
+<?
+
+/*
+ * 
+ * Handles all methods for creating and managing classes.
+ *
+ */
+
+include_once(LIB_PATH.'classObj.php');
+include_once(LIB_PATH.'courseObj.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'eventsObj.php');
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class classes extends AdminService
+{
+	
+	// form stuff
+	var $cleanedArray = array();
+		
+	var $presentor = "htmlPresentation";
+	var $authorizer = 'ServiceMapAuth';
+
+	// Links
+	var $sectionTitle = 'Class Manager';
+	
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Restore Class' => 'classrestore/'
+	);
+	/**
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Restore Class' => 'classrestore/',
+		'Restore All Classes' => 'classes/event=restoreall',
+		'Backup Classes' => 'classes/event=backup'
+	);
+	**/
+	var $applinks = array(
+		'List Classes' => 'classes/',
+		'Add a Class' => 'classes/event=add'
+	);
+	
+	
+	/**
+	 *	rebuildng exam entries
+	 */
+	function rebuildAssessmentCalendarDatesRun($db,&$u,&$lc,&$t)
+	{
+		echo 'You may not execute this';
+		return;
+		
+		// purge all exam items in the calendar
+		$sql = '
+		DELETE 
+		FROM lcEvents
+		WHERE calendarType=\'assessmentscheduling\'
+		';
+		$db->query($sql);
+		
+		// selecting all exams that have been stamped "approved" status = 3 
+		$sql = '
+		SELECT A.*
+		FROM assessment as A
+		WHERE (A.date_available > 0 AND A.date_unavailable > 0)
+		';
+		
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{
+			$ast_calendar = new assessmentscheduling();
+			$ast_calendar->set_id_item($db->Record['assessment_id']);
+			$ast_calendar->set_id_class($db->Record['class_id']);
+			$ast_calendar->set_date_start($db->Record['date_available']);
+			$ast_calendar->set_date_end($db->Record['date_unavailable']);
+			$ast_calendar->set_title($db->Record['display_name']);
+			$ast_calendar->set_allday(true);
+			
+			$ast_calendar->save();
+
+		}
+
+	}
+	
+	
+	/**
+	 *	rebuildng exam entries
+	 */
+	function rebuildExamCalendarDatesRun($db,&$u,&$lc,&$t)
+	{
+		$campus_array = array(1=>'Northwest', 2=>'Northeast', 3=>'South', 4=>'Southeast');				
+		
+		echo 'You may not execute this';
+		return;
+		// purge all exam items in the calendar
+		$sql = '
+		DELETE 
+		FROM lcEvents
+		WHERE calendarType=\'examscheduling\'
+		';
+		$db->query($sql);
+		
+		// selecting all exams that have been stamped "approved" status = 3 
+		$sql = '
+		SELECT C.date_start, C.date_end, B.id_classes, A.id_exam_schedule_classes_dates, A.title, A.instructions, B.courseNumber, B.courseFamily, B.facultyId
+		FROM exam_schedule_classes_dates as A
+		INNER JOIN classes as B ON A.id_classes=B.id_classes
+		INNER JOIN exam_schedule_dates as C ON A.id_exam_schedule_dates=C.id_exam_schedule_dates
+		WHERE A.status=3
+		';
+		
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{
+			$exam_calendar = new examscheduling();
+			
+			$exam_calendar->set_id_class($db->Record['id_classes']);
+			$exam_calendar->set_id_item($db->Record['id_exam_schedule_classes_dates']);
+			$exam_calendar->set_owner($db->Record['facultyId']);
+			$exam_calendar->set_title('['.$db->Record['courseFamily'].$db->Record['courseNumber'].'] '.addslashes(stripslashes($db->Record['title'])));
+			$exam_calendar->set_description(addslashes(stripslashes($db->Record['instructions'])));
+			$exam_calendar->set_date_start($db->Record['date_start']);
+			$exam_calendar->set_date_end($db->Record['date_end']);
+			
+			$exam_calendar->save();
+			
+			
+			//echo date('y-m-d g:i A', 1063759500). '<br>';
+			//echo date('y-m-d g:i A', 1063630800);
+			//debug($addevent);
+			
+		}
+
+	}
+	
+					
+	/**
+	 *	rebuildng exam entries
+	 */
+	function buildExamDatesRun($db,&$u,&$lc,&$t)
+	{
+		// I needs what I need mofo!
+		include_once(LIB_PATH.'ExamScheduleClasses.php');
+		
+		// get all id's of classes that do not have gradebooks
+		$sql = '
+		SELECT A.id_classes, A.id_semesters
+		FROM classes as A
+		LEFT JOIN exam_schedule_classes as B
+			ON A.id_classes=B.id_classes
+		WHERE B.id_classes IS NULL
+		AND A.id_semesters='.$lc->getvars['semester'];
+
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{
+			// roll throw and create new gradebook entries for all these friggin classes
+			
+			$esc = new ExamScheduleClasses();
+			$esc->idClasses = $db->Record['id_classes'];
+			$esc->idSemester = $db->Record['id_semesters'];
+			$esc->status = 0;
+			$esc->southCampus = 0;
+			$esc->southeastCampus = 0;
+			$esc->northeastCampus = 0;
+			$esc->northwestCampus = 0;
+			$esc->receivedDate = '';
+			$esc->note = '';
+			$esc->save();
+			
+        	if ($esc->idExamScheduleClasses == false)
+        	{	echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->Record['id_classes'].'"*';
+        		break;
+        	}
+			
+        	unset($esc);
+			
+		}
+		
+		
+	}
+	
+	
+	/**
+	 *	Will build up gradebooks for classes that do not have gradebooks
+	 */
+	function buildClassGradebooksRun($db,&$u,&$lc,&$t)
+	{
+		// I needs what I need mofo!
+		include_once(LIB_PATH.'ClassGradebook.php');
+		
+		// get all id's of classes that do not have gradebooks
+		$sql = '
+		SELECT A.id_classes
+		FROM classes as A
+		LEFT JOIN class_gradebook as B
+			ON A.id_classes=B.id_classes
+		WHERE B.id_classes IS NULL';
+		
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{
+			// roll throw and create new gradebook entries for all these friggin classes
+			
+        	$gradebookObj = new ClassGradebookBase();
+        	$gradebookObj->set('idClasses', $db->Record['id_classes']);
+        	$gradebookObj->save();
+        	if ($gradebookObj->idClassGradebook == false)
+        	{	echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->Record['id_classes'].'"*';
+        		break;
+        	}
+			
+        	unset($gradebookObj);
+			
+		}
+		
+		
+	}
+	
+	
+	/*
+	 * Builds folders for classes that don't contain any folders ( some error happened that folders weren't created for classes so i can rebuild them)
+	 */
+	function rebuildClassFoldersRun($db,&$u,&$lc,&$t)
+	{
+		$sql = '
+		SELECT A.id_classes, A.facultyId
+		FROM classes as A
+		LEFT JOIN classdoclib_Folders as B
+			ON A.id_classes=B.class_id
+		WHERE B.class_id IS NULL';
+		$db->query($sql);
+
+		while ($db->next_record())
+		{
+			$new_id_class = $db->Record['id_classes'];
+			$facultyId = trim($db->Record['facultyId']);
+			echo $new_id_class . '|'. $facultyId. '<br>';
+		/*	
+			include_once(LIB_PATH. 'documentLibraryLib.php');
+
+ 			$folderObj = new LC_folder();
+	                $folderObj->name = 'Trash';
+	                $folderObj->folderType= 0;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $facultyId;
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->notes = 'Place files viewable by your classroom in here.';
+			$folderObj->_save('classdoclib_Folders');
+					
+	                unset($folderObj);
+	
+			$folderObj = new LC_folder();
+	                $folderObj->name = 'Classroom';
+	                $folderObj->folderType= 1;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $facultyId;
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->notes = 'Place files viewable by your classroom in here.';
+			$folderObj->_save('classdoclib_Folders');
+					
+	                unset($folderObj);
+	                
+	                $folderObj = new LC_folder();
+	                $folderObj->name = 'Web Images';
+	                $folderObj->folderType= 1;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $facultyId;
+	                $folderObj->notes = 'Place images for your lesson web pages here.';
+	                $folderObj->class_id = $new_id_class;
+	                	$folderObj->_save('classdoclib_Folders');
+					
+	                unset($folderObj);
+	                
+	                $folderObj = new LC_folder();
+	                $folderObj->name = 'Assignments';
+	                $folderObj->folderType= 1;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $facultyId;
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->notes = 'When a student submits homework it will be stored here.';
+		        $folderObj->_save('classdoclib_Folders');
+					
+	                unset($folderObj);
+
+	
+	*/
+	
+		}
+		
+		
+	}
+	
+	# Displays Classes by default (chooses current semster by default)	
+	function Run($db,&$u,&$lc,&$t)
+	{
+		$lc->templateStyle='private';
+		$lc->templateName = 'classes_main';
+		
+		if ((int)$lc->postvars['semester'] > 0)
+		{	$u->sessionvars['administration']['classes']['currentsemester'] = (int)$lc->postvars['semester'];
+		}
+		if ((int)$u->sessionvars['administration']['classes']['currentsemester'] <= 0)
+		{
+			// @@@ we need to load up the current semester
+			$u->sessionvars['administration']['classes']['currentsemester']= semesterObj::getCurrentID();
+
+		}
+		
+		# __FIX_ME__ when there is no semester it cannot figure out
+		# what to load up
+		if
+		($u->sessionvars['administration']['classes']['currentsemester'])
+		{
+		$semesterObj = semesterObj::_getFromDB((int)$u->sessionvars['administration']['classes']['currentsemester'], 'id_semesters');	
+		$t['semesterDisplay'] = $semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
+		} else {
+			$t['nosemester'] = TRUE;
+			return;
+		}
+		$f = new SiteForm();
+		$f->getForm('semester', array('semester'=>$u->sessionvars['administration']['classes']));
+		$f->action = modurl('classes/main/');
+		$t['form'] = $f->ToHTML();
+		
+		$datagrid = new SearchGrid($this->module,$this->serviceName);
+		$datagrid->table = 'classes as a';
+		$datagrid->headerClass = 'classheader';
+		$datagrid->class = 'datagrid';
+		
+		$datagrid->column = 'c.courseName, a.id_classes, concat(b.lastname, ", ",b.firstname) as Faculty, a.classType, a.courseFamily, a.courseNumber, a.sectionNumbers ';
+		$datagrid->where = 'a.id_semesters='. (int)$u->sessionvars['administration']['classes']['currentsemester'];
+		$datagrid->joins = 'left join profile as b on a.facultyId=b.username INNER JOIN courses as c ON a.id_courses=c.id_courses';
+		
+		if ($lc->getvars[$this->sortVar])
+		{	
+			if ($lc->getvars[$datagrid->sortVar] == 'Faculty')
+			{	$datagrid->orderby = 'b.lastname';
+			}elseif($lc->getvars[$datagrid->sortVar] == 'courseName')
+			{	$datagrid->orderby = 'c.courseName';	
+			}else
+			{	$datagrid->orderby = 'a.'.$lc->getvars[$datagrid->sortVar];
+			}
+			// add whatever other custom sortables here (outside tables)
+		}
+		
+		$datagrid->ignore = array('id_courses', 'id_semesters', 'priority', 'courseFamilyNumber');
+		$datagrid->sortColumns = array('id_classes', 'courseName', 'sectionNumbers', "courseFamily", "courseNumber", 'Faculty', 'classType');
+		$datagrid->headers = array(
+			'sectionNumbers' => 'Section #',
+			'id_classes' => 'CLASS ID',
+			'courseName'=>'Class Title',
+			'courseFamily'=>'Course Family',
+			'courseNumber'=>'Course #',
+			'Faculty'=>'Faculty',
+			"classType"=>"Class Type", 
+			'end'=>' ');
+		
+		$datagrid->overrideColumn('<?=nl2br($sectionNumbers);?>','sectionNumbers');
+		$datagrid->setCellWidth('courseNumber', '55');
+		$datagrid->setCellAlign('courseNumber', 'center');
+		
+		$datagrid->setCellWidth('classType', '80');
+		$datagrid->setCellAlign('classType', 'center');
+		
+		$datagrid->setCellWidth('Faculty', '20%');
+		
+		$datagrid->setCellWidth('end', '80');
+		$datagrid->setCellAlign('end', 'center');
+		
+		$datagrid->postpendColumn('<a href="<?=modurl("classes/event=edit/id=$id_classes");?>">edit</a> | <a onclick="if (confirm(\'Warning you are about to remove this class, please be absolutely sure before continuing. Click [ OK ] to remove this class.\')) { return true; } else { return false; }" href="<?=modurl("classes/event=delete/id=$id_classes");?>">delete</a>','end');
+
+		$this->sectionTitle = 'List Classes for '.$t['semesterDisplay'];
+		$this->inactivelinks = array( 'List Classes' );
+
+		$datagrid->addInstructorSelectFilter('Instructor', 'a.facultyId');
+		$datagrid->addClassTypeSelectFilter('Class Type', 'a.classType');
+		$datagrid->addCourseFamilySelectFilter('Course Family', 'a.courseFamily');
+		$datagrid->addInputFilter('Class ID', 'a.id_classes', true);
+		$datagrid->addInputFilter('Class Title', 'c.courseName');
+		$datagrid->addInputFilter('Section Number', 'a.sectionNumbers');
+		$t['table'] = $datagrid->toHTML();
+		
+	}
+
+	
+	function addRun($db,&$u,&$lc,&$t)
+	{
+		$t['myEvizent'] = 'add';
+		
+		$lc->templateName = 'classes_add';
+		$this->sectionTitle = 'Add a Class';
+		$this->inactivelinks = array( 'Add a Class' );
+		$f = new SiteForm();
+		$cf = 0;
+		// course family but really it's course ID and i will retrieve the course family from it and the 
+		// teachers that have added it as a preference
+		if ((int)$lc->getvars['cf'] > 0)
+		{	$cf = (int)$lc->getvars['cf'];
+		}
+		
+		if ($lc->postvars['submit'])
+		{
+			$t['error'] = $f->validateForm('adminclassinfo', $lc->postvars);
+			$this->cleanedArray = $f->cleanedArray;
+			
+			$a_sec_numbers = explode("\n", $this->cleanedArray['sectionNumbers']);
+			
+			$this->cleanedArray['sectionNumbers'] = ''; //clearing
+			// trying to find out already existing section numbers
+			$sectionnumbers_processed = 0;
+			foreach($a_sec_numbers as $pointer=>$snum)
+			{
+				if ((int)$snum == 0)
+				{	continue;
+				}
+				
+				$sectionnumbers_processed ++;
+				$this->cleanedArray['sectionNumbers'] .= (int)$snum. "\n";
+				
+				$sql = '
+				SELECT count(*) as SECTION_exists
+				FROM class_sections INNER JOIN classes ON classes.id_classes=class_sections.id_classes
+				WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$snum;
+				
+				$db->queryOne($sql);
+				if ($db->Record['SECTION_exists'])
+				{	// deny the adding of the class, inform them that section number exists already
+					$t['error'] .= 'Section #'. (int)$snum. ' exists<br>';
+					$f->error = true;
+				}
+				
+			}
+			
+			if ($sectionnumbers_processed == 0)
+			{	$t['error'] .= 'You must have at least 1 section number for a class<br>';
+				$f->error = true;
+			}
+			
+			$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
+			
+			if ($f->hasErrors() == false)
+			{	
+				$a_course = courseObj::_getFromDB($this->cleanedArray['id_courses'], 'id_courses');
+				$this->cleanedArray['courseFamily'] = $a_course->courseFamily;
+				$this->cleanedArray['courseNumber'] = $a_course->courseNumber;
+				$this->cleanedArray['courseFamilyNumber'] = $a_course->courseFamily.$a_course->courseNumber;
+				
+				// add class and say Thank you class maker!
+				$classObj = new classObj();
+				$classObj->_loadArray($this->cleanedArray);
+				$classObj->_saveToDB();
+				
+				if ($new_id_class = mysql_insert_id())
+				{
+					// add section numbers
+					foreach ($a_sec_numbers as $pointer=>$snum)
+					{	
+						if ((int)$snum <= 0)
+						{	continue;
+						}
+						
+						$sql = '
+						INSERT INTO class_sections 
+						SET sectionNumber='.(int)$snum. ',
+						id_classes='.$new_id_class;
+						
+						$db->query($sql);
+						
+					}
+					
+					// add classdoc folders (Assignments, Web Content, Classroom, Images'
+					include_once(LIB_PATH. 'documentLibraryLib.php');
+ 					$folderObj = new LC_folder();
+	                $folderObj->name = 'Trash';
+	                $folderObj->folderType= 0;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $this->cleanedArray['facultyId'];
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->notes = 'Place files viewable by your classroom in here.';
+
+					$folderObj->_save('classdoclib_Folders');
+						
+	                unset($folderObj);
+	
+					$folderObj = new LC_folder();
+	                $folderObj->name = 'Classroom';
+	                $folderObj->folderType= 1;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $this->cleanedArray['facultyId'];
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->notes = 'Place files viewable by your classroom in here.';
+					$folderObj->_save('classdoclib_Folders');
+					
+	                unset($folderObj);
+	                
+	                $folderObj = new LC_folder();
+	                $folderObj->name = 'Web Images';
+	                $folderObj->folderType= 1;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $this->cleanedArray['facultyId'];
+	                $folderObj->notes = 'Place images for your lesson web pages here.';
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->_save('classdoclib_Folders');
+					
+	                unset($folderObj);
+	                
+	                $folderObj = new LC_folder();
+	                $folderObj->name = 'Assignments';
+	                $folderObj->folderType= 1;
+	                $folderObj->parentKey = 0;
+	                $folderObj->owner = $this->cleanedArray['facultyId'];
+	                $folderObj->class_id = $new_id_class;
+	                $folderObj->notes = 'Use this folder to hold
+					assignments for students that were not uploaded
+					via the assignment manager.';
+		        	$folderObj->_save('classdoclib_Folders');
+					
+					// Insert an entry for the Gradeboko Application
+		        	include_once(LIB_PATH.'ClassGradebook.php');
+		        	$gradebookObj = new ClassGradebookBase();
+		        	
+		        	$gradebookObj->set('idClasses', $new_id_class);
+		        	$gradebookObj->aLower = 0;
+		        	$gradebookObj->bLower = 0;
+		        	$gradebookObj->cLower = 0;
+		        	$gradebookObj->dLower = 0;
+		        	$gradebookObj->totalPoints = 0;
+		        	$gradebookObj->roundScoresUp = 0;
+		        	$gradebookObj->calculationType = 0;
+		        	$gradebookObj->colorMissingGrade = '';
+		        	$gradebookObj->save();
+		        
+	
+		        	if ($gradebookObj->idClassGradebook == false)
+		        	{	echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
+		        	}
+
+					// Insert an entry for the Exam Scheduler Application
+					include_once(LIB_PATH.'ExamScheduleClasses.php');
+					$esc = new ExamScheduleClasses();
+					$esc->idClasses = $new_id_class;
+					$esc->idSemester = $this->cleanedArray['id_semesters'];
+					$esc->status = 0;
+					$esc->southCampus = 0;
+					$esc->southeastCampus = 0;
+					$esc->northeastCampus = 0;
+					$esc->northwestCampus = 0;
+					$esc->receivedDate = '';
+					$esc->note = '';
+					$esc->save();
+					
+	                
+				}
+				
+				$u->sessionvars['administration']['classes']['currentsemester'] = $this->cleanedArray['id_semesters'];
+				
+				$t['goodtimes'] = '<li>Thank you, your class has been added successfully.';
+
+				$this->run($db, $u, $lc, $t);
+				return;
+
+			} else
+			{
+				$t['error'] .= '<br>Failed to add class, please check your information and try again';
+			}
+			
+		}
+		
+		$f->getForm('adminclassinfo', $this->cleanedArray);
+		
+		if ($cf > 0)
+		{	// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
+			// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
+			$f->modFormValue('facultyId', 'CHANGEFAMILY'.$cf);
+			$f->modFormValue('id_courses', $cf);
+		}
+		
+		$t['form'] = $f->ToHTML();
+	}
+	
+	
+	function editRun($db,&$u,&$lc,&$t)
+	{
+		$t['myEvizent'] = 'edit/id='.$lc->getvars['id'];
+		$this->sectionTitle = 'Edit a Class';
+		$lc->templateName = 'classes_add';
+
+		$sql = '
+		SELECT count(DISTINCT (A.username) ) AS f_count FROM profile as A';
+		$db->queryOne($sql);
+		$rec_f_count = $db->Record['f_count'];
+		
+		$sql = '
+		SELECT count(DISTINCT (B.id_semesters) ) AS s_count FROM semesters as B';
+		$db->queryOne($sql);
+		$rec_s_count = $db->Record['s_count'];
+		
+		$sql = '
+		SELECT count(DISTINCT (C.id_courses) ) AS c_count FROM  courses AS C';
+		$db->queryOne($sql);
+		$rec_c_count = $db->Record['c_count'];
+		
+		if ( $rec_f_count ==false ) {
+			$t['error'] = "You must have at least one faculty member in the database to add a class.";
+		} else if ($rec_s_count == false ) {
+			$t['error'] = "You must have at least one semester in the database to add a class.";
+		} else if ($rec_c_count == false) {
+			$t['error'] = "you must have at least one course in the database to add a class.";
+		}
+		
+		/*
+		$sql = 'SELECT 
+		count(DISTINCT (A.username) ) AS f_count, 
+		count(DISTINCT (B.id_semesters) ) AS s_count, 
+		count(DISTINCT (C.id_courses) ) AS c_count
+		FROM semesters AS B, profile AS A, courses AS C';
+		
+		$db->queryOne($sql);
+
+		if ( $db->Record['f_count'] ==false ) {
+			$t['error'] = "You must have at least one faculty member in the database to add a class.";
+		} else if ( $db->Record['s_count'] == false ) {
+			$t['error'] = "You must have at least one semester in the database to add a class.";
+		} else if ( $db->Record['c_count'] == false) {
+			$t['error'] = "you must have at least one course in the database to add a class.";
+		}
+*/
+
+		if ( $t['error'] ) return;
+
+		$f = new SiteForm();
+		
+		$classObj = classObj::_getFromDB($lc->getvars['id'], 'id_classes');
+		
+		if ($lc->postvars['submit'] && is_object($classObj))
+		{	
+			$t['error'] = $f->validateForm('adminclassinfo', $lc->postvars);
+			$this->cleanedArray = $f->cleanedArray;
+			
+			//section number check
+			
+			/*
+				pull out all the good numbers (in submitted data)
+				
+				// grab the old ones
+				
+				// compare against new ones.					. if old one exists but new one doesn't, lets drop it
+				// maybe do the compare inside the below if block (f->hasErrors())
+				
+				// if both exist, don't do anything
+				// if old doesn't exist but new does. we add it.
+				
+				
+			 */
+			$a_sec_numbers = explode("\n", $this->cleanedArray['sectionNumbers']);
+			
+			$this->cleanedArray['sectionNumbers'] = '';
+			
+			// trying to find out already existing section numbers
+			$sectionnumbers_processed = 0;
+			foreach($a_sec_numbers as $pointer=>$snum)
+			{
+				if ((int)$snum == 0)
+				{	unset($a_sec_numbers[$pointer]);
+					continue;
+				} else
+				{	$a_sec_numbers[$pointer] = (int)trim($snum);
+				}
+				
+				$sectionnumbers_processed ++;
+				$this->cleanedArray['sectionNumbers'] .= (int)$snum. "\n";
+
+			}
+			
+			if ($sectionnumbers_processed == 0)
+			{	$t['error'] .= 'You must have at least 1 section number for a class<br>';
+				$f->error = true;
+			}
+			
+			$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
+			
+			
+				$sql = '
+				SELECT sectionNumber
+				FROM class_sections 
+				WHERE id_classes='. $classObj->id_classes;
+				
+				$a_db_sec_numbers = array();
+				$db->query($sql);
+				while ($db->next_record())
+				{	$a_db_sec_numbers[] = $db->Record['sectionNumber'];
+					
+				}
+				
+				foreach($a_db_sec_numbers as $k)
+				{	
+					$k = trim($k);
+					// these are the new numbers
+					if (in_array($k, $a_sec_numbers))
+					{	
+						$s = array_keys($a_sec_numbers, $k);
+						if (is_integer($s[0]))
+						{	unset($a_sec_numbers[$s[0]]);
+						}
+						
+					} else
+					{	
+						// remove it from the database
+						$sql = '
+						DELETE FROM class_sections 
+						WHERE sectionNumber='.(int)$k. '
+						AND   id_classes='.$classObj->id_classes;
+						$db->query($sql);
+						
+					}
+					
+				}
+				
+				if (count($a_sec_numbers) > 0)
+				{	
+					// now i've got to make sure the new ones don't exist in the ENTIRE section# db
+					foreach($a_sec_numbers as $number)
+					{
+						// does it exist already? if os.. nuke it from $a_sec_numbers
+						// else lets add dat Numba!?
+						$sql = '
+						SELECT count(*) as SECTION_exists
+						FROM class_sections INNER JOIN classes ON classes.id_classes=class_sections.id_classes
+						WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$number;
+
+						$db->queryOne($sql);
+						if ($db->Record['SECTION_exists'])
+						{	// deny the adding of the class, inform them that section number exists already
+							$t['error'] .= 'Section #'. (int)$number. ' exists<br>';
+							$f->error = true;
+						}
+						
+					}
+					
+				}
+				
+			
+			if ($f->hasErrors() == false)
+			{	
+				$a_sec_numbers;
+				foreach($a_sec_numbers as $number)
+				{	
+					// i'm to worried about a screwed up object that didnt' load
+					if ($classObj->id_classes > 0)
+					{
+						$sql = '
+						INSERT INTO class_sections 
+						SET sectionNumber='.(int)$number. ',
+						id_classes='.$classObj->id_classes;
+						
+						$db->query($sql);
+					}
+				}
+				
+				
+				$a_course = courseObj::_getFromDB($classObj->id_courses, 'id_courses');
+				
+				$this->cleanedArray['courseFamily'] = $a_course->courseFamily;
+				$this->cleanedArray['courseNumber'] = $a_course->courseNumber;
+				$this->cleanedArray['courseFamilyNumber'] = $a_course->courseFamily.$a_course->courseNumber;
+				
+				$old_facultyId = $classObj->facultyId;
+				
+				$classObj->_loadArray($this->cleanedArray);
+				
+				$new_facultyId = $classObj->facultyId;
+				
+				if ($old_facultyId != $new_facultyId)
+				{
+					/*
+						I am taking it upon myself to update the classdoclib_folders
+						becuase the object is to friggin whacky 
+					*/
+					
+					$sql = '
+					UPDATE classdoclib_Folders
+					SET owner=\''. $new_facultyId. '\'
+					WHERE class_id='.$classObj->id_classes.'
+					';
+					
+					$db->query($sql);
+					
+					/*
+					 *	Now i have to update files? I need to test to see if i really need to update
+					 *	the files or not.
+					 *
+					 *	Answer: no, i don't, files don't seem to respect there ownership, but rather
+					 *	the ownership of the folders. At least this is the case for me but I am in 
+					 *	administrators groups. Could this affect my test? If not. we're good with not 
+					 *	updating the owner of the file
+					 */
+				
+				}
+				
+				$classObj->_saveToDB();
+				
+				$this->run($db, $u, $lc, $t);
+				return;
+
+			} else
+			{
+				$t['error'] .= '<br>Failed to add class, please check your information and try again';
+			}
+			
+		}
+		$cf = 0;
+		if ($lc->postvars['submit'] == false && $lc->getvars['cf'] > 0 && $classObj->id_courses != $this->getvars['cf'])
+		{	$classObj->id_courses = (int)$lc->getvars['cf'];
+			$cf = (int)$lc->getvars['cf'];
+		}
+		
+		$f->getForm('adminclassinfo', object2array($classObj));
+		$f->modFormValue('submit', 'Update Class');
+		
+		if ($cf > 0)
+		{	// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
+			// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
+			$f->modFormValue('facultyId', 'CHANGEFAMILY'.$cf);
+			$f->modFormValue('id_courses', $cf);
+		}
+		
+		$t['form'] = $f->ToHTML();
+		
+	}
+
+	// MIssing forums for assignments and
+	// possibly classroom forums?  I think that's it.
+	
+	function deleteRun($db,&$u,&$lc,&$t)
+	{
+		$classObj = classObj::_getFromDB($lc->getvars['id'], 'id_classes');
+		
+		if (is_object($classObj) && $classObj->id_classes > 0)
+		{
+			$id_classes = $classObj->id_classes;
+			
+			$sql[] = 'DELETE FROM class_announcements WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM chat WHERE chat_id='.$id_classes;
+			$sql[] = 'DELETE FROM class_faqs WHERE id_classes='.$id_classes;
+			
+			$sql_string = 'SELECT id_class_assignments FROM class_assignments WHERE id_classes='.$id_classes;
+			$db->query($sql_string);
+			while ($db->next_record())
+			{
+				$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+				$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+				$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+			}
+			$sql[] = 'DELETE FROM class_assignments WHERE id_classes='.$id_classes;
+			
+			$sql[] = 'DELETE FROM class_gradebook WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM class_gradebook_categories WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM class_gradebook_entries WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM class_gradebook_val WHERE id_classes='.$id_classes;
+
+			$sql[] = 'DELETE FROM class_lesson_content WHERE id_classes='.$id_classes;
+			
+			$sql_string = 'SELECT id_class_lessons FROM class_lessons WHERE id_classes='.$id_classes;
+			$db->query($sql_string);
+			while ($db->next_record())
+			{
+				$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->Record['id_class_lessons'];
+				$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->Record['id_class_lessons'];
+			}
+			$sql[] = 'DELETE FROM class_lessons WHERE id_classes='.$id_classes;
+
+			// get lesson id's that belong to the class
+			
+			$sql[] = 'DELETE FROM class_links WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM class_links_categories WHERE id_classes='.$id_classes;
+
+			$sql[] = 'DELETE FROM class_objectives WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM class_presentations WHERE id_classes='.$id_classes;
+			
+			$sql[] = 'DELETE FROM class_syllabuses WHERE id_classes='.$id_classes;
+			
+			$sql[] = 'DELETE FROM lcEvents WHERE id_classes='.$id_classes;
+			// @@@ NOTICE..  I'm not sure what I should do about class_student_sections.
+			// do i just let that table go and have the import keep that information in sync and not worry
+			// or should i track down that information to this class and purge it?
+			$sql[] = 'DELETE FROM class_sections WHERE id_classes='.$id_classes;
+
+			$sql[] = 'DELETE FROM exam_schedule_classes WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM exam_schedule_classes_dates WHERE id_classes='.$id_classes;
+			
+			$sql[] = 'DELETE FROM orientation_classes WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM seminar_classes_dates WHERE id_classes='.$id_classes;
+			
+			$sql[] = 'DELETE FROM textbook WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM textbook_classes WHERE id_classes='.$id_classes;
+			
+			$sql_string = 'SELECT assessment_id FROM assessment WHERE id_class='.$id_classes;
+			$db->query($sql_string);
+			while ($db->next_record())
+			{
+				$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->Record['assessment_id'];
+			}
+			
+			$sql[] = 'DELETE FROM assessment WHERE class_id='.$id_classes;
+			$sql[] = 'DELETE FROM assessment_answer WHERE id_classes='.$id_classes;
+			$sql[] = 'DELETE FROM assessment_log WHERE id_classes='.$id_classes;
+			
+			// get pkey for files_folderid
+			$sql_string = 'SELECT pkey FROM classdoclib_Folders WHERE class_id='.$id_classes;
+			$db->query($sql_string);
+			
+			while ($db->next_record())
+			{	
+				$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->Record['pkey'];
+			}
+			
+			$sql[] = 'DELETE FROM classdoclib_Folders WHERE class_id='.$id_classes;
+			
+			foreach($sql as $sql_exec)
+			{
+				$db->query($sql_exec);
+				if (mysql_errno()) echo 'Err: '. mysql_error(). '<br>';
+			}
+			//debug($sql);
+			$classObj->_deleteFromDB();
+			
+			
+			##$id = (int)$lc->getvars['id'];
+			#$db->query('delete From class_sections where id_classes='.$lc->getvars['id']);
+			#fakequery('delete From class_sections where id_classes='.$lc->getvars['id']);
+			// @@@ I need confirmation of this secondary delete.. 
+
+// mgk 07/09/03 - doing other deletes as necessary
+// tables to delete from
+// 
+/* 
+class_announcements     id_classes
+class_assignments       id_classes
+class_assignments_grades (related to class_assignments)
+class_assignments_turnin (related to above)
+class_chat              id_classes
+class_faqs              id_classes
+class_gradebook         id_classes
+class_gradebook_categories id_classes
+class_gradebook_entries id_classes
+class_gradebook_val     id_classes
+class_lessons           id_classes
+class_lesson_content    (related to above)
+class_lesson_links      (related to above)
+class_lesson_objectives (related to above)
+class_links             id_classes
+class_links_categories  id_classes
+class_objectives        id_classes
+class_presentations     id_classes
+class_sections          id_classes
+class_syllabuses        id_classes
+more to follow??
+*/
+
+/*
+// delete links relating to classes relating to id_classes
+related_delete($db,"class_lesson_content","id_classes",$id,"id_class_lessons","class_lesson_links","id_class_lessons");
+// delete objectives relating to class lessons related to id_classes
+related_delete($db,"class_lesson_content","id_classes",$id,"id_class_lessons","class_lesson_objectives","id_class_lesson");
+// delete students in sections relating to id_classes
+related_delete($db,"class_sections","id_classes",$id,"sectionNumber","class_student_sections");
+// delete grades relating to id_classes
+related_delete($db,"class_assignments","id_classes",$id,"id_class_assignments","class_assignment_grades");
+related_delete($db,"class_assignments","id_classes",$id,"id_class_assignments","class_assignment_turnin");
+
+related_delete($db,"classdoclib_Folders","class_id",$id,"pkey","classdoclib_Sharing","folderKey");
+related_delete($db,"classdoclib_Folders","class_id",$id,"pkey","classdoclib_Filers","folder");
+
+$tables = array("class_announcements",
+"class_assignments",
+"class_chat",
+"class_faqs",
+"class_gradebook",
+"class_gradebook_categories",
+"class_gradebook_entries",
+"class_gradebook_val",
+"class_lessons",
+"class_lesson_content",
+"class_links_categories",
+"class_objectives",
+"class_presentations",
+"class_sections",
+"class_syllabuses"
+);
+			while(list($key,$val) = each($tables)) { 
+		#		$db->query("delete from $val where id_classes=$id");
+				fakequery("delete from $val where id_classes=$id");
+			}
+			// extra
+		#	$db->query("delete from classdoclib_Folders where class_id=$id");
+			fakequery("delete from classdoclib_Folders where class_id=$id");
+
+
+
+*/
+		} else
+		{	$t['error'] = '<blockquote><b>Error:</b> Could not find the requested class to remove.</blockquote>';
+		}
+		
+		$lc->templateName = 'classes_main';
+		$this->run($db, $u, $lc, $t);
+
+	}
+	
+	
+	function scheduleRun($db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'classes_schedule';
+	}
+
+	
+}
+function related_delete($db,$parent,$keycolumn,$key,$parentcolumn,$child,$childcolumn='') {
+	if ($childcolumn=='') { $childcolumn=$parentcolumn; }
+	$db->query("select * from $parent where $keycolumn=$key");
+	while($db->next_record()) {
+		$list[] = $db->Record[$parentcolumn];
+	}
+	if (is_array($list)) { 
+	fakequery("delete from $child where $childcolumn=".implode(" or $childcolumn=",$list));
+	}
+}
+function fakequery($string) { 
+echo $string."<BR>\n";
+}
+?>
