@@ -8,9 +8,9 @@ class TestCase extends NoAuth {
 
 		$d = dir(SERVICE_PATH.'testCase');
 		while (false !== ($entry = $d->read())) {
-			if ($entry == 'main.lcp' || strpos($entry,'~') || (substr($entry,0,1) == '.') ) continue;
+			if ($entry == 'main.lcp' || strpos($entry,'~') || (substr($entry,0,1) == '.') || $entry == 'unitTest.php' ) continue;
 
-			if ( strpos($entry,'.lcp') ) {
+			if ( strpos($entry,'.php') ) {
 				include(SERVICE_PATH.'testCase/'.$entry);
 				$count++;
 				$tests[$count]['name'] = substr($entry,0,-4);
@@ -37,12 +37,12 @@ class TestCase extends NoAuth {
 		$testObj = new $className();
 
 		$testObj->run($db,$u,$lc,$t);
-		$tests[$k]['tests'] = $ts->tests;
+		$tests[$k]['tests'] = $testObj->tests;
 
 		while ( list($k,$v ) = @each($testObj->tests) ) {
 			$test = '$testObj->results[\''.$k.'\'] = $testObj->'.$v['name'].'Test();';
-			print "testing $k $v <br>";
 			eval($test);
+			//print "testing $k "; print_r($v); print " <br>";
 		}
 
 
@@ -60,7 +60,7 @@ class TestCase extends NoAuth {
 				$bad++;
 			}
 		}
-		$t['results'] = $testObj->results;
+		//$t['results'] = $testObj->results;
 		$t['css'] = ($bad == 0) ? 'PASS':'FAIL';
 	}
 
@@ -73,10 +73,10 @@ class TestCase extends NoAuth {
 		$testName = $lc->getvars['t'];
 		$moduleName = $lc->getvars['m'];
 		$serviceName = $lc->getvars['s'];
-		include(SERVICE_PATH.'testCase/'.$serviceName.'.lcp');
+		include(SERVICE_PATH.'testCase/'.$serviceName.'.php');
 		$test = new $serviceName();
 
-		$file = fopen(SERVICE_PATH.'testCase/'.$serviceName.'.lcp','r');
+		$file = fopen(SERVICE_PATH.'testCase/'.$serviceName.'.php','r');
 		if (!$file) exit();
 		flush();
 
