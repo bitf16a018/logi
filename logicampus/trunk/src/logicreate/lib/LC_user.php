@@ -1,17 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
 require_once(LIB_PATH.'User.php');
 
 	/**
@@ -164,7 +151,7 @@ class lcUser {
 		$f = fopen("/tmp/badsess.txt","a");
 		$s = date("m/d/Y h:i:s")." - {$_SERVER['REMOTE_ADDR']} - $sessID - ".$_SERVER['HTTP_USER_AGENT']."\n";
 		ob_start();
-		print_r(apache_request_headers());
+		if ( function_exists('apache_request_headers') ) print_r(apache_request_headers());
 		$x = ob_get_contents();
 		ob_end_clean();
 		fputs($f,$s.$x."\n==========\n");
@@ -603,7 +590,7 @@ Password: '.$this->password.'
 
 Thank you,
 
-'.SITE_NAME.' Webmaster
+'.SITE_NAME.' Admission and Registration Department
 '.WEBMASTER_EMAIL;
 	 	mail($this->email,$subject,$message, "From: ".WEBMASTER_EMAIL."\r\nReply-To: ".WEBMASTER_EMAIL."\r\nReturn-Path: ".WEBMASTER_EMAIL."\r\n");
 	 }
@@ -723,11 +710,14 @@ class UserProfile {
 	var $values = array();
 	var $dirty;
 	var $specific = true;
-	var $common_attribs = array('firstname','lastname','emailAlternate','homePhone',
+	//start of changed lines for self register module
+	//added the extra fields for inserting profile data
+	var $common_attribs = array('title','firstname','lastname','dob','emailAlternate','homePhone',
 			'workPhone','faxPhone','cellPhone','pagerPhone','photo','address','address2',
-			'city','state','zip','showaddinfo','url','icq','aim',
+			'city','state','zip','country','hphone','education','lastinstitute','showaddinfo','url','icq','aim',
 			'yim','msn','showonlineinfo','occupation','gender','sig','bio',
 			'showbioinfo','emailNotify');
+	//end of changed lines for self register module
 	var $specific_attribs = array();
 	var $student_attribs = array( 'isp', 'operatingSystem', 'connectionType' );
 	var $faculty_attribs = array(
