@@ -539,17 +539,15 @@ class AssessmentQuestionMatching extends AssessmentQuestion {
 		}
 
 
-		if ($answerObj->pointsEarned != $this->questionPoints ) {
+		if ($num_correct == $this->questionPoints ) {
 			$answerObj->set('pointsEarned',$this->questionPoints);
 			$answerObj->save();
 		} else {
 
-			//they got it wrong, if it's new then insert a 0,
-			// if it's old && different, then save
-			if ( $answerObj->isNew() ) {
-				$answerObj->set('pointsEarned',0);
-				$answerObj->save();
-			}
+			//they got it wrong, insert a 0,
+			$score = floor($this->questionPoints * ($num_correct/$count));
+			$answerObj->set('pointsEarned',$score);
+			$answerObj->save();
 		}
 
 	}
