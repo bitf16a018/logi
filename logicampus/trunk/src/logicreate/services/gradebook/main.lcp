@@ -18,7 +18,7 @@ class gradebook extends FacultyService {
 	// links
 	var $sectionTitle = 'Gradebook';
 	var $navlinks = array (
-		'Classroom Manager' => '%classmgr/display/',
+		'Classroom Overview' => '%classmgr/display/',
 		'Announcements'=>'%classmgr/announcements/',
 		'Assessment Manager' => '%assessments/',
 		'Assignments' => '%classmgr/assignmentManage/',

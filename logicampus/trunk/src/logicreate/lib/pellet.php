@@ -91,6 +91,31 @@ class Service {
 
 	function preTemplate(&$obj,&$t){
 	}
+
+
+	//__FIXME__
+	function translateNavLinks() {
+
+		if ( !is_array($this->navlinks) ) return;
+		$newlinks = array();
+		while ( list ($k,$v) = each($this->navlinks) ) {
+			$newlinks[ lct($k) ] = $v;
+		}
+
+		$this->navlinks = $newlinks;
+	}
+
+	//__FIXME__
+	function translateAppLinks() {
+
+		if ( !is_array($this->navlinks) ) return;
+		$newlinks = array();
+		while ( list ($k,$v) = each($this->navlinks) ) {
+			$newlinks[ lct($k) ] = $v;
+		}
+
+		$this->navlinks = $newlinks;
+	}
 }
 
 
@@ -109,13 +134,16 @@ class BasicAuth extends Service {
 
 	function preTemplate (&$obj,&$t) {
 
+		//__FIXME__ translation
+		$this->translateNavLinks();
+		$this->translateAppLinks();
+
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
 		$t['sectionheader']  .= '<div id="sectionheader">';
 		while ( list($k,$v) = @each($this->navlinks) ) {
 
 			if (in_array($k, $this->inactivelinks)) {
-#				$t['sectionheader'] .= "<b>$k</b>".' &bull; ';
 				$t['sectionheader'] .= '<b><a href="'.$link.'">'.$k.'</a></b> &bull; ';
 			} else {
 				if (preg_match('/^%/', $v)) {
@@ -133,7 +161,6 @@ class BasicAuth extends Service {
 			$t['sectionheader'] .= '<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;';
 			while ( list($k,$v) = @each($this->applinks) ) {
 				if (in_array($k, $this->inactivelinks)) {
-#					$t['sectionheader'] .= "<b>$k</b>".' &bull; ';
 				$t['sectionheader'] .= '<b><a href="'.$link.'">'.$k.'</a></b> &bull; ';
 				} else {
 					if (preg_match('/^%/', $v)) {
@@ -169,6 +196,10 @@ class RegAuth extends Service {
 	}
 
 	function preTemplate (&$obj,&$t) {
+
+		//__FIXME__ translation
+		$this->translateNavLinks();
+		$this->translateAppLinks();
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
@@ -333,6 +364,10 @@ class AdminService extends Service {
 
 	function preTemplate (&$obj,&$t) {
 
+		//__FIXME__ translation
+		$this->translateNavLinks();
+		$this->translateAppLinks();
+
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
 		$t['sectionheader']  .= '<div id="sectionheader">';
@@ -424,6 +459,10 @@ class FacultyService extends Service {
 
 
 	function preTemplate (&$obj,&$t) {
+
+		//__FIXME__ translation
+		$this->translateNavLinks();
+		$this->translateAppLinks();
 
 		if ($obj->getvars['print']) {
 			$t['sectionheader']  .= '<h3>'.$this->sectionTitle;
@@ -550,6 +589,10 @@ class StudentService extends Service {
 	}
 
 	function preTemplate(&$obj,&$t) {
+
+		//__FIXME__ translation
+		$this->translateNavLinks();
+		$this->translateAppLinks();
 
 		if ($obj->getvars['print']) {
 			$t['sectionheader']  .= '<h3>'.$this->sectionTitle;
