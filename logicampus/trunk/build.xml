@@ -1,4 +1,4 @@
-<?xml version="1.0.1"?>
+<?xml version="1.0"?>
 <project name="LogiCampus" default="dist" basedir=".">
 	<description>
 		LogiCreate php app server and associated services/modules.
