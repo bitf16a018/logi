@@ -3,9 +3,9 @@
 class PBDO_PluginManager {
 	private $pluginList = array();
 	
-	function createNewPlugin ($className,$dir='') {
+	function createNewPlugin ($className) {
 		if (! class_exists($className) ) {
-			include($dir.$className.'.php');
+			include('plugins/'.$className.'/'.$className.'.php');
 		}
 
 		$this->pluginList[] = new $className();

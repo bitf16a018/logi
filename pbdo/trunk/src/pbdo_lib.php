@@ -130,7 +130,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	public $complex = false;
 	private $possibleValues;
 	private $codeType;
-	private $primaryKey = false;
+	private $isPrimary = false;
 
 
 	function PBDO_ParsedAttribute($n,$t) {
@@ -158,8 +158,13 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	}
 
 
-	function setPrimaryKey() {
-		$this->primaryKey = true;
+	function setPrimary($pk) {
+		$this->isPrimary = $pk;
+	}
+
+
+	function isPrimary() {
+		return $this->isPrimary;
 	}
 
 
@@ -177,7 +182,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 
 		$pk = $obj->getAttribute('primaryKey');
 		if ( $pk ) {
-			$x->setPrimaryKey();
+			$x->setPrimary(true);
 		}
 
 		return $x;
