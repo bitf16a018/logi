@@ -1,11 +1,18 @@
 <?=$t['sectionheader'];?>
+<style type='text/css'>
+	.forumsection {
+		background-color: #99DD66;
+	}
+</style>
+
 <center><table width="98%"><tr><td align="left">
 
 				<h4>Reply to "<?=$t['post']->lcForumPostTitle;?>", by <?=$t['post']->lcForumPostUsername;?></h4>
 </td></tr>
 <tr>
 	<td>
-		<Form method='post' action='<?=appurl("classroom/discussion_post/event=post");?>'>
+		<Form method='post' action='<?=appurl("classroom/discussion_post/event=post");?>' enctype="multipart/form-data">
+
 		<table>
 
 			<tr>
@@ -14,8 +21,20 @@
 			</tr>
 			<tr>
 				<td valign="top"><b>Message</b></td>
-				<td><textarea name="forum[message]" rows="10" cols="60"></textarea></td>
+				<td>
+					<?=$t['editor'];?>
+				</td>
 			</tr>
+			<tr>
+				<td><b>File Attachment 1</b></td>
+				<td><input type="file" name="file1"></td>
+			</tr>
+
+			<tr>
+				<td><b>File Attachment 2</b></td>
+				<td><input type="file" name="file2"></td>
+			</tr>
+
 		</table>
 
 		<input type='submit' value='Submit'>

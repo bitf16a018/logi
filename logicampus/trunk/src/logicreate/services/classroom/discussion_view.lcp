@@ -7,6 +7,7 @@
  * Forum system
  */
 
+define('FORUM_FILES_PATH',CONTENT_PATH."/forums");
 
 include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
 include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
@@ -68,7 +69,26 @@ class discussion_view extends StudentService {
 			}
 		}
 
+		if ($lc->getvars['fileid']==1) { 
+			ob_end_clean();
+			$forumPost->lcForumFile1Count++;
+			$forumPost->save();
+			header("Content-type: ".$forumPost->lcForumFile1MIME);
+			header("Content-disposition: attachment; filename='".$forumPost->lcForumFile1Name."'");
+			readfile(FORUM_FILES_PATH."/".$forumPost->lcForumFile1SysName);
+			exit();
+		}
 		
+		if ($lc->getvars['fileid']==2) { 
+			ob_end_clean();
+			$forumPost->lcForumFile2Count++;
+			$forumPost->save();
+			header("Content-type: ".$forumPost->lcForumFile2MIME);
+			header("Content-disposition: attachment; filename='".$forumPost->lcForumFile2Name."'");
+			readfile(FORUM_FILES_PATH."/".$forumPost->lcForumFile2SysName);
+			exit();
+		}
+
 		$t['forumPost'] = $forumPost;
 		$lc->templateName = 'discussion_view_main';
 
@@ -84,6 +104,7 @@ class discussion_view extends StudentService {
 
 			$view = new ForumView($tree);
 			$view->url = "classroom/discussion_post";
+			$view->dlurl = "classroom/discussion_view";
 			$t['view'] = $view->renderAsTable();
 #debug($view); exit();
 			$lc->templateName = 'discussion_view_main_threaded';
