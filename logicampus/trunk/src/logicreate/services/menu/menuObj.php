@@ -377,20 +377,20 @@ class MenuItem extends PersistantObject {
 
 		switch($attrs[type]) {
 			case "htm":
-				$this = PersistantObject::createFromArray("HTMLMenuItem",$attrs);
+				$x = PersistantObject::createFromArray("HTMLMenuItem",$attrs);
 				break;
 			case "hr":
-				$this = PersistantObject::createFromArray("BreakMenuItem",$attrs);
+				$x = PersistantObject::createFromArray("BreakMenuItem",$attrs);
 				break;
 			case "ext":
-				$this = PersistantObject::createFromArray("URLMenuItem",$attrs);
+				$x = PersistantObject::createFromArray("URLMenuItem",$attrs);
 				break;
 			case "app":
-				$this = PersistantObject::createFromArray("APPMenuItem",$attrs);
+				$x = PersistantObject::createFromArray("APPMenuItem",$attrs);
 				break;
 			}
 
-	return $this;
+	return $x;
 	}
 
 
