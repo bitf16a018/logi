@@ -20,3 +20,7 @@ if($t['msg']){?><span style="color:blue"><?=$t['msg']?></span><?}
 </table>
 <input type="hidden" name="event" value="uploadProcess"/>
 </form>
+<? if ($t['notidy']) { ?>
+<hr>
+NOTE:  We have detected you do not have TIDY installed.  The uploaded files may not be properly cleaned.  
+<? } ?>
