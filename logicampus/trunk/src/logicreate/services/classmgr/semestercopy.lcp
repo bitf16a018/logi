@@ -61,7 +61,27 @@ class semestercopy extends FacultyService  {
 			$class[$db->Record['id_classes']] = $db->Record['courseFamilyNumber']." ".
 			htmlentities($db->Record['courseName'],ENT_QUOTES)." (".$db->Record['semesterId'].")";
 		}
-		$t['options'] = makeOptions($class);
+                $t['fromoptions'] = makeOptions($class, $u->activeClassTaught->id_classes);
+
+                $class = '';
+
+                $sql = '
+                SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
+                FROM classes as A
+                INNER JOIN courses as B ON A.id_courses=B.id_courses
+                INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+                WHERE A.facultyId=\''.$u->username.'\' AND C.dateDeactivation >= now()
+                ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+
+                $db->query($sql);
+                $db->RESULT_TYPE = MYSQL_ASSOC;
+                while ($db->next_record()) {
+                //      $t['selections'][$db->Record['id_classes']] = $db->Record;
+                        $class[$db->Record['id_classes']] = $db->Record['courseFamilyNumber']." ".
+                        htmlentities($db->Record['courseName'],ENT_QUOTES)." (".$db->Record['semesterId'].")";
+                }
+                $t['tooptions'] = makeOptions($class);
+
 	}
 	
 	
