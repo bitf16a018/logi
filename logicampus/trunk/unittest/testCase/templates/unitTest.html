@@ -17,7 +17,7 @@
 			result
 		</td>
 	</tr>
-	<? while ( list($k,$v) = @each($t['results']) ) { ?>
+	<? while ( list($k,$v) = each($t['results']) ) { ?>
 	<tr class="<?=$v;?>">
 		<td>
 			<a href="<?=appurl('testCase/main/event=inspect/m='.$t['m'].'/s='.$t['s'].'/#'.$k);?>"><?= $k;?></a>
