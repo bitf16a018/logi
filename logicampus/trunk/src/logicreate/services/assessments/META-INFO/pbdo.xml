@@ -181,5 +181,32 @@
             size="32"
             type="VARCHAR"/>
   </table>
+  <table  name="assessment_grade">
+    <column name="assessment_grade_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="assessment_id"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+    <column name="student_id"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="comments"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+    <column name="points"
+            required="false"
+            size="10,2"
+            type="FLOAT"/>
+    <column name="points_override"
+            required="false"
+            size="10,2"
+            type="FLOAT"/>
+  </table>
 </database>
 <!-- END OF MYSQL2TURBINE DUMP -->
