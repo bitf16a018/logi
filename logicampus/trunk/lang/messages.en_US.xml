@@ -134,7 +134,7 @@
 	<message id ="Content &amp; Lesson Links" domain="system" status="">
 		Content &amp; Lesson Links
 	</message>
-	<!--Content &amp;amp;amp;amp;amp; Lesson Links-->
+	<!--Content &amp; Lesson Links-->
 	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
 
 
@@ -220,13 +220,6 @@
 	</message>
 	<!--Export Class-->
 	<usage id ="Export Class" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="23"/>
-
-
-	<message id ="FAQ" domain="system" status="">
-		FAQ
-	</message>
-	<!--FAQ-->
-	<usage id ="FAQ" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="51"/>
 
 
 	<message id ="Lessons" domain="system" status="">
