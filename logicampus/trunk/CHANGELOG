@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  12/09/03 11:58 EST
+Last Updated:  $Date: 2004-06-07 04:08:48 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,8 @@ SYNTAX:
 
 
 #########################
+06/06/2004 11:55 PM - mark
+Fixed bug #960571
 
 06/06/2004 6:15 PM - michael
 Added area in 'student management' for teachers to create subgroups of students.  
