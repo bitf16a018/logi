@@ -101,7 +101,7 @@ class PBDO_ParsedTable {
 		$ret .= "-- DB type: mysql\n";
 		$ret .="-- generated on: ".date('m.d.Y')."\n\n";
 		$ret .= 'DROP TABLE IF EXISTS `'.$this->name.'`;
-		';
+';
 		$ret .= 'CREATE TABLE `'.$this->name.'` (
 		';
 		foreach($this->columns as $cname=>$column) {
@@ -184,19 +184,20 @@ class PBDO_ParsedColumn {
 	}
 
 
-	function createFromXMLObj($type,$node,&$x) {
-		$x = PBDO_ParsedColumn::parsedColumnFactory($type,$node->getAttribute('name'));
-		$x->type = trim($node->getAttribute('type'));
-		$x->size = $node->getAttribute('size');
-		$x->description = $node->getAttribute('description');
+	function createFromAttribute($type,$attrib) {
+		$x = PBDO_ParsedColumn::parsedColumnFactory( $type,$attrib->name );
+		$x->type = trim( $attrib->type );
+		$x->size = $attrib->getSize();
+		$x->description = $attrib->description;
 
-		if ($node->getAttribute('required') == 'true') {
+
+		if ($attrib->required == 'true') {
 			$x->null = false;
 		} else {
 			$x->null = true;
 		}
 
-		if ($node->getAttribute('primaryKey')) {
+		if ( $attrib->isPrimary() ) {
 			$x->primary = true;
 			$x->null = false;
 			if (eregi("int",$x->type)) { 
@@ -204,39 +205,40 @@ class PBDO_ParsedColumn {
 			}
 		}
 
-if ($x->type=='longtext') { 
-	$x->type='text';
-	$x->size='';
-}
-if ($x->type=='tinytext') { 
-	$x->type='varchar';
-	$x->size=255;
-}
-if ($x->type=='mediumtext') { 
-	$x->type='varchar';
-	$x->size=255;
-}
-if ($x->type=='date') { 
-	$x->type='datetime';
-}
-if ($x->type=='blob') { 
-	$x->type='text';
-}
-if ($x->type=='mediumint') { 
-	$x->type='int';
-}
-// __FIXME__
-// Making SIZE to empty for MySQL -
-// we need to override this method for MS and PG
-if ($x->type=='datetime') { 
-	$x->size='';
-}
 
-		if (is_object($index) ) {
-			return $index;
-		} else {
-			return false;
+		if ($x->type=='longtext') { 
+			$x->type='text';
+			$x->size='';
 		}
+		if ($x->type=='tinytext') { 
+			$x->type='varchar';
+			$x->size=255;
+		}
+		if ($x->type=='mediumtext') { 
+			$x->type='varchar';
+			$x->size=255;
+		}
+		if ($x->type=='date') { 
+			$x->type='datetime';
+		}
+		if ($x->type=='blob') { 
+			$x->type='text';
+		}
+		if ($x->type=='mediumint') { 
+			$x->type='int';
+		}
+		if ($x->type=='String') {
+			$x->type='varchar';
+
+		}
+		// __FIXME__
+		// Making SIZE to empty for MySQL -
+		// we need to override this method for MS and PG
+		if ($x->type=='datetime') { 
+			$x->size='';
+		}
+
+	return $x;
 	}
 
 

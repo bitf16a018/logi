@@ -77,7 +77,7 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 class PBDO_ParsedEntity extends PBDO_InternalModel {
 	public $displayName;
 	public $name;
-	private $attributes = array();
+	public $attributes = array();
 	public $package;
 	public $language = 'php';
 	private $generateFlag = 'all';
@@ -159,6 +159,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	public $name;
 	public $colName;
 	public $type;
+	public $size;
 	private $value;
 	public $complex = false;
 	private $possibleValues;
@@ -191,6 +192,20 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	}
 
 
+	/**
+	 * desired size of this attribute
+	 * Directly translates into SQL column size for now
+	 */
+	function setSize($s) {
+		$this->size = $s;
+	}
+
+
+	function getSize() {
+		return $this->size;
+	}
+
+
 	function setPrimary($pk) {
 		$this->isPrimary = $pk;
 	}
@@ -217,6 +232,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 		if ( $pk ) {
 			$x->setPrimary(true);
 		}
+		$x->setSize( $obj->getAttribute('size') );
 
 		return $x;
 	}

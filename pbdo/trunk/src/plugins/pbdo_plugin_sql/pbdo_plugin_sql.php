@@ -14,13 +14,16 @@
 class PBDO_Plugin_Sql extends PBDO_Plugin {
 
 	public $displayName = 'PBDO Sql Generator';
-
+	
+	private $database;
+	private $type = 'mysql';
 
 	/**
 	 * create directories for storing the code
 	 * turn internal data model into parsed code objects
 	 */
 	function initPlugin() {
+		include('plugins/pbdo_plugin_sql/sqldef.php');
 		$projectName = $this->dataModel->projectName;
 		$sqlExt = 'sql';
 		$codePath = 'projects/'.$projectName.'/'.$sqlExt.'/';
@@ -36,13 +39,39 @@ class PBDO_Plugin_Sql extends PBDO_Plugin {
 
 		//echo "Found ". count($this->dataModel->entities)." Entities\n";
 		echo "Converting ". count($this->dataModel->entities)." Entities to internal SQL objects...\n";
-		
+
+
+		$this->database = new PBDO_ParsedDatabase($this->dataModel->projectName);
+		$this->database->setVersion( $this->dataModel->getVersion() );
 		foreach($this->dataModel->entities as $v) { 
-			 $x = ParsedClass::createFromEntity($v);
-			
-			 $this->codeStack[] = $x;
-			
+			unset($x);
+			$x = new PBDO_ParsedTable($v->name);
+			foreach($v->attributes as $attr) {
+				unset($a);
+				$a = PBDO_ParsedColumn::createFromAttribute('mysql',$attr);
+				$x->addColumn($a);
+			}
+			$this->database->addTable($x);
 		}
 	}
+
+
+	function startPlugin() {
+		$projectName = $this->dataModel->projectName;
+		$type = $this->type;
+		foreach($this->database->tables as $k=>$v) {
+			$file = fopen('projects/'.$projectName.'/sql/'.$v->name.'.'.$type.'.sql','w+');
+			print "Writing 'projects/$projectName/sql/".$v->name.'.'.$type.".sql'...\n";
+			$sql = $v->toSQL();
+			fputs($file,$sql,strlen($sql) );
+			fclose($file);
+		}
+	}
+
+
+	function destroyPlugin() {
+		unset($this->database);
+	}
+
 }
 ?>
