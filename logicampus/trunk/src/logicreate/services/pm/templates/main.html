@@ -53,7 +53,11 @@ if (is_array($t['messages'])) { ?>
 	<input type='checkbox' id="<?=$i;?>" name='mess[<?=$mess->pkey;?>]'>
 	</td>
 		<td colspan='1'>Subject: <a href="<?=appurl("pm/main/event=read/pkey=".$mess->pkey);?>"><?=$mess->subject;?></a></td>
+	<? if ($t['viewing']==0) { ?>
 		<td colspan='1'>From: <?=$mess->userFrom?></td>
+	<? } else { ?>
+		<td colspan='1'>Sent to: <?=$mess->messageTo;?></td>
+	<? } ?>
 	</tr>
 	<tr class='<?=$row;?>'>
 	<td>Sent: <?=date("m/d/Y h:i A",$mess->sentTime);?></td>

@@ -21,7 +21,7 @@ var $presentor = "htmlPresentation";
 
 	function fixRun($db,&$u,&$arg,&$t) {
 		$db2 = db::GetHandle();
-		$db->query("select pkey,messageTo from privateMessages where sentReceived = 0 and messageTo like '%_%'");
+		$db->query("select pkey,messageTo from privateMessages where messageTo like '%_%'");
 		while($db->next_record()) {
 			$pkey = $db->Record['pkey'];
 			$messageTo = $db->Record['messageTo'];
@@ -35,7 +35,6 @@ var $presentor = "htmlPresentation";
 	}
 
 
-	## Removed July 3rd 2003 (tarrant doesn't want anyone to turn off email notifications ##
 	function notifyRun($db,&$u,&$arg,&$t) {
 		$notify= $arg->getvars['val'];
 		if ($notify=='yes') {
@@ -46,25 +45,20 @@ var $presentor = "htmlPresentation";
 			$u->profile->set('emailNotify', 'n');
 			$db->query("update profile set emailnotify='n' where username='".$u->username."'");
 		}
-		#$u->updateProfile();
+		$u->updateProfile();
 		$this->Run($db,$u,$arg,$t);
 
 	}
 
 
 	function Run($db,&$u,&$arg,&$t) {
-		if ($arg->getvars['sentReceived']!='') { 
-			$u->sessionvars['pm']['sentReceived'] = (int)$arg->getvars['sentReceived'];
-		}
-		$viewing = intval($u->sessionvars['pm']['sentReceived']);
-		$t['viewing'] = intval($u->sessionvars['pm']['sentReceived']);
 		$arg->templateName = 'main';
 		$start = intval($arg->getvars['start']);
 		$max = $this->_displayPerPage;
 		$t['start'] = $start;
 		$t['max'] = $max;
 		$t['emailNotify'] = $u->profile->get('emailNotify');
-		$db->queryOne("select count(pkey) from privateMessages where sentReceived=$viewing and messageTo='".$u->username."'"); 
+		$db->queryOne("select count(pkey) from privateMessages where messageTo='".$u->username."'"); 
 		$count = $db->Record[0];
 		if ( ( ($max+$start) < $count)  && ($start<$count)) { 
 
@@ -74,7 +68,7 @@ var $presentor = "htmlPresentation";
 			$t['prev'] = true;
 		}
 
-		$db->query("select pkey from privateMessages where sentReceived=$viewing and messageTo='".$u->username."' order by sentTime DESC limit $start,$max");
+		$db->query("select pkey from privateMessages where messageTo='".$u->username."' order by sentTime DESC limit $start,$max");
 		while($db->next_record()) {
 			$x = privMess::load($db->Record[0]);
 			$user = lcUser::getUserByUsername($x->messageFrom);
@@ -87,7 +81,6 @@ var $presentor = "htmlPresentation";
 
 	# Reads the message
 	function readRun($db,&$u,&$arg,&$t) {
-		$viewing = intval($u->sessionvars['pm']['sentReceived']);
 		$pkey = $arg->getvars['pkey'];
 		$mess = privMess::load($pkey);
 		if (trim(strtolower($mess->messageTo)) != trim(strtolower($u->username))) { 
