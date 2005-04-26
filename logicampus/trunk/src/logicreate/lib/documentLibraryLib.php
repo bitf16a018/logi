@@ -305,7 +305,14 @@ SELECT
 		ksort($x);
 		while(list($k,$v) = each($x)) {
 			while(list($key,$val) = each($v)) {
+
+				// feature request - this may not be the best way to do this right now - too many queries?
+				// also, would queryOne work here?  Do we have that in this version?
+				$db->query("select count(folder) as filecount from classdoclib_Files where folder=".$val['pkey']);
+				$db->next_record();
+				$val['name'] .= " (".intval($db->Record['filecount']).") ";
 				$data[] = $val;
+
 			}
 		}
 		$tree = new TreeList();
