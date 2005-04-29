@@ -40,8 +40,9 @@ class classroom extends StudentService {
 						$sql = "
 						SELECT id_class_assignments, title 
 						FROM class_assignments
-						WHERE id_classes='".$u->classesTaken[$x]->id_classes."'
+						WHERE ( $assignmentsOrClause )
 						AND activeDate <= $ut
+						AND (dueDate >= $ut OR noDueDate = 1)
 						ORDER BY dueDate ASC, activeDate DESC 
 						LIMIT 1";
 
