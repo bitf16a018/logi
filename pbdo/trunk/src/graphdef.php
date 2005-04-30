@@ -156,7 +156,6 @@ class PBDO_GraphManager {
 				$this->model->getNodeByName($name)
 			);
 		}
-
 		$this->drawEdges();
 
 		//print_r($this->model->nodes['client_info']);
