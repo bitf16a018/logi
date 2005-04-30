@@ -2,7 +2,7 @@
 
 class PBDO_GraphManager2 extends PBDO_GraphManager {
 
-	var $grid = array ('x'=>10,'y'=>10);
+	var $grid = array ('x'=>30,'y'=>30);
 
 
 	function drawEdges() {
@@ -567,9 +567,9 @@ class AStar_PathFinder {
 
 			
 			///safety measure
-			if (++$kill > 100 ) {
+			if (++$kill > 200 ) {
 				$foundEnd = true;
-				echo "*** safety measure tripped\n\n";
+				echo "*** safety measure tripped: can't find endpoint after 200 passes.\n\n";
 			}
 			//*/
 		}
@@ -597,7 +597,7 @@ class AStar_PathFinder {
 			//safety measure
 			if (++$kill2 > 200 ) {
 				$backToStart = true;
-				echo "*** safety measure tripped\n\n";
+				echo "*** safety 2 measure tripped: can't find path back to start!\n\n";
 				return ;
 			}
 			//*/
