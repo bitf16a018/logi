@@ -47,16 +47,7 @@ $execution_time=get_microtime();
 	if ( $PHPSESSID=="" )  {		//if no cookie was passed, set a new one
 		$hadCookie = false;
 		$PHPSESSID=md5 (uniqid (rand()));
-		setcookie("PHPSESSID",$PHPSESSID,0,$tail,COOKIE_HOST);
-		#setcookie("PHPSESSID",$PHPSESSID,0,'/');
-		$f = fopen("/tmp/cookies.txt","a");
-		fputs($f,date("m/d/Y h:i:s")." - set cookie $PHPSESSID for ip ".$_SERVER['REMOTE_ADDR']." - ".$_SERVER['HTTP_USER_AGENT']."\n-----\n");
-		ob_start();
-		print_r(apache_request_headers());
-		$x = ob_get_contents();
-		ob_end_clean();
-		fputs($f,$x."\n====================\n");
-		fclose($f);
+		setcookie("PHPSESSID",$PHPSESSID,0,$tail);
 	} else { 
 		$hadCookie = true;
 	}
