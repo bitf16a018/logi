@@ -1,0 +1,327 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'classLessonObj.php');
+
+
+class LessonManager extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+//	var $authorizer = 'native';
+
+	// links
+	var $inactivelinks = array( 'Lessons' );
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $applinks = array (
+		'List Lessons' => 'lessonManager/',
+		'Add a Lesson' => 'lessonManager/event=edit'
+	);
+
+
+
+function authorize($lc,$u) {
+if ($u->username != 'mark' ) { 
+?><center><h2>Shutting down lesson manager</h2></center>
+<?
+	$this->presentor = 'errorMessage';
+	return false;
+}
+	return true;
+}
+
+
+	/**
+	 * Show the main page of the lesson manager: a list of all the lessons
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'lessonManager_main';
+		$this->inactivelinks[] = 'List Lessons';
+		$this->sectionTitle = 'List Lessons';
+
+		$dg = new DataGrid($this->module,$this->serviceName);
+		$dg->table = 'class_lessons';
+		$dg->column = 'createdOn,activeOn,title,description,id_class_lessons';
+		$dg->class = 'datagrid';
+		$dg->ignore = array('id_classes', 'checkList', 'id_class_lessons', 'inactiveOn' );
+		$dg->overrideColumn('<?=date("M j h:i A", $createdOn);?>', 'createdOn');
+		$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
+		$dg->where = "id_classes='{$u->activeClassTaught->id_classes}'";
+		$dg->headers = array(
+			'createdOn' => 'Created',
+			'activeOn' => 'Active On',
+			'title' => 'Title',
+			'description' => 'Description',
+			'links' => ' '
+		);
+		$dg->sortColumns = array( 'createdOn', 'activeOn', 'title' );
+		$dg->postpendColumn('<a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">view</a> | <a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">edit</a> | <a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">delete</a>', 'links'); 
+		$t['content'] = $dg->toHTML();
+
+	}
+
+
+	/**
+	 * show the editing page
+	 */
+	function editRun(&$db,&$u,&$lc,&$t) {
+
+		$this->sectionTitle = 'Add a New Lesson';
+		$lc->templateName = 'lessonManager_edit';
+		$defaults = array();
+		$lessonid = $lc->getvars['id'];
+
+		if ($lessonid && !$this->checkAuth($lessonid,$db,$u,$t)) return;
+
+		DEFINE(LESSON_ID, $lessonid); // for the custom fields
+
+		// First, we want to make sure they have at least one of each of these
+		// before we give them the form: content, objectives.
+		$db->queryOne("select count(id_class_lesson_content) as content
+			from class_lesson_content
+			where id_classes='{$u->activeClassTaught->id_classes}'
+			and id_class_lessons is null or id_class_lessons='{$lessonid}'" );
+		$t['numcontent'] = $db->Record['content'];
+		$db->queryOne("select count(id_class_objectives) as objectives
+			from class_objectives
+			where id_classes='{$u->activeClassTaught->id_classes}'");
+		$t['numobjectives'] = $db->Record['objectives'];
+
+		// The template knows what to do in this case.
+		if ( $t['numcontent'] == 0 || $t['numobjectives'] == 0 )
+			return;
+
+		// Get the basic info about the lesson
+		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
+			from class_lessons
+			where id_class_lessons='{$lessonid}'";
+		$db->queryOne($sql);
+		$defaults['title'] = $db->Record['title'];
+		$defaults['description'] = $db->Record['description'];
+		$defaults['createdOn'] = $db->Record['createdOn'];
+		$defaults['activeOn'] = $db->Record['activeOn'];
+		$defaults['inactiveOn'] = $db->Record['inactiveOn'];
+		$defaults['checkList'] = $db->Record['checkList'];
+		
+		// get the content field
+		$sql = "select id_class_lesson_content from class_lesson_content
+			where id_class_lessons='{$lessonid}'";
+		$db->queryOne($sql);
+		$defaults['content'] = $db->Record['id_class_lesson_content'];
+
+		// get the web links -- check out this query!
+		$sql = "select class_links.id_class_links from class_links
+			left join class_lesson_links on class_links.id_class_links=class_lesson_links.id_class_links
+			left join class_lessons on class_lessons.id_class_lessons=class_lesson_links.id_class_lessons
+			where class_lesson_links.id_class_lessons='{$lessonid}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$defaults['links'][] = $db->Record['id_class_links'];
+
+		if (!$lessonid) {
+			// prepop activeOn with today's date
+			$defaults['activeOn'] = time();
+
+			// prepop inactiveOn with the end of the semester
+			$db->queryOne("select s.dateEnd as end from semesters as s
+				left join classes as c on c.id_semesters=s.id_semesters
+				where c.id_classes='{$u->activeClassTaught->id_classes}'");
+			$d = split('-', $db->Record['end']);
+			$defaults['inactiveOn'] = mktime(0, 0, 0, $d[1], $d[2], $d[0]);
+		}
+
+		$f = new SiteForm();
+
+		if ($lessonid) {
+			$f->getForm( 'lesson', $defaults );
+			$f->modFormValue('submit', 'Modify Lesson');
+			$this->sectionTitle = 'Edit Lesson';
+		} else {
+			$f->getForm( 'lesson', $lc->postvars );
+		}
+
+		$t['content'] = $f->toHTML();
+		
+	}
+
+	/**
+	 * commit the posted data to the database, if worthy
+	 */
+	function updateRun(&$db,&$u,&$lc,&$t)
+	{
+		$f = new Siteform();
+		$lessonid = $lc->getvars['id'];
+
+		if ($lessonid && !$this->checkAuth($lessonid,$db,$u,$t)) return;
+		$t['error'] = $f->validateForm('lesson', $lc->postvars);
+		if (!$t['error']) {
+			
+			$f->cleanedArray['activeOn'] = dateArray2TimestampFull($f->cleanedArray['activeOn']);
+			$f->cleanedArray['inactiveOn'] = dateArray2Timestamp($f->cleanedArray['inactiveOn']);
+
+			// Take care of the lesson table
+			if ($lessonid) {
+				$sql = "update class_lessons set id_classes='{$u->activeClassTaught->id_classes}',title='{$f->cleanedArray['title']}',description='{$f->cleanedArray['description']}',activeOn='{$f->cleanedArray['activeOn']}',inactiveOn='{$f->cleanedArray['inactiveOn']}', checkList='{$f->cleanedArray['checkList']}' where id_class_lessons='{$lessonid}'";
+				$t['msg'] = 'Lesson updated successfully.';
+			} else {
+				$sql = "insert into class_lessons set id_classes='{$u->activeClassTaught->id_classes}',createdOn=".time().",title='{$f->cleanedArray['title']}',description='{$f->cleanedArray['description']}',activeOn='{$f->cleanedArray['activeOn']}',inactiveOn='{$f->cleanedArray['inactiveOn']}', checkList = '{$f->cleanedArray['checkList']}'";
+				$t['msg'] = 'Lesson added successfully.';
+			}
+			$db->query($sql);
+
+			// IMPORTANT!  This means that if they're creating a NEW lesson, the 'id' getvar
+			// is NOT the REAL one for the rest of this page.
+			if ( !$lessonid )
+				$lessonid = $db->getInsertID();
+
+			// take care of the content table
+			$db->query( "update class_lesson_content set
+				id_class_lessons=NULL
+				where id_class_lessons='{$lessonid}'" );
+			$db->query( "update class_lesson_content set
+				id_class_lessons='{$lessonid}'
+				where id_class_lesson_content='{$lc->postvars['content']}'" );
+
+			// Take care of the objectives table
+			// clear class_lesson_objectives where this lesson ID is present, insert new records
+			$db->query( "DELETE FROM class_lesson_objectives
+				WHERE id_class_lesson = {$lessonid}" );
+
+			$db->query('SELECT id_class_objectives 
+					FROM class_objectives 
+					WHERE id_classes = '.$u->activeClassTaught->id_classes);
+
+			while ( $db->next_record() ) {
+				$okayObjs[] = $db->Record['id_class_objectives'];
+			}
+
+			$sql = 'INSERT INTO class_lesson_objectives
+					(id_class_objectives,id_class_lesson)
+					VALUES
+					(%d,%d)';
+			while ( list($k,$v) = @each($f->cleanedArray['objectives']) ) {
+				if ( in_array($v,$okayObjs) ) {
+					$db->query( sprintf($sql,$v,$lessonid) );
+				}
+			}
+
+
+			//done with objective security
+
+
+			// Take care of the assignments table
+			$db->query( "delete from class_assignments_link
+				where id_class_lessons='{$lessonid}'" );
+			// make sure they didn't pick the magic 'None' item.
+			if ( !@in_array('0', $lc->postvars['assignments']) ) {
+				foreach ( $lc->postvars['assignments'] as $objid ) {
+					$sql = "insert into class_assignments_link set
+						id_class_lessons='{$lessonid}',
+						id_class_assignments='{$objid}'";
+					$db->query($sql);
+				}
+			}
+
+			// Take care of the Webliography business: first delete all the links linked to this
+			// lesson, then add whatever was selected back to the table.
+			$sql = "delete from class_lesson_links where id_class_lessons='{$lessonid}'";
+			$db->query($sql);
+			foreach ( $lc->postvars['links'] as $linkid ) {
+				$sql = "insert into class_lesson_links set
+					id_class_lessons='{$lessonid}',
+					id_class_links='{$linkid}'";
+				$db->query($sql);
+			}
+
+			$this->run($db,$u,$lc,$t);
+			return;
+		}
+		$this->editRun($db,$u,$lc,$t);
+	}
+
+	/**
+	 * confirm the lesson deletion and ask if we should remove or just unlink the
+	 * external items.
+	 */
+	function deleteConfRun(&$db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'lessonManager_deleteConf';
+		$lessonid = $lc->getvars['id'];
+
+		$db->queryOne( "select title from class_lessons where id_class_lessons='{$lessonid}'");
+		$t['lessonTitle'] = $db->Record['title'];
+		$t['id_class_lessons'] = $lessonid;
+		$t['id_classes'] = $u->activeClassTaught->id_classes;
+
+	}
+
+
+	/**
+	 * delete the lesson
+	 */
+	function deleteRun(&$db,&$u,&$lc,&$t)
+	{
+		$lessonid = $lc->getvars['id'];
+
+		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
+
+		// just set the lesson id in all the tables to NULL
+		$db->query("update class_lesson_content set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
+	//	$db->query("update class_objectives set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
+
+		// we just want to remove the link associations for weblinks and objectives.
+		$db->query("delete from class_lesson_links where id_class_lessons='{$lessonid}'");
+		$db->query("delete from class_lesson_objectives where id_class_lesson='{$lessonid}'");
+		$db->query("delete from class_assignments_link where id_class_lessons='{$lessonid}'");
+
+		// finally, delete the lesson itself
+		$db->query("delete from class_lessons where id_class_lessons='{$lessonid}'");
+
+		$t['msg'] = 'The lesson has been removed and all its associated content, objectives,
+			and assignments have been unlinked. You may now reuse these items in other lessons';
+
+		$this->Run($db,$u,$lc,$t);
+		
+	}
+
+
+	// Do they have authority for this lesson? Yes, return true. No, give them an error
+	// and return false. (The caller need only return.)
+	function checkAuth($lessonid, &$db, &$u, &$t) {
+		$db->queryOne("select count(id_class_lessons) as cnt from class_lessons as l
+			left join classes as c on l.id_classes=c.id_classes
+			where l.id_classes='{$u->activeClassTaught->id_classes}'
+			and l.id_class_lessons='{$lessonid}'");
+		if (!$db->Record['cnt']) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to modify that lesson.";
+			return false;
+		} else return true;
+	}
+
+}
+
+?>

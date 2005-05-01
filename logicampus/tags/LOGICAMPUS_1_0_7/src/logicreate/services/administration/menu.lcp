@@ -1,0 +1,578 @@
+<?php
+
+
+
+include_once(LIB_PATH. 'datagrid.php');
+include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
+
+class menu extends AdminService 
+{
+	var $cleanedArray = array();
+	
+	
+	var $applinks = array(
+		'Create new menu' => 'menu/event=menueditorAdd/'		
+	);
+	
+	var $inactivelinks = array( 'Menus' );
+	var $sectionTitle = 'Menus';
+	
+	var $presentor = "htmlPresentation";
+	var $navlinks = array (
+		'Adminstration Home'=>'main',
+		'Form Manager'=>'formmgr',
+		'MOTD'=>'mod'
+	);
+	
+	function run (&$db,&$u,&$arg,&$t) 
+	{
+		$t['menus'] = MenuObj::getAll();
+		$arg->templateName = 'menu_main';
+	}
+	
+
+	/**
+	 * show the details of one menu
+	 */
+	function detailsRun(&$db, &$u, &$arg, &$t) {
+
+		$this->applinks = array('View menus'=>'menu/');
+		if ( intval($arg->getvars['mid']) < 1 ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'No menu id specified';
+			return;
+		}
+		$menuID = $arg->getvars['mid'];
+		$menu = MenuObj::get($menuID);
+		$omenu = $menu;
+		$menuView = new MenuListView($menu->treeList);
+		
+		$t['menus'] = $menuView->toEditableTable($menu->title,$menu->pkey, 'menu', 'item');
+		$t['mid'] = $menu->pkey;
+		
+
+		$db->queryOne("select * from menuCache where pkey=$menuID");
+		$cachedMenu = unserialize($db->Record['menuObj']);
+		
+		$arg->templateName = 'menu_details';
+	}
+
+	
+	
+	
+	
+	
+	function itemAddRun (&$db, &$u, &$arg, &$t) {
+		
+		include_once(LIB_PATH."LC_html.php");
+		
+		switch($arg->postvars['linkType']) {
+			case "html": 
+				$arg->templateName="menu_item_html";
+				$db->query("select filename, title from lcHtml");
+				while($db->next_record()) {
+					$t['html'][$db->Record[0]] = $db->Record[1];
+				}
+				$t['html'] = makeOptions($t['html']);
+			break;
+
+			case "app": 
+				$arg->templateName="menu_item_app";
+				$db->query("select mid, moduleName from lcRegistry");
+				while($db->next_record()) {
+					$t['apps'][$db->Record[0]] = $db->Record[1];
+				}
+				$t['apps'] = makeOptions($t['apps']);
+			break;
+
+			case "ext": 
+				$arg->templateName="menu_item_url";
+				break;
+				
+			case "hr": 
+				$arg->templateName="menu_item_hr";
+				break;
+		}
+
+		//parent menus
+		$db->query("select pkey, title from menu order by title");
+		while($db->next_record()) {
+			$t['menuOpts'] .= '<option value="'.$db->Record[0].'">'.$db->Record[1].'</option>';
+		}
+		$t['event'] = "itemInsert";
+		$t['mid'] = $arg->postvars['mid'];
+
+	}
+	
+	
+
+	// fix the menuID and the groups
+	function itemInsertRun (&$db, &$u, &$arg, &$t) 
+	{
+		switch($arg->postvars['linkType']) {
+			case "htm":
+				$item = new HTMLMenuItem();
+				$item->location = $arg->postvars[location];
+				$item->linkText = $arg->postvars[linkText];
+				$item->rank = intval($arg->postvars[rank]);
+				$item->menuID = $arg->postvars[menuID];
+				if ($arg->postvars[useImage]) 
+					$item->imgOff = $arg->postvars[imgOff];
+				$item->groups = array();
+				break;
+			case "hr":
+				$item = new BreakMenuItem();
+				$item->location = $arg->postvars[location];
+				$item->rank = intval($arg->postvars[rank]);
+				$item->menuID = $arg->postvars[menuID];
+				if ($arg->postvars[custom] == "hr" ) {
+					$item->linkText = "<hr>";
+				} else {
+					$item->linkText = $arg->postvars[linkText];
+				}
+				$item->groups = array();
+				break;
+			case "url":
+				$item = new URLMenuItem();
+				$item->location = $arg->postvars[location];
+				$item->rank = intval($arg->postvars[rank]);
+				$item->linkText = $arg->postvars[linkText];
+				$item->menuID = $arg->postvars[menuID];
+				if ($arg->postvars[useImage]) 
+					$item->imgOff = $arg->postvars[imgOff];
+				$item->groups = array();
+				break;
+			case "app":
+				$item = new APPMenuItem();
+				$item->appOption = $arg->postvars[appOption];
+				$item->rank = intval($arg->postvars[rank]);
+				$item->location = $arg->postvars[location];
+				$item->linkText = $arg->postvars[linkText];
+				$item->menuID = $arg->postvars[menuID];
+				if ($arg->postvars[useImage]) 
+					$item->imgOff = $arg->postvars[imgOff];
+				$item->groups = array();
+		}
+		$item->update();
+		
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl("menu/event=details/mid=".$arg->postvars['menuID']);
+	}
+	
+	
+	
+
+	/**
+	 * show template for editing
+	 */
+	function itemEditRun (&$db, &$u, &$arg, &$t) {
+		include_once(LIB_PATH."LC_html.php");
+		$link = MenuItem::get($arg->getvars[1]);
+		$t[menuItem] = $link;
+		$t['mid'] = $arg->getvars['mid'];
+
+		switch($link->type) {
+			case "htm":
+				$db->query("select filename, title from lcHtml");
+				while($db->next_record()) {
+					$t[html][$db->Record[0]] = $db->Record[1];
+					if ( $link->location == $db->Record[0] ) { $sel = $db->Record[0]; }
+				}
+				$t[html] = makeOptions($t[html],$sel);
+				break;
+
+			case "app": $arg->templateName="menu_item_app";
+				include_once(LIB_PATH."LC_html.php");
+				$db->query("select mid, moduleName from lcRegistry");
+				while($db->next_record()) {
+					$t['apps'][$db->Record[0]] = $db->Record[1];
+					if ( $link->location == $db->Record[0] ) { $sel = $db->Record[1]; }
+
+				}
+				$t['apps'] = makeOptions($t['apps'], $sel);
+				break;
+
+		}
+
+		// parent menus
+		$db->query("select pkey, title from menu order by title");
+		while($db->next_record()) {
+			$t['menuOpts'] .= '<option value="'.$db->Record[0].'" ';
+			if ( $db->Record[0] == $t['menuItem']->menuID) {$t[menuOpts] .= 'SELECTED';}
+			$t['menuOpts'] .= '>'.$db->Record[1].'</option>';
+		}
+
+		
+		switch($link->editPage)
+		{	case 'itemEditor_app':
+				$arg->templateName = 'menu_item_app';
+				break;
+			
+			case 'itemEditor_html':
+				$arg->templateName = 'menu_item_html';
+				break;
+			
+			case 'itemEditor_url':
+				$arg->templateName = 'menu_item_url';
+				break;
+			
+			case 'itemEditor_hr':
+				$arg->templateName = 'menu_item_hr';
+				break;
+				
+		}
+		
+		$t[event] = "itemUpdate";
+	}
+
+	
+
+	/**
+	 * update db for editing an item
+	 */
+	function itemUpdateRun (&$db, &$u, &$arg, &$t) {
+#	print_r($arg->postvars);
+#	exit();
+		$link = MenuItem::get($arg->postvars[pkey]);
+		$link->linkText = $arg->postvars[linkText];
+		$link->menuID = $arg->postvars[menuID];
+		$link->rank= $arg->postvars[rank];
+		$link->location = $arg->postvars[location];
+		$link->groups = implode('|',$link->groups);
+		if ($arg->postvars[useImage]) { 
+			$link->imgOff = $arg->postvars[imgOff];
+		} else {
+			$link->imgOff = "";
+		}	
+		if ($arg->postvars[linkType] == 'app' ) {
+			$link->appOption = $arg->postvars[appOption];
+		}
+
+		$link->_save("menuItems");
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl("menu/event=details/mid=".$arg->postvars['menuID']);
+	}
+
+	
+	
+	/**
+	 * Remove entry from the db, still requires saving a menu when done
+	 */
+	function itemDeleteRun (&$db, &$u, &$arg, &$t) {
+		
+		$db->query("delete from menuItems where pkey ='".$arg->getvars[1]."'");		 
+		$t['url'] = modurl("menu/event=details/mid=".$arg->getvars['mid']);
+		$this->presentor = 'redirectPresentation';
+	}
+
+	
+	
+	/**
+	 * Show template for selecting a new parent menuItem
+	 */
+	function itemMoveRun (&$db, &$u, &$arg, &$t) {
+		//use new Tree structure
+		$arg->templateName = 'menu_item_move';
+		$t['mid'] = $arg->getvars['mid'];
+
+		include_once(LIB_PATH."LC_html.php");
+		include_once(LIB_PATH."LC_Categories.php");
+		include_once(LIB_PATH."Tree.php");
+		$link = MenuItem::get($arg->getvars[1]);
+		$t[menuItem] = $link;
+
+
+		$db->query("select pkey,parentID,linkText,type from menuItems where menuID = ".$link->menuID." order by parentID, rank");
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		while ( $db->next_record() ) {
+			$data[] = new menuItem($db->Record);
+		
+		}
+		$tree = new TreeList();
+		$tree->loadObjects($data);
+
+		while ($tree->traverse() ) {
+			if ($tree->p_CurrentNode->contents->pkey == $link->pkey ) {
+				$tree->p_CurrentNode->expanded = false;
+			}
+		}
+		
+		$tree->reset();
+		$t[menuOpts] = $this->renderItems($tree);
+	}
+
+	/**
+	 * save new parent id of menuItem. ::itemMoveRun()::
+	 */
+	function itemupdatePositionRun (&$db, &$u, &$arg, &$t) {
+		
+		$newlink = MenuItem::get($arg->postvars[pkey]);
+		if ($newlink->parentID != $arg->postvars[parentID]) {
+			if ( $newlink->pkey != $arg->postvars[parentID]) {
+				$newlink->parentID = $arg->postvars[parentID];
+		$newlink->linkText = addslashes($newlink->linkText);
+				$newlink->update();
+			}
+		}
+		$t['url'] = modurl("menu/event=details/mid=".$arg->postvars['mid']);
+		$this->presentor = 'redirectPresentation';
+	}
+
+	
+	
+	/**
+	 * adjust the rank of this item
+	 */
+	function itemUpRun (&$db, &$u, &$arg, &$t) {
+//		$this->presentor = "debug"; return;
+
+		$link = MenuItem::get($arg->getvars[1]);
+		$link->linkText = addslashes($link->linkText);
+		if ($link->rank > 0) {
+			$link->rank = $link->rank -1;
+			$link->update("menuItems");
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl("menu/event=details/mid=".$arg->getvars['mid']);
+	}
+
+
+	/**
+	 * adjust the rank of this item
+	 */
+	function itemDownRun (&$db, &$u, &$arg, &$t) {
+//		$this->presentor = "debug"; return;
+		
+		$link = MenuItem::get($arg->getvars[1]);
+		$link->linkText = addslashes($link->linkText);
+		$link->rank = $link->rank + 1;
+		$link->update("menuItems");
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl("menu/event=details/mid=".$arg->getvars['mid']);
+	}
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	function menueditorAddRun (&$db, &$u, &$arg, &$t) {
+
+		$this->applinks = array('View menus'=>'menu/');
+		$db->query("select gid,groupName from lcGroups order by groupName");
+		while($db->next_record()) {
+			$t[groups] .= '<option value="'.$db->Record[0].'" ';
+			$t[notgroups] .= '<option value="'.$db->Record[0].'" ';
+			$t[groups] .= '>'.$db->Record[1].'</option>';
+			$t[notgroups] .= '>'.$db->Record[1].'</option>';
+
+		}
+
+		$t['event'] = "menueditorInsert";
+		$arg->templateName = "menu_menueditor_add";
+	}
+	
+	function menueditorInsertRun (&$db, &$u, &$arg, &$t) {
+		$menu = new MenuObj();
+
+		$menu->title = $arg->postvars['title'];
+		$menu->menuid = $arg->postvars['menuid'];
+		switch ($arg->postvars['layout']) {
+			case 'v':
+				$menu->layout = 'vertical';
+				break;
+			case 'h':
+				$menu->layout = 'horizontal';
+				break;
+			case 'jh':
+				$menu->layout = 'jshorizontal';
+				break;
+
+			default:
+				$menu->layout = 0;
+		}
+
+		if ($arg->postvars['groups'] != '') {
+			$menu->groups = $arg->postvars['groups'];
+		} else {
+			$menu->groups = array();
+		}
+
+		if ($arg->postvars['notgroups'] != '') {
+			$menu->notgroups = $arg->postvars['notgroups'];
+		} else {
+			$menu->notgroups = array();
+		}
+		$menu->update();
+		
+		$this->run($db, $u, $arg, $t);
+	}
+	
+	
+	function menueditorRun (&$db, &$u, &$arg, &$t) {
+
+		
+		$t[menu] = MenuObj::get($arg->getvars['mid']);
+
+		$db->query("select gid,groupName from lcGroups order by groupName");
+		while($db->next_record()) {
+			$t[groups] .= '<option value="'.$db->Record[0].'" ';
+			$t[notgroups] .= '<option value="'.$db->Record[0].'" ';
+			if ( in_array($db->Record[0],$t[menu]->groups) ) {
+				$t[groups] .= 'SELECTED';
+			}
+			if ( in_array($db->Record[0],$t[menu]->notgroups) ) {
+				$t[notgroups] .= 'SELECTED';
+			}
+			$t[groups] .= '>'.$db->Record[1].'</option>';
+			$t[notgroups] .= '>'.$db->Record[1].'</option>';
+
+		}
+
+		$t['event'] = "menueditorUpdate";
+		$arg->templateName = "menu_menueditor_add";
+		
+	}
+	
+	
+	function menueditorUpdateRun (&$db, &$u, &$arg, &$t) {
+		
+		$menu = MenuObj::get($arg->postvars['pkey']);
+		
+		$menu->title = $arg->postvars['title'];
+		$menu->menuid = $arg->postvars['menuid'];
+
+		if ($arg->postvars[groups] != '') { 
+			$menu->groups = $arg->postvars['groups'];
+		} else {
+			$menu->groups = array();
+		}
+		if ($arg->postvars['notgroups'] != '') {
+			$menu->notgroups = $arg->postvars['notgroups'];
+		} else {
+			$menu->notgroups = array();
+		}
+		switch ($arg->postvars['layout']) {
+			case 'v':
+				$menu->layout = 'vertical';
+				break;
+			case 'h':
+				$menu->layout = 'horizontal';
+				break;
+			case 'jh':
+				$menu->layout = 'jshorizontal';
+				break;
+
+			default:
+				$menu->layout = 0;
+		}
+		
+		$menu->update();
+		
+		$this->cacheRun($db,$u,$arg,$t);
+		
+	}
+	
+	
+	
+	/**
+	 * remove the menu from menu, menuCache,
+	 * and the menu items from menuItems
+	 */
+	function menueditorDeleteRun (&$db, &$u, &$arg, &$t) {
+		$id = $arg->postvars['pkey'];
+		if ( intval( trim ($id) ) > 0 ) {
+			$db->query("delete from menu where pkey = $id");
+			$db->query("delete from menuItems where menuID = $id");
+			$db->query("delete from menuCache where pkey = $id");
+		}
+		$this->run($db, $u, $arg, $t);
+	}
+	
+	
+	/**
+	 * save the php serialized object into a mysql table for faster access
+	 */
+	function cacheRun (&$db, &$u, &$arg, &$t) {
+		$foo = MenuObj::get($arg->getvars['mid']);
+		$sql = "replace into menuCache set pkey = $foo->pkey, menuObj ='".addSlashes(serialize($foo))."', rank = {$foo->rank}, groups = '|".join('|',$foo->groups)."|', notgroups = '|".join('|',$foo->notgroups)."|', menuid='{$foo->menuid}'";
+		$db->query($sql);
+		$this->run($db, $u, $arg, $t);
+	}
+	
+	
+	
+	/**
+	 * adjust the rank of this item
+	 */
+	function menueditorUpRun (&$db, &$u, &$arg, &$t) {
+
+		$sql = 'update menu set rank = rank-1 where pkey='.$arg->getvars['mid'].' and rank > 0';
+		$db->query($sql);
+
+		$sql = 'update menuCache set rank = rank-1 where pkey='.$arg->getvars['mid'].' and rank > 0';
+		$db->query($sql);
+
+		$this->run($db, $u, $arg, $t);
+	}
+
+
+	/**
+	 * adjust the rank of this item
+	 */
+	function menueditorDownRun (&$db, &$u, &$arg, &$t) {
+
+		$sql = 'update menu set rank = rank+1 where pkey='.$arg->getvars['mid'];
+		$db->query($sql);
+
+		$sql = 'update menuCache set rank = rank+1 where pkey='.$arg->getvars['mid'];
+		$db->query($sql);
+
+		$this->run($db, $u, $arg, $t);
+	}
+
+	
+	/**
+	 * Puts the menu items in <option> tags
+	 * @static
+	 */
+	function renderItems(&$tree,$sel=false) {
+
+
+		while ($tree->traverse() ) {
+			if ($tree->p_CurrentNode->expanded === false) continue;
+			unset($break);
+			for ($l=0; $l < $tree->p_CurrentNode->indent; ++$l) { $break .= "&nbsp;-&nbsp;-"; }
+			
+			$v = &$tree->p_CurrentNode->contents;
+
+			if ( $sel == $v->pkey ) {			
+				$ret .= '			<option value="'.$v->pkey.'" SELECTED>'.$break.$v->linkText.'</option>
+';
+			} else {
+				$ret .= '			<option value="'.$v->pkey.'">'.$break.$v->linkText.'</option>
+';
+			}
+
+		}
+	return $ret;
+	} 
+	
+	
+	
+	
+	
+}
+
+
+
+?>

@@ -1,0 +1,19 @@
+<h2>Download a test file</h2>
+<? if (!is_array($t['file'])) { ?>
+There is no file to download.
+<? } else {  ?>
+Tarrant County College has requested that you download this test file.
+<BR><BR>
+File: <b><?=$t['file']['file'];?></b><BR>
+Size: <b><?=$t['file']['size'];?></b><BR>
+<? if ($t['file']['description']) { ?>
+Description: <BR>
+<?=$t['file']['description'];?>
+<? } ?>
+<BR>
+<BR>
+<a href="<?=modurl("show/".$t['file']['hash']."/event=dl/".$t['file']['file']);?>">Click here</a> to download the file
+
+
+<? } ?>
+

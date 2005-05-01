@@ -1,0 +1,249 @@
+<?
+/*
+ *
+ * handles viewing of online lessons
+ *
+ */
+include_once(LIB_PATH.'classLessonContentObj.php');
+include_once(LIB_PATH.'datagrid.php');
+
+class lessons extends StudentService {
+
+	var $presentor='lessonPresentation';
+
+	var $sectionTitle = 'Classroom Lessons';
+	var $inactivelinks = array(
+		'Lessons',
+	);
+	
+
+/*
+ *
+ * Default event
+ * 
+ * Input data:  $u->activeClassTaken->id_classes
+ * Output data: show all lessons for this class
+ *
+ */
+
+		function run(&$db,&$u,&$lc,&$t) {
+
+			$ut = time();						
+			$lc->templateName = 'lessons_main';
+
+			# Build datagrid of lessons, only show ones that are
+			# active
+			$dg = new datagrid($this->module, $this->serviceName);
+			$dg->table = 'class_lessons';
+			$dg->column = 'createdOn, activeOn, inactiveOn, title, description, id_class_lessons';
+			$dg->ignore = array('id_class_lessons', 'createdOn', 'inactiveOn' );
+			$dg->where = 'id_classes='.$u->activeClassTaken->id_classes.'
+				AND activeOn <= '.$ut.'
+				AND inactiveOn > '.$ut;
+			$dg->orderby = 'createdOn';
+			$dg->sortColumns = array( 'activeOn', 'inactiveOn', 'title' );
+
+			$dg->headers = array(
+				'title' => 'Lesson',
+				'description' => 'Description',
+				'activeOn' => 'Active On',
+				'inactiveOn' => 'Inactive On'
+			);
+			$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
+			$dg->overrideColumn('<a href="'.modurl('lessons/event=view/id=<?=$id_class_lessons;?>').'"><?=$title;?></a>', 'title');
+			$t['table'] = $dg->toHTML();
+		}
+
+/*
+ *
+ *
+ * Views a lesson
+ * 
+ * Input data:  lesson id and activeClassTaken->id_classes
+ * Output data: a lesson and all of its associatd data (links, assignments, etc)
+ *
+ */
+		function viewRun(&$db,&$u,&$lc,&$t) {
+			
+			$lc->templateName='lessons_view';
+
+			// Make sure they're allowed to access this lesson AND
+			#function checkContentPermission($activeClassTaken, $table, $tablePkey, $contentLabel, $contentPkey
+
+			$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $lc->getvars['id']);
+			if (!$check)
+			{
+				$lc->templateName = 'main_nocontentaccess';
+				return;
+			}
+			// actually retrieve the data from the db
+			$ut = time();
+			$sql = "select * from class_lessons
+				where id_class_lessons='{$lc->getvars['id']}'
+				and id_classes='{$u->activeClassTaken->id_classes}'";
+			if (!$u->isFaculty())
+				$sql .= " and (activeOn < ".time()."
+					and inactiveOn > ".time().')';
+
+			$db->queryOne($sql);
+			$t['lesson'] = $db->Record;
+			$checkListArray = explode("\n",trim($db->Record['checkList']));
+			if (trim($checkListArray[0]) != '') {
+			$checkList = implode("</li><li>", $checkListArray);
+			$checkList = "<li>$checkList</li>";
+			}
+		#	debug($checkList);
+			if (!$t['lesson']['id_class_lessons']) {
+				$lc->templateName = 'main_nocontentaccess';
+				return;
+			}
+
+			$db->queryOne("select id_class_lesson_content, txTitle,txText from class_lesson_content
+				where id_class_lessons='{$lc->getvars['id']}'");
+			$t['content'] = $db->Record;
+
+			$db->query("SELECT class_objectives.id_class_objectives, objective, f_hide 
+				FROM class_objectives
+				LEFT JOIN class_lesson_objectives on 
+					class_lesson_objectives.id_class_objectives = class_objectives.id_class_objectives
+				WHERE class_lesson_objectives.id_class_lesson='{$lc->getvars['id']}' 
+				AND f_hide=0 ORDER BY i_sort ASC");
+			while ($db->next_record()) $t['objectives'][] = $db->Record;
+
+			// modified this sql statemnet to order by dueDate instead of activeDate in desc order
+			$sql = "select a.id_class_assignments, a.title from class_assignments as a
+				left join class_assignments_link as k on k.id_class_assignments=a.id_class_assignments
+				left join class_lessons as l on l.id_class_lessons=k.id_class_lessons
+				where a.id_classes='".$u->activeClassTaken->id_classes."'"
+				.(($u->isFaculty() == false) ? ' AND activeDate <= '
+				.mktime(0, 0, 0, date('m'), date('d'),date('Y')) : '')
+				." AND l.id_class_lessons='{$lc->getvars['id']}' order by dueDate ASC";
+			$db->query($sql);
+			while ($db->next_record()) $t['assignments'][] = $db->Record;
+
+//			AND activeDate <= ". mktime(0, 0, 0, date('m'), date('d'),date('Y')). "
+
+			$sql = "select l.id_class_links, title, url from class_links as l
+				left join class_lesson_links as ll on l.id_class_links=ll.id_class_links
+				where ll.id_class_lessons='{$lc->getvars['id']}'";
+			$db->query($sql);
+			while ($db->next_record()) $t['weblinks'][] = $db->Record;
+
+			// Create the sidebar and stash it in the session
+			$sidebar = "<p><span style=\"font-weight:bold;font-size:medium;\">\n"
+				.$t['lesson']['title']."</span><br/>"
+				."&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"".modurl('lessons/event=view')
+				."/id={$t['lesson']['id_class_lessons']}\">Start Lesson</a><br/><br/>"
+				."<b>Description</b></p>"
+				."<p style=\"margin-left:15px;\">{$t['lesson']['description']}</p>";
+		
+			/*
+			if ((is_array($t['objectives']) && count($t['objectives']) > 0) ||
+				(is_array($t['assignments']) && count($t['assignments']) > 0) || 
+				(is_array($t['weblinks']) && count($t['weblinks']) > 0)
+				)
+			{	// if you aren't seeing any links, it's probably becuase
+				//	$sidebar .= '<b>The student will:</b><br><br>';
+			}	
+			*/
+			
+			if ((is_array($t['objectives']) && count($t['objectives']) > 0))
+			{
+			
+				$sidebar .= "<b>Objectives</b><br><br><b>The student will:</b><ul>";
+				while (list(,$obj) = @each($t['objectives']))
+					$sidebar .= '<li> '.htmlentities($obj['objective'], ENT_QUOTES).'</li>';
+			}
+	
+			$sidebar .= "</ul>";
+			$sidebar .= "<b>Assignments</b><ul>";
+			while (list(,$ass) = @each($t['assignments']))
+				$sidebar .= '<li> <a href="'.MOD_URL.'assignments/event=view/id='
+					.$ass['id_class_assignments'].'">'.$ass['title'].'</a></li>';
+			if (count($t['assignments']) == 0) $sidebar .= "<li> <i>None</i></li>";
+			$sidebar .= "</ul><b>Web Links</b><ul>";
+			while (list(,$webl) = @each($t['weblinks']))
+				$sidebar .= '<li> <a target="new" href="'.MOD_URL.'links/id='
+					.$webl['id_class_links'].'">'.$webl['title'].'</a></li>';
+			if (count($t['weblinks']) == 0) $sidebar .= "<li> <i>None</i></li>";
+			$sidebar .= '</ul>';
+
+			if ($checkList != '')
+			{
+			  $sidebar .= '<b>Check List</b><ol>';
+			  $sidebar .= $checkList;
+			  $sidebar .= '</ol>';
+			}
+
+
+		
+			$u->sessionvars['activeLesson'] = $t['lesson'];
+			$u->sessionvars['activeLessonSidebar'] = $t['sidebar'] = $sidebar;
+
+			if ($lc->getvars['print']) {
+				$this->presentor = 'printPresentation';
+			}
+
+		}
+
+		function viewContentRun(&$db, &$u, &$lc, &$t)
+		{
+			
+			$lc->templateName='lessons_content';
+
+			// Make sure they're allowed to access this lesson AND
+
+			// __FIXME__
+			/* should we actually link arbitrary content to lessons ??
+//			$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $lc->getvars['id']);
+//			if (!$check)
+//			{
+//				$lc->templateName = 'main_nocontentaccess';
+//				return;
+//			}
+			*/
+
+			// actually retrieve the data from the db
+			$sql = "select * from class_lesson_content
+				WHERE id_classes='{$u->activeClassTaken->id_classes}'
+				and id_class_lesson_content = '{$lc->getvars['id']}'";
+			$db->queryOne($sql);
+			$t['content'] = $db->Record;
+			if ($lc->getvars['print']) {
+				$this->presentor = 'printPresentation';
+			}
+
+			$t['sidebar'] = $u->sessionvars['activeLessonSidebar'];
+
+		}
+
+
+		function printLessonRun(&$db, &$u, &$lc, &$t)
+		{
+			# load up a printer presentation handler
+			# so we the student can print a version of the lesson
+		}
+
+
+# current active class
+# table we are checking
+# table pkey name
+# content id
+# active class id
+function checkContentPermission($activeClassTaken, $table, $tablePkeyLabel,
+$contentLabel, $contentPkey)
+{
+	$db = DB::getHandle();
+	$sql = "SELECT $contentLabel FROM $table WHERE 
+			$tablePkeyLabel ='$contentPkey'";
+	$db->queryOne($sql);
+	if ($activeClassTaken == $db->Record[$contentLabel])
+	{
+		return true;
+	}
+	return false;				
+}
+}
+
+
+?>

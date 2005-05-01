@@ -1,0 +1,5 @@
+<table  width='100%' cellpadding='4'><tr><td colspan='2'><a href='<?=appurl('wireframe');?>'>wireframe tool</a></td></tr><tr><td colspan='2'><h2><a href='<?=appurl('classroom/main/event=');?>'>classroom</a> -> <a href='<?=appurl('classroom/emailList/event=');?>'>emailList</a> -> <a href='<?=appurl('classroom/emailList/event=');?>'>main</a></h2></td></tr><tr><td colspan='2'><h3>Description</h3>Show list of all students in the class.  Checkbox next to each student to collect them into a group.  This event will also show the form for the email body and subject.  Submitted subject and body will be emailed to selected students.</td></tr><tr><td width='50%' valign='top'><h3>Input / Output</h3>This is a list of the data the event expects, and what it will produce as output<hr>Input data: <br />
+Output data: </td><td width='50%' valign='top'><h3>Exit paths</h3>How will people leave this event?<hr><form method='post' action='<?=appurl('classroom/emailList/event=sendEmail');?>'><br />
+<a href="<?=appurl('classroom/emailList/event=sendEmail');?>">Posted info to classroom -> emailList -> sendEmail</a><br />
+</form><br />
+</td></tr></table>

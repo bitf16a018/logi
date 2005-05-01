@@ -1,0 +1,30 @@
+<?
+/*
+ *
+ * Will print requested textbook requests to pdf for
+ * hard printing. by bookmanagers
+ *
+ */
+
+class printPDF extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Outputs a printing batch to PDF
+ * 
+ * Input data: print_code
+ * Output data: pdf
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='printPDF_main';
+
+		}
+
+
+
+}
+
+?>

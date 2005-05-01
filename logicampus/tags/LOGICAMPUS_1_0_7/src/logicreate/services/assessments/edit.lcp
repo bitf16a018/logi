@@ -1,0 +1,167 @@
+<?
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+
+class edit extends FacultyService {
+
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Class Assessments';
+
+	var $data = array();  # cleaned form data
+	var $applinks = array (
+		'List Assessments' => 'main',
+		'Add Assessment' => 'main/event=add'
+		);
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Announcements'=>'%classmgr/announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Content' => '%classmgr/lessonContent/',
+		'FAQ' => '%classmgr/faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => '%classmgr/lessonManager/',
+		'Objectives' => '%classmgr/lessonObjectives/',
+		'Webliography' => '%classmgr/lessonWebliography/'
+	);
+	var $inactivelinks = array (
+		'Add Assessment' => 'main/event=add',
+		'Assessment Manager'
+	);
+
+
+
+	/**
+	 * show a form for a new assessment
+	 */
+	function newRun($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'edit_new';
+	}
+
+
+
+	/**
+	 * show a form for editing an assessment
+	 */
+	function editRun($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'edit_edit';
+
+		$id = (int)$lc->getvars['id'];
+
+		//load the assessment
+		$assmnt = Assessment::load($id,$u->activeClassTaught->id_classes);
+
+		if (! $assmnt ) {
+			$t['message'] = "You do not have permission to edit the assessment #".$id;
+			$this->presentor = 'errorMessage';
+			return;
+		}
+
+		$t['assmnt'] = $assmnt;
+
+
+		//load all possible gradebook categories
+		$t['categories'] = ClassGradebookCategoriesPeer::doSelect( 'id_classes='.$assmnt->classId);
+
+
+		//load the one category that belongs to this assessement
+		$t['gbe'] = $t['assmnt']->loadGradebookEntry();
+
+		if ( ! $t['gbe'] ) {
+			//gbe must've been lost in a class copy
+
+			$t['__LcWarning'] = "There is no GradeBook Entry associated with this test.";
+		}
+
+		$isLinked = false;
+		foreach( $t['categories'] as $blank=>$gbc) {
+			if ($gbc->idClassGradebookCategories == $t['gbe']->idClassGradebookCategories ) {
+				$isLinked = true;
+				break;
+			}
+		}
+		reset($t['categories']);
+		if ( ! isset($t['gbe']->idClassGradebookCategories) || ! $isLinked ) {
+			//gbe must've been lost in a class copy
+
+			$t['__LcWarning'] .= "<br/>There is no GradeBook Category associated with this test.";
+		}
+
+	}
+
+
+
+
+
+	function updateRun(&$db,&$u,&$lc,&$t) {
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('addassessment', &$lc->postvars);
+		if ($t['error'])
+		{
+			$this->run($db, $u, $lc, $t);
+			return;
+		}
+
+
+		$id = (int)$lc->getvars['id'];
+
+		//load the assessment
+		$a = Assessment::load($id,$u->activeClassTaught->id_classes);
+
+		if (! $a ) {
+			$t['message'] = "You do not have permission to edit the assessment #".$id;
+			$this->presentor = 'errorMessage';
+			return;
+		}
+
+
+		$a->displayName = $lc->postvars['displayName'];
+		$a->description = $lc->postvars['description'];
+		$a->instructions = $lc->postvars['instructions'];
+
+		$a->mailResponses = (int)($lc->postvars['mailResponses'] == 'on');
+		$a->autoPublish = (int)($lc->postvars['autoPublish'] == 'on');
+
+		if ( intval($a->classId) == 0 ) {
+			print "active class id of 0, dying...";
+			exit();
+			trigger_error('empty class id');
+			return false;
+		}
+
+		$a->save();
+
+		# Add new assessment to the gradebook
+		$assessmentId = $a->getPrimaryKey();
+
+		$gbe = ClassGradebookEntries::load( array('assessment_id'=>$assessmentId) );
+		if(!$gbe) { 
+			//didn't find a GBE, make a new one
+			$gbe = new ClassGradebookEntries();
+			$gbe->idClasses = $u->activeClassTaught->id_classes;
+		}
+
+		$gbe->title = $lc->postvars['displayName'];
+		$gbe->assessmentId = $assessmentId;
+		$gbe->gradebookCode = $lc->postvars['gradebookCode'];
+		$gbe->idClassGradebookCategories = $lc->postvars['idClassGradebookCategories'];
+		$gbe->notes = $lc->postvars['description'];
+		$gbe->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('main/');
+	}
+}
+?>
