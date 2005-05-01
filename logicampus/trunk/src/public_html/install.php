@@ -226,8 +226,8 @@ $defines = "<?
  * PICS_URL		= main directory for graphics - use in templates if needed
  */
 
-define('LOGICAMPUS_VERSION','1.0.4');
-define('LOGICAMPUS_VERSION_STATUS','gamma');
+define('LOGICAMPUS_VERSION','1.0.7');
+define('LOGICAMPUS_VERSION_STATUS','release');
 define('SITE_NAME','logicampus');
 define('SITE_DISPLAY_NAME','LogiCampus');
 define('USE_MD5_PASSWORDS',TRUE);
