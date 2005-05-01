@@ -1,0 +1,125 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(LIB_PATH."datagrid.php");
+include_once(LIB_PATH."ClassGroup.php");
+include_once(LIB_PATH."ClassGroupMember.php");
+
+class discussion extends StudentService {
+
+	var $presentor = "htmlPresentation";
+	var $sectionTitle = 'Class Discussion';
+
+	var $applinks = array(
+		'List Threads' => 'discussion/',
+		'Start new Thread' => 'discussion_post/',
+	);
+
+	var $inactivelinks = array(
+		'List Threads',
+		'Discussion Board'
+	);
+	
+
+	function Run($db,&$u,&$lc,&$t) {	
+		$forum_id = (int)$lc->getvars['forum_id'];
+
+		$k = $u->activeClassTaken->id_classes;
+		if ($forum_id>0) { 
+			$forum = LcForum::load(
+				array("lc_forum_numeric_link"=>$k,'lc_forum_id'=>$forum_id)
+			);
+			// check the forum to see if it's restricted to a group
+			// then find out if we're in that group
+			// this is a little backwards...
+			$group = $forum->lcForumCharLink;
+			list($g,$groupid) = split("_",$group);
+			if ($groupid>0) { 
+				$c = classGroupMember::load(
+					array("class_group_id"=>$groupid,"student_id"=>$u->username)
+				);	
+				if (!is_object($c)) { 
+					unset($forum);
+				}
+			}
+		} else { 
+			$forum = LcForum::getLcForumForClass($k);
+		}
+		if ($forum->lcForumParentId>0) { 
+			$t['forumParent'][] = LcForum::load(array("lc_forum_id"=>$forum->lcForumParentId));
+		}
+		if (is_object($forum)) { 
+			$t['forumChildren'] = $forum->getLcForums();
+		}
+
+// groups a user is a student id
+// directly assigned by a teacher (for now - adhoc self-directed groups later?)
+		$group1 = ClassGroupMemberPeer::doSelect(" student_id='".$u->username."'");
+		$group2 = ClassGroupPeer::doSelect(" class_id='".$u->activeClassTaught->id_classes."'");
+		$groups = @array_merge($group1,$group2);
+		while(list($k,$v) = @each($groups)) { 
+			$groupList[$v->classGroupId] = $v->classGroupId;
+		}
+		$studentGroupForums = $forum->getLcForumsStudentGroups($groupList);
+
+		$t['forumChildren'] = array_merge($t['forumChildren'],$studentGroupForums);
+		$t['posts'] = $forum->getLcForumPosts();
+		$nposts = $t['posts'];
+		while(list($k,$v) = @each($nposts)) {
+			if ($v->lcForumPostStatus==0) { 
+				$posts[] = $v;
+			}
+		}
+
+
+// possible future nested forums for a class?
+		while(list($sec,$forums) = @each($t['forumChildren'])) {
+			$k = $forums->getLcForums();
+			$forumChildren[$forums->lcForumId] = $forums->getLcForums();
+		}
+		@reset($t['forumChildren']);
+		$t['forumChildren2'] = $forumChildren;
+		$t['forum'] = $forum;
+
+		// use datagrid for display of top level posts
+		// for easier paging
+		$grid = new datagrid('classroom','discussion');
+		$grid->datarows = $posts;
+		$grid->rowsPerPage = 500;
+		$grid->_totalRows = count($posts);
+		$grid->ignore = array("_new","_modified","lcForumId","lcForumPostStatus",'lcForumRecentPoster',"lcForumPostParentId","__attributes","lcForumPostMessage","lcForumPostThreadId","lcForumPostId",'lcForumThreadCount','lcForumPostTimedate','lcForumRecentPostId','lcForumRecentPostTimedate',
+'lcForumFile1Name',
+'lcForumFile1SysName',
+'lcForumFile1Size',
+'lcForumFile1Count',
+'lcForumFile2Count',
+'lcForumFile1MIME',
+'lcForumFile2Name',
+'lcForumFile2SysName',
+'lcForumFile2Size',
+'lcForumFile2MIME'
+);
+		$grid->headers= array('lcForumPostUsername'=>'Thread starter','lcForumPostTitle'=>"Thread",'lcForumReplyCount'=>"Replies");
+		$grid->overrideColumn('<a href="<?=appurl("classroom/discussion_view/".$lcForumPostId);?>"><?=$lcForumPostTitle;?><?if ($lcForumPostTitle=="") { echo "No Subject";}?></a>','lcForumPostTitle');
+		$t['table'] = $grid->toHTML();
+		$this->applinks['Start new Thread'] = "discussion_post/".$forum->lcForumId;
+		$lc->templateName = 'discussion_view';
+		return;
+
+	}
+
+
+}
+?>

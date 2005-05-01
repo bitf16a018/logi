@@ -1,0 +1,65 @@
+<?=$t['sectionheader'];?>
+
+Input information below that will be common to all
+courses for the chosen semester.  Such as testing center hours and locations,
+course withdrawal information, and school holidays. This information
+will then populate into the appropriate areas of each virtual
+classroom. 
+
+<font color="maroon">
+<?=$t['error'];?>
+</font>
+
+<br><br>
+<form action="" method="POST">
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+<tr>
+	<td>Load Semester</td>
+	<td width="125"><select name="id_semesters">
+		<?=makeOptions(semesterInfo::getSemesterList(), $obj->postvars['id_semesters']);?></select></td>
+	<td width="50"><input type="submit" value="Go" name="Submit"></td>
+</tr>
+</table>	
+</form>
+<br><br>
+
+<?php
+//echo makeOptions(semesterInfo::getSemesterList(), $lc->postvars['id_semesters']);
+if (is_array($t['extra']))
+{
+	?>
+	<b>Current Semester Loaded</b><br>
+	<?=$t['extra']['semesterId'];?>
+	<?php
+}
+if ($obj->postvars['id_semesters'] > 0)
+{
+	?>
+<form action="" method="POST">
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+<tr>
+	<td>Copy Semester</td>
+	<td width="150"><?=$t['extra']['semesterId'];?></td>
+	<td width="25">To</td>
+	<td width="100">
+		<select name="id_semesters">
+			<?php
+				$copy_opt = semesterInfo::getSemesterList();
+				unset($copy_opt[$obj->postvars['id_semesters']]);
+			?>
+			<?=makeOptions($copy_opt, $obj->postvars['id_semesters']);?>
+		</select>
+	</td>
+	<td width="50"><input onclick="alert('ALERT - By submitting this form you are not making a live copy, the page will reload and allow you to save the copied information to the intended semester but you can still backout or make modifications before submitting that information for finalization! (woah thats long! shortin this!)');" type="submit" value="Go" name="Submit"></td>
+</tr>
+</table>
+<input type="hidden" name="event" value="semesterInfoCopyTo">
+<input type="hidden" name="copyfrom" value="<?=$obj->postvars['id_semesters'];?>">
+</form>
+<br><br>
+	<?php
+}
+?>
+<hr>
+<?=$t['form'];?>

@@ -1,0 +1,37 @@
+
+<? 
+
+if($t[error]) {
+	echo $t[error];
+} else { ?>
+<h3>Photo Gallery - Edit Picture</h3>
+<table border="0" width="100%" cellspacing="1" cellpadding="4">
+	<tr>
+		<td valign="top" width="30%" class="header2">Image:</td>
+		<td valign="top" width="70%"><a href="<?=$t[imageurl]?>"><img src="<?= $t[photo][link];?>" border="0"></a><b></td>
+	</tr>
+	<tr>
+		<td valign="top" class="header2">
+		<form method="POST">
+			Caption:<br><i>(up to 250 characters)</i></td>
+	<td><textarea cols="25" rows="10" maxlength="250" name="caption"><?=$t[photo][caption]?></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" class="header2">&nbsp;</td>
+		<td>
+		<input type="submit" value="Save Changes">
+		<input type="hidden" name="event" value="save">
+		<input type="hidden" name="pkey" value="<?=$t[photo][pkey]?>">
+		</form>
+		or
+		<form method="POST">
+		<input type="submit" value="Delete Photo">
+		<input type="hidden" name="event" value="delete">
+		<input type="hidden" name="pkey" value="<?=$t[photo][pkey]?>">
+		</form>
+	</td>
+</tr>
+</table>
+
+<? } ?>

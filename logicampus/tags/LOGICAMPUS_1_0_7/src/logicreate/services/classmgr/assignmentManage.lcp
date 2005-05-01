@@ -1,0 +1,1125 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * App to allow for add/edit/delete of assignments. 
+ * Assignment will have text, due date, points. 
+ * This info will be pulled in to other areas of the
+ * site (calendar, etc)
+ RESPONSE TYPES:
+
+ 	1= upload file
+	2= text response
+	3= upload & text
+	4= forum post
+	5= None
+ 
+ 
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH."SiteForms.php");
+include_once(LIB_PATH."classAssignmentObj.php");
+include_once(LIB_PATH."ClassGradebookEntries.php");
+include_once(LIB_PATH."ClassGradebook.php");
+include_once(LIB_PATH."ClassGradebookVal.php");
+
+
+class assignmentManage extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+
+	// links
+
+	var $inactivelinks = array( 'Assignments' );
+
+
+
+	function rebuildClassDocLibHashesRun($db,&$u,&$lc,&$t)
+	{
+		$db_saver = DB::getHandle();
+		$i=10;
+		
+		$sql = '
+		SELECT pkey, daHasha, displayname, folder
+		FROM classdoclib_Files 
+		WHERE  daHasha = \'\'
+		';
+		
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{
+			$i++;
+			$daHasha = ''; // clobering
+			$daHasha = md5($db->Record['displayname'].microtime().$i.$db->Record['folder']);
+			
+			$sql = '
+			UPDATE classdoclib_Files
+			SET daHasha=\''.$daHasha.'\'
+			WHERE pkey='.$db->Record['pkey'].'
+			';
+			$db_saver->query($sql);
+			
+		}
+		
+		echo 'Done...<br>Updated: '. ($i-10). ' (files)';
+		
+	}
+	
+	
+	function rebuildClassDocLibLinksFromPkeyToHashRun($db,&$u,&$lc,&$t)
+	{
+		$db3 = DB::getHandle();
+		$db_saver = DB::getHandle();
+		
+		$sql = '
+			SELECT id_class_lesson_content, txText
+			FROM class_lesson_content
+			WHERE (txText		  
+			LIKE \'%classdoclib/download/pkey%\' OR
+			txText LIKE \'%classroom/viewContent/pkey%\')
+			';
+		
+			$db->query($sql);
+			
+			while ($db->next_record())
+			{
+				$i_replaced = false;
+				$a_replacable_items = array(); //clobbering array (refreshing)
+				
+				$a_replacable_items = $this->find_all_items_and_pkey($db->Record['txText'], array('classroom/viewContent/', 'classdoclib/download/'));
+				
+				if (count($a_replacable_items) > 0)
+				{
+					foreach($a_replacable_items as $item)
+					{
+						$sql = '
+						SELECT daHasha 
+						FROM classdoclib_Files
+						WHERE pkey=\''.$item['pkey'].'\'';
+						
+						//echo $sql. '<br><br><br>';
+						
+						$db3->queryOne($sql);
+						
+						// we will only replace this if we can locate the hash!
+						if ($db3->Record['daHasha'] != '')
+						{	$db->Record['txText'] = str_replace($item['fullstring'], $item['originalstring'].'fhash='.$db3->Record['daHasha'], $db->Record['txText']);
+							$i_replaced = true;
+						}
+						
+						// get hash from classdoclib
+						
+					}
+					
+					
+					// only update if we have something to replace!
+					if ($i_replaced)
+					{	
+						echo 'Replacing text on (Content): '. $db->Record['id_class_lesson_content']. '<br>';
+						
+						$sql = '
+						UPDATE class_lesson_content
+						SET txText=\''.str_replace('\'', '\'\'', stripslashes($db->Record['txText'])).'\'
+						WHERE id_class_lesson_content='. $db->Record['id_class_lesson_content'];
+						
+						$db_saver->query($sql);
+						
+					}
+					
+				}
+				
+			}
+			
+			
+			// OH ASSIGNMENTS HOW I LOVE THEEE
+			$sql = '
+			SELECT id_class_assignments, instructions
+			FROM class_assignments
+			WHERE instructions
+			LIKE \'%classdoclib/download/pkey%\' OR
+			instructions LIKE \'%classroom/viewContent/pkey%\'
+			';
+			$db->query($sql);
+			
+			while ($db->next_record())
+			{	
+				$i_replaced = false;
+				$a_replacable_items = array(); //clobbering array (refreshing)
+				
+				$a_replacable_items = $this->find_all_items_and_pkey($db->Record['instructions'], array('classroom/viewContent/', 'classdoclib/download/'));
+				
+				if (count($a_replacable_items) > 0)
+				{
+					//debug($a_replacable_items);
+					foreach($a_replacable_items as $item)
+					{
+						$sql = '
+						SELECT daHasha 
+						FROM classdoclib_Files
+						WHERE pkey=\''.$item['pkey'].'\'';
+						
+						//echo $sql. '<br><br><br>';
+						
+						$db3->queryOne($sql);
+						
+						// we will only replace this if we can locate the hash!
+						if ($db3->Record['daHasha'] != '')
+						{	$db->Record['instructions'] = str_replace($item['fullstring'], $item['originalstring'].'fhash='.$db3->Record['daHasha'], $db->Record['instructions']);
+							$i_replaced = true;
+						}
+						
+						// get hash from classdoclib
+						
+					}
+					
+					
+					// only update if we have something to replace!
+					if ($i_replaced)
+					{	
+						echo 'Replacing text on (Assign): '. $db->Record['id_class_assignments']. '<br>';
+						
+						$sql = '
+						UPDATE class_assignments
+						SET instructions=\''.str_replace('\'', '\'\'', stripslashes($db->Record['instructions'])).'\'
+						WHERE id_class_assignments='. $db->Record['id_class_assignments'];
+						
+						$db_saver->query($sql);
+						
+					}
+					
+				}
+				
+						
+			}
+			
+			
+			
+			
+	}
+	 	
+	/**
+	 *	Used with rebuildClassDocLibLinksFromPkeyToHashRun (I'm friggin HUMP BACK GO CRAZY!!!!)
+	 */
+	function find_all_items_and_pkey($STRING, $a_item)
+    {
+        $i=0;
+        $a_return_item = array();
+        $length = strlen($STRING);
+
+        foreach($a_item as $item)
+        { 	
+        	$i=0; //reset on each iteration of item (pointer)
+        
+        	if (strpos($STRING, $item. 'pkey=') > 0)
+	        {
+	                while ($i< $length)
+	                {
+	                        $p = strpos($STRING, $item. 'pkey=', ($i+1));
+	
+	                        if ($i==$p || $p === false)
+	                        {       break;
+	                        }
+	
+	                        if ($p > $i)
+	                        {       $x = strpos($STRING, '"', $p+1);
+	                        		
+	                        		// if the " (quote) is greater than 15 ( i dont want to stray to far.. we will stop
+	                        		if (($x-($p+strlen($item. 'pkey='))) > 15)
+	                        		{	$i= ($p+strlen($item. 'pkey='));
+	                        			continue;
+	                        		}
+	                        	
+	                                $a_return_item[] = array('fullstring' => substr($STRING, $p, ($x-$p)), 'originalstring'=>$item, 'pkey'=> array_pop(explode('=', substr($STRING, $p, ($x-$p)) )) );
+                               	//debug($a_return_item);
+	                                $i=$p;
+	                        }
+	                }
+	        }
+        
+        }
+        
+    return $a_return_item;
+    }
+
+    
+	function rebuildOldContentLinksRun($db,&$u,&$lc,&$t)
+	{
+		if ($u->username == 'keason')
+		{	
+			$sql = '
+			SELECT id_class_lesson_content, txText
+			FROM class_lesson_content
+			WHERE txText
+			LIKE \'%dl-qm.tccd.edu%\'
+			';
+			$db->query($sql);
+			
+			while ($db->next_record())
+			{
+				$sql = '
+				UPDATE class_lesson_content
+				SET txText=\''.str_replace("'", '\'\'', (stripslashes(str_replace('dl-qm.tccd.edu', 'dl.tccd.edu', $db->Record['txText'])))).'\'
+				WHERE id_class_lesson_content='.$db->Record['id_class_lesson_content'];
+				$db->query($sql);			
+			}
+
+			$sql = '
+			SELECT id_class_assignments, instructions
+			FROM class_assignments
+			WHERE instructions
+			LIKE \'%dl-qm.tccd.edu%\'
+			';
+			$db->query($sql);
+			
+			while ($db->next_record())
+			{
+				$sql = '
+				UPDATE class_assignments
+				SET instructions=\''.str_replace("'", '\'\'', (stripslashes(str_replace('dl-qm.tccd.edu', 'dl.tccd.edu', $db->Record['instructions'])))).'\'
+				WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+				$db->query($sql);			
+			}
+			
+			
+			
+		} else
+		{	echo 'You are attempting to rebuild content linkage, but I *must* say... BEGONE!';
+		}
+		
+	}
+	
+	function rebuildAssignmentsRun($db,&$u,&$lc,&$t)
+	{
+		if ($u->username == 'kelder')
+		{
+			
+			$sql = '
+			DELETE 
+			FROM lcEvents 
+			WHERE calendarType=\'classroomassignments\'';
+			$db->query($sql);
+			echo mysql_error();
+			$sql = '
+			SELECT A.id_class_assignments, A.title, A.instructions, A.activeDate, A.dueDate, A.id_classes, B.facultyId
+			FROM class_assignments as A
+			INNER JOIN classes as B 
+				ON A.id_classes=B.id_classes
+			';		
+			
+			$db->query($sql);
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			
+			include_once(LIB_PATH.'eventsObj.php');
+			
+			while ($db->next_record())
+			{
+				$addevent = new classroomassignments();
+				
+				$addevent->set_owner($db->Record['facultyId']);
+				$addevent->set_title($db->Record['title']);
+				$addevent->set_description(addslashes(stripslashes($db->Record['instructions'])));
+				
+				$addevent->set_date_start($db->Record['activeDate']);
+				$addevent->set_date_end($db->Record['dueDate']);
+				
+				$addevent->set_id_class($db->Record['id_classes']);
+				$addevent->set_id_item($db->Record['id_class_assignments']);
+				
+				$addevent->save();
+				
+				$addevent = '';
+			if (mysql_errno())
+			{	echo 'STOP';
+				echo ':'. mysql_error();
+				exit;
+			}
+		}
+		
+		} else
+		{	echo 'NOOOOO';
+		}
+		
+	}
+	
+	
+
+	/**
+	 * show a list of available GBEs to insert this assignment into
+	 */
+	function showEntriesListRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'assignmentManage_pushtoGradebook';
+
+		// get assignment object
+		$assignmentObj = classAssignmentObj::_getFromDB($lc->getvars['id_class_assignments'], 'id_class_assignments', 'id_classes='.$u->activeClassTaught->id_classes);
+
+		// ok lets give a list, it's our view time viewing this
+
+
+		//we don't want people pushing assignments into assessment entries...
+		// grades will get all screwed up
+		include_once(LIB_PATH.'ClassGradebookEntries.php');
+		$gradebook_entries_obj = ClassGradebookEntriesPeer::doSelect('id_classes='.$assignmentObj->id_classes. ' 
+			AND assessment_id = 0
+			AND assignment_id = 0
+			ORDER BY id_class_gradebook_categories ASC, title ASC');
+
+		if ( is_array($gradebook_entries_obj) ) {
+			$t['table'] .= '<table border="0" align="center"><tr><th>Code / Entry Name</th><td>&nbsp;</td></tr>';
+
+			foreach($gradebook_entries_obj as $object) {
+
+				$t['table'] .= '<tr><td><a href="'.modurl('assignmentManage/event=pushtoGradebook/id_class_assignments='.$assignmentObj->id_class_assignments.'/id_class_gradebook_entries='.$object->get('idClassGradebookEntries')).'">';
+				$t['table'] .= '['.$object->get('gradebookCode').'] '. $object->get('title').'</td>';
+
+				$t['table'] .= '<td>&lt;- click the entry to publish there</td></tr>';
+
+			}
+
+			$t['table'] .= '</table>';
+		}
+
+
+	}
+
+
+	/**
+	 * do the actual pushing
+	 */
+	function pushtoGradebookRun(&$db,&$u,&$lc,&$t) {
+
+		include_once(LIB_PATH.'ClassGradebookVal.php');
+		include_once(LIB_PATH.'ClassGradebookEntries.php');
+
+		
+		// get assignment object
+		$assignmentObj = classAssignmentObj::_getFromDB($lc->getvars['id_class_assignments'], 'id_class_assignments', 'id_classes='.$u->activeClassTaught->id_classes);
+		
+		$t['assignmentObj'] = $assignmentObj;
+		$entryObj = ClassGradebookEntries::load(
+			array('id_class_gradebook_entries'=>$lc->getvars['id_class_gradebook_entries'],
+				'id_classes'=>$u->activeClassTaught->id_classes,
+				'assignment_id'=>'0','assessment_id'=>'0') );
+
+		//if this was loaded, but has no assignment id, set the id and save it
+		if ( is_object($entryObj) && (!$entryObj->assignmentId || !$entryObj->dateDue || !$entryObj->assessmentId) ) {
+			$entryObj->assignmentId = $assignmentObj->id_class_assignments;
+			$entryObj->dateDue = $assignmentObj->dueDate;
+			$entryObj->save();
+		} else {
+			//they clicked a link with an id that they don't own
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't own the gradebook entry #".$lc->getvars['id_class_gradebook_entries']." 
+			or it is already attached to another assignment or assessment.";
+			$t['details'] = "Go back and select another gradebook entry.  If you think you've gotten this message in error, contact the helpdesk.";
+			$t['details'] .= "<br/>Assignment ID = ".$entryObj->assignmentId." - Assessment ID = ".$entryObj->assessmentId;
+			return;
+		}
+
+
+
+		//need both assignment and entry permission to update
+		if ($assignmentObj->id_classes && $entryObj->idClassGradebookEntries)
+		{
+			// __FIXME__ try to get a GBE, if there's one that relates via GBE's assignment_id field, then
+			// go in this next block
+
+			// pushing
+			if ((int)$lc->getvars['id_class_gradebook_entries'] > 0)
+			{	
+				
+				$lc->getvars['id_class_gradebook_entries'] = (int)$lc->getvars['id_class_gradebook_entries']; // making it an int
+				// lets add user's grades to the VAL of this entry
+				
+
+				//__FIXME__  not really a fix me but a notice
+				// all inactive students will still have grades pushed to the gradebook
+				// is this okay?  should be because they can't get access to the GB anyway
+
+				// getting class list w/ grades
+				$sql = '
+				SELECT A.*, B.id_classes
+				FROM class_assignments_grades as A
+				INNER JOIN class_assignments as B
+					ON A.id_class_assignments = B.id_class_assignments
+				WHERE 
+				A.id_class_assignments='.$assignmentObj->id_class_assignments.'
+				';
+				
+				$db->query($sql);
+				$db3 = DB::getHandle();
+				while ($db->next_record())
+				{
+					// doing a swap off.. remove one, then readd it
+					$sql = '
+					DELETE
+					FROM class_gradebook_val
+					WHERE ( id_class_gradebook_entries='.$lc->getvars['id_class_gradebook_entries'].' AND
+							id_classes='.$assignmentObj->id_classes.' AND 
+							username=\''.$db->Record['id_student'].'\')
+					';
+					$db3->query($sql);
+
+					$gradebook_val_obj = new ClassGradebookVal();
+					$gradebook_val_obj->set('username', $db->Record['id_student']);
+					$gradebook_val_obj->set('score', $db->Record['grade']);
+					$gradebook_val_obj->set('comments', $db->Record['comments']);
+					$gradebook_val_obj->set('idClasses', $db->Record['id_classes']);
+					$gradebook_val_obj->set('idClassGradebookEntries', $lc->getvars['id_class_gradebook_entries']);
+					$gradebook_val_obj->save();
+					// I can't stop someone from entering these in multiple times right now
+
+					//echo 'I am updating: '. $db->Record['id_student']. '<br>';
+				}
+				
+				
+				$this->run($db, $u, $lc, $t);
+				return;
+			}
+
+		} else {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'We are sorry to report that we could not locate the class this assignment belongs to, please try again!';
+			$t['details'] = 'You may not be the owner of this assignment or gradebook entry.';
+			return;
+		}
+		
+	}
+	
+	
+
+	/**
+	 * must push to class_gradebook_vals if there is a GBE associated with this
+	 */
+	function gradeStudentRun(&$db,&$u,&$lc,&$t)
+	{
+		$lc->getvars['id_class_assignments'] = (int)$lc->getvars['id_class_assignments'];
+		$lc->getvars['student'] = trim($lc->getvars['student']);
+		$lc->getvars['student'] = addslashes(stripslashes( $lc->getvars['student']));
+
+		$db->query('SELECT A.id_class_assignments 
+			FROM class_assignments A
+			WHERE id_class_assignments = '.$lc->getvars['id_class_assignments'].'
+			AND id_classes = '.$u->activeClassTaught->id_classes);
+
+		if (! $db->next_record() ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to alter grades for this assignment";
+			$t['details'] = $lc->getvars['id_class_assignments'] . " is not an assignment ID that is owned by you or your current class.";
+			return;
+		}
+
+		//__FIXME__ do one more security check on the student via 2 tables
+		// not really usefull, someone wants to grade a student for a class that it's not in...
+		// won't affect anything
+
+
+		// this is a good query to find duplicates, just gotta make sure the student and assigment
+		// belong to this current teacher!
+		$sql = '
+			SELECT id_class_assignments_grades, grade, comments
+			FROM class_assignments_grades
+			WHERE (id_class_assignments='.$lc->getvars['id_class_assignments'].'
+			AND id_student=\''.$lc->getvars['student'].'\')
+			';
+
+		if ($lc->postvars['submit'] == 'Update')
+		{
+			//need to do explicit next record to get duplicate grades
+			$db->query($sql);
+			$db->next_record();
+			//this next block is in here for data cleanup, you can remove next semester
+			// MAK 10-02-2003
+			if ( $db->getNumRows() > 1 ) {
+				$db->query('DELETE FROM class_assignments_grades
+				WHERE (id_class_assignments='.$lc->getvars['id_class_assignments'].'
+				AND id_student=\''.$lc->getvars['student'].'\')');
+
+				$db->Record['id_class_assignments_grades'] = 0;
+			}
+				
+			if ((int)$db->Record['id_class_assignments_grades'] > 0)
+			{
+				$sql = '
+				UPDATE class_assignments_grades
+				SET grade='. number_format($lc->postvars['grade'], 2). ' , 
+				comments=\''. str_replace("'", '\'\'', stripslashes($lc->postvars['teachercomments'])). '\'
+				WHERE id_class_assignments_grades='.$db->Record['id_class_assignments_grades'];
+			$db->query($sql);
+
+			} else 
+			{
+				$sql = '
+				INSERT INTO class_assignments_grades
+				SET id_class_assignments='.(int)$lc->getvars['id_class_assignments'].',
+				comments=\''. str_replace("'", '\'\'', stripslashes($lc->postvars['teachercomments'])). '\',
+				grade='. number_format($lc->postvars['grade'], 2). ',
+				id_student=\''.$lc->getvars['student'].'\'
+				';
+			$db->query($sql);
+
+			}
+		//assignment_grades has been updated, let's find an associated GBE, if there is one we will push a new GBV
+		$entryObj = ClassGradebookEntries::load(
+			array('assignment_id'=>$lc->getvars['id_class_assignments'],
+				'id_classes'=>$u->activeClassTaught->id_classes) );
+		if ( is_object($entryObj) ) {
+			$gbvObj = ClassGradebookVal::load( 
+				array('id_class_gradebook_entries'=>$entryObj->idClassGradebookEntries,
+					'username'=>$lc->getvars['student']) );
+			if (!is_object($gbvObj) ) {
+				$gbvObj = new ClassGradebookVal();
+				$gbvObj->set('idClassGradebookEntries',$entryObj->idClassGradebookEntries);
+				$gbvObj->set('idClasses',$u->activeClassTaught->id_classes);
+				$gbvObj->set('username',$lc->getvars['student']);
+			}
+			$gbvObj->set('comments',$lc->postvars['teachercomments']);
+			$gbvObj->set('score',$lc->postvars['grade']);
+			$gbvObj->save();
+		}
+		}
+
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/assignmentManage/event=viewAssignment/id_class_assignments='.$lc->getvars['id_class_assignments']);
+		return;
+	}
+	
+
+/*
+ *
+ * Show a list of courses assigned to instructor.
+ * 
+ * Input data: 
+ * Output data: list of courses
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+
+			$datagrid = new DataGrid($this->module,$this->serviceName);
+
+			$datagrid->table = 'class_assignments';
+			$datagrid->column = 'dueDate,noDueDate,title,id_class_assignments';
+			$datagrid->where = 'id_classes='.$u->activeClassTaught->id_classes;
+
+			$datagrid->ignore = array('id_class_assignments', 'noDueDate');
+			$datagrid->headers = array(
+				'title' => 'Assignment',
+				'dueDate' => 'Due Date',
+				'links' => ' '
+			);
+			
+			$datagrid->class = 'datagrid';
+			$datagrid->overrideColumn('<?=$noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
+			$datagrid->postpendColumn(' <a href="<?=appurl("classmgr/assignmentManage/event=viewAssignment/id_class_assignments=$id_class_assignments/");?>">view</a> | <a href="<?=appurl("classmgr/assignmentManage/event=editAssignment/id_class_assignments=$id_class_assignments/");?>">edit</a> | <a href="<?=appurl("classmgr/assignmentManage/event=deleteAssignment/id_class_assignments=$id_class_assignments/");?>" onclick="if (confirm(\'Are you SURE you want to delete this assignment?\')) { return true; } else { return false; }">delete</a>', 'links');
+			$t['table'] = $datagrid->toHTML();
+
+			$this->sectionTitle = "Assignment Manager";
+			$this->inactivelinks[] = 'List Assignments';
+			$lc->templateName='assignmentManage_main';
+			$lc->templateStyle = 'private';
+		}
+
+
+	
+	function viewAssignmentRun(&$db,&$u,&$lc,&$t) {
+
+		include_once(LIB_PATH.'ClassGradebookEntries.php');
+
+		// grabbing assignment information for viewing
+		$assignment = classAssignmentObj::_getFromDB($lc->getvars['id_class_assignments'], 'id_class_assignments');
+		// SECURITY, People!
+		if ( $assignment->id_classes != $u->activeClassTaught->id_classes) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You do not have permission to view this assignment.";
+			$t['details'] = "If you are certain that you can view this document, try clicking
+			on the class to which this assignment belongs in menus on the left and browse to your
+			assignments again.";
+			return;
+		}
+
+		$t['asmt'] = $assignment;
+
+		// load up a GBE to see if it has a gradebook entry, if not we need to instruct the teacher to
+		// publish one last time, then it will save the relationship
+		$entryObj = ClassGradebookEntries::load( array('assignment_id'=>$assignment->id_class_assignments) );
+
+		if ( is_object($entryObj) ) {
+			$t['entryCode'] = $entryObj->gradebookCode;
+			$t['entryLinked'] = true;
+		} else {
+			$t['entryCode'] = '<i>Not linked to a gradebook entry yet</i>';
+			$t['entryLinked'] = false;
+		}
+
+		// first view is listing all students in a particular assignment w/ assignment information to show
+		$lc->templateName='assignmentManage_viewAssignment_one';
+
+
+		// second view will be showing students' assignment
+		if ($lc->getvars['student'] != '')
+		{
+			//if the student is in the URL, set the template and pass some important flags
+			$lc->templateName = 'assignmentManage_viewAssignment_single';
+			$t['id_class_assignments'] = $lc->getvars['id_class_assignments'];
+			$t['student'] = $lc->getvars['student'];
+
+
+			// find student information (verification kinda thing, plus.. i need there info!)
+			$sql = '
+				SELECT id_class_assignments_grades, grade, comments
+				FROM class_assignments_grades
+				WHERE (id_class_assignments='.(int)$lc->getvars['id_class_assignments'].'
+				AND id_student=\''.$lc->getvars['student'].'\')
+				';
+				
+			$db->query($sql);
+			$db->next_record();
+			//cleanup bad data, assume two duplicate records, combine highest score
+			// with longest comment.  Should fix the data problems that we have
+			if ( $db->getNumRows() > 1){
+				$record1 = $db->Record;
+				$db->next_record();
+				$record2 = $db->Record;
+				if ( strlen($record1['coments']) > strlen($record2['comments']) ) {
+					$db->Record['comments'] = $record1['comments'];
+				} else {
+					$db->Record['comments'] = $record2['comments'];
+				}
+				if ( $record1['grade'] > $record2['grade'] ) {
+					$db->Record['grade'] = $record1['grade'];
+				} else {
+					$db->Record['grade'] = $record2['grade'];
+				}
+			}
+
+			// original code before this data fixing patch
+			$t['student_grade_info'] = $db->Record;	
+
+
+			// get current attachments for this assignment for this student (FILES ONLY)
+			$sql = '
+			SELECT class_assignments_turnin.id_class_assignments_turnin,
+			class_assignments_turnin.assign_file_name,
+			class_assignments_turnin.assign_file_size,
+			class_assignments_turnin.assign_file_mime,
+			class_assignments_turnin.dateTurnin
+
+			FROM class_assignments_turnin
+
+			INNER JOIN class_assignments
+				ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
+
+			WHERE id_student=\''. $lc->getvars['student'].'\'
+			AND assign_type=1
+			AND class_assignments.id_classes='. $u->activeClassTaught->id_classes. '
+			AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id_class_assignments'].'
+			';
+			
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->query($sql);
+			//echo mysql_error();
+			while ($db->next_record())
+			{
+				//debug($db3->Record);
+				$t['attachments'][] = $db->Record;
+			}
+
+
+
+
+			#return;
+
+		} else
+		{
+			
+			// give me a class list
+			$sql = '
+			SELECT B.id_student, C.firstname, C.lastname, C.username
+			FROM class_sections AS A
+			INNER JOIN class_student_sections as B
+				ON A.sectionNumber=B.sectionNumber			
+			INNER JOIN profile AS C 
+				ON B.id_student = C.username
+			
+			WHERE 
+				A.id_classes='.$u->activeClassTaught->id_classes.' AND 
+				B.active=1
+			ORDER BY C.lastname ASC
+			';
+			
+			$db->query($sql);
+			while ($db->next_record()) {
+				$a_student_list[$db->Record['id_student']] = $db->Record;
+//				$a_student_list[] = $db->Record;
+			}
+			
+
+			// I hate to do this but damn... This is soooooo inefficent.. but how often is something going to use this?
+
+			foreach($a_student_list as $k=>$student)
+			{
+				// getting grade
+//don't need this, i added it to the join up above
+
+				$sql = '
+				SELECT A.*
+				FROM class_assignments_grades as A
+				WHERE 
+				A.id_student=\''.$student['id_student'].'\' AND
+				A.id_class_assignments='.$assignment->id_class_assignments.'
+				';
+				
+				$db->queryOne($sql);
+//*/
+				$a_student_list[$k]['grade'] = $db->Record['grade'];
+
+				$sql = 'SELECT COUNT(id_class_assignments) as completed, dateTurnin
+				FROM class_assignments_turnin
+				WHERE id_class_assignments = '.$assignment->id_class_assignments.' AND
+				id_student=\''.$student['id_student'].'\'
+				GROUP BY id_class_assignments';
+				$db->queryOne($sql);
+#echo $sql."<BR>";
+				$a_student_list[$k]['datecompleted'] = (($db->Record['dateTurnin'] != null) ? date('F j Y g:i a',strtotime($db->Record['dateTurnin'])) : '');
+				$a_student_list[$k]['completed'] = $db->Record['completed'];
+				++$c;
+			#	if ($c>5) { echo 'c=6'; exit(); }
+			}
+			
+			$t['student_list'] = $a_student_list;
+
+			//debug($t['student_list']);
+			
+			// get a class list and status applied to assignment
+			// grab assign
+			// connect assign to class
+			// connect classs_section with classid (sectionNubmer=sectionNumber to class_section
+			// then class_section.studentid to profile for names
+					
+			
+		}
+		
+		// get assignment text
+		$db2 = DB::getHandle();
+		$db2->RESULT_TYPE = MYSQL_ASSOC;
+/**
+	I had to change this from activeClassTaken to ClassTaught
+	
+		AND b.id_classes='. $u->activeClassTaught->id_classes. '
+**/	
+		$sql = 'SELECT a.assign_text
+		FROM  class_assignments_turnin as a
+
+		INNER JOIN class_assignments AS b
+			ON a.id_class_assignments = b.id_class_assignments
+
+		WHERE assign_type=0
+		AND b.id_classes='. $u->activeClassTaught->id_classes. '
+		AND a.id_class_assignments='. $lc->getvars['id_class_assignments'].'
+		AND a.id_student=\''. $lc->getvars['student'].'\'';
+
+		$db2->queryOne($sql);
+		//debug($db2->Record);
+		$t['turnin'] = $db2->Record;
+
+
+		$this->sectionTitle = "Assignment Manager";
+
+
+		}
+
+
+
+/*
+ *
+ * Show confirmation message, with a
+ * link back to the listAssignments area. Links to
+ * deleteAssignmentConfirm is "yes" is pressed.
+ * 
+ * Input data: assignment id
+ * Output data: confirmation page
+ *
+ */
+		function deleteAssignmentRun(&$db,&$u,&$lc,&$t) {
+
+			$aid = $lc->getvars['id_class_assignments'];
+
+				include_once(LIB_PATH.'eventsObj.php');
+				
+				$event = new classroomAssignments();
+				$event->set_id_class($u->activeClassTaught->id_classes);
+				$event->set_id_item($aid);
+				
+				if ($event->dbLoad())
+				{	$event->delete();
+				}
+				
+			$objKeys = array(
+				'id_class_assignments' => $aid,
+				'id_classes' => $u->activeClassTaught->id_classes
+			);
+			$assignment = classAssignmentObj::_getFromDB($objKeys);
+
+			if ( is_object($assignment) ) {
+				$assignment->_deleteFromDB();
+				$db->query("delete from class_assignments_link where id_class_assignments='{$aid}'");
+				$t['msg'] = 'Assignment deleted.';
+			} else {
+				$t['error'] = 'Failed to delete assignment.';
+			}
+			
+			$this->Run($db,$u,$lc,$t);
+		}
+/*
+ *
+ * Show a form for an assignment.  If we get an ID, show the
+ * assignment info for that ID, and treat it as an 'edit'.  If
+ * no ID received, show the same form as 'empty'.
+ * 
+ * Input data: assignment id to edit
+ * Output data: add/edit form for assignment
+ *
+ */
+
+		function editAssignmentRun(&$db,&$u,&$lc,&$t) {
+
+			$f = new Siteform();
+
+			// if they want to edit an assignment, make sure they own it first
+			if ( $lc->getvars['id_class_assignments'] ) {
+				$objKeys = array(
+					'id_class_assignments' => $lc->getvars['id_class_assignments'],
+					'id_classes' => $u->activeClassTaught->id_classes
+				);
+	
+				$assignment = classAssignmentObj::_getFromDB($objKeys);
+				
+				if (!$assignment) {
+					$this->presentor = 'errorMessage';
+					$t['message'] = "You don't have permission to view this assignment.";
+					return;
+				}
+			}
+
+			// commit to the database
+			if ( $lc->postvars['submit'] && !$t['error'] ) {
+				$t['error'] = $f->validateForm('addassignments',$lc->postvars);
+
+				// This fixes the dates and does some extra error checking
+				$f->cleanedArray['activeDate'] = dateArray2Timestamp($f->cleanedArray['activeDate']);
+				$f->cleanedArray['dueDate'] = dateArray2TimestampFull($f->cleanedArray['dueDate']);
+				$f->cleanedArray['noDueDate'] =$f->cleanedArray['noDueDate'] ? 1 : 0;
+
+				if ( $f->cleanedArray['noDueDate'] ) {
+					$f->cleanedArray['noDueDate'] = 1;
+					$f->cleanedArray['responseType'] = 5; // None
+				} else {
+					$f->cleanedArray['noDueDate'] = 0;
+				}
+
+				if ( $f->cleanedArray['activeDate'] > $f->cleanedArray['dueDate']
+					&& !$t['error'] && !$f->cleanedArray['noDueDate'] )
+				{
+					// the assignment becomes active AFTER it's due!
+					$t['error'] = 'The due date must be AFTER the active date.';
+				}
+	
+				if ( !$t['error'] ) {
+
+					$assignment = ( $lc->getvars['id_class_assignments']
+						? classAssignmentObj::_getFromDB($lc->getvars['id_class_assignments'], 'id_class_assignments')
+						: new classAssignmentObj() );
+					
+					$assignment->_loadArray($f->cleanedArray);
+					$assignment->id_classes = $u->activeClassTaught->id_classes;
+
+					if (($f->cleanedArray['dateNoAccept']['ampm'] == 'PM'
+						&& $f->cleanedArray['dateNoAccept']['hours'] != 12)
+						|| ($f->cleanedArray['dateNoAccept']['ampm'] == 'AM'
+						&& $f->cleanedArray['dateNoAccept']['hours'] == 12))
+					{	$f->cleanedArray['dateNoAccept']['hours'] += 12;
+						if ($f->cleanedArray['dateNoAccept']['hours'] >= 24)
+						{	$f->cleanedArray['dateNoAccept']['hours'] = '00';
+						}
+					}
+					
+					$assignment->dateNoAccept = $f->cleanedArray['dateNoAccept']['year'] . '-'. $f->cleanedArray['dateNoAccept']['month'].'-'. $f->cleanedArray['dateNoAccept']['day']. ' '. $f->cleanedArray['dateNoAccept']['hours'].':'.$f->cleanedArray['dateNoAccept']['minutes']. ':00'; 	
+				
+					// indicates if we're in editmode or not (later i'm doing a boolean)
+					$edit_mode = $assignment->id_class_assignments;	
+					$assignment->_saveToDB();
+					$t['msg'] = 'Assignment saved.';
+				
+
+					// adding a calendared item
+					if ((int)$edit_mode == 0)
+					{
+						// becuase i dont want to insert something into cal when it's bad
+						if ($db->getInsertID() > 0)
+						{
+							// I have to accomidate if the event should even be entered ( no due date)
+							include_once(LIB_PATH.'eventsObj.php');
+							$addevent = new classroomassignments();
+							
+							$addevent->set_title($f->cleanedArray['title']);
+							$addevent->set_description($f->cleanedArray['instructions']);
+							
+							$addevent->set_date_start($f->cleanedArray['activeDate']);
+							$addevent->set_date_end($f->cleanedArray['dueDate']);
+							
+							$addevent->set_id_class($u->activeClassTaught->id_classes);
+							$addevent->set_id_item($db->getInsertID());
+							if ($addevent->save())
+							{	
+								//echo 'Event added';
+
+							} else 
+							{
+								//echo 'Failed to add event';
+							}
+							
+							if ($f->cleanedArray['goGradebook'] == 'on')
+							{	// we need to redirect user to the gradebook.. OH YES!
+								$t['url'] = appurl('gradebook/entry/event=add/title='.str_replace('=', '*', base64_encode($f->cleanedArray['title'])));
+								$this->presentor = 'redirectPresentation';
+							}
+							
+						//debug($addevent);
+						}
+					} else
+					{
+						// I have to accomidate if the event should be updated ( no due date)
+						// lets update 
+						include_once(LIB_PATH.'eventsObj.php');
+						$cal_event = new classroomassignments();
+						
+						$cal_event->set_id_class($u->activeClassTaught->id_classes);
+						$cal_event->set_id_item($assignment->id_class_assignments);
+						
+						// what happens when there is nothing loaded up? crap!
+						$cal_event->dbLoad();
+						
+						$cal_event->set_title($f->cleanedArray['title']);
+						$cal_event->set_description($f->cleanedArray['instructions']);
+						
+						$cal_event->set_date_start($f->cleanedArray['activeDate']);
+						$cal_event->set_date_end($f->cleanedArray['dueDate']);
+						
+						$cal_event->save();
+						
+					}
+
+
+					$this->Run($db,$u,$lc,$t);
+					return;
+				}
+
+			}
+			
+			if ($assignment->noDueDate == '0') unset($assignment->noDueDate);
+
+			if ( is_object($assignment) ) {
+				// They're editing.
+				$f->getForm('addassignments', $assignment );
+				$f->removeFormField('goGradebook');
+			} else {
+				// They're adding
+				$f->getForm('addassignments', $lc->postvars );
+			}
+
+			$f->cssLeft = "row1";
+			$f->cssRight = "";
+			if (is_object($assignment)) $f->modFormValue('submit', 'Update Assignment');
+			$t['form'] = $f->toHTML();
+			$t['id_classes'] = $u->activeClassTaught->id_classes;
+
+			if ( $lc->getvars['id_class_assignments'] ) {
+				$this->sectionTitle = 'Edit Assignment';
+			} else {
+				$this->sectionTitle = 'Add Assignment';
+				$this->inactivelinks[] = 'Add Assignment';
+			}
+			$lc->templateName='assignmentManage_editAssignment';
+			$lc->templateStyle = 'private';
+		}
+
+	function getFileRun($db,&$u,&$lc,&$t)
+	{
+		$sql = '
+		SELECT class_assignments_turnin.id_class_assignments_turnin,
+		class_assignments_turnin.assign_file_name,
+		class_assignments_turnin.assign_file_size,
+		class_assignments_turnin.assign_file_mime,
+		class_assignments_turnin.dateTurnin,
+		class_assignments_turnin.assign_file_blob
+		FROM class_assignments_turnin
+
+		INNER JOIN class_assignments
+			ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
+
+		WHERE 
+		class_assignments_turnin.id_class_assignments_turnin='.(int)$lc->getvars['turnin'].'
+		AND id_student=\''. $lc->getvars['student'].'\'
+		AND assign_type=1
+		AND class_assignments.id_classes='. $u->activeClassTaught->id_classes. '
+		AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id_class_assignments'].'
+		';
+
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+
+		ob_end_clean();
+		header("Cache-control: private");
+		header("Content-type: ".$db->Record['assign_file_mime']);
+		header("Content-Disposition: attachment; filename=".$lc->getvars['student'].'_'.$u->activeClassTaught->courseFamilyNumber.'_'.$db->Record['assign_file_name']);
+		if ( strlen($db->Record['assign_file_blob']) > 80) { 
+			$data = base64_decode($db->Record['assign_file_blob']);
+		} else {
+			$data = implode("",file(CONTENT_PATH."/uploads/".$db->Record['assign_file_blob']));
+		}
+		echo $data;
+		exit();
+
+	}
+
+
+
+	function buildNavLinks() {
+
+		$this->navlinks = array ();
+		$this->navlinks[ lct('Classroom Overview') ] = 'display/';
+		$this->navlinks[ lct('Lessons') ] = 'lessonManager/';
+		$this->navlinks[ lct('Webliography') ] = 'lessonWebliography/';
+		$this->navlinks[ lct('FAQs') ] = 'faq/';
+		$this->navlinks[ lct('Assignments') ] = 'assignmentManage/';
+		$this->navlinks[ lct('Content') ] = 'lessonContent/';
+		$this->navlinks[ lct('Presentations') ] = 'studentPresentation';
+		$this->navlinks[ lct('Objectives') ] = 'lessonObjectives/';
+
+	}
+
+	function buildAppLinks() {
+		$this->applinks = array(
+			lct('List Assignments') => 'assignmentManage/',
+			lct('Add Assignment') => 'assignmentManage/event=editAssignment/',
+			lct('Add a Lesson') => 'lessonManager/event=edit/'
+		);
+	}
+}
+?>

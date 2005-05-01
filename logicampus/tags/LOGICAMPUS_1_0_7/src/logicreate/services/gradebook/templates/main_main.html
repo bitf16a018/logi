@@ -1,0 +1,85 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+<tr>
+	<td valign="top">
+		Semester: <b><?=$t['semester'];?></b><br>
+		Course: <b><?=$obj->user->activeClassTaught->courseFamilyNumber;?></b><br>
+		Class ID: <b>#<?=$obj->user->activeClassTaught->id_classes;?></b><br>
+	</td>
+	<td valign="top">
+		Instructor's Name: <b><?=$obj->user->activeClassTaught->facultyName;?></b><br>
+		Section Numbers: <b><?=preg_replace("/\s+/", ', ', $obj->user->activeClassTaught->sectionNumbers);?></b><br>
+
+	</td>
+</tr>
+</table>
+<hr>
+<form method="post" action="<?=modurl('');?>">
+Filter: By Students <select name="filteractive">
+<?
+$opts = array( 'All', 'Active', 'Dropped' );
+while ( list(,$opt) = each($opts) ) {
+	if ( $opt == $t['filteractive'] ) {
+		print "<option SELECTED>$opt</option>\n";
+	} else {
+		print "<option>$opt</option>\n";
+	}
+}
+?>
+</select>
+
+&nbsp;&nbsp; Filter: By Last Name <select name="filterletter">
+<?
+$alphabet = array( 'All', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
+while ( list(,$letter) = each($alphabet) ) {
+	if ( ($letter == 'All' && !$t['filterletter']) || $letter == $t['filterletter']) {
+		print "<option SELECTED>$letter</option>\n";
+	} else {
+		print "<option>$letter</option>\n";
+	}
+}
+?>
+</select>
+
+&nbsp; &nbsp; Filter: By Types <select name="filtercat">
+<?
+if ( !$t['filtercat'] ) $t['filtercat'] = '0';
+
+foreach ( $t['gbCats'] as $cid => $cat ) {
+	if ( $cid == $t['filtercat'] ) {
+		print "<option value=\"$cid\" SELECTED>$cat</option>\n";
+	} else {
+		print "<option value=\"$cid\">$cat</option>\n";
+	}
+}
+?>
+</select> 
+&nbsp; &nbsp; <input type="submit" value="Filter" />
+</form>
+<hr>
+<table border="0">
+	<tr>
+		<td>
+			Colored background - These grades have not been 'published', they are hidden from student view.
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<font color="red">Red font</font> - Failing grades
+		</td>
+	</tr>
+	<tr>
+		<td>
+			??? - Nothing submitted from the student or no grade entered yet.
+		</td>
+	</tr>
+</table>
+<hr>
+<!-- iframe -->
+
+		<IFRAME SRC="<?=MOD_URL;?>main/event=iframe" WIDTH="100%" HEIGHT="370"></IFRAME>
+

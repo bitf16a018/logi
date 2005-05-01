@@ -1,0 +1,218 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH.'LC_html.php');
+include_once(INSTALLED_SERVICE_PATH."pm/privmess.php");
+
+class contactStudents extends FacultyService 
+{
+
+	var $applinks = array(
+		'Contact Students' => 'contactStudents/'
+	);
+
+	var $cleanedArray = array();
+	var $inactivelinks = array( 'Contact Students' );
+	
+	// links
+	var $navlinks = array(
+		'Classroom Manager' => 'display/',
+		'Announcements' => 'announcements/',
+	);
+	
+	var $presentor = "htmlPresentation";
+	var $sectionTitle = 'Contact Students';
+	
+	
+	function run( &$db, &$u, &$lc, &$t) 
+	{
+		$lc->templateName = "contactStudents_main";
+		$lc->templateStyle = 'private';
+		
+		if (count($t['students']) == false)
+		{	
+			$sql = '
+			SELECT DISTINCT D.firstname, D.lastname, D.username, Z.email
+			
+			FROM classes as A
+			
+				INNER JOIN class_sections AS B 
+					ON A.id_classes = B.id_classes
+			
+				INNER JOIN class_student_sections AS C 
+					ON B.sectionNumber = C.sectionNumber
+			
+				INNER JOIN lcUsers as Z
+					ON C.id_student = Z.username
+			
+				INNER JOIN profile AS D 
+					ON Z.username = D.username
+
+			WHERE
+				( 
+				A.id_classes = '.$u->activeClassTaught->id_classes.' AND 
+				B.id_classes = '.$u->activeClassTaught->id_classes.' AND
+				C.semester_id = A.id_semesters AND
+				C.active=1			
+				)
+			ORDER BY D.lastname ASC';
+			
+			$db->query($sql);
+			
+			while ($db->next_record())
+			{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
+			}
+
+		}
+
+		if (count($t['students']) == 0)
+		{
+			$t['emessage'] = '<h2 align="center" style="color: red;">No students available in this class</h2>';
+		}
+	}
+
+	
+	function submitRun(&$db, &$u, &$lc, &$t) 
+	{
+		$lc->templateName = "contactStudents_main";
+		$lc->templateStyle = 'private';
+		
+		// getting a list of classroom students
+		$sql = '
+		SELECT DISTINCT D.firstname, D.lastname, D.username, Z.email
+		
+		FROM classes as A
+		
+			INNER JOIN class_sections AS B 
+				ON A.id_classes = B.id_classes
+		
+			INNER JOIN class_student_sections AS C 
+				ON B.sectionNumber = C.sectionNumber
+		
+			INNER JOIN lcUsers as Z
+				ON C.id_student = Z.username
+		
+			INNER JOIN profile AS D 
+				ON Z.username = D.username
+
+		WHERE
+			( 
+			A.id_classes = '.$u->activeClassTaught->id_classes.' AND 
+			B.id_classes = '.$u->activeClassTaught->id_classes.' AND
+			C.active=1				
+			)
+			ORDER BY D.lastname ASC';
+		$db->query($sql);
+
+		while ($db->next_record())
+		{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
+			$my_students[$db->Record['username']] = $db->Record['email'];
+		}
+		
+		$my_email_to_send = array();
+	
+	/**
+	 *	Modified this:
+	 		+ had to change _ to . usernames are firstname.lastname not firstname_lastname .. the
+			_ made it javascript friendly.. failed to do the conversion.
+	 */
+#	 debug($lc->postvars);
+		/*
+		foreach($lc->postvars as $k=>$v)
+		{
+			if (substr($k, 0, 8) == 'student_')
+			{	$my_email_to_send[substr($k, 8, (strlen($k)-8))] = $my_students[str_replace('_', '.', substr($k, 8, (strlen($k)-8)))];
+			}
+		}
+		*/
+		foreach($lc->postvars as $k=>$v)
+		{
+			if (substr($k, 0, 8) == 'student_')
+			{	
+			$short = substr($k,8);
+			$short = str_replace("_",".",$short);
+			$my_email_to_send[$short] = $my_students[str_replace('_', '.', $short)];
+			}
+		}
+		switch($lc->postvars['type'])
+		{
+			case 'both':
+			case 'pm';
+				$privateMsg = new privMess();
+				$privateMsg->messageFrom = $u->username;
+				$privateMsg->message = $lc->postvars['message'];
+				$privateMsg->subject = $lc->postvars['subject'];
+				$privateMsg->sentTime = time();
+#debug($privateMsg);exit();				
+				foreach($my_email_to_send as $username => $useremail)
+				{
+					$privateMsg->messageTo = $username;	
+					$privateMsg->add();
+				}
+				
+				if ($lc->postvars['copy'] == 'copy') { $privateMsg->messageTo = $u->username; $privateMsg->subject .= ' [copy to sender]'; $privateMsg->add(); }
+				if ($lc->postvars['type'] != 'both') break;	// i want it to continue down the line if we're using BOTH
+				
+			case 'email':
+				$mailer = (object)$tmp;
+				// imay want to include title (mr. dr. ms.)
+				$mailer->messageFrom = $u->profile->get('title'). ' '. $u->profile->get('lastname').' <'.$u->email. '>';
+				$mailer->message = stripslashes($lc->postvars['message']);
+				$mailer->subject = $lc->postvars['subject'];
+				
+				foreach($my_email_to_send as $username => $useremail)
+				{
+					$mailer->messageTo .= $useremail. ', ';	
+
+				}
+				
+				$mailer->messageTo = substr($mailer->messageTo, 0, (strlen($mailer->messageTo)-2));
+				
+				$CC = '';
+				if (strlen(trim($lc->postvars['cc']))  > 5)
+				{	$CC = 'cc: '.trim($lc->postvars['cc']). "\n";
+				}
+				
+				$BCC = '';
+				if (strlen(trim($lc->postvars['bcc']))  > 5)
+				{	$BCC = 'bcc: '.trim($lc->postvars['bcc']). "\n";
+				}
+				
+				$header = "From: ".$mailer->messageFrom."\nReply-To: ".$mailer->messageFrom. "\n".$CC.$BCC;
+				mail($mailer->messageTo, $mailer->subject, $mailer->message, $header);
+
+				// copy to sender
+				if ($lc->postvars['copy'] == 'copy') { 
+					$mailer->subject .= ' [copy to sender]'; 
+					mail($mailer->messageFrom, 
+						$mailer->subject, 
+						$mailer->message, 
+						"From: ".$mailer->messageFrom."\nReply-To: ".$mailer->messageFrom."\n"); 
+				}
+				
+
+		}
+		
+		$t['emessage'] = '<h3 align="center" style="color: blue;">Mailer sent out to students</h3>';
+		
+		$this->run($db, $u, $lc, $t);
+		
+	} 
+
+
+}
+
+
+?>

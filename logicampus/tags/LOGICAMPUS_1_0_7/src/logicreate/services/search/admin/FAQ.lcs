@@ -1,0 +1,38 @@
+<?
+class FAQSearchTool extends searchTool {
+
+	function FAQSearchTool() {
+		$this->moduleName =  'FAQ';
+		$this->tableName  =  'lcFaqs';
+		$this->keyName    =  'pkey';
+		$this->mid	  =  'faq';
+		$this->filename	  =  'FAQ';
+		$this->getCountSQL = 'Select count(pkey) from lcFaqs';
+	}
+
+	function initQuery() {
+		$this->db = DB::getHandle();
+		$this->db->query('select * from '.$this->tableName);
+	}
+
+	function nextItem() {
+		$tmp = new SearchEntry();
+		if (!$this->db->next_record() ) {
+			return false;
+		}
+		$tmp->searchdata = $this->db->Record[question] . ' ';
+
+		$tmp->searchdata .= $this->db->Record[answer];
+		$tmp->searchdata = searchTool::stripNoiseWords($tmp->searchdata);
+
+		$tmp->title = $this->db->Record[question];
+		$tmp->type = 'FAQ';
+		$tmp->link = 'faq/main/'.$this->db->Record[pkey].'/event=read';
+		$tmp->modID = $this->mid;
+		$tmp->mkey = $this->db->Record[pkey];
+		$tmp->groups = $this->db->Record[groups];
+		$tmp->notgroups = $this->db->Record[notgroups];
+		return $tmp;
+	}
+}
+?>
