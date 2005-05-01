@@ -310,7 +310,7 @@ SELECT
 				// also, would queryOne work here?  Do we have that in this version?
 				$db->query("select count(folder) as filecount from classdoclib_Files where folder=".$val['pkey']);
 				$db->next_record();
-				$val['name'] .= " (".intval($db->Record['filecount']).") ";
+				$val['fullname'] = $val['name']." (".intval($db->Record['filecount']).") ";
 				$data[] = $val;
 
 			}
