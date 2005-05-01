@@ -465,42 +465,42 @@
 
 
 	<message id ="Help Desk" domain="system" status="">
-		帮助
+		Help Desk
 	</message>
 	<!--Help Desk-->
 	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
 
 
 	<message id ="Messages" domain="system" status="">
-		留言
+		Messages
 	</message>
 	<!--Messages-->
 	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
 
 
 	<message id ="my classes" domain="system" status="">
-		自己的课
+		my classes
 	</message>
 	<!--my classes-->
 	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="143"/>
 
 
 	<message id ="welcome" domain="system" status="">
-		欢迎, $name
+		Welcome, $name
 	</message>
 	<!--welcome-->
 	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
 
 
 	<message id ="Logout" domain="system" status="">
-		注销
+		Logout
 	</message>
 	<!--Logout-->
 	<usage id ="Logout" file="../src/public_html/templates/private/welcome_login.html.php" line="110"/>
 
 
 	<message id ="Home Page" domain="system" status="">
-		主页
+		Home Page
 	</message>
 	<!--Home Page-->
 	<usage id ="Home Page" file="../src/public_html/templates/private/header.html.php" line="73"/>
