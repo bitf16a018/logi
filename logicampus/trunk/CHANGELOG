@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2004-12-20 00:26:10 $
+Last Updated:  $Date: 2005-05-01 21:09:14 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -7,6 +7,10 @@ SYNTAX:
 
 
 #########################
+5/1/05 - mgk
+Removed debugging information from index.php controller, and changed cookie handling so that it should work with localhost.  Many smaller changes have happened over the past few months - small cleanups and UI changes, for example.
+
+
 12/19/04 7:20 - mgk
 Added registration info to installer - trying to determine usage/installation numbers.  :)  Also, mark didn't mention it, but some more translation work has been done (primarily in chinese) and we've also put in some new sample user data.
 
