@@ -70,6 +70,7 @@
 	<copy todir="${build}">
 	  <fileset dir="${docs}">
 	  	<include name="INSTALL" />
+	  	<include name="SAMPLE_DATA" />
 	  </fileset>
 	</copy>
 	<!-- readme and license -->
