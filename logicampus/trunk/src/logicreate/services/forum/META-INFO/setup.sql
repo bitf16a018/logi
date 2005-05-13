@@ -101,7 +101,7 @@ CREATE TABLE `lc_forum_post` (
   `lc_forum_recent_post_timedate` int(11) default '0',
   `lc_forum_recent_poster` varchar(30) default NULL,
   `lc_forum_file1_name` varchar(100) default NULL,
-  `lc_forum_file1_sys_name` varchar(100) NOT NULL default '',
+  `lc_forum_file1_sys_name` varchar(100) default NULL,
   `lc_forum_file1_size` varchar(100) default NULL,
   `lc_forum_file1_mime` varchar(100) default NULL,
   `lc_forum_file1_count` int(11) default '0',
