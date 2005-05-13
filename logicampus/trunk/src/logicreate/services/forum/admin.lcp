@@ -144,13 +144,13 @@ if ($t['forum']) {
 		$db = DB::getHandle();
 		
 		$sql = "SELECT * FROM lc_forum_perm WHERE lc_forum_id=".$id_forum;
-echo $sql; exit();	
+#echo $sql; exit();	
 		$db->query($sql);
-die(microtime());
+#die(microtime());
 		
 		while ($db->next_record())
 		{	
-#$a_perms[$db->Record['lc_forum_perm_action']][$db->Record['lc_forum_perm_id']] = $db->Record['lc_forum_perm_group'];
+			$a_perms[$db->Record['lc_forum_perm_action']][$db->Record['lc_forum_perm_id']] = $db->Record['lc_forum_perm_group'];
 		}
 	return $a_perms;
 	}
