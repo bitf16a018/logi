@@ -243,7 +243,7 @@ class semestercopy extends FacultyService  {
 		//what to update: 
 		// assignments, assignments_link 
 		// gradebook, gradebook_categories, gradebook_entries
-		// class_lessons, class_lesson_links, class_lesson_content, class_links, class_objectives, class_lesson_objectives
+		// class_lessons, class_lesson_links, class_lesson_content, class_links, class_links_categories, class_objectives, class_lesson_objectives
 		// class_syllabuses
 
 		// don't do this anymore
@@ -270,6 +270,7 @@ class semestercopy extends FacultyService  {
 		include_once(LIB_PATH.'PBDO/ClassLessonContent.php');
 		include_once(LIB_PATH.'PBDO/ClassLessons.php');
 		include_once(LIB_PATH.'PBDO/ClassLinks.php');
+		include_once(LIB_PATH.'PBDO/ClassLinksCategories.php');
 		include_once(LIB_PATH.'PBDO/ClassObjectives.php');
 		include_once(LIB_PATH.'PBDO/ClassSyllabuses.php');
 
@@ -342,7 +343,28 @@ class semestercopy extends FacultyService  {
 
 
 
+		//class links categories
+		$links_old_to_new = array();
+		$db->query("DELETE FROM class_links_categories WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLinksCategoriesPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$oldid = $pbdo->idClassLinksCategories;
+			$links_cats_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassLinks = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$links_cats_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
 
+		//assume that every old categories is now a new one
+		// traverse throu links_cats_old_to_new and update the parent id
+		reset($links_cats_old_to_new);
+		while ( list($oldid, $newid) = @each($links_cats_old_to_new) ) {
+			$db->query('UPDATE class_links_categories SET id_class_links_categories_parent = '.$newid.' where id_class_links_categories_parent = '.$oldid.' and id_classes = '.$id_classes_to);
+
+		}
 
 		//class links
 		$links_old_to_new = array();
@@ -355,6 +377,7 @@ class semestercopy extends FacultyService  {
 			$pbdo->_new = true;
 			$pbdo->idClassLinks = '';
 			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->set('idClassLinksCategories', sprintf('%d',$links_cats_old_to_new[$pbdo->idClassLinksCategories]));
 			$pbdo->save();
 			$links_old_to_new[$oldid] = $pbdo->getPrimaryKey();
 		}
