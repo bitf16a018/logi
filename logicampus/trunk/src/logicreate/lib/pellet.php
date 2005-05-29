@@ -410,6 +410,15 @@ class AdminService extends Service {
 	
 }
 
+
+/**
+ * @see facultyOnlyAuth
+ */
+class FacutlyOnlyService extends Service {
+	var $authorizer = 'facultyOnlyAuth';
+}
+
+
 /**
  * Every service that responds to faculty needs to subclass this
  */
@@ -543,7 +552,7 @@ class FacultyService extends Service {
 class StudentService extends Service {
 
 	var $authorizer = 'studentAuth';
-
+	var $navlinks = array();
 	var $applinks = array();
 	var $inactivelinks = array();
 	var $sectionTitle = 'Student Links';
@@ -784,6 +793,43 @@ function takesClassesAuth(&$lc,&$u) {
 
 	return false;
 }
+
+
+/**
+ * this is just like facultyAuth except it will just stop 
+ * observers from seeing certain service files
+ * this should probably be taken care of more with basicauth
+ * but this is so far gone that I'm not sure how to do this
+ * mgk - 5/30/04  - based on an email from davidw
+ * gradebook will be facultyOnlyAuth to start with
+ */
+function facultyOnlyAuth(&$lc,&$u) {
+        global $lcTemplate;
+        if ($u->activeClassTaught->facultyType == 'o') { 
+            $lcTemplate['reason'] = "You are an observer and can not access this functionality.";
+            return false;
+        }
+
+	if ($u->activeClassTaught->id_classes != '') {
+		return true;
+	}
+	$u->activeClassTaught = $u->classesTaught[0];
+	if ($u->activeClassTaught->id_classes != '') {
+		return true;
+	}
+
+	$lcTemplate['reason'] = 'It seems that you do not have a class that you teach loaded in memory.';
+	ob_end_clean();
+	ob_start();
+	unset($u->password);
+	print_r($u);
+	$lcTemplate['debug'] = ob_get_contents();
+	ob_end_clean();
+	ob_start();
+
+	return false;
+}
+
 
 function facultyAuth(&$lc,&$u) {
         global $lcTemplate;
