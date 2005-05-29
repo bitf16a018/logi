@@ -38,13 +38,14 @@ class grade extends FacultyService {
 		);
 	var $navlinks = array(
 		'Calendar' => 'cal',
-		'Grade book' => '%gradebook'
+		'Gradebook' => '%gradebook'
 	);
 
 	var $inactivelinks = array (
 		'Add Assessment' => 'main/event=add'
 	);
 
+	var $authorizer = 'facultyOnlyAuth';
 
 
 	/*
@@ -154,7 +155,8 @@ class grade extends FacultyService {
 			}
 		
 			$t['percentage'] = number_format($t['total_points_earned'] / $t['questions_total_points'], 4) * 100;
-			$t['letter_grade'] = $gb->getLetterGrade($t['percentage'],$t['questions_total_points']);
+			#$t['letter_grade'] = $gb->getLetterGrade($t['percentage'],$t['questions_total_points']);
+			$t['letter_grade'] = $gb->getLetterGrade($t['total_points_earned'],$t['questions_total_points']);
 	
 			reset ($t['questions']);
 			$t['assessmentId'] = $t['assessment']->assessmentId;
