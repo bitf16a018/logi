@@ -165,7 +165,7 @@ CREATE TABLE class_presentations (
   createdOn datetime default NULL,
   approvedOn datetime default NULL,
   content text,
-  PRIMARY KEY  (id_presentations,id_presentations)
+  PRIMARY KEY  (id_presentations)
 ) TYPE=MyISAM;
 
 
