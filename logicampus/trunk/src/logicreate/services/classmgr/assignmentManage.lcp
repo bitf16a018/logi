@@ -1,32 +1,18 @@
-<?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
+<?php
 
-/*
+/**
  *
  * App to allow for add/edit/delete of assignments. 
  * Assignment will have text, due date, points. 
  * This info will be pulled in to other areas of the
  * site (calendar, etc)
- RESPONSE TYPES:
+   RESPONSE TYPES:
 
  	1= upload file
 	2= text response
 	3= upload & text
 	4= forum post
 	5= None
- 
- 
  *
  */
 
@@ -43,11 +29,21 @@ class assignmentManage extends FacultyService {
 	var $presentor = 'htmlPresentation';
 
 	// links
-
 	var $inactivelinks = array( 'Assignments' );
 
 
 
+        function wipeClassAssignmentsRun($db,&$u,&$lc,&$t) {
+                $class_id = $u->activeClassTaught->id_classes;
+                $sql = "update class_gradebook_entries set assignment_id=0 where id_classes=$class_id";
+                $db->query($sql);
+		#echo "Did not actually run the query";
+                $lc->templateName = 'assignmentManage_wipeClassAssignments';
+        }
+
+
+
+	
 	function rebuildClassDocLibHashesRun($db,&$u,&$lc,&$t)
 	{
 		$db_saver = DB::getHandle();
@@ -331,7 +327,7 @@ class assignmentManage extends FacultyService {
 				$addevent = new classroomassignments();
 				
 				$addevent->set_owner($db->Record['facultyId']);
-				$addevent->set_title($db->Record['title']);
+				$addevent->set_title(addslashes(stripslashes($db->Record['title'])));
 				$addevent->set_description(addslashes(stripslashes($db->Record['instructions'])));
 				
 				$addevent->set_date_start($db->Record['activeDate']);
@@ -574,6 +570,7 @@ class assignmentManage extends FacultyService {
 			$db->query($sql);
 
 			}
+
 		//assignment_grades has been updated, let's find an associated GBE, if there is one we will push a new GBV
 		$entryObj = ClassGradebookEntries::load(
 			array('assignment_id'=>$lc->getvars['id_class_assignments'],
@@ -593,7 +590,6 @@ class assignmentManage extends FacultyService {
 			$gbvObj->save();
 		}
 		}
-
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/assignmentManage/event=viewAssignment/id_class_assignments='.$lc->getvars['id_class_assignments']);
@@ -623,7 +619,7 @@ class assignmentManage extends FacultyService {
 				'dueDate' => 'Due Date',
 				'links' => ' '
 			);
-			
+			$datagrid->sortColumns = array('title', 'dueDate');
 			$datagrid->class = 'datagrid';
 			$datagrid->overrideColumn('<?=$noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
 			$datagrid->postpendColumn(' <a href="<?=appurl("classmgr/assignmentManage/event=viewAssignment/id_class_assignments=$id_class_assignments/");?>">view</a> | <a href="<?=appurl("classmgr/assignmentManage/event=editAssignment/id_class_assignments=$id_class_assignments/");?>">edit</a> | <a href="<?=appurl("classmgr/assignmentManage/event=deleteAssignment/id_class_assignments=$id_class_assignments/");?>" onclick="if (confirm(\'Are you SURE you want to delete this assignment?\')) { return true; } else { return false; }">delete</a>', 'links');
@@ -654,6 +650,14 @@ class assignmentManage extends FacultyService {
 		}
 
 		$t['asmt'] = $assignment;
+
+// mgk 4/17/05
+// per davidw/markk
+		if (!facultyOnlyAuth(&$lc,&$u)) { 
+			$lc->templateName = "assignmentManage_viewAssignment_observer";
+			return;
+		}
+
 
 		// load up a GBE to see if it has a gradebook entry, if not we need to instruct the teacher to
 		// publish one last time, then it will save the relationship
@@ -1014,13 +1018,14 @@ class assignmentManage extends FacultyService {
 						
 						// what happens when there is nothing loaded up? crap!
 						$cal_event->dbLoad();
-						
+
 						$cal_event->set_title($f->cleanedArray['title']);
 						$cal_event->set_description($f->cleanedArray['instructions']);
 						
 						$cal_event->set_date_start($f->cleanedArray['activeDate']);
 						$cal_event->set_date_end($f->cleanedArray['dueDate']);
 						
+						$cal_event->title = addslashes(stripslashes($cal_event->title));
 						$cal_event->save();
 						
 					}
@@ -1086,22 +1091,21 @@ class assignmentManage extends FacultyService {
 
 		ob_end_clean();
 		header("Cache-control: private");
-		header("Content-type: ".$db->Record['assign_file_mime']);
-		header("Content-Disposition: attachment; filename=".$lc->getvars['student'].'_'.$u->activeClassTaught->courseFamilyNumber.'_'.$db->Record['assign_file_name']);
+		header("Content-type: ".trim($db->Record['assign_file_mime']));
+		header("Content-Disposition: attachment; filename=".trim($lc->getvars['student'].'_'.$u->activeClassTaught->courseFamilyNumber.'_'.$db->Record['assign_file_name']));
 		if ( strlen($db->Record['assign_file_blob']) > 80) { 
 			$data = base64_decode($db->Record['assign_file_blob']);
 		} else {
 			$data = implode("",file(CONTENT_PATH."/uploads/".$db->Record['assign_file_blob']));
 		}
+		header("Content-length: ".strlen($data)+1);
 		echo $data;
 		exit();
-
 	}
 
 
 
 	function buildNavLinks() {
-
 		$this->navlinks = array ();
 		$this->navlinks[ lct('Classroom Overview') ] = 'display/';
 		$this->navlinks[ lct('Lessons') ] = 'lessonManager/';
@@ -1111,15 +1115,16 @@ class assignmentManage extends FacultyService {
 		$this->navlinks[ lct('Content') ] = 'lessonContent/';
 		$this->navlinks[ lct('Presentations') ] = 'studentPresentation';
 		$this->navlinks[ lct('Objectives') ] = 'lessonObjectives/';
-
 	}
+
 
 	function buildAppLinks() {
 		$this->applinks = array(
-			lct('List Assignments') => 'assignmentManage/',
-			lct('Add Assignment') => 'assignmentManage/event=editAssignment/',
-			lct('Add a Lesson') => 'lessonManager/event=edit/'
+		lct('List Assignments') => 'assignmentManage/',
+		lct('Add Assignment') => 'assignmentManage/event=editAssignment/',
+		lct('Add a Lesson') => 'lessonManager/event=edit/'
 		);
 	}
+ 
 }
 ?>
