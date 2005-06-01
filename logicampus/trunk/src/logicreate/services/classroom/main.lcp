@@ -30,10 +30,15 @@ class classroom extends StudentService {
 				 if ($count >= 1) 
 				 {
 				 	# Loop through all classes they are taking
-						for ($x=0; $x < $count; ++$x)  {
-							# build up SQL or clause for queries later on
+					for ($x=0; $x < $count; ++$x)  {
+						# build up SQL or clause for queries later on
 						$assignmentsOrClause .= 'class_assignments.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
 						$lessonsOrClause .= 'class_lessons.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
+
+						# Clean up OrClause
+						$assignmentsOrClause = substr($assignmentsOrClause,0,-3);
+						$lessonsOrClause = substr($lessonsOrClause,0,-3);
+
 
 						$t['classdata'][$u->classesTaken[$x]->id_classes] = '<ul>';
 						# Pull in last annoucement for each class
@@ -84,10 +89,6 @@ class classroom extends StudentService {
 						$lc->templateName = 'main_noclassestaken';
 						return;
 					}
-				# Clean up OrClause
-				$assignmentsOrClause = substr($assignmentsOrClause,0,-3);
-				$lessonsOrClause = substr($lessonsOrClause,0,-3);
-
 				/*****
 				 * PULL IN LESSONS
 				 *****/
