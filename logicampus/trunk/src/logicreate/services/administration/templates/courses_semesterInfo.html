@@ -51,7 +51,7 @@ if ($obj->postvars['id_semesters'] > 0)
 			<?=makeOptions($copy_opt, $obj->postvars['id_semesters']);?>
 		</select>
 	</td>
-	<td width="50"><input onclick="alert('ALERT - By submitting this form you are not making a live copy, the page will reload and allow you to save the copied information to the intended semester but you can still backout or make modifications before submitting that information for finalization! (woah thats long! shortin this!)');" type="submit" value="Go" name="Submit"></td>
+	<td width="50"><input onclick="alert('ALERT - By submitting this form you are NOT saving any changes!  The next page will allow you to save the data to the new semester.');" type="submit" value="Go" name="Submit"></td>
 </tr>
 </table>
 <input type="hidden" name="event" value="semesterInfoCopyTo">
