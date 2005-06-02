@@ -1,8 +1,15 @@
-UPGRADE INFORMATION
+PATCHES
+================================================================================
+The "patches" folder contains sql statements and php scripts that might be 
+necassary to run from one version to the next.
 
+
+
+UPGRADE INFORMATION
+================================================================================
 This file will assist in how to upgrade from LogiCampus release to release.
 
 UPGRADE LogiCampus 1.0.3 -> 1.0.4
-Uncompress the logicampus-1.0.4.tar.gz file to a temporary directory.  Copy the 'logicreate' folder over the top of your
-current installation. Done.
+Uncompress the logicampus-1.0.4.tar.gz file to a temporary directory.  Copy the 
+'logicreate' folder over the top of your current installation. Done.
 
