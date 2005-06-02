@@ -26,11 +26,17 @@ done
 echo '***********************'
 echo 'INSTALLING base LC data'
 mysql -u $1 -p$2 $db < ../data/setup.sql 
+echo 'lcRegistry'
 mysql -u $1 -p$2 $db < ../data/lcRegistry.sql 
+echo 'lcUsers'
 mysql -u $1 -p$2 $db < ../data/lcUsers.sql 
+echo 'lcPerms'
 mysql -u $1 -p$2 $db < ../data/lcPerms.sql 
+echo 'lcForms'
 mysql -u $1 -p$2 $db < ../data/lcForms_and_lcFormInfo.sql 
+echo 'lcConfig'
 mysql -u $1 -p$2 $db < ../data/lcConfig.sql
+echo 'lcGroups'
 mysql -u $1 -p$2 $db < ../data/lcGroups.sql
 echo '***********************'
 echo 'INSTALLING base modules'
