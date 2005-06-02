@@ -30,32 +30,26 @@ class classroom extends StudentService {
 				 if ($count >= 1) 
 				 {
 				 	# Loop through all classes they are taking
-					for ($x=0; $x < $count; ++$x)  {
-						# build up SQL or clause for queries later on
+						for ($x=0; $x < $count; ++$x)  {
+							# build up SQL or clause for queries later on
 						$assignmentsOrClause .= 'class_assignments.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
 						$lessonsOrClause .= 'class_lessons.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
-
-						# Clean up OrClause
-						$assignmentsOrClause = substr($assignmentsOrClause,0,-3);
-						$lessonsOrClause = substr($lessonsOrClause,0,-3);
-
 
 						$t['classdata'][$u->classesTaken[$x]->id_classes] = '<ul>';
 						# Pull in last annoucement for each class
 						$sql = "
-						SELECT id_class_assignments, title 
+						SELECT id_class_assignments, title, activeDate
 						FROM class_assignments
-						WHERE ( $assignmentsOrClause )
-						AND activeDate <= $ut
-						AND (dueDate >= $ut OR noDueDate = 1)
+						WHERE id_classes='".$u->classesTaken[$x]->id_classes."'
+						AND activeDate <= $ut  and (unix_timestamp(dateNoAccept)>$ut or dateNoAccept='0000-00-00 00:00:00') 
 						ORDER BY dueDate ASC, activeDate DESC 
 						LIMIT 1";
 
 						$db->queryOne($sql);
 						if (is_array($db->Record))
 						{
-								$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><a
-								href="'.APP_URL.'classroom/assignments/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->Record['id_class_assignments'].'">Assignment: '.$db->Record['title'].'</a></li>';
+							$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><a
+							href="'.APP_URL.'classroom/assignments/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->Record['id_class_assignments'].'">Assignment: '.$db->Record['title'].'</a></li>';
 						} else {
 								$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li>Assignment: none</li>';
 						}
@@ -89,6 +83,10 @@ class classroom extends StudentService {
 						$lc->templateName = 'main_noclassestaken';
 						return;
 					}
+				# Clean up OrClause
+				$assignmentsOrClause = substr($assignmentsOrClause,0,-3);
+				$lessonsOrClause = substr($lessonsOrClause,0,-3);
+
 				/*****
 				 * PULL IN LESSONS
 				 *****/
