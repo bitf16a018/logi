@@ -305,14 +305,7 @@ SELECT
 		ksort($x);
 		while(list($k,$v) = each($x)) {
 			while(list($key,$val) = each($v)) {
-
-				// feature request - this may not be the best way to do this right now - too many queries?
-				// also, would queryOne work here?  Do we have that in this version?
-				$db->query("select count(folder) as filecount from classdoclib_Files where folder=".$val['pkey']);
-				$db->next_record();
-				$val['fullname'] = $val['name']." (".intval($db->Record['filecount']).") ";
 				$data[] = $val;
-
 			}
 		}
 		$tree = new TreeList();
@@ -462,8 +455,21 @@ class LC_DiskRepository {
 	}
 
 
+	/**
+	 * Get Directories
+	 *
+	 * algorithm to balance files on a disk with a two tier nested
+	 * directory structure.  Use the MD5 and take the first two
+	 * and last two characters as directory names
+	 */
+	function getDirectories($md5name) {
+		$dir1 = substr($md5name,0,2);
+		$dir2 = substr($md5name,-2,2);
+		return array($dir1,$dir2);
+	}
 
-	/*
+
+	/**
 	 * takes an array of keys which will make a unique ID for this file
 	 * hashes them and saves them in the repository
 	 */
@@ -524,24 +530,30 @@ class LC_DiskRepository {
          * saves a gb images handle
          */
         function saveGDImage($keys,$gdhandle) {
+		$seed = join($this->seperator,$keys);
+		$filename = md5($seed);
+		//use a two tier directory structure
+		//first two chars of md5 and last two
+		$dir1 = substr($filename,0,2);
+		$dir2 = substr($filename,-2,2);
+		if (! $this->isDir($dir1) ) {
+			$this->makeDir($dir1);
+			$this->makeDir($dir1.'/'.$dir2);
+		} else if ( ! $this->isDir($dir1.'/'.$dir2) ) {
+			$this->makeDir($dir1.'/'.$dir2);
+		}
 
-			$seed = join($this->seperator,$keys);
-			$filename = md5($seed);
-			//use a two tier directory structure
-			//first two chars of md5 and last two
-			$dir1 = substr($filename,0,2);
-			$dir2 = substr($filename,-2,2);
-			if (! $this->isDir($dir1) ) {
-				$this->makeDir($dir1);
-				$this->makeDir($dir1.'/'.$dir2);
-			} else if ( ! $this->isDir($dir1.'/'.$dir2) ) {
-				$this->makeDir($dir1.'/'.$dir2);
+		if ( file_exists($this->baseDir.$dir1.'/'.$dir2.'/'.$filename) ) {
+			$success = $this->deleteFileWithKeys($keys);
+			if ( !$success ) {
+				trigger_error("Could not remove image before saving a new copy.  Save aborted.");
+				return false;
 			}
+		}
 
-			ImageJpeg($gdhandle,$this->baseDir.$dir1.'/'.$dir2.'/'.$filename);
+		ImageJpeg($gdhandle,$this->baseDir.$dir1.'/'.$dir2.'/'.$filename);
 
-			return $filename;
-
+		return $filename;
         }
 
 
@@ -578,6 +590,26 @@ class LC_DiskRepository {
                 }
         return $single;
         }
+
+
+	/**
+	 * wipe a file from the disk
+	 */
+	function deleteFileWithKeys($keys) {
+		if (strlen($this->baseDir) < 2 ) {
+			trigger_error('No file repository directory set, cannot delete file');
+			return false;
+		}
+
+		$seed = join($this->seperator,$keys);
+		$filename = md5($seed);
+		$dirs = $this->getDirectories($filename);
+		$dir1 = $dirs[0];
+		$dir2 = $dirs[1];
+
+		//echo "Trying to remove ... ".$this->baseDir.$dir1.'/'.$dir2.'/'.$filename."<br>\n";
+		return unlink($this->baseDir.$dir1.'/'.$dir2.'/'.$filename);
+	}
 }
 
 
@@ -660,7 +692,17 @@ class FileMGTView extends ListView{
 				$ret .= $this->tree->p_CurrentNode->contents['name'];
 				$ret .= "</a>";
 				$ret .= "</td>";
-				
+
+				// mgk - 5/31/05
+				// bug report #145
+				// count of files in a folder
+				// this currently doesn't recursively count
+				// get a count of files in this pkey
+				$db = db::getHandle();
+				$db->queryOne("select count(pkey) as filecount from classdoclib_Files where folder=".$this->tree->p_CurrentNode->contents['pkey']);
+				$ret .= "<td>".$db->Record['filecount']."</td>";
+
+
 				//print one cell of icons or not
 /*				if ( $withControls) {
 					$ret .= "<td class=\"classdoclibrary_$color\" align=\"center\" NOWRAP>\n";
