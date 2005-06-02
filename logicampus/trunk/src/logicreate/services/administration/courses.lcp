@@ -210,41 +210,39 @@ class courses extends AdminService
 		$lc->templateName = 'courses_viewcourse';
 		$lc->templateStyle = 'private';
 	}
-	
-	function semesterInfoCopyTorun(&$db,&$u,&$lc,&$t)
+
+	/**
+	 * Place the info from one semester into a form for another semester
+	 * Don't save anything yet
+	 */
+	function semesterInfoCopyToRun(&$db,&$u,&$lc,&$t)
 	{
 		$this->sectionTitle = 'Semester Course Info';	
-		$id_to_copy_to = $lc->postvars['id_semesters'];
-		$id_to_copy_from = $lc->postvars['copyfrom'];
+		$id_to_copy_to = intval($lc->postvars['id_semesters']);
+		$id_to_copy_from = intval($lc->postvars['copyfrom']);
 		
-		$t['extra'] = object2array(semesterInfo::loadSemester($lc->postvars['id_semesters']));
+		$t['extra'] = object2array(semesterInfo::loadSemester($id_to_copy_to));
 			
-		if (count($this->cleanedArray) <= 0)
-		{	$this->cleanedArray = object2array(semesterInfo::load($id_to_copy_from));
+		if (count($this->cleanedArray) <= 0) {
+			$this->cleanedArray = object2array(semesterInfo::load($id_to_copy_from));
 		}
 		
-		if ($this->cleanedArray['id_semesters'])
-		{	
-			$f = new form();
+		if ($this->cleanedArray['id_semesters']) {
+			$f = new SiteForm();
 			$f->getForm('admincourseinfo', $this->cleanedArray);
-			
+
 			// changing the id semester so that it's copied TO the following id
 			$f->modFormValue('id_semesters', $id_to_copy_to);
-			
 			$t['form'] = $f->ToHTML();
-			
-		} else
-		{
-			echo 'Failed to load.. :: swap this message out ::';
+		} else {
+			trigger_error("Failed to load semester info");
 		}
 		
 		$lc->templateName = 'courses_semesterInfo';
 		$lc->templateStyle = 'private';		
-
-		
 	}
-	
-	
+
+
 	#  Allows the admin to edit course specific information based on 
 	#  on a semester.  This information will be progated to all
 	#  classes.
@@ -257,6 +255,7 @@ class courses extends AdminService
 	 */
 	function semesterInfoRun(&$db,&$u,&$lc,&$t)
 	{	$this->sectionTitle = 'Semester Course Info';	
+		$id_semesters = (int)$lc->postvars['id_semesters'];
 
 		/*
 		 *	! loads nothing but a way to "choose" a form
@@ -269,35 +268,29 @@ class courses extends AdminService
 		// well then we will seed the loader to choose "current" semester
 		// else it will be seeded with id_semseter from postvars
 		
-		if ((int)$lc->postvars['id_semesters'] > 0)
+		if ($id_semesters > 0)
 		{
 			
-			$t['extra'] = object2array(semesterInfo::loadSemester($lc->postvars['id_semesters']));
-			
-			if (count($this->cleanedArray) <= 0)
-			{	$this->cleanedArray = object2array(semesterInfo::load($lc->postvars['id_semesters']));
+			$t['extra'] = object2array(semesterInfo::loadSemester($id_semesters));
+
+			if (count($this->cleanedArray) <= 0) {
+				$this->cleanedArray = object2array(semesterInfo::load($id_semesters));
 			}
-			
 			if ($this->cleanedArray['id_semesters'])
 			{	
 				$f = new SiteForm();
 				$f->getForm('admincourseinfo', $this->cleanedArray);
-				// Altho this is only useful upon "Loading Semester", it doesn't matter anytime after, so keep it here
-				$f->modFormValue('id_semesters', $lc->postvars['id_semesters']);
-				
+				// Although this is only useful upon "Loading Semester", it doesn't matter anytime after, so keep it here
+				$f->modFormValue('id_semesters', $id_semesters);
 				$t['form'] = $f->ToHTML();
-				
-			}			
-				
+			}
 		}
-		
+
 		$lc->templateName = 'courses_semesterInfo';
 		$lc->templateStyle = 'private';		
-
-
 	}
 
-		
+
 	function semesterInfoPostRun($db,&$u,&$lc,&$t)
 	{
 		$this->sectionTitle = 'Semester Course Info';	
