@@ -434,7 +434,7 @@
 
 
 
-		# Generates a facutly Dropdown
+		# Generates a faculty Dropdown
 		function facultyToHTML($v)
 		{
 			// this is a  MAJOR friggin hack

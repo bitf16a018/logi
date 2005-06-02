@@ -414,7 +414,7 @@ class AdminService extends Service {
 /**
  * @see facultyOnlyAuth
  */
-class FacutlyOnlyService extends Service {
+class FacultyOnlyService extends Service {
 	var $authorizer = 'facultyOnlyAuth';
 }
 

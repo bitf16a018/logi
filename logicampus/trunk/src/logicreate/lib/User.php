@@ -7,7 +7,7 @@
 			Type  		Constant			Value
 			*Standard	USERTYPE_STANDARD	1
 			*Student	USERTYPE_STUDENT	2
-			*Facutly	USERTYPE_FACULTY	3	
+			*Faculty	USERTYPE_FACULTY	3	
 			*Admin		USERTYPE_ADMIN		4
 
 		These user types make up the 4 user types that use
@@ -120,7 +120,7 @@
 			return false;
 		}
 
-		# Check if facutly is a student in a class
+		# Check if faculty is a student in a class
 		function isStudent()
 		{
 			global $lcObj;	
