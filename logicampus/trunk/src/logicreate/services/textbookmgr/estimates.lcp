@@ -221,8 +221,8 @@ GROUP BY B.id_classes
 // we need to match that up with the id_classes for the 'enrollment' semester
 // to grab info.
 // example:
-// sp2004 - bmgt1303 is id_classes 399 and taught by kevin.eason
-// we need to look up the id_classes of bmgt1301/kevin.eason and 
+// sp2004 - bmgt1303 is id_classes 399 and taught by kevin E
+// we need to look up the id_classes of bmgt1301/kevin E and 
 // use that to get enrollments for that id_classes or maybe even section numbers
 // ack!
 
