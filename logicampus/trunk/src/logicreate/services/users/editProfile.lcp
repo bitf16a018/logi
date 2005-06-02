@@ -148,16 +148,18 @@ class editProfile extends RegAuth {
 
 				$lcdr = new LC_DiskRepository(IMAGES_PATH.'photos/');
 				$filename = $lcdr->saveGDImage( array($u->username), $thumbImage );
-	
-				$this->cleanedArray['photo'] = $lcdr->getFullPath($filename, false);
+				if ( $filename == false ) {
+					trigger_error('Could not save photo');
+					return false;
+				}
 
+				$this->cleanedArray['photo'] = $lcdr->getFullPath($filename, false);
 			}
 		}
 
 		$t['error'] .= $f->validateForm('userprofile', $lc->postvars);
 
 		if (!$t['error']) {
-
 			$this->cleanedArray = array_merge( $this->cleanedArray, $f->cleanedArray);
 			$this->cleanedArray['homePhone'] = arrayToPhoneNumber($this->cleanedArray['homePhone']);
 			$this->cleanedArray['workPhone'] = arrayToPhoneNumber($this->cleanedArray['workPhone']);
@@ -167,14 +169,21 @@ class editProfile extends RegAuth {
 			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
 			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
 
-			// if they didn't set a new photo, put their current value back in the db
+			//if they didn't set a new photo, put their current value back in the db
+
+			//only wipe out the value if we don't already have one from above
+			// people might want to change their photo!
 			if ($this->cleanedArray['removePhoto'] == false)
 			{
+				//if they didn't submit a new one, put the old value back in the new array
 				if ( !$this->cleanedArray['photo'] ) {
 					$this->cleanedArray['photo'] = $u->profile->values['photo'];
 				}
-			} else
-			{	$this->cleanedArray['photo'] = '';
+			} else {
+				//delete the file here
+				$lcdr = new LC_DiskRepository(IMAGES_PATH.'photos/');
+				$lcdr->deleteFileWithKeys( array($u->username) );
+				$this->cleanedArray['photo'] = '';
 			}
 
 			while(list ($k, $v) = @each($this->cleanedArray) )
