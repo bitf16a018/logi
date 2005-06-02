@@ -10,15 +10,17 @@
   <property name="lcsrc" location="src/logicreate/" />
   <property name="docs" location="docs" />
   <property name="data" location="data" />
-  <property name="build" location="temp" />
   <property name="dist"  location="dist" />
   <property name="scripts" location="scripts" />
-  <property name="builddir" location="build" />
+
+
   <target name="init" depends="cleantemp">
     <!-- Create the time stamp -->
     <tstamp>
           <format property="lc.build_date" pattern="MMMM-d-yyyy" locale="en"/>
     </tstamp>
+
+    <property name="build" location="temp/logicampus-${lc.version}" />
 
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
@@ -28,6 +30,7 @@
     <mkdir dir="${build}/public_html/"/>
     <mkdir dir="${build}/public_html/docs/"/>
     <mkdir dir="${build}/public_html/images/"/>
+
   </target>
 
 <!--DEMO-->
@@ -146,6 +149,15 @@
 	  </fileset>
 	</copy>
 
+	<mkdir dir="${build}/patches"/>
+	<copy todir="${build}/patches">
+	  <fileset dir="patches">
+		<include name="**"/>
+		<exclude name="**CVS**"/>
+		<exclude name="**~"/>
+	  </fileset>
+	</copy>
+
 	<filter token="LC_VERSION" value="${lc.version}"/>
 	<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
 	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
@@ -167,15 +179,17 @@
 
 	<!-- After license is applied, copy defines.php over -->
 	<copy todir="${build}/public_html/" overwrite='true'>
-		<fileset dir="${builddir}">
+		<fileset dir="${build}">
 			<include name="defines.php"/>
 		</fileset>
 	</copy> 
 
 	<!-- tar up -->
-	<tar tarfile="${dist}/logicampus-${lc.version}.tar" basedir="${build}" />
+	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
+	<!--
 	<gzip src="${dist}/logicampus-${lc.version}.tar" zipfile="${dist}/logicampus-${lc.version}.tar.gz" />
 	<delete file="${dist}/logicampus-${lc.version}.tar" />
+	-->
 
 	<!-- clean up temp-->
 	<antcall target="cleantemp"/>
@@ -203,7 +217,9 @@
 		description="uses a combination of bash and perl in the build/ dir to apply a common license to all code files" 
 		unless="forgetlicense">
 		<echo message="Applying LCPL to source files ..." />
-		<exec executable="${build}/../build/applylicense.sh" dir="${build}/../build" failonerror="true" />
+		<exec executable="sh" dir="build" failonerror="true">
+			<arg line="applylicense.sh"/>
+		</exec>
 	</target>
 
 
@@ -211,23 +227,23 @@
 	<target name="translate"
 		description="uses php to build translation tables out of XML files">
 		<echo message="Translating [english,spanish,chinese] ..." />
-		<exec executable="php" dir="${build}/../lang/" failonerror="true">
+		<exec executable="php" dir="lang/" failonerror="true">
 			<arg value="buildtrans.php"/>
 			<arg value="en_US"/>
 		</exec>
-		<exec executable="php" dir="${build}/../lang/" failonerror="false">
+		<exec executable="php" dir="lang/" failonerror="false">
 			<arg value="buildtrans.php"/>
 			<arg value="es_MX"/>
 		</exec>
-		<exec executable="php" dir="${build}/../lang/" failonerror="false">
+		<exec executable="php" dir="lang/" failonerror="false">
 			<arg value="buildtrans.php"/>
 			<arg value="zh_CN"/>
 		</exec>
 
 
-		<copy todir="${build}/logicreate/lang/" file="${build}/../lang/lct.en_US.php"/>
-		<copy todir="${build}/logicreate/lang/" file="${build}/../lang/lct.es_MX.php"/>
-		<copy todir="${build}/logicreate/lang/" file="${build}/../lang/lct.zh_CN.php"/>
+		<copy todir="${build}/logicreate/lang/" file="lang/lct.en_US.php"/>
+		<copy todir="${build}/logicreate/lang/" file="lang/lct.es_MX.php"/>
+		<copy todir="${build}/logicreate/lang/" file="lang/lct.zh_CN.php"/>
 		<copy todir="${build}/logicreate/lang/" file="${lcsrc}/lang/fallback.php"/>
 
 	</target>
@@ -283,4 +299,22 @@
 	<target name="report">
 		<echoproperties/>
 	</target>
+
+	<target name="changelog"
+		description="create today's changelog">
+		<cvschangelog dir="."
+			destfile="changelog.xml"
+			start="02 May 2005"
+			end="02 June 2005"/>
+
+		<style in="changelog.xml" 
+			out="changelog.html" 
+			style="${ant.home}/etc/changelog.xsl">
+			<param name="title" expression="LogiCampus ChangeLog"/>
+			<param name="module" expression="logicampus"/>
+			<param name="cvsweb" expression="http://cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
+		</style>
+	</target>
+
+
 </project>
