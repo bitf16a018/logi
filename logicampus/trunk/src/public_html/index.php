@@ -15,7 +15,6 @@
 //xdebug_start_profiling();
 
 ob_start();
-ini_set("session.cache_limiter","nocache");
 
 		/*
 		 * if you're going to time things,
