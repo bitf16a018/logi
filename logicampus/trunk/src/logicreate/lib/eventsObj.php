@@ -269,19 +269,26 @@ repeat types
 		// is ''repeatType" == 0?  If so, do date comparisons
 		// if repeatType>0 then do partial date comparisons
 		// id_classes = 0 means anything SITEWIDE
+		/**
+		 * the four or clauses
+		 * repeating with no end
+		 * some event ends inside the viewing window of time
+		 * some event starts inside the viewing window of time
+		 * some event starts before and ends after the viewing window of time (spans window)
+		 */
 		$sql ='
 		SELECT * 
 		FROM lcEvents 
-		WHERE ('.((is_array($id_classes)) ? ((count($id_classes) > 0) ? 'id_classes='.implode($id_classes, ' or id_classes=').' or ' : '') : (((string)$id_classes == '*') ? '' : 'id_classes='.$id_classes.' or ')).'('.(((string)$id_classes == '*') ? 'id_classes > 0' : 'id_classes=0').$sql_group.')) and
+		WHERE ('.((is_array($id_classes)) ? ((count($id_classes) > 0) ? 'id_classes='.implode($id_classes, ' or id_classes=').' or ' : '') : (((string)$id_classes == '*') ? '' : 'id_classes='.$id_classes.' or ')).'('.(((string)$id_classes == '*') ? 'id_classes > 0' : 'id_classes=0').$sql_group.')) 
+		AND
 		(
-			(repeatType=0 and (enddate>='.$start.' and startdate<='.$end.') )
-			OR 
-			(
-				repeatType > 0 AND
-				(	enddate = 0
-					OR (enddate >='.$start.' OR startdate<='.$end.')
-				)
-			)
+			(repeatType > 0  AND enddate = 0)
+			OR
+			(enddate >='.$start.' AND enddate<='.$end.')
+			OR
+			(startdate >='.$start.' AND startdate<='.$end.')
+			OR
+			(startdate <= '.$start.' AND enddate >= '.$end.')
 		)	'.$sql_type.'	
 		ORDER BY calendarType ASC
 		';
@@ -594,11 +601,9 @@ $dayText = array(1=>'Sunday', 2=>'Monday', 4=>'Tuesday', 8=>'Wednesday', 16=>'Th
 				break;
 			}
 		}
-
-		while(list($k,$v) = @each($edateObj->events)) 
-		{		$new[$k] = $v;
+		while(list($k,$v) = @each($edateObj->events)) {
+			$new[$k] = $v;
 		}
-
 		return $new;
 	}
 }
@@ -609,7 +614,7 @@ class cali {
 	var $calenderID;
 	var $events;
 	var $showTimes = true;
-	var $showTItle = true;
+	var $showTitle = true;
 	var $showDescription = true;			// show event description?
 	var $titleLength = 10;					// event title  max length in view
 	var $showEventCount = false;			// show the # of events in  day?
@@ -639,7 +644,7 @@ class cali {
 	var $fl_no_link_numerical_day_event = false;
 	
 	/**
-	 *	@param	$id_classes				int 		[EXCEPTION: you may pass in * which means, ANY class, but NOT classes==0]
+	 *	@param	$id_classes  int [EXCEPTION: you may pass in * which means, ANY class, but NOT classes==0]
 	 */
 	function cali($start, $end, $type='', $id_classes=0, $a_groups=array()) 
 	{
@@ -655,7 +660,6 @@ class cali {
 		}
 		
 		$this->events 			= edate::getEvents($start,$end,$type, $id_classes, $use_groups);
-		
 		$this->monthReviewURL 	= appurl($this->monthReviewURL);
 		$this->eventDayURL 		= appurl($this->eventDayURL);
 		$this->eventCountURL 	= appurl($this->eventCountURL);
@@ -737,6 +741,7 @@ class cali {
 			$events = array_merge($events,$e);
 		}
 
+
 		list($m,$d,$y) = split(" ",date("m d Y",$this->start));
 		$startTime = strtotime("$m/$d/$y ".$this->START_HOUR);
 		$endTime = strtotime("$m/$d/$y ".$this->END_HOUR);
@@ -749,6 +754,7 @@ class cali {
 		}
 
 		$events = $e;
+		unset($e);
 		$loopTime = $startTime;
 
 		while($loopTime < $endTime ) {
@@ -758,51 +764,46 @@ class cali {
 			$inside = '';
 
 			// @@ this area scares me.. 
-			while($tempcount < $loopcount) 
-			{	$rowString = date("h:i A",$loopTime);
-				
-				if (is_array($events)) 
-				{	reset($events);
+			while($tempcount < $loopcount) {
+				$rowString = date("h:i A",$loopTime);
+				if (is_array($events)) {
+					reset($events);
 
-					while(list($tkey,$tval) = each($events)) 
-					{
-						while(list($key,$val) = each($tval)) 
-						{
+					while(list($tkey,$tval) = each($events)) {
+						while(list($key,$val) = each($tval)) {
+// __FIXME__ mgk 8/29/04
+// hack to handle 2 day issues
+if(date("m/d/Y",$loopTime)==date("m/d/Y",$val->startdate+86400)) { 
+	$val->startdate+=86400;
+}
 							$thisString = date("h:i A",$val->startdate);
 							// is it just an ordinary calendar type? (world viewable) or specialized ? '' = world
-							if (trim($val->calendarType) != '')
-							{	
+							if (trim($val->calendarType) != '') {
 								$classname = $val->calendarType;
 								// customized
-								if (class_exists($classname))	// making sure class exists before initializing
-								{
+								if (class_exists($classname)){	// making sure class exists before initializing
 									$tmp = new $val->calendarType;
-									
 									//__FIXME__ why don't any of these work?
 									if ($tmp->autoLoad($val) && $tmp->cansee($loopTime, true))
 									{
 									//debug($tmp);
-										if ($tmp->f_allday)
-										{
+										if ($tmp->f_allday) {
 											$allday_events[] = $tmp->get_brief_display($loopTime);
 											
-										} else
-										{
+										} else {
 											$inside .= $tmp->get_brief_display($loopTime).'<br>';
-											
 										}
 										
 										// prevention from reiterating overandoverandover
 										unset($events[$tkey][$key]);
 									
-									} 
+									}
 
 									
 											
 								}
 								//debug($tmp);
-							} else 
-							{	
+							} else {
 								// basic shiz
 								if ($rowString == $thisString) {
 									$tstring ='';
@@ -823,7 +824,8 @@ class cali {
 											// it into the event editor
 											$allday_events[] = '<b>'.$val->title."</b><BR>".$val->description;
 										} else 
-										{	$inside .= $tstring."<HR>";
+										{
+											$inside .= $tstring."<HR>";
 										}
 										
 									}
@@ -838,8 +840,9 @@ class cali {
 			}
 				$prevTime = $loopTime - ($miniinterval * $loopcount);
 				
-				if ($inside)
+				if ($inside) {
 					$trow[$prevTime] .= '<b>'. date("g:i A", $prevTime).'</b><ul>'.$inside. '</ul>';
+				}
 					
 				$inside='';
 
@@ -848,7 +851,7 @@ class cali {
 		/** old way.. with the times listed 8 830 9 930...
 		
 		if (count($allday_events) > 0)
-		{	$st_allday = '<tr><td class="todayseventstitle" colspan="2"><B>TODAYS ITEMS<b></td></tr>';
+		{	$st_allday = '<tr><td class="todayseventstitle" colspan="2"><B>TODAY&apos;S ITEMS<b></td></tr>';
 			$st_allday .= '<tr><td class="todaysevents" colspan="2">'.implode($allday_events, '<br>'). '</td></tr>';
 		}
 		
@@ -858,9 +861,9 @@ class cali {
 		
 		*/
 		if (count($allday_events) > 0)
-		{	//$st_allday = '<tr><td removedclass="todayseventstitle"><B>TODAYS ITEMS<b></td></tr>';
+		{	//$st_allday = '<tr><td removedclass="todayseventstitle"><B>TODAY&apos;S ITEMS<b></td></tr>';
 			$st_allday = '';
-			$st_allday .= '<tr><td removedclass="todaysevents"><B>TODAYS EVENTS<b><br><ul>'.implode($allday_events, '<br>'). '</ul></td></tr>';
+			$st_allday .= '<tr><td removedclass="todaysevents"><B>TODAY&apos;S EVENTS<b><br><ul>'.implode($allday_events, '<br>'). '</ul></td></tr>';
 			$st_allday .= '<tr><td>&nbsp;</td></tr>';
 		}
 		
@@ -894,7 +897,8 @@ class cali {
 				{
 					$tmp = new $event->calendarType;
 					if ($tmp->autoLoad($event) && $tmp->cansee($timestamp) == false)
-					{	$c--;
+					{
+						$c--;
 					}
 				}
 			}
@@ -971,7 +975,7 @@ class cali {
 			}
 
 		}
-		
+
 	return $temp;
 	}
 
@@ -1132,6 +1136,10 @@ class cali {
 						$tmp_render .= "&nbsp;";
 					}
 					++$dayInMonth;
+				}
+				//this is different for clients, I think this is the better way
+				if ($dayInMonth>31) {
+					$dayInMonth=32;
 				}
 				
 				if ($this->display_style_for_this_friggin_day == false)
@@ -1347,8 +1355,8 @@ class eventItem
 		}
 
 		
-		if ($this->f_allday)
-		{ 	return true;
+		if ($this->f_allday) {
+			return true;
 		}
 		
 		
@@ -1581,22 +1589,20 @@ class classroomAssignments extends eventItem
 	 */	
 	function cansee($timestamp, $request_label_for_dayview=false, $showitanyway=false)
 	{
-		if ($this->startdate <= time())
-		{	
+		if ( $this->startdate <= time() ) {
 			$begintoday = mktime(0,0,0, date('m', $this->startdate), date('d', $this->startdate), date('y', $this->startdate));
 
 			$requested_todayview = mktime(0,0,0, date('m', $timestamp), date('d', $timestamp), date('y', $timestamp));
-
 			$endtoday = mktime(0,0,0-1, date('m', $timestamp), date('d', $timestamp)+1, date('y', $timestamp));
 			$myenddate =  mktime(0,0,0, date('m',$this->enddate), date('d',$this->enddate), date('y',$this->enddate));
  
-			if ($begintoday == $requested_todayview)
-			{	return true;
+			if ($begintoday == $requested_todayview) {
+				return true;
 			}
 
 			// I need to know where i am today?
-			if ($myenddate == $requested_todayview)
-			{	return true;
+			if ($myenddate == $requested_todayview) {
+				return true;
 			}
 
 			/**
@@ -1605,15 +1611,14 @@ class classroomAssignments extends eventItem
 			 *	the block is hit (ie: startdate has passed)
 			 *	How do I detect if i'm in the master calendar?
 			 */	
-			 if ($showitanyway)
-			 {	return true;
+			 if ($showitanyway) {
+				return true;
 			 }
 			 
-		} else
-		{
+		} else {
 			//echo 'INvalid StartDate';
 		}
-		
+		return false;
 	}
 	
 	
@@ -1824,36 +1829,35 @@ class examscheduling extends eventItem
 	}
 	
 	
-	function cansee($timestamp, $request_label_for_dayview=false, $showitanyway=false)
-	{	//echo 'Testing exam date viewable? [';
+	function cansee($timestamp, $request_label_for_dayview=false, $showitanyway=false) {
+		//echo 'Testing exam date viewable? [';
 		//debug($this);
 		//echo date('y-M-d h:i:s', $timestamp);
-		if ($request_label_for_dayview)
-		{
-			if ($this->startdate == $timestamp || $this->enddate == $timestamp)
+		if ($request_label_for_dayview) {
+			if ($this->startdate == $timestamp || $this->enddate == $timestamp) {
 				return true;
-		} else 
-		{
+			}
+		} else {
 
 			// month views will hit this
 			$begintoday = mktime(0,0,0, date('m', $this->startdate), date('d', $this->startdate), date('y', $this->startdate));
 			//echo date('y-M-d h:i:s', $begintoday);
 			//echo $begintoday.'|'.$timestamp.'<br>';
-			if ($timestamp == $begintoday)
-			{	return true;
+			if ($timestamp == $begintoday) {
+				return true;
 			}
 
 			$beginsecond = mktime(0,0,0, date('m', $this->enddate), date('d', $this->enddate), date('y', $this->enddate));
 			//echo date('y-M-d h:i:s', $begintoday);
 			//echo $begintoday.'|'.$timestamp.'<br>';
-			if ($timestamp == $beginsecond)
-			{	return true;
+			if ($timestamp == $beginsecond) {
+				return true;
 			}
 
 		}
 
-		if ($showitanyway)
-		{	return true;
+		if ($showitanyway){
+			return true;
 		}
 	return false;
 	}
@@ -1940,8 +1944,8 @@ class assessmentscheduling extends eventItem
 		if ($request_label_for_dayview)
 		{	
 			// when to show the label
-			// only when teh start day has beeen passed or = to right now! can we show this label// OR mark it on the calendar
-			if ($start_day <= time() || $end_day <= $time() )
+			// only when the start day has beeen passed or = to right now! can we show this label// OR mark it on the calendar
+			if ($start_day <= time() || $end_day <= time() )
 			{	
 				// because it's an all day thing
 				// we dont have to worry about hours
