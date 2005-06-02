@@ -8,7 +8,7 @@
 include_once(LIB_PATH.'ClassGradebookVal.php');
 include_once(LIB_PATH.'ClassGradebookEntries.php');
 
-class assessment extends FacultyService {
+class assessment extends FacultyOnlyService {
 
 	var $presentor='htmlPresentation';
 
