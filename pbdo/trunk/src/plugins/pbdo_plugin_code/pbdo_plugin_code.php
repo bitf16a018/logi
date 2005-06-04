@@ -288,7 +288,7 @@ class ParsedClass {
 			$fCodeName = convertTableName($rel->getEntityB());
 
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
-			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertTableName($lcol).".'\'',\$dsn);\n";
+			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
 			$ret .= "\t\treturn \$array;\n";
 			$ret .= "\t}\n\n";
 		}
@@ -303,10 +303,11 @@ class ParsedClass {
 			$lcol = $rel->getAttribB();
 			$fcol = $rel->getAttribA();
 			$q = convertTableName($rel->getEntityA()."By".ucfirst($fcol));
+			$fCodeName = convertTableName($rel->getEntityA());
 
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
-			$ret .= "\t\tif ( \$this->".convertColName($fcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
-			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
+			$ret .= "\t\tif ( \$this->".convertColName($lcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
+			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
 			$ret .= "\t\tif ( count(\$array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }\n";
 			$ret .= "\t\treturn \$array[0];\n";
 			$ret .= "\t}\n\n";
