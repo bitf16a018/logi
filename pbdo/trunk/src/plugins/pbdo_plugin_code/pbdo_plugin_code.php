@@ -152,7 +152,7 @@ class ParsedClass {
 		if ($package != '') {
 			$this->package = ucfirst($package);
 			$this->codeName = $this->package.'_'.$this->codeName;
-			$this->tableName = $package.'_'.$this->tableName;
+//			$this->tableName = $this->tableName;
 		}
 	}
 
@@ -282,11 +282,13 @@ class ParsedClass {
 			}
 			$fcol = $rel->getAttribB();
 			$lcol = $rel->getAttribA();
-			$q = convertTableName($rel->getEntityB());
 
 			if ( substr($q,-1) == 's' ) { $s = ''; } else { $s ='s'; }
-			$ret .= "\tfunction get".$q.$s."(\$dsn='default') {\n";
-			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$fcol." = \''.\$this->getPrimaryKey().'\'',\$dsn);\n";
+			$q = convertTableName($rel->getEntityB() .$s."By".ucfirst($lcol));
+			$fCodeName = convertTableName($rel->getEntityB());
+
+			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
+			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertTableName($lcol).".'\'',\$dsn);\n";
 			$ret .= "\t\treturn \$array;\n";
 			$ret .= "\t}\n\n";
 		}
@@ -298,13 +300,13 @@ class ParsedClass {
 			if ( $rel->getEntityB() != $this->tableName ) { 
 				continue;
 			}
-			$fcol = $rel->getAttribB();
-			$col = $rel->getAttribA();
-			$q = convertTableName($rel->getEntityB());
+			$lcol = $rel->getAttribB();
+			$fcol = $rel->getAttribA();
+			$q = convertTableName($rel->getEntityA()."By".ucfirst($fcol));
 
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
-			$ret .= "\t\tif ( \$this->".convertColName($col)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
-			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$col." = \''.\$this->".convertColName($fcol).".'\'',\$dsn);\n";
+			$ret .= "\t\tif ( \$this->".convertColName($fcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
+			$ret .= "\t\t\$array = ".$q."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
 			$ret .= "\t\tif ( count(\$array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }\n";
 			$ret .= "\t\treturn \$array[0];\n";
 			$ret .= "\t}\n\n";
@@ -649,7 +651,7 @@ class ParsedAttribute {
 }
 
 
-function convertTableName($n) {
+function convertTableName($n, $package = '') {
 	$n = ucfirst($n);
 	//find all _s
 	$undPos = strpos($n,'_');
