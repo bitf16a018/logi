@@ -14,8 +14,8 @@ include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
 include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
 include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
 include_once(LIB_PATH."datagrid.php");
-include_once(LIB_PATH."ClassGroup.php");
-include_once(LIB_PATH."ClassGroupMember.php");
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
 class discussion extends StudentService {
 

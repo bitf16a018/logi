@@ -324,11 +324,13 @@ class LcForum extends LcForumBase {
 		while(list($k,$v) = @each($studentGroups)) { 
 			$x[] = "lc_forum_char_link='g_$v'";
 		}
-		$where = " (";
-		$where .= implode(" or ",$x);
-		$where .= ")";
+		if ( is_array($x) ) {
+			$where = " and (";
+			$where .= implode(" or ",$x);
+			$where .= ")";
+		}
 
-                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' and '.$where);
+                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' '.$where);
                 return $array;
         }
 
@@ -380,29 +382,38 @@ class LcForum extends LcForumBase {
  
         function updateStats() {
                 $db =db::getHandle();
+		$forumId = intval($this->lcForumId);
                 // __FIX_ME
                 // check 'status' in here too eventually?
-                #echo("select count(lc_forum_post_id) from lc_forum_post where lc_forum_id=".$this->lcForumId." and lc_forum_post_status=0");
-                $db->queryOne("select count(lc_forum_post_id) from lc_forum_post where lc_forum_id=".$this->lcForumId." and lc_forum_post_status=0");
+                $db->queryOne("SELECT count(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE lc_forum_id=".$forumId." 
+			AND  (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
                 $this->lcForumPostCount = $db->Record[0];
-                #echo("select count(lc_forum_post_id) from lc_forum_post where lc_forum_id=".$this->lcForumId . " and lc_forum_post_parent_id=0 and lc_forum_post_status=0");
-                $db->queryOne("select count(lc_forum_post_id) from lc_forum_post where lc_forum_id=".$this->lcForumId . " and lc_forum_post_parent_id=0 and lc_forum_post_status=0");
+
+                $db->queryOne("SELECT count(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE lc_forum_id=".$forumId . " 
+			AND lc_forum_post_parent_id=0 
+			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
                 $this->lcForumThreadCount = $db->Record[0];
-                #echo("select max(lc_forum_post_id) from lc_forum_post where lc_forum_id=".$this->lcForumId. " and lc_forum_post_status=0");
-                $db->queryOne("select max(lc_forum_post_id) from lc_forum_post where lc_forum_id=".$this->lcForumId. " and lc_forum_post_status=0");
-                $max = $db->Record[0];
-                #echo("select * from lc_forum_post where lc_forum_post_id=$max and lc_forum_post_status=0");
-                $db->queryOne("select * from lc_forum_post where lc_forum_post_id=$max and lc_forum_post_status=0");
+
+                $db->queryOne("SELECT max(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE lc_forum_id=".$forumId. " 
+			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
+                $max = sprintf('%d',$db->Record[0]);
+
+                $db->queryOne("SELECT * 
+			FROM lc_forum_post 
+			WHERE lc_forum_post_id=$max 
+			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
                 $this->lcForumRecentPostTimedate= $db->Record['lc_forum_post_timedate'];
                 $this->lcForumRecentPoster = $db->Record['lc_forum_post_username'];
                 $this->lcForumRecentPostId = $max;
-#               debug($this);exit();
                 $this->save();  
-
         }
-
 }
-
 
 
 class LcForumPeer extends LcForumPeerBase {
