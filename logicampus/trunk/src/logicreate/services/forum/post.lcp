@@ -114,6 +114,10 @@ $u->saveSession();
 
 // update stats on parent forum
 		$forum = lcForum::load($forum_post_to);
+		if (! is_object($forum) ) {
+			trigger_error('Could not find forum.');
+			return false;
+		}
 		$forum->updateStats(); 
 		$forumPost = lcForumPost::load($t['forum_thread_id']);
 		$forumPost->updateStats(); 

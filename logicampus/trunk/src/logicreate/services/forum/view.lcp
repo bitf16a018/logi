@@ -63,7 +63,13 @@ class view extends NoAuth {
 		$grid = new datagrid('forum','view');
 		$grid->datarows = $posts;
 		$grid->_totalRows = count($posts);
-		$grid->ignore = array("_new","_modified","lcForumId","lcForumPostStatus",'lcForumRecentPoster',"lcForumPostParentId","__attributes","lcForumPostMessage","lcForumPostThreadId","lcForumPostId",'lcForumThreadCount','lcForumPostTimedate','lcForumRecentPostId');
+		$grid->ignore = array('_new','_modified','lcForumId',
+			'lcForumPostStatus','lcForumRecentPoster','lcForumPostParentId',
+			'__attributes','lcForumPostMessage','lcForumPostThreadId','lcForumPostId',
+			'lcForumThreadCount','lcForumPostTimedate','lcForumRecentPostId',
+			'lcForumFile1Name','lcForumFile1SysName', 'lcForumFile1Size',
+			'lcForumFile1MIME', 'lcForumFile2Name', 'lcForumFile2SysName', 
+			'lcForumFile2Size', 'lcForumFile2MIME', 'lcForumFile1Count', 'lcForumFile2Count');
 		$grid->headers= array('lcForumRecentPostTimedate'=>"Last post",'lcForumPostUsername'=>'Thread starter','lcForumPostTitle'=>"Thread",'lcForumReplyCount'=>"Replies");
 		$grid->overrideColumn('<a href="<?=appurl("forum/viewPost/".$lcForumPostId);?>"><?=$lcForumPostTitle;?></a>','lcForumPostTitle');
 		$grid->overrideColumn('<? if ($lcForumRecentPostTimedate>0) { echo date("m/d/Y h:i A",$lcForumRecentPostTimedate);?><BR>by <?=$lcForumRecentPoster; } ?>','lcForumRecentPostTimedate');
