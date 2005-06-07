@@ -1,0 +1,53 @@
+<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0>
+<tr>
+	<td><big>Master Calendar</big></td>
+	<td align="right">&nbsp;</td>
+</tr>
+</table>
+	<div id="sectionheader">
+		<a href="<?=modurl('');?>">Master Calendar</a>
+	</div>
+	<div id="applinks">
+		<b class="title">Application Links:</b>&nbsp;&nbsp;<a href="<?=modurl('week/');?>">Week view</a> &bull; 
+		<a href="<?=modurl('');?>">Month view</a> &bull; 
+		<b>Year view</b>
+		<?php
+		if (in_array('dlstaff', $obj->user->groups))
+		{	?> &bull; <a href="<?=modurl('cal/event=editschedule/');?>">Schedule event</a> <?php
+			?> &bull; <a href="<?=modurl('cal/event=schedule/');?>">View schedule</a> <?php
+		}
+		?>
+	</div>
+	<br>
+<h4>Year:  <?=$t['year'];?></h4>
+
+<font class="textone">
+	<b>Click on a date to view more information about an event.</b>
+</font>
+
+
+
+<p align="center" id="calendar">
+	
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+	<tr>
+		<td width="50%"><?=$t['LINK_prev'];?></td>
+		<td width="50%" align="right"><?=$t['LINK_next'];?></td>
+	</tr>
+	</table>
+	
+<?php
+
+	echo htmlTable($t['calendar'], 3, '100%', '', 0, 0, 0, 'center');
+
+?>
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+	<tr>
+		<td width="50%"><?=$t['LINK_prev'];?></td>
+		<td width="50%" align="right"><?=$t['LINK_next'];?></td>
+	</tr>
+	</table>
+	
+</p>
+
+

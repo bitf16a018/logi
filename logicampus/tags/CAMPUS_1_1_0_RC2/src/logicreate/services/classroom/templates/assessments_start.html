@@ -1,0 +1,96 @@
+<?=$t['sectionheader'];?>
+<?=//debug($t['answers']);?>
+<b><?=lct('Teacher Instructions');?></b>
+<br/>
+<?=$t['instructions']?>
+
+<br/><br/>
+
+<?=$t['description']?>
+<br/><br/>
+
+<FIELDSET>
+<LEGEND><b>Instructions</b></LEGEND>
+Below are the list of questions for this assessment.  Select the question you wish to answer by clicking on the
+question.  You can return to this page by selecting the button "View All Questions" on any question you are
+viewing.  You can also use the previous and next buttons to go through each question.  
+</FIELDSET>
+<br>
+<b>Minutes Remaining</b>: <?=$t['minutes_remaining'];?> &nbsp; <b>Start Time</b>: <?=$t['starttime']?> &nbsp;
+<b>Time Limit</b>: <?=$t['minute_limit']?> minutes
+<span id="datagrid">
+<table table="100%" border="0">
+		<tr class="even">
+		<th nowrap><b>Question #</b></th>
+			<th><b>Question</b></th>
+			<th><b>Type</b></th>
+			<th><b>Answered</b></th>
+			<th><b>Answers</b></th>
+		</tr>
+<?
+	$count = count ($t['questions']);
+
+	for ($i=0; $i<$count; $i++)
+	{ 
+		$class = 'even';	
+		if ($i % 2 == 0) $class = 'odd';	
+	?>
+		<tr class="<?=$class?>">
+			<td valign="top">
+				<?=$i+1?>.
+			</td>
+			<td valign="top">
+				<a href="<?=APP_URL?>classroom/question/qid=<?=$t['questions'][$i]->assessmentQuestionId?>">
+				<?=substr($t['questions'][$i]->questionText, 0, 97);?>
+				<? if (strlen($t['questions'][$i]->questionText) >97) echo '...'; ?>
+				</a>
+			</td>
+			<td valign="top">
+				<?=$t['questions'][$i]->questionDisplay?>
+			</td>
+			<td valign="top">
+				<? if (trim($t['questions'][$i]->answer->assessmentAnswerValues) == '')
+				{ ?>
+
+				<a href="<?=APP_URL?>classroom/question/qid=<?=$t['questions'][$i]->assessmentQuestionId?>">No</a>
+				<? } else { ?>
+				<a href="<?=APP_URL?>classroom/question/qid=<?=$t['questions'][$i]->assessmentQuestionId?>">Yes</a>
+			<?	} ?>
+			</td>
+			<td valign="top">
+				<?
+					if ($t['questions'][$i]->questionType == QUESTION_MATCHING || $t['questions'][$i]->questionType == QUESTION_MANSWER) 
+					{
+						$answer = $t['questions'][$i]->answer->assessmentAnswerValues;
+						$answerCount = count($answer);
+						for ($x=0;$x<$answerCount; $x++)
+						{
+							echo '&bull;';
+							echo $answer[$x].'<br>';
+						}
+					} else {
+						if (strlen($t['questions'][$i]->answer->assessmentAnswerValues) >10){
+							$end = '. . .';
+						}
+						echo substr($t['questions'][$i]->answer->assessmentAnswerValues, 0, 25).$end;
+
+					}
+					unset($end);
+				?>
+			</td>
+		</tr>
+	
+	<? } ?>
+</table>
+<br>
+<FIELDSET>
+<LEGEND><b><?=lct('Complete the Assessment');?></b></LEGEND>
+Once you are finished with your assessment, click the button below so your test will be submitted for a grade.
+If you do not turn in your test, you will not receive a grade.
+<form METHOD="POST">
+<center>
+	<input type="submit" name="submit" value="<?=lct('Turn In Test');?>">
+	<input type="hidden" name="event" value="stop">
+</center>
+</form>
+</FIELDSET>

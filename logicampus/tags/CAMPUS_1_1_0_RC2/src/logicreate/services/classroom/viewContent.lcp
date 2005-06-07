@@ -1,0 +1,178 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include(LIB_PATH."documentLibraryLib.php");
+/**
+ * file management 
+ * Folder managers can share files in nested folders.
+ * Only certain groups can download
+ * push content down w/o template and w/appropriate headers
+ */
+class viewContent extends StudentService {
+
+
+	var $presentor = 'emptyPresentation';
+	var $authorizer = 'native';
+
+function authorize()
+{
+return true;
+}	
+
+	function run(&$db,&$u,&$lcObj,&$t)
+	{
+		//forget session tracking for this since we are just pulling in images (mostly)
+		$lcObj->TRACK_SESSIONS = false;
+//		debug($u,1);
+		$pkey = intval($lcObj->getvars["pkey"]);
+		
+		// stripping bad characters.. md5hash does not have these characters
+		$fhash = eregi_replace('[^0-9a-zA-z]', '', stripslashes($lcObj->getvars['fhash']));
+		
+		// START FHASH // I'm allowing this to be backwards compatible for now
+		if (strlen($fhash) == 32) {	
+			if (!$u->activeClassTaught) {
+	#			$class_id = (int)$u->activeClassTaken->id_classes;
+				$facultyId = (int)$u->activeClassTaken->facultyId;
+			} else {
+	#			$class_id = (int)$u->activeClassTaught->id_classes;
+				$facultyId = (int)$u->activeClassTaught->facultyId;
+			}
+
+			// mgk - 8/21/04
+			// owner is the facultyId
+			// instead of mapping to the class you're in, we map to the 
+			// teacher of the class you're in.  this allows the content to be 
+			// tied to a teacher, not a class
+		
+
+			$sql = '
+			SELECT A.pkey 
+			FROM classdoclib_Files as A
+			INNER JOIN classdoclib_Folders as B
+				ON A.folder=B.pkey
+			WHERE (B.owner='.$facultyId.'
+			AND A.daHasha=\''.$fhash.'\')
+			';
+			$db->queryOne($sql);
+			if ($db->Record == false)
+			{
+				//no permission to view this file
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You do not have permission to view this content.";
+				return;
+			}
+			
+		$pkey = $db->Record['pkey'];			
+		}
+		// END FHASH
+		
+		$x = LC_file::getSingle($pkey, $class_id);
+		if ($x == null ) {
+			$x = LC_file::getSingle($pkey, $u->activeClassTaught->id_classes);
+		}
+
+		//failed for both teachers and students, pull the mime type and print an error
+		if ($x == null ) {
+			$db->queryOne('select mime from classdoclib_Files where pkey = '.$pkey);
+			list ($mimeFamily,$mimeType) = explode('/',$db->Record['mime']);
+			if ($mimeFamily == 'image') {
+				header("Cache-control: public");
+				header("Content-type: ".$file->mime);
+				$fd = fopen(IMAGES_PATH.'img_accessdenied.gif',"r");
+				fpassthru($fd);
+				exit;
+			} else {
+				$this->presentor = 'errorMessage';
+				$t['details'] = 'There is a problem with the server\'s file repository.  The file cannot be accessed.';
+				$t['message'] = 'This file cannot be accessed';
+				return;
+			}
+		}
+
+		ob_end_clean();
+
+		
+
+		list ($mimeFamily,$mimeType) = explode('/',$x->mime);
+		switch($mimeFamily) {
+			case 'image':
+				$this->showImage($x);
+				break;
+			case 'text':
+				$this->showText($x);
+				break;
+			default:
+				$this->showText($x);
+				break;
+		}
+		
+	
+		$fd = fopen($fullpath,"r");
+		fpassthru($fd);
+		exit;
+		
+	}
+
+
+	/**
+	 * push headers for mime type of image
+	 */
+	function showImage(&$file) {
+		header("Cache-control: public");
+		header("Content-type: ".$file->mime);
+		//permission to view folder?
+		$fullpath = LC_DiskRepository::getFullPath($file->diskName);
+
+		if (! file_exists($fullpath) || $file->diskName == '' ) {
+			$fd = fopen(IMAGES_PATH.'img_accessdenied.gif',"r");
+			fpassthru($fd);
+			exit;
+
+		} else {
+			$fd = fopen($fullpath,"r");
+			fpassthru($fd);
+			exit;
+		}		
+
+
+	}
+
+
+	/**
+	 * push headers for mime type of text
+	 */
+	function showText(&$file) {
+		$fullpath = LC_DiskRepository::getFullPath($file->diskName);
+		if (! file_exists($fullpath) || $file->diskName == '' ) {
+			$this->presentor = 'errorMessage';
+			$t['details'] = 'There is a problem with the server\'s file repository.  The file '.$x->filename.' cannot be found.';
+			$t['message'] = 'This file does not exist';
+			global $lcObj;
+			$lcObj->TRACK_SESSIONS = false;
+			return;
+		} else {
+			header("Cache-control: public");
+			header("Content-type: ".$file->mime);
+			header("Content-disposition: attachment; filename=".$file->file);
+			$fd = fopen($fullpath,"r");
+			fpassthru($fd);
+			exit;
+		}
+	}
+}
+
+
+?>

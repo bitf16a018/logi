@@ -1,0 +1,215 @@
+<? 
+
+/******
+* helpdesk module for tccd
+* 8/3/03
+*
+******/
+ 
+include_once (LIB_PATH."LC_html.php"); 
+include_once (LIB_PATH."datagrid.php"); 
+include_once (LIB_PATH."SiteForms.php"); 
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+ 
+ 
+class helpdesk extends RegAuth { 
+ 
+	var $presentor = "htmlPresentation"; 
+ 
+	var $sectionTitle = 'Help Desk';
+	var $navlinks = array(
+		'Helpdesk'=>'main',
+		'FAQs'=>'faq'
+	);
+	var $applinks = array(
+		'List Tickets' => '',
+		'Submit new ticket' => 'helpdeskSubmit'
+		
+	);
+	var $inactivelinks = array(
+	);
+
+	function helpdesk() { 
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+	 
+	/** 
+	 * Show different template for different users - staff or student
+	 */ 
+
+	function run(&$db,&$u,&$arg,&$t) 
+	{
+		$this->inactivelinks[] = 'List Tickets';
+		
+		$arg->templateStyle = 'private';
+
+		// get a list of categories
+		$db->query("select * from helpdesk_categories");
+		while($db->next_record()) {
+			$t['categories'][$db->Record[0]] = $db->Record['helpdesk_category_label'];
+		}
+				
+		// STAFF
+		if (in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) ) { 
+			$this->adminRun($db,$u,$arg,$t);
+			return;
+		}
+		if (in_array("hdstaff",$u->groups) || in_array('admin', $u->groups) ) { 
+			$this->adminRun($db,$u,$arg,$t);
+			return;
+		}
+		// END STAFF
+		
+		
+		// REGULAR VIEW (AVERAGE PERSON) (NON PUBLIC) but student/faculty
+		$sql = "
+		SELECT a.*, count(b.helpdesk_id) as activity
+		
+		FROM helpdesk_incident as a
+		
+		INNER JOIN helpdesk_incident_log as b
+			ON b.helpdesk_id=a.helpdesk_id
+		
+		WHERE a.userid='".$u->username."' 
+			AND a.status<>3 
+		
+		GROUP BY b.helpdesk_id
+		
+		ORDER BY a.status DESC";
+		
+		$db->query($sql);
+		while($db->next_record()) 
+		{	$t['open'][] =$db->Record;
+		}
+		
+		$sql = "
+		SELECT a.*, count(b.helpdesk_id) as activity
+		
+		FROM helpdesk_incident as a
+		
+		INNER JOIN helpdesk_incident_log as b
+			ON b.helpdesk_id=a.helpdesk_id
+		
+		WHERE a.userid='".$u->username."' 
+			AND a.status = 3 
+		
+		GROUP BY b.helpdesk_id
+		
+		ORDER BY a.status DESC";
+		
+		$db->query($sql);
+		while($db->next_record()) 
+		{	$t['closed'][] =$db->Record;
+		}
+		
+		$arg->templateName = 'main_view';
+		// END AVERAGE PERSON
+		
+	}
+	
+
+	function adminRun(&$db,&$u,&$arg,&$t) 
+	{
+		$this->inactivelinks[] = 'List Tickets';
+	
+		if (in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) )
+		{	
+			$this->applinks['Modify status and category codes'] = 'main/event=admin2';
+			$this->applinks['User Accounts'] = '%administration/users';
+
+			if ($arg->getvars['dgorder'] == false)
+			{	$arg->getvars['dgorder'] = 'status ASC, helpdesk_id';
+			}
+
+		}
+		$arg->templateStyle = 'private';
+		
+		// get a list of statuses
+		$db->query("select * from helpdesk_status");
+		while($db->next_record()) {
+			$t['status'][$db->Record[0]] = $db->Record['helpdesk_status_label'];
+		}		
+
+		$arg->templateName = 'main_hdadmin';
+
+		if ($arg->getvars['dgsoder']=='') { 	// note misspelling! 
+			$arg->getvars['dgsoder'] = 'DESC';
+			$arg->getvars['dgorder'] = 'timedate_open';
+		}
+	/**
+	 *
+		Had to swap the searchgrid() with questinPoolgrid
+		becuase the questionpoolgrid keeps the filter state
+		on next/prev link (images)
+	 *
+	 */
+		$x = new questionPoolGrid('helpdesk','main');
+#		$x = new searchgrid('helpdesk','main');
+		
+		// Quite simple... if there's a post.. that means we're applying files.. 
+		// then we must remove our default constraints
+		if (count($arg->postvars) == 0)
+		{	$x->where = " status <> 3 ";
+		}
+			
+		$x->rowsPerPage = 15;
+		$x->sortColumns = array("category","assigned_to","status","timedate_open","timedate_close","summary", 'helpdesk_id', 'userid');
+		$x->column = "helpdesk_id,summary,timedate_open,timedate_close,status,category,assigned_to,userid";
+		$x->table = "helpdesk_incident";
+		#$x->where = " userid='".$u->pkey."'";
+		$j = "\$t = unserialize('".serialize($t['status'])."');";
+		$x->overrideColumn('<? '.$j.' echo $t[$status];?>','status');
+		$j = "\$t = unserialize('".serialize($t['categories'])."');";
+		$x->overrideColumn('<? '.$j.' echo $t[$category];?>','category');
+		$x->overrideColumn('<?=date("m/d/Y h:i A",$timedate_open);?>','timedate_open');
+		$x->overrideColumn('<a href="<?=appurl("helpdesk/helpdeskView/$helpdesk_id");?>"><?=((strlen(trim($summary)) > 3) ? $summary : \'[ no summary given ]\');?></a>','summary');
+		//link username to history
+		$x->overrideColumn('<a href="<?=appurl("helpdesk/history/username=$userid");?>"><?=$userid;?></a>','userid');
+		$x->overrideColumn('<? if ($timedate_close>0) { echo date("m/d/Y h:i A",$timedate_close); } ?>','timedate_close');
+		$x->ignore = array('timedate_close');
+		$x->headers = array("summary"=>"Summary","timedate_open"=>"Opened","timedate_close"=>"Closed","status"=>"Status","category"=>"Category","assigned_to"=>"Technician",
+			'helpdesk_id'=>'Incident #',
+			'userid'=>'Owner'
+			);
+
+		$x->orderby = 'status';
+		$x->sort_order = 'ASC';
+
+		$x->addTechnicianSelectFilter('Technician', 'assigned_to');
+		$x->addOwnerSelectFilter('Owner', 'userid'); // Added for ticket 493
+		$x->addHelpdeskStatusFilter('Status', 'status');
+		$x->addHelpdeskTicketCategoryFilter('Category', 'category');
+		$x->addInputFilter("Incident #","helpdesk_id");
+		$x->addInputFilter("Summary","summary"); // Added for ticket 493
+
+		$t['table'] = $x->toHTML();
+	}
+
+	function admin2Run(&$db,&$u,&$arg,&$t) { 
+		
+		$this->applinks['Modify status and category codes'] = 'main/event=admin2';
+		$this->applinks['User Accounts'] = '%administration/users';
+
+
+		$this->inactivelinks[] = 'Modify status and category codes';
+		
+		$db->query("select * from helpdesk_status");
+		while($db->next_record()) {
+			$t['status'][$db->Record[0]] = $db->Record['helpdesk_status_label'];
+		}	
+		
+		// get a list of categories
+		$db->query("select * from helpdesk_categories");
+		while($db->next_record()) {
+			$t['categories'][$db->Record[0]] = $db->Record['helpdesk_category_label'];
+		}
+		
+		$arg->templateName = "main_hdadmin2";
+		$arg->templateStyle = "private";
+		
+	}
+
+}
+?>
