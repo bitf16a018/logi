@@ -304,12 +304,19 @@
 		description="create today's changelog">
 		<cvschangelog dir="."
 			destfile="changelog.xml"
-			start="02 May 2005"
-			end="02 June 2005"/>
+			start="02 June 2005"
+			end="08 June 2005"/>
 
 		<style in="changelog.xml" 
 			out="changelog.html" 
 			style="${ant.home}/etc/changelog.xsl">
+			<param name="title" expression="LogiCampus ChangeLog"/>
+			<param name="module" expression="logicampus"/>
+			<param name="cvsweb" expression="http://cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
+		</style>
+		<style in="changelog.xml" 
+			out="changelog.txt" 
+			style="${ant.home}/etc/changelog-text.xsl">
 			<param name="title" expression="LogiCampus ChangeLog"/>
 			<param name="module" expression="logicampus"/>
 			<param name="cvsweb" expression="http://cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
