@@ -1,10 +1,62 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2005-05-01 21:09:14 $
+Last Updated:  $Date: 2005-06-07 21:43:53 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
 <Module / Library> - <Description>
 
+ALTERNATE SYNTAX:
+<Date: Y-M-D h:i> username
+================================================================================
+Comments
+     *file (rev)
+     *file (rev)
+
+
+2005-06-06 15:26 hardcorelamer
+================================================================================
+Fixes to classroom posts and generic forums.
+Removed extra columns.
+Stopped errors from queries that weren't expecting nulls.
+     *src/logicreate/services/forum/LcForum.php (1.4)
+     *src/logicreate/services/forum/LcForumPost.php (1.3)
+     *src/logicreate/services/forum/post.lcp (1.2)
+     *src/logicreate/services/forum/view.lcp (1.2)
+
+
+2005-06-06 15:26 hardcorelamer
+================================================================================
+Fixes to classroom posts and generic forums.
+Removed extra columns.
+Stopped errors from queries that weren't expecting nulls.
+     *src/logicreate/services/classroom/discussion.lcp (1.4)
+
+
+2005-06-02 17:11 hardcorelamer
+================================================================================
+Fix to allow photos to be re-uploaded.
+Fix to delete image from harddrive when remove photo is checked.
+Feature: file count next to folders in File Manager.
+     *src/logicreate/lib/documentLibraryLib.php (1.5)
+     *src/logicreate/services/users/editProfile.lcp (1.2)
+
+
+2005-06-02 13:11 hardcorelamer
+================================================================================
+Applying correct fix for due dates to the assignments query.
+     *src/logicreate/services/classroom/main.lcp (1.5)
+
+
+2005-06-02 12:49 hardcorelamer
+================================================================================
+Fixing alert language.
+     *src/logicreate/services/administration/templates/courses_semesterInfo.html (1.2)
+
+
+5/29/2005 - mak
+lib - Added facutly only authorizers to stop observers from viewing grades
+assessments - Added facutly only authorizers to stop observers from viewing 
+grades.  Fixed a problem with letter grades on assessments.
 
 #########################
 5/1/05 - mgk
