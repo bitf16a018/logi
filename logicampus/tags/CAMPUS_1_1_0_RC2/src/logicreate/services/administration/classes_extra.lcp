@@ -1,0 +1,135 @@
+<?
+
+/*
+ * classes_extra 
+ * created 10/20/03 
+ * handles admin of extra faculty to already defined classes
+ *
+ */
+
+include_once(LIB_PATH.'classObj.php');
+include_once(LIB_PATH.'courseObj.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class classes_extra extends AdminService
+{
+	
+	// form stuff
+	var $cleanedArray = array();
+		
+	var $presentor = "htmlPresentation";
+
+	// Links
+	var $sectionTitle = 'Class Manager';
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Restore Class' => 'classrestore/',
+		'Manage Extra Faculty' => 'classes_extra',
+	);
+	var $applinks = array(
+	);
+	
+
+
+	# Displays Classes by default (chooses current semster by default)	
+	function Run($db,&$u,&$lc,&$t)
+	{
+
+		// Grab the current semester form
+       	$f = new SiteForm();
+		$f->getForm('semester', $lc->postvars);
+		$f->action = modurl('classes_extra/main/');
+		$t['form'] = $f->ToHTML();
+		
+		if ($lc->postvars['semester'])
+		{
+			$sql = 'select c.courseName, a.id_classes, concat(b.lastname, ", ",b.firstname) 
+			as faculty, a.classType, a.courseFamily, a.courseNumber, a.sectionNumbers  
+			from classes as a left join profile as b on a.facultyId=b.username INNER JOIN 
+			courses as c ON a.id_courses=c.id_courses  where 
+			a.id_semesters='.(int)$lc->postvars['semester'].' ORDER BY a.courseFamily';
+
+
+			$db->RESULT_TYPE= MYSQL_ASSOC;
+			$db->query($sql);
+			while($db->next_record()) {
+				#debug($db->Record);
+				$x[$db->Record['id_classes']] = $db->Record['courseFamily'].$db->Record['courseNumber']." - ".$db->Record['courseName'].' ('.$db->Record['faculty'].')';
+			}
+
+		}
+
+		$t['classes'] = makeOptions($x);
+
+		$lc->templateName = 'classes_extra_main';
+		$lc->templateStyle='private';
+	}
+
+	
+	function deleteRun($db,&$u,&$lc,&$t) {
+		$key = $lc->getvars['key'];
+		$db->query("delete from class_extra_faculty  where pkey=$key");
+		$this->showRun($db,$u,$lc,$t);
+		return;
+	}
+
+	function addRun($db,&$u,&$lc,&$t) {
+		$id = $lc->postvars['id_classes'];
+		$faculty = $lc->postvars['faculty'];
+		$type = $lc->postvars['type'];
+		$sql = "insert into class_extra_faculty (id_classes,facultyId,facultyType) values ('$id','$faculty','$type')";
+		$db->query($sql);
+		$this->showRun($db,$u,$lc,$t);
+		return;
+	}
+
+	function showRun($db,&$u,&$lc,&$t) {
+		#debug($lc->postvars);
+		$class = $lc->postvars['class'];
+		if ($class=='') { 
+			$class = $u->sessionvars['administration']['extra']['class'];
+		} else {
+			$u->sessionvars['administration']['extra']['class'] = $class;
+		}
+		
+		if ((int)$class>0) { 
+			
+			$t['id_classes'] = $class;
+
+			$db->RESULT_TYPE= MYSQL_ASSOC;
+			$sql = "select c.courseName, a.id_classes, concat(b.lastname, \", \",b.firstname) 
+			as faculty, a.classType, a.courseFamily, a.courseNumber, a.sectionNumbers  
+			from classes as a left join profile as b on a.facultyId=b.username INNER JOIN 
+			courses as c ON a.id_courses=c.id_courses  where a.id_classes='".$class."'";
+				
+			$db->queryOne($sql);
+			
+			$t['classInfo'] = $db->Record;
+			$this->sectionTitle .= ' - '.$t['classInfo']['courseName'];
+			$sql = "select * from class_extra_faculty where id_classes = $class";
+			$db->query($sql);
+			while($db->next_record()) {
+				$t['list'][] = $db->Record;
+			}
+			
+			$g = new datagrid('classes_extra','show');
+			$g->showNavLinks = false;
+			$g->setRows($t['list']);
+			$g->ignore = array("id_classes","pkey");
+			$g->prependColumn('<a href="<?=modurl("classes_extra/event=delete/key=$pkey");?>">del</a>','del');
+			$g->overrideColumn('<? if ($facultyType=="o") { echo "Observer"; } else { echo "Extra"; }?>','facultyType');
+			$t['table'] = $g->toHTML();
+		} else {
+			$t['message'] = "No class was selected.  Please try again.";
+			$this->presentor = 'errorPresetation';
+			return;
+		}
+
+
+		$lc->templateName = 'classes_extra_show';
+	}
+}
+?>

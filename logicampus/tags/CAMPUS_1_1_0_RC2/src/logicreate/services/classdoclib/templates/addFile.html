@@ -1,0 +1,58 @@
+<?=$t['sectionheader'];?>
+<h3>Add files to folder: <img src="<?=IMAGES_URL?>folder.gif">&nbsp;<?=$t['folderName']?></h3>
+
+<b><?=$t["message"];?></b>
+
+<table width="200">
+<tr>
+	<td width="200" valign="top">
+
+		<form method="post" action="<?=appurl("classdoclib/addFile/event=handleUpload");?>" enctype="multipart/form-data">
+
+		<h3>File #1</h3>
+		<table>
+		<tr>
+			<td>Filename</td>
+			<td><input type="file" name="files[]" size="35"></td>
+		</tr>
+		<tr>
+			<td>Notes</td>
+			<td><input type="text" name="descriptions[]" size="45"></td>
+		</tr>
+		</table>
+
+
+		<h3>File #2 (optional)</h3>
+		<table>
+		<tr>
+			<td>Filename</td>
+			<td><input type="file" name="files[]" size="35"></td>
+		</tr>
+		<tr>
+			<td>Notes</td>
+			<td><input type="text" name="descriptions[]" size="45"></td>
+		</tr>
+		</table>
+
+		<h3>File #3 (optional)</h3>
+		<table>
+		<tr>
+			<td>Filename</td>
+			<td><input type="file" name="files[]" size="35"></td>
+		</tr>
+		<tr>
+			<td>Notes</td>
+			<td><input type="text" name="descriptions[]" size="45"></td>
+		</tr>
+		</table>
+
+		<input type="submit" value="Start Upload">
+		<input type="hidden" value="<?= $t['folderID']?>" name="folderID">
+		</form>
+		<i>*This operation may take several minutes depending on the size of the files you chose to upload.</i>
+		<br>&nbsp;<br>
+		Maximum allowable size for one upload is <?=$t['max_file_size']?> Mb.
+	</td>
+</tr>
+</table>
+

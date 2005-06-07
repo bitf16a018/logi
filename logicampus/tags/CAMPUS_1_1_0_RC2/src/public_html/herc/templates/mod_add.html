@@ -1,0 +1,48 @@
+
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+	Module Admin
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+
+<form method="post">
+<input type="hidden" name="event" value="add">
+<table>
+<tr>
+	<td>Module name<BR>Class will be same name</td>
+	<td><input type="text" name="modulename" maxlength="25"></td>
+</tr>
+<tr>
+	<td>Module display name<BR>(for module browser)</td>
+	<td><input type="text" name="displayname" maxlength="25"></td>
+</tr>
+<tr>
+	<td>Author</td>
+	<td><input type="text" name="author" maxlength="25"></td>
+</tr>
+<tr>
+	<td>Copyright info</td>
+	<td><input type="text" name="copyright" maxlength="25"></td>
+</tr>
+<tr>
+	<td>Configuration items<BR>(one per line)</td>
+	<td><textarea name="config" rows="5" cols="25"></textarea></td>
+</tr>
+<tr><td colspan="2"><input type="submit" value="Add"></td></tr>
+</table>
+
+</form>
+
+
+      </td></tr>
+<tr><td>
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+	</td></tr>
+</table>
+<? if ($t["added"]) { ?>
+<script>
+       parent.Controls.location ='<?= _APP_URL;?>controls/?<?=time();?>';
+</script>
+<? } ?>

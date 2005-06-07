@@ -1,0 +1,208 @@
+<?php
+
+  require_once(SERVICE_PATH.'/docs/includes/Docs.php');
+  require_once(SERVICE_PATH.'/docs/includes/Access.php');
+  require_once(SERVICE_PATH.'/docs/includes/Directory.php');
+  require_once(SERVICE_PATH.'/docs/includes/File.php');
+  require_once(SERVICE_PATH.'/docs/includes/Filetype.php');
+
+  class docs extends NoAuth
+  {
+    var $presentor = "htmlPresentation";
+  
+    function run(&$db,&$u,&$lc,&$t)
+    {
+      $go = APP_URL.'docs/main/event=dir/dirID=1';
+
+      header("Location: $go");
+      exit();
+    } 
+
+    function dirRun(&$db,&$user,&$lc,&$t)
+    {
+      $lc->templateName = 'dirRun';
+
+
+      $t['dirID'] = $dirID = 1;
+      if((int)$lc->getvars['dirID'] > 1)
+      {
+        $t['dirID'] = $dirID = $lc->getvars['dirID'];
+      }
+
+
+      $dir = & new Docs_Directory();
+      $errors = array();
+      if($dir->getDirectoryById($dirID))
+      {
+//        echo '<pre>'; print_r($dir->user); echo '</pre>';
+
+        if(!$dir->_r())
+        {
+          $lc->templateName = 'noPerms';
+          return false;
+        }
+
+        if(strlen($lc->postvars['newDir']))
+        {
+          if($dir->_w())
+          {
+            $result = $dir->mkdir($lc->postvars['newDir'],$user);
+            if(Docs_Base::isError($result))
+            {
+              $errors[] = $result; 
+            }
+          }
+        }
+
+        if(is_array($_FILES['newFile']) && 
+           count($_FILES['newFile']) && $dir->_w())
+        {
+          $file = & new Docs_File();
+          $result = $file->write($_FILES['newFile'],$dir->directoryID);
+          if(Docs_Base::isError($result))
+          {
+            $errors[] = $result;
+          }
+        }
+
+//        $dirs  = $dir->getDirectories();
+//        $files = $dir->getFiles();
+
+//        echo '<pre>'; print_r($dir); echo '</pre>';
+        $t['dir']    = $dir;
+        $t['errors'] = $errors;
+      }
+      else
+      {
+        $t['msg'] = 'Invalid Directory';
+      }
+    }
+
+    function rmRun(&$db,&$user,&$lc,&$t)
+    {
+      $lc->templateName = 'rmRun';
+      if((int)$lc->getvars['fileID'] > 0)    
+      {
+        $file = & new Docs_File();
+        if($file->getFileById($lc->getvars['fileID']))
+        {
+          if($file->remove())
+          {
+
+          }
+        }
+      }
+    }
+
+    function deltreeRun(&$db,&$user,&$lc,&$t)
+    {
+      $lc->templateName = 'deltreeRun';
+      if((int)$lc->getvars['dirID'] > 0)    
+      {
+        $dir = & new Docs_Directory();
+        if($dir->getDirectoryById($lc->getvars['dirID']))
+        {
+          $dir->deltree($lc->getvars['dirID']);
+        }
+      }
+    }
+
+    function dlRun(&$db,&$user,&$lc,&$t)
+    {
+      $this->presentor = "emptyPresentation";
+
+      if((int)$lc->getvars['fileID'] > 0)
+      {
+        $file = & new Docs_File();
+        if($file->getFileById($lc->getvars['fileID']))
+        {
+          $file->display();
+        }
+      }
+    }
+
+    function permsRun(&$db,&$user,&$lc,&$t)
+    {
+      $lc->templateName = 'permsRun';
+
+      if(is_array($_POST['gid']) && count($_POST['gid']))
+      {
+        $perms = $_POST['perms'];
+
+        $sql   = array();
+        $sql[] = "DELETE 
+                  FROM ".$perms['table']." 
+                  WHERE ".$perms['field']."='".$perms['id']."'";
+
+        while(list($key,$val) = each($_POST['gid']))
+        {
+          if((int)$val === 1)
+          {
+            $sql[] = "INSERT INTO ".$perms['table']."
+                      SET ".$perms['field']."='".$perms['id']."',
+                          gid='$key'";
+          }
+        }
+
+        for($i = 0 ; $i < count($sql) ; ++$i)
+        {
+          $db->query($sql[$i]);
+        }
+
+        $t['dirID'] = $_POST['dirID'];
+        $lc->templateName = 'permsDone';
+
+        return true; // exit after we have updated permissions
+      }
+
+      $sql = "SELECT *
+              FROM lcGroups
+              ORDER BY groupName";
+
+      $db->query($sql);
+      if($db->getNumRows())
+      {
+        $lcGroups = array();
+        while($db->next_record())
+        {
+          $lcGroups[$db->Record['gid']] = $db->Record['groupName'];
+        } 
+      }
+
+      if((int)$lc->getvars['fileID'] > 0)
+      {
+        $class = & new Docs_File();
+        if($class->getFileById($lc->getvars['fileID']))
+        {
+          // echo '<pre>'; print_r($class); echo '</pre>';
+          $groups = $class->_getGroups();
+
+          $table = 'docs_files_groups';
+          $field = 'fileID';
+          $id    = $class->fileID;
+        }
+      }
+      elseif((int)$lc->getvars['dirID'] > 0)
+      {
+        $class = & new Docs_Directory();
+        if($class->getDirectoryById($lc->getvars['dirID']))
+        {
+          $groups = $class->_getGroups();
+
+          $table = 'docs_directories_groups';
+          $field = 'directoryID';
+          $id    = $class->directoryID;
+        }
+      }
+
+      $t['table']    = $table;
+      $t['field']    = $field;
+      $t['id']       = $id;
+
+      $t['lcGroups'] = $lcGroups;
+      $t['groups']   = $groups;
+      $t['dirID']    = $class->directoryID;
+    }
+  }
+
+?>

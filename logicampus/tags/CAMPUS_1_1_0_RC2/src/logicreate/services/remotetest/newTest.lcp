@@ -1,0 +1,102 @@
+<?
+/*
+ *
+ *  App to manage remote user access to uploaded test files
+ *
+ */
+include_once(LIB_PATH."datagrid.php");
+
+class newTest extends BasicAuth {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Remote Test Administration';
+	var $navlinks = array();
+	var $applinks = array(
+		'List tests' => 'main',
+		'Submit new test' => 'newTest'
+	);
+	var $inactivelinks = array();
+	
+	function newTest() {
+	 	$this->filePrefix = CONTENT_PATH."/uploads/remote_test_";
+	}
+
+/*
+ *
+ * nothing.. it's all template links(icons)
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='newTest_main';
+		}
+
+		function addRun(&$db,&$u,&$lc,&$t) {
+			$email = $lc->postvars['email'];
+			$file = $lc->uploads['testfile'];
+			$description = $lc->postvars['description'];
+			if ($file['size']==0) { 
+				$t['email'] = stripslashes($email);
+				$t['description'] = stripslashes($description);
+				$t['message'] = "There was a problem receiving the file.  Please try again, or try a different file.";
+			}
+			if (!check_email($email)) { 
+				$t['email'] = stripslashes($email);
+				$t['description'] = stripslashes($description);
+				$t['message'] = "The email does not appear to be a valid address.  Please try again.";
+			}
+
+			$description = addslashes(stripslashes($description));
+			$email = addslashes(stripslashes($email));
+			$filename= addslashes(stripslashes($file['name']));
+			$mime= addslashes(stripslashes($file['mime']));
+			$size= addslashes(stripslashes($file['size']));
+			$hash= md5($email.$filename.time()); 
+			$filedate = date("Y-m-d h:i:s");
+
+			$newFile = $this->filePrefix.$hash;
+			if (!move_uploaded_file($file['tmp_name'], $newFile)) { 
+				$t['email'] = stripslashes($email);
+				$t['description'] = stripslashes($description);
+				$t['message'] = "There was a problem uploading the file .  Please try again.";
+			}
+				
+			if ($t['message'] ) {
+				$this->run($db,$u,$lc,$t);
+				return;
+			}
+
+			$sql = "insert into remote_test_files (email,hash,file,displayname,description,mime,filedate,size) values ('$email','$hash','$filename','$filename','$description','$mime','$filedate','$size')";
+			$db->query($sql);
+
+// send email invite to the email user
+			$message = "Hello.
+
+You have been requested to download the file '".stripslashes($filename)."' from 
+Tarrant County College.  The file is a test to be administered by you at your 
+facility.  Please visit 
+
+".appurl("remotetest/show/".$hash)." 
+
+to download the file.";
+
+			mail($email,"Request to download a file from Tarrant County College",$message,"From: ".WEBMASTER_EMAIL);
+			$lc->templateName='newTest_done';
+		}
+
+
+}
+
+// basic email check function
+
+function check_email($str)
+{
+    //returns 1 if valid email, 0 if not
+    if(ereg("^.+@.+\\..+$", $str))
+        return 1;
+    else
+        return 0;
+}
+?>

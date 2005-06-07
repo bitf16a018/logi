@@ -1,0 +1,63 @@
+<?=$t['sectionheader'];?>
+
+<form method="post">
+<fieldset style="text-align: center; padding: 10px;">
+<legend><b>Choose which style you wish to apply to your <i>students</i> classroom view</b></legend>
+<p style="text-align: left;">
+Select a "style" for your classroom below.  Choosing the style below will alter the
+color theme of your classroom.  This will help students and yourself easily identify
+which class they are in by the theme you choose below.  We suggest to not change this
+once the class is setup as it may confuse students once they are used to viewing your
+classroom in a certain style.  Once you make a change to the style, you <a
+href="<?=APP_URL?>login/out">must log out</a> in order to view the change to your classroom.
+</p>
+
+<select name="usestyle">
+	<option value="">No special style applied</option>
+
+	<?php
+		foreach ($t['stylesheet_array'] as $k=>$filename)
+		{
+			echo '
+			<option value="'. $k.'"'.(($t['stylesheet_inuse'] == $k) ? ' selected' : ''). '>';
+			echo ucwords(substr(array_shift(explode('.', $filename)), 10));
+			echo '</option>';
+		}
+	?>
+	
+</select>
+
+<input type="submit" name="submit" value="Apply Style">
+<input type="hidden" name="event" value="saveClassStyle">
+</form>
+</fieldset>
+
+<br>
+
+<form method="post">
+<fieldset style="text-align: center; padding: 10px;">
+		<legend><b>Choose your Classroom Resource Content Page</b></legend>
+				<p style="text-align: left;">
+				The following option allows you to select which piece of content you wish to display in the "Classroom Resource" section in your main class page.  If you haven't created this page yet then go ahead and <a href="<?=APP_URL?>classmgr/lessonContent/#editing">create one</a>.  If you already created this content page, then select it below.
+				</p>
+				<select name="content">
+				<option value="">Select One</option>
+				<?=$t['classresourceoptions'];?>
+				</select>
+
+				<input type="submit" name="submit" value="Update">
+				<input type="hidden" name="event" value="saveClassResource">
+</form>
+</fieldset>
+
+<fieldset
+	style="text-align:center; padding: 10px;">
+	
+	<legend><b>Setup Classroom Gradebook</b></legend>
+
+		<center>
+		<a href="<?=APP_URL;?>gradebook/main/event=controlPanel">Setup Classroom Gradebook</a>
+		</center>
+
+</fieldset>
+
