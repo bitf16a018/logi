@@ -182,7 +182,6 @@ class helpdesk extends RegAuth {
 
 		//let the column sort override the default behavior above
 		if ( strlen($arg->getvars['dgorder']) > 0 ) {
-			$x->joins = '';
 			$x->orderby = $arg->getvars[''];
 			if ( strlen($arg->getvars['dgsorder']) > 0 ) {
 				$x->sort_order = $arg->getvars['dgsorder'];
