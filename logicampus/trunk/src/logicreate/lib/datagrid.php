@@ -145,13 +145,15 @@ class DataGrid {
 	{
 		$this->genID();
 		$u =&lcUser::getCurrentUser();
-		$this->orderby = $this->obj->getvars[$this->sortVar];
-		if (trim($this->orderby)!='') { 
-			$u->sessionvars['dg_info'][$this->_id] = array($this->orderby,$this->obj->getvars[$this->sortOrderVar]);
-
-		} else {
-			$this->orderby =  $u->sessionvars['dg_info'][$this->_id][0];
-			$this->sort_order=  $u->sessionvars['dg_info'][$this->_id][1];
+		//don't reset orderby if it's already set
+		if ( strlen ($this->orderby) < 1 ) {
+			$this->orderby = $this->obj->getvars[$this->sortVar];
+			if (trim($this->orderby)!='') { 
+				$u->sessionvars['dg_info'][$this->_id] = array($this->orderby,$this->obj->getvars[$this->sortOrderVar]);
+			} else {
+				$this->orderby =  $u->sessionvars['dg_info'][$this->_id][0];
+				$this->sort_order=  $u->sessionvars['dg_info'][$this->_id][1];
+			}
 		}
 
 
@@ -163,11 +165,12 @@ class DataGrid {
 		// setting the sort order
 		/**	The unfortunate fact is that someone could put something OTHER than ASC DESC
 		 */
-		 if ($this->obj->getvars[$this->sortOrderVar]) { 
+		if ($this->obj->getvars[$this->sortOrderVar]) { 
 			$this->sort_order = $this->obj->getvars[$this->sortOrderVar];
 		}
 		if ($this->sort_order != 'DESC')
-		{	$this->sort_order = 'ASC';
+		{
+			$this->sort_order = 'ASC';
 		}
 		
 	}
@@ -201,12 +204,12 @@ class DataGrid {
 			$sql = "select $this->column from $this->table $this->joins $this->where";
 		}
 		if ($this->orderby) 
-		{	$sql .= " order by ".$this->orderby. ' '. $this->sort_order;
+		{
+			$sql .= " order by ".$this->orderby. ' '. $this->sort_order;
 		}
 		
 		$sql .= " limit ".( ($this->startPage) * $this->rowsPerPage).",".$this->rowsPerPage;
 
-		echo "<!--$sql-->";
 		return $sql;
 	}
 
@@ -451,7 +454,7 @@ class DataGrid {
 	function toHTML() {
 		
 		$this->init();
-		
+
 		if (!$this->processed) { $this->processRows(); } 
 		if ($this->class) { $class = " class='".$this->class."'"; }
 		
@@ -507,19 +510,19 @@ class DataGrid {
 				ob_start();eval("?>$v<? ");$j = ob_get_contents();ob_end_clean();
 				} else { $j = $v; }
 				if ($b_header)
-				{	$td[] = new grid_th($j);
-				
+				{
+					$td[] = new grid_th($j);
 				} else
-				{	$td[] = new $this->tdObject($j, $this->a_cell_width[$k], $this->a_cell_align[$k]);
-				
+				{
+					$td[] = new $this->tdObject($j, $this->a_cell_width[$k], $this->a_cell_align[$k]);
 				}
-				
 			}
-			$row = new $this->trObject;
-			$row->arrayToRow($td);
-			if (!is_array($this->headerNames)) {
-				$this->headerNames = array_diff(array_keys($array), $this->ignore);
-			}
+		}
+
+		$row = new $this->trObject;
+		$row->arrayToRow($td);
+		if (!is_array($this->headerNames)) {
+			$this->headerNames = array_diff(array_keys($array), $this->ignore);
 		}
 		return $row;
 	}

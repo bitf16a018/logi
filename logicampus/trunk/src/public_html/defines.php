@@ -11,8 +11,8 @@
  */
 
 
-define('LOGICAMPUS_VERSION','1.0.0');
-define('LOGICAMPUS_VERSION_STATUS','gamma');
+define('LOGICAMPUS_VERSION','1.1.0');
+define('LOGICAMPUS_VERSION_STATUS','rc2');
 define('SITE_NAME','logicampus');
 define('SITE_DISPLAY_NAME','LogiCampus');
 
@@ -105,5 +105,6 @@ $dsn['default'] = array(
 define('USERTYPE_STANDARD', 1);
 define('USERTYPE_STUDENT', 2);
 define('USERTYPE_FACULTY', 3);
+define('USERTYPE_ADMIN', 4);
 define('UPDATE_MAILSERVER_DB', false);
 ?>

@@ -113,17 +113,13 @@ class helpdesk extends RegAuth {
 	function adminRun(&$db,&$u,&$arg,&$t) 
 	{
 		$this->inactivelinks[] = 'List Tickets';
-	
+
 		if (in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) )
 		{	
 			$this->applinks['Modify status and category codes'] = 'main/event=admin2';
 			$this->applinks['User Accounts'] = '%administration/users';
-
-			if ($arg->getvars['dgorder'] == false)
-			{	$arg->getvars['dgorder'] = 'status ASC, helpdesk_id';
-			}
-
 		}
+
 		$arg->templateStyle = 'private';
 		
 		// get a list of statuses
@@ -134,10 +130,6 @@ class helpdesk extends RegAuth {
 
 		$arg->templateName = 'main_hdadmin';
 
-		if ($arg->getvars['dgsoder']=='') { 	// note misspelling! 
-			$arg->getvars['dgsoder'] = 'DESC';
-			$arg->getvars['dgorder'] = 'timedate_open';
-		}
 	/**
 	 *
 		Had to swap the searchgrid() with questinPoolgrid
@@ -151,11 +143,12 @@ class helpdesk extends RegAuth {
 		// Quite simple... if there's a post.. that means we're applying files.. 
 		// then we must remove our default constraints
 		if (count($arg->postvars) == 0)
-		{	$x->where = " status <> 3 ";
+		{
+			$x->where = " status <> 3 ";
 		}
 			
-		$x->rowsPerPage = 15;
-		$x->sortColumns = array("category","assigned_to","status","timedate_open","timedate_close","summary", 'helpdesk_id', 'userid');
+		$x->rowsPerPage = 25;
+		$x->sortColumns = array("category","assigned_to","timedate_open","timedate_close","summary", 'helpdesk_id', 'userid');
 		$x->column = "helpdesk_id,summary,timedate_open,timedate_close,status,category,assigned_to,userid";
 		$x->table = "helpdesk_incident";
 		#$x->where = " userid='".$u->pkey."'";
@@ -169,13 +162,34 @@ class helpdesk extends RegAuth {
 		$x->overrideColumn('<a href="<?=appurl("helpdesk/history/username=$userid");?>"><?=$userid;?></a>','userid');
 		$x->overrideColumn('<? if ($timedate_close>0) { echo date("m/d/Y h:i A",$timedate_close); } ?>','timedate_close');
 		$x->ignore = array('timedate_close');
-		$x->headers = array("summary"=>"Summary","timedate_open"=>"Opened","timedate_close"=>"Closed","status"=>"Status","category"=>"Category","assigned_to"=>"Technician",
+		$x->headers = array(
+			"summary"=>"Summary",
+			"timedate_open"=>"Opened",
+			"timedate_close"=>"Closed",
+			"status"=>"Status",
+			"category"=>"Category",
+			"assigned_to"=>"Technician",
 			'helpdesk_id'=>'Incident #',
 			'userid'=>'Owner'
 			);
 
-		$x->orderby = 'status';
+		//must override default sort order with a join table to 
+		// allow for defining arbitrary sort orders regardless
+		// of the auto-increment id of the status label
+		$x->joins = 'LEFT JOIN helpdesk_status AS B ON helpdesk_incident.status = B.helpdesk_status_id';
+		$x->orderby = 'B.helpdesk_status_sort';
 		$x->sort_order = 'ASC';
+
+		//let the column sort override the default behavior above
+		if ( strlen($arg->getvars['dgorder']) > 0 ) {
+			$x->joins = '';
+			$x->orderby = $arg->getvars[''];
+			if ( strlen($arg->getvars['dgsorder']) > 0 ) {
+				$x->sort_order = $arg->getvars['dgsorder'];
+			} else {
+				$x->sort_order = 'ASC';
+			}
+		}
 
 		$x->addTechnicianSelectFilter('Technician', 'assigned_to');
 		$x->addOwnerSelectFilter('Owner', 'userid'); // Added for ticket 493
