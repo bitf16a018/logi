@@ -16,6 +16,7 @@ CREATE TABLE helpdesk_comments (
 CREATE TABLE helpdesk_status (
   helpdesk_status_id int(11) NOT NULL auto_increment,
   helpdesk_status_label varchar(30) NOT NULL default '',
+  helpdesk_status_sort int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (helpdesk_status_id)
 ) TYPE=MyISAM;
 
@@ -24,6 +25,8 @@ CREATE TABLE helpdesk_incident (
   helpdesk_id int(11) NOT NULL auto_increment,
   timedate_open int(11) NOT NULL default '0',
   timedate_close int(11) NOT NULL default '0',
+  timedate_reply int(11) NOT NULL default '0',
+  timedate_update int(11) NOT NULL default '0',
   status int(11) NOT NULL default '0',
   summary text NOT NULL,
   userid varchar(32) NOT NULL default '',
@@ -74,10 +77,10 @@ CREATE TABLE helpdesk_faq_vote (
 ) TYPE=MyISAM COMMENT='tracks users to their votes.';
 
 
-INSERT INTO helpdesk_status VALUES (1,'New');
-INSERT INTO helpdesk_status VALUES (2,'Pending');
-INSERT INTO helpdesk_status VALUES (3,'In progress');
-INSERT INTO helpdesk_status VALUES (4,'Closed');
+INSERT INTO helpdesk_status VALUES (1,'New', 1);
+INSERT INTO helpdesk_status VALUES (2,'In progress', 3);
+INSERT INTO helpdesk_status VALUES (3,'Closed', 4);
+INSERT INTO helpdesk_status VALUES (4,'Replied', 2);
 
 INSERT INTO helpdesk_categories (helpdesk_category_id, helpdesk_category_label) VALUES (1, 'General Help');
 INSERT INTO helpdesk_categories (helpdesk_category_id, helpdesk_category_label) VALUES (2, 'E-mail');
