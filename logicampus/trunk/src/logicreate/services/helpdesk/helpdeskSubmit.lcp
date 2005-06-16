@@ -136,9 +136,12 @@ class helpdeskSubmit extends RegAuth {
 		if ( in_array("hdadmin",$u->groups) || in_array("hdstaff",$u->groups) || in_array('admin', $u->groups) ) {
 			$incident->assignedTo = $u->username;
 			$incident->status=2;			// in progress
+			$incident->set('timedateUpdate',time());
 			$action = 'In Progress';
 		} else {
 			$incident->status=4;			// replied
+			$incident->set('timedateReply',time());
+			$incident->set('timedateUpdate',time());
 			$action = 'Replied';
 		}
 

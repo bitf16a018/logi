@@ -4,9 +4,13 @@ class HelpdeskIncidentBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.4';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $helpdeskId;
 	var $timedateOpen;
 	var $timedateClose;
+	var $timedateReply;
+	var $timedateUpdate;
 	var $status;
 	var $summary;
 	var $userid;
@@ -17,16 +21,13 @@ class HelpdeskIncidentBase {
 	'helpdeskId'=>'integer',
 	'timedateOpen'=>'integer',
 	'timedateClose'=>'integer',
+	'timedateReply'=>'integer',
+	'timedateUpdate'=>'integer',
 	'status'=>'integer',
-	'summary'=>'text',
+	'summary'=>'longvarchar',
 	'userid'=>'varchar',
 	'category'=>'integer',
 	'assignedTo'=>'varchar');
-
-	function getHelpdeskIncidentLogs() {
-		$array = HelpdeskIncidentLogPeer::doSelect('helpdesk_id = \''.$this->getPrimaryKey().'\'');
-		return $array;
-	}
 
 
 
@@ -38,16 +39,15 @@ class HelpdeskIncidentBase {
 		$this->helpdeskId = $val;
 	}
 	
-	function save() {
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(HelpdeskIncidentPeer::doInsert($this));
+			$this->setPrimaryKey(HelpdeskIncidentPeer::doInsert($this,$dsn));
 		} else {
-			HelpdeskIncidentPeer::doUpdate($this);
+			HelpdeskIncidentPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -56,9 +56,14 @@ class HelpdeskIncidentBase {
 		} else {
 			$where = "helpdesk_id='".$key."'";
 		}
-		$array = HelpdeskIncidentPeer::doSelect($where);
+		$array = HelpdeskIncidentPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+	function delete($deep=false,$dsn="default") {
+		HelpdeskIncidentPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
@@ -79,59 +84,31 @@ class HelpdeskIncidentBase {
 
 	}
 
-	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
-	 */
-	function setArray($array) {
-		if ($array['timedateOpen'])
-			$this->timedateOpen = $array['timedateOpen'];
-		if ($array['timedateClose'])
-			$this->timedateClose = $array['timedateClose'];
-		if ($array['status'])
-			$this->status = $array['status'];
-		if ($array['summary'])
-			$this->summary = $array['summary'];
-		if ($array['userid'])
-			$this->userid = $array['userid'];
-		if ($array['category'])
-			$this->category = $array['category'];
-		if ($array['assignedTo'])
-			$this->assignedTo = $array['assignedTo'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
-	}
-
 }
 
 
-class HelpdeskIncidentPeer {
+class HelpdeskIncidentPeerBase {
 
 	var $tableName = 'helpdesk_incident';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
+		$db = lcDB::getHandle($dsn);
 		$st = new LC_SelectStatement("helpdesk_incident",$where);
 		$st->fields['helpdesk_id'] = 'helpdesk_id';
 		$st->fields['timedate_open'] = 'timedate_open';
 		$st->fields['timedate_close'] = 'timedate_close';
+		$st->fields['timedate_reply'] = 'timedate_reply';
+		$st->fields['timedate_update'] = 'timedate_update';
 		$st->fields['status'] = 'status';
 		$st->fields['summary'] = 'summary';
 		$st->fields['userid'] = 'userid';
 		$st->fields['category'] = 'category';
 		$st->fields['assigned_to'] = 'assigned_to';
-#		$st->fields[''] = '';
 
 		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = HelpdeskIncidentPeer::row2Obj($db->record);
@@ -139,13 +116,15 @@ class HelpdeskIncidentPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
+		$db = lcDB::getHandle($dsn);
 		$st = new LC_InsertStatement("helpdesk_incident");
 		$st->fields['helpdesk_id'] = $this->helpdeskId;
 		$st->fields['timedate_open'] = $this->timedateOpen;
 		$st->fields['timedate_close'] = $this->timedateClose;
+		$st->fields['timedate_reply'] = $this->timedateReply;
+		$st->fields['timedate_update'] = $this->timedateUpdate;
 		$st->fields['status'] = $this->status;
 		$st->fields['summary'] = $this->summary;
 		$st->fields['userid'] = $this->userid;
@@ -162,13 +141,15 @@ class HelpdeskIncidentPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
+		$db = lcDB::getHandle($dsn);
 		$st = new LC_UpdateStatement("helpdesk_incident");
 		$st->fields['helpdesk_id'] = $obj->helpdeskId;
 		$st->fields['timedate_open'] = $obj->timedateOpen;
 		$st->fields['timedate_close'] = $obj->timedateClose;
+		$st->fields['timedate_reply'] = $obj->timedateReply;
+		$st->fields['timedate_update'] = $obj->timedateUpdate;
 		$st->fields['status'] = $obj->status;
 		$st->fields['summary'] = $obj->summary;
 		$st->fields['userid'] = $obj->userid;
@@ -181,8 +162,9 @@ class HelpdeskIncidentPeer {
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = lcDB::getHandle($dsn);
 		if ($this->isNew() ) {
 			$db->executeQuery(new LC_InsertStatement($criteria));
 		} else {
@@ -191,18 +173,18 @@ class HelpdeskIncidentPeer {
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
+		$db = lcDB::getHandle($dsn);
 		$st = new LC_DeleteStatement("helpdesk_incident","helpdesk_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
-			$st = new LC_DeleteStatement("helpdesk_incident_log","helpdesk_id = '".$obj->getPrimaryKey()."'");
-			$db->executeQuery($st);
 		}
 
 		$obj->_new = false;
@@ -212,11 +194,29 @@ class HelpdeskIncidentPeer {
 
 	}
 
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = lcDB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
+
 	function row2Obj($row) {
 		$x = new HelpdeskIncident();
 		$x->helpdeskId = $row['helpdesk_id'];
 		$x->timedateOpen = $row['timedate_open'];
 		$x->timedateClose = $row['timedate_close'];
+		$x->timedateReply = $row['timedate_reply'];
+		$x->timedateUpdate = $row['timedate_update'];
 		$x->status = $row['status'];
 		$x->summary = $row['summary'];
 		$x->userid = $row['userid'];
@@ -227,6 +227,7 @@ class HelpdeskIncidentPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -261,6 +262,12 @@ class HelpdeskIncident extends HelpdeskIncidentBase {
 		}
 		return $array;
 	}
+
+}
+
+
+
+class HelpdeskIncidentPeer extends HelpdeskIncidentPeerBase {
 
 }
 

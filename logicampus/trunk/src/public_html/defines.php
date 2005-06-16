@@ -12,7 +12,7 @@
 
 
 define('LOGICAMPUS_VERSION','1.1.0');
-define('LOGICAMPUS_VERSION_STATUS','rc2');
+define('LOGICAMPUS_VERSION_STATUS','rc3');
 define('SITE_NAME','logicampus');
 define('SITE_DISPLAY_NAME','LogiCampus');
 
