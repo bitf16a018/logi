@@ -304,8 +304,8 @@
 		description="create today's changelog">
 		<cvschangelog dir="."
 			destfile="changelog.xml"
-			start="02 June 2005"
-			end="08 June 2005"/>
+			start="07 June 2005"
+			end="09 June 2005"/>
 
 		<style in="changelog.xml" 
 			out="changelog.html" 
