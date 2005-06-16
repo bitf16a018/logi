@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2005-06-07 21:43:53 $
+Last Updated:  $Date: 2005-06-16 02:38:36 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -11,6 +11,21 @@ ALTERNATE SYNTAX:
 Comments
      *file (rev)
      *file (rev)
+
+
+
+2005-06-09 16:16 hardcorelamer
+================================================================================
+Adding last update and last reply times
+     *patches/107_to_110/06_add_helpdesk_time.sql (1.1)
+
+
+2005-06-09 16:16 hardcorelamer
+================================================================================
+Adding last update and last reply times
+     *src/logicreate/services/helpdesk/META-INFO/pbdo.xml (1.2)
+
+     *src/logicreate/services/helpdesk/META-INFO/setup.sql (1.2)
 
 
 2005-06-06 15:26 hardcorelamer
