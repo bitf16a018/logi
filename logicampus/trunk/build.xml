@@ -179,7 +179,7 @@
 
 	<!-- After license is applied, copy defines.php over -->
 	<copy todir="${build}/public_html/" overwrite='true'>
-		<fileset dir="${build}">
+		<fileset dir="${src}">
 			<include name="defines.php"/>
 		</fileset>
 	</copy> 
