@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2005-06-16 02:38:36 $
+Last Updated:  $Date: 2005-06-18 21:08:35 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -12,6 +12,12 @@ Comments
      *file (rev)
      *file (rev)
 
+
+
+2005-06-18 17:16 mgkimsal
+================================================================================
+Fixing NULL issues with new values not set
+	* src/logicreate/services/helpdesk/helpdeskSubmit.lcp (1.4)
 
 
 2005-06-09 16:16 hardcorelamer
