@@ -81,9 +81,11 @@ class helpdeskSubmit extends RegAuth {
 		
 // no errors, let's commit to helpdeskIncident
 		$h = HelpdeskIncidentPeer::row2Obj($arg->postvars);
-		$h->timedateOpen = time();
-		$h->status = 1; 	// initial status is new
-		$h->_new = true;
+		$h->timedateOpen 	= time();
+		$h->timedateUpdate	= time();
+		$h->timedateReply 	= time();
+		$h->status 		= 1; 	// initial status is new
+		$h->_new 		= true;
 		if (in_array("hdadmin",$u->groups) || in_array("hdstaff",$u->groups) || in_array('admin', $u->groups) ) {
 			$h->userid = $arg->postvars['username'];
 			
