@@ -1,4 +1,16 @@
 <?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * Copyright 2005 Michael Kimsal, Mark Kimsal
+ ***************************************************/
+
 include_once(LIB_PATH."LC_html.php");
 
 /*
@@ -349,7 +361,8 @@ class DataGrid {
 					$this->headerNames[$k] = $this->headers[$v];
 				}
 				if (in_array($v,$this->sortColumns)) { 
-					$x = "<a href=\"".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."\">".$this->headerNames[$k]."</a>";
+
+					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); \">".$this->headerNames[$k]."</a>";
 					$this->headerNames[$k] = $x;
 				}
 			}
@@ -362,8 +375,8 @@ class DataGrid {
 
 		
 		if ($this->startPage > 0) { // previous
-			$this->beginpage = "<a href=\"".$this->baseurl."/".$this->startVar."=0/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->beginpage}</a>";
-			$this->prevpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage -1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->prevpage}</a>";
+			$this->beginpage = "<a href=\"".$this->baseurl."/".$this->startVar."=0/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->beginpage}</a>";
+			$this->prevpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage -1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->prevpage}</a>";
 		} else
 		{
 			$this->beginpage = str_replace('prevprev.gif', 'noprevprev.gif', $this->beginpage);
@@ -371,9 +384,9 @@ class DataGrid {
 		
 		}
 		
-		if ($this->startPage < $this->_totalPages) { // previous
-			$this->lastpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".$this->_totalPages."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->lastpage}</a>";
-			$this->nextpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage +1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->nextpage}</a>";
+		if ($this->startPage < $this->_totalPages) { //  next
+			$this->lastpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".$this->_totalPages."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->lastpage}</a>";
+			$this->nextpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage +1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false; \">{$this->nextpage}</a>";
 		} else
 		{ 
 			$this->lastpage = str_replace('nextnext.gif', 'nonextnext.gif', $this->lastpage);
@@ -977,7 +990,8 @@ class questionPoolGrid extends SearchGrid {
 					$this->headerNames[$k] = $this->headers[$v];
 				}
 				if (in_array($v,$this->sortColumns)) { 
-					$x = "<a href=\"".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."\">".$this->headerNames[$k]."</a>";
+
+					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); \">".$this->headerNames[$k]."</a>";
 					$this->headerNames[$k] = $x;
 				}
 			}
@@ -990,8 +1004,8 @@ class questionPoolGrid extends SearchGrid {
 
 		
 		if ($this->startPage > 0) { // previous
-			$this->beginpage = "<a href=\"".$this->baseurl."/".$this->startVar."=0/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.submit(); return false;\">{$this->beginpage}</a>";
-			$this->prevpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage -1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.submit(); return false;\">{$this->prevpage}</a>";
+			$this->beginpage = "<a href=\"".$this->baseurl."/".$this->startVar."=0/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->beginpage}</a>";
+			$this->prevpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage -1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->prevpage}</a>";
 		} else
 		{
 			$this->beginpage = str_replace('prevprev.gif', 'noprevprev.gif', $this->beginpage);
@@ -1000,8 +1014,8 @@ class questionPoolGrid extends SearchGrid {
 		}
 		
 		if ($this->startPage < $this->_totalPages) { // previous
-			$this->lastpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".$this->_totalPages."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.submit(); return false;\">{$this->lastpage}</a>";
-			$this->nextpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage +1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.submit(); return false; \">{$this->nextpage}</a>";
+			$this->lastpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".$this->_totalPages."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->lastpage}</a>";
+			$this->nextpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage +1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false; \">{$this->nextpage}</a>";
 		} else
 		{ 
 			$this->lastpage = str_replace('nextnext.gif', 'nonextnext.gif', $this->lastpage);
