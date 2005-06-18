@@ -66,7 +66,7 @@ class DataGrid {
 	var $a_cell_align= array();
 	
 	var $sort_order = 'ASC';		// sort order
-	var $sortOrderVar = 'dgsoder';// GET variable for retrieving the sort order
+	var $sortOrderVar = 'dgsorder';// GET variable for retrieving the sort order
 
 	var $use_pagedropdown = true; 	// should we show a dropdown of pages? default(false)
 	
@@ -362,7 +362,7 @@ class DataGrid {
 				}
 				if (in_array($v,$this->sortColumns)) { 
 
-					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); \">".$this->headerNames[$k]."</a>";
+					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">".$this->headerNames[$k]."</a>";
 					$this->headerNames[$k] = $x;
 				}
 			}
@@ -991,7 +991,7 @@ class questionPoolGrid extends SearchGrid {
 				}
 				if (in_array($v,$this->sortColumns)) { 
 
-					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); \">".$this->headerNames[$k]."</a>";
+					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">".$this->headerNames[$k]."</a>";
 					$this->headerNames[$k] = $x;
 				}
 			}
