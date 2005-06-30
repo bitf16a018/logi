@@ -38,7 +38,7 @@
           <format property="build.date" pattern="MMMM-d-yyyy" locale="en"/>
     </tstamp>
 
-    <property name="lc.version" location="${version.number}${version.extra}" />
+    <property name="lc.version" value="${version.number}${version.extra}" />
     <property name="build" location="temp/logicampus-${lc.version}" />
 
     <!-- Create the build directory structure used by compile -->
@@ -196,11 +196,9 @@
 	<antcall target="apply_license"/>
 
 	<!-- After license is applied, copy defines.php over -->
-	<copy todir="${build}/public_html/" overwrite='true'>
-		<fileset dir="${src}">
-			<include name="defines.php"/>
-		</fileset>
-	</copy> 
+	<echo message="copying defines file."/>
+	<antcall target="setup"/>
+	<copy todir="${build}/public_html/" file="${src}/defines.php" overwrite='true'/>
 
 	<!-- tar up -->
 	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
@@ -316,8 +314,8 @@
 		description="create today's changelog">
 		<cvschangelog dir="."
 			destfile="changelog.xml"
-			start="09 June 2005"
-			end="15 June 2005"/>
+			start="18 June 2005"
+			end="31 June 2005"/>
 
 		<style in="changelog.xml" 
 			out="changelog.html" 

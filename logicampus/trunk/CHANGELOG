@@ -1,5 +1,5 @@
 LOGICAMPUS CHANGE LOG
-Last Updated:  $Date: 2005-06-18 22:16:59 $
+Last Updated:  $Date: 2005-06-30 22:00:11 $
 
 SYNTAX:  
 <Date: m/d/y h:i> - <username>
@@ -12,6 +12,58 @@ Comments
      *file (rev)
      *file (rev)
 
+
+
+
+2005-06-30 21:46 hardcorelamer
+================================================================================
+Changing the build process to create a defines file from a template.
+Putting more variables in build.properties
+     *src/public_html/defines.php (1.6)
+
+     *src/public_html/defines.template.php (1.1)
+
+
+2005-06-30 21:46 hardcorelamer
+================================================================================
+Changing the build process to create a defines file from a template.
+Putting more variables in build.properties
+     *build.properties (1.6)
+
+     *build.xml (1.23)
+
+
+2005-06-30 21:29 hardcorelamer
+================================================================================
+Skip herc configured auth, only admins can enter.
+     *src/logicreate/services/administration/enrollment.lcp (1.4)
+
+
+2005-06-30 21:28 hardcorelamer
+================================================================================
+Fixing sorting to sort by any update, not just student replies.
+     *src/logicreate/services/helpdesk/main.lcp (1.5)
+
+
+2005-06-18 22:16 mgkimsal
+================================================================================
+soder should be sorder.  Also, added 'return false' to the header clicks
+     *src/logicreate/lib/datagrid.php (1.4)
+
+
+2005-06-18 21:37 mgkimsal
+================================================================================
+Added some javascript in here to make all clicks into POSTs even when they weren't.  This will
+help keep any necessary state resulting from a previous POST event.  copied some code
+from questionPool subclass - there might be some redundancy for now, but initial testing didn't
+throw any errors.
+     *src/logicreate/lib/datagrid.php (1.3)
+
+
+2005-06-18 21:07 mgkimsal
+================================================================================
+Some new fields weren't being set and the mysql db was complaining about NULL issues.
+     *src/logicreate/services/helpdesk/helpdeskSubmit.lcp (1.4)
 
 
 2005-06-18 17:16 mgkimsal
