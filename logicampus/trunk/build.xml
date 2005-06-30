@@ -14,12 +14,31 @@
   <property name="scripts" location="scripts" />
 
 
-  <target name="init" depends="cleantemp">
+  <target name="setup" depends="init"
+	  description="Create the defines file from the template.">
+	  <copy tofile="${src}/defines.php" file="${src}/defines.template.php" overwrite="true">
+		  <filterset>
+			<filter token="build.date" value="${build.date}"/>
+			<filter token="version.number" value="${version.number}"/>
+			<filter token="version.extra" value="${version.extra}"/>
+			<!-- db settings -->
+			<filter token="db.driver" value="${db.driver}"/>
+			<filter token="db.host" value="${db.host}"/>
+			<filter token="db.database" value="${db.database}"/>
+			<filter token="db.user" value="${db.user}"/>
+			<filter token="db.password" value="${db.password}"/>
+		  </filterset>
+	  </copy>
+  </target>
+
+
+  <target name="init">
     <!-- Create the time stamp -->
     <tstamp>
-          <format property="lc.build_date" pattern="MMMM-d-yyyy" locale="en"/>
+          <format property="build.date" pattern="MMMM-d-yyyy" locale="en"/>
     </tstamp>
 
+    <property name="lc.version" location="${version.number}${version.extra}" />
     <property name="build" location="temp/logicampus-${lc.version}" />
 
     <!-- Create the build directory structure used by compile -->
@@ -33,7 +52,6 @@
 
   </target>
 
-<!--DEMO-->
 
   <target name="dist" depends="init"
 	  description="generate an LC dist for Logicampus">
@@ -109,8 +127,8 @@
 	</copy>
 	<copy todir="${build}/public_html/">
 	  <filterset>
-		<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
-		<filter token="LC_VERSION" value="${lc.version}"/>
+		<filter token="LC_BUILD_DATE" value="${build.date}"/>
+		<filter token="LC_VERSION" value="${version.number}${version.extra}"/>
 	  </filterset>
 	  <fileset dir="${src}">
 		<include name="license.txt"/>
@@ -159,7 +177,7 @@
 	</copy>
 
 	<filter token="LC_VERSION" value="${lc.version}"/>
-	<filter token="LC_BUILD_DATE" value="${lc.build_date}"/>
+	<filter token="LC_BUILD_DATE" value="${build.date}"/>
 	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/install.php" todir="${build}/public_html/" filtering="true"/>
 
@@ -186,18 +204,12 @@
 
 	<!-- tar up -->
 	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
-	<!--
-	<gzip src="${dist}/logicampus-${lc.version}.tar" zipfile="${dist}/logicampus-${lc.version}.tar.gz" />
-	<delete file="${dist}/logicampus-${lc.version}.tar" />
-	-->
 
 	<!-- clean up temp-->
 	<antcall target="cleantemp"/>
 	<echo message="Archive saved in 'dist/' directory!" />
   </target>
 
-
-<!--DEMO END-->
 
 
 	<target name="copy_data"
