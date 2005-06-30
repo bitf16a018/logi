@@ -8,7 +8,7 @@ include_once(LIB_PATH.'semesterObj.php');
 class enrollment extends AdminService {
 
 	var $presentor = "htmlPresentation";
-	var $authorizer = 'ServiceMapAuth';
+	var $authorizer = 'adminAuth';
 	var $PAGE_SIZE = 30;
 	var $cleanedArray = array();
 
