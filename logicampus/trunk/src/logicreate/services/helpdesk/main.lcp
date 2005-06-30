@@ -138,15 +138,14 @@ class helpdesk extends RegAuth {
 	 *
 	 */
 		$x = new questionPoolGrid('helpdesk','main');
-#		$x = new searchgrid('helpdesk','main');
-		
-		// Quite simple... if there's a post.. that means we're applying files.. 
-		// then we must remove our default constraints
-		if (count($arg->postvars) == 0)
+
+		//only show closed if it's specifically asked for
+		// otherwise, filter it out all the time
+		if ($arg->postvars['selectfilter']['status'] != 3)
 		{
 			$x->where = " status <> 3 ";
 		}
-			
+
 		$x->rowsPerPage = 25;
 		$x->sortColumns = array("category","assigned_to","timedate_update","timedate_close","summary", 'helpdesk_id', 'userid');
 		$x->column = "helpdesk_id,summary,timedate_update,timedate_close,status,category,assigned_to,userid";
@@ -157,7 +156,7 @@ class helpdesk extends RegAuth {
 		$j = "\$t = unserialize('".serialize($t['categories'])."');";
 		$x->overrideColumn('<? '.$j.' echo $t[$category];?>','category');
 		$x->overrideColumn('<? if($timedate_update > 0) {echo date("m/d/Y h:i A",$timedate_update);}?>','timedate_update');
-		$x->overrideColumn('<a href="<?=appurl("helpdesk/helpdeskView/$helpdesk_id");?>"><?=((strlen(trim($summary)) > 3) ? $summary : \'[ no summary given ]\');?></a>','summary');
+		$x->overrideColumn('<a href="<?=appurl("helpdesk/helpdeskView/$helpdesk_id");?>"><?=((strlen(trim($summary)) > 1) ? $summary : \'[ no summary given ]\');?></a>','summary');
 		//link username to history
 		$x->overrideColumn('<a href="<?=appurl("helpdesk/history/username=$userid");?>"><?=$userid;?></a>','userid');
 		$x->overrideColumn('<? if ($timedate_close>0) { echo date("m/d/Y h:i A",$timedate_close); } ?>','timedate_close');
@@ -177,7 +176,7 @@ class helpdesk extends RegAuth {
 		// allow for defining arbitrary sort orders regardless
 		// of the auto-increment id of the status label
 		$x->joins = 'LEFT JOIN helpdesk_status AS B ON helpdesk_incident.status = B.helpdesk_status_id';
-		$x->sort_order = 'DESC';
+//		$x->sort_order = 'DESC';
 
 		//let the column sort override the default behavior above
 		if ( strlen($arg->getvars['dgorder']) > 0 ) {
@@ -193,9 +192,9 @@ class helpdesk extends RegAuth {
 		// give it the sort order that it wanted, because we are going to
 		// overwrite it.
 		if ( strlen($x->orderby) > 0 ) {
-			$x->orderby .= ' '.$x->sort_order .', ';
+			$x->orderby .= ' '.$x->sort_order.', ';
 		}
-		$x->orderby .= ' B.helpdesk_status_sort, timedate_reply DESC, timedate_update';
+		$x->orderby .= ' B.helpdesk_status_sort, timedate_update';
 		$x->sort_order = 'DESC';
 
 		$x->addTechnicianSelectFilter('Technician', 'assigned_to');
@@ -204,6 +203,13 @@ class helpdesk extends RegAuth {
 		$x->addHelpdeskTicketCategoryFilter('Category', 'category');
 		$x->addInputFilter("Incident #","helpdesk_id");
 		$x->addInputFilter("Summary","summary"); // Added for ticket 493
+
+		//This is searching by user id, which is generally the student
+		// name.  Searching by student name in the profile table would
+		// mean doing a big join across the profile, user table and
+		// user_id join.
+
+		$x->addInputFilter("Username","userid");
 
 		$t['table'] = $x->toHTML();
 	}
