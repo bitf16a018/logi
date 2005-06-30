@@ -11,8 +11,8 @@
  */
 
 
-define('LOGICAMPUS_VERSION','1.1.0');
-define('LOGICAMPUS_VERSION_STATUS','rc3');
+define('LOGICAMPUS_VERSION','@version.number@');
+define('LOGICAMPUS_VERSION_STATUS','@version.extra@');
 define('SITE_NAME','logicampus');
 define('SITE_DISPLAY_NAME','LogiCampus');
 
@@ -85,11 +85,11 @@ $dsn = array();
 
 
 $dsn['default'] = array(
-        'driver'=>'mysql',
-        'host'=>'localhost',
-        'user'=>'campus',
-        'password'=>'campus',
-        'database'=>'campus',
+        'driver'=>'@db.driver@',
+        'host'=>'@db.host@',
+        'user'=>'@db.user@',
+        'password'=>'@db.password@',
+        'database'=>'@db.database@',
         'persistent'=>'n');
 
 
