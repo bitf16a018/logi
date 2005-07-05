@@ -21,6 +21,20 @@
 	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/custom.js"></script>
 	<style type="text/css">
 		@import url(<?=BASE_URL;?>htmlarea/htmlarea.css);
+		.r_wrapper
+		{
+		float:right;width:47%;text-align:top;
+		}
+
+		.l_wrapper
+		{
+		float:left;width:47%;text-align:top;
+		}
+
+		.box_standard
+		{
+		margin-bottom:1em;padding:.5em;background-color:#f7f7f7;border:1px solid silver;
+		}
 	</style>
 </HEAD> 
  
@@ -76,23 +90,23 @@
     &nbsp;
   </td>
 </tr>
-<form method="post" action="<?=APP_URL?>login/main/">
+<form id="login" method="post" action="<?=APP_URL?>login/main/">
 <tr>
   <td colspan="2">
 <br />
 <table width="100%">
 <tr>
-  <td width="50%" align="right"><b><?=lct('username')?>:</b></td>
-  <td width="50%"><input type="text" size="15" maxlength="32" name="username" value="" /></td>
+  <td width="50%" align="right"><b><?=lct('username');?>:</b></td>
+  <td width="50%"><input id="login_name" type="text" size="15" maxlength="32" name="username" /></td>
 </tr>
 <tr>
-  <td width="50%" align="right"><b><?=lct('password')?>:</b></td>
-  <td width="50%"><input type="password" size="15" maxlength="32" name="password" value="" /></td>
+  <td width="50%" align="right"><b><?=lct('password');?>:</b></td>
+  <td width="50%"><input id="login_passwd" type="password" size="15" maxlength="32" name="password" /></td>
 </tr>
 <tr>
   <td colspan="2" align="center">
     <input type="hidden" name="event" value="login"/>
-    <input type="submit" value="<?=lct('Login')?>"/>
+    <input type="submit" value="<?=lct('Login');?>"/>
   </td>
 </tr>
 </table>
@@ -103,22 +117,105 @@
 </form>
 <tr>
   <td colspan="2" align="right" class="blue">
-    LogiCampus <?=LOGICAMPUS_VERSION?>-<?=LOGICAMPUS_VERSION_STATUS?> </td>
+    LogiCampus <?=LOGICAMPUS_VERSION.LOGICAMPUS_VERSION_STATUS?> </td>
 <tr>
+<tr>
+<td colspan="2">
+<strong>IMPORTANT</strong>
+<p>
+The system only allows one login of each username at one time.  Therefore, you may experience disruption in your demo as other people login to the system.  If the system says you don't have permission to do something, this may be because you have been logged out as someone else logs in with the same username.
+</p>
 
-</table>
+<strong>Login Information</strong><br>
+LogiCampus works differently depending on which user you log in as.  
+Here are three different logins you can use:
+
+
+<div class="l_wrapper">
+<fieldset class="box_standard">
+	<legend>Staff</legend>
+	<strong>Administrator</strong>
+	<a href="#" onclick="loginAs('admin','admin');return false;" >login as...</a>
+	<br>
+	Login: admin<br>
+	Password: admin<br>
+</fieldset>
+
+<br/>
+
+
+<fieldset class="box_standard">
+	<legend>Students</legend>
+	<strong>Student:</strong>
+	<a href="#" onclick="loginAs('nelson.muntz','nelson.muntz');return false;" >login as...</a>
+	<br>
+	Login: nelson.muntz<br>
+	Password: nelson.muntz<br>
+
+	<strong>Student:</strong>
+	<a href="#" onclick="loginAs('bart.simpson','bart.simpson');return false;" >login as...</a>
+	<br>
+	Login: bart.simpson<br>
+	Password: bart.simpson<br>
+</fieldset>
 </div>
-<br />
-<a href="<?=APP_URL?>welcome/about">[ABOUT THIS DEMO]</a>
-<p>&nbsp;</p>
 
-Choose your language:<br/>
+<div class="r_wrapper">
+<fieldset class="box_standard">
+	<legend>Faculty</legend>
+	<strong>Teacher:</strong>
+	<a href="#" onclick="loginAs('teacher1','teacher1');return false;" >login as...</a>
+	<br>
+	Login: teacher1<br>
+	Password: teacher1<br>
+
+	<strong>Teacher:</strong>
+	<a href="#" onclick="loginAs('teacher2','teacher2');return false;" >login as...</a>
+	<br>
+	Login: teacher2<br>
+	Password: teacher2<br>
+</fieldset>
+</div>
+
+<p style="clear:both;">&nbsp;</p>
+Choose your language (new, not completed):<br/>
 <a href="?switchlocale=en_US">English (US)</a>
 <a href="?switchlocale=es_MX">Spanish (MX)</a>
 <a href="?switchlocale=zh_CN">Chinese (PRC)</a>
+
+<p>&nbsp;</p>
+
+<strong>Requirements</strong><br>
+If you are using Windows, in order to use the content editor that is built in, you must be running either IE version 5.5 or higher.
+<br><br>
+If you are using MAC OS X or Linux, we suggest using Mozilla 1.3 or higher (1.5 recommended).</td>
+</tr>
+</table>
+</div>
+<br />
+<a href="<?=APP_URL?>welcome/about">[HOW TO USE THIS DEMO]</a>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<a href="http://sourceforge.net/projects/logicampus/"> <img src="http://sourceforge.net/sflogo.php?group_id=95474&amp;type=4" border="0" alt="SourceForge.net Logo" /></a>
+
+
+
+
+
 </center>
 <script language="JavaScript">
 	document.forms[0].elements[0].focus();
+
+	function loginAs(user,pass) {
+		document.getElementById('login_name').value = user;
+		document.getElementById('login_passwd').value = pass;
+		document.getElementById('login').submit();
+	}
 </script>
 
 
