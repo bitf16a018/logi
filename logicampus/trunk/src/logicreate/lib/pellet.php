@@ -140,23 +140,27 @@ class BasicAuth extends Service {
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
-		$t['sectionheader']  .= '<div id="sectionheader">';
-		while ( list($k,$v) = @each($this->navlinks) ) {
 
-			if (in_array($k, $this->inactivelinks)) {
-				$t['sectionheader'] .= '<b><a href="'.$link.'">'.$k.'</a></b> &bull; ';
-			} else {
-				if (preg_match('/^%/', $v)) {
-					$link = appurl(preg_replace('/^%/', '', $v));
+		if ( count($this->navlinks) > 0 ) {
+			$t['sectionheader']  .= '<div id="sectionheader">';
+			while ( list($k,$v) = @each($this->navlinks) ) {
+
+				if (in_array($k, $this->inactivelinks)) {
+					$t['sectionheader'] .= '<b><a href="'.$link.'">'.$k.'</a></b> &bull; ';
 				} else {
-					$link = modurl($v);
+					if (preg_match('/^%/', $v)) {
+						$link = appurl(preg_replace('/^%/', '', $v));
+					} else {
+						$link = modurl($v);
+					}
+					$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
 				}
-				$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
-			}
 
+			}
+			if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
+			$t['sectionheader']  .= '</div>';
 		}
-		if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
-		$t['sectionheader']  .= '</div>';
+
 		if ( count($this->applinks) > 0 ) {
 			$t['sectionheader'] .= '<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;';
 			while ( list($k,$v) = @each($this->applinks) ) {
@@ -203,23 +207,27 @@ class RegAuth extends Service {
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		$t['sectionheader'] .= '</td></tr></table>';
-		$t['sectionheader']  .= '<div id="sectionheader">';
-		while ( list($k,$v) = @each($this->navlinks) ) {
 
-			if (in_array($k, $this->inactivelinks)) {
-				$t['sectionheader'] .= "<b>$k</b>".' &bull; ';
-			} else {
-				if (preg_match('/^%/', $v)) {
-					$link = appurl(preg_replace('/^%/', '', $v));
+		if ( count($this->navlinks) > 0 ) {
+			$t['sectionheader']  .= '<div id="sectionheader">';
+			while ( list($k,$v) = @each($this->navlinks) ) {
+
+				if (in_array($k, $this->inactivelinks)) {
+					$t['sectionheader'] .= "<b>$k</b>".' &bull; ';
 				} else {
-					$link = modurl($v);
+					if (preg_match('/^%/', $v)) {
+						$link = appurl(preg_replace('/^%/', '', $v));
+					} else {
+						$link = modurl($v);
+					}
+					$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
 				}
-				$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
-			}
 
+			}
+			if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
+			$t['sectionheader']  .= '</div>';
 		}
-		if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
-		$t['sectionheader']  .= '</div>';
+
 		if ( count($this->applinks) > 0 ) {
 			$t['sectionheader'] .= '<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;';
 			while ( list($k,$v) = @each($this->applinks) ) {
@@ -486,21 +494,24 @@ class FacultyService extends Service {
 		if ($obj->user->activeClassTaught->courseName)
 			$t['sectionheader'] .= '</td><td align="right">'.$obj->user->activeClassTaught->courseName.' ('.$obj->user->activeClassTaught->courseFamily.' '.$obj->user->activeClassTaught->courseNumber.' - '.$obj->user->activeClassTaught->semesterID.') ('.$obj->user->activeClassTaught->facultyName.')';
 		$t['sectionheader'] .= '</td></tr></table>';
-		$t['sectionheader']  .= '<div id="sectionheader">';
-		while ( list($k,$v) = @each($this->navlinks) ) {
-			if (in_array($k, $this->inactivelinks)) {
-				$t['sectionheader'] .= "<b>$k</b>".' &bull; ';
-			} else {
-				if (preg_match('/^%/', $v)) {
-					$link = appurl(preg_replace('/^%/', '', $v));
+		if ( count($this->navlinks) > 0 ) {
+			$t['sectionheader']  .= '<div id="sectionheader">';
+			while ( list($k,$v) = @each($this->navlinks) ) {
+				if (in_array($k, $this->inactivelinks)) {
+					$t['sectionheader'] .= "<b>$k</b>".' &bull; ';
 				} else {
-					$link = modurl($v);
+					if (preg_match('/^%/', $v)) {
+						$link = appurl(preg_replace('/^%/', '', $v));
+					} else {
+						$link = modurl($v);
+					}
+					$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
 				}
-				$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
 			}
+			if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
+			$t['sectionheader']  .= '</div>';
 		}
-		if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
-		$t['sectionheader']  .= '</div>';
+
 		if ( count($this->applinks) > 0 ) {
 			$t['sectionheader'] .= '<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;';
 			while ( list($k,$v) = @each($this->applinks) ) {
@@ -636,29 +647,33 @@ class StudentService extends Service {
 		if ($obj->user->activeClassTaken->courseName)
 			$t['sectionheader'] .= '</td><td align="right">'.$obj->user->activeClassTaken->courseName.' <br/><a href="'.appurl('pm/main/event=compose/sendto='.$obj->user->activeClassTaken->facultyId).'">Contact Instructor</a>: '.$obj->user->activeClassTaken->facultyName;
 		$t['sectionheader'] .= '</td></tr></table>';
-		$t['sectionheader']  .= '<div id="sectionheader">';
-		while ( list($k,$v) = @each($this->navlinks) ) {
-			if (in_array($k, $this->inactivelinks)) {
-				
-				if (preg_match('/^%/', $v)) {
-					$link = appurl(preg_replace('/^%/', '', $v));
+
+		if ( count($this->navlinks) > 0 ) {
+			$t['sectionheader']  .= '<div id="sectionheader">';
+			while ( list($k,$v) = @each($this->navlinks) ) {
+				if (in_array($k, $this->inactivelinks)) {
+					
+					if (preg_match('/^%/', $v)) {
+						$link = appurl(preg_replace('/^%/', '', $v));
+					} else {
+						$link = modurl($v);
+					}
+					$t['sectionheader'] .= '<b><a href="'.$link.'">'.$k.'</a></b> &bull; ';
+					
 				} else {
-					$link = modurl($v);
+					if (preg_match('/^%/', $v)) {
+						$link = appurl(preg_replace('/^%/', '', $v));
+					} else {
+						$link = modurl($v);
+					}
+					$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
 				}
-				$t['sectionheader'] .= '<b><a href="'.$link.'">'.$k.'</a></b> &bull; ';
-				
-			} else {
-				if (preg_match('/^%/', $v)) {
-					$link = appurl(preg_replace('/^%/', '', $v));
-				} else {
-					$link = modurl($v);
-				}
-				$t['sectionheader'] .= '<a href="'.$link.'">'.$k.'</a> &bull; ';
 			}
+			
+			if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
+			$t['sectionheader']  .= '</div>';
 		}
-		
-		if (count($this->navlinks)) $t['sectionheader'] = substr($t['sectionheader'],0,-8);
-		$t['sectionheader']  .= '</div>';
+
 		if ( count($this->applinks) > 0 ) {
 			$t['sectionheader'] .= '<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;';
 			while ( list($k,$v) = @each($this->applinks) ) {
