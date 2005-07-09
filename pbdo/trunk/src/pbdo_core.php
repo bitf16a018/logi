@@ -144,10 +144,10 @@ if ( !OLD_STYLE ) {
 	}
 }
 
-	$graph = new PBDO_GraphManager2($engine);
-	$graph->strokeGraph();
-	print "Writing 'projects/$projectName/graph/schema.png'...\n";
-	$graph->saveGraph();
+//	$graph = new PBDO_GraphManager2($engine);
+//	$graph->strokeGraph();
+//	print "Writing 'projects/$projectName/graph/schema.png'...\n";
+//	$graph->saveGraph();
 
 //	$graph = new PBDO_HTMLManager($engine);
 //	$graph->generateHTML();
