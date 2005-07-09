@@ -1,0 +1,170 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/ClassForum.php");
+include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumCategory.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+
+
+/**
+ * Class Forums
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class forum extends StudentService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $navlinks = array();
+
+	function run (&$db, &$u, &$lc, &$t) {
+
+
+		$lc->templateName = 'main_main';
+
+		//main code
+		include('main_main.html'); //just for the CSS
+
+		$dm = new MyPostTableModel($lc->getvars['forum_id']);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=64;
+		$col->cellRenderer = new LC_TableIconRenderer();
+
+		$col_b = &$columnModel->getColumnAt(2);
+		$col_b->maxWidth=100;
+
+		$col_c = &$columnModel->getColumnAt(3);
+		$col_c->maxWidth=200;
+		$col_c->cellRenderer = new LC_TableDateRenderer();
+
+		$col_d = &$columnModel->getColumnAt(1);
+		$col_d->cellRenderer = new LC_TableForumRenderer();
+		$col_d->justify = 'left';
+
+		$t['table'] = new LC_TableRenderer($table);
+
+	}
+}
+
+
+
+class MyPostTableModel extends LC_TableModel {
+
+	var $posts = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyPostTableModel($fid) {
+		$this->posts = ClassForumPostPeer::doSelect('class_forum_id = '.$fid);
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->posts));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 4;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return '&nbsp;'; break;
+
+			case '1':
+				return 'Topics'; break;
+
+			case '2':
+				return 'Replies'; break;
+
+			case '3':
+				return 'Last Reply'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$post = $this->posts[$x];
+		switch ($y) {
+			case 0:
+				return $post->classForumId;
+			case 1:
+				return $post;
+			case 2:
+				return 0;
+			case 3:
+				return time();
+		}
+	}
+}
+
+class LC_TableIconRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		if ($this->row % 2 == 0 ) {
+			return '<img height="32" width="32" src="http://dev.lc.com/images/cross_logo_shadow.png" title="new posts" alt="new posts">';
+		} else {
+			return 'no new posts.&nbsp;';
+		}
+	}
+}
+
+
+
+class LC_TableMoneyRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return sprintf('JPY &yen; %.2f',intval($this->value));
+	}
+}
+
+
+
+class LC_TableForumRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<a href="'.appurl('classforums/forum/').'forum_id='.$this->value->classForumId.'">'.$this->value->subject.'</a> <br/>'.substr($this->value->message,0,45);
+	}
+}
+
+
+class LC_TableDateRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return date('m.d.Y',$this->value);
+	}
+}
+
+?>

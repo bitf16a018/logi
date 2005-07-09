@@ -8,7 +8,8 @@
 	<meta http-equiv="keywords" content="">
 	<meta http-equiv="description" content="">
 
-	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL.'/'.$t['cssFile'];?>">
+	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL.$t['cssFile'];?>">
+	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL?>datagrid.css">
 
 <? if (trim($obj->user->activeClassTaken->stylesheet) != '' && $this->module == 'classroom') { ?>
 	<link rel="stylesheet" type="text/css" href="<?=BASE_URL. 'templates/student/';?><?=$obj->user->activeClassTaken->stylesheet;?>">
@@ -158,12 +159,11 @@
 			<td height="20" valign="top" bgcolor="#FFFFFF">
 
 		
-			<table cellpadding="15" cellspacing="0" border="0" width="100%">
+			<table cellpadding="10" cellspacing="0" border="0" width="100%" style="margin-top:-5px;">
 			<tr>
 				<td>
-					
 					<table bgcolor="#FFFFFF" class="content" cellpadding="12" cellspacing="0" width="100%">
 					<tr>
-						<td class="content">	
+						<td class="content">
 
 
