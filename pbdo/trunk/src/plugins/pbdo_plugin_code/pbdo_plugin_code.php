@@ -274,7 +274,7 @@ class ParsedClass {
 	function printRelations() {
 		$model = PBDO_Compiler::getDataModel();
 		//foreign (assume one to many)
-		reset($model->relationships);
+		@reset($model->relationships);
 		while ( list ($q,$rel) = @each($model->relationships) ) {
 			//not a foreign key
 			if ( $rel->getEntityA() != $this->tableName ) { 
@@ -283,13 +283,15 @@ class ParsedClass {
 			$fcol = $rel->getAttribB();
 			$lcol = $rel->getAttribA();
 
-			if ( substr($q,-1) == 's' ) { $s = ''; } else { $s ='s'; }
-			$q = convertTableName($rel->getEntityB() .$s."By".ucfirst($lcol));
+			$q = convertTableName($rel->getEntityB() ."By".ucfirst($lcol));
 			$fCodeName = convertTableName($rel->getEntityB());
 
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
+			$ret .= "\t\tif ( \$this->".convertColName($lcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
 			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
-			$ret .= "\t\treturn \$array;\n";
+			$ret .= "\t\tif ( count(\$array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }\n";
+			//$ret .= "\t\treturn \$array;\n";
+			$ret .= "\t\treturn \$array[0];\n";
 			$ret .= "\t}\n\n";
 		}
 
@@ -302,14 +304,16 @@ class ParsedClass {
 			}
 			$lcol = $rel->getAttribB();
 			$fcol = $rel->getAttribA();
-			$q = convertTableName($rel->getEntityA()."By".ucfirst($fcol));
+
+			if ( substr($q,-1) == 's' ) { $s = ''; } else { $s ='s'; }
+			$q = convertTableName($rel->getEntityA().$s."By".ucfirst($fcol));
 			$fCodeName = convertTableName($rel->getEntityA());
 
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
 			$ret .= "\t\tif ( \$this->".convertColName($lcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
 			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
-			$ret .= "\t\tif ( count(\$array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }\n";
-			$ret .= "\t\treturn \$array[0];\n";
+			$ret .= "\t\treturn \$array;\n";
+			//$ret .= "\t\treturn \$array[0];\n";
 			$ret .= "\t}\n\n";
 		}
 
