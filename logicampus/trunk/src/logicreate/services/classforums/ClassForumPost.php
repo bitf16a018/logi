@@ -24,10 +24,17 @@ class ClassForumPostBase {
 	'replyId'=>'integer',
 	'threadId'=>'integer',
 	'subject'=>'varchar',
-	'message'=>'longvarchar',
+	'message'=>'text',
 	'userId'=>'varchar',
 	'postTimedate'=>'integer',
 	'classForumPostStatus'=>'integer');
+
+	function getClassForumByClassForumId($dsn='default') {
+		if ( $this->classForumId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = ClassForumPeer::doSelect('class_forum_id = \''.$this->classForumId.'\'',$dsn);
+		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
+		return $array[0];
+	}
 
 
 
@@ -69,19 +76,30 @@ class ClassForumPostBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
 
+	/**
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
+	 */
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }

@@ -1,0 +1,90 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+
+
+/**
+ * Class Forums : Posts
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class posts extends StudentService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $applinks = array();
+	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('Class Forums Home') => '%classforums/',
+		lct('New Topic') => '%classforums/topic/event=post'
+		);
+	}
+
+
+	/**
+	 * show a post and any replies
+	 */
+	function run (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'posts_main';
+
+		//main code
+		include('main_main.html'); //just for the CSS
+	}
+
+
+
+	function newTopicRun (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'posts_newTopic';
+
+		//main code
+		include('main_main.html'); //just for the CSS
+	}
+
+
+
+	/**
+	 * Save a new topic in the DB
+	 */
+	function startTopicRun (&$db, &$u, &$lc, &$t) {
+
+		$post = new ClassForumPost();
+		$post->subject = $lc->postvars['subject'];
+		$post->message = $lc->postvars['message'];
+		$post->set('userId','nelson.muntz');
+		$post->set('classForumId',1);
+		$post->set('postTimedate',time());
+
+		$post->save();
+
+		$t['url'] = appurl('classforums/forum/forum_id=1');
+		$this->presentor = 'redirectPresentation';
+	}
+}
+
+?>

@@ -1,8 +1,6 @@
 <?php
 
-include_once(INSTALLED_SERVICE_PATH."classforums/ClassForum.php");
-include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumPost.php");
-include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumCategory.php");
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
@@ -27,6 +25,7 @@ class classforums extends StudentService {
 	var $presentor = 'htmlPresentation';
 	var $sectionTitle = 'Classroom Forums';
 
+	var $applinks = array();
 	var $navlinks = array();
 
 	function run (&$db, &$u, &$lc, &$t) {
@@ -58,18 +57,63 @@ class classforums extends StudentService {
 		$col_d->cellRenderer = new LC_TableForumRenderer();
 		$col_d->justify = 'left';
 
+		//faculty can administrate forums
+		if ( $u->isFaculty() ) {
+			$col_admin = new LC_TableColumn();
+			$col_admin->cellRenderer = new LC_TableControlRenderer();
+			$col_admin->name = 'Admin';
+			$col_admin->maxWidth=70;
+			$columnModel->addColumn($col_admin);
+		}
+
 		//make sub headers for forum categories
+
+		//always make a general
 		$subHeaderModel = new LC_TableDefaultColumnModel();
 		$sub_col_a = new LC_TableColumn();
-		$sub_col_a->name = 'Category: General';
+		$sub_col_a->name = lct('Category').': '. lct('General');
 		$subHeaderModel->addColumn($sub_col_a);
 		$subHeader = new LC_TableHeader($subHeaderModel);
 		$subHeader->row = 0;
 		$table->addSubHeader($subHeader);
+		$forumCount = $dm->getForumsInCategory(0);
+
+
+		//TODO use real class id
+		$categories = ClassForum_Categories::getAll(1);
+
+		foreach($categories as $k=>$v) {
+			$thisCount = $dm->getForumsInCategory($v->getCategoryId());
+			if ($thisCount < 1) { continue; }
+
+			$subHeaderModel = new LC_TableDefaultColumnModel();
+			$sub_col_a = new LC_TableColumn();
+			$sub_col_a->name = lct('Category').': '. $v->getName();
+			$subHeaderModel->addColumn($sub_col_a);
+			$subHeader = new LC_TableHeader($subHeaderModel);
+			$subHeader->row = $forumCount;
+
+			$forumCount += $thisCount;
+
+			$table->addSubHeader($subHeader);
+		}
+
+
 
 
 		$t['table'] = new LC_TableRenderer($table);
 
+	}
+
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('New Forum') => '%classforums/new/',
+		lct('Forum Categories') => '%classforums/categories/'
+		);
 	}
 }
 
@@ -83,7 +127,7 @@ class MyTableModel extends LC_TableModel {
 	 * make a 5 x 10 grid of nonsense
 	 */
 	function MyTableModel() {
-		$this->forums = ClassForumPeer::doSelect();
+		$this->forums = ClassForum_Forums::getAll(1);
 	}
 
 
@@ -123,6 +167,9 @@ class MyTableModel extends LC_TableModel {
 
 			case '4':
 				return 'Last Post'; break;
+
+			case '5':
+				return 'Admin'; break;
 		}
 	}
 
@@ -134,39 +181,63 @@ class MyTableModel extends LC_TableModel {
 		$forum = $this->forums[$x];
 		switch ($y) {
 			case 0:
-				return $forum->classForumId;
+				return $forum->_dao->classForumId;
 			case 1:
-				return $forum;
+				return $forum->_dao;
 			case 2:
-				return 0;
+				if ($x % 2 == 0 ) {
+					return 4;
+				} else {
+					return 0;
+				}
+
 			case 3:
 				return 0;
 			case 4:
 				return time();
+			case 5:
+				return $forum->_dao;
 		}
 	}
+
+
+
+	/**
+	 * Custom function to get number of forums
+	 * in a certain category
+	 * saves from hitting the DB, since all the forums are loaded already
+	 */
+	function getForumsInCategory($catId) {
+		$ret = 0;
+		foreach($this->forums as $k => $v ) {
+			if ($v->getCategoryId() == $catId) {
+				$ret++;
+			}
+		}
+		return $ret;
+	}
 }
+
 
 class LC_TableIconRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="http://dev.lc.com/images/cross_logo_shadow.png" title="new posts" alt="new posts">';
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
 		} else {
-			return 'no new posts.&nbsp;';
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="old posts" alt="old posts">';
 		}
 	}
 }
 
 
 
-class LC_TableMoneyRenderer extends LC_TableCellRenderer {
+class LC_TableControlRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
-		return sprintf('JPY &yen; %.2f',intval($this->value));
+		return '<a href="'.appurl('classforums/admin/').'forum_id='.$this->value->classForumId.'">EDIT</a>';
 	}
 }
-
 
 
 class LC_TableForumRenderer extends LC_TableCellRenderer {
@@ -176,12 +247,5 @@ class LC_TableForumRenderer extends LC_TableCellRenderer {
 	}
 }
 
-
-class LC_TableDateRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		return date('m.d.Y',$this->value);
-	}
-}
 
 ?>

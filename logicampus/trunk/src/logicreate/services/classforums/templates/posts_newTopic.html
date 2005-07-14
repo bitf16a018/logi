@@ -1,0 +1,13 @@
+<?php echo $t['sectionheader'];?>
+
+
+<form method="POST" action="<?php echo appurl('classforums/posts/event=startTopic');?>">
+
+	<input type="text" name="subject" value="Subject"/>
+	<br/>
+	<textarea rows="15" cols="80" name="message"></textarea>
+
+	<br/>
+	<br/>
+	<input type="submit" value="Start Topic"/>
+</form>
