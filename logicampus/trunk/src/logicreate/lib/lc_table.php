@@ -219,6 +219,18 @@ class LC_TableColumnModel {
 	 */
 	function getColumnAt($i) { }
 
+
+	/**
+	 * return the last column
+	 */
+	function getLastColumn() { }
+
+
+	/**
+	 * return the first column
+	 */
+	function getFirstColumn() { }
+
 }
 
 
@@ -258,6 +270,22 @@ class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 	 */
 	function &getColumnAt($i) { 
 		return $this->tableColumns[$i];
+	}
+
+
+	/**
+	 * return the last column
+	 */
+	function &getLastColumn() { 
+		return $this->tableColumns[ count($this->tableColumns)-1 ];
+	}
+
+
+	/**
+	 * return the first column
+	 */
+	function &getFirstColumn() { 
+		return $this->tableColumns[0];
 	}
 }
 
