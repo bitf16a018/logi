@@ -8,10 +8,18 @@ class ClassForumCategoryBase {
 	var $_entityVersion = '';	//Source version number
 	var $classForumCategoryId;
 	var $name;
+	var $classId;
 
 	var $__attributes = array(
 	'classForumCategoryId'=>'integer',
-	'name'=>'varchar');
+	'name'=>'varchar',
+	'classId'=>'integer');
+
+	function getClassForumsByClassForumCategoryId($dsn='default') {
+		if ( $this->classForumCategoryId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = ClassForumPeer::doSelect('class_forum_category_id = \''.$this->classForumCategoryId.'\'',$dsn);
+		return $array;
+	}
 
 
 
@@ -53,19 +61,30 @@ class ClassForumCategoryBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
 
+	/**
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
+	 */
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -81,6 +100,7 @@ class ClassForumCategoryPeerBase {
 		$st = new LC_SelectStatement("class_forum_category",$where);
 		$st->fields['class_forum_category_id'] = 'class_forum_category_id';
 		$st->fields['name'] = 'name';
+		$st->fields['class_id'] = 'class_id';
 
 		$st->key = $this->key;
 
@@ -98,6 +118,7 @@ class ClassForumCategoryPeerBase {
 		$st = new LC_InsertStatement("class_forum_category");
 		$st->fields['class_forum_category_id'] = $this->classForumCategoryId;
 		$st->fields['name'] = $this->name;
+		$st->fields['class_id'] = $this->classId;
 
 		$st->key = 'class_forum_category_id';
 		$db->executeQuery($st);
@@ -115,6 +136,7 @@ class ClassForumCategoryPeerBase {
 		$st = new LC_UpdateStatement("class_forum_category");
 		$st->fields['class_forum_category_id'] = $obj->classForumCategoryId;
 		$st->fields['name'] = $obj->name;
+		$st->fields['class_id'] = $obj->classId;
 
 		$st->key = 'class_forum_category_id';
 		$db->executeQuery($st);
@@ -174,6 +196,7 @@ class ClassForumCategoryPeerBase {
 		$x = new ClassForumCategory();
 		$x->classForumCategoryId = $row['class_forum_category_id'];
 		$x->name = $row['name'];
+		$x->classId = $row['class_id'];
 
 		$x->_new = false;
 		return $x;
