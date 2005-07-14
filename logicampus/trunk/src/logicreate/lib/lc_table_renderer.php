@@ -195,7 +195,7 @@ class LC_TableDefaultCellRenderer extends LC_TableCellRenderer {
 		//print_r($this->value);
 	
 		if ( is_numeric($this->value) ) {
-			return sprintf('%.2f',$this->value);
+			return sprintf('%d',$this->value);
 		} else if (is_string($this->value) ) {
 			return sprintf('%s',$this->value);
 		} else if ( method_exists('toString',$this->value) ) {
@@ -205,4 +205,69 @@ class LC_TableDefaultCellRenderer extends LC_TableCellRenderer {
 		}
 	}
 }
+
+
+class LC_TableMoneyRenderer extends LC_TableCellRenderer {
+
+	var $moneyType = 'USD';
+
+	function getRenderedValue() {
+		switch ($this->moneyType) {
+			case 'USD':
+			return sprintf('USD $; %.2f',intval($this->value));
+
+			case 'JPY':
+			return sprintf('JPY &yen; %.2f',intval($this->value));
+		}
+
+		return sprintf('$ %.2f',intval($this->value));
+	}
+}
+
+
+class LC_TableFormatRenderer extends LC_TableCellRenderer {
+
+	var $format = '%s';
+
+	function getRenderedValue() {
+		return sprintf($this->format,$this->value);
+	}
+}
+
+
+class LC_TableDateRenderer extends LC_TableCellRenderer {
+
+	var $dateFormat = 'n / j / Y';
+
+	function getRenderedValue() {
+		return date($this->dateFormat, $this->value);
+	}
+}
+
+
+class LC_TableUrlRenderer extends LC_TableCellRenderer {
+
+	var $url;
+	var $linkText = '';
+	var $argName  = '';
+
+	function LC_TableUrlRenderer($url,$linkText,$argName = null) {
+		$this->url = $url;
+		if ( $argName != null ) {
+			$this->argName = $argName;
+		}
+		$this->linkText = $linkText;
+	}
+
+
+	function getRenderedValue() {
+		$arglist= ''; 
+		if ( strlen($this->argName) > 0 ) {
+			$arglist = $this->argName.'='.urlencode($this->value).'/';
+		}
+		return '<a href="'.$this->url.$arglist.'">'.$this->linkText.'</a>';
+	}
+}
+
+
 ?>
