@@ -55,8 +55,10 @@ class PBDO_Plugin_Sql extends PBDO_Plugin {
 
 			foreach($this->dataModel->keys as $j) { 
 				if ($j->belongsToTable($v->name)) {
+					unset($y);
 					$y = PBDO_ParsedIndex::parsedIndexFactory($this->type,$j->getAttribute(),$j->getName(),$j->getEntity());
 					$x->addIndex($y);
+					echo "*** adding index (".$y->name. ") to table (". $x->name .") on attribute (".$j->getAttribute().") \n";
 				}
 			}
 
