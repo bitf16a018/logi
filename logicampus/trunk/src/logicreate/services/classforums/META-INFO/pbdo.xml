@@ -1,7 +1,4 @@
 <?xml version="1.0"?>
-<!-- MySQL does not support foreign keys. This means   -->
-<!-- that this XML file will not reflect foreign key   -->
-<!-- relationships. You will have to do that yourself. -->
 <project name="logicampus">
   <entity  name="class_forum">
     <attribute name="class_forum_id"
@@ -13,6 +10,10 @@
             required="true"
             size="255"
             type="VARCHAR"/>
+    <attribute name="class_id"
+            required="true"
+            size="11"
+            type="INTEGER"/>
     <attribute name="description"
             required="true"
             size="255"
@@ -41,11 +42,22 @@
             default="0"
             size="11"
             type="INTEGER"/>
-    <attribute name="class_forum_section_id"
+    <attribute name="class_forum_category_id"
             required="false"
             default="0"
             size="11"
             type="INTEGER"/>
+    <foreign-key foreignTable="class_forum_category">
+	    <reference
+		local="class_forum_category_id"
+		foreign="class_forum_category_id"/>
+    </foreign-key>
+    <key 
+	    attribute="class_forum_category_id"
+	    name="class_forum_category_idx"/>
+    <key 
+	    attribute="class_id"
+	    name="class_idx"/>
   </entity>
   <entity  name="class_forum_post">
     <attribute name="class_forum_post_id"
@@ -92,6 +104,20 @@
             default="0"
             size="11"
             type="INTEGER"/>
+    <foreign-key foreignTable="class_forum">
+	    <reference
+		local="class_forum_id"
+		foreign="class_forum_id"/>
+    </foreign-key>
+    <key 
+	    attribute="is_sticky"
+	    name="is_sticky_idx"/>
+    <key 
+	    attribute="user_id"
+	    name="user_idx"/>
+    <key 
+	    attribute="thread_id"
+	    name="thread_id"/>
   </entity>
   <entity  name="class_forum_category">
     <attribute name="class_forum_category_id"
@@ -103,8 +129,17 @@
             required="true"
             size="255"
             type="VARCHAR"/>
+    <attribute name="class_id"
+            required="true"
+            size="11"
+            type="INTEGER"/>
+    <key 
+	    attribute="class_id"
+	    name="class_idx"/>
     <index>
-      <index-attribute name="class_forum_section_parent_id"/>
+      <index-column name="class_id"/>
     </index>
+
   </entity>
+
 </project>
