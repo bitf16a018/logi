@@ -24,6 +24,7 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 	public $displayName = '';
 	public $entities = array();
 	public $relationships = array();
+	public $keys = array();
 	public $projectName = 'PBDO-Unnamed Project';
 	private $projectVersion;
 	private $currentId = 0;
@@ -57,6 +58,14 @@ class PBDO_ParsedDataModel extends PBDO_InternalModel {
 		$r->setInternalId($this->currentId);
 
 		$this->relationships[$this->currentId] = $r;
+	}
+
+
+	function addKey(&$k) {
+		++$this->currentId;
+		$k->setInternalId($this->currentId);
+
+		$this->keys[$this->currentId] = $k;
 	}
 
 
@@ -328,6 +337,69 @@ class PBDO_ParsedRelationship extends PBDO_InternalModel {
 		return $this->attribB;
 	}
 
+}
+
+
+/**
+ * Represents an index on one or more attributes
+ * Internal representations of an attribute use 
+ * the string format of 'table:attribute'
+ */
+class PBDO_ParsedKey extends PBDO_InternalModel {
+
+	private $name;
+	private $attributes = array();
+	private $isUnique = false;
+
+
+	/**
+	 * Attribute uses the string format of 'table:attribute'
+	 */
+	function PBDO_ParsedKey($a,$n=null) {
+		$this->setAttribute($a);
+		$this->setName($n);
+	}
+
+
+	function setName($n) {
+		$this->name = $n;
+	}
+
+
+	function getName() {
+		return $this->name;
+	}
+
+
+	function setAttribute($c,$i=0) {
+		$this->attributes[$i] = $c;
+	}
+
+
+	function getEntity($i=0) {
+		list($table,$col) = split(':',$this->attributes[$i]);
+		return $table;
+	}
+
+
+	function getAttribute($i=0) {
+		list($table,$col) = split(':',$this->attributes[$i]);
+		return $col;
+	}
+
+
+	/**
+	 * Return true or false if this index
+	 * relies on an attribute of a given table
+	 */
+	function belongsToTable($t) {
+		foreach ($this->attributes as $k=>$v) {
+			list($table,$col) = split(':',$v);
+			if ($t== $table)
+				return true;
+		}
+		return false;
+	}
 }
 
 ?>

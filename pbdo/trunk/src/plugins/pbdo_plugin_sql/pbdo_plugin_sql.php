@@ -51,6 +51,15 @@ class PBDO_Plugin_Sql extends PBDO_Plugin {
 				$a = PBDO_ParsedColumn::createFromAttribute('mysql',$attr);
 				$x->addColumn($a);
 			}
+
+
+			foreach($this->dataModel->keys as $j) { 
+				if ($j->belongsToTable($v->name)) {
+					$y = PBDO_ParsedIndex::parsedIndexFactory($this->type,$j->getAttribute(),$j->getName(),$j->getEntity());
+					$x->addIndex($y);
+				}
+			}
+
 			$this->database->addTable($x);
 		}
 	}

@@ -256,17 +256,19 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 
 
 	function visitKeyNode(&$key) {
-		/*
+		//*
 		unset($this->workingIndex);
-		$this->workingIndex = PBDO_ParsedIndex::parsedIndexFactory(
-					$this->dbtype,
+		$this->workingIndex = new PBDO_ParsedKey(
+					$this->workingEntity->name.':'.
 					$key->xmlnode->getAttribute('attribute'),
-					$key->xmlnode->getAttribute('name'),
-					$this->workingTable->name);
+					$key->xmlnode->getAttribute('name')
+				);
 
 		if ($key->xmlnode->getAttribute('unique') == 'true') {
-			$this->workingIndex->unique = true;
+			$this->workingIndex->setUnique( true );
 		}
+		PBDO_Compiler::$model->addKey($this->workingIndex);
+		/*
 		if ($this->workingTable) {
 			$this->workingTable->addIndex($this->workingIndex);
 		}
