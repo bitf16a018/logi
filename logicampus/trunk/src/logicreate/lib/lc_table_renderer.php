@@ -239,6 +239,12 @@ class LC_TableDateRenderer extends LC_TableCellRenderer {
 
 	var $dateFormat = 'n / j / Y';
 
+	function LC_TableDateRenderer($format='') {
+		if ( strlen($format) > 0 ) {
+			$this->dateFormat = $format;
+		}
+	}
+
 	function getRenderedValue() {
 		return date($this->dateFormat, $this->value);
 	}
