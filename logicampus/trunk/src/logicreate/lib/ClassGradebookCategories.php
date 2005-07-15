@@ -96,7 +96,7 @@ class ClassGradebookCategoriesBase {
 			$this->label = $array['label'];
 		if ($array['weight'])
 			$this->weight = $array['weight'];
-		if ($array['dropCount'])
+		if ($array['dropCount']!==FALSE)
 			$this->dropCount = $array['dropCount'];
 
 		$this->_modified = true;
