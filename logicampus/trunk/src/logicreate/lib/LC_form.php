@@ -262,7 +262,6 @@
 
 			if ($v['extra'] == 'E')
 				$HTML .='<img src="'.IMAGES_URL.'wysig-help.gif" align="right">Toolbar buttons can access your File Resources.';
-				
 			$HTML .= '</td></tr></table>';
 			$HTML .= $msg.'</td></tr>';
 
@@ -282,7 +281,6 @@
 				$HTML .= '
 				<script type="text/javascript" src="'.appurl('js/').'"></script>
 				<script>
-				
 				function WYS'.$v['fieldName'].'()
 				{
 				'.$resize_script.'
@@ -1525,7 +1523,8 @@
 			{
 				// removes elements submitted that are not identified in the database
 				if ($tmp[$k] == false)
-				{	unset($ar[$k]);
+				{
+					unset($ar[$k]);
 					continue;
 				}
 				#echo $ar[$k].'----->ar<br>';
