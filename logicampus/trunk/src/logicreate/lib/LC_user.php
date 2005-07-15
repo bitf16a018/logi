@@ -1,6 +1,4 @@
 <?
-
-
 require_once(LIB_PATH.'User.php');
 
 	/**
@@ -11,6 +9,7 @@ require_once(LIB_PATH.'User.php');
 	 * should only allow one login under that username at a time.
 	 * Call lcUser->bindSession() from any login script to log-in a user.
 	 */
+
 
 class lcUser {
 
@@ -34,11 +33,7 @@ class lcUser {
 		$db = DB::getHandle();
 		$db->query("select * from lcUsers where username = '$uname'",false);
 		$db->next_record();
-
 		switch($db->Record['userType']) {
-			case USERTYPE_ADMIN:
-				$temp = new AdminUser($db->Record['username']);
-				break;
 			case USERTYPE_FACULTY:
 				$temp = new FacultyUser($db->Record['username']);
 				break;
@@ -74,14 +69,10 @@ class lcUser {
 			return $temp;
 		}
 
-		// mgk - changed again on 9/5/03 to combat access_denied issue - this
-		// way it'll never run, which may be starting the problem at 1 am.
-		if (rand(1,10) >= 80 ) {  //gc cleanup - TIMESTAMP is YYYYMMDDHHMMSS
-		global $PHPSESSID;
-		#mail("michael@tapinternet.com","garbage collection",$PHPSESSID);
-			$x = "  ".date("Ymdhis",time()-3600);
-                       #$db->query("delete from lcSessions where unix_timestamp(gc) < ( unix_timestamp(NOW())- 86400 )",false);
-//                       $db->query("delete from lcSessions where gc < $x",false);
+		if (rand(1,10) >= 80 ) {
+		//gc cleanup, mysql specific with DATE_SUB
+			global $PHPSESSID;
+			$db->query("DELETE from lcSessions WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) > gc",false);
 		}
 		$db->query("select * from lcSessions where sesskey = '$sessID'",false);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
@@ -110,7 +101,6 @@ class lcUser {
 		if ($temp2['_userobj']->username!='anonymous') { 
 			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
 		}
-		#mylog("/tmp/sesslog.txt","select * from lcSessions where sesskey='$sessID'\n-----\n$tt");
 		if ($j) {
 			$db->RESULT_TYPE=MYSQL_BOTH;
 			$sessArr = $temp2;
@@ -124,10 +114,6 @@ class lcUser {
 			$origSession = crc32($db->Record['sessdata']);
 			if ($sessArr['_userobj'] != "" && $sessArr['_userobj']->userType > 0) {
 				$temp = $sessArr['_userobj'];
-				#mail("michael@tapinternet.com","user data",serialize($sessArr));
-				if ($_SERVER['REMOTE_ADDR']=='68.22.6.158') { 
-#				echo "<form><textarea rows='10' cols='80'>"; print_r($temp); echo "</textarea></form>";
-				}
 				unset($sessArr['_userobj']);
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
@@ -154,27 +140,17 @@ class lcUser {
 
 		return $temp;
 		} else {
-		global $hadCookie;
-		if ($hadCookie==true) {
-		//trigger_error('we had a cookie submitted from you, but we cannot find your session.');
-		$f = @fopen("/tmp/badsess.txt","a");
-			if ($f) { 
-				$s = date("m/d/Y h:i:s")." - {$_SERVER['REMOTE_ADDR']} - $sessID - ".$_SERVER['HTTP_USER_AGENT']."\n";
-				ob_start();
-				if ( function_exists('apache_request_headers') ) print_r(apache_request_headers());
-				$x = ob_get_contents();
-				ob_end_clean();
-				fputs($f,$s.$x."\n==========\n");
-				fclose($f);
+			global $hadCookie;
+			if ($hadCookie==true) {
+				//trigger_error('we had a cookie submitted from you, but we cannot find your session.');
+				// user might have been logged out
+				$db->RESULT_TYPE=MYSQL_BOTH;
+				//none found, make new session, return new user
+				sess_open(DB::getHandle(),$sessID);
+				$temp =  new lcUser();
+				$temp->loadProfile();
+				return $temp;
 			}
-		}
-			$db->RESULT_TYPE=MYSQL_BOTH;
-			//none found, make new session, return new user
-			sess_open(DB::getHandle(),$sessID);
-			$temp =  new lcUser();
-			$temp->loadProfile();
-			return $temp;
-		}
 	}
 
 
@@ -425,14 +401,10 @@ class lcUser {
 		$val=base64_encode($val);
 		$s="replace into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
 		$origs="replace into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$oval','$sessid')";
-#		mail("michael@tapinternet.com","Session save",$s);
 		if ($this->username == "anonymous" ) { 
 			$s="replace into lcSessions (sessdata,sesskey) values ('$val','$sessid')";
 			$origs="replace into lcSessions (sessdata,sesskey) values ('$oval','$sessid')";
 		}
-		//$f = fopen("/tmp/sess.txt","a");
-		//fputs($f,$sessid." - ".date("m/d/Y h:i:s")."\n$origs\n-----\n");
-		//fclose($f);
 
 		$db->query($s,true);
 		//sess_close(DB::getHandle(),$this->uid,serialize($this->session));
@@ -830,6 +802,7 @@ class UserProfile {
 		$db = DB::getHandle();
 
 		while(list ($k, $v) =@each($this->common_attribs) ) {
+			if ($this->values[$v])
 			$update .= "$v='".$this->values[$v]."', ";
 		}
 		$update = substr($update, 0, -2);
