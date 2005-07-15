@@ -58,14 +58,6 @@ class Service {
 			include_once(TEMPLATE_PATH."footer.html.php");
 	}
 
-	function lessonPresentation (&$obj,&$t) {
-		//put the template and content together to form a 
-		// basic html page
-			include_once(TEMPLATE_PATH."header.html.php");
-			include_once($obj->module_root."templates/".$obj->templateName.".html");
-			include_once(TEMPLATE_PATH."lesson.footer.html.php");
-	}
-
 
 
 	function printPresentation (&$obj,&$t) {
@@ -717,7 +709,7 @@ function adminPresentation (&$obj,&$t) {
 }
 
 function plainPresentation (&$obj,&$t) {
-  include_once($obj->module_root."templates/".$obj->templateName.".html");
+	include_once($obj->module_root."templates/".$obj->templateName.".html");
 }
 
 /*
