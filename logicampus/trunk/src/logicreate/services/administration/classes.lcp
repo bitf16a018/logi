@@ -1,23 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
-
-/*
- * 
- * Handles all methods for creating and managing classes.
- *
- */
 
 include_once(LIB_PATH.'classObj.php');
 include_once(LIB_PATH.'courseObj.php');
@@ -27,6 +8,10 @@ include_once(LIB_PATH.'eventsObj.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'SiteForms.php');
 
+/**
+ * Handles all methods for creating and managing classes.
+ *
+ */
 class classes extends AdminService
 {
 	
@@ -124,7 +109,7 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record()) { 
+		while ($db->next_record()) {
 			$exam_calendar = new examscheduling();
 			
 			$exam_calendar->set_id_class($db->Record['id_classes']);
@@ -180,22 +165,21 @@ class classes extends AdminService
 			$esc->note = '';
 			$esc->save();
 			
-        	if ($esc->idExamScheduleClasses == false) { 
-        		echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->Record['id_classes'].'"*';
+        	if ($esc->idExamScheduleClasses == false) {
+			echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->Record['id_classes'].'"*';
         		break;
         	}
 			
         	unset($esc);
 			
 		}
-		
 	}
 	
 	
 	/**
 	 *	Will build up gradebooks for classes that do not have gradebooks
 	 */
-	function buildClassGradebooksRun($db,&$u,&$lc,&$t) { 
+	function buildClassGradebooksRun($db,&$u,&$lc,&$t) {
 		// I needs what I need mofo!
 		include_once(LIB_PATH.'ClassGradebook.php');
 		
@@ -216,7 +200,7 @@ class classes extends AdminService
         	$gradebookObj->set('idClasses', $db->Record['id_classes']);
         	$gradebookObj->save();
         	if ($gradebookObj->idClassGradebook == false) {
-        		echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->Record['id_classes'].'"*';
+			echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->Record['id_classes'].'"*';
         		break;
         	}
 			
@@ -237,7 +221,7 @@ class classes extends AdminService
 		WHERE B.class_id IS NULL';
 		$db->query($sql);
 
-		while ($db->next_record()) { 
+		while ($db->next_record()) {
 			$new_id_class = $db->Record['id_classes'];
 			$facultyId = trim($db->Record['facultyId']);
 			echo $new_id_class . '|'. $facultyId. '<br>';
@@ -287,12 +271,11 @@ class classes extends AdminService
 		        $folderObj->_save('classdoclib_Folders');
 					
 	                unset($folderObj);
-	
+
 	*/
 		}
-		
 	}
-	
+
 	# Displays Classes by default (chooses current semster by default)	
 	function Run($db,&$u,&$lc,&$t) {
 		$lc->templateStyle='private';
@@ -335,9 +318,9 @@ class classes extends AdminService
 		if ($lc->getvars[$this->sortVar]) {
 			if ($lc->getvars[$datagrid->sortVar] == 'Faculty') {
 				$datagrid->orderby = 'b.lastname';
-			}elseif($lc->getvars[$datagrid->sortVar] == 'courseName') {
-				$datagrid->orderby = 'c.courseName';	
-			}else {
+			} elseif($lc->getvars[$datagrid->sortVar] == 'courseName') {
+				$datagrid->orderby = 'c.courseName';
+			} else {
 				$datagrid->orderby = 'a.'.$lc->getvars[$datagrid->sortVar];
 			}
 			// add whatever other custom sortables here (outside tables)
@@ -445,10 +428,9 @@ class classes extends AdminService
 				$classObj = new classObj();
 				$classObj->_loadArray($this->cleanedArray);
 				$classObj->_saveToDB();
-			
+
 // __FIXME__ - use db driver last insert
 				if ($new_id_class = mysql_insert_id()) {
-				
 					// add section numbers
 					foreach ($a_sec_numbers as $pointer=>$snum) {
 						if ((int)$snum <= 0) {
@@ -464,18 +446,18 @@ class classes extends AdminService
 						
 					}
 					
-					// add classdoc folders (Assignments, Web Content, Classroom, Images'
-					include_once(LIB_PATH. 'documentLibraryLib.php');
- 					$folderObj = new LC_folder();
+			// add classdoc folders (Assignments, Web Content, Classroom, Images'
+			include_once(LIB_PATH. 'documentLibraryLib.php');
+
+ 			$folderObj = new LC_folder();
 	                $folderObj->name = 'Trash';
 	                $folderObj->folderType= 0;
 	                $folderObj->parentKey = 0;
 	                $folderObj->owner = $this->cleanedArray['facultyId'];
 	                $folderObj->class_id = $new_id_class;
 	                $folderObj->notes = 'Place files viewable by your classroom in here.';
+			$folderObj->_save('classdoclib_Folders');
 
-					$folderObj->_save('classdoclib_Folders');
-						
 	                unset($folderObj);
 	
 					$folderObj = new LC_folder();
@@ -510,25 +492,24 @@ class classes extends AdminService
 					assignments for students that were not uploaded
 					via the assignment manager.';
 		        	$folderObj->_save('classdoclib_Folders');
-					
-					// Insert an entry for the Gradeboko Application
-		        	include_once(LIB_PATH.'ClassGradebook.php');
-		        	$gradebookObj = new ClassGradebookBase();
-		        	
-		        	$gradebookObj->set('idClasses', $new_id_class);
-		        	$gradebookObj->aLower = 0;
-		        	$gradebookObj->bLower = 0;
-		        	$gradebookObj->cLower = 0;
-		        	$gradebookObj->dLower = 0;
-		        	$gradebookObj->totalPoints = 0;
-		        	$gradebookObj->roundScoresUp = 0;
-		        	$gradebookObj->calculationType = 0;
-		        	$gradebookObj->colorMissingGrade = '';
-		        	$gradebookObj->save();
-		        
-	
+
+				// Insert an entry for the Gradeboko Application
+				include_once(LIB_PATH.'ClassGradebook.php');
+				$gradebookObj = new ClassGradebookBase();
+
+				$gradebookObj->set('idClasses', $new_id_class);
+				$gradebookObj->aLower = 0;
+				$gradebookObj->bLower = 0;
+				$gradebookObj->cLower = 0;
+				$gradebookObj->dLower = 0;
+				$gradebookObj->totalPoints = 0;
+				$gradebookObj->roundScoresUp = 0;
+				$gradebookObj->calculationType = 0;
+				$gradebookObj->colorMissingGrade = '';
+				$gradebookObj->save();
+
 		        	if ($gradebookObj->idClassGradebook == false) {
-		        		echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
+					echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
 		        	}
 
 					// Insert an entry for the Exam Scheduler Application
@@ -655,7 +636,7 @@ class classes extends AdminService
 				if ((int)$snum == 0) {
 					unset($a_sec_numbers[$pointer]);
 					continue;
-				} else{
+				} else {
 					$a_sec_numbers[$pointer] = (int)trim($snum);
 				}
 				
@@ -683,13 +664,11 @@ class classes extends AdminService
 					$a_db_sec_numbers[] = $db->Record['sectionNumber'];
 					
 				}
-				
+
 				foreach($a_db_sec_numbers as $k) {
-					
 					$k = trim($k);
 					// these are the new numbers
 					if (in_array($k, $a_sec_numbers)) {
-						
 						$s = array_keys($a_sec_numbers, $k);
 						if (is_integer($s[0])) {
 							unset($a_sec_numbers[$s[0]]);
@@ -788,7 +767,7 @@ class classes extends AdminService
 			} else {
 				$t['error'] .= '<br>Failed to add class, please check your information and try again';
 			}
-			
+
 		}
 		$cf = 0;
 		if ($lc->postvars['submit'] == false && $lc->getvars['cf'] > 0 && $classObj->id_courses != $this->getvars['cf']) {
@@ -815,7 +794,7 @@ class classes extends AdminService
 	function deleteRun($db,&$u,&$lc,&$t) {
 		$classObj = classObj::_getFromDB($lc->getvars['id'], 'id_classes');
 		
-		if (is_object($classObj) && $classObj->id_classes > 0) { 
+		if (is_object($classObj) && $classObj->id_classes > 0) {
 			$id_classes = $classObj->id_classes;
 			
 			$sql[] = 'DELETE FROM class_announcements WHERE id_classes='.$id_classes;
@@ -871,7 +850,7 @@ class classes extends AdminService
 			$sql[] = 'DELETE FROM textbook WHERE id_classes='.$id_classes;
 			$sql[] = 'DELETE FROM textbook_classes WHERE id_classes='.$id_classes;
 			
-			$sql_string = 'SELECT assessment_id FROM assessment WHERE id_class='.$id_classes;
+			$sql_string = 'SELECT assessment_id FROM assessment WHERE class_id='.$id_classes;
 			$db->query($sql_string);
 			while ($db->next_record()) {
 				$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->Record['assessment_id'];
