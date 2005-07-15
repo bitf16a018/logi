@@ -26,7 +26,8 @@ class cal extends AdminService
 		'Month view' => 'cal/',
 		'Year view' => 'cal/event=viewYear',
 		'View scheduled events' => 'cal/event=schedule',
-		'Schedule event' => 'cal/event=editschedule'
+		'Schedule event' => 'cal/event=editschedule',
+		'Search' => 'search/'
 	);
 	
 	
