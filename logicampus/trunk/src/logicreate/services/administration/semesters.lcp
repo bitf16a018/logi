@@ -180,7 +180,7 @@ class semesters extends AdminService
 				
 				
 				// which accounts does this mean? faculty or students? maybe both? eventually we'll need to know :)
-				$bl_account_deactivation	= strtotime($lc->postvars['dateDeactivation']['month']. '/'. $lc->postvars['dateDeactivation']['day']. '/'.$lc->postvars['dateDeactivation']['year']);
+				$bl_account_deactivation = strtotime($lc->postvars['dateDeactivation']['month']. '/'. $lc->postvars['dateDeactivation']['day']. '/'.$lc->postvars['dateDeactivation']['year']);
 				
 				// making sure account_deactivation comes after or ON semester start
 				if ($bl_account_deactivation < $bl_date_start)
@@ -254,17 +254,51 @@ class semesters extends AdminService
 						if ($lc->postvars['dateAccountActivation']['ampm'] == 'PM')
 						{	$lc->postvars['dateAccountActivation']['hours'] +=12;
 						} 
-					
-						$semesterObj->dateAccountActivation = $lc->postvars['dateAccountActivation']['year']. '-'.$lc->postvars['dateAccountActivation']['month']. '-'. $lc->postvars['dateAccountActivation']['day'].' '.$lc->postvars['dateAccountActivation']['hours']. ':'. $lc->postvars['dateAccountActivation']['minutes']. ':00';
-						$semesterObj->dateDeactivation 		= $lc->postvars['dateDeactivation']['year']. '-'.$lc->postvars['dateDeactivation']['month']. '-'. $lc->postvars['dateDeactivation']['day'];
-						$semesterObj->dateCensus 			= $lc->postvars['dateCensus']['year']. '-'.$lc->postvars['dateCensus']['month']. '-'. $lc->postvars['dateCensus']['day'];
-						$semesterObj->dateFinalDrop			= $lc->postvars['dateFinalDrop']['year']. '-'.$lc->postvars['dateFinalDrop']['month']. '-'. $lc->postvars['dateFinalDrop']['day']. ' 00:00:00';//.$lc->postvars['dateFinalDrop']['hours']. ':'. $lc->postvars['dateFinalDrop']['day']. ':'.$lc->postvars['dateFinalDrop']['day'];
-						
+						$semesterObj->dateAccountActivation = 
+						$lc->postvars['dateAccountActivation']['year']. 
+						'-'.$lc->postvars['dateAccountActivation']['month']. 
+						'-'.$lc->postvars['dateAccountActivation']['day'].
+						' '.$lc->postvars['dateAccountActivation']['hours']. 
+						':'.$lc->postvars['dateAccountActivation']['minutes']. ':00';
+
+						if ($lc->postvars['dateDectivation']['ampm'] == 'PM')
+						{	$lc->postvars['dateDectivation']['hours'] +=12;
+						} 
+						$semesterObj->dateDeactivation 	= 
+						$lc->postvars['dateDeactivation']['year']. 
+						'-'.$lc->postvars['dateDeactivation']['month']. 
+						'-'.$lc->postvars['dateDeactivation']['day']. 
+						' '.$lc->postvars['dateDeactivation']['hours'].
+						':'.$lc->postvars['dateDeactivation']['minutes'].':00';
+
+						$semesterObj->dateCensus = 
+						$lc->postvars['dateCensus']['year']. 
+						'-'.$lc->postvars['dateCensus']['month']. 
+						'-'. $lc->postvars['dateCensus']['day'];
+
+						$semesterObj->dateFinalDrop = 
+						$lc->postvars['dateFinalDrop']['year']. 
+						'-'.$lc->postvars['dateFinalDrop']['month']. 
+						'-'. $lc->postvars['dateFinalDrop']['day']. 
+						' 00:00:00';
+
 						if ($lc->postvars['dateStudentActivation']['ampm'] == 'PM')
 						{	$lc->postvars['dateStudentActivation']['hours'] +=12;
 						} 
 						$semesterObj->dateStudentActivation = $lc->postvars['dateStudentActivation']['year']. '-'.$lc->postvars['dateStudentActivation']['month']. '-'. $lc->postvars['dateStudentActivation']['day'].' '.$lc->postvars['dateStudentActivation']['hours']. ':'. $lc->postvars['dateStudentActivation']['minutes']. ':00';
 					
+
+						if ($lc->postvars['dateStudentDeactivation']['ampm'] == 'PM')
+						{	$lc->postvars['dateStudentDeactivation']['hours'] +=12;
+						} 
+						$semesterObj->dateStudentDeactivation = 
+						$lc->postvars['dateStudentDeactivation']['year']. 
+						'-'.$lc->postvars['dateStudentDeactivation']['month']. 
+						'-'. $lc->postvars['dateStudentDeactivation']['day'].
+						' '.$lc->postvars['dateStudentDeactivation']['hours']. 
+						':'. $lc->postvars['dateStudentDeactivation']['minutes'].':00';
+	
+
 						$semesterObj->semesterId			= $lc->postvars['semesterTerm']. $lc->postvars['semesterYear']['year'];
 						$semesterObj->semesterYear			= $lc->postvars['semesterYear']['year'];
 						$semesterObj->semesterTerm			= $this->semesterTerms[$lc->postvars['semesterTerm']];
@@ -281,12 +315,12 @@ class semesters extends AdminService
 						
 						$semesterObj->dateEndExam= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndExam']));
 						$semesterObj->dateStartExam = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartExam']));
-						
-						
+
+
 						$semesterObj->_saveToDB();
-						
-						if (mysql_insert_id() >= 1)
-						{	$sql = 'insert into semesters_course_info set id_semesters='.mysql_insert_id();
+
+						if (mysql_insert_id() > 1) {
+							$sql = 'insert into semesters_course_info set id_semesters='.mysql_insert_id();
 							$db->query($sql);
 							/// i need to know if this worked..add error checking later
 						}
