@@ -1,16 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
 
 // this is different from the documentLibraryLib.php file
 // that one deals with classdoclib_ table names, this one 
@@ -168,7 +156,7 @@ WHERE
 		}
 		$this->tmpfile ='';
 		// UNSET DOESN'T ALWAYS WORK
-		unset($this->tmpfile);
+		//unset($this->tmpfile);
 		$this->_save($this->prefix."doclib_Files");
 		return true;
 	}
