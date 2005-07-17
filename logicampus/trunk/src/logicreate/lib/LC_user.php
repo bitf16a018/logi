@@ -151,6 +151,7 @@ class lcUser {
 				$temp->loadProfile();
 				return $temp;
 			}
+		}
 	}
 
 
