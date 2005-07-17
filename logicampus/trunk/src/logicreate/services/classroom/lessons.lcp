@@ -1,7 +1,7 @@
 <?
 
 include_once(LIB_PATH.'classLessonContentObj.php');
-//include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'datagrid.php');
 
 include(LIB_PATH.'lc_table.php');
 include(LIB_PATH.'lc_table_renderer.php');
@@ -33,6 +33,30 @@ class lessons extends StudentService {
 		$ut = time();						
 		$lc->templateName = 'lessons_main';
 
+		//query to get all visible lessons
+		$sql = 'SELECT * FROM class_lessons
+			where id_classes='.$u->activeClassTaken->id_classes.'
+			AND activeOn <= '.$ut.'
+			AND inactiveOn > '.$ut.'
+			ORDER BY createdOn';
+
+		$db->query($sql);
+		while ($db->next_record()) $lessons[] = $db->Record;
+
+
+/*
+// TODO add sorting to LC_Table (LC_TableSortable ??)
+		$dm = new MyLessonModel($lessons);
+		$table = new LC_Table($dm);
+
+		$render = new LC_TableRenderer($table);
+//		echo $render->toHTML();
+//exit();
+		$t['table'] = $render->toHTML();
+*/
+
+
+
 		# Build datagrid of lessons, only show ones that are
 		# active
 		$dg = new datagrid($this->module, $this->serviceName);
@@ -54,6 +78,8 @@ class lessons extends StudentService {
 		$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
 		$dg->overrideColumn('<a href="'.modurl('lessons/event=view/id=<?=$id_class_lessons;?>').'"><?=$title;?></a>', 'title');
 		$t['table'] = $dg->toHTML();
+//*/
+
 	}
 
 	/**
@@ -66,11 +92,12 @@ class lessons extends StudentService {
 	function viewRun(&$db,&$u,&$lc,&$t) {
 		
 		$lc->templateName='lessons_view';
+		$class_id = intval($lc->getvars['id']);
 
 		// Make sure they're allowed to access this lesson AND
 		#function checkContentPermission($activeClassTaken, $table, $tablePkey, $contentLabel, $contentPkey
 
-		$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $lc->getvars['id']);
+		$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $class_id);
 		if (!$check)
 		{
 			$lc->templateName = 'main_nocontentaccess';
@@ -79,7 +106,7 @@ class lessons extends StudentService {
 		// actually retrieve the data from the db
 		$ut = time();
 		$sql = "select * from class_lessons
-			where id_class_lessons='{$lc->getvars['id']}'
+			where id_class_lessons='".$class_id."'
 			and id_classes='{$u->activeClassTaken->id_classes}'";
 		if (!$u->isFaculty())
 			$sql .= " and (activeOn < ".time()."
@@ -94,14 +121,14 @@ class lessons extends StudentService {
 		}
 
 		$db->queryOne("select id_class_lesson_content, txTitle,txText from class_lesson_content
-			where id_class_lessons='{$lc->getvars['id']}'");
+			where id_class_lessons='".$class_id."'");
 		$t['content'] = $db->Record;
 
 		$db->query("SELECT class_objectives.id_class_objectives, objective, f_hide 
 			FROM class_objectives
 			LEFT JOIN class_lesson_objectives on 
 				class_lesson_objectives.id_class_objectives = class_objectives.id_class_objectives
-			WHERE class_lesson_objectives.id_class_lesson='{$lc->getvars['id']}' 
+			WHERE class_lesson_objectives.id_class_lesson='".$class_id."' 
 			AND f_hide=0 ORDER BY i_sort ASC");
 		while ($db->next_record()) $t['objectives'][] = $db->Record;
 
@@ -109,13 +136,22 @@ class lessons extends StudentService {
 		//ASSIGNMENTS TABLE
 		// modified this sql statemnet to order by dueDate 
 		//  instead of activeDate in desc order
-		$sql = "select a.id_class_assignments, a.title, a.dueDate, a.responseType from class_assignments as a
-			left join class_assignments_link as k on k.id_class_assignments=a.id_class_assignments
-			left join class_lessons as l on l.id_class_lessons=k.id_class_lessons
-			where a.id_classes='".$u->activeClassTaken->id_classes."'"
-			.(($u->isFaculty() == false) ? ' AND activeDate <= '
-			.mktime(0, 0, 0, date('m'), date('d'),date('Y')) : '')
-			." AND l.id_class_lessons='{$lc->getvars['id']}' order by dueDate ASC";
+		$sql = "SELECT a.id_class_assignments, a.title, a.dueDate, a.responseType,
+			cat.dateTurnin
+			FROM class_assignments as a
+			LEFT JOIN class_assignments_link as k 
+			  ON k.id_class_assignments=a.id_class_assignments
+
+			LEFT JOIN class_lessons as l 
+			  ON l.id_class_lessons=k.id_class_lessons
+
+			LEFT JOIN class_assignments_turnin as cat 
+			  ON a.id_class_assignments=cat.id_class_assignments
+
+			WHERE a.id_classes='".$u->activeClassTaken->id_classes."'"
+			." AND l.id_class_lessons='".$class_id."' 
+			ORDER BY dueDate ASC";
+
 		$db->query($sql);
 		while ($db->next_record()) $t['assignments'][] = $db->Record;
 
@@ -125,7 +161,7 @@ class lessons extends StudentService {
 		$columnModel = &$table->getColumnModel();
 		$col_a = &$columnModel->getColumnAt(0);
 		$col_a->cellRenderer = new LC_TableAssignmentRenderer();
-		$col_a->maxWidth = 250;
+		$col_a->maxWidth = 230;
 		$col_a->justify = 'left';
 
 		$col_b = &$columnModel->getColumnAt(1);
@@ -150,7 +186,7 @@ class lessons extends StudentService {
 		$sql = "SELECT l.id_class_links, title, url from class_links as l
 			LEFT JOIN class_lesson_links as ll 
 			  ON l.id_class_links=ll.id_class_links
-			WHERE ll.id_class_lessons='{$lc->getvars['id']}'";
+			WHERE ll.id_class_lessons='".$class_id."'";
 		$db->query($sql);
 		while ($db->next_record()) $t['weblinks'][] = $db->Record;
 
@@ -238,6 +274,69 @@ class lessons extends StudentService {
 
 // TABLE INTERFACE CLASSES
 
+class MyLessonModel extends LC_TableModel {
+
+	var $lessons = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyLessonModel($l) {
+		$this->lessons = $l;
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->lessons));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 3;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return 'Active On'; break;
+
+			case '1':
+				return 'Lesson'; break;
+
+			case '2':
+				return 'Description'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$l = $this->lessons[$x];
+		switch ($y) {
+			case 0:
+				return $l['activeOn'];
+			case 1:
+				return $l['title'];
+			case 2:
+				return $l['description'];
+		}
+	}
+}
+
+
 class MyAssignmentModel extends LC_TableModel {
 
 	var $assignments = array();
@@ -304,7 +403,7 @@ class MyAssignmentModel extends LC_TableModel {
 			case 2:
 				return $assignment;
 			case 3:
-				return 'No';
+				return $assignment['dateTurnin'] > 0 ? 'Yes':'No';
 		}
 
 		// 1 upload file
