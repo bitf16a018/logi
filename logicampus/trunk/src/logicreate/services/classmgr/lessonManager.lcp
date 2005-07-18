@@ -1,21 +1,10 @@
 <?php
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
 
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'classLessonObj.php');
+// PBDO is the new standard, above object is DEPRECATED
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
 
 
 class LessonManager extends FacultyService {
@@ -37,20 +26,9 @@ class LessonManager extends FacultyService {
 	);
 	var $applinks = array (
 		'List Lessons' => 'lessonManager/',
-		'Add a Lesson' => 'lessonManager/event=edit'
+		'Add a Lesson' => 'lessonManager/event=add'
 	);
 
-
-
-function authorize($lc,$u) {
-if ($u->username != 'mark' ) { 
-?><center><h2>Shutting down lesson manager</h2></center>
-<?
-	$this->presentor = 'errorMessage';
-	return false;
-}
-	return true;
-}
 
 
 	/**
@@ -80,7 +58,55 @@ if ($u->username != 'mark' ) {
 		$dg->sortColumns = array( 'createdOn', 'activeOn', 'title' );
 		$dg->postpendColumn('<a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">view</a> | <a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">edit</a> | <a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">delete</a>', 'links'); 
 		$t['content'] = $dg->toHTML();
+	}
 
+
+	/**
+	 * show the add page
+	 */
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonManager_new';
+		$this->sectionTitle = 'Add a Lesson';
+
+		$class_id = $u->activeClassTaught->id_classes;
+
+		// get the possible content choices for the pulldown 
+		$sql = "SELECT txTitle,id_class_lesson_content 
+			FROM class_lesson_content
+			WHERE id_classes='".$class_id."'";
+
+		$db->query($sql);
+		while ( $db->next_record() ) {
+			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
+		}
+	}
+
+
+	/**
+	 * Save a new lesson
+	 */
+	function newRun(&$db,&$u,&$lc,&$t) {
+//		$lc->templateName = 'lessonManager_new';
+
+		$class_id = $u->activeClassTaught->id_classes;
+		if (intval($class_id) == 0) {
+			trigger_error("A valid class id could not be found");
+			return;
+		}
+
+		$lesson = new ClassLessons();
+		$lesson->set('createdOn',time());
+		$lesson->set('title',htmlentities($lc->postvars['title']));
+		$lesson->set('description',htmlentities($lc->postvasr['title']));
+		$lesson->set('activeOn',time());
+		$lesson->set('inactiveOn',time()+36000);
+		$lesson->set('idClasses',$class_id);
+		$lesson->set('checkList',"step 1\nstep 2\nstep 3");
+
+		$lesson->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson->getPrimaryKey());
 	}
 
 
@@ -92,9 +118,10 @@ if ($u->username != 'mark' ) {
 		$this->sectionTitle = 'Add a New Lesson';
 		$lc->templateName = 'lessonManager_edit';
 		$defaults = array();
-		$lessonid = $lc->getvars['id'];
+		$lessonid = intval($lc->getvars['id']);
+		$t['lesson_id'] = $lessonid;
 
-		if ($lessonid && !$this->checkAuth($lessonid,$db,$u,$t)) return;
+		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
 
 		DEFINE(LESSON_ID, $lessonid); // for the custom fields
 
@@ -119,18 +146,18 @@ if ($u->username != 'mark' ) {
 			from class_lessons
 			where id_class_lessons='{$lessonid}'";
 		$db->queryOne($sql);
-		$defaults['title'] = $db->Record['title'];
-		$defaults['description'] = $db->Record['description'];
-		$defaults['createdOn'] = $db->Record['createdOn'];
-		$defaults['activeOn'] = $db->Record['activeOn'];
-		$defaults['inactiveOn'] = $db->Record['inactiveOn'];
-		$defaults['checkList'] = $db->Record['checkList'];
+		$t['title'] = $db->Record['title'];
+		$t['description'] = $db->Record['description'];
+		$t['createdOn'] = $db->Record['createdOn'];
+		$t['activeOn'] = $db->Record['activeOn'];
+		$t['inactiveOn'] = $db->Record['inactiveOn'];
+		$t['checkList'] = split("\n",$db->Record['checkList']);
 		
 		// get the content field
 		$sql = "select id_class_lesson_content from class_lesson_content
 			where id_class_lessons='{$lessonid}'";
 		$db->queryOne($sql);
-		$defaults['content'] = $db->Record['id_class_lesson_content'];
+		$t['content'] = $db->Record['id_class_lesson_content'];
 
 		// get the web links -- check out this query!
 		$sql = "select class_links.id_class_links from class_links
@@ -153,6 +180,7 @@ if ($u->username != 'mark' ) {
 			$defaults['inactiveOn'] = mktime(0, 0, 0, $d[1], $d[2], $d[0]);
 		}
 
+/*
 		$f = new SiteForm();
 
 		if ($lessonid) {
@@ -162,10 +190,12 @@ if ($u->username != 'mark' ) {
 		} else {
 			$f->getForm( 'lesson', $lc->postvars );
 		}
+*/
 
-		$t['content'] = $f->toHTML();
+//		$t['content'] = $f->toHTML();
 		
 	}
+
 
 	/**
 	 * commit the posted data to the database, if worthy
@@ -175,7 +205,7 @@ if ($u->username != 'mark' ) {
 		$f = new Siteform();
 		$lessonid = $lc->getvars['id'];
 
-		if ($lessonid && !$this->checkAuth($lessonid,$db,$u,$t)) return;
+		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
 		$t['error'] = $f->validateForm('lesson', $lc->postvars);
 		if (!$t['error']) {
 			
@@ -262,6 +292,7 @@ if ($u->username != 'mark' ) {
 		$this->editRun($db,$u,$lc,$t);
 	}
 
+
 	/**
 	 * confirm the lesson deletion and ask if we should remove or just unlink the
 	 * external items.
@@ -308,14 +339,36 @@ if ($u->username != 'mark' ) {
 	}
 
 
-	// Do they have authority for this lesson? Yes, return true. No, give them an error
-	// and return false. (The caller need only return.)
+	/**
+	 * Show the Check List for editing
+	 */
+	function checkListRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$sql = "select checkList
+			from class_lessons
+			where id_class_lessons='{$lesson_id}'";
+
+		$db->queryOne($sql);
+
+		$t['checkList'] = split("\n", $db->Record['checkList']);
+
+		$lc->templateName = 'lessonManager_checkList';
+	}
+
+
+	/**
+	 * Do they have authority for this lesson? Yes, return true. No, give them an error
+	 * and return false. (The caller need only return.)
+	 */
 	function checkAuth($lessonid, &$db, &$u, &$t) {
 		$db->queryOne("select count(id_class_lessons) as cnt from class_lessons as l
 			left join classes as c on l.id_classes=c.id_classes
 			where l.id_classes='{$u->activeClassTaught->id_classes}'
 			and l.id_class_lessons='{$lessonid}'");
-		if (!$db->Record['cnt']) {
+		if (!$db->Record['cnt'] || intval($lessonid) == 0 ) {
 			$this->presentor = 'errorMessage';
 			$t['message'] = "You don't have permission to modify that lesson.";
 			return false;

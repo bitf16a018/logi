@@ -1,0 +1,11 @@
+<?= $t['sectionheader']; ?>
+
+<h2 style="margin:0px;">Check List for Lesson</h2>
+<ol>
+	<?php
+	for ($x=0; $x < 20; ++$x) {
+	$v = $t['checkList'][$x];
+	?>
+	<li><input type="text" value="<?= htmlentities($v); ?>"/></li>
+	<?php } ?>
+</ol>

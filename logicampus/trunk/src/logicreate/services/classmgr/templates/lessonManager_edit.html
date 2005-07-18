@@ -1,17 +1,276 @@
-<?
+<?php 
 print $t['sectionheader'];
+?>
+<form action="" method="POST" enctype="application/x-www-form-urlencoded">
+	<table width="" border="0" cellspacing="3" cellpadding="0">
+		<tr>
+			<td valign="top" class="">*Title</td>
+			<td valign="top" class=""><input type="text" id="title" name="title" value="<?=$t['title'];?>" size="65" maxlength="255"/></td>
+		</tr>
+		<tr>
+			<td valign="top" class="" valign="top">*Description</td>
+			<td valign="top" class="">
+				<textarea name="description" cols="62" rows="7" id="description"><?= $t['description'];?></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class="">*Content Page</td>
+			<td valign="top" class="">
+				<select id="content" name="content"  size="1">
+					<option value="1" SELECTED >ffffffffffff</option>
+					<option value="2">PAge 2</option>
+				</select>
+			</td>
+		</tr>
+	</table>
 
-if ( $t['numcontent'] == 0 )
-	print '<p style="color:red">You need at least one <a href="'.MOD_URL.'lessonContent/">content item</a> that is unused by another lesson before you can edit this lesson.<p>';
+	<fieldset>
+		<legend>Dates</legend>
+	<table width="" border="0" cellspacing="3" cellpadding="0">
+		<tr>
+			<td valign="top" class="">Activate On</td>
+			<td valign="top" class="">
+				<select name='activeOn[month]'>
+	<option value="1">January</option>
+	<option value="2">February</option>
+	<option value="3">March</option>
+	<option value="4">April</option>
+	<option value="5">May</option>
 
-if ( $t['numobjectives'] == 0 )
-	print '<p style="color:red">You must create at least one <a href="'.MOD_URL.'lessonObjectives/event=edit">lesson objective</a> before the lesson.<p>';
+	<option value="6">June</option>
+	<option value="7" SELECTED >July</option>
+	<option value="8">August</option>
+	<option value="9">September</option>
+	<option value="10">October</option>
+	<option value="11">November</option>
+
+	<option value="12">December</option>
+				</select>
+				<select name='activeOn[day]'>
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	<option value="5">5</option>
+
+	<option value="6">6</option>
+	<option value="7">7</option>
+	<option value="8">8</option>
+	<option value="9">9</option>
+	<option value="10">10</option>
+	<option value="11">11</option>
+
+	<option value="12">12</option>
+	<option value="13">13</option>
+	<option value="14" SELECTED >14</option>
+	<option value="15">15</option>
+	<option value="16">16</option>
+	<option value="17">17</option>
+
+	<option value="18">18</option>
+	<option value="19">19</option>
+	<option value="20">20</option>
+	<option value="21">21</option>
+	<option value="22">22</option>
+	<option value="23">23</option>
+
+	<option value="24">24</option>
+	<option value="25">25</option>
+	<option value="26">26</option>
+	<option value="27">27</option>
+	<option value="28">28</option>
+	<option value="29">29</option>
+
+	<option value="30">30</option>
+	<option value="31">31</option>
+				</select>
+				<select name='activeOn[year]'>
+	<option value="2005" SELECTED >2005</option>
+	<option value="2006">2006</option>
+	<option value="2007">2007</option>
+				</select>
+				<select name='activeOn[hours]'>
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	<option value="5" SELECTED >5</option>
+	<option value="6">6</option>
+
+	<option value="7">7</option>
+	<option value="8">8</option>
+	<option value="9">9</option>
+	<option value="10">10</option>
+	<option value="11">11</option>
+	<option value="12">12</option>
+				</select>
+				<select name='activeOn[minutes]'>
+	<option value="0" SELECTED >00</option>
+	<option value="5">5</option>
+	<option value="10">10</option>
+	<option value="15">15</option>
+	<option value="20">20</option>
+	<option value="25">25</option>
+
+	<option value="30">30</option>
+	<option value="35">35</option>
+	<option value="40">40</option>
+	<option value="45">45</option>
+	<option value="50">50</option>
+	<option value="55">55</option>
+				</select>
+				<select name='activeOn[ampm]'>
+	<option value="AM">AM</option>
+	<option value="PM" SELECTED >PM</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class="">Deactivate On</td>
+			<td valign="top" class="">
+				<select name='inactiveOn[month]'>
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7" SELECTED >July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<select name='inactiveOn[day]'>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option value="15">15</option>
+
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
+					<option value="20" SELECTED >20</option>
+					<option value="21">21</option>
+
+					<option value="22">22</option>
+					<option value="23">23</option>
+					<option value="24">24</option>
+					<option value="25">25</option>
+					<option value="26">26</option>
+					<option value="27">27</option>
+
+					<option value="28">28</option>
+					<option value="29">29</option>
+					<option value="30">30</option>
+					<option value="31">31</option>
+				</select>
+				<select name='inactiveOn[year]'>
+					<option value="2005" SELECTED >2005</option>
+					<option value="2006">2006</option>
+
+					<option value="2007">2007</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	</fieldset>
+
+		<br/>
+		<div style="text-align:center;">
+			<input type="submit" id="submit" name="submit" value="Save Changes">
+			<input type="hidden" name="event" value="update">
+		</div>
 
 
-if ( $t['numcontent'] && $t['numobjectives'] ) { ?>
-<p>This page allows you to take your content, objectives, assignments, and weblinks and assemble them into a lesson. For the multi-select list boxes, simply hold down your ctrl key as you click on the items to select them. If you assign an objective or assignment to this lesson that already belongs to another lesson, it will be reassigned. In other words, each objective and assignment can only belong to one lesson.</p>
-<? } ?>
+		<div style="font-size:85%">* denotes a required field</div>
 
-<?if($t['error']){?><span style="color:red"><?=$t['error']?></span><?}?>
-<?if($t['msg']){?><span style="color:blue"><?=$t['msg']?></span><?}?>
-<?=$t['content'];?>
+
+		<div style="font-size:85%;">** Make sure you save changes to the above items before changes items below this line.</div>
+
+</form>
+	<hr>
+
+	<p style="clear:both;">&nbsp;</p>
+
+
+	<div style="width:48%;float:right;">
+		<fieldset>
+			<legend>Lesson Objectives</legend>
+			<a href="#">Change Objectives</a>
+			<ul>
+				<li>aaaaaaa
+aaaaaaaa
+aaaaaaaa
+aaaaaaaa
+</li>
+<li>bbbbbbbb
+bbbbbbbbb
+bbbbbbbbb
+bbbbbbbbbb
+</li>
+			</ul>
+		</fieldset>
+	</div>
+
+
+	<div style="width:48%;float:left">
+		<fieldset>
+			<legend>Lesson Check List</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lesson_id']);?>">Change Check List</a>
+			<ol>
+				<?php
+				foreach ($t['checkList'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ol>
+		</fieldset>
+	</div>
+
+
+	<p style="clear:both;">&nbsp;</p>
+
+
+	<div style="width:48%;float:right;">
+		<fieldset>
+			<legend>Web Links</legend>
+			<a href="#">Change Web Links</a>
+			<ul>
+				<li>sdaf</li>
+				<li>foogle</li>
+			</ul>
+		</fieldset>
+	</div>
+	
+
+	<div style="width:48%;float:left;">
+		<fieldset>
+			<legend>Assignments</legend>
+			<a href="#">Change Assignemnts</a>
+			<ul>
+				<li>Make a Pie</li>
+				<li>Eat the pie</li>
+			</ul>
+		</fieldset>
+	</div>
+	
+
+	<p style="clear:both;">&nbsp;</p>
