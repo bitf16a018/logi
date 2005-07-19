@@ -20,20 +20,24 @@ class LessonManager extends FacultyService {
 
 	// links
 	var $inactivelinks = array( 'Lessons' );
-	var $navlinks = array (
-		'Classroom Manager' => 'display',
-		'Lessons' => 'lessonManager/',
-		'Webliography' => 'lessonWebliography/',
-		'FAQ' => 'faq/',
-		'Assignments' => 'assignmentManage/',
-		'Content' => 'lessonContent/',
-		'Presentations' => 'studentPresentation',
-		'Objectives' => 'lessonObjectives/'
-	);
 	var $applinks = array (
 		'List Lessons' => 'lessonManager/',
 		'Add a Lesson' => 'lessonManager/event=add'
 	);
+        var $navlinks = array (
+                'Classroom Manager' => 'display/',
+                'Announcements'=>'announcements/',
+                'Assessment Manager' => '%assessments/',
+                'Assignments' => 'assignmentManage/',
+                'Content' => 'lessonContent/',
+                'FAQ' => 'faq/',
+                'File Resource Manager' => '%classdoclib/',
+                'Gradebook' => '%gradebook/',
+                'Lessons' => 'lessonManager/',
+                'Objectives' => 'lessonObjectives/',
+                'Webliography' => 'lessonWebliography/'
+        );
+
 
 
 
@@ -61,6 +65,9 @@ class LessonManager extends FacultyService {
 			'description' => 'Description',
 			'links' => ' '
 		);
+		if ($lc->getvars['gdorder']=='') {
+			$lc->getvars['dgorder'] = 'activeOn';
+		}
 		$dg->sortColumns = array( 'createdOn', 'activeOn', 'title' );
 		$dg->postpendColumn('<a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">view</a> | <a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">edit</a> | <a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">delete</a>', 'links'); 
 		$t['content'] = $dg->toHTML();
