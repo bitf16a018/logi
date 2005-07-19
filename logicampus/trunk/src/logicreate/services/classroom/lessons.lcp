@@ -249,7 +249,7 @@ class lessons extends StudentService {
 		// get the lesson from the DB so we can show the title
 		$ut = time();
 		$sql = "select * from class_lessons
-			where id_class_lessons='{$lc->getvars['id']}'
+			where id_class_lessons='".$t['content']['id_class_lessons']."'
 			and id_classes='{$u->activeClassTaken->id_classes}'";
 		$db->queryOne($sql);
 		$t['lesson'] = $db->Record;
