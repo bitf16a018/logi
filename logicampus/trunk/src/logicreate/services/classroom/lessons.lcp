@@ -136,8 +136,8 @@ class lessons extends StudentService {
 		//ASSIGNMENTS TABLE
 		// modified this sql statemnet to order by dueDate 
 		//  instead of activeDate in desc order
-		$sql = "SELECT a.id_class_assignments, a.title, a.dueDate, a.responseType,
-			cat.dateTurnin
+		$t['assignments'] = array();
+		$sql = "SELECT a.id_class_assignments, a.title, a.dueDate, a.responseType
 			FROM class_assignments as a
 			LEFT JOIN class_assignments_link as k 
 			  ON k.id_class_assignments=a.id_class_assignments
@@ -145,15 +145,24 @@ class lessons extends StudentService {
 			LEFT JOIN class_lessons as l 
 			  ON l.id_class_lessons=k.id_class_lessons
 
-			LEFT JOIN class_assignments_turnin as cat 
-			  ON a.id_class_assignments=cat.id_class_assignments
-
-			WHERE a.id_classes='".$u->activeClassTaken->id_classes."'"
-			." AND l.id_class_lessons='".$class_id."' 
+			WHERE a.id_classes='".$u->activeClassTaken->id_classes."'
+			AND l.id_class_lessons='".$class_id."' 
 			ORDER BY dueDate ASC";
 
 		$db->query($sql);
 		while ($db->next_record()) $t['assignments'][] = $db->Record;
+		//can't figure this out with a join
+		foreach($t['assignments'] as $k =>$v) {
+			$db->query("SELECT dateTurnin 
+				FROM class_assignments_turnin
+				WHERE id_class_assignments = ".$v['id_class_assignments']."
+				AND id_student = '".$u->username."'");
+			if ($db->next_record()) {
+				$t['assignments'][$k]['dateTurnin'] = $db->Record['dateTurnin'];
+			} else {
+				$t['assignments'][$k]['dateTurnin'] = 0;
+			}
+		}
 
 		$dataModel = new MyAssignmentModel($t['assignments']);
 		$table = new LC_Table($dataModel);
