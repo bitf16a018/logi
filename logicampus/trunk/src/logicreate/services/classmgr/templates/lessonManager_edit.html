@@ -214,18 +214,19 @@ print $t['sectionheader'];
 	<div style="width:48%;float:right;">
 		<fieldset>
 			<legend>Lesson Objectives</legend>
-			<a href="#">Change Objectives</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lesson_id']);?>">Change Objective</a>
+			<?php
+			if ( ! is_array($t['objectives']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Objectives</span>
+			<?php } ?>
 			<ul>
-				<li>aaaaaaa
-aaaaaaaa
-aaaaaaaa
-aaaaaaaa
-</li>
-<li>bbbbbbbb
-bbbbbbbbb
-bbbbbbbbb
-bbbbbbbbbb
-</li>
+				<?php
+				foreach ($t['objectives'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
 			</ul>
 		</fieldset>
 	</div>
@@ -235,6 +236,13 @@ bbbbbbbbbb
 		<fieldset>
 			<legend>Lesson Check List</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lesson_id']);?>">Change Check List</a>
+			<?php
+			if ( ! is_array($t['checkList']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Check List</span>
+			<?php } ?>
+
 			<ol>
 				<?php
 				foreach ($t['checkList'] as $k=>$v) {
@@ -252,10 +260,19 @@ bbbbbbbbbb
 	<div style="width:48%;float:right;">
 		<fieldset>
 			<legend>Web Links</legend>
-			<a href="#">Change Web Links</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkWeb/id='.$t['lesson_id']);?>">Change Web Links</a>
+			<?php
+			if ( ! is_array($t['web']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Web Links</span>
+			<?php } ?>
 			<ul>
-				<li>sdaf</li>
-				<li>foogle</li>
+				<?php
+				foreach ($t['web'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
 			</ul>
 		</fieldset>
 	</div>
@@ -264,10 +281,19 @@ bbbbbbbbbb
 	<div style="width:48%;float:left;">
 		<fieldset>
 			<legend>Assignments</legend>
-			<a href="#">Change Assignemnts</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lesson_id']);?>">Change Assignemnts</a>
+			<?php
+			if ( ! is_array($t['assignments']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Assignments</span>
+			<?php } ?>
 			<ul>
-				<li>Make a Pie</li>
-				<li>Eat the pie</li>
+				<?php
+				foreach ($t['assignments'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
 			</ul>
 		</fieldset>
 	</div>
