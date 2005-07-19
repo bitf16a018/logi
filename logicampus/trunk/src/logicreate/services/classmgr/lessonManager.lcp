@@ -136,13 +136,15 @@ class LessonManager extends FacultyService {
 
 		$this->sectionTitle = 'Change Assignments';
 		$lc->templateName = 'lessonManager_linkItems';
-		$t['saveEvent'] = 'saveWeb';
+		$t['saveEvent'] = 'saveAssignments';
 		$t['lessonId'] = $lesson_id;
 
-		$sql = "SELECT A.id_class_assignments, A.title, B.id_class_lessons
+		$sql = "SELECT A.id_class_assignments, A.title, C.title, B.id_class_lessons
 			FROM class_assignments AS A
 			LEFT JOIN class_assignments_link AS B
 			  ON A.id_class_assignments = B.id_class_assignments
+			LEFT JOIN class_lessons AS C 
+			  ON B.id_class_lessons = C.id_class_lessons
 			WHERE A.id_classes = ".$class_id;
 
 		$dm = new LinkedItemsModel($sql,$db);
@@ -157,10 +159,15 @@ class LessonManager extends FacultyService {
 		$col->cellRenderer = new LC_TableCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->idName = 'id_class_assignments';
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Assignment';
 		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->name='Lesson';
+		$col_c->justify='left';
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -179,10 +186,12 @@ class LessonManager extends FacultyService {
 		$t['saveEvent'] = 'saveWeb';
 		$t['lessonId'] = $lesson_id;
 
-		$sql = "SELECT A.id_class_links, A.title, B.id_class_lessons
+		$sql = "SELECT A.id_class_links, A.title, C.title, B.id_class_lessons
 			FROM class_links AS A
 			LEFT JOIN class_lesson_links AS B
 			  ON A.id_class_links = B.id_class_links
+			LEFT JOIN class_lessons AS C 
+			  ON B.id_class_lessons = C.id_class_lessons
 			WHERE A.id_classes = ".$class_id;
 
 		$dm = new LinkedItemsModel($sql,$db);
@@ -203,6 +212,10 @@ class LessonManager extends FacultyService {
 		$col_b->name='Web Link';
 		$col_b->justify='left';
 
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->name='Lesson';
+		$col_c->justify='left';
+
 		$t['table'] = new LC_TableRenderer($table);
 	}
 
@@ -221,10 +234,12 @@ class LessonManager extends FacultyService {
 		$t['lessonId'] = $lesson_id;
 
 
-		$sql = "SELECT A.id_class_objectives, A.objective, B.id_class_lesson
+		$sql = "SELECT A.id_class_objectives, A.objective, C.title, B.id_class_lesson
 			FROM class_objectives AS A
 			LEFT JOIN class_lesson_objectives AS B
 			  ON A.id_class_objectives = B.id_class_objectives
+			LEFT JOIN class_lessons AS C 
+			  ON B.id_class_lesson = C.id_class_lessons
 			WHERE A.id_classes = ".$class_id;
 
 		$dm = new LinkedItemsModel($sql,$db);
@@ -245,6 +260,9 @@ class LessonManager extends FacultyService {
 		$col_b->name='Objective';
 		$col_b->justify='left';
 
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->name='Lesson';
+		$col_c->justify='left';
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -306,7 +324,7 @@ class LessonManager extends FacultyService {
 
 
 	/**
-	 * Save the objectives to this lesson
+	 * Save the web links to this lesson
 	 */
 	function saveWebRun(&$db,&$u,&$lc,&$t) {
 		$lesson_id = intval($lc->getvars['id']);
@@ -322,7 +340,6 @@ class LessonManager extends FacultyService {
 		$sql = "SELECT A.id_class_links
 			FROM class_links AS A
 			WHERE A.id_classes = ".$class_id;
-echo $sql;
 		$db->query($sql);
 		while ($db->next_record()) {
 			$allowableItems[] = $db->Record['id_class_links'];
@@ -348,6 +365,59 @@ echo $sql;
 
 		$clear = 'DELETE from class_lesson_links
 		WHERE id_class_links = %d';
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($clear, $v));
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Save the assignments to this lesson
+	 */
+	function saveAssignmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_assignments
+			FROM class_assignments AS A
+			WHERE A.id_classes = ".$class_id;
+		$db->query($sql);
+		while ($db->next_record()) {
+			$allowableItems[] = $db->Record['id_class_assignments'];
+		}
+
+		//clean input array to match allowable items
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+			}
+		}
+		//wipe all previous objective links for this lesson
+		$db->query('DELETE from class_assignments_link 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_assignments_link
+		(id_class_assignments,id_class_lessons)
+		VALUES (%d, %d)';
+
+		$clear = 'DELETE from class_assignments_link
+		WHERE id_class_assignments = %d';
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
@@ -396,7 +466,8 @@ echo $sql;
 			FROM class_objectives AS A
 			LEFT JOIN class_lesson_objectives AS B
 			  ON A.id_class_objectives=B.id_class_objectives
-			WHERE B.id_class_lesson='{$lesson_id}'";
+			WHERE B.id_class_lesson='{$lesson_id}'
+			AND A.id_classes = '{$class_id}'";
 		$db->query($sql);
 		while ( $db->next_record() )
 			$t['objectives'][] = $db->Record['objective'];
@@ -419,10 +490,23 @@ echo $sql;
 			FROM class_links AS A
 			LEFT JOIN class_lesson_links  AS B
 			  ON A.id_class_links=B.id_class_links
-			where B.id_class_lessons='{$lesson_id}'";
+			WHERE B.id_class_lessons='{$lesson_id}'
+			AND A.id_classes = '{$class_id}'";
 		$db->query($sql);
 		while ( $db->next_record() )
 			$t['web'][] = $db->Record['title'];
+
+
+		// get the assignments
+		$sql = "SELECT A.id_class_assignments, A.title
+			FROM class_assignments AS A
+			LEFT JOIN class_assignments_link  AS B
+			  ON A.id_class_assignments=B.id_class_assignments
+			WHERE B.id_class_lessons='{$lesson_id}'
+			AND A.id_classes = '{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['assignments'][] = $db->Record['title'];
 	}
 
 
@@ -435,90 +519,45 @@ echo $sql;
 		$lessonid = $lc->getvars['id'];
 
 		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
-		$t['error'] = $f->validateForm('lesson', $lc->postvars);
-		if (!$t['error']) {
-			
-			$f->cleanedArray['activeOn'] = dateArray2TimestampFull($f->cleanedArray['activeOn']);
-			$f->cleanedArray['inactiveOn'] = dateArray2Timestamp($f->cleanedArray['inactiveOn']);
 
-			// Take care of the lesson table
-			if ($lessonid) {
-				$sql = "update class_lessons set id_classes='{$u->activeClassTaught->id_classes}',title='{$f->cleanedArray['title']}',description='{$f->cleanedArray['description']}',activeOn='{$f->cleanedArray['activeOn']}',inactiveOn='{$f->cleanedArray['inactiveOn']}', checkList='{$f->cleanedArray['checkList']}' where id_class_lessons='{$lessonid}'";
-				$t['msg'] = 'Lesson updated successfully.';
-			} else {
-				$sql = "insert into class_lessons set id_classes='{$u->activeClassTaught->id_classes}',createdOn=".time().",title='{$f->cleanedArray['title']}',description='{$f->cleanedArray['description']}',activeOn='{$f->cleanedArray['activeOn']}',inactiveOn='{$f->cleanedArray['inactiveOn']}', checkList = '{$f->cleanedArray['checkList']}'";
-				$t['msg'] = 'Lesson added successfully.';
-			}
-			$db->query($sql);
+		$activeOn = dateArray2TimestampFull($f->cleanedArray['activeOn']);
+		$inactiveOn = dateArray2Timestamp($f->cleanedArray['inactiveOn']);
 
-			// IMPORTANT!  This means that if they're creating a NEW lesson, the 'id' getvar
-			// is NOT the REAL one for the rest of this page.
-			if ( !$lessonid )
-				$lessonid = $db->getInsertID();
+		$title = addslashes(htmlentities($lc->postvars['title']));
+		$desc = addslashes(htmlentities($lc->postvars['description']));
+		$checkList = addslashes(htmlentities($lc->postvars['checkList']));
 
-			// take care of the content table
-			$db->query( "update class_lesson_content set
-				id_class_lessons=NULL
-				where id_class_lessons='{$lessonid}'" );
-			$db->query( "update class_lesson_content set
-				id_class_lessons='{$lessonid}'
-				where id_class_lesson_content='{$lc->postvars['content']}'" );
+		$content_id = intval($lc->postvars['content']);
 
-			// Take care of the objectives table
-			// clear class_lesson_objectives where this lesson ID is present, insert new records
-			$db->query( "DELETE FROM class_lesson_objectives
-				WHERE id_class_lesson = {$lessonid}" );
+		// Take care of the lesson table
+		$sql = "UPDATE class_lessons 
+			SET title='%s',
+			description='%s',
+			activeOn=%d,
+			inactiveOn=%d, 
+			checkList='%s' 
+			WHERE id_class_lessons='{$lessonid}'";
 
-			$db->query('SELECT id_class_objectives 
-					FROM class_objectives 
-					WHERE id_classes = '.$u->activeClassTaught->id_classes);
+			$t['msg'] = 'Lesson updated successfully.';
 
-			while ( $db->next_record() ) {
-				$okayObjs[] = $db->Record['id_class_objectives'];
-			}
+		$db->query( sprintf($sql,
+				$title,
+				$desc,
+				$activeOn,
+				$inactiveOn,
+				$checkList)
+			);
 
-			$sql = 'INSERT INTO class_lesson_objectives
-					(id_class_objectives,id_class_lesson)
-					VALUES
-					(%d,%d)';
-			while ( list($k,$v) = @each($f->cleanedArray['objectives']) ) {
-				if ( in_array($v,$okayObjs) ) {
-					$db->query( sprintf($sql,$v,$lessonid) );
-				}
-			}
+		// take care of the content table
+		$db->query( "update class_lesson_content set
+			id_class_lessons=NULL
+			where id_class_lessons='{$lessonid}'" );
+		$db->query( "update class_lesson_content set
+			id_class_lessons='{$lessonid}'
+			where id_class_lesson_content=".$content_id );
 
-
-			//done with objective security
-
-
-			// Take care of the assignments table
-			$db->query( "delete from class_assignments_link
-				where id_class_lessons='{$lessonid}'" );
-			// make sure they didn't pick the magic 'None' item.
-			if ( !@in_array('0', $lc->postvars['assignments']) ) {
-				foreach ( $lc->postvars['assignments'] as $objid ) {
-					$sql = "insert into class_assignments_link set
-						id_class_lessons='{$lessonid}',
-						id_class_assignments='{$objid}'";
-					$db->query($sql);
-				}
-			}
-
-			// Take care of the Webliography business: first delete all the links linked to this
-			// lesson, then add whatever was selected back to the table.
-			$sql = "delete from class_lesson_links where id_class_lessons='{$lessonid}'";
-			$db->query($sql);
-			foreach ( $lc->postvars['links'] as $linkid ) {
-				$sql = "insert into class_lesson_links set
-					id_class_lessons='{$lessonid}',
-					id_class_links='{$linkid}'";
-				$db->query($sql);
-			}
-
-			$this->run($db,$u,$lc,$t);
-			return;
-		}
-		$this->editRun($db,$u,$lc,$t);
+		$this->run($db,$u,$lc,$t);
+		return;
 	}
 
 

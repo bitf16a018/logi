@@ -39,7 +39,7 @@ class LinkedItemsModel extends LC_TableModel {
 	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return 2;
+		return 3;
 	}
 
 
