@@ -144,13 +144,13 @@ class lcUser {
 			if ($hadCookie==true) {
 				//trigger_error('we had a cookie submitted from you, but we cannot find your session.');
 				// user might have been logged out
-				$db->RESULT_TYPE=MYSQL_BOTH;
-				//none found, make new session, return new user
-				sess_open(DB::getHandle(),$sessID);
-				$temp =  new lcUser();
-				$temp->loadProfile();
-				return $temp;
 			}
+			$db->RESULT_TYPE=MYSQL_BOTH;
+			//none found, make new session, return new user
+			sess_open(DB::getHandle(),$sessID);
+			$temp =  new lcUser();
+			$temp->loadProfile();
+			return $temp;
 		}
 	}
 
