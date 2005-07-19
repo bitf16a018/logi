@@ -58,6 +58,7 @@ class LinkedItemsModel extends LC_TableModel {
 	function getValueAt($x,$y) {
 		$record = $this->results[$x];
 		if ($y == 0 ) { return $record; }
+		if ($y == 2 ) { return $record; }
 		return $record[$y];
 	}
 }
@@ -75,5 +76,38 @@ class LC_TableCheckboxRenderer extends LC_TableCellRenderer {
 		return '<input name="item['.$this->row.']" value="'.$this->value[$this->idName].'" '.$selected.' type="checkbox">';
 	}
 }
+
+
+
+class LC_TableLessonCheckboxRenderer extends LC_TableCellRenderer {
+
+	var $selectedVal;
+	var $selectedKey;
+	var $idName;
+	var $itemsToLessons = array();
+
+	function getRenderedValue() {
+		$itemKey = $this->value[$this->idName];
+		$selected = ( in_array($this->selectedVal, $this->itemsToLessons[$itemKey]))  ? ' CHECKED ':'';
+		return '<input name="item['.$this->row.']" value="'.$this->value[$this->idName].'" '.$selected.' type="checkbox">';
+	}
+}
+
+
+
+class LC_TableLessonRenderer extends LC_TableCellRenderer {
+
+	var $lessonTitles = array();
+	var $idName;
+	var $isOneToMany = true;
+
+	function getRenderedValue() {
+		if ($this->isOneToMany) 
+			return implode('; ',$this->lessonTitles[$this->value[$this->idName]]);
+		else 
+			return $this->value['title'];
+	}
+}
+
 
 ?>

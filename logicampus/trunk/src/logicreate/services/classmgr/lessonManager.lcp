@@ -172,11 +172,14 @@ class LessonManager extends FacultyService {
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Assignment';
+		$col_b->maxWidth=360;
 		$col_b->justify='left';
 
 		$col_c = &$columnModel->getColumnAt(2);
 		$col_c->name='Lesson';
 		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->isOneToMany = false;
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -195,12 +198,8 @@ class LessonManager extends FacultyService {
 		$t['saveEvent'] = 'saveWeb';
 		$t['lessonId'] = $lesson_id;
 
-		$sql = "SELECT A.id_class_links, A.title, C.title, B.id_class_lessons
+		$sql = "SELECT A.id_class_links, A.title
 			FROM class_links AS A
-			LEFT JOIN class_lesson_links AS B
-			  ON A.id_class_links = B.id_class_links
-			LEFT JOIN class_lessons AS C 
-			  ON B.id_class_lessons = C.id_class_lessons
 			WHERE A.id_classes = ".$class_id."
 			ORDER BY A.title";
 
@@ -208,23 +207,44 @@ class LessonManager extends FacultyService {
 
 		$table = new LC_Table($dm);
 
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_links, A.id_class_lessons, B.title
+			FROM class_lesson_links AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_links']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_links']][] = $db->Record['id_class_lessons'];
+		}
+
 		$columnModel = &$table->getColumnModel();
 
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=60;
 		$col->name='&nbsp;';
-		$col->cellRenderer = new LC_TableCheckboxRenderer();
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
-		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 		$col->cellRenderer->idName = 'id_class_links';
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Web Link';
+		$col_b->maxWidth=360;
 		$col_b->justify='left';
 
 		$col_c = &$columnModel->getColumnAt(2);
 		$col_c->name='Lesson';
 		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -244,12 +264,8 @@ class LessonManager extends FacultyService {
 		$t['lessonId'] = $lesson_id;
 
 
-		$sql = "SELECT A.id_class_objectives, A.objective, C.title, B.id_class_lesson
+		$sql = "SELECT A.id_class_objectives, A.objective
 			FROM class_objectives AS A
-			LEFT JOIN class_lesson_objectives AS B
-			  ON A.id_class_objectives = B.id_class_objectives
-			LEFT JOIN class_lessons AS C 
-			  ON B.id_class_lesson = C.id_class_lessons
 			WHERE A.id_classes = ".$class_id."
 			ORDER BY A.objective";
 
@@ -257,23 +273,43 @@ class LessonManager extends FacultyService {
 
 		$table = new LC_Table($dm);
 
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_objectives, A.id_class_lesson, B.title
+			FROM class_lesson_objectives AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lesson = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_objectives']][] = $db->Record['id_class_lesson'];
+		}
+
 		$columnModel = &$table->getColumnModel();
 
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=60;
 		$col->name='&nbsp;';
-		$col->cellRenderer = new LC_TableCheckboxRenderer();
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
-		$col->cellRenderer->selectedKey = 'id_class_lesson';
 		$col->cellRenderer->idName = 'id_class_objectives';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Objective';
+		$col_b->maxWidth=360;
 		$col_b->justify='left';
 
 		$col_c = &$columnModel->getColumnAt(2);
 		$col_c->name='Lesson';
 		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -319,13 +355,9 @@ class LessonManager extends FacultyService {
 		(id_class_objectives,id_class_lesson)
 		VALUES (%d, %d)';
 
-		$clear = 'DELETE from class_lesson_objectives
-		WHERE id_class_objectives = %d';
-
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
-			$db->query( sprintf($clear, $v));
 			$db->query( sprintf($insert, $v, $lesson_id));
 		}
 
@@ -374,12 +406,9 @@ class LessonManager extends FacultyService {
 		(id_class_links,id_class_lessons)
 		VALUES (%d, %d)';
 
-		$clear = 'DELETE from class_lesson_links
-		WHERE id_class_links = %d';
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
-			$db->query( sprintf($clear, $v));
 			$db->query( sprintf($insert, $v, $lesson_id));
 		}
 
