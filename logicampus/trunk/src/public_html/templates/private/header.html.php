@@ -123,7 +123,7 @@
 				<strong><?=lct('password')?>:</strong><br/> 
 				 <input type="password" size="10" maxlength="32" name="password" /><br>
 				<input type="hidden" name="event" value="login"/>
-				<input type="submit" value="<?=lct('Login')?>"/>
+				<input type="submit" value="<?=lct('Login')?>" name="submit"/>
 				</form>
 			</td></tr>
 			</table>
