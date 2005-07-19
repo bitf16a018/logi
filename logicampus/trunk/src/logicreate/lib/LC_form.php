@@ -748,7 +748,8 @@
 				}
 				
 			} else
-			{	$date=mktime((int)$v['defaultValue']['hours'], (int)$v['defaultValue']['minutes'], 0, (int)$v['defaultValue']['month'],(int)$v['defaultValue']['day'], (int)$v['defaultValue']['year']);
+			{
+				$date=mktime((int)$v['defaultValue']['hours'], (int)$v['defaultValue']['minutes'], 0, (int)$v['defaultValue']['month'],(int)$v['defaultValue']['day'], (int)$v['defaultValue']['year']);
 			}
 			
 			$name=$v['fieldName'];
@@ -831,27 +832,27 @@
 			    $ampm['PM'] = 'PM';
 			    
 			if ($bits & _MONTH) {  
-				$ret .= "<select name='".$name."[month]'>".$this->makeOptions($months,$m)."</select>\n";
+				$ret .= "<select name='".$name."[month]'>".Form::makeOptions($months,$m)."</select>\n";
 			}
 			
 			if ($bits & _DAY) {  
-				$ret .= "<select name='".$name."[day]'>".$this->makeOptions($days,$d)."</select>\n";
+				$ret .= "<select name='".$name."[day]'>".Form::makeOptions($days,$d)."</select>\n";
 			}
 			
 			if ($bits & _YEAR) {  
-				$ret .= "<select name='".$name."[year]'>".$this->makeOptions($years,$y)."</select>\n";
+				$ret .= "<select name='".$name."[year]'>".Form::makeOptions($years,$y)."</select>\n";
 			}
 			
 			if ($bits & _HOURS) {  
-				$ret .= "<select name='".$name."[hours]'>".$this->makeOptions($hours,$h)."</select>\n";
+				$ret .= "<select name='".$name."[hours]'>".Form::makeOptions($hours,$h)."</select>\n";
 			}
 
 			if ($bits & _MINUTES) {  
-				$ret .= "<select name='".$name."[minutes]'>".$this->makeOptions($mins,$i)."</select>\n";
+				$ret .= "<select name='".$name."[minutes]'>".Form::makeOptions($mins,$i)."</select>\n";
 			}
 
 			if ($bits & _12HOUR) {  
-				$ret .= "<select name='".$name."[ampm]'>".$this->makeOptions($ampm,$a)."</select>\n";
+				$ret .= "<select name='".$name."[ampm]'>".Form::makeOptions($ampm,$a)."</select>\n";
 			}
 		
 			if ($v['req'] == 'Y') $ast = '*';
