@@ -1,6 +1,7 @@
 <?php
 
 include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'classLessonObj.php');
 // PBDO is the new standard, above object is DEPRECATED
@@ -145,7 +146,8 @@ class LessonManager extends FacultyService {
 			  ON A.id_class_assignments = B.id_class_assignments
 			LEFT JOIN class_lessons AS C 
 			  ON B.id_class_lessons = C.id_class_lessons
-			WHERE A.id_classes = ".$class_id;
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.title";
 
 		$dm = new LinkedItemsModel($sql,$db);
 
@@ -192,7 +194,8 @@ class LessonManager extends FacultyService {
 			  ON A.id_class_links = B.id_class_links
 			LEFT JOIN class_lessons AS C 
 			  ON B.id_class_lessons = C.id_class_lessons
-			WHERE A.id_classes = ".$class_id;
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.title";
 
 		$dm = new LinkedItemsModel($sql,$db);
 
@@ -240,7 +243,8 @@ class LessonManager extends FacultyService {
 			  ON A.id_class_objectives = B.id_class_objectives
 			LEFT JOIN class_lessons AS C 
 			  ON B.id_class_lesson = C.id_class_lessons
-			WHERE A.id_classes = ".$class_id;
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.objective";
 
 		$dm = new LinkedItemsModel($sql,$db);
 
@@ -483,7 +487,18 @@ class LessonManager extends FacultyService {
 		$t['createdOn'] = $db->Record['createdOn'];
 		$t['activeOn'] = $db->Record['activeOn'];
 		$t['inactiveOn'] = $db->Record['inactiveOn'];
-		$t['checkList'] = split("\n", trim($db->Record['checkList']) );
+		if ( strlen( trim( $db->Record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->Record['checkList']) );
+
+		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+		$t['activeOnStruct']['fieldName'] = 'activeOn';
+		$t['activeOnStruct']['displayName'] = 'Active On';
+		$t['activeOnStruct']['dateTimeBit'] = 255;
+
+		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
+		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
+		$t['inactiveOnStruct']['dateTimeBit'] = 7;
 
 		// get the web links
 		$sql = "SELECT A.id_class_links, A.title
@@ -520,12 +535,11 @@ class LessonManager extends FacultyService {
 
 		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
 
-		$activeOn = dateArray2TimestampFull($f->cleanedArray['activeOn']);
-		$inactiveOn = dateArray2Timestamp($f->cleanedArray['inactiveOn']);
+		$activeOn = dateArray2TimestampFull($lc->postvars['activeOn']);
+		$inactiveOn = dateArray2Timestamp($lc->postvars['inactiveOn']);
 
-		$title = addslashes(htmlentities($lc->postvars['title']));
-		$desc = addslashes(htmlentities($lc->postvars['description']));
-		$checkList = addslashes(htmlentities($lc->postvars['checkList']));
+		$title = htmlentities($lc->postvars['title']);
+		$desc = htmlentities($lc->postvars['description']);
 
 		$content_id = intval($lc->postvars['content']);
 
@@ -534,8 +548,7 @@ class LessonManager extends FacultyService {
 			SET title='%s',
 			description='%s',
 			activeOn=%d,
-			inactiveOn=%d, 
-			checkList='%s' 
+			inactiveOn=%d
 			WHERE id_class_lessons='{$lessonid}'";
 
 			$t['msg'] = 'Lesson updated successfully.';
@@ -544,8 +557,7 @@ class LessonManager extends FacultyService {
 				$title,
 				$desc,
 				$activeOn,
-				$inactiveOn,
-				$checkList)
+				$inactiveOn)
 			);
 
 		// take care of the content table
@@ -556,8 +568,9 @@ class LessonManager extends FacultyService {
 			id_class_lessons='{$lessonid}'
 			where id_class_lesson_content=".$content_id );
 
-		$this->run($db,$u,$lc,$t);
-		return;
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonid);
+
 	}
 
 
@@ -615,15 +628,44 @@ class LessonManager extends FacultyService {
 
 		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 
-		$sql = "select checkList
+		$sql = "select checkList, title
 			from class_lessons
 			where id_class_lessons='{$lesson_id}'";
 
 		$db->queryOne($sql);
 
 		$t['checkList'] = split("\n", $db->Record['checkList']);
+		$t['title'] = $db->Record['title'];
+		$t['lessonId'] = $lesson_id;
 
 		$lc->templateName = 'lessonManager_checkList';
+	}
+
+
+	/**
+	 * Save the check list to this lesson
+	 */
+	function saveCheckListRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		foreach($lc->getvars['checkList'] as $k=>$v) {
+			if ( strlen(trim($v)) > 0 ) {
+				$checkList .= htmlentities($v)."\n";
+			}
+		}
+
+		$sql = "UPDATE class_lessons 
+			SET checkList='%s'
+			WHERE id_class_lessons='{$lesson_id}'";
+
+		$db->query( sprintf($sql,
+				$checkList)
+			);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
 	}
 
 
