@@ -75,7 +75,7 @@ class lessons extends StudentService {
 			'activeOn' => 'Active On',
 			'inactiveOn' => 'Inactive On'
 		);
-		$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
+		$dg->overrideColumn('<?=date("M j, Y h:i A", $activeOn);?>', 'activeOn');
 		$dg->overrideColumn('<a href="'.modurl('lessons/event=view/id=<?=$id_class_lessons;?>').'"><?=$title;?></a>', 'title');
 		$t['table'] = $dg->toHTML();
 //*/
@@ -219,8 +219,7 @@ class lessons extends StudentService {
 	}
 
 
-	function viewContentRun(&$db, &$u, &$lc, &$t)
-	{
+	function viewContentRun(&$db, &$u, &$lc, &$t) {
 
 		$lc->templateName='lessons_content';
 		$content_id = intval($lc->getvars['id']);
@@ -247,8 +246,13 @@ class lessons extends StudentService {
 			$this->presentor = 'printPresentation';
 		}
 
-		$t['sidebar'] = $u->sessionvars['activeLessonSidebar'];
-
+		// get the lesson from the DB so we can show the title
+		$ut = time();
+		$sql = "select * from class_lessons
+			where id_class_lessons='{$lc->getvars['id']}'
+			and id_classes='{$u->activeClassTaken->id_classes}'";
+		$db->queryOne($sql);
+		$t['lesson'] = $db->Record;
 	}
 
 
