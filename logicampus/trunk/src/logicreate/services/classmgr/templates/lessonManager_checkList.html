@@ -1,11 +1,18 @@
 <?= $t['sectionheader']; ?>
 
-<h2 style="margin:0px;">Check List for Lesson</h2>
+<h2 style="margin:0px;">Lesson Check List (<?= $t['title'];?>)</h2>
+
+<form action="<?= appurl('classmgr/lessonManager/event=saveCheckList/id='.$t['lessonId']);?>" style="margin:0px;">
 <ol>
 	<?php
 	for ($x=0; $x < 20; ++$x) {
 	$v = $t['checkList'][$x];
 	?>
-	<li><input type="text" value="<?= htmlentities($v); ?>"/></li>
+	<li><input type="text" value="<?= htmlentities($v); ?>" name="checkList[]"/></li>
 	<?php } ?>
 </ol>
+
+<br/>
+<input type="submit" value="Save"/>
+</form>
+
