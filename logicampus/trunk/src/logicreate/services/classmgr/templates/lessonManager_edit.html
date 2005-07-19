@@ -17,8 +17,8 @@ print $t['sectionheader'];
 			<td valign="top" class="">*Content Page</td>
 			<td valign="top" class="">
 				<select id="content" name="content"  size="1">
-					<option value="1" SELECTED >ffffffffffff</option>
-					<option value="2">PAge 2</option>
+					<option value="0">No Content Page</option>
+					<?= makeOptions($t['contentPages'],$t['content']); ?>
 				</select>
 			</td>
 		</tr>
@@ -214,7 +214,7 @@ print $t['sectionheader'];
 	<div style="width:48%;float:right;">
 		<fieldset>
 			<legend>Lesson Objectives</legend>
-			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lesson_id']);?>">Change Objective</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lessonId']);?>">Change Objective</a>
 			<?php
 			if ( ! is_array($t['objectives']) ) {
 			?>
@@ -235,7 +235,7 @@ print $t['sectionheader'];
 	<div style="width:48%;float:left">
 		<fieldset>
 			<legend>Lesson Check List</legend>
-			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lesson_id']);?>">Change Check List</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lessonId']);?>">Change Check List</a>
 			<?php
 			if ( ! is_array($t['checkList']) ) {
 			?>
@@ -260,7 +260,7 @@ print $t['sectionheader'];
 	<div style="width:48%;float:right;">
 		<fieldset>
 			<legend>Web Links</legend>
-			<a href="<?= appurl('classmgr/lessonManager/event=linkWeb/id='.$t['lesson_id']);?>">Change Web Links</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkWeb/id='.$t['lessonId']);?>">Change Web Links</a>
 			<?php
 			if ( ! is_array($t['web']) ) {
 			?>
@@ -281,7 +281,7 @@ print $t['sectionheader'];
 	<div style="width:48%;float:left;">
 		<fieldset>
 			<legend>Assignments</legend>
-			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lesson_id']);?>">Change Assignemnts</a>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lessonId']);?>">Change Assignemnts</a>
 			<?php
 			if ( ! is_array($t['assignments']) ) {
 			?>

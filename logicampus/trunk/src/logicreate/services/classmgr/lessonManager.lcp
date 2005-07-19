@@ -91,7 +91,8 @@ class LessonManager extends FacultyService {
 	 * Save a new lesson
 	 */
 	function newRun(&$db,&$u,&$lc,&$t) {
-//		$lc->templateName = 'lessonManager_new';
+
+		$content_id = intval($lc->postvars['content']);
 
 		$class_id = $u->activeClassTaught->id_classes;
 		if (intval($class_id) == 0) {
@@ -102,13 +103,23 @@ class LessonManager extends FacultyService {
 		$lesson = new ClassLessons();
 		$lesson->set('createdOn',time());
 		$lesson->set('title',htmlentities($lc->postvars['title']));
-		$lesson->set('description',htmlentities($lc->postvasr['title']));
-		$lesson->set('activeOn',time());
-		$lesson->set('inactiveOn',time()+36000);
+		$lesson->set('description',htmlentities($lc->postvars['description']));
+		$lesson->set('activeOn',dateArray2TimestampFull($lc->postvars['activeOn']));
+		$lesson->set('inactiveOn',dateArray2Timestamp($lc->postvars['inactiveOn']));
 		$lesson->set('idClasses',$class_id);
-		$lesson->set('checkList',"step 1\nstep 2\nstep 3");
+		$lesson->set('checkList',"");
 
 		$lesson->save();
+
+		//link the content page
+		$sql = 'UPDATE class_lesson_content
+			SET id_class_lessons = %d
+			WHERE id_class_lesson_content = %d
+			AND id_classes = %d';
+
+		$db->query( sprintf($sql, $lesson->getPrimaryKey(),
+					  $content_id,
+					  $class_id) );
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson->getPrimaryKey());
@@ -186,6 +197,7 @@ class LessonManager extends FacultyService {
 		$col->cellRenderer = new LC_TableCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->idName = 'id_class_links';
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Web Link';
@@ -227,6 +239,7 @@ class LessonManager extends FacultyService {
 		$col->cellRenderer = new LC_TableCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->selectedKey = 'id_class_lesson';
+		$col->cellRenderer->idName = 'id_class_objectives';
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Objective';
@@ -283,15 +296,67 @@ class LessonManager extends FacultyService {
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
-			echo( sprintf($insert, $v, $lesson_id));
-			echo( sprintf($clear, $v));
 			$db->query( sprintf($clear, $v));
 			$db->query( sprintf($insert, $v, $lesson_id));
 		}
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
 
+
+	/**
+	 * Save the objectives to this lesson
+	 */
+	function saveWebRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_links
+			FROM class_links AS A
+			WHERE A.id_classes = ".$class_id;
+echo $sql;
+		$db->query($sql);
+		while ($db->next_record()) {
+			$allowableItems[] = $db->Record['id_class_links'];
+		}
+
+		//clean input array to match allowable items
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+			}
+		}
+
+		//wipe all previous objective links for this lesson
+		$db->query('DELETE from class_lesson_links 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_links
+		(id_class_links,id_class_lessons)
+		VALUES (%d, %d)';
+
+		$clear = 'DELETE from class_lesson_links
+		WHERE id_class_links = %d';
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($clear, $v));
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
 	}
 
 
@@ -300,23 +365,31 @@ class LessonManager extends FacultyService {
 	 */
 	function editRun(&$db,&$u,&$lc,&$t) {
 
-		$this->sectionTitle = 'Add a New Lesson';
+		$this->sectionTitle = 'Edit Lesson';
 		$lc->templateName = 'lessonManager_edit';
 		$defaults = array();
 		$lesson_id = intval($lc->getvars['id']);
-		$t['lesson_id'] = $lesson_id;
+		$class_id = $u->activeClassTaught->id_classes;
+		$t['lessonId'] = $lesson_id;
 
 		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 
 		DEFINE(LESSON_ID, $lesson_id); // for the custom fields
 
-		// First, we want to make sure they have at least one of each of these
-		// before we give them the form: content, objectives.
-		$db->queryOne("select count(id_class_lesson_content) as content
-			from class_lesson_content
-			where id_classes='{$u->activeClassTaught->id_classes}'
-			and id_class_lessons is null or id_class_lessons='{$lesson_id}'" );
-		$t['numcontent'] = $db->Record['content'];
+
+		// get the content pages
+		$sql = "SELECT A.id_class_lesson_content, A.txTitle
+			FROM class_lesson_content AS A
+			WHERE A.id_classes='{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
+
+		// get the content field
+		$sql = "select id_class_lesson_content from class_lesson_content
+			where id_class_lessons='{$lesson_id}'";
+		$db->queryOne($sql);
+		$t['content'] = $db->Record['id_class_lesson_content'];
 
 		// get the objectives
 		$sql = "SELECT A.objective 
@@ -340,32 +413,16 @@ class LessonManager extends FacultyService {
 		$t['activeOn'] = $db->Record['activeOn'];
 		$t['inactiveOn'] = $db->Record['inactiveOn'];
 		$t['checkList'] = split("\n", trim($db->Record['checkList']) );
-		
-		// get the content field
-		$sql = "select id_class_lesson_content from class_lesson_content
-			where id_class_lessons='{$lesson_id}'";
-		$db->queryOne($sql);
-		$t['content'] = $db->Record['id_class_lesson_content'];
 
 		// get the web links
-		$sql = "select class_links.id_class_links from class_links
-			left join class_lesson_links on class_links.id_class_links=class_lesson_links.id_class_links
-			where class_lesson_links.id_class_lessons='{$lesson_id}'";
+		$sql = "SELECT A.id_class_links, A.title
+			FROM class_links AS A
+			LEFT JOIN class_lesson_links  AS B
+			  ON A.id_class_links=B.id_class_links
+			where B.id_class_lessons='{$lesson_id}'";
 		$db->query($sql);
 		while ( $db->next_record() )
-			$defaults['links'][] = $db->Record['id_class_links'];
-
-		if (!$lesson_id) {
-			// prepop activeOn with today's date
-			$defaults['activeOn'] = time();
-
-			// prepop inactiveOn with the end of the semester
-			$db->queryOne("select s.dateEnd as end from semesters as s
-				left join classes as c on c.id_semesters=s.id_semesters
-				where c.id_classes='{$u->activeClassTaught->id_classes}'");
-			$d = split('-', $db->Record['end']);
-			$defaults['inactiveOn'] = mktime(0, 0, 0, $d[1], $d[2], $d[0]);
-		}
+			$t['web'][] = $db->Record['title'];
 	}
 
 
