@@ -170,22 +170,21 @@ class lessons extends StudentService {
 		$columnModel = &$table->getColumnModel();
 		$col_a = &$columnModel->getColumnAt(0);
 		$col_a->cellRenderer = new LC_TableAssignmentRenderer();
-		$col_a->maxWidth = 230;
+		$col_a->maxWidth = 270;
 		$col_a->justify = 'left';
 
 		$col_b = &$columnModel->getColumnAt(1);
-		$col_b->cellRenderer = new LC_TableDateRenderer('m/j/Y h:i a');
-		$col_b->maxWidth = 110;
+		$col_b->cellRenderer = new LC_TableDateRenderer('M j h:i a');
+		$col_b->maxWidth = 120;
 
 		$col_c = &$columnModel->getColumnAt(2);
 		$col_c->cellRenderer = new LC_TableAssignmentStatusRenderer();
-		$col_c->maxWidth = 110;
 
 		$col_d = &$columnModel->getColumnAt(3);
-		$col_d->maxWidth = 110;
+		$col_d->maxWidth = 60;
 
 		$col_z = &$columnModel->getColumnAt(4);
-		$col_z->maxWidth = 10;
+		$col_z->maxWidth = 60;
 
 		$render = new LC_TableRenderer($table);
 		$t['assignmentsTable'] = $render->toHTML();
