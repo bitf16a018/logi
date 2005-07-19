@@ -36,13 +36,16 @@ CREATE TABLE class_assignments_grades (
   id_student varchar(32) NOT NULL default '',
   comments text NOT NULL,
   grade float(10,2) default NULL,
-  PRIMARY KEY  (id_class_assignments_grades)
+  PRIMARY KEY  (id_class_assignments_grades),
+  KEY id_class_assignments (id_class_assignments)
 ) TYPE=MyISAM;
 
 
 CREATE TABLE class_assignments_link (
   id_class_lessons int(11) unsigned NOT NULL default '0',
   id_class_assignments int(11) unsigned NOT NULL default '0'
+  KEY id_class_lessons (id_class_lessons),
+  KEY id_class_assignments (id_class_assignments)
 ) TYPE=MyISAM;
 
 
@@ -92,7 +95,7 @@ CREATE TABLE class_lesson_links (
   id_class_lessons int(11) default NULL,
   id_class_links int(11) default NULL,
   KEY id_class_lessons (id_class_lessons),
-  KEY id_class_links (id_class_links)
+  KEY id_class_links (id_class_links),
 ) TYPE=MyISAM;
 
 
@@ -129,6 +132,8 @@ CREATE TABLE class_links (
   createdby varchar(32) NOT NULL default '',
   hits int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (id_class_links)
+  KEY id_classes (id_classes),
+  KEY id_class_links_categories (id_class_links_categories)
 ) TYPE=MyISAM PACK_KEYS=0;
 
 
@@ -165,7 +170,8 @@ CREATE TABLE class_presentations (
   createdOn datetime default NULL,
   approvedOn datetime default NULL,
   content text,
-  PRIMARY KEY  (id_presentations)
+  PRIMARY KEY  (id_presentations),
+  KEY id_classes (id_classes)
 ) TYPE=MyISAM;
 
 
@@ -240,7 +246,8 @@ CREATE TABLE `class_group` (
   `class_group_id` int(10) unsigned NOT NULL auto_increment,
   `class_group_name` varchar(100) NOT NULL default '',
   `class_id` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`class_group_id`)
+  PRIMARY KEY  (`class_group_id`),
+  KEY class_id (class_id)
 ) TYPE=MyISAM; 
 
 CREATE TABLE `class_group_member` (
