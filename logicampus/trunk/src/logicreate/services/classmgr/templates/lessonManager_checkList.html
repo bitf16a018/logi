@@ -2,13 +2,20 @@
 
 <h2 style="margin:0px;">Lesson Check List (<?= $t['title'];?>)</h2>
 
+<div style="float:right">
+	<form style="margin:0px;" action="<?= appurl('classmgr/lessonManager/event=edit/id='.$t['lessonId']);?>">
+		<input type="submit" value="Cancel"/>
+	</form>
+</div>
+
 <form action="<?= appurl('classmgr/lessonManager/event=saveCheckList/id='.$t['lessonId']);?>" style="margin:0px;">
+<input type="submit" value="Save"/>
 <ol>
 	<?php
 	for ($x=0; $x < 20; ++$x) {
 	$v = $t['checkList'][$x];
 	?>
-	<li><input type="text" value="<?= htmlentities($v); ?>" name="checkList[]"/></li>
+	<li style="margin:5px;"><input type="text" size="65" value="<?= htmlentities($v); ?>" name="checkList[]"/></li>
 	<?php } ?>
 </ol>
 
