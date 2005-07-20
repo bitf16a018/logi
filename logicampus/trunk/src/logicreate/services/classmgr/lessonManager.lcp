@@ -147,12 +147,8 @@ class LessonManager extends FacultyService {
 		$t['saveEvent'] = 'saveAssignments';
 		$t['lessonId'] = $lesson_id;
 
-		$sql = "SELECT A.id_class_assignments, A.title, C.title, B.id_class_lessons
+		$sql = "SELECT A.id_class_assignments, A.title
 			FROM class_assignments AS A
-			LEFT JOIN class_assignments_link AS B
-			  ON A.id_class_assignments = B.id_class_assignments
-			LEFT JOIN class_lessons AS C 
-			  ON B.id_class_lessons = C.id_class_lessons
 			WHERE A.id_classes = ".$class_id."
 			ORDER BY A.title";
 
@@ -160,15 +156,34 @@ class LessonManager extends FacultyService {
 
 		$table = new LC_Table($dm);
 
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_assignments, A.id_class_lessons, B.title
+			FROM class_assignments_link AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_assignments']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_assignments']][] = $db->Record['id_class_lessons'];
+		}
+
+
 		$columnModel = &$table->getColumnModel();
 
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=60;
 		$col->name='&nbsp;';
-		$col->cellRenderer = new LC_TableCheckboxRenderer();
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->selectedKey = 'id_class_lessons';
 		$col->cellRenderer->idName = 'id_class_assignments';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
 		$col_b->name='Assignment';
@@ -179,7 +194,8 @@ class LessonManager extends FacultyService {
 		$col_c->name='Lesson';
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
-		$col_c->cellRenderer->isOneToMany = false;
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+		$col_c->cellRenderer->idName = 'id_class_assignments';
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -242,7 +258,7 @@ class LessonManager extends FacultyService {
 		$col_c->name='Lesson';
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
-		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->idName = 'id_class_links';
 		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
 
 
@@ -456,12 +472,9 @@ class LessonManager extends FacultyService {
 		(id_class_assignments,id_class_lessons)
 		VALUES (%d, %d)';
 
-		$clear = 'DELETE from class_assignments_link
-		WHERE id_class_assignments = %d';
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
-			$db->query( sprintf($clear, $v));
 			$db->query( sprintf($insert, $v, $lesson_id));
 		}
 
