@@ -145,7 +145,10 @@ class LessonManager extends FacultyService {
 		$this->sectionTitle = 'Change Assignments';
 		$lc->templateName = 'lessonManager_linkItems';
 		$t['saveEvent'] = 'saveAssignments';
+		$t['pageHeading'] = 'Lesson Assignments';
 		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
 
 		$sql = "SELECT A.id_class_assignments, A.title
 			FROM class_assignments AS A
@@ -212,7 +215,11 @@ class LessonManager extends FacultyService {
 		$this->sectionTitle = 'Change Web Links';
 		$lc->templateName = 'lessonManager_linkItems';
 		$t['saveEvent'] = 'saveWeb';
+		$t['pageHeading'] = 'Lesson Web Links';
 		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
 
 		$sql = "SELECT A.id_class_links, A.title
 			FROM class_links AS A
@@ -277,7 +284,10 @@ class LessonManager extends FacultyService {
 		$this->sectionTitle = 'Change Objectives';
 		$lc->templateName = 'lessonManager_linkItems';
 		$t['saveEvent'] = 'saveObjectives';
+		$t['pageHeading'] = 'Lesson Objectives';
 		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
 
 
 		$sql = "SELECT A.id_class_objectives, A.objective
