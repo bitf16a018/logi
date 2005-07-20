@@ -301,7 +301,7 @@ $t['assessment']->save();
 	}
 
 	/**
-	 * Removes the assesment and all things associated with it
+	 * Removes the assessment and all things associated with it
 	 */
 	function removeConfirmRun($db,&$u,&$lc,&$t) {
 	
@@ -332,7 +332,7 @@ $t['assessment']->save();
 				{
 		 			ClassGradebookEntriesPeer::doDelete($gb);
 				} else {
-					$t['message'] = '<h3>Error</h3>We were unable to remove the gradebook entry.  We did delete the assesment.';
+					$t['message'] = '<h3>Error</h3>We were unable to remove the gradebook entry.  We did delete the assessment.';
 					$lc->templateName = 'main_error';
 					return;
 				}
