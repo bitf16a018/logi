@@ -1,16 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * Copyright 2005 Michael Kimsal, Mark Kimsal
- ***************************************************/
-
 include_once(LIB_PATH."LC_html.php");
 
 /*
@@ -50,6 +38,7 @@ class DataGrid {
 	var $array = array(); 			// data array
 	var $ignore = array();			// array of columns to ignore - data is still available for evaling
 	var $evalCols = array(); 		// array of column names to evaluate for embedded PHP
+	var $callbackCols = array();		// array of column names to call an external function for getting data
 	var $override = array();		// array of columns to override with PHP formatting
 	var $prepend = array();			// array of columns to prepend to each row of data
 	var $postend = array();			// array of columns to postpend to each row of data
@@ -265,7 +254,7 @@ class DataGrid {
 // from the original constructor arguments (table, cols, where clause)
 	
 	function processRows() {
-		
+
 		$this->rows = array();
 		if (!$this->rowsset) {
 			if ($this->table) { 
@@ -274,7 +263,7 @@ class DataGrid {
 			}
 		}
 		
-		
+		@reset($this->datarows);
 		while(list($k,$v) = @each($this->datarows)) {
 			$row = $this->arrayToRow($v);
 			if (is_array($this->rowClasses)) {
@@ -351,6 +340,13 @@ class DataGrid {
 
 	}
 
+
+	function postpendCallbackColumn($data,$name) {
+		$this->postpend[$name] = $data;
+		$this->callbackCols[] = $name;
+	}
+
+
 // internal - don't call yourself
 
 	function headers() {
@@ -362,7 +358,7 @@ class DataGrid {
 				}
 				if (in_array($v,$this->sortColumns)) { 
 
-					$x = "<a href=\"#\" onClick=\"document.datagrid.action='".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."'; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">".$this->headerNames[$k]."</a>";
+					$x = "<a href=\"".$this->baseurl."/{$this->startVar}={$this->startPage}/".$this->sortVar."=$v/".$this->sortOrderVar.'='.(($this->sort_order == 'DESC' ) ? 'ASC' : 'DESC' )."\">".$this->headerNames[$k]."</a>";
 					$this->headerNames[$k] = $x;
 				}
 			}
@@ -375,8 +371,8 @@ class DataGrid {
 
 		
 		if ($this->startPage > 0) { // previous
-			$this->beginpage = "<a href=\"".$this->baseurl."/".$this->startVar."=0/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->beginpage}</a>";
-			$this->prevpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage -1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->prevpage}</a>";
+			$this->beginpage = "<a href=\"".$this->baseurl."/".$this->startVar."=0/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->beginpage}</a>";
+			$this->prevpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage -1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->prevpage}</a>";
 		} else
 		{
 			$this->beginpage = str_replace('prevprev.gif', 'noprevprev.gif', $this->beginpage);
@@ -385,8 +381,8 @@ class DataGrid {
 		}
 		
 		if ($this->startPage < $this->_totalPages) { //  next
-			$this->lastpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".$this->_totalPages."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false;\">{$this->lastpage}</a>";
-			$this->nextpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage +1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\" onClick=\"document.datagrid.action=this.href; document.datagrid.method='POST'; document.datagrid.submit(); return false; \">{$this->nextpage}</a>";
+			$this->lastpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".$this->_totalPages."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->lastpage}</a>";
+			$this->nextpage = "<a href=\"".$this->baseurl."/".$this->startVar."=".($this->startPage +1)."/{$this->sortVar}={$this->orderby}/{$this->sortOrderVar}={$this->sort_order}\">{$this->nextpage}</a>";
 		} else
 		{ 
 			$this->lastpage = str_replace('nextnext.gif', 'nonextnext.gif', $this->lastpage);
@@ -520,13 +516,17 @@ class DataGrid {
 					$v = $this->override["$k"];
 				}
 				if (in_array("$k",$this->evalCols)) {
-				ob_start();eval("?>$v<? ");$j = ob_get_contents();ob_end_clean();
-				} else { $j = $v; }
-				if ($b_header)
-				{
+					ob_start();eval("?>$v<? ");$j = ob_get_contents();ob_end_clean();
+				} else if ( in_array("$k", $this->callbackCols) ) {
+					$f = $this->postpend[$k];
+					call_user_func($f,$array,&$j);
+				} else {
+				       	$j = $v; 
+				}
+
+				if ($b_header) {
 					$td[] = new grid_th($j);
-				} else
-				{
+				} else {
 					$td[] = new $this->tdObject($j, $this->a_cell_width[$k], $this->a_cell_align[$k]);
 				}
 			}
