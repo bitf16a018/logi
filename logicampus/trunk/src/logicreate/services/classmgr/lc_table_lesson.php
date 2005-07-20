@@ -103,7 +103,7 @@ class LC_TableLessonRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		if ($this->isOneToMany) 
-			return implode('; ',$this->lessonTitles[$this->value[$this->idName]]);
+			return implode('<br/> ',$this->lessonTitles[$this->value[$this->idName]]);
 		else 
 			return $this->value['title'];
 	}
