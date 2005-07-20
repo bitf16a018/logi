@@ -29,8 +29,25 @@ class assignmentManage extends FacultyService {
 	var $presentor = 'htmlPresentation';
 
 	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display/',
+		'Announcements'=>'announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'FAQ' => 'faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => 'lessonManager/',
+		'Objectives' => 'lessonObjectives/',
+		'Webliography' => 'lessonWebliography/'
+	);
 	var $inactivelinks = array( 'Assignments' );
-
+	var $applinks = array(
+		'List Assignments' => 'assignmentManage/',
+		'Add Assignment' => 'assignmentManage/event=editAssignment/',
+		'Add a Lesson' => 'lessonManager/event=edit/'
+	);
 
 
         function wipeClassAssignmentsRun($db,&$u,&$lc,&$t) {
