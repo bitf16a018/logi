@@ -245,13 +245,8 @@ class lessons extends StudentService {
 			$this->presentor = 'printPresentation';
 		}
 
-		// get the lesson from the DB so we can show the title
-		$ut = time();
-		$sql = "select * from class_lessons
-			where id_class_lessons='".$t['content']['id_class_lessons']."'
-			and id_classes='{$u->activeClassTaken->id_classes}'";
-		$db->queryOne($sql);
-		$t['lesson'] = $db->Record;
+		// get the lesson from the session so we can show the title
+		$t['lesson'] = $u->sessionvars['activeLesson'];
 	}
 
 
