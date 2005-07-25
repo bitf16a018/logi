@@ -10,7 +10,7 @@ class LessonObjectives extends FacultyService {
 	var $applinks = array (
 		'List Objectives' => 'lessonObjectives/',
 		'Add Objective' => 'lessonObjectives/event=edit',
-		'Add a Lesson' => 'lessonManager/event=edit/'
+		'Add a Lesson' => 'lessonNew/event=add/'
 	);
 	var $navlinks = array (
 		'Classroom Manager' => 'display/',

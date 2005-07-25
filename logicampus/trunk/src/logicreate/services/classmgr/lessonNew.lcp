@@ -59,6 +59,12 @@ class LessonNew extends FacultyService {
 		while ( $db->next_record() ) {
 			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
 		}
+
+		$t['allowSave'] = true;
+		if ( count($t['contentPages']) < 1 ) {
+			$t['message'] = "You need at least one content page in order to create a new lesson.";
+			$t['allowSave'] = false;
+		}
 	}
 
 

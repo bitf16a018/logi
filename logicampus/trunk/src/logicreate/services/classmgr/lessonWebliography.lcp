@@ -27,7 +27,7 @@ class LessonWebliography extends FacultyService {
 		'Webliography' => 'lessonWebliography/'
 	);
 	var $applinks = array (
-		'Add a Lesson' => 'lessonManager/event=edit/'
+		'Add a Lesson' => 'lessonNew/event=add/'
 	);
 	var $inactivelinks = array( 'Webliography' );
 	var $sectionTitle = 'Webliography';

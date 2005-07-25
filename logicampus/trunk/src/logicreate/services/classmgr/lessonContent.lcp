@@ -50,7 +50,7 @@ Class LessonContent extends FacultyService
 
 			$this->applinks['Import Content - NO TIDY'] = 'lessonContent/event=import';	
 		}
-		$this->applinks['Add a Lesson'] = 'lessonManager/event=edit/';
+		$this->applinks['Add a Lesson'] = 'lessonNew/event=add/';
 
 	}
 
