@@ -14,7 +14,7 @@
 	 	
 	if (!class_exists('form'))
 	{
-		include_once('LC_form.php');
+		include_once(LIB_PATH.'LC_form.php');
 	}
 	 
 	class SiteForm extends Form 
