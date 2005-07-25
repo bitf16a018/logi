@@ -203,7 +203,7 @@ class LessonNew extends FacultyService {
 		}
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/');
 	}
 
 
@@ -560,191 +560,6 @@ class LessonNew extends FacultyService {
 	}
 
 
-	/**
-	 * show the editing page
-	 */
-	function editRun(&$db,&$u,&$lc,&$t) {
-
-		$this->sectionTitle = 'Edit Lesson';
-		$lc->templateName = 'lessonManager_edit';
-		$defaults = array();
-		$lesson_id = intval($lc->getvars['id']);
-		$class_id = $u->activeClassTaught->id_classes;
-		$t['lessonId'] = $lesson_id;
-
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
-
-		DEFINE(LESSON_ID, $lesson_id); // for the custom fields
-
-
-		// get the content pages
-		$sql = "SELECT A.id_class_lesson_content, A.txTitle
-			FROM class_lesson_content AS A
-			WHERE A.id_classes='{$class_id}'";
-		$db->query($sql);
-		while ( $db->next_record() )
-			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
-
-		// get the content field
-		$sql = "select id_class_lesson_content from class_lesson_content
-			where id_class_lessons='{$lesson_id}'";
-		$db->queryOne($sql);
-		$t['content'] = $db->Record['id_class_lesson_content'];
-
-		// get the objectives
-		$sql = "SELECT A.objective 
-			FROM class_objectives AS A
-			LEFT JOIN class_lesson_objectives AS B
-			  ON A.id_class_objectives=B.id_class_objectives
-			WHERE B.id_class_lesson='{$lesson_id}'
-			AND A.id_classes = '{$class_id}'";
-		$db->query($sql);
-		while ( $db->next_record() )
-			$t['objectives'][] = $db->Record['objective'];
-
-
-		// Get the basic info about the lesson
-		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
-			from class_lessons
-			where id_class_lessons='{$lesson_id}'";
-		$db->queryOne($sql);
-		$t['title'] = $db->Record['title'];
-		$t['description'] = $db->Record['description'];
-		$t['createdOn'] = $db->Record['createdOn'];
-		$t['activeOn'] = $db->Record['activeOn'];
-		$t['inactiveOn'] = $db->Record['inactiveOn'];
-		if ( strlen( trim( $db->Record['checkList'] ) ) > 0 )
-			$t['checkList'] = split("\n", trim($db->Record['checkList']) );
-
-		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
-		$t['activeOnStruct']['fieldName'] = 'activeOn';
-		$t['activeOnStruct']['displayName'] = 'Active On';
-		$t['activeOnStruct']['dateTimeBit'] = 255;
-
-		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
-		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
-		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
-		$t['inactiveOnStruct']['dateTimeBit'] = 7;
-
-		// get the web links
-		$sql = "SELECT A.id_class_links, A.title
-			FROM class_links AS A
-			LEFT JOIN class_lesson_links  AS B
-			  ON A.id_class_links=B.id_class_links
-			WHERE B.id_class_lessons='{$lesson_id}'
-			AND A.id_classes = '{$class_id}'";
-		$db->query($sql);
-		while ( $db->next_record() )
-			$t['web'][] = $db->Record['title'];
-
-
-		// get the assignments
-		$sql = "SELECT A.id_class_assignments, A.title
-			FROM class_assignments AS A
-			LEFT JOIN class_assignments_link  AS B
-			  ON A.id_class_assignments=B.id_class_assignments
-			WHERE B.id_class_lessons='{$lesson_id}'
-			AND A.id_classes = '{$class_id}'";
-		$db->query($sql);
-		while ( $db->next_record() )
-			$t['assignments'][] = $db->Record['title'];
-	}
-
-
-	/**
-	 * commit the posted data to the database, if worthy
-	 */
-	function updateRun(&$db,&$u,&$lc,&$t)
-	{
-		$f = new Siteform();
-		$lessonid = $lc->getvars['id'];
-
-		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
-
-		$activeOn = dateArray2TimestampFull($lc->postvars['activeOn']);
-		$inactiveOn = dateArray2Timestamp($lc->postvars['inactiveOn']);
-
-		$title = htmlentities($lc->postvars['title']);
-		$desc = htmlentities($lc->postvars['description']);
-
-		$content_id = intval($lc->postvars['content']);
-
-		// Take care of the lesson table
-		$sql = "UPDATE class_lessons 
-			SET title='%s',
-			description='%s',
-			activeOn=%d,
-			inactiveOn=%d
-			WHERE id_class_lessons='{$lessonid}'";
-
-			$t['msg'] = 'Lesson updated successfully.';
-
-		$db->query( sprintf($sql,
-				$title,
-				$desc,
-				$activeOn,
-				$inactiveOn)
-			);
-
-		// take care of the content table
-		$db->query( "update class_lesson_content set
-			id_class_lessons=NULL
-			where id_class_lessons='{$lessonid}'" );
-		$db->query( "update class_lesson_content set
-			id_class_lessons='{$lessonid}'
-			where id_class_lesson_content=".$content_id );
-
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonid);
-
-	}
-
-
-	/**
-	 * confirm the lesson deletion and ask if we should remove or just unlink the
-	 * external items.
-	 */
-	function deleteConfRun(&$db,&$u,&$lc,&$t)
-	{
-		$lc->templateName = 'lessonManager_deleteConf';
-		$lessonid = $lc->getvars['id'];
-
-		$db->queryOne( "select title from class_lessons where id_class_lessons='{$lessonid}'");
-		$t['lessonTitle'] = $db->Record['title'];
-		$t['id_class_lessons'] = $lessonid;
-		$t['id_classes'] = $u->activeClassTaught->id_classes;
-
-	}
-
-
-	/**
-	 * delete the lesson
-	 */
-	function deleteRun(&$db,&$u,&$lc,&$t)
-	{
-		$lessonid = $lc->getvars['id'];
-
-		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
-
-		// just set the lesson id in all the tables to NULL
-		$db->query("update class_lesson_content set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
-	//	$db->query("update class_objectives set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
-
-		// we just want to remove the link associations for weblinks and objectives.
-		$db->query("delete from class_lesson_links where id_class_lessons='{$lessonid}'");
-		$db->query("delete from class_lesson_objectives where id_class_lesson='{$lessonid}'");
-		$db->query("delete from class_assignments_link where id_class_lessons='{$lessonid}'");
-
-		// finally, delete the lesson itself
-		$db->query("delete from class_lessons where id_class_lessons='{$lessonid}'");
-
-		$t['msg'] = 'The lesson has been removed and all its associated content, objectives,
-			and assignments have been unlinked. You may now reuse these items in other lessons';
-
-		$this->Run($db,$u,$lc,$t);
-		
-	}
-
 
 	/**
 	 * Show the Check List for editing
@@ -762,6 +577,7 @@ class LessonNew extends FacultyService {
 	 */
 	function saveChecklistRun(&$db,&$u,&$lc,&$t) {
 
+		$checkList = '';
 		foreach($lc->getvars['checkList'] as $k=>$v) {
 			if ( strlen(trim($v)) > 0 ) {
 				$checkList .= htmlentities($v)."\n";
