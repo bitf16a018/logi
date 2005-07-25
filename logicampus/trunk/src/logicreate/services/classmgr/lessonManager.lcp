@@ -305,13 +305,22 @@ class LessonManager extends FacultyService {
 		}
 
 		//clean input array to match allowable items
+		$validEntry = false;
 		foreach($itemArray as $k=>$v) {
 			if  ( ! in_array($v, $allowableItems) ) {
 				$itemArray[$k] = 0;
 			} else {
 				$itemArray[$k] = intval($v);
+				$validEntry = true;
 			}
 		}
+
+		if (!$validEntry) {
+			$this->linkObjectivesRun($db,$u,$lc,$t);
+			$t['message'] = "You need to choose at least one objective.";
+			return false;
+		}
+
 
 		//wipe all previous objective links for this lesson
 		$db->query('DELETE from class_lesson_objectives 

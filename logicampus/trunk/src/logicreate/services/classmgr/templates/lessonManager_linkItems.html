@@ -1,6 +1,12 @@
 <?= $t['sectionheader']; ?>
 
 <h2 style="margin:0px;"><?= $t['pageHeading']; if (strlen($t['title'])) {echo ' ('.$t['title'].')';}?></h2>
+<?php
+if ( strlen($t['message']) > 0 ) { ?>
+	<h3 style="margin:0px;color:red;"><?= $t['message'];?></h3>
+<?php } ?>
+
+
 
 <div style="float:right">
 	<form style="margin:0px;" action="<?= appurl('classmgr/lessonManager/event=edit/id='.$t['lessonId']);?>">
