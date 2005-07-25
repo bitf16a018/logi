@@ -13,7 +13,7 @@ include(SERVICE_PATH.'classmgr/lc_table_lesson.php');
 
 
 
-class LessonManager extends FacultyService {
+class LessonNew extends FacultyService {
 
 	var $presentor = 'HTMLPresentation';
 //	var $authorizer = 'native';
@@ -42,53 +42,207 @@ class LessonManager extends FacultyService {
 
 
 	/**
-	 * Show the main page of the lesson manager: a list of all the lessons
+	 * show the add page
 	 */
-	function run(&$db,&$u,&$lc,&$t) {
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonManager_new';
+		$this->sectionTitle = 'Add a Lesson';
 
-		$lc->templateName = 'lessonManager_main';
-		$this->inactivelinks[] = 'List Lessons';
-		$this->sectionTitle = 'List Lessons';
+		$class_id = $u->activeClassTaught->id_classes;
 
-		$dg = new DataGrid($this->module,$this->serviceName);
-		$dg->table = 'class_lessons';
-		$dg->column = 'createdOn,activeOn,title,description,id_class_lessons';
-		$dg->class = 'datagrid';
-		$dg->ignore = array('id_classes', 'checkList', 'id_class_lessons', 'inactiveOn' );
-		$dg->overrideColumn('<?=date("M j h:i A", $createdOn);?>', 'createdOn');
-		$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
-		$dg->where = "id_classes='{$u->activeClassTaught->id_classes}'";
-		$dg->headers = array(
-			'createdOn' => 'Created',
-			'activeOn' => 'Active On',
-			'title' => 'Title',
-			'description' => 'Description',
-			'links' => ' '
-		);
-		if ($lc->getvars['gdorder']=='') {
-			$lc->getvars['dgorder'] = 'activeOn';
+		// get the possible content choices for the pulldown 
+		$sql = "SELECT txTitle,id_class_lesson_content 
+			FROM class_lesson_content
+			WHERE id_classes='".$class_id."'";
+
+		$db->query($sql);
+		while ( $db->next_record() ) {
+			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
 		}
-		$dg->sortColumns = array( 'createdOn', 'activeOn', 'title' );
-		$dg->postpendColumn('<a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">view</a> | <a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">edit</a> | <a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">delete</a>', 'links'); 
-		$t['content'] = $dg->toHTML();
+	}
+
+
+	/**
+	 * Figure out what the next step should be
+	 */
+	function nextRun(&$db,&$u,&$lc,&$t) {
+
+		//assume error, fallback because previous template adds one
+		$t['step'] = ($lc->getvars['step'] -1);
+
+		switch($lc->getvars['step']) {
+			case '2':
+			$this->showObjectivesRun($db,$u,$lc,$t);
+			break;
+
+			case '3':
+			if (!$this->saveObjectivesRun($db,$u,$lc,$t)) {
+				$this->showObjectivesRun($db,$u,$lc,$t);
+				return;
+			}
+			$this->showAssignmentsRun($db,$u,$lc,$t);
+			break;
+
+			case '4':
+			if (!$this->saveAssignmentsRun($db,$u,$lc,$t)) {
+				$this->showAssignmentsRun($db,$u,$lc,$t);
+				return;
+			}
+			$this->showWebRun($db,$u,$lc,$t);
+			break;
+	
+			case '5':
+			if (!$this->saveWebRun($db,$u,$lc,$t)) {
+				$this->showWebRun($db,$u,$lc,$t);
+				return;
+			}
+			$this->showChecklistRun($db,$u,$lc,$t);
+			break;
+
+
+			case '6':
+			if (!$this->saveChecklistRun($db,$u,$lc,$t)) {
+				$this->showChecklistRun($db,$u,$lc,$t);
+				return;
+			}
+			$this->saveRun($db,$u,$lc,$t);
+			break;
+
+			default:
+			$lc->templateName = 'lessonManager_new';
+		}
+
+
+		//no error, use current value because previous template adds one
+		$t['step'] = $lc->getvars['step'];
+	}
+
+
+	/**
+	 * Save the lesson in the session as 'newLesson'
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+
+		$class_id = $u->activeClassTaught->id_classes;
+		$lesson = $u->sessionvars['newLesson']['object'];
+
+		//CHECKLIST
+		$lesson->set('checkList',$u->sessionvars['newLesson']['checkList']);
+
+		$lesson->save();
+		$lesson_id = $lesson->getPrimaryKey();
+
+		//link the content page
+		$sql = 'UPDATE class_lesson_content
+			SET id_class_lessons = %d
+			WHERE id_class_lesson_content = %d
+			AND id_classes = %d';
+
+		$db->query( sprintf($sql, $lesson->getPrimaryKey(),
+					  $content_id,
+					  $class_id) );
+
+
+		//OBJECTIVES
+		$itemArray = $u->sessionvars['newLesson']['objectives'];
+		//wipe all previous objective links for this lesson
+		$db->query('DELETE from class_lesson_objectives 
+			WHERE id_class_lesson = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_objectives
+		(id_class_objectives,id_class_lesson)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+
+		//ASSIGNMENTS
+		$itemArray = $u->sessionvars['newLesson']['assignments'];
+		//wipe all previous assignment links for this lesson
+		$db->query('DELETE from class_assignments_link 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_assignments_link
+		(id_class_assignments,id_class_lessons)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+
+		//WEBLINKS
+		$itemArray = $u->sessionvars['newLesson']['web'];
+		//wipe all previous web links for this lesson
+		$db->query('DELETE from class_lesson_links 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_links
+		(id_class_links,id_class_lessons)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Store a lesson in the session for a wizard-style setup
+	 */
+	function newRun(&$db,&$u,&$lc,&$t) {
+
+		$content_id = intval($lc->postvars['content']);
+
+		$class_id = $u->activeClassTaught->id_classes;
+		if (intval($class_id) == 0) {
+			trigger_error("A valid class id could not be found");
+			return;
+		}
+
+		$lesson = new ClassLessons();
+		$lesson->set('createdOn',time());
+		$lesson->set('title',htmlentities($lc->postvars['title']));
+		$lesson->set('description',htmlentities($lc->postvars['description']));
+		$lesson->set('activeOn',dateArray2TimestampFull($lc->postvars['activeOn']));
+		$lesson->set('inactiveOn',dateArray2Timestamp($lc->postvars['inactiveOn']));
+		$lesson->set('idClasses',$class_id);
+		$lesson->set('checkList',"");
+
+		$u->sessionvars['newLesson']['object'] = $lesson;
+		$u->sessionvars['newLesson']['content_id'] = $content_id;
+
+		$this->presentor = 'redirectPresentation';
+//		$t['url'] = appurl('classmgr/lessonManager/event=add/step=2/id='.$lesson->getPrimaryKey());
+		$t['url'] = appurl('classmgr/lessonNew/event=next/step=2');
 	}
 
 
 	/**
 	 * Edit the assignments to this lesson
 	 */
-	function linkAssignmentsRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
+	function showAssignmentsRun(&$db,&$u,&$lc,&$t) {
 		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 
 		$this->sectionTitle = 'Change Assignments';
-		$lc->templateName = 'lessonManager_linkItems';
+		$lc->templateName = 'lessonNew_linkItems';
 		$t['saveEvent'] = 'saveAssignments';
 		$t['pageHeading'] = 'Lesson Assignments';
 		$t['lessonId'] = $lesson_id;
-		$lesson = ClassLessons::load($lesson_id);
-		$t['title'] = $lesson->get('title');
 
 		$sql = "SELECT A.id_class_assignments, A.title
 			FROM class_assignments AS A
@@ -147,19 +301,13 @@ class LessonManager extends FacultyService {
 	/**
 	 * Edit the assignments to this lesson
 	 */
-	function linkWebRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
+	function showWebRun(&$db,&$u,&$lc,&$t) {
 		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 
 		$this->sectionTitle = 'Change Web Links';
-		$lc->templateName = 'lessonManager_linkItems';
+		$lc->templateName = 'lessonNew_linkItems';
 		$t['saveEvent'] = 'saveWeb';
 		$t['pageHeading'] = 'Lesson Web Links';
-		$t['lessonId'] = $lesson_id;
-		$lesson = ClassLessons::load($lesson_id);
-		$t['title'] = $lesson->get('title');
-
 
 		$sql = "SELECT A.id_class_links, A.title
 			FROM class_links AS A
@@ -216,20 +364,13 @@ class LessonManager extends FacultyService {
 	/**
 	 * Edit the objectives to this lesson
 	 */
-	function linkObjectivesRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
+	function showObjectivesRun(&$db,&$u,&$lc,&$t) {
 		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 
 		$this->sectionTitle = 'Change Objectives';
-		$lc->templateName = 'lessonManager_linkItems';
+		$lc->templateName = 'lessonNew_linkItems';
 		$t['saveEvent'] = 'saveObjectives';
 		$t['pageHeading'] = 'Lesson Objectives';
-		$t['lessonId'] = $lesson_id;
-		$lesson = ClassLessons::load($lesson_id);
-		if( is_object($lesson))
-		$t['title'] = $lesson->get('title');
-
 
 		$sql = "SELECT A.id_class_objectives, A.objective
 			FROM class_objectives AS A
@@ -288,8 +429,7 @@ class LessonManager extends FacultyService {
 	function saveObjectivesRun(&$db,&$u,&$lc,&$t) {
 		$lesson_id = intval($lc->getvars['id']);
 		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
-	
+
 		$itemArray = $lc->getvars['item'];
 		if (! is_array($itemArray) ) {
 			$itemArray = array();
@@ -305,31 +445,27 @@ class LessonManager extends FacultyService {
 		}
 
 		//clean input array to match allowable items
+		$validEntry = false;
 		foreach($itemArray as $k=>$v) {
 			if  ( ! in_array($v, $allowableItems) ) {
 				$itemArray[$k] = 0;
 			} else {
 				$itemArray[$k] = intval($v);
+				$validEntry = true;
 			}
 		}
 
-		//wipe all previous objective links for this lesson
-		$db->query('DELETE from class_lesson_objectives 
-			WHERE id_class_lesson = '.$lesson_id);
-
-		//insert each new link
-		$insert = 'INSERT INTO class_lesson_objectives
-		(id_class_objectives,id_class_lesson)
-		VALUES (%d, %d)';
-
-		foreach($itemArray as $k=>$v) {
-			if ($v < 1 ) continue;
-
-			$db->query( sprintf($insert, $v, $lesson_id));
+		if (!$validEntry) {
+			$t['message'] = "You need to choose at least one objective.";
+			return false;
 		}
 
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+
+		foreach($itemArray as $k=>$v) {
+			$u->sessionvars['newLesson']['objectives'][$k] = $v;
+		}
+
+		return true;
 	}
 
 
@@ -337,9 +473,7 @@ class LessonManager extends FacultyService {
 	 * Save the web links to this lesson
 	 */
 	function saveWebRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
 		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 	
 		$itemArray = $lc->getvars['item'];
 		if (! is_array($itemArray) ) {
@@ -364,23 +498,12 @@ class LessonManager extends FacultyService {
 			}
 		}
 
-		//wipe all previous web links for this lesson
-		$db->query('DELETE from class_lesson_links 
-			WHERE id_class_lessons = '.$lesson_id);
-
-		//insert each new link
-		$insert = 'INSERT INTO class_lesson_links
-		(id_class_links,id_class_lessons)
-		VALUES (%d, %d)';
-
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
-			$db->query( sprintf($insert, $v, $lesson_id));
+			$u->sessionvars['newLesson']['web'][$k] = $v;
 		}
-
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		return true;
 	}
 
 
@@ -388,9 +511,7 @@ class LessonManager extends FacultyService {
 	 * Save the assignments to this lesson
 	 */
 	function saveAssignmentsRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
 		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 	
 		$itemArray = $lc->getvars['item'];
 		if (! is_array($itemArray) ) {
@@ -407,30 +528,29 @@ class LessonManager extends FacultyService {
 		}
 
 		//clean input array to match allowable items
+		$validEntry = false;
 		foreach($itemArray as $k=>$v) {
 			if  ( ! in_array($v, $allowableItems) ) {
 				$itemArray[$k] = 0;
 			} else {
 				$itemArray[$k] = intval($v);
+				$validEntry = true;
 			}
 		}
-		//wipe all previous assignment links for this lesson
-		$db->query('DELETE from class_assignments_link 
-			WHERE id_class_lessons = '.$lesson_id);
 
-		//insert each new link
-		$insert = 'INSERT INTO class_assignments_link
-		(id_class_assignments,id_class_lessons)
-		VALUES (%d, %d)';
+		/* do we need at least one assignment ?
+		if (!$validEntry) {
+			$t['message'] = "You need to choose at least one assignment.";
+			return false;
+		}
+		*/
 
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 
-			$db->query( sprintf($insert, $v, $lesson_id));
+			$u->sessionvars['newLesson']['assignments'][$k] = $v;
 		}
-
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		return true;
 	}
 
 
@@ -623,49 +743,26 @@ class LessonManager extends FacultyService {
 	/**
 	 * Show the Check List for editing
 	 */
-	function checkListRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
+	function showChecklistRun(&$db,&$u,&$lc,&$t) {
 
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
-
-		$sql = "select checkList, title
-			from class_lessons
-			where id_class_lessons='{$lesson_id}'";
-
-		$db->queryOne($sql);
-
-		$t['checkList'] = split("\n", $db->Record['checkList']);
-		$t['title'] = $db->Record['title'];
 		$t['lessonId'] = $lesson_id;
 
-		$lc->templateName = 'lessonManager_checkList';
+		$lc->templateName = 'lessonNew_checkList';
 	}
 
 
 	/**
 	 * Save the check list to this lesson
 	 */
-	function saveCheckListRun(&$db,&$u,&$lc,&$t) {
-		$lesson_id = intval($lc->getvars['id']);
-		$class_id = $u->activeClassTaught->id_classes;
-		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	function saveChecklistRun(&$db,&$u,&$lc,&$t) {
 
 		foreach($lc->getvars['checkList'] as $k=>$v) {
 			if ( strlen(trim($v)) > 0 ) {
 				$checkList .= htmlentities($v)."\n";
 			}
 		}
-
-		$sql = "UPDATE class_lessons 
-			SET checkList='%s'
-			WHERE id_class_lessons='{$lesson_id}'";
-
-		$db->query( sprintf($sql,
-				$checkList)
-			);
-
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$u->sessionvars['newLesson']['checkList'] = $checkList;
+		return true;
 	}
 
 
