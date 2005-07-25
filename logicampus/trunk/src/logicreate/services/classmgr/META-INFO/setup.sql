@@ -95,7 +95,7 @@ CREATE TABLE class_lesson_links (
   id_class_lessons int(11) default NULL,
   id_class_links int(11) default NULL,
   KEY id_class_lessons (id_class_lessons),
-  KEY id_class_links (id_class_links),
+  KEY id_class_links (id_class_links)
 ) TYPE=MyISAM;
 
 
@@ -131,7 +131,7 @@ CREATE TABLE class_links (
   dateCreated datetime default NULL,
   createdby varchar(32) NOT NULL default '',
   hits int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (id_class_links)
+  PRIMARY KEY  (id_class_links),
   KEY id_classes (id_classes),
   KEY id_class_links_categories (id_class_links_categories)
 ) TYPE=MyISAM PACK_KEYS=0;
