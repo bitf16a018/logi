@@ -43,7 +43,7 @@ CREATE TABLE class_assignments_grades (
 
 CREATE TABLE class_assignments_link (
   id_class_lessons int(11) unsigned NOT NULL default '0',
-  id_class_assignments int(11) unsigned NOT NULL default '0'
+  id_class_assignments int(11) unsigned NOT NULL default '0',
   KEY id_class_lessons (id_class_lessons),
   KEY id_class_assignments (id_class_assignments)
 ) TYPE=MyISAM;
