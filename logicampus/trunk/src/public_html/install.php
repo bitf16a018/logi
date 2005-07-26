@@ -1,4 +1,6 @@
-<html>
+<?php
+	include('defines.template.php');
+?><html>
 <body>
 
 
@@ -27,5 +29,11 @@
 <br/>
 
 <a href="<?= $PHP_SELF;?>">Click here</a> to reload the page when you're done with the installation.
+
+<div style="margin-top:2em;font-size:75%;">
+Logicampus <?= LOGICAMPUS_VERSION.LOGICAMPUS_VERSION_STATUS;?>
+<br/>
+Build Date: <?= LOGICAMPUS_BUILD_DATE;?>
+</div>
 </body>
 </html>

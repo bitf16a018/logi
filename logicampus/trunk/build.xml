@@ -193,11 +193,20 @@
 	<antcall target="translate"/>
 
   	<!-- apply LCPL to files -->
+	<!--
 	<antcall target="apply_license"/>
+	-->
 
 	<!-- After license is applied, copy defines.php over -->
 	<echo message="copying defines template."/>
-	<copy todir="${build}/public_html/" file="${src}/defines.template.php" overwrite='true'/>
+	<copy todir="${build}/public_html/" file="${src}/defines.template.php" overwrite='true'>
+		<filterset>
+			<filter token="build.date" value="${build.date}"/>
+			<filter token="version.number" value="${version.number}"/>
+			<filter token="version.extra" value="${version.extra}"/>
+		</filterset>
+	</copy>
+
 
 
 	<!-- After license is applied, copy install.php over -->
