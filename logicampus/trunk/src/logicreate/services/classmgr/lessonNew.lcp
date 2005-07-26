@@ -144,6 +144,8 @@ class LessonNew extends FacultyService {
 			WHERE id_class_lesson_content = %d
 			AND id_classes = %d';
 
+		$content_id = intval($u->sessionvars['newLesson']['content_id']);
+
 		$db->query( sprintf($sql, $lesson->getPrimaryKey(),
 					  $content_id,
 					  $class_id) );
