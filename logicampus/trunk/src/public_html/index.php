@@ -31,8 +31,10 @@ $execution_time=get_microtime();
 	$start = microtime();
 	srand ((double) microtime() * 1000000);
 
-	include("defines.php");
-
+	if (!@include('defines.php') ) {
+		include('install.php');
+		exit();
+	}
 
 
 

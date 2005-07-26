@@ -82,8 +82,19 @@ define('DEBUG',true);
 
 $dsn = array();
 
+/*
+Sample values for the database driver
+$dsn['default'] = array(
+        'driver'=>'mysql',
+        'host'=>'localhost',
+        'user'=>'campus',
+        'password'=>'campus',
+        'database'=>'campus',
+        'persistent'=>'n');
+*/
 
 
+//CHANGE THESE SETTINGS TO MATCH YOUR DATABASE SETUP
 $dsn['default'] = array(
         'driver'=>'@db.driver@',
         'host'=>'@db.host@',
