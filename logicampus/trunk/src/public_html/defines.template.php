@@ -13,6 +13,7 @@
 
 define('LOGICAMPUS_VERSION','@version.number@');
 define('LOGICAMPUS_VERSION_STATUS','@version.extra@');
+define('LOGICAMPUS_BUILD_DATE','@build.date@');
 define('SITE_NAME','logicampus');
 define('SITE_DISPLAY_NAME','LogiCampus');
 
