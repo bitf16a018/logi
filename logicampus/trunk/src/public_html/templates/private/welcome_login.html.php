@@ -106,7 +106,7 @@
 <tr>
   <td colspan="2" align="center">
     <input type="hidden" name="event" value="login"/>
-    <input type="submit" value="<?=lct('Login');?>"/>
+    <input type="submit" name="login_button" value="<?=lct('Login');?>"/>
   </td>
 </tr>
 </table>
