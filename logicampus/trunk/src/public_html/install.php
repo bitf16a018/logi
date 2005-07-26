@@ -9,8 +9,8 @@
 
 <br/>
 
-<fieldset>
-<legend>Instructions</legend>
+<fieldset style="background-color:#DDE;font-family:Helvetica,Arial;">
+<legend style="font-size:120%;">Instructions</legend>
 	<p>
 	It seems as though the site has not been installed yet.  To complete the installation 
 	you need to:
@@ -24,5 +24,8 @@
 	</p>
 </fieldset>
 
+<br/>
+
+<a href="<?= $PHP_SELF;?>">Click here</a> to reload the page when you're done with the installation.
 </body>
 </html>
