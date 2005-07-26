@@ -196,9 +196,13 @@
 	<antcall target="apply_license"/>
 
 	<!-- After license is applied, copy defines.php over -->
-	<echo message="copying defines file."/>
-	<antcall target="setup"/>
-	<copy todir="${build}/public_html/" file="${src}/defines.php" overwrite='true'/>
+	<echo message="copying defines template."/>
+	<copy todir="${build}/public_html/" file="${src}/defines.template.php" overwrite='true'/>
+
+
+	<!-- After license is applied, copy install.php over -->
+	<echo message="copying installation instructions."/>
+	<copy todir="${build}/public_html/" file="${src}/install.php" overwrite='true'/>
 
 	<!-- tar up -->
 	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
