@@ -851,7 +851,7 @@ if(date("m/d/Y",$loopTime)==date("m/d/Y",$val->startdate+86400)) {
 		/** old way.. with the times listed 8 830 9 930...
 		
 		if (count($allday_events) > 0)
-		{	$st_allday = '<tr><td class="todayseventstitle" colspan="2"><B>TODAY&apos;S ITEMS<b></td></tr>';
+		{	$st_allday = '<tr><td class="todayseventstitle" colspan="2"><B>TODAY\'S ITEMS<b></td></tr>';
 			$st_allday .= '<tr><td class="todaysevents" colspan="2">'.implode($allday_events, '<br>'). '</td></tr>';
 		}
 		
@@ -861,9 +861,9 @@ if(date("m/d/Y",$loopTime)==date("m/d/Y",$val->startdate+86400)) {
 		
 		*/
 		if (count($allday_events) > 0)
-		{	//$st_allday = '<tr><td removedclass="todayseventstitle"><B>TODAY&apos;S ITEMS<b></td></tr>';
+		{	//$st_allday = '<tr><td removedclass="todayseventstitle"><B>TODAY\'S ITEMS<b></td></tr>';
 			$st_allday = '';
-			$st_allday .= '<tr><td removedclass="todaysevents"><B>TODAY&apos;S EVENTS<b><br><ul>'.implode($allday_events, '<br>'). '</ul></td></tr>';
+			$st_allday .= '<tr><td removedclass="todaysevents"><B>TODAY\'S EVENTS<b><br><ul>'.implode($allday_events, '<br>'). '</ul></td></tr>';
 			$st_allday .= '<tr><td>&nbsp;</td></tr>';
 		}
 		
