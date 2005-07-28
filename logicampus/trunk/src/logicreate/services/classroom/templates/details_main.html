@@ -8,7 +8,7 @@
 
 		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
 		<tr class="menu">
-			<td class="portalbox">Announcements<br/><small>(1 of <?=$t['num_announcements'];?> <a href="<?=APP_URL?>classroom/announcements">view all</a>)</small></td>
+			<td class="portalbox">Announcements<br/><small>(<?= ($t['num_announcements'] > 0) ? '1':'0';?> of <?=$t['num_announcements'];?> <a href="<?=APP_URL?>classroom/announcements">view all</a>)</small></td>
 		</tr>
 		<tr>
 			<td><?=$t['announcements'];?></td>
