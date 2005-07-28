@@ -73,7 +73,7 @@ class courses extends AdminService
 
 		// mgk 12/7/03
 		// limit on adding courses
-			 
+		/*
 		$db->queryOne("select count(*) from courses");
 		$maxcourses = (int)base64_decode(MAX_COURSES);
 		if ($db->Record[0] >= $maxcourses) { 
@@ -81,7 +81,7 @@ class courses extends AdminService
 			$this->run($db,$u,$lc,$t);
 			return;
 		} 
-
+*/
 		if ($lc->postvars['addcourse'] == 'Add Course!') {
 			#debug($lc->postvars, 1);
 			$t['error'] = $f->validateForm('admincourse', $lc->postvars);
