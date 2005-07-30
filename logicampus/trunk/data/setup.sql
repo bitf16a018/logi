@@ -212,6 +212,7 @@ CREATE TABLE lcForms (
   dateTimeBit char(2) NOT NULL default '',
   extra varchar(255) NOT NULL default '',
   PRIMARY KEY  (pkey),
+  KEY formId (formId),
   KEY pkey (pkey)
 ) TYPE=MyISAM;
 
