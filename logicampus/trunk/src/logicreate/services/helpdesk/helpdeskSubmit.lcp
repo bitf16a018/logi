@@ -199,7 +199,7 @@ class helpdeskSubmit extends RegAuth {
 // log info in the 'action', but more specifically
 // a 'system comment' should go in details then?
 
-		$d = trim($arg->postvars['details']);
+		$d = htmlentities(trim($arg->postvars['details']));
 		if ($d!='') { 
 			$j = new HelpdeskIncidentLog();
 			$j->helpdeskId = $id;
