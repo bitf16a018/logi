@@ -6,7 +6,6 @@
 		<td width="18%" class="row2"><B>Summary:</B></td>
 		<td><?=stripslashes($t['hd']['summary']);?></td>
 		<? if ( $t['canSeeComments'] ) { ?>
-		<? if ( $t['comment']->comment != '' ) { ?>
 		<td rowspan="6" valign="top">
 			<fieldset>
 			<legend>staff comments (only HD staff and admins)</legend>
@@ -16,7 +15,6 @@
 			</fieldset>
 			<a href="<?=appurl('helpdesk/history/username='.$t['hd']['userid']);?>">Edit comments</a> about <?=$t['hd']['userid'];?>
 		</td>
-		<? } ?>
 		<? } ?>
 
 	</tr>

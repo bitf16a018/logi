@@ -2,5 +2,28 @@
 
 <h3>Submit a new issue</h3>
 <?=$t['error'];?>
-<?=$t['form'];?>
+
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<form action="http://dev.logicampus.com/index.php/helpdesk/helpdeskSubmit/event=add" method="POST" enctype="application/x-www-form-urlencoded">
+		<tr>
+			<td valign="top" class="" valign="top">*Detailed description</td>
+			<td valign="top" class="">
+				<table cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td><textarea name="details" cols="50" rows="6" id="details"></textarea></td>
+					</tr>
+				</table>
+				<div style="font-size=80%;">Give us a detailed description of your problem.</div>
+					</td>
+		</tr>
+		<tr>
+			<td valign="top" class=""></td>
+			<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Post your issue"></td>
+		</tr>
+	</form>
+</table>
+
+<div style="font-size: 85%">*denotes a required field</div>
 
