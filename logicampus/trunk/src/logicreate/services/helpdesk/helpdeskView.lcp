@@ -43,8 +43,10 @@ class helpdeskView extends RegAuth {
 		$canUseLoginAs = false;
 		$showComments = false;
 
-		if (in_array('hdadmin',$u->groups) || in_array('hdstaff',$u->groups) || in_array('admin', $u->groups) ) 
-		{
+		if (in_array('hdadmin',$u->groups) 
+			|| in_array('hdstaff',$u->groups) 
+			|| in_array('admin', $u->groups) ) {
+
 			// get a list of technicians
 			$db->query("select * from lcUsers where groups like '%hdstaff%' or groups like '%|admin|%' or groups like '%|hdadmin|%'");
 			while($db->next_record()) {
@@ -59,6 +61,7 @@ class helpdeskView extends RegAuth {
 			$canUseLoginAs = true;
 			$showComments = true;
 			$t['canSeeComments'] = true;
+			$arg->templateName = 'helpdeskView_admin';
 		} else 
 		{
 			$db->queryOne("select * from helpdesk_incident 
@@ -69,8 +72,9 @@ class helpdeskView extends RegAuth {
 		
 		$j = HelpdeskCategory::loadAll();
 		
-		foreach($j as $k=>$v)
-		{	$t['categories'][$v->helpdeskCategoryId] = $v->helpdeskCategoryLabel;
+		$t['categories'][0] = 'uncategorized';
+		foreach($j as $k=>$v) {
+			$t['categories'][$v->helpdeskCategoryId] = $v->helpdeskCategoryLabel;
 		}		
 
 
@@ -88,6 +92,18 @@ class helpdeskView extends RegAuth {
 			}
 		}
 		$arg->templateName = "helpdeskView_main";
+
+
+		if (in_array('hdadmin',$u->groups) 
+			|| in_array('hdstaff',$u->groups) 
+			|| in_array('admin', $u->groups) ) {
+
+			$arg->templateName = 'helpdeskView_admin';
+		}
+
+		if ($arg->getvars['saved'] == 1) {
+			$t['saveMessage'] = true;
+		}
 	}
 
 // add issue submitted from user

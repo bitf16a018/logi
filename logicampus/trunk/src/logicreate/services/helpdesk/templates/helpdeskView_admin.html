@@ -1,14 +1,37 @@
 <?=$t['sectionheader'];?>
 
-<h4>Summary information</h4>
-<table cellspacing="0" cellpadding="2" width="100%">
+<h3 style="margin:1px;">Ticket information</h3>
+
+<?php
+if ($t['saveMessage'] == true ) {?>
+<div style="border:1px solid blue;float:center;text-align:center;font-size:110%;color:blue;">Your changes were saved.</div>
+<?php } ?>
+
+<form method='post' action='<?=appurl("helpdesk/helpdeskSubmit/event=categorize");?>'>
+<table cellspacing="0" cellpadding="2" width="100%" border="0">
 	<tr>
 		<td width="18%" class="row2"><B>Summary:</B></td>
-		<td><?=stripslashes($t['hd']['summary']);?></td>
+		<td><input type="text" name="summary" value="<?=stripslashes($t['hd']['summary']);?>" size="35"/>&nbsp;</td>
+		<? if ( $t['canSeeComments'] ) { ?>
+		<td rowspan="6" valign="top" width="50%">
+			<fieldset>
+			<legend>staff comments (only HD staff and admins)</legend>
+			<pre>
+<?= $t['comment']->comment;?>
+			</pre>
+			</fieldset>
+			<a href="<?=appurl('helpdesk/history/username='.$t['hd']['userid']);?>">Edit comments</a> about <?=$t['hd']['userid'];?>
+		</td>
+		<? } ?>
+
 	</tr>
 	<tr>
 		<td width="18%"><nobr><B>Categorized As:</B></nobr></td>
-		<td><i><?=$t['categories'][$t['hd']['category']];?></i></td>
+		<td>
+			<select name="category_id">
+				<?= makeOptions($t['categories'],$t['hd']['category']);?>
+			</select>
+		</td>
 	</tr>
 	<tr>
 		<td width="18%"><nobr><B>Current Status:</B></nobr></td>
@@ -36,7 +59,15 @@
 	</tr>	
 </table>
 
-<h5>Detail information</h5>
+<br/>
+
+<input type='submit' name='category_submit' value='Save Category and Summary'>
+</form>
+
+<br/>
+
+
+<h4 style="margin:1px;">Communication Log</h4>
 <table cellpadding="2" cellspacing="0" width="100%" style="border: 1px solid silver;">
 	<tr class="titlehead">
 		<td><B>Date Logged</B></td>
@@ -61,16 +92,19 @@
 	
 	<textarea name='details' rows='7' cols='60'></textarea><br><br>
 	
-<? if ($t['techs']) { // do we have a list of techs to reassign to? ?>
-Reassign to: <select name='reassign'><option value=''>Do not reassign</option>
-<?=$t['techs'];?>
-</select><BR>
-<? } ?>
+	<? if ($t['techs']) { // do we have a list of techs to reassign to? ?>
+		Reassign to: <select name='reassign'><option value=''>Do not reassign</option>
+		<?=$t['techs'];?>
+		</select>
+		<br/>
+	<? } ?>
+
 	<? if ($t['hd']['status']==3) { // closed ?>
 		<input type='submit' name='button' value='Send details and reopen incident'>
 	<? } else { ?>
+		Close this incident when sending details? <input type="checkbox" name="close"/>
+		<br/>
 		<input type='submit' name='button' value='Send details'>
-		<input type='submit' name='button' value='Send details and close incident' onclick="if (confirm('You are about to set this tickets status to *CLOSED*, are you sure?')) { return true; } else { return false; }">
 	<? } ?>
 </form>
 <br>

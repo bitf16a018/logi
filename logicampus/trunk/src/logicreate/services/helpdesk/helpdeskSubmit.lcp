@@ -48,11 +48,6 @@ class helpdeskSubmit extends RegAuth {
 		} else {
 			$f->getForm('helpdeskSubmit');
 		}
-	#	$db->query("select * from helpdesk_categories");
-	#	while($db->next_record()) {
-	#		$t['categories'][$db->Record[0]] = $db->Record[0]."=".$db->Record['helpdesk_category_label'];
-	#	}
-	#	$f->addSelect("category","Category",implode(",",$t['categories']));
 		$f->action = appurl("helpdesk/helpdeskSubmit/event=add");
 		$t['form'] = $f->toHTML();
 		$arg->templateName = "helpdeskSubmit_main";
@@ -113,6 +108,39 @@ class helpdeskSubmit extends RegAuth {
 	}
 
 
+
+	/**
+	 * Update the category and the summary
+	 */
+	function categorizeRun(&$db,&$u,&$arg,&$t) {
+
+		if ( !in_array("hdadmin",$u->groups) 
+			&& !in_array("hdstaff",$u->groups) 
+			&& !in_array('admin', $u->groups) ) {
+			$t['message'] = "You don't have permission to modify this ticket in this way";
+			$this->presentor = 'errorPresentation';
+			return;
+		}
+
+		$id = $u->sessionvars['helpdesk_id'];
+		$incident = helpdeskIncident::load($id);
+
+		if (! is_object($incident) ) {
+			$t['message'] = "Cannot find the ticket stored in your session.";
+			$this->presentor = 'errorPresentation';
+			return;
+		}
+
+		
+		$incident->set('summary', htmlentities($arg->postvars['summary']));
+		$incident->set('category',htmlentities($arg->postvars['category_id']));
+		$incident->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('helpdesk/helpdeskView/'.$incident->getPrimaryKey().'/saved=1');
+	}
+
+
 	/**
 	 * all updates are done through this add details
 	 * it's really an add comments
@@ -121,7 +149,7 @@ class helpdeskSubmit extends RegAuth {
 	 * Status 3 = CLOSED
 	 * Stauts 4 = REPLIED
 	 */
-	function addDetailrun(&$db,&$u,&$arg,&$t) 
+	function addDetailRun(&$db,&$u,&$arg,&$t) 
 	{ 
 		$arg->templateStyle = 'private';
 // get the incident id we were looking at before
@@ -154,8 +182,8 @@ class helpdeskSubmit extends RegAuth {
 
 		$action = 'Further Details';
 
-		$button = trim($arg->postvars['button']);
-		if (eregi("close",$button)) { 
+		$close = trim($arg->postvars['close']);
+		if ( strtolower($close) == 'on') { 
 			$action = 'Closed';
 			$incident->status=3;	//  CLOSED
 			$incident->timedateClose = time();
