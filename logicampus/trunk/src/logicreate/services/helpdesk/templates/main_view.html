@@ -15,10 +15,16 @@
 		<td align="center"><B>Messages</B></td>
 	</tr>
 	<? while(list($k,$v) = @each($t['open'])) { $i++; ?>
+	<?php
+	$summary = substr($v['comment'],0,30);
+	if ( strlen($v['comment']) > 30 ) {
+		$summary .= ' ...';
+	}
+	?>
 	<tr>
 		<td width="110" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>">#<?=$v['helpdesk_id'];?></td>
 		<td width="110" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=$t['categories'][$v['category']];?></td>
-		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><a href="<?=appurl("helpdesk/helpdeskView/".$v['helpdesk_id']);?>"><?=substr($v['summary'],0,30)."...";?></a></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><a href="<?=appurl("helpdesk/helpdeskView/".$v['helpdesk_id']);?>"><?=$summary;?></a></td>
 		<td width="150" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>"><?=date("M j, Y g:i A",$v['timedate_open']);?></td>
 		<td width="30" bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" align="center"><?=$v['activity'];?></td>
 	</tr>
