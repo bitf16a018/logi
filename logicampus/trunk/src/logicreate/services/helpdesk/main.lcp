@@ -65,7 +65,7 @@ class helpdesk extends RegAuth {
 		
 		// REGULAR VIEW (AVERAGE PERSON) (NON PUBLIC) but student/faculty
 		$sql = "
-		SELECT a.*, count(b.helpdesk_id) as activity
+		SELECT a.*, b.comment, count(b.helpdesk_id) as activity
 		
 		FROM helpdesk_incident as a
 		
