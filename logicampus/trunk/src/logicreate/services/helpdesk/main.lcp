@@ -46,9 +46,10 @@ class helpdesk extends RegAuth {
 		$arg->templateStyle = 'private';
 
 		// get a list of categories
+		$t['categories'][0] = '<i>uncategorized</i>';
 		$db->query("select * from helpdesk_categories");
 		while($db->next_record()) {
-			$t['categories'][$db->Record[0]] = $db->Record['helpdesk_category_label'];
+			$t['categories'][$db->Record['helpdesk_category_id']] = $db->Record['helpdesk_category_label'];
 		}
 				
 		// STAFF
