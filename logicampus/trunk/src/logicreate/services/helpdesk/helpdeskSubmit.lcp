@@ -68,7 +68,7 @@ class helpdeskSubmit extends RegAuth {
 			$t['error'] = "Your incident needs more detail.";
 		}
 
-		if ($t['error']) { 
+		if ($t['error']) {
 			$this->run($db,$u,$arg,$t);
 			return;
 		}
@@ -82,12 +82,7 @@ class helpdeskSubmit extends RegAuth {
 		$h->_new 		= true;
 		$h->summary = '';	//no summary
 		$h->category = '';	//no category
-		if (in_array("hdadmin",$u->groups) || in_array("hdstaff",$u->groups) || in_array('admin', $u->groups) ) {
-			$h->userid = htmlentities($arg->postvars['username']);
-			
-		} else { 
-			$h->userid = $u->username;
-		}
+		$h->userid = $u->username;
 
 		$h->timedateClose = 0;
 		$h->assignedTo = '';
@@ -183,7 +178,7 @@ class helpdeskSubmit extends RegAuth {
 		$action = 'Further Details';
 
 		$close = trim($arg->postvars['close']);
-		if ( strtolower($close) == 'on') { 
+		if ( strtolower($close) == 'on') {
 			$action = 'Closed';
 			$incident->status=3;	//  CLOSED
 			$incident->timedateClose = time();
