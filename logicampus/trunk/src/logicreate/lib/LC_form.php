@@ -561,7 +561,6 @@
 
 		function checkboxToHTML($v)
 		{	
-			#debug($v);
 			if ($v['message'] != '')
 			{
 				$msg = '<div style="font-size=80%;">'.$v['message'].'</div>';
@@ -1471,6 +1470,11 @@
 						if ( !isset($vars[$db->Record['fieldName']]) )
 						{ 
 							$db->Record['checked'] = 'N';
+						} else {
+							if ( $vars[$db->Record['fieldName']] == false) {
+
+								$db->Record['checked'] = 'N';
+							}
 						}
 					} 
 
