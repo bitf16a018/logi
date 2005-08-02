@@ -145,7 +145,7 @@ WHERE
 		//write tmp files to documentLibrary directory.
 
 		$rep = new LC_DiskRepository(LC_CLASSLIB_REP);
-		$keys = array($this->owner,$this->file,$this->fileSize,$this->filedate);
+		$keys = array($this->owner,$this->file,$this->size,$this->filedate);
 		if ($this->diskName) { 
 			$this->tmpname = LC_DiskRepository::getFullPath($this->diskName);
 		} else { 
@@ -180,7 +180,7 @@ WHERE
 	 */
 	function saveToRepository() {
 		$rep = LC_DiskRepository::getSingleton();
-		$keys = array($this->owner,$this->filename,$this->fileSize,$this->filedate);
+		$keys = array($this->owner,$this->filename,$this->size,$this->filedate);
 		$this->diskName = $rep->saveFile($keys,$this->tmpname);
 	return $this->diskName;
 	}
