@@ -48,7 +48,11 @@ if ($t['saveMessage'] == true ) {?>
 	</tr>
 	<tr>
 		<td width="18%"><B>By:</B></td>
-		<td><a href="<?=appurl('administration/users/'.$t['hd']['userid'].'/event=loginAs');?>"><?=$t['hd']['userid'];?></a>
+		<td><?=$t['hd']['userid'];?>
+			<br/>
+			<a href="<?=appurl('helpdesk/history/username='.$t['hd']['userid']);?>">View History</a> 
+			&nbsp;&nbsp;
+			<a href="<?=appurl('administration/users/'.$t['hd']['userid'].'/event=loginAs');?>">Login As...</a>
 
 		<? if ($t['hd']['helpdesk_status_label'] == 'Closed' ) { ?>
 		<? if (in_array("hdadmin",$obj->user->groups) || in_array('admin', $obj->user->groups) || in_array('hdstaff', $obj->user->groups) ) { ?>
