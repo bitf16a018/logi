@@ -56,7 +56,7 @@ return true;
 			// instead of mapping to the class you're in, we map to the 
 			// teacher of the class you're in.  this allows the content to be 
 			// tied to a teacher, not a class
-		
+
 
 			$sql = '
 			SELECT A.pkey 
@@ -74,7 +74,7 @@ return true;
 				$t['message'] = "You do not have permission to view this content.";
 				return;
 			}
-			
+
 		$pkey = $db->Record['pkey'];			
 		}
 		// END FHASH
