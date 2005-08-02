@@ -1,6 +1,6 @@
 <?
 
-/* 
+/**
  * Create by Keith Elder
  * Last Modified 9/12/02
  *
@@ -9,7 +9,7 @@
  * 
  * This service pulls in information from
  * several other modules to give a fair picture
- * of the user including news they user wrote,
+ * of the user including news they wrote,
  * their personal photo gallery, comments, etc.
  */
 
@@ -23,6 +23,7 @@ class view extends RegAuth {
 		global $lcObj;
 		$lcObj->templateStyle = 'private';
 	}
+
 	function run($db,&$u,$arg,&$t) {
 
 		$name = $t['username'] = $arg->getvars[1];	
