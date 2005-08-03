@@ -27,15 +27,15 @@
 
 	<p>
 	After you setup the configuration file you will need to populate the database.
-	A bash script called <i>'wipeclean.sh'</i> is provided in the <i>'logicampus/scripts/'</i> directory.  It will <em><u>erase ALL TABLES</u></em> in the given database and
+	A bash script called <i>'wipe_clean.sh'</i> is provided in the <i>'logicampus/scripts/'</i> directory.  It will <em><u>erase ALL TABLES</u></em> in the given database and
 	insert the proper LogiCampus tables.  It is important to use a new database and to 
-	remove the <i>'logicampus/scripts/'</i> directory after running <i>'wipeclean.sh'</i>.
+	remove the <i>'logicampus/scripts/'</i> directory after running <i>'wipe_clean.sh'</i>.
 	</p>
 
 	<p>
 	<pre>
 	# cd logicampus/scripts/
-	# ./wipeclean.sh db_user db_pass db_name
+	# sh ./wipe_clean.sh db_user db_pass db_name
 	</pre>
 	</p>
 </fieldset>
