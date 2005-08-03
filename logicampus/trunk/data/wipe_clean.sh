@@ -44,7 +44,10 @@ sh ./install_metainfo.sh $1 $2 $db
 
 
 echo '***********************'
-echo 'POPULATING with dummy data'
-mysql -u $1 -p$2 $db < ../data/semesters_and_classes.sql
+echo 'Custom profile data'
 mysql -u $1 -p$2 $db < ../data/profile.sql 
-mysql -u $1 -p$2 $db < ../data/assessments.sql 
+
+
+echo '*********************************'
+echo 'NOT INSERTING DUMMY DATA, (see webtest)'
+

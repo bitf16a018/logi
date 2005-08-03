@@ -1,9 +1,15 @@
-INSERT INTO lcUsers VALUES (1,'admin','21232f297a57a5a743894a0e4a801fc3','admin@localhost','|admin|public|reg|','2004-11-27 17:26:49',1);
-INSERT INTO lcUsers VALUES (2,'teacher1','41c8949aa55b8cb5dbec662f34b62df3','teacher1@localhost','|public|reg|faculty|','2004-11-27 17:26:49',3);
-INSERT INTO lcUsers VALUES (3,'teacher2','ccffb0bb993eeb79059b31e1611ec353','teacher2@localhost','|public|reg|faculty|','2004-11-27 17:26:49',3);
-INSERT INTO lcUsers VALUES (4,'staff','1253208465b1efa876f982d8a9e73eef','staff@localhost','|hdadmin|hdstaff|public|reg|','2004-11-27 17:26:49',1);
-INSERT INTO lcUsers VALUES (6,'ralph.wiggum','336137dff3be08a4b71f77abef46fe73','ralph.wiggum@localhost','|public|reg|student|','2004-11-27 17:26:49',2);
-INSERT INTO lcUsers VALUES (7,'lisa.simpson','6cebe4044588b8c9cbe1de92da02dea2','lisa.simpson@localhost','|public|reg|student|','2004-11-27 17:26:49',2);
-INSERT INTO lcUsers VALUES (8,'bart.simpson','c1c41bed296920eb65a3a3a5d45fa1ff','bart.simpson@localhost','|public|reg|student|','2004-11-27 17:26:49',2);
-INSERT INTO lcUsers VALUES (9,'nelson.muntz','84b37601db41fa18779f4de4fdeb4d14','nelson.muntz@localhost','|public|reg|student|','2004-11-27 17:26:49',2);
+INSERT INTO lcUsers VALUES (1,'admin',MD5('admin'),'admin@localhost','|admin|public|reg|',NOW(),1);
+INSERT INTO lcUsers VALUES (2,'teacher1',MD5('teacher1'),'teacher1@localhost','|public|reg|faculty|',NOW(),3);
+INSERT INTO lcUsers VALUES (3,'teacher2',MD5('teacher2'),'teacher2@localhost','|public|reg|faculty|',NOW(),3);
+INSERT INTO lcUsers VALUES (4,'staff',MD5('staff'),'staff@localhost','|hdadmin|hdstaff|public|reg|',NOW(),1);
+INSERT INTO lcUsers VALUES (10,'student1',MD5('student1'),'student1@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (11,'student2',MD5('student2'),'student2@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (12,'student3',MD5('student3'),'student3@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (13,'student4',MD5('student4'),'student4@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (14,'student5',MD5('student5'),'student5@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (15,'student6',MD5('student6'),'student6@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (16,'student7',MD5('student7'),'student7@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (17,'student8',MD5('student8'),'student8@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (18,'student9',MD5('student9'),'student9@localhost','|public|reg|student|',NOW(),2);
+INSERT INTO lcUsers VALUES (19,'student10',MD5('student10'),'student10@localhost','|public|reg|student|',NOW(),2);
 
