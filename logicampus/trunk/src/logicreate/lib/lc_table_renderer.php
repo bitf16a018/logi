@@ -246,7 +246,12 @@ class LC_TableDateRenderer extends LC_TableCellRenderer {
 	}
 
 	function getRenderedValue() {
-		return date($this->dateFormat, $this->value);
+		//is it a date string?
+		if ( (string)intval($this->value) != (string)$this->value) {
+			return date($this->dateFormat, strtotime($this->value));
+		} else {
+			return date($this->dateFormat, $this->value);
+		}
 	}
 }
 
