@@ -148,6 +148,11 @@ class assessments extends FacultyService {
 		$a->mailResponses = (int)($lc->postvars['mailResponses'] == 'on');
 		$a->autoPublish = (int)($lc->postvars['autoPublish'] == 'on');
 
+		$a->set('showResultType',0);
+		$a->set('showAfterClose',0);
+		$a->set('isPrintable',0);
+		$a->set('possiblePoints',0);
+
 		if ( intval($a->classId) == 0 ) {
 			print "active class id of 0, dying...";
 			exit();
