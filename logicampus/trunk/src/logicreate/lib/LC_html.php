@@ -164,10 +164,10 @@ if ($endyear==0) {
 }
 if ($endyear<$startyear) { $s = $startyear; $startyear = $endyear; $endyear = $s; }
 if ( $date != ""  &&  $date !="0000-00-00 00:00:00") {
-	if ( $date === intval($date)) { 
-		list($y, $m, $d) = explode("-", date("Y-m-d",$date));
-	} else { 
+	if ( (string)intval($date) != (string)$date) {
 		list($y, $m, $d) = explode("-", date("Y-m-d",strtotime($date)) );
+	} else { 
+		list($y, $m, $d) = explode("-", date("Y-m-d",$date));
 	}
 } else {
 	list($m, $d, $y) = explode("-", date("m-d-Y") );
@@ -175,11 +175,13 @@ if ( $date != ""  &&  $date !="0000-00-00 00:00:00") {
 $m = intval($m);
 $d = intval($d);
 $y = intval($y);
+
 if ($m == 0) { 
-$m = date("m");
-$d = date("d");
-$y = date("Y");
+	$m = date("m");
+	$d = date("d");
+	$y = date("Y");
 }
+
 $months = array (1=>'January',
                  'February',
                  'March',
