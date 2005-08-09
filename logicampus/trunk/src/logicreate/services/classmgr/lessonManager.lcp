@@ -502,7 +502,7 @@ class LessonManager extends FacultyService {
 		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
 		$t['activeOnStruct']['fieldName'] = 'activeOn';
 		$t['activeOnStruct']['displayName'] = 'Active On';
-		$t['activeOnStruct']['dateTimeBit'] = 255;
+		$t['activeOnStruct']['dateTimeBit'] = 63;
 
 		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
 		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
