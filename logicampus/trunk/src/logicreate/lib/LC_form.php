@@ -764,22 +764,29 @@
 			define (_12HOUR, 32);
 			
 			if ($endyear<$startyear) { $s = $startyear; $startyear = $endyear; $endyear = $s; }
+
+
+
 			if ( $date != ""  &&  $date !="0000-00-00 00:00:00") {
-				if (is_numeric($date)) { 
-					list($y, $m, $d) = explode("-", date("Y-m-d",$date));
+				if ( (string)intval($date) != (string)$date) {
+					$date = strtotime($date);
 				} else { 
-					list($y, $m, $d) = explode("-", date("Y-m-d",strtotime($date)) );
+					$date = (int)$date;
 				}
 			} else {
-				list($m, $d, $y) = explode("-", date("m-d-Y") );
+				$date = time();
 			}
-			
+			list ($newdate, $newtime) =  explode(" ", date("m-d-Y h:i:s:A",$date) );
+			list($m, $d, $y) = explode("-", $newdate);
+			list($h, $i, $s, $a) = explode(":", $newtime);
+
+
 			$m = intval($m);
 			$d = intval($d);
 			$y = intval($y);
-			$h = date('h', $date);
-			$i = date('i', $date);
-			$a = date('A', $date);
+			$h = intval($h);
+			$i = intval($i);
+			$s = intval($s);
 			
 			if ($m == 0) { 
 			$m = date("m");
