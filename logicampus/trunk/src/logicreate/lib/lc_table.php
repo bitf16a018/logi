@@ -33,7 +33,7 @@ class LC_Table {
 			$this->columnModel = $columnModel;
 		}
 
-		$this->tableHeader = new LC_TableHeader($columnModel);
+		$this->tableHeader = new LC_TableHeader($this->columnModel);
 	}
 
 
@@ -96,6 +96,14 @@ class LC_Table {
 	 */
 	function &getColumnModel() {
 		return $this->columnModel;
+	}
+
+
+	/**
+	 * return a ref to this header model
+	 */
+	function &getHeaderModel() {
+		return $this->tableHeader;
 	}
 
 
@@ -311,6 +319,25 @@ class LC_TableHeader {
 	function &getColumnModel() {
 		return $this->columnModel;
 	}
+
+
+	/**
+	 * return the column at index $i
+	 */
+	function &getColumnAt($i) { 
+		return $this->columnModel->tableColumns[$i];
+	}
+
+
+	/**
+	 * Asks the data model for a column name
+	 * wrapper function
+	 */
+	function getColumnName($columnIndex) { 
+		return $this->columnModel->getColumnName($columnIndex);
+	}
+
+
 }
 
 
