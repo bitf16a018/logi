@@ -56,16 +56,30 @@ class LC_TableRenderer {
 		$this->html .= '<thead>';
 		$this->html .= '<tr class="left_justify">';
 		$numCols = $this->table->getColumnCount();
-		$colModel = $this->table->getColumnModel();
+		$colModel = $this->table->getHeaderModel();
 
 		for ($y=0; $y < $numCols; ++$y ) {
+			$hCol = $colModel->getColumnAt($y);
+			if ( strlen($hCol->justify) > 0 ) {
+				$justify = $hCol->justify.'_justify';
+			} else {
+				$justify = '';
+			}
+
 			$colName = $colModel->getColumnName($y);
-			$this->html .= '<th  abbr="'.$colName.'" scope="col" title="'.$colName.'">';
+			$this->html .= '<th abbr="'.$colName.'" scope="col" title="'.$colName.'"';
+
+			if ( strlen($justify) > 0) {
+				$this->html .= ' class="'.$justify.'"';
+			}
+
+			$this->html .= '>';
 			$this->html .= $colName;
 			$this->html .= '</th>';
 		}
 		$this->html .= '</tr>';
 		$this->html .= '</thead>';
+		$this->html .= "\n\n";
 	}
 
 
