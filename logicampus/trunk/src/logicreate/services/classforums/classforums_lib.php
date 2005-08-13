@@ -93,7 +93,7 @@ class ClassForum_Posts {
 	 * gets the message for showing in HTML
 	 */
 	function showMessage() {
-		return ClassForum_Posts::swapForumTags(nl2br($this->_dao->message));
+		return ClassForum_Posts::swapForumTags($this->_dao->message);
 	}
 
 
@@ -106,17 +106,54 @@ class ClassForum_Posts {
 	/**
 	 * Changes [TAG] into <TAG>
 	 *
-	 * only works for QUOTE, CODE, B, I
+	 * only works for QUOTE, CODE, B, I.
+	 * don't use nl2br on text inside [CODE] tags because it's
+	 * already in a PRE tag.
 	 * @static
 	 * @param string $code the forum code that needs to be converted
 	 * @return string HTML ready code
 	 */
 	function swapForumTags($code) {
-		$code = str_replace('[QUOTE]','<div class="forum_quote_shell"><b>Quote:</b><div class="forum_quote">',$code);
-		$code = str_replace('[/QUOTE]','</div></div>',$code);
+		$code = nl2br($code);
 
-		$code = str_replace('[CODE]','<div class="forum_code_shell"><b>Code:</b><div class="forum_code"><pre>',$code);
-		$code = str_replace('[/CODE]','</pre></div></div>',$code);
+		//this is an expensive operation, only do it if we have
+		// find a code tag
+		if (strpos($code, '[/CODE]') > 1 ) {
+		//remove BR tags inbetween CODE tags because they are going to have
+		// a PRE around them
+		$code = preg_replace_callback(
+			"#\[CODE([^\]]*)\](((?!\[/?CODE(?:[^\]]*)\]).)*)\[/CODE\]#si",
+			create_function(
+				//nl2br doesn't replace the new line, it only appends to it
+				'$matches',
+				'return "[CODE]".str_replace("<br />","", $matches[2])."[/CODE]";'
+			),
+		$code);
+		}
+
+
+		//do regular FORUM CODE tag to html tag replacement
+		$code = str_replace('[QUOTE]','<div class="forum_quote_shell"><b>Quote:</b><blockquote class="forum_quote">',$code);
+		$code = str_replace('[/QUOTE]','</blockquote></div>',$code);
+
+		//sneak the original codeText back in, after the nl2br
+		$code = str_replace('[CODE]','<div class="forum_code_shell"><b>Code:</b><blockquote class="forum_code"><pre>',$code);
+		$code = str_replace('[/CODE]','</pre></blockquote></div>',$code);
+
+		//BOLD
+		$code = str_replace('[B]','<B>',$code);
+		$code = str_replace('[/B]','</B>',$code);
+
+		$code = str_replace('[b]','<B>',$code);
+		$code = str_replace('[/b]','</B>',$code);
+
+		//ITALICS
+		$code = str_replace('[I]','<I>',$code);
+		$code = str_replace('[/I]','</I>',$code);
+
+		$code = str_replace('[i]','<I>',$code);
+		$code = str_replace('[/i]','</I>',$code);
+
 		return $code;
 	}
 }
