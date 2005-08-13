@@ -219,7 +219,7 @@ class lcSystem {
 		 if (get_magic_quotes_GPC() ) { 
                         $stripquotes = create_function('&$data, $self',
                         'if (is_array($data)) foreach ($data as $k=>$v) $self($data[$k], $self); '.
-                        'else $data = stripslashes($data);');
+                        'else $data = stripslashes($data); $data=str_replace("\'","&#039;",$data);');
                         $stripquotes($_POST,$stripquotes);
                         $stripquotes($_GET,$stripquotes);
                 }
