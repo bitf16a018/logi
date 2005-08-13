@@ -156,11 +156,19 @@ class ClassForum_Forums {
 
 
 	/**
-	 * Set Description
+	 * Set ClassId
 	 */
 	function setClassId($id) {
 		$this->_dao->set('classId',$id);
 	}
+
+	/**
+	 * Set CategoryId
+	 */
+	function setCategoryId($id) {
+		$this->_dao->set('classForumCategoryId',$id);
+	}
+
 
 
 	/**
