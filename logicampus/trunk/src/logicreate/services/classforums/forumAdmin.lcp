@@ -20,13 +20,20 @@ include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
  * You need to be a student to use this interface.
  * Faculty should use another one.
  */
-class ForumAdmin extends StudentService {
+class ForumAdmin extends FacultyService {
 
 	var $presentor = 'htmlPresentation';
 	var $sectionTitle = 'Classroom Forums';
 
 	var $applinks = array();
 	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
 
 	function run (&$db, &$u, &$lc, &$t) {
 
@@ -89,18 +96,6 @@ class ForumAdmin extends StudentService {
 
 
 		//make sub headers for forum categories
-
-/*
-		//always make a general
-		$subHeaderModel = new LC_TableDefaultColumnModel();
-		$sub_col_a = new LC_TableColumn();
-		$sub_col_a->name = lct('Category').': '. lct('General');
-		$subHeaderModel->addColumn($sub_col_a);
-		$subHeader = new LC_TableHeader($subHeaderModel);
-		$subHeader->row = 0;
-		$table->addSubHeader($subHeader);
-		$forumCount = $dm->getForumsInCategory(0);
-*/
 
 		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
 
@@ -198,22 +193,6 @@ class ForumAdmin extends StudentService {
 		}
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = modurl('forumAdmin/');
-	}
-
-
-	/**
-	 * Allow for the links to be translated
-	 */
-	function buildAppLinks() {
-		$this->applinks = array (
-		);
-
-		global $lcUser;
-		//need to make this search for moderator status
-		if ( $lcUser->isFaculty() ) {
-			$this->applinks[lct('Admin')]  = 'forumAdmin/';
-			$this->applinks[lct('Forum Categories')]  = '%classforums/categories/';
-		}
 	}
 }
 

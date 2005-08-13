@@ -25,7 +25,15 @@ class Categories extends FacultyService {
 	var $presentor = 'htmlPresentation';
 	var $sectionTitle = 'Classroom Forum Categories';
 
+	var $applinks = array();
 	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
 
 	function run (&$db, &$u, &$lc, &$t) {
 
@@ -79,18 +87,6 @@ class Categories extends FacultyService {
 		$t['url'] = modurl('categories/');
 	}
 
-
-
-	/**
-	 * Allow for the links to be translated
-	 */
-	function buildAppLinks() {
-		$this->navlinks = array (
-		lct('Class Forums Home') => '%classforums/',
-		lct('New Forum') => '%classforums/new/',
-		lct('Forum Categories') => '%classforums/categories/'
-		);
-	}
 }
 
 
