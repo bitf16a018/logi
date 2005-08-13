@@ -77,16 +77,48 @@ class ClassForum_Posts {
 		return $this->_dao->classForumPostId;
 	}
 
-	
+
+	/**
+	 * gets the raw message
+	 *
+	 * needed, for example, if you want to edit the message
+	 * in a text area.
+	 */
 	function getMessage() {
 		return $this->_dao->message;
 	}
+
+
+	/**
+	 * gets the message for showing in HTML
+	 */
+	function showMessage() {
+		return ClassForum_Posts::swapForumTags(nl2br($this->_dao->message));
+	}
+
 
 
 	function getSubject() {
 		return $this->_dao->subject;
 	}
 
+
+	/**
+	 * Changes [TAG] into <TAG>
+	 *
+	 * only works for QUOTE, CODE, B, I
+	 * @static
+	 * @param string $code the forum code that needs to be converted
+	 * @return string HTML ready code
+	 */
+	function swapForumTags($code) {
+		$code = str_replace('[QUOTE]','<div class="forum_quote_shell"><b>Quote:</b><div class="forum_quote">',$code);
+		$code = str_replace('[/QUOTE]','</div></div>',$code);
+
+		$code = str_replace('[CODE]','<div class="forum_code_shell"><b>Code:</b><div class="forum_code"><pre>',$code);
+		$code = str_replace('[/CODE]','</pre></div></div>',$code);
+		return $code;
+	}
 }
 
 

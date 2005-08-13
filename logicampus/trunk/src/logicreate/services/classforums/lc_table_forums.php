@@ -149,9 +149,13 @@ class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		$ret  = '<div style="float:left">posted on : 8/10/2005</div>';
-		$ret .= '<div align="right">Reply | Reply &amp; Quote | Edit</div>';
+		$ret .= '<div align="right">';
+		$ret .= '<a href="'.modurl('posts/event=reply/p_id='.$this->value->getPostId()).'">Reply</a> | ';
+		$ret .= '<a href="'.modurl('posts/event=reply/quote=true/p_id='.$this->value->getPostId()).'">Reply &amp; Quote</a> | ';
+		$ret .=  'Edit</div>';
+
 		$ret .= "<hr>\n\t\t";
-		$ret .= $this->value->getMessage();
+		$ret .= $this->value->showMessage();
 
 		$ret .= "\n<br><p>&nbsp;</p>\n\t\t";
 
