@@ -206,14 +206,27 @@ class cache {
  */
 
 class lcSystem {
+
 	var $postvars;
+	var $getvars;
 	var $templateStyle = 'private';
 	var $TRACK_SESSIONS = true;
 
 	function lcSystem() {
-		global $HTTP_POST_VARS,$HTTP_POST_FILES;
-		$this->postvars = 	$HTTP_POST_VARS;
-		$this->uploads  = 	$HTTP_POST_FILES;
+		// global $HTTP_POST_VARS,$HTTP_POST_FILES;
+
+		// doesn't check for magic_quotes_sybase, which may mess things up
+		 if (get_magic_quotes_GPC() ) { 
+                        $stripquotes = create_function('&$data, $self',
+                        'if (is_array($data)) foreach ($data as $k=>$v) $self($data[$k], $self); '.
+                        'else $data = stripslashes($data);');
+                        $stripquotes($_POST,$stripquotes);
+                        $stripquotes($_GET,$stripquotes);
+                }
+
+		$this->postvars = 	$_POST;
+		$this->getvars = 	$_GET;
+		$this->uploads  = 	$_FILES;
 
 		//__FIXME__ use a constant to turn on and off
 		$e =& ErrorStack::_singleton();
