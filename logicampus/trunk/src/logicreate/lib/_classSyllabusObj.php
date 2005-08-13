@@ -83,9 +83,23 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_syllabuses =='') {$this->id_class_syllabuses=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_syllabuses set id_classes='{$this->id_classes}',other='{$this->other}',courseObjectives='{$this->courseObjectives}',courseReqs='{$this->courseReqs}',gradingScale='{$this->gradingScale}',instructionMethods='{$this->instructionMethods}',emailPolicy='{$this->emailPolicy}' where id_class_syllabuses = '{$this->{$this->_pkey}}'";
+$sql = "update class_syllabuses set 
+id_classes='".addslashes($this->id_classes)."',
+other='".addslashes($this->other)."',
+courseObjectives='".addslashes($this->courseObjectives)."',
+courseReqs='".addslashes($this->courseReqs)."',
+gradingScale='".addslashes($this->gradingScale)."',
+instructionMethods='".addslashes($this->instructionMethods)."',
+emailPolicy='{$this->emailPolicy}' where id_class_syllabuses = '{$this->{$this->_pkey}}'";
 } else {
-$sql = "replace into class_syllabuses   (id_classes,other,courseObjectives,courseReqs,gradingScale,instructionMethods,emailPolicy) values ('{$this->id_classes}','{$this->other}','{$this->courseObjectives}','{$this->courseReqs}','{$this->gradingScale}','{$this->instructionMethods}','{$this->emailPolicy}')";
+$sql = "replace into class_syllabuses   (id_classes,other,courseObjectives,courseReqs,gradingScale,instructionMethods,emailPolicy) values (
+	'".addslashes($this->id_classes)."',
+	'".addslashes($this->other)."',
+	'".addslashes($this->courseObjectives)."',
+	'".addslashes($this->courseReqs)."',
+	'".addslashes($this->gradingScale)."',
+	'".addslashes($this->instructionMethods)."',
+	'".addslashes($this->emailPolicy)."')";
 }
 $db->query($sql);
 

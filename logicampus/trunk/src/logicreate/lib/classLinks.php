@@ -85,10 +85,28 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_links =='') {$this->id_class_links=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_links set id_class_links='{$this->id_class_links}',id_classes='{$this->id_classes}',id_class_links_categories='{$this->id_class_links_categories}',title='{$this->title}',url='{$this->url}',description='{$this->description}',dateCreated='{$this->dateCreated}',createdby='{$this->createdby}',hits='{$this->hits}' where id_class_links = '{$this->{$this->_pkey}}'";
+$sql = "update class_links set 
+id_class_links='".addslashes($this->id_class_links)."',
+id_classes='".addslashes($this->id_classes)."',
+id_class_links_categories='".addslashes($this->id_class_links_categories)."',
+title='".addslashes($this->title)."',
+url='".addslashes($this->url)."',
+description='".addslashes($this->description)."',
+dateCreated='".addslashes($this->dateCreated)."',
+createdby='".addslashes($this->createdby)."',
+hits='".addslashes($this->hits)."' where 
+id_class_links = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into class_links   (id_classes,id_class_links_categories,title,url,description,dateCreated,createdby,hits) values ('{$this->id_classes}','{$this->id_class_links_categories}','{$this->title}','{$this->url}','{$this->description}','{$this->dateCreated}','{$this->createdby}','{$this->hits}')";
+$sql = "insert into class_links   (id_classes,id_class_links_categories,title,url,description,dateCreated,createdby,hits) values (
+	'".addslashes($this->id_classes)."',
+	'".addslashes($this->id_class_links_categories)."',
+	'".addslashes($this->title)."',
+	'".addslashes($this->url)."',
+	'".addslashes($this->description)."',
+	'".addslashes($this->dateCreated)."',
+	'".addslashes($this->createdby)."',
+	'".addslashes($this->hits)."')";
 $db->query($sql);
 }
 

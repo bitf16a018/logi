@@ -71,10 +71,21 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_lessons =='') {$this->id_class_lessons=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_lessons set checkList='{$this->checkList}', id_class_lessons='{$this->id_class_lessons}',createdOn='{$this->createdOn}',title='{$this->title}',description='{$this->description}' where id_class_lessons = '{$this->{$this->_pkey}}'";
+$sql = "update class_lessons set 
+checkList='".addslashes($this->checkList)."', 
+id_class_lessons='".addslashes($this->id_class_lessons)."',
+createdOn='".addslashes($this->createdOn)."',
+title='".addslashes($this->title)."',
+description='".addslashes($this->description)."' where 
+id_class_lessons = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into class_lessons   (checkList,id_class_lessons,createdOn,title,description) values ('{$this->checkList}','{$this->id_class_lessons}','{$this->createdOn}','{$this->title}','{$this->description}')";
+$sql = "insert into class_lessons   (checkList,id_class_lessons,createdOn,title,description) values (
+	'".addslashes($this->checkList)."',
+	'".addslashes($this->id_class_lessons)."',
+	'".addslashes($this->createdOn)."',
+	'".addslashes($this->title)."',
+	'".addslashes($this->description)."')";
 $db->query($sql);
 }
 

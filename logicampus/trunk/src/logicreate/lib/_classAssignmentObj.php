@@ -108,10 +108,31 @@ return str_replace(".","",uniqid(str_replace(" ","",microtime()), $len));
 function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_assignments set id_forum='{$this->id_forum}', id_forum_thread='{$this->id_forum_thread}', id_class_assignments='{$this->id_class_assignments}',title='{$this->title}',instructions='{$this->instructions}',dueDate='{$this->dueDate}',noDueDate='{$this->noDueDate}',activeDate='{$this->activeDate}',responseType='{$this->responseType}',id_classes='{$this->id_classes}',dateNoAccept='{$this->dateNoAccept}' where id_class_assignments = '{$this->{$this->_pkey}}'";
+$sql = "update class_assignments set 
+id_forum='".addslashes($this->id_forum)."', 
+id_forum_thread='".addslashes($this->id_forum_thread)."', 
+id_class_assignments='".addslashes($this->id_class_assignments)."',
+title='".addslashes($this->title)."',
+instructions='".addslashes($this->instructions)."',
+dueDate='".addslashes($this->dueDate)."',
+noDueDate='".addslashes($this->noDueDate)."',
+activeDate='".addslashes($this->activeDate)."',
+responseType='".addslashes($this->responseType)."',
+id_classes='".addslashes($this->id_classes)."',
+dateNoAccept='".addslashes($this->dateNoAccept)."' where id_class_assignments = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "replace into class_assignments   (id_forum, id_forum_thread, title,instructions,dueDate,noDueDate,activeDate,responseType,id_classes,dateNoAccept) values ('{$this->id_forum}','{$this->id_forum_thread}','{$this->title}','{$this->instructions}','{$this->dueDate}','{$this->noDueDate}','{$this->activeDate}','{$this->responseType}','{$this->id_classes}','{$this->dateNoAccept}')";
+$sql = "replace into class_assignments   (id_forum, id_forum_thread, title,instructions,dueDate,noDueDate,activeDate,responseType,id_classes,dateNoAccept) values 
+('{$this->id_forum}',
+'{$this->id_forum_thread}',
+'".addslashes($this->title)."',
+'".addslashes($this->instructions)."',
+'".addslashes($this->dueDate)."',
+'".addslashes($this->noDueDate)."',
+'".addslashes($this->activeDate)."',
+'".addslashes($this->responseType)."',
+'".addslashes($this->id_classes)."',
+'".addslashes($this->dateNoAccept)."')";
 $db->query($sql);
 $this->__id = $db->getInsertID();
 }
