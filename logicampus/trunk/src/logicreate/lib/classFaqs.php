@@ -81,10 +81,22 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_faqs =='') {$this->id_class_faqs=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_faqs set id_class_faqs='{$this->id_class_faqs}',id_classes='{$this->id_classes}',category='{$this->category}',question='{$this->question}',answer='{$this->answer}',clicks='{$this->clicks}',groups='{$this->groups}' where id_class_faqs = '{$this->{$this->_pkey}}'";
+$sql = "update class_faqs set id_class_faqs='{$this->id_class_faqs}',
+	id_classes='{$this->id_classes}',
+	category='".addslashes($this->category)."',
+	question='".addslashes($this->question)."',
+	answer='".addslashes($this->answer)."',
+	clicks='".addslashes($this->clicks)."',
+	groups='".addslashes($this->groups)."' where id_class_faqs = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into class_faqs   (id_classes,category,question,answer,clicks,groups) values ('{$this->id_classes}','{$this->category}','{$this->question}','{$this->answer}','{$this->clicks}','{$this->groups}')";
+$sql = "insert into class_faqs   (id_classes,category,question,answer,clicks,groups) 
+values ('{$this->id_classes}',
+'".addslashes($this->category)."',
+'".addslashes($this->question)."',
+'".addslashes($this->answer)."',
+'".addslashes($this->clicks)."',
+'".addslashes($this->groups)."')";
 $db->query($sql);
 }
 

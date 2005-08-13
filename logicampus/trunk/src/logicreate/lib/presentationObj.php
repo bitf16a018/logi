@@ -81,10 +81,24 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_presentations =='') {$this->id_presentations=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_presentations set id_classes='{$this->id_classes}',title='{$this->title}',status='{$this->status}',author='{$this->author}',createdOn='{$this->createdOn}',approvedOn='{$this->approvedOn}',content='{$this->content}' where id_presentations = '{$this->{$this->_pkey}}'";
+$sql = "update class_presentations set 
+id_classes='".addslashes($this->id_classes)."',
+title='".addslashes($this->title)."',
+status='".addslashes($this->status)."',
+author='".addslashes($this->author)."',
+createdOn='".addslashes($this->createdOn)."',
+approvedOn='".addslashes($this->approvedOn)."',
+content='".addslashes($this->content)."' where id_presentations = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into class_presentations (id_classes,title,status,author,createdOn,approvedOn,content) values ('{$this->id_classes}','{$this->title}','{$this->status}','{$this->author}','{$this->createdOn}','{$this->approvedOn}','{$this->content}')";
+$sql = "insert into class_presentations (id_classes,title,status,author,createdOn,approvedOn,content) values (
+	'".addslashes($this->id_classes)."',
+	'".addslashes($this->title)."',
+	'".addslashes($this->status)."',
+	'".addslashes($this->author)."',
+	'".addslashes($this->createdOn)."',
+	'".addslashes($this->approvedOn)."',
+	'".addslashes($this->content)."')";
 $db->query($sql);
 }
 

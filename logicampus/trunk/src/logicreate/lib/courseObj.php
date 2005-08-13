@@ -101,10 +101,35 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_courses =='') {$this->id_courses=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update courses set id_courses='{$this->id_courses}',courseFamily='{$this->courseFamily}',courseNumber='{$this->courseNumber}',courseName='{$this->courseName}',courseDescription='{$this->courseDescription}',preReq1='{$this->preReq1}',preReq2='{$this->preReq2}',preReq3='{$this->preReq3}',preReq4='{$this->preReq4}',coReq1='{$this->coReq1}',coReq2='{$this->coReq2}',coReq3='{$this->coReq3}',coReq4='{$this->coReq4}' where id_courses = '{$this->{$this->_pkey}}'";
+$sql = "update courses set 
+id_courses='".addslashes($this->id_courses)."',
+courseFamily='".addslashes($this->courseFamily)."',
+courseNumber='".addslashes($this->courseNumber)."',
+courseName='".addslashes($this->courseName)."',
+courseDescription='".addslashes($this->courseDescription)."',
+preReq1='".addslashes($this->preReq1)."',
+preReq2='".addslashes($this->preReq2)."',
+preReq3='".addslashes($this->preReq3)."',
+preReq4='".addslashes($this->preReq4)."',
+coReq1='".addslashes($this->coReq1)."',
+coReq2='".addslashes($this->coReq2)."',
+coReq3='".addslashes($this->coReq3)."',
+coReq4='".addslashes($this->coReq4)."' where id_courses = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into courses   (courseFamily,courseNumber,courseName,courseDescription,preReq1,preReq2,preReq3,preReq4,coReq1,coReq2,coReq3,coReq4) values ('{$this->courseFamily}','{$this->courseNumber}','{$this->courseName}','{$this->courseDescription}','{$this->preReq1}','{$this->preReq2}','{$this->preReq3}','{$this->preReq4}','{$this->coReq1}','{$this->coReq2}','{$this->coReq3}','{$this->coReq4}')";
+$sql = "insert into courses   (courseFamily,courseNumber,courseName,courseDescription,preReq1,preReq2,preReq3,preReq4,coReq1,coReq2,coReq3,coReq4) values (
+	'".addslashes($this->courseFamily)."',
+	'".addslashes($this->courseNumber)."',
+	'".addslashes($this->courseName)."',
+	'".addslashes($this->courseDescription)."',
+	'".addslashes($this->preReq1)."',
+	'".addslashes($this->preReq2)."',
+	'".addslashes($this->preReq3)."',
+	'".addslashes($this->preReq4)."',
+	'".addslashes($this->coReq1)."',
+	'".addslashes($this->coReq2)."',
+	'".addslashes($this->coReq3)."',
+	'".addslashes($this->coReq4)."')";
 $db->query($sql);
 }
 

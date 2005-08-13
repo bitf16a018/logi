@@ -106,10 +106,32 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_classes =='') {$this->id_classes=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update classes set stylesheet='{$this->stylesheet}', id_class_resource='{$this->id_class_resource}',id_classes='{$this->id_classes}',id_courses='{$this->id_courses}',id_semesters='{$this->id_semesters}',sectionNumbers='{$this->sectionNumbers}',classType='{$this->classType}',facultyId='{$this->facultyId}',courseFamily='{$this->courseFamily}',courseNumber='{$this->courseNumber}',courseFamilyNumber='{$this->courseFamilyNumber}' where id_classes = '{$this->{$this->_pkey}}'";
+$sql = "update classes set 
+stylesheet='".addslashes($this->stylesheet)."', 
+id_class_resource='".addslashes($this->id_class_resource)."',
+id_classes='".addslashes($this->id_classes)."',
+id_courses='".addslashes($this->id_courses)."',
+id_semesters='".addslashes($this->id_semesters)."',
+sectionNumbers='".addslashes($this->sectionNumbers)."',
+classType='".addslashes($this->classType)."',
+facultyId='".addslashes($this->facultyId)."',
+courseFamily='".addslashes($this->courseFamily)."',
+courseNumber='".addslashes($this->courseNumber)."',
+courseFamilyNumber='".addslashes($this->courseFamilyNumber)."' where 
+id_classes = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into classes  (stylesheet, id_class_resource, id_courses,id_semesters,sectionNumbers,classType,facultyId,courseFamily,courseNumber,courseFamilyNumber) values ('{$this->stylesheet}', '{$this->id_class_resource}', '{$this->id_courses}','{$this->id_semesters}','{$this->sectionNumbers}','{$this->classType}','{$this->facultyId}','{$this->courseFamily}','{$this->courseNumber}','{$this->courseFamilyNumber}')";
+$sql = "insert into classes  (stylesheet, id_class_resource, id_courses,id_semesters,sectionNumbers,classType,facultyId,courseFamily,courseNumber,courseFamilyNumber) values (
+	'".addslashes($this->stylesheet)."', 
+	'".addslashes($this->id_class_resource)."', 
+	'".addslashes($this->id_courses)."',
+	'".addslashes($this->id_semesters)."',
+	'".addslashes($this->sectionNumbers)."',
+	'".addslashes($this->classType)."',
+	'".addslashes($this->facultyId)."',
+	'".addslashes($this->courseFamily)."',
+	'".addslashes($this->courseNumber)."',
+	'".addslashes($this->courseFamilyNumber)."')";
 $db->query($sql);
 }
 

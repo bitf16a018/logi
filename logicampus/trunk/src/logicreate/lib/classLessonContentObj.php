@@ -69,10 +69,20 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_lesson_content =='') {$this->id_class_lesson_content=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_lesson_content set id_class_lesson_content='{$this->id_class_lesson_content}',id_classes='{$this->id_classes}',txTitle='{$this->txTitle}',txText='{$this->txText}',dateCreated='{$this->dateCreated}' where id_class_lesson_content = '{$this->{$this->_pkey}}'";
+$sql = "update class_lesson_content set 
+id_class_lesson_content='".addslashes($this->id_class_lesson_content)."',
+id_classes='".addslashes($this->id_classes)."',
+txTitle='".addslashes($this->txTitle)."',
+txText='".addslashes($this->txText)."',
+dateCreated='".addslashes($this->dateCreated)."' where 
+id_class_lesson_content = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into class_lesson_content   (id_classes,txTitle,txText,dateCreated) values ('{$this->id_classes}','{$this->txTitle}','{$this->txText}','{$this->dateCreated}')";
+$sql = "insert into class_lesson_content   (id_classes,txTitle,txText,dateCreated) values (
+'{$this->id_classes}',
+'{$this->txTitle}',
+'{$this->txText}',
+'{$this->dateCreated}')";
 $db->query($sql);
 }
 

@@ -73,10 +73,20 @@ $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_objectives =='') {$this->id_class_objectives=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
 // Adam modified this next line
-$sql = "update class_objectives set i_sort='{$this->i_sort}',f_hide='{$this->f_hide}', id_class_objectives='{$this->id_class_objectives}',id_classes='{$this->id_classes}',objective='{$this->objective}' where id_class_objectives = '{$this->{$this->_pkey}}'";
+$sql = "update class_objectives set 
+i_sort='".addslashes($this->i_sort)."',
+f_hide='".addslashes($this->f_hide)."', 
+id_class_objectives='".addslashes($this->id_class_objectives)."',
+id_classes='".addslashes($this->id_classes)."',
+objective='".addslashes($this->objective)."' where 
+id_class_objectives = '{$this->{$this->_pkey}}'";
 } else {
 // Adam modified this next line
-$sql = "insert into class_objectives   (i_sort,f_hide,id_classes,objective) values ('{$this->i_sort}','{$this->f_hide}','{$this->id_classes}','{$this->objective}')";
+$sql = "insert into class_objectives   (i_sort,f_hide,id_classes,objective) values (
+	'{$this->i_sort}',
+	'{$this->f_hide}',
+	'{$this->id_classes}',
+	'{$this->objective}')";
 }
 $db->query($sql);
 

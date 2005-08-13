@@ -173,27 +173,27 @@ if ($this->id_semesters =='') {$this->id_semesters=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
 $sql = "UPDATE semesters 
 		SET
-		dateStartTextbook='{$this->dateStartTextbook}',
-		dateEndTextbook='{$this->dateEndTextbook}',
-		dateStartExam='{$this->dateStartExam}',
-		dateEndExam='{$this->dateEndExam}',
-		dateStartOrientation='{$this->dateStartOrientation}',
-		dateEndOrientation='{$this->dateEndOrientation}',
-		dateEndITVseminar='{$this->dateEndITVseminar}',
-		dateStartITVseminar='{$this->dateStartITVseminar}',
-		id_semesters='{$this->id_semesters}',
-		semesterId='{$this->semesterId}',
-		semesterTerm='{$this->semesterTerm}',
-		dateCensus='{$this->dateCensus}',
-		dateFinalDrop='{$this->dateFinalDrop}',
-		dateDeactivation='{$this->dateDeactivation}',
-		dateStart='{$this->dateStart}',
-		dateEnd='{$this->dateEnd}',
-		dateRegistrationStart='{$this->dateRegistrationStart}',
-		dateRegistrationEnd='{$this->dateRegistrationEnd}',
-		dateAccountActivation='{$this->dateAccountActivation}',
-		dateStudentActivation='{$this->dateStudentActivation}',
-		semesterYear='{$this->semesterYear}' 
+		dateStartTextbook='".addslashes($this->dateStartTextbook)."',
+		dateEndTextbook='".addslashes($this->dateEndTextbook)."',
+		dateStartExam='".addslashes($this->dateStartExam)."',
+		dateEndExam='".addslashes($this->dateEndExam)."',
+		dateStartOrientation='".addslashes($this->dateStartOrientation)."',
+		dateEndOrientation='".addslashes($this->dateEndOrientation)."',
+		dateEndITVseminar='".addslashes($this->dateEndITVseminar)."',
+		dateStartITVseminar='".addslashes($this->dateStartITVseminar)."',
+		id_semesters='".addslashes($this->id_semesters)."',
+		semesterId='".addslashes($this->semesterId)."',
+		semesterTerm='".addslashes($this->semesterTerm)."',
+		dateCensus='".addslashes($this->dateCensus)."',
+		dateFinalDrop='".addslashes($this->dateFinalDrop)."',
+		dateDeactivation='".addslashes($this->dateDeactivation)."',
+		dateStart='".addslashes($this->dateStart)."',
+		dateEnd='".addslashes($this->dateEnd)."',
+		dateRegistrationStart='".addslashes($this->dateRegistrationStart)."',
+		dateRegistrationEnd='".addslashes($this->dateRegistrationEnd)."',
+		dateAccountActivation='".addslashes($this->dateAccountActivation)."',
+		dateStudentActivation='".addslashes($this->dateStudentActivation)."',
+		semesterYear='".addslashes($this->semesterYear)."' 
 		WHERE 
 		id_semesters = '{$this->{$this->_pkey}}'";
 $db->query($sql);
@@ -208,12 +208,26 @@ $sql = "insert into semesters   (
 	values 
 	
 	(
-	'{$this->dateStartTextbook}',
-	'{$this->dateEndTextbook}',
-	'{$this->dateStartExam}',
-	'{$this->dateEndExam}',
-
-	'{$this->dateEndOrientation}','{$this->dateStartOrientation}','{$this->dateStartITVseminar}','{$this->dateEndITVseminar}','{$this->semesterId}','{$this->semesterTerm}','{$this->dateCensus}','{$this->dateFinalDrop}','{$this->dateDeactivation}','{$this->dateStart}','{$this->dateEnd}','{$this->dateRegistrationStart}','{$this->dateRegistrationEnd}','{$this->dateAccountActivation}','{$this->dateStudentActivation}','{$this->semesterYear}')";
+	'".addslashes($this->dateStartTextbook)."',
+	'".addslashes($this->dateEndTextbook)."',
+	'".addslashes($this->dateStartExam)."',
+	'".addslashes($this->dateEndExam)."',
+	'".addslashes($this->dateEndOrientation)."',
+	'".addslashes($this->dateStartOrientation)."',
+	'".addslashes($this->dateStartITVseminar)."',
+	'".addslashes($this->dateEndITVseminar)."',
+	'".addslashes($this->semesterId)."',
+	'".addslashes($this->semesterTerm)."',
+	'".addslashes($this->dateCensus)."',
+	'".addslashes($this->dateFinalDrop)."',
+	'".addslashes($this->dateDeactivation)."',
+	'".addslashes($this->dateStart)."',
+	'".addslashes($this->dateEnd)."',
+	'".addslashes($this->dateRegistrationStart)."',
+	'".addslashes($this->dateRegistrationEnd)."',
+	'".addslashes($this->dateAccountActivation)."',
+	'".addslashes($this->dateStudentActivation)."',
+	'".addslashes($this->semesterYear)."')";
 $db->query($sql);
 }
 

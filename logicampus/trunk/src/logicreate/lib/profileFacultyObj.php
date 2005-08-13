@@ -119,10 +119,44 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->username =='') {$this->username=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update profile_faculty set username='{$this->username}',emergencyContact='{$this->emergencyContact}',emergencyPhone='{$this->emergencyPhone}',title='{$this->title}',degree='{$this->degree}',jobtitle='{$this->jobtitle}',officeLocation='{$this->officeLocation}',relevantExp='{$this->relevantExp}',photo='{$this->photo}',faxPhone='{$this->faxPhone}',officePhone='{$this->officePhone}',homepage='{$this->homepage}',offHrsMonday='{$this->offHrsMonday}',offHrsTuesday='{$this->offHrsTuesday}',offHrsWednesday='{$this->offHrsWednesday}',offHrsThursday='{$this->offHrsThursday}',offHrsFriday='{$this->offHrsFriday}' where username = '{$this->{$this->_pkey}}'";
+$sql = "update profile_faculty set 
+username='".addslashes($this->username)."',
+emergencyContact='".addslashes($this->emergencyContact)."',
+emergencyPhone='".addslashes($this->emergencyPhone)."',
+title='".addslashes($this->title)."',
+degree='".addslashes($this->degree)."',
+jobtitle='".addslashes($this->jobtitle)."',
+officeLocation='".addslashes($this->officeLocation)."',
+relevantExp='".addslashes($this->relevantExp)."',
+photo='".addslashes($this->photo)."',
+faxPhone='".addslashes($this->faxPhone)."',
+officePhone='".addslashes($this->officePhone)."',
+homepage='".addslashes($this->homepage)."',
+offHrsMonday='".addslashes($this->offHrsMonday)."',
+offHrsTuesday='".addslashes($this->offHrsTuesday)."',
+offHrsWednesday='".addslashes($this->offHrsWednesday)."',
+offHrsThursday='".addslashes($this->offHrsThursday)."',
+offHrsFriday='".addslashes($this->offHrsFriday)."' where username = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into profile_faculty   (username,emergencyContact,emergencyPhone,title,degree,jobtitle,officeLocation,relevantExp,photo,faxPhone,officePhone,homepage,offHrsMonday,offHrsTuesday,offHrsWednesday,offHrsThursday,offHrsFriday) values ('{$this->username}','{$this->emergencyContact}','{$this->emergencyPhone}','{$this->title}','{$this->degree}','{$this->jobtitle}','{$this->officeLocation}','{$this->relevantExp}','{$this->photo}','{$this->faxPhone}','{$this->officePhone}','{$this->homepage}','{$this->offHrsMonday}','{$this->offHrsTuesday}','{$this->offHrsWednesday}','{$this->offHrsThursday}','{$this->offHrsFriday}')";
+$sql = "insert into profile_faculty   (username,emergencyContact,emergencyPhone,title,degree,jobtitle,officeLocation,relevantExp,photo,faxPhone,officePhone,homepage,offHrsMonday,offHrsTuesday,offHrsWednesday,offHrsThursday,offHrsFriday) values (
+	'".addslashes($this->username)."',
+	'".addslashes($this->emergencyContact)."',
+	'".addslashes($this->emergencyPhone)."',
+	'".addslashes($this->title)."',
+	'".addslashes($this->degree)."',
+	'".addslashes($this->jobtitle)."',
+	'".addslashes($this->officeLocation)."',
+	'".addslashes($this->relevantExp)."',
+	'".addslashes($this->photo)."',
+	'".addslashes($this->faxPhone)."',
+	'".addslashes($this->officePhone)."',
+	'".addslashes($this->homepage)."',
+	'".addslashes($this->offHrsMonday)."',
+	'".addslashes($this->offHrsTuesday)."',
+	'".addslashes($this->offHrsWednesday)."',
+	'".addslashes($this->offHrsThursday)."',
+	'".addslashes($this->offHrsFriday)."')";
 $db->query($sql);
 }
 

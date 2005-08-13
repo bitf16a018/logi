@@ -69,10 +69,20 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_links_categories =='') {$this->id_class_links_categories=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_links_categories set id_class_links_categories='{$this->id_class_links_categories}',id_class_links_categories_parent='{$this->id_class_links_categories_parent}',id_classes='{$this->id_classes}',txTitle='{$this->txTitle}',sortOrder='{$this->sortOrder}' where id_class_links_categories = '{$this->{$this->_pkey}}'";
+$sql = "update class_links_categories set 
+id_class_links_categories='".addslashes($this->id_class_links_categories)."',
+id_class_links_categories_parent='".addslashes($this->id_class_links_categories_parent)."',
+id_classes='".addslashes($this->id_classes)."',
+txTitle='".addslashes($this->txTitle)."',
+sortOrder='".addslashes($this->sortOrder)."' where 
+id_class_links_categories = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
-$sql = "insert into class_links_categories   (id_class_links_categories_parent,id_classes,txTitle,sortOrder) values ('{$this->id_class_links_categories_parent}','{$this->id_classes}','{$this->txTitle}','{$this->sortOrder}')";
+$sql = "insert into class_links_categories   (id_class_links_categories_parent,id_classes,txTitle,sortOrder) values (
+	'".addslashes($this->id_class_links_categories_parent)."',
+	'".addslashes($this->id_classes)."',
+	'".addslashes($this->txTitle)."',
+	'".addslashes($this->sortOrder)."')";
 $db->query($sql);
 }
 
