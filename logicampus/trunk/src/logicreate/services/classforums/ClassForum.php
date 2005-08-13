@@ -9,6 +9,10 @@ class ClassForumBase {
 	var $classForumId;
 	var $name;
 	var $classId;
+	var $isLocked;
+	var $isVisible;
+	var $isModerated;
+	var $allowUploads;
 	var $description;
 	var $classForumRecentPostTimedate;
 	var $classForumRecentPoster;
@@ -21,6 +25,10 @@ class ClassForumBase {
 	'classForumId'=>'integer',
 	'name'=>'varchar',
 	'classId'=>'integer',
+	'isLocked'=>'tinyint',
+	'isVisible'=>'tinyint',
+	'isModerated'=>'tinyint',
+	'allowUploads'=>'tinyint',
 	'description'=>'varchar',
 	'classForumRecentPostTimedate'=>'integer',
 	'classForumRecentPoster'=>'varchar',
@@ -122,6 +130,10 @@ class ClassForumPeerBase {
 		$st->fields['class_forum_id'] = 'class_forum_id';
 		$st->fields['name'] = 'name';
 		$st->fields['class_id'] = 'class_id';
+		$st->fields['is_locked'] = 'is_locked';
+		$st->fields['is_visible'] = 'is_visible';
+		$st->fields['is_moderated'] = 'is_moderated';
+		$st->fields['allow_uploads'] = 'allow_uploads';
 		$st->fields['description'] = 'description';
 		$st->fields['class_forum_recent_post_timedate'] = 'class_forum_recent_post_timedate';
 		$st->fields['class_forum_recent_poster'] = 'class_forum_recent_poster';
@@ -147,6 +159,10 @@ class ClassForumPeerBase {
 		$st->fields['class_forum_id'] = $this->classForumId;
 		$st->fields['name'] = $this->name;
 		$st->fields['class_id'] = $this->classId;
+		$st->fields['is_locked'] = $this->isLocked;
+		$st->fields['is_visible'] = $this->isVisible;
+		$st->fields['is_moderated'] = $this->isModerated;
+		$st->fields['allow_uploads'] = $this->allowUploads;
 		$st->fields['description'] = $this->description;
 		$st->fields['class_forum_recent_post_timedate'] = $this->classForumRecentPostTimedate;
 		$st->fields['class_forum_recent_poster'] = $this->classForumRecentPoster;
@@ -172,6 +188,10 @@ class ClassForumPeerBase {
 		$st->fields['class_forum_id'] = $obj->classForumId;
 		$st->fields['name'] = $obj->name;
 		$st->fields['class_id'] = $obj->classId;
+		$st->fields['is_locked'] = $obj->isLocked;
+		$st->fields['is_visible'] = $obj->isVisible;
+		$st->fields['is_moderated'] = $obj->isModerated;
+		$st->fields['allow_uploads'] = $obj->allowUploads;
 		$st->fields['description'] = $obj->description;
 		$st->fields['class_forum_recent_post_timedate'] = $obj->classForumRecentPostTimedate;
 		$st->fields['class_forum_recent_poster'] = $obj->classForumRecentPoster;
@@ -239,6 +259,10 @@ class ClassForumPeerBase {
 		$x->classForumId = $row['class_forum_id'];
 		$x->name = $row['name'];
 		$x->classId = $row['class_id'];
+		$x->isLocked = $row['is_locked'];
+		$x->isVisible = $row['is_visible'];
+		$x->isModerated = $row['is_moderated'];
+		$x->allowUploads = $row['allow_uploads'];
 		$x->description = $row['description'];
 		$x->classForumRecentPostTimedate = $row['class_forum_recent_post_timedate'];
 		$x->classForumRecentPoster = $row['class_forum_recent_poster'];
