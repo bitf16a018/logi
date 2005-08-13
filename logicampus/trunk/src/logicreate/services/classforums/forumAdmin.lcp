@@ -158,7 +158,7 @@ class ForumAdmin extends StudentService {
 			foreach ($lc->postvars['move'] as $blank=>$id) {
 				$db->query(
 				//echo(
-				ClassForums_Queries::getQuery('moveForum',
+				ClassForum_Queries::getQuery('moveForum',
 					array ($cat_move_to, $id, $u->activeClassTaught->id_classes)
 				));
 			}
