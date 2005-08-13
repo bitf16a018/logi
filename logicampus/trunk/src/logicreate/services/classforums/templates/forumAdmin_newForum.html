@@ -13,7 +13,9 @@
 
 <form method="POST" action="<?=modurl('forumAdmin/event=saveForum');?>">
 <div style="float:left">
-	<input type="text" name="name">
+	Forum name: <input type="text" name="name">
+	<br/>
+	Forum description: 
 	<br/>
 	<textarea name="description"></textarea>
 	<br/>
@@ -29,19 +31,24 @@
 		<legend>Choose Category</legend>
 
 		<div class="hover_button" onclick="document.getElementById('radio_1').checked=true;">
-			<input type="radio" value="1" id="radio_1" name="category_id"/>
+			<input type="radio" value="1" id="radio_1" name="category_id" checked/>
 			General
 		</div>
 
-		<div class="hover_button" onclick="document.getElementById('radio_2').checked=true;">
-			<input type="radio" value="2" id="radio_2" name="category_id"/>
-			Homework
-		</div>
-
-		<div class="hover_button" onclick="document.getElementById('radio_3').checked=true;">
-			<input type="radio" value="3" id="radio_3" name="category_id"/>
-			Trash
-		</div>
+		<? if (is_array($t['categories'])) { ?>
+		<? 
+			$count = 2;
+			foreach($t['categories'] as $categoryKey=>$categoryName) { 
+			?>
+			<div class="hover_button" onclick="document.getElementById('radio_<?=$count;?>').checked=true;">
+				<input type="radio" value="<?=$categoryKey;?>" id="radio_<?=$count;?>" name="category_id"/>
+				<?=$categoryName;?>
+				</div>
+			<?
+			++$count;
+			}
+		?>
+		<? } ?>
 	</fieldset>
 </div>
 </form>

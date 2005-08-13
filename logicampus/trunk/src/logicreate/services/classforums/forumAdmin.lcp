@@ -5,6 +5,7 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
+include_once(LIB_PATH."LC_html.php");
 
 include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
 
@@ -99,12 +100,18 @@ class ForumAdmin extends StudentService {
 		$table->addSubHeader($subHeader);
 		$forumCount = $dm->getForumsInCategory(0);
 
-
-		//TODO use real class id
-		$categories = ClassForum_Categories::getAll(1);
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
 
 		foreach($categories as $k=>$v) {
-			$thisCount = $dm->getForumsInCategory($v->getCategoryId());
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+			$categoryArray[$id] = $name;
+
+			$thisCount = $dm->getForumsInCategory($id);
 			if ($thisCount < 1) { continue; }
 
 			$subHeaderModel = new LC_TableDefaultColumnModel();
@@ -119,6 +126,10 @@ class ForumAdmin extends StudentService {
 			$table->addSubHeader($subHeader);
 		}
 
+		// sort the array based alphabetically
+		// NOTE that 'don't move' and 'general' will always still be at the top
+		asort($categoryArray);
+		$t['categoryPulldown'] = makeOptions($categoryArray);
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -128,6 +139,25 @@ class ForumAdmin extends StudentService {
 	 */
 	function newForumRun (&$db, &$u, &$lc, &$t) {
 		$lc->templateName = 'forumAdmin_newForum';
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+			$categoryArray[$id] = $name;
+		}
+
+		// sort the array based alphabetically
+		// NOTE that 'don't move' and 'general' will always still be at the top
+		asort($categoryArray);
+		$t['categories'] = $categoryArray; 
+
+
 	}
 
 
@@ -140,6 +170,7 @@ class ForumAdmin extends StudentService {
 		$x->setName( $lc->postvars['name'] );
 		$x->setDescription( $lc->postvars['description'] );
 		$x->setClassId( $u->activeClassTaken->id_classes );
+		$x->setCategoryId( $lc->postvars['category_id']);
 
 		$x->save();
 
