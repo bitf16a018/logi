@@ -218,6 +218,8 @@ class ClassForum_Forums {
 
 	/**
 	 * Retrieve a list of all class forums 
+	 * the response is sorted alphbetically and tied to the 
+	 * category sort
 	 *
 	 * @static
 	 * @param classId int id of the current class
@@ -225,7 +227,15 @@ class ClassForum_Forums {
 	function getAll($classId) {
 
 		$classId = intval($classId);
-		$list = ClassForumPeer::doSelect(' class_id='.$classId.' ORDER BY class_forum_category_id, name ASC');
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('forumsSorted',
+				array($classId)
+			)
+		);
+		while ($db->nextRecord()) {
+			$list[] = ClassForumPeer::row2Obj($db->record);
+		}
 
 		$objList = array();
 		foreach ($list as $k=>$v) {
@@ -432,6 +442,13 @@ class ClassForum_Queries {
 		FROM `class_forum_post`
 		WHERE class_forum_id = %d
 		AND thread_id IS NULL';
+
+		$this->queries['forumsSorted'] = 
+		'SELECT class_forum_id,A.name,A.class_id,is_locked,is_visible,is_moderated,allow_uploads,description,class_forum_recent_post_timedate,class_forum_recent_poster,class_forum_thread_count,class_forum_post_count,class_forum_unanswered_count,A.class_forum_category_id 
+		FROM class_forum A
+		LEFT JOIN class_forum_category B
+		  ON A.class_forum_category_id = B.class_forum_category_id
+		WHERE A.class_id=%d ORDER BY B.name, A.class_forum_category_id, A.name ASC';
 	}
 
 
