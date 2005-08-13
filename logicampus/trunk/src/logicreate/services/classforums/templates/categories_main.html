@@ -1,17 +1,17 @@
 <?php echo $t['sectionheader'];?>
 
-<fieldset>
-	<legend>New Category</legend>
-	<form>
-		Name:
-		<input type="text" name="name"/>
+<form action="<?= modurl('categories/event=saveCategory');?>" method="POST">
+	<fieldset>
+		<legend>Category Properties</legend>
+			Name:
+			<input type="text" id="name" name="name"/>
 
-		<br/>
-		<br/>
-		<input type="submit" value="Create Category"/>
-	</form>
-</fieldset>
+			<br/>
+			<br/>
+			<input type="submit" id="submit_category" value="Save Category"/>
+	</fieldset>
 
+</form>
 <p>&nbsp;</p>
 
 <?php

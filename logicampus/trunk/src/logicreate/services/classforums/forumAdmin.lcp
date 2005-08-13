@@ -5,9 +5,8 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
-include(LIB_PATH.'lc_table.php');
-include(LIB_PATH.'lc_table_renderer.php');
 
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
 
 /**
  * Class Forums
@@ -20,7 +19,7 @@ include(LIB_PATH.'lc_table_renderer.php');
  * You need to be a student to use this interface.
  * Faculty should use another one.
  */
-class classforums extends StudentService {
+class ForumAdmin extends StudentService {
 
 	var $presentor = 'htmlPresentation';
 	var $sectionTitle = 'Classroom Forums';
@@ -30,43 +29,63 @@ class classforums extends StudentService {
 
 	function run (&$db, &$u, &$lc, &$t) {
 
+		$lc->templateName = 'forumAdmin_main';
 
-		$lc->templateName = 'main_main';
-
-		//main code
-//		include('main_main.html'); //just for the CSS
-
-		$dm = new MyTableModel();
+		$dm = new LC_Table_ForumModerator();
 
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
-		$col = &$columnModel->getColumnAt(0);
-		$col->maxWidth=64;
-		$col->cellRenderer = new LC_TableIconRenderer();
+		$col_a = &$columnModel->getColumnAt(0);
+		$col_a->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_a->cellRenderer->fieldName = 'move';
+		$col_a->cellRenderer->idName = 'classForumId';
+		$col_a->cellRenderer->selectedVal = '1';
+		$col_a->maxWidth=35;
+		$col_a->justify = 'center';
 
-		$col_b = &$columnModel->getColumnAt(2);
-		$col_b->maxWidth=100;
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->justify = 'left';
 
-		$col_b = &$columnModel->getColumnAt(3);
-		$col_b->maxWidth=100;
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_c->cellRenderer->fieldName = 'locked';
+		$col_c->cellRenderer->selectedVal = '1';
+		$col_c->maxWidth=64;
 
-		$col_c = &$columnModel->getColumnAt(4);
-		$col_c->cellRenderer = new LC_TableDateRenderer();
+		$col_d = &$columnModel->getColumnAt(3);
+		$col_d->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_d->cellRenderer->fieldName = 'moderated';
+		$col_d->cellRenderer->selectedVal = '1';
+		$col_d->maxWidth=64;
 
-		$col_d = &$columnModel->getColumnAt(1);
-		$col_d->cellRenderer = new LC_TableForumRenderer();
-		$col_d->justify = 'left';
+		$col_e = &$columnModel->getColumnAt(4);
+		$col_e->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_e->cellRenderer->fieldName = 'visible';
+		$col_e->maxWidth=64;
 
-/*
-		//faculty can administrate forums
-		if ( $u->isFaculty() ) {
-			$col_admin = new LC_TableColumn();
-			$col_admin->cellRenderer = new LC_TableControlRenderer();
-			$col_admin->name = 'Admin';
-			$col_admin->maxWidth=70;
-			$columnModel->addColumn($col_admin);
-		}
-*/
+		$col_f = &$columnModel->getColumnAt(5);
+		$col_f->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_f->cellRenderer->fieldName = 'files';
+		$col_f->maxWidth=64;
+
+		$col_g = &$columnModel->getColumnAt(6);
+		$col_g->maxWidth=90;
+
+
+		$headerModel = &$table->getHeaderModel();
+		$col_c = &$headerModel->getColumnAt(2);
+		$col_c->justify = 'center';
+
+		$col_d = &$headerModel->getColumnAt(3);
+		$col_d->justify = 'center';
+
+		$col_e = &$headerModel->getColumnAt(4);
+		$col_e->justify = 'center';
+
+		$col_f = &$headerModel->getColumnAt(5);
+		$col_f->justify = 'center';
+
+
 
 		//make sub headers for forum categories
 
@@ -101,10 +120,51 @@ class classforums extends StudentService {
 		}
 
 
-
-
 		$t['table'] = new LC_TableRenderer($table);
+	}
 
+	/**
+	 * Show the page to add a new forum
+	 */
+	function newForumRun (&$db, &$u, &$lc, &$t) {
+		$lc->templateName = 'forumAdmin_newForum';
+	}
+
+
+	/**
+	 * Add a new forum
+	 */
+	function saveForumRun (&$db, &$u, &$lc, &$t) {
+		$x = new ClassForum_Forums();
+
+		$x->setName( $lc->postvars['name'] );
+		$x->setDescription( $lc->postvars['description'] );
+		$x->setClassId( $u->activeClassTaken->id_classes );
+
+		$x->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('forumAdmin/');
+	}
+
+
+	/**
+	 * move forums as well as save invisible, locked, moderated, and uploads...
+	 */
+	function saveChangesRun (&$db, &$u, &$lc, &$t) {
+
+		$cat_move_to = (int)$lc->postvars['cat_move_to'];
+		if ($cat_move_to > -1) {
+			foreach ($lc->postvars['move'] as $blank=>$id) {
+				$db->query(
+				//echo(
+				ClassForums_Queries::getQuery('moveForum',
+					array ($cat_move_to, $id, $u->activeClassTaught->id_classes)
+				));
+			}
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('forumAdmin/');
 	}
 
 
@@ -126,14 +186,14 @@ class classforums extends StudentService {
 
 
 
-class MyTableModel extends LC_TableModel {
+class LC_Table_ForumModerator extends LC_TableModel {
 
 	var $forums = array();
 
 	/**
 	 * make a 5 x 10 grid of nonsense
 	 */
-	function MyTableModel() {
+	function LC_Table_ForumModerator() {
 		$this->forums = ClassForum_Forums::getAll(1);
 	}
 
@@ -151,7 +211,7 @@ class MyTableModel extends LC_TableModel {
 	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return 5;
+		return 7;
 	}
 
 
@@ -167,16 +227,19 @@ class MyTableModel extends LC_TableModel {
 				return 'Forum'; break;
 
 			case '2':
-				return 'Topics'; break;
+				return 'Locked'; break;
 
 			case '3':
-				return 'Posts'; break;
+				return 'Moderated'; break;
 
 			case '4':
-				return 'Last Post'; break;
+				return 'Visible'; break;
 
 			case '5':
-				return 'Admin'; break;
+				return 'Files'; break;
+
+			case '6':
+				return '&nbsp;'; break;
 		}
 	}
 
@@ -188,17 +251,19 @@ class MyTableModel extends LC_TableModel {
 		$forum = $this->forums[$x];
 		switch ($y) {
 			case 0:
-				return $forum->_dao->classForumId;
+				return $forum;
 			case 1:
-				return $forum->_dao;
+				return $forum->_dao->name;
 			case 2:
-				return $forum->getTopicCount();
+				return $forum;
 			case 3:
-				return $forum->getPostCount();
+				return $forum;
 			case 4:
-				return time();
+				return $forum;
 			case 5:
-				return $forum->_dao;
+				return $forum;
+			case 6:
+				return '<a href="#">[ Edit ]</a> <a href="#">[ People ]</a>';
 		}
 	}
 
@@ -219,29 +284,6 @@ class MyTableModel extends LC_TableModel {
 		return $ret;
 	}
 }
-
-
-class LC_TableIconRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
-		} else {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="old posts" alt="old posts">';
-		}
-	}
-}
-
-
-
-/*
-class LC_TableControlRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		return '<a href="'.appurl('classforums/forumAdmin/').'forum_id='.$this->value->classForumId.'">EDIT</a>';
-	}
-}
-*/
 
 
 class LC_TableForumRenderer extends LC_TableCellRenderer {

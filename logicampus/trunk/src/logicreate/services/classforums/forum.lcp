@@ -5,9 +5,7 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
-include(LIB_PATH.'lc_table.php');
-include(LIB_PATH.'lc_table_renderer.php');
-
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
 
 /**
  * Class Forums
@@ -39,8 +37,7 @@ class forum extends StudentService {
 	 */
 	function buildAppLinks() {
 		$this->applinks = array (
-		lct('Class Forums Home') => '%classforums/',
-		lct('New Topic') => '%classforums/topic/event=post'
+		lct('New Topic') => '%classforums/posts/event=newTopic'
 		);
 	}
 
@@ -48,9 +45,6 @@ class forum extends StudentService {
 	function run (&$db, &$u, &$lc, &$t) {
 
 		$lc->templateName = 'forum_main';
-
-		//main code
-		include('main_main.html'); //just for the CSS
 
 		$dm = new MyPostTableModel($lc->getvars['forum_id']);
 
@@ -60,20 +54,19 @@ class forum extends StudentService {
 		$col->maxWidth=64;
 		$col->cellRenderer = new LC_TableIconRenderer();
 
-		$col_b = &$columnModel->getColumnAt(2);
-		$col_b->maxWidth=100;
+		$col_b = &$columnModel->getColumnAt(3);
+		$col_b->maxWidth=60;
 
-		$col_c = &$columnModel->getColumnAt(3);
-		$col_c->maxWidth=200;
-		$col_c->cellRenderer = new LC_TableDateRenderer();
-		$col_c->cellRenderer->dateFormat = 'n / j / Y &\n\b\sp;&\n\b\sp; h:i:s';
+		$col_c = &$columnModel->getColumnAt(4);
+		$col_c->maxWidth=160;
+		$col_c->cellRenderer = new LC_TableRenderer_ForumLastReply();
+		$col_c->cellRenderer->dateFormat = 'M j Y &\n\b\sp;h:i A';
 
 		$col_d = &$columnModel->getColumnAt(1);
-		$col_d->cellRenderer = new LC_TableTopicRenderer();
+		$col_d->cellRenderer = new LC_TableRenderer_ForumTopic();
 		$col_d->justify = 'left';
 
 		$t['table'] = new LC_TableRenderer($table);
-
 	}
 }
 
@@ -105,7 +98,7 @@ class MyPostTableModel extends LC_TableModel {
 	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return 4;
+		return 5;
 	}
 
 
@@ -121,9 +114,12 @@ class MyPostTableModel extends LC_TableModel {
 				return 'Topics'; break;
 
 			case '2':
-				return 'Replies'; break;
+				return 'Started By'; break;
 
 			case '3':
+				return 'Replies'; break;
+
+			case '4':
 				return 'Last Reply'; break;
 		}
 	}
@@ -140,31 +136,12 @@ class MyPostTableModel extends LC_TableModel {
 			case 1:
 				return $post;
 			case 2:
-				return $post->getReplyCount();
+				return $post->_dao->userId;
 			case 3:
-				return $post->postTimedate;
+				return $post->getReplyCount();
+			case 4:
+				return $post;
 		}
-	}
-}
-
-class LC_TableIconRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
-		} else {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="new posts" alt="new posts">';
-			return 'no new posts.&nbsp;';
-		}
-	}
-}
-
-
-
-class LC_TableTopicRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		return '<a href="'.appurl('classforums/posts/').'post_id='.$this->value->getPostId().'">'.$this->value->getSubject().'</a> <br/>'.substr($this->value->getMessage(),0,45);
 	}
 }
 
