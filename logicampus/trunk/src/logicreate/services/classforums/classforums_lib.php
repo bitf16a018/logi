@@ -311,6 +311,13 @@ class ClassForum_Categories {
 		$list = ClassForumCategoryPeer::doSelect(' class_id='.$classId.' ORDER BY name ASC');
 
 		$objList = array();
+		$generalDao = new ClassForumCategory();
+		$generalDao->set('name','General');
+		$generalDao->set('classForumCategoryId',0);
+		$generalCategory = new ClassForum_Categories();
+		$generalCategory->_dao = $generalDao;
+		$objList[] = $generalCategory;
+
 		foreach ($list as $k=>$v) {
 			$x = new ClassForum_Categories();
 			$x->_dao = $v;
