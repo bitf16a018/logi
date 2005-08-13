@@ -170,7 +170,7 @@ class MyTableModel extends LC_TableModel {
 				return 'Topics'; break;
 
 			case '3':
-				return 'Posts'; break;
+				return 'Replies'; break;
 
 			case '4':
 				return 'Last Post'; break;
