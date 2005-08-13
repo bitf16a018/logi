@@ -206,7 +206,7 @@ class ClassForum_Forums {
 		if ($this->postCount < 0) {
 			$db = DB::getHandle();
 			$db->query(
-				ClassForums_Queries::getQuery('postCountForum',
+				ClassForum_Queries::getQuery('postCountForum',
 					array($this->_dao->getPrimaryKey())
 				)
 			);
@@ -224,7 +224,7 @@ class ClassForum_Forums {
 		if ($this->topicCount < 0) {
 			$db = DB::getHandle();
 			$db->query(
-				ClassForums_Queries::getQuery('topicCountForum',
+				ClassForum_Queries::getQuery('topicCountForum',
 					array($this->_dao->getPrimaryKey())
 				)
 			);
@@ -323,7 +323,7 @@ class ClassForum_Categories {
 		if ($this->forumCount < 0) {
 			$db = DB::getHandle();
 			$db->query(
-				ClassForums_Queries::getQuery('forumCountCategory',
+				ClassForum_Queries::getQuery('forumCountCategory',
 					array($this->getCategoryId(),
 					$this->_dao->classId)
 				)
@@ -341,13 +341,13 @@ class ClassForum_Categories {
 /**
  * Holds all the raw queries for the class forums system
  */
-class ClassForums_Queries {
+class ClassForum_Queries {
 
 	var $queries = array();
 
 
 	function getQuery($name,$args) {
-		$singleton = ClassForums_Queries::singleton();
+		$singleton = ClassForum_Queries::singleton();
 		$s_args = array_merge( $singleton->queries[$name], $args);
 		return call_user_func_array('sprintf', $s_args);
 	}
@@ -389,7 +389,7 @@ class ClassForums_Queries {
 	function &singleton() {
 		static $singleton;
 		if (! is_object($singletone) ) {
-			$singleton = new ClassForums_Queries();
+			$singleton = new ClassForum_Queries();
 			$singleton->init();
 		}
 
@@ -398,4 +398,4 @@ class ClassForums_Queries {
 }
 
 
-ClassForums_Queries::init();
+ClassForum_Queries::init();
