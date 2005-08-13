@@ -79,6 +79,10 @@ class posts extends StudentService {
 			$threadId = $postId;
 		}
 
+		if ($lc->getvars['quote'] == 'true') {
+			$t['quote'] = '[QUOTE]'.$post->getMessage().'[/QUOTE]';
+		}
+
 		$t['postId'] = $postId;
 		$t['threadId'] = $threadId;
 		$lc->templateName = 'posts_reply';
@@ -98,8 +102,8 @@ class posts extends StudentService {
 	function startTopicRun (&$db, &$u, &$lc, &$t) {
 
 		$post = new ClassForumPost();
-		$post->subject = $lc->postvars['subject'];
-		$post->message = $lc->postvars['message'];
+		$post->subject = htmlentities(stripslashes($lc->postvars['subject']));
+		$post->message = htmlentities(stripslashes($lc->postvars['message']));
 		$post->set('userId',$u->username);
 		$post->set('classForumId',1);
 		$post->set('postTimedate',time());
@@ -120,8 +124,8 @@ class posts extends StudentService {
 		$threadId = (int)$lc->postvars['thread_id'];
 
 		$post = new ClassForumPost();
-		$post->subject = $lc->postvars['subject'];
-		$post->message = $lc->postvars['message'];
+		$post->subject = htmlentities(stripslashes($lc->postvars['subject']));
+		$post->message = htmlentities(stripslashes($lc->postvars['message']));
 		$post->set('userId',$u->username);
 		$post->set('classForumId',1);
 		$post->set('replyId',$postId);
