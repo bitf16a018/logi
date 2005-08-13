@@ -11,6 +11,15 @@ include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumCategory.php");
 class ClassForum_Posts {
 
 	var $_dao;
+	var $replies = array();
+	var $repliesLoaded = false;
+
+	function load($postId) {
+		$x = ClassForumPost::load($postId);
+		$y = new ClassForum_Posts();
+		$y->_dao = $x;
+		return $y;
+	}
 
 
 	/**
@@ -32,13 +41,30 @@ class ClassForum_Posts {
 			$x->_dao = $v;
 			$objList[] = $x;
 		}
-
 		return $objList;
 	}
 
 
+	function getReplies() {
+
+		$topicId = intval($this->getPostId());
+		$list = ClassForumPostPeer::doSelect(' thread_id='.$topicId.' ORDER BY is_sticky DESC, post_timedate ASC');
+
+		foreach ($list as $k=>$v) {
+			$x = new ClassForum_Posts();
+			$x->_dao = $v;
+			$this->replies[] = $x;
+		}
+		$this->repliesLoaded = true;
+		return $this->replies;
+	}
+
+
 	function getReplyCount() {
-		return 1;
+		if ( !$this->repliesLoaded ) {
+			$this->getReplies();
+		}
+		return count($this->replies);
 	}
 
 
@@ -70,6 +96,47 @@ class ClassForum_Posts {
 class ClassForum_Forums {
 
 	var $_dao;
+	var $postCount = -1;
+	var $topicCount = -1;
+
+	/**
+	 * Constructor
+	 */
+	function ClassForum_Forums() {
+		$this->_dao = new ClassForum();
+	}
+
+
+	/**
+	 * Set Name
+	 */
+	function setName($n) {
+		$this->_dao->set('name',$n);
+	}
+
+
+	/**
+	 * Set Description
+	 */
+	function setDescription($n) {
+		$this->_dao->set('description',$n);
+	}
+
+
+	/**
+	 * Set Description
+	 */
+	function setClassId($id) {
+		$this->_dao->set('classId',$id);
+	}
+
+
+	/**
+	 * Save
+	 */
+	function save() {
+		return $this->_dao->save();
+	}
 
 
 	/**
@@ -81,7 +148,7 @@ class ClassForum_Forums {
 	function getAll($classId) {
 
 		$classId = intval($classId);
-		$list = ClassForumPeer::doSelect(' class_id='.$classId.' ORDER BY name ASC,class_forum_category_id');
+		$list = ClassForumPeer::doSelect(' class_id='.$classId.' ORDER BY class_forum_category_id, name ASC');
 
 		$objList = array();
 		foreach ($list as $k=>$v) {
@@ -97,6 +164,44 @@ class ClassForum_Forums {
 	function getCategoryId() {
 		return $this->_dao->classForumCategoryId;
 	}
+
+
+	/**
+	 * Get a count of posts under this forum, excluding topics
+	 * (topics are thread starters, posts that were not a reply to anything)
+	 */
+	function getPostCount() {
+		if ($this->postCount < 0) {
+			$db = DB::getHandle();
+			$db->query(
+				ClassForums_Queries::getQuery('postCountForum',
+					array($this->_dao->getPrimaryKey())
+				)
+			);
+			$db->nextRecord();
+			$this->postCount = $db->record['num'];
+		}
+		return $this->postCount;
+	}
+
+
+	/**
+	 * Get a count of topics under this forum
+	 */
+	function getTopicCount() {
+		if ($this->topicCount < 0) {
+			$db = DB::getHandle();
+			$db->query(
+				ClassForums_Queries::getQuery('topicCountForum',
+					array($this->_dao->getPrimaryKey())
+				)
+			);
+			$db->nextRecord();
+			$this->topicCount = $db->record['num'];
+		}
+		return $this->topicCount;
+	}
+
 }
 
 
@@ -107,6 +212,15 @@ class ClassForum_Categories {
 
 	var $forumCount = -1;
 	var $_dao;
+
+
+	/**
+	 * Constructor
+	 */
+	function ClassForum_Categories() {
+		$this->_dao = new ClassForumCategory();
+	}
+
 
 	/**
 	 * Retrieve a list of all class forum categories
@@ -131,29 +245,125 @@ class ClassForum_Categories {
 
 
 	/**
-	 * Get a count of forums under this category
-	 *
+	 * Save
 	 */
-	function getName() {
-		return $this->_dao->name;
+	function save() {
+		return $this->_dao->save();
 	}
 
 
 	/**
-	 * Get a count of forums under this category
+	 * Set the name field
 	 *
 	 */
-	function getForumCount() {
-		if ($this->forumCount > -1) {
-			return $this->forumCount;
-		} else {
-			// TODO: hit DB
-			return 10;
-		}
+	function setClassId($id) {
+		$this->_dao->set('classId', intval($id));
+	}
+
+
+	/**
+	 * Set the name field
+	 *
+	 */
+	function setName($n) {
+		$this->_dao->set('name', $n);
+	}
+
+
+	/**
+	 * Get the name field
+	 *
+	 */
+	function getName() {
+		return $this->_dao->get('name');
 	}
 
 
 	function getCategoryId() {
 		return $this->_dao->getPrimaryKey();
 	}
+
+
+	/**
+	 * Get a count of forums under this category
+	 */
+	function getForumCount() {
+		if ($this->forumCount < 0) {
+			$db = DB::getHandle();
+			$db->query(
+				ClassForums_Queries::getQuery('forumCountCategory',
+					array($this->getCategoryId(),
+					$this->_dao->classId)
+				)
+			);
+			$db->nextRecord();
+			$this->forumCount = $db->record['num'];
+		}
+		return $this->forumCount;
+	}
+
 }
+
+
+
+/**
+ * Holds all the raw queries for the class forums system
+ */
+class ClassForums_Queries {
+
+	var $queries = array();
+
+
+	function getQuery($name,$args) {
+		$singleton = ClassForums_Queries::singleton();
+		$s_args = array_merge( $singleton->queries[$name], $args);
+		return call_user_func_array('sprintf', $s_args);
+	}
+
+
+	/**
+	 * create the SQL statements
+	 */
+	function init() {
+		$this->queries['forumCountCategory']  = 
+		'SELECT count(class_forum_id) as num
+		FROM `class_forum`
+		WHERE class_forum_category_id = %d
+		AND class_id = %d';
+
+		$this->queries['moveForum']  = 
+		'UPDATE `class_forum`
+		SET class_forum_category_id = %d
+		WHERE class_forum_id = %d 
+		AND class_id = %d';
+
+		$this->queries['postCountForum']  = 
+		'SELECT count(class_forum_post_id) as num
+		FROM `class_forum_post`
+		WHERE class_forum_id = %d
+		AND thread_id IS NOT NULL';
+
+		$this->queries['topicCountForum']  = 
+		'SELECT count(class_forum_post_id) as num
+		FROM `class_forum_post`
+		WHERE class_forum_id = %d
+		AND thread_id IS NULL';
+	}
+
+
+	/**
+	 * PHP4 has no static class variables
+	 */
+	function &singleton() {
+		static $singleton;
+		if (! is_object($singletone) ) {
+			$singleton = new ClassForums_Queries();
+			$singleton->init();
+		}
+
+		return $singleton;
+	}
+}
+
+
+ClassForums_Queries::init();

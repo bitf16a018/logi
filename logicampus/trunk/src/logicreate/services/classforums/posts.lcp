@@ -5,8 +5,9 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
-include(LIB_PATH.'lc_table.php');
-include(LIB_PATH.'lc_table_renderer.php');
+
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
+include_once(SERVICE_PATH.'classforums/classforums_lib.php');
 
 
 /**
@@ -39,8 +40,7 @@ class posts extends StudentService {
 	 */
 	function buildAppLinks() {
 		$this->applinks = array (
-		lct('Class Forums Home') => '%classforums/',
-		lct('New Topic') => '%classforums/topic/event=post'
+		//lct('New Topic') => '%classforums/topic/event=post'
 		);
 	}
 
@@ -51,19 +51,43 @@ class posts extends StudentService {
 	function run (&$db, &$u, &$lc, &$t) {
 
 		$lc->templateName = 'posts_main';
+		$postId = (int) $lc->getvars['post_id'];
 
-		//main code
-		include('main_main.html'); //just for the CSS
+		$table = new LC_Table_ForumThread($postId);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=100;
+		$col->cellRenderer = new LC_TableRenderer_ForumAuthor();
+
+		$col_d = &$columnModel->getColumnAt(1);
+		$col_d->cellRenderer = new LC_TableRenderer_ForumPost();
+		$col_d->justify = 'left';
+
+		$t['threadTable'] = new LC_TableRenderer($table);
+
+		$t['postId'] = $postId;
 	}
 
+
+	function replyRun (&$db, &$u, &$lc, &$t) {
+
+		$postId = (int) $lc->getvars['p_id'];
+		$post = ClassForum_Posts::load($postId);
+		if ($post->_dao->threadId > 0 ) {
+			$threadId = $post->_dao->threadId;
+		} else {
+			$threadId = $postId;
+		}
+
+		$t['postId'] = $postId;
+		$t['threadId'] = $threadId;
+		$lc->templateName = 'posts_reply';
+	}
 
 
 	function newTopicRun (&$db, &$u, &$lc, &$t) {
 
 		$lc->templateName = 'posts_newTopic';
-
-		//main code
-		include('main_main.html'); //just for the CSS
 	}
 
 
@@ -76,7 +100,7 @@ class posts extends StudentService {
 		$post = new ClassForumPost();
 		$post->subject = $lc->postvars['subject'];
 		$post->message = $lc->postvars['message'];
-		$post->set('userId','nelson.muntz');
+		$post->set('userId',$u->username);
 		$post->set('classForumId',1);
 		$post->set('postTimedate',time());
 
@@ -85,6 +109,31 @@ class posts extends StudentService {
 		$t['url'] = appurl('classforums/forum/forum_id=1');
 		$this->presentor = 'redirectPresentation';
 	}
+
+
+	/**
+	 * Save a reply in the DB
+	 */
+	function saveReplyRun (&$db, &$u, &$lc, &$t) {
+
+		$postId = (int)$lc->postvars['post_id'];
+		$threadId = (int)$lc->postvars['thread_id'];
+
+		$post = new ClassForumPost();
+		$post->subject = $lc->postvars['subject'];
+		$post->message = $lc->postvars['message'];
+		$post->set('userId',$u->username);
+		$post->set('classForumId',1);
+		$post->set('replyId',$postId);
+		$post->set('threadId',$threadId);
+		$post->set('postTimedate',time());
+
+		$post->save();
+
+		$t['url'] = appurl('classforums/forum/forum_id=1');
+		$this->presentor = 'redirectPresentation';
+	}
 }
+
 
 ?>

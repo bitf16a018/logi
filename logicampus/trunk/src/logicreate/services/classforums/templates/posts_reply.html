@@ -1,0 +1,15 @@
+<?php echo $t['sectionheader'];?>
+
+
+<form method="POST" action="<?php echo appurl('classforums/posts/event=saveReply');?>">
+
+	<input type="text" name="subject" value="Subject"/>
+	<br/>
+	<textarea rows="15" cols="80" name="message"></textarea>
+
+	<br/>
+	<br/>
+	<input type="submit" id="submit_post" value="Post Reply"/>
+	<input type="hidden" name="post_id" value="<?=$t['postId'];?>"/>
+	<input type="hidden" name="thread_id" value="<?=$t['threadId'];?>"/>
+</form>

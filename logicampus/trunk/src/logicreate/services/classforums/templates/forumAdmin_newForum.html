@@ -1,0 +1,47 @@
+<?php echo $t['sectionheader'];?>
+<style type="text/css">
+	DIV.hover_button:hover {
+		background-color:silver;
+		border:1px solid gray;
+	}
+
+	DIV.hover_button {
+		border:1px solid white;
+	}
+</style>
+
+
+<form method="POST" action="<?=modurl('forumAdmin/event=saveForum');?>">
+<div style="float:left">
+	<input type="text" name="name">
+	<br/>
+	<textarea name="description"></textarea>
+	<br/>
+	<input type="submit" id="submit_forum" value="Submit"/>
+</div>
+
+<div style="width:100px;float:left">
+	&nbsp;
+</div>
+
+<div style="float:left">
+	<fieldset>
+		<legend>Choose Category</legend>
+
+		<div class="hover_button" onclick="document.getElementById('radio_1').checked=true;">
+			<input type="radio" value="1" id="radio_1" name="category_id"/>
+			General
+		</div>
+
+		<div class="hover_button" onclick="document.getElementById('radio_2').checked=true;">
+			<input type="radio" value="2" id="radio_2" name="category_id"/>
+			Homework
+		</div>
+
+		<div class="hover_button" onclick="document.getElementById('radio_3').checked=true;">
+			<input type="radio" value="3" id="radio_3" name="category_id"/>
+			Trash
+		</div>
+	</fieldset>
+</div>
+</form>

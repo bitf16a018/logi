@@ -20,7 +20,7 @@ include(LIB_PATH.'lc_table_renderer.php');
  *
  * Edit categories, for faculty only.
  */
-class categories extends FacultyService {
+class Categories extends FacultyService {
 
 	var $presentor = 'htmlPresentation';
 	var $sectionTitle = 'Classroom Forum Categories';
@@ -35,7 +35,7 @@ class categories extends FacultyService {
 		//main code
 		include('main_main.html'); //just for the CSS
 
-		$dm = new ForumCategoriesTableModel();
+		$dm = new ForumCategoriesTableModel($u->activeClassTaught->id_classes);
 
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
@@ -47,21 +47,12 @@ class categories extends FacultyService {
 		$col_d->maxWidth=75;
 		$col_d->justify = 'center';
 
-		$col_move = &$columnModel->getColumnAt(2);
-		$col_move->maxWidth=100;
-		$col_move->justify = 'left';
-		$col_move->cellRenderer = new LC_TableUrlRenderer(
-			appurl('classforums/categories/event=move/'),
-			'...to this category',
-			'cat_id'
-			);
-
 		//faculty can administrate forums
 		if ( $u->isFaculty() ) {
 			$col_admin = &$columnModel->getLastColumn();
 			$col_admin->cellRenderer = new LC_TableUrlRenderer(
 			appurl('classforums/categories/event=edit/'),
-			'EDIT',
+			'[ EDIT ]',
 			'cat_id'
 			);
 			$col_admin->name = '';
@@ -69,10 +60,25 @@ class categories extends FacultyService {
 
 		}
 
-
 		$t['table'] = new LC_TableRenderer($table);
-
 	}
+
+
+	/**
+	 * Add a new forum category
+	 */
+	function saveCategoryRun (&$db, &$u, &$lc, &$t) {
+		$x = new ClassForum_Categories();
+
+		$x->setName( $lc->postvars['name'] );
+		$x->setClassId( $u->activeClassTaken->id_classes );
+
+		$x->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('categories/');
+	}
+
 
 
 	/**
@@ -114,7 +120,7 @@ class ForumCategoriesTableModel extends LC_TableModel {
 	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return 4;
+		return 3;
 	}
 
 
@@ -130,9 +136,6 @@ class ForumCategoriesTableModel extends LC_TableModel {
 				return 'Forums'; break;
 
 			case '2':
-				return 'Move'; break;
-
-			case '3':
 				return 'Admin'; break;
 		}
 	}
@@ -149,8 +152,6 @@ class ForumCategoriesTableModel extends LC_TableModel {
 			case 1:
 				return $cat->getForumCount();
 			case 2:
-				return $cat->getCategoryId();
-			case 3:
 				return $cat->getCategoryId();
 			default:
 				return $cat;
