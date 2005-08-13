@@ -90,6 +90,7 @@ class ForumAdmin extends StudentService {
 
 		//make sub headers for forum categories
 
+/*
 		//always make a general
 		$subHeaderModel = new LC_TableDefaultColumnModel();
 		$sub_col_a = new LC_TableColumn();
@@ -99,6 +100,7 @@ class ForumAdmin extends StudentService {
 		$subHeader->row = 0;
 		$table->addSubHeader($subHeader);
 		$forumCount = $dm->getForumsInCategory(0);
+*/
 
 		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
 
