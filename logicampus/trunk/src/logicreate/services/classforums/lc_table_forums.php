@@ -66,7 +66,12 @@ class LC_Table_ForumThreadModel extends LC_TableModel {
 				return 'Author'; break;
 
 			case '1':
-				return 'Post'; break;
+				if (is_object($this->topicObj) ) {
+					return 'Post: '.$this->topicObj->_dao->subject;
+				} else {
+					return 'Post';
+				}
+				break;
 
 		}
 	}
