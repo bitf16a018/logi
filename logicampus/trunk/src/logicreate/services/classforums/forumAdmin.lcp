@@ -57,23 +57,33 @@ class ForumAdmin extends FacultyService {
 		$col_c = &$columnModel->getColumnAt(2);
 		$col_c->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_c->cellRenderer->fieldName = 'locked';
+		$col_c->cellRenderer->idName = 'classForumId';
+		$col_d->cellRenderer->selectedKey = 'isLocked';
 		$col_c->cellRenderer->selectedVal = '1';
 		$col_c->maxWidth=64;
 
 		$col_d = &$columnModel->getColumnAt(3);
 		$col_d->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_d->cellRenderer->fieldName = 'moderated';
+		$col_d->cellRenderer->idName = 'classForumId';
+		$col_d->cellRenderer->selectedKey = 'isModerated';
 		$col_d->cellRenderer->selectedVal = '1';
 		$col_d->maxWidth=64;
 
 		$col_e = &$columnModel->getColumnAt(4);
 		$col_e->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_e->cellRenderer->fieldName = 'visible';
+		$col_e->cellRenderer->idName = 'classForumId';
+		$col_e->cellRenderer->selectedKey = 'isVisible';
+		$col_e->cellRenderer->selectedVal = '1';
 		$col_e->maxWidth=64;
 
 		$col_f = &$columnModel->getColumnAt(5);
 		$col_f->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_f->cellRenderer->fieldName = 'files';
+		$col_f->cellRenderer->idName = 'classForumId';
+		$col_f->cellRenderer->selectedKey = 'allowUploads';
+		$col_f->cellRenderer->selectedVal = '1';
 		$col_f->maxWidth=64;
 
 		$col_g = &$columnModel->getColumnAt(6);
@@ -181,6 +191,7 @@ class ForumAdmin extends FacultyService {
 	 */
 	function saveChangesRun (&$db, &$u, &$lc, &$t) {
 
+		//moving categories
 		$cat_move_to = (int)$lc->postvars['cat_move_to'];
 		if ($cat_move_to > -1) {
 			foreach ($lc->postvars['move'] as $blank=>$id) {
@@ -191,6 +202,59 @@ class ForumAdmin extends FacultyService {
 				));
 			}
 		}
+
+		//locked
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('is_locked', $u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['locked'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('is_locked', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		//moderated
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('is_moderated',$u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['moderated'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('is_moderated', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		//visible
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('is_visible',$u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['visible'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('is_visible', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		//uploads
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('allow_uploads',$u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['files'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('allow_uploads', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = modurl('forumAdmin/');
 	}
@@ -275,7 +339,7 @@ class LC_Table_ForumModerator extends LC_TableModel {
 			case 5:
 				return $forum;
 			case 6:
-				return '<a href="#">[ Edit ]</a> <a href="#">[ People ]</a>';
+				return '<a href="#">[ Edit ]</a> <!--<a href="#">[ People ]</a>-->';
 		}
 	}
 
