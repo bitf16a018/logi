@@ -15,9 +15,13 @@ class LC_TableRenderer {
 
 	/**
 	 * Shows the table as HTML
+	 *
+	 * do not show a table if there are zero (0) rows, return false
 	 * @static
 	 */
 	function toHTML() {
+		if ($this->table->getRowCount() < 1) { return false; }
+
 		$this->html = '';
 
 		$this->startTable();
@@ -204,7 +208,6 @@ class LC_TableRendererPaged extends LC_TableRenderer {
 		$this->html .= '</div>';
 		parent::startTable();
 	}
-
 
 
 	/**

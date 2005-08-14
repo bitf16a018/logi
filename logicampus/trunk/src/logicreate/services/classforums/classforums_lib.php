@@ -12,7 +12,7 @@ class ClassForum_Posts {
 
 	var $_dao;
 	var $replies = array();
-	var $repliesLoaded = false;
+	var $threadLoaded = false;
 
 	function load($postId) {
 		$x = ClassForumPost::load($postId);
@@ -45,24 +45,24 @@ class ClassForum_Posts {
 	}
 
 
-	function getReplies() {
+	function getThread($limit, $start) {
 
 		$topicId = intval($this->getPostId());
-		$list = ClassForumPostPeer::doSelect(' thread_id='.$topicId.' ORDER BY is_sticky DESC, post_timedate ASC');
+		$list = ClassForumPostPeer::doSelect(' thread_id='.$topicId.' ORDER BY is_sticky DESC, post_timedate ASC LIMIT '.$start.', '.$limit);
 
 		foreach ($list as $k=>$v) {
 			$x = new ClassForum_Posts();
 			$x->_dao = $v;
 			$this->replies[] = $x;
 		}
-		$this->repliesLoaded = true;
+		$this->threadLoaded = true;
 		return $this->replies;
 	}
 
 
 	function getReplyCount() {
-		if ( !$this->repliesLoaded ) {
-			$this->getReplies();
+		if ( !$this->threadLoaded ) {
+			$this->getThread();
 		}
 		return count($this->replies);
 	}

@@ -7,13 +7,11 @@
 </form>
 </div>
 
-<?php
-echo $t['threadTable']->toHTML();
-
-
-//debug($t['topic']);
-
-?>
+<?php if ( ! $x = $t['threadTable']->toHTML() ) { ?>
+	There are no posts to show.
+<?php } else {
+	echo $x;
+} ?>
 
 <div align="center" style="width:100%;">
 	<a href="<?=modurl('forumAdmin/event=newForum');?>">New Topic</a>
