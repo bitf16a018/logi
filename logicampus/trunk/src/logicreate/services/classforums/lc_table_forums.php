@@ -67,7 +67,7 @@ class LC_Table_ForumThreadModel extends LC_TableModelPaged {
 
 	function getRowCount() {
 		//FIXME this won't work on the last page
-		$x = count($this->replies) + 1;
+		$x = count($this->replies);
 		if ($x > $this->rowsPerPage) {
 			return $this->rowsPerPage;
 		}
