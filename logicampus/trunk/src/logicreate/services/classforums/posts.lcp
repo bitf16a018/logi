@@ -52,8 +52,13 @@ class posts extends StudentService {
 
 		$lc->templateName = 'posts_main';
 		$postId = (int) $lc->getvars['post_id'];
+		$page = (int) $lc->getvars['page'];
 
-		$table = new LC_Table_ForumThread($postId);
+		if($page < 1) {
+			$page = 1;
+		}
+
+		$table = new LC_Table_ForumThread($postId, $page, 10);
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=100;
@@ -63,7 +68,7 @@ class posts extends StudentService {
 		$col_d->cellRenderer = new LC_TableRenderer_ForumPost();
 		$col_d->justify = 'left';
 
-		$t['threadTable'] = new LC_TableRenderer($table);
+		$t['threadTable'] = new LC_TableRendererPaged($table);
 
 		$t['postId'] = $postId;
 	}
@@ -71,7 +76,7 @@ class posts extends StudentService {
 
 	function replyRun (&$db, &$u, &$lc, &$t) {
 
-		$postId = (int) $lc->getvars['p_id'];
+		$postId = (int) $lc->getvars['post_id'];
 		$post = ClassForum_Posts::load($postId);
 		if ($post->_dao->threadId > 0 ) {
 			$threadId = $post->_dao->threadId;

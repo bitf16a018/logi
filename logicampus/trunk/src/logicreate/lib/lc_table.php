@@ -132,6 +132,35 @@ class LC_Table {
 
 
 
+class LC_TablePaged extends LC_Table {
+
+	var $rowsPerPage = 10;
+	var $currentPage = 1;
+	var $url;
+
+
+	function getPrevUrl() {
+		return '#';
+	}
+
+
+	function getNextUrl() {
+		return '#';
+	}
+
+
+	function getPageUrl($i) {
+		return '#';
+	}
+
+
+	function getMaxRows() {
+		return 1;
+	}
+}
+
+
+
 class LC_TableModel {
 
 	/**
@@ -168,6 +197,14 @@ class LC_TableModel {
 	 * Sets the value in the cell at columnIndex and rowIndex to aValue.
 	 */
 	function setValueAt($val, $rowIndex, $columnIndex) { }
+}
+
+
+
+class LC_TableModelPaged extends LC_TableModel{
+	var $rowsPerPage = 10;
+	var $currentPage = 1;
+
 }
 
 

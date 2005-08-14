@@ -32,6 +32,11 @@
 		text-align:right;
 	}
 
+	.datatable_nav {
+		padding:0px 7px 0px 7px;
+		margin:0px;
+	}
+
 	DIV.forum_quote_shell {
 		width:90%;
 		margin-left:4%;

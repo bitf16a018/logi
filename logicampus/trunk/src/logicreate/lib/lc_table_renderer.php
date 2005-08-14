@@ -35,7 +35,7 @@ class LC_TableRenderer {
 	 * opens the table
 	 */
 	function startTable() {
-		$this->html .= '<table cellpadding="0" cellspacing="1" class="datatable" width="100%">';
+		$this->html .= '<table cellpadding="0" cellspacing="1" class="datatable" width="100%" style="clear:both;">';
 		$this->html .= "\n";
 	}
 
@@ -177,11 +177,55 @@ class LC_TableRenderer {
 			$this->html .= '</tr>';
 		}
 
-		$this->html .= '</thead>';
+		$this->html .= '</tbody>';
 
 	}
 
 }
+
+
+
+class LC_TableRendererPaged extends LC_TableRenderer {
+
+
+	/**
+	 * Add back and forth navigation
+	 */
+	function startTable() {
+		$maxRows = $this->table->getMaxRows();
+		$pages = ceil($maxRows / $this->table->rowsPerPage);
+		$this->html .= '<div class="datatable_nav" style="padding-top:7px;" align="right">';
+		$this->html .= '<a href="'.$this->table->getPrevUrl().'">&laquo;Prev</a> | ';
+		for ($x=1; $x<=$pages; ++$x) {
+			$this->html .= ' <a href="'.$this->table->getPageUrl($x).'">'.$x.'</a>';
+		}
+		$this->html .= ' | <a href="'.$this->table->getNextUrl().'">Next&raquo;</a>';
+		$this->html .= ' Current Page: '.$this->table->currentPage;
+		$this->html .= '</div>';
+		parent::startTable();
+	}
+
+
+
+	/**
+	 * Add back and forth navigation
+	 */
+	function endTable() {
+		parent::endTable();
+		$maxRows = $this->table->getMaxRows();
+		$pages = ceil($maxRows / $this->table->rowsPerPage);
+		$this->html .= '<div class="datatable_nav" style="padding-bottom:7px;" align="right">';
+		$this->html .= '<a href="'.$this->table->getPrevUrl().'">&laquo;Prev</a> | ';
+		for ($x=1; $x<=$pages; ++$x) {
+			$this->html .= ' <a href="'.$this->table->getPageUrl($x).'">'.$x.'</a>';
+		}
+		$this->html .= ' | <a href="'.$this->table->getNextUrl().'">Next&raquo;</a>';
+		$this->html .= ' Current Page: '.$this->table->currentPage;
+		$this->html .= '</div>';
+	}
+}
+
+
 
 
 class LC_TableCellRenderer {

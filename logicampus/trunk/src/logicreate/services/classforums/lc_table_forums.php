@@ -4,16 +4,18 @@ include_once(LIB_PATH.'lc_table.php');
 include_once(LIB_PATH.'lc_table_renderer.php');
 
 
-class LC_Table_ForumThread extends LC_Table {
+class LC_Table_ForumThread extends LC_TablePaged {
 
-	var $rowsPerPage = 30;
 
 	/**
 	 * Constructor uses an automatic LC_Table_ForumThreadModel
 	 */
-	function LC_Table_ForumThread($postId) {
+	function LC_Table_ForumThread($postId, $cp, $rpp) {
+		$this->rowsPerPage = $rpp;
+		$this->currentPage = $cp;
+		$this->postId = $postId;
 
-		$dataModel = new LC_Table_ForumThreadModel($postId);
+		$dataModel = new LC_Table_ForumThreadModel($postId, $cp, $rpp);
 
 		parent::LC_Table($dataModel);
 	}
@@ -23,19 +25,43 @@ class LC_Table_ForumThread extends LC_Table {
 		$this->dataModel->rowsPerPage = $n;
 	}
 
+
+	function getPrevUrl() {
+		return $this->getPageUrl($this->currentPage-1);
+	}
+
+
+	function getNextUrl() {
+		return $this->getPageUrl($this->currentPage+1);
+	}
+
+
+	function getPageUrl($i) {
+		return modurl('posts/post_id='.$this->postId.'/page='.$i);
+	}
+
+
+	function getMaxRows() {
+		return 100;
+	}
+
 }
 
-class LC_Table_ForumThreadModel extends LC_TableModel {
+class LC_Table_ForumThreadModel extends LC_TableModelPaged {
 
 	var $topicId;
 	var $topicObj;
 	var $replies = array();
-	var $rowsPerPage = 30;
 
-	function LC_Table_ForumThreadModel($postId) {
+	function LC_Table_ForumThreadModel($postId, $cp, $rpp) {
+		$this->rowsPerPage = $rpp;
+		$this->currentPage = $cp;
 		$this->topicId = $postId;
 		$this->topicObj = ClassForum_Posts::load($postId);
-		$this->replies = $this->topicObj->getReplies();
+		$this->replies = $this->topicObj->getThread($this->rowsPerPage, $this->currentPage);
+		if ($this->currentPage == 1) {
+			$this->replies = array_merge( array($this->topicObj), $this->replies);
+		}
 	}
 
 
@@ -46,6 +72,11 @@ class LC_Table_ForumThreadModel extends LC_TableModel {
 			return $this->rowsPerPage;
 		}
 		return $x;
+	}
+
+
+	function getMaxRows() {
+		return 100;
 	}
 
 
@@ -81,11 +112,8 @@ class LC_Table_ForumThreadModel extends LC_TableModel {
 	 * return the value at an x,y coord
 	 */
 	function getValueAt($x,$y) {
-		if ($x == 0 ) {
-			$post = $this->topicObj;
-		} else {
-			$post = $this->replies[$x-1];
-		}
+		$post = $this->replies[$x];
+
 		switch ($y) {
 			case 0:
 				return $post->_dao->userId;
