@@ -57,17 +57,6 @@ class classforums extends StudentService {
 		$col_d->cellRenderer = new LC_TableForumRenderer();
 		$col_d->justify = 'left';
 
-/*
-		//faculty can administrate forums
-		if ( $u->isFaculty() ) {
-			$col_admin = new LC_TableColumn();
-			$col_admin->cellRenderer = new LC_TableControlRenderer();
-			$col_admin->name = 'Admin';
-			$col_admin->maxWidth=70;
-			$columnModel->addColumn($col_admin);
-		}
-*/
-
 		//make sub headers for forum categories
 
 		//TODO use real class id
@@ -123,6 +112,15 @@ class MyTableModel extends LC_TableModel {
 	 */
 	function MyTableModel() {
 		$this->forums = ClassForum_Forums::getAll(1);
+		$newList = array();
+		//throw out "invisible" ones
+		foreach ($this->forums as $k=>$v) {
+			if ( !$v->isVisible() ) {
+				continue;
+			}
+			$newList[] = $v;
+		}
+		$this->forums = $newList;
 	}
 
 
@@ -176,7 +174,7 @@ class MyTableModel extends LC_TableModel {
 		$forum = $this->forums[$x];
 		switch ($y) {
 			case 0:
-				return $forum->_dao->classForumId;
+				return $forum;
 			case 1:
 				return $forum->_dao;
 			case 2:
@@ -212,6 +210,10 @@ class MyTableModel extends LC_TableModel {
 class LC_TableIconRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
+		if ($this->value->isLocked() ) {
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_locked.png" title="new posts" alt="new posts">';
+		}
+
 		if ($this->row % 2 == 0 ) {
 			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
 		} else {

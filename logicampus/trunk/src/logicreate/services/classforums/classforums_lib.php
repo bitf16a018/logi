@@ -211,6 +211,21 @@ class ClassForum_Forums {
 	}
 
 
+	/**
+	 * Is this forum viewable by users?
+	 */
+	function isVisible() {
+		return $this->_dao->get('isVisible');
+	}
+
+
+	/**
+	 * Is this forum locked? (don't allow posts nor editing)
+	 */
+	function isLocked() {
+		return $this->_dao->get('isLocked');
+	}
+
 
 	/**
 	 * Save
