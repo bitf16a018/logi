@@ -20,6 +20,19 @@ class LC_Table_ForumThread extends LC_TablePaged {
 		parent::LC_Table($dataModel);
 	}
 
+
+	/**
+	 * Return the forum id of this thread
+	 */
+	function getForumId() {
+		if ( is_object($this->tableModel->topicObj) ) {
+			return $this->tableModel->topicObj->getForumId();
+		} else {
+			return false;
+		}
+	}
+
+
 	function setRowsPerPage($n) {
 		$this->rowsPerPage = $n;
 		$this->dataModel->rowsPerPage = $n;
@@ -180,8 +193,11 @@ class LC_TableRenderer_ForumAuthor extends LC_TableCellRenderer {
 
 class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 
+	var $dateFormat = 'M d y';
+	var $dateTimeFormat = 'M d \'y - h:i A';
+
 	function getRenderedValue() {
-		$ret  = '<div style="float:left">posted on : 8/10/2005</div>';
+		$ret  = '<div style="float:left">posted on : '.date($this->dateTimeFormat,$this->value->getTime()).'</div>';
 		$ret .= '<div align="right">';
 		$ret .= '<a href="'.modurl('posts/event=reply/p_id='.$this->value->getPostId()).'">Reply</a> | ';
 		$ret .= '<a href="'.modurl('posts/event=reply/quote=true/p_id='.$this->value->getPostId()).'">Reply &amp; Quote</a> | ';

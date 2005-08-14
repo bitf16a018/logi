@@ -14,6 +14,12 @@ class ClassForum_Posts {
 	var $replies = array();
 	var $threadLoaded = false;
 
+
+	function ClassForum_Posts() {
+		$this->_dao = new ClassForumPost();
+	}
+
+
 	function load($postId) {
 		$x = ClassForumPost::load($postId);
 		$y = new ClassForum_Posts();
@@ -33,7 +39,7 @@ class ClassForum_Posts {
 	function getTopics($forumId) {
 
 		$forumId = intval($forumId);
-		$list = ClassForumPostPeer::doSelect(' class_forum_id='.$forumId.' and thread_id IS NULL ORDER BY is_sticky DESC, post_timedate DESC');
+		$list = ClassForumPostPeer::doSelect(' class_forum_id='.$forumId.' and thread_id = class_forum_post_id ORDER BY is_sticky DESC, post_timedate DESC');
 
 		$objList = array();
 		foreach ($list as $k=>$v) {
@@ -48,7 +54,7 @@ class ClassForum_Posts {
 	function getThread($limit=-1, $start=-1) {
 
 		$topicId = intval($this->getPostId());
-		$query =' thread_id='.$topicId.' ORDER BY is_sticky DESC, post_timedate ASC';
+		$query =' thread_id='.$topicId.' and reply_id IS NOT NULL ORDER BY is_sticky DESC, post_timedate ASC';
 		if ($limit > -1) {
 			$query .= ' LIMIT '.$start.', '.$limit;
 		}
@@ -79,6 +85,44 @@ class ClassForum_Posts {
 
 	function getPostId() {
 		return $this->_dao->classForumPostId;
+	}
+
+
+	function getThreadId() {
+		return $this->_dao->threadId;
+	}
+
+
+	function setThreadId($id) {
+		$this->_dao->set('threadId',$id);
+	}
+
+
+	function setUser($uname) {
+		$this->_dao->set('userId',$uname);
+	}
+
+
+	function setSubject($s) {
+		$this->_dao->set('subject',htmlentities($s));
+	}
+
+
+	function setMessage($m) {
+		$this->_dao->set('message',htmlentities($m));
+	}
+
+	function setForumId($id) {
+		$this->_dao->set('classForumId',intval($id));
+	}
+
+
+	/**
+	 * Returns unix timestamp of when this post was posted
+	 *
+	 */
+	function getTime() {
+		return $this->_dao->postTimedate;
 	}
 
 
@@ -160,6 +204,14 @@ class ClassForum_Posts {
 
 		return $code;
 	}
+
+
+	/**
+	 * Save
+	 */
+	function save() {
+		return $this->_dao->save();
+	}
 }
 
 
@@ -216,6 +268,14 @@ class ClassForum_Forums {
 	 */
 	function isVisible() {
 		return $this->_dao->get('isVisible');
+	}
+
+
+	/**
+	 * Is this forum viewable by users?
+	 */
+	function setVisible($b = true) {
+		return $this->_dao->set('isVisible', $b);
 	}
 
 
@@ -280,7 +340,7 @@ class ClassForum_Forums {
 		if ($this->postCount < 0) {
 			$db = DB::getHandle();
 			$db->query(
-				ClassForum_Queries::getQuery('postCountForum',
+				ClassForum_Queries::getQuery('replyCountForum',
 					array($this->_dao->getPrimaryKey())
 				)
 			);
@@ -456,11 +516,17 @@ class ClassForum_Queries {
 		WHERE class_forum_id = %d
 		AND thread_id IS NOT NULL';
 
+		$this->queries['replyCountForum']  = 
+		'SELECT count(class_forum_post_id) as num
+		FROM `class_forum_post`
+		WHERE class_forum_id = %d
+		AND reply_id IS NOT NULL';
+
 		$this->queries['topicCountForum']  = 
 		'SELECT count(class_forum_post_id) as num
 		FROM `class_forum_post`
 		WHERE class_forum_id = %d
-		AND thread_id IS NULL';
+		AND thread_id = class_forum_post_id';
 
 		$this->queries['forumsSorted'] = 
 		'SELECT class_forum_id,A.name,A.class_id,is_locked,is_visible,is_moderated,allow_uploads,description,class_forum_recent_post_timedate,class_forum_recent_poster,class_forum_thread_count,class_forum_post_count,class_forum_unanswered_count,A.class_forum_category_id 

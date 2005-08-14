@@ -40,7 +40,6 @@ class posts extends StudentService {
 	 */
 	function buildAppLinks() {
 		$this->applinks = array (
-		//lct('New Topic') => '%classforums/topic/event=post'
 		);
 	}
 
@@ -71,6 +70,7 @@ class posts extends StudentService {
 		$t['threadTable'] = new LC_TableRendererPaged($table);
 
 		$t['postId'] = $postId;
+		$t['forumId'] = $table->getForumId();
 	}
 
 
@@ -97,6 +97,7 @@ class posts extends StudentService {
 	function newTopicRun (&$db, &$u, &$lc, &$t) {
 
 		$lc->templateName = 'posts_newTopic';
+		$t['forumId'] = (int) $lc->getvars['forum_id'];
 	}
 
 
@@ -106,16 +107,25 @@ class posts extends StudentService {
 	 */
 	function startTopicRun (&$db, &$u, &$lc, &$t) {
 
-		$post = new ClassForumPost();
-		$post->subject = htmlentities(stripslashes($lc->postvars['subject']));
-		$post->message = htmlentities(stripslashes($lc->postvars['message']));
-		$post->set('userId',$u->username);
-		$post->set('classForumId',1);
+		$forumId = (int)$lc->postvars['forum_id'];
+
+		$post = new ClassForum_Posts();
+		$post->setSubject($lc->postvars['subject']);
+		$post->setMessage($lc->postvars['message']);
+		$post->setUser($u->username);
+
+		$post->setForumId($forumId);
+//		$post->set('postTimedate',time());
+/* do these in forum->postMessage
+		$post->setForumId(0);
 		$post->set('postTimedate',time());
+*/
 
 		$post->save();
+		$post->setThreadId($post->getPostId());
+		$post->save();
 
-		$t['url'] = appurl('classforums/forum/forum_id=1');
+		$t['url'] = appurl('classforums/forum/forum_id='.$forumId);
 		$this->presentor = 'redirectPresentation';
 	}
 
@@ -127,19 +137,22 @@ class posts extends StudentService {
 
 		$postId = (int)$lc->postvars['post_id'];
 		$threadId = (int)$lc->postvars['thread_id'];
+		$topic = ClassForum_Posts::load($threadId);
+
+		$forumId = $topic->getForumId();
 
 		$post = new ClassForumPost();
-		$post->subject = htmlentities(stripslashes($lc->postvars['subject']));
-		$post->message = htmlentities(stripslashes($lc->postvars['message']));
+		$post->subject = htmlentities($lc->postvars['subject']);
+		$post->message = htmlentities($lc->postvars['message']);
 		$post->set('userId',$u->username);
-		$post->set('classForumId',1);
+		$post->set('classForumId',$forumId);
 		$post->set('replyId',$postId);
 		$post->set('threadId',$threadId);
 		$post->set('postTimedate',time());
 
 		$post->save();
 
-		$t['url'] = appurl('classforums/forum/forum_id=1');
+		$t['url'] = appurl('classforums/forum/forum_id='.$forumId);
 		$this->presentor = 'redirectPresentation';
 	}
 }

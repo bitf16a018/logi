@@ -6,6 +6,6 @@
 
 <p>&nbsp;</p>
 <?php // TODO: only do this based on permissions ?>
-<form method="GET" action="<?php echo appurl('classforums/posts/event=newTopic'); ?>">
+<form method="GET" action="<?php echo appurl('classforums/posts/event=newTopic/forum_id='.$t['forumId']); ?>">
 	<input type="submit" value="Start New Topic"/>
 </form>
