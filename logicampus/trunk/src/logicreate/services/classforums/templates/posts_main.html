@@ -3,11 +3,9 @@
 <div align="center" style="width:100%;">
 	<a href="<?=modurl('forumAdmin/event=newForum');?>">New Topic</a>
 	|
-	<a href="<?=modurl('posts/event=reply/p_id='.$t['postId']);?>">Post Reply</a>
+	<a href="<?=modurl('posts/event=reply/post_id='.$t['postId']);?>">Post Reply</a>
 </form>
 </div>
-
-<p style="margin:1px;">&nbsp;</p>
 
 <?php
 echo $t['threadTable']->toHTML();
@@ -17,10 +15,9 @@ echo $t['threadTable']->toHTML();
 
 ?>
 
-<p style="margin:1px;">&nbsp;</p>
 <div align="center" style="width:100%;">
 	<a href="<?=modurl('forumAdmin/event=newForum');?>">New Topic</a>
 	|
-	<a href="<?=modurl('posts/event=reply/p_id='.$t['postId']);?>">Post Reply</a>
+	<a href="<?=modurl('posts/event=reply/post_id='.$t['postId']);?>">Post Reply</a>
 </form>
 </div>
