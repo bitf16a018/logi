@@ -45,10 +45,14 @@ class ClassForum_Posts {
 	}
 
 
-	function getThread($limit, $start) {
+	function getThread($limit=-1, $start=-1) {
 
 		$topicId = intval($this->getPostId());
-		$list = ClassForumPostPeer::doSelect(' thread_id='.$topicId.' ORDER BY is_sticky DESC, post_timedate ASC LIMIT '.$start.', '.$limit);
+		$query =' thread_id='.$topicId.' ORDER BY is_sticky DESC, post_timedate ASC';
+		if ($limit > -1) {
+			$query .= ' LIMIT '.$start.', '.$limit;
+		}
+		$list = ClassForumPostPeer::doSelect($query);
 
 		foreach ($list as $k=>$v) {
 			$x = new ClassForum_Posts();
@@ -449,6 +453,17 @@ class ClassForum_Queries {
 		LEFT JOIN class_forum_category B
 		  ON A.class_forum_category_id = B.class_forum_category_id
 		WHERE A.class_id=%d ORDER BY B.name, A.class_forum_category_id, A.name ASC';
+
+		$this->queries['unsetAllForums']  = 
+		'UPDATE `class_forum`
+		SET %s = 0
+		WHERE class_id = %d';
+
+		$this->queries['setForum']  = 
+		'UPDATE `class_forum`
+		SET %s = 1
+		WHERE class_forum_id = %d
+		AND class_id = %d';
 	}
 
 
