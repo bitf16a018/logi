@@ -178,6 +178,8 @@ class ForumAdmin extends FacultyService {
 		$x->setDescription( $lc->postvars['description'] );
 		$x->setClassId( $u->activeClassTaken->id_classes );
 		$x->setCategoryId( $lc->postvars['category_id']);
+		//visible by default
+		$x->setVisible( true );
 
 		$x->save();
 

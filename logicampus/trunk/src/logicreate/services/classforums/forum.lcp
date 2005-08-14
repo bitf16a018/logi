@@ -37,7 +37,7 @@ class forum extends StudentService {
 	 */
 	function buildAppLinks() {
 		$this->applinks = array (
-		lct('New Topic') => '%classforums/posts/event=newTopic'
+//		lct('New Topic') => '%classforums/posts/event=newTopic'
 		);
 
 		global $lcUser;
@@ -52,6 +52,7 @@ class forum extends StudentService {
 
 		$lc->templateName = 'forum_main';
 
+		//FIXME check for closed, visibility, etc
 		$dm = new MyPostTableModel($lc->getvars['forum_id']);
 
 		$table = new LC_Table($dm);
@@ -73,6 +74,7 @@ class forum extends StudentService {
 		$col_d->justify = 'left';
 
 		$t['table'] = new LC_TableRenderer($table);
+		$t['forumId'] = (int)$lc->getvars['forum_id'];
 	}
 }
 

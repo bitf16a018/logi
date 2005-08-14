@@ -1,7 +1,7 @@
 <?php echo $t['sectionheader'];?>
 
 <div align="center" style="width:100%;">
-	<a href="<?=modurl('forumAdmin/event=newForum');?>">New Topic</a>
+	<a href="<?=modurl('posts/event=newTopic/forum_id='.$t['forumId']);?>">New Topic</a>
 	|
 	<a href="<?=modurl('posts/event=reply/post_id='.$t['postId']);?>">Post Reply</a>
 </form>
@@ -14,7 +14,7 @@
 } ?>
 
 <div align="center" style="width:100%;">
-	<a href="<?=modurl('forumAdmin/event=newForum');?>">New Topic</a>
+	<a href="<?=modurl('posts/event=newTopic/forum_id='.$t['forumId']);?>">New Topic</a>
 	|
 	<a href="<?=modurl('posts/event=reply/post_id='.$t['postId']);?>">Post Reply</a>
 </form>
