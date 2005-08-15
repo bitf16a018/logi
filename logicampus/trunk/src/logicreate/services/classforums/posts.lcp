@@ -137,7 +137,12 @@ class posts extends StudentService {
 	function startTopicRun (&$db, &$u, &$lc, &$t) {
 
 		$forumId = (int)$lc->postvars['forum_id'];
-		$forum = ClassForum_Forums::load($forum_id);
+		$forum = ClassForum_Forums::load($forumId);
+		if (! is_object($forum) ) {
+			trigger_error("Error loading forum");
+			return false;
+		}
+
 		if ($forum->isLocked()) {
 			$lc->templateName = 'posts_forumLocked';
 			return;
@@ -158,7 +163,7 @@ class posts extends StudentService {
 		$post->setForumId(0);
 		$post->set('postTimedate',time());
 */
-		$post->set('postTimedate',time());
+		$post->_dao->set('postTimedate',time());
 
 		$post->save();
 		$post->setThreadId($post->getPostId());
@@ -180,7 +185,12 @@ class posts extends StudentService {
 
 		$forumId = $topic->getForumId();
 
-		$forum = ClassForum_Forums::load($forum_id);
+		$forum = ClassForum_Forums::load($forumId);
+		if (! is_object($forum) ) {
+			trigger_error("Error loading forum");
+			return false;
+		}
+
 		if ($forum->isLocked()) {
 			$lc->templateName = 'posts_forumLocked';
 			return;
