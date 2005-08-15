@@ -33,9 +33,6 @@ class classforums extends StudentService {
 
 		$lc->templateName = 'main_main';
 
-		//main code
-//		include('main_main.html'); //just for the CSS
-
 		$dm = new MyTableModel();
 
 		$table = new LC_Table($dm);
@@ -182,7 +179,7 @@ class MyTableModel extends LC_TableModel {
 			case 3:
 				return $forum->getPostCount();
 			case 4:
-				return time();
+				return $forum->getLastPostTime();
 			case 5:
 				return $forum->_dao;
 		}
