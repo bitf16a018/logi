@@ -201,8 +201,14 @@ class LC_TableRenderer_ForumLastReply extends LC_TableCellRenderer {
 	var $dateFormat;
 
 	function getRenderedValue() {
-		$ret = date($this->dateFormat, $this->value->_dao->postTimedate);
-		$ret .= '<br/><a href="'.appurl('classforums/posts/').'post_id='.$this->value->getPostId().'">Go to last page</a>';
+
+		$lastPostTime = $this->value->getLastReplyTime();
+		if ($lastPostTime < 1) {
+			//there are no replies
+			return '&nbsp;';
+		}
+		$ret = date($this->dateFormat, $lastPostTime);
+		//$ret .= '<br/><a href="'.appurl('classforums/posts/').'post_id='.$this->value->getPostId().'">Go to last page</a>';
 
 		return $ret;
 	}

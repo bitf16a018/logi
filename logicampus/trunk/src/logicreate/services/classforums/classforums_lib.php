@@ -70,6 +70,23 @@ class ClassForum_Posts {
 	}
 
 
+	/**
+	 */
+	function getLastReplyTime() {
+		$db = DB::getHandle();
+		$db->query(
+		//echo(
+			ClassForum_Queries::getQuery('lastPostThread',
+				array($this->_dao->getPrimaryKey())
+			)
+		);
+		$db->nextRecord();
+
+		$this->lastPostTime = $db->record['last_post_time'];
+		return $this->lastPostTime;
+	}
+
+
 	function getReplyCount() {
 		if ( !$this->threadLoaded ) {
 			$this->getThread();
@@ -376,6 +393,23 @@ class ClassForum_Forums {
 		return $this->topicCount;
 	}
 
+
+	/**
+	 */
+	function getLastPostTime() {
+		$db = DB::getHandle();
+		$db->query(
+		//echo(
+			ClassForum_Queries::getQuery('lastPostForum',
+				array($this->_dao->getPrimaryKey())
+			)
+		);
+		$db->nextRecord();
+
+		$this->lastPostTime = $db->record['last_post_time'];
+		return $this->lastPostTime;
+	}
+
 }
 
 
@@ -559,6 +593,17 @@ class ClassForum_Queries {
 		SET %s = 1
 		WHERE class_forum_id = %d
 		AND class_id = %d';
+
+		$this->queries['lastPostForum']  = 
+		'SELECT MAX(post_timedate) as last_post_time
+		FROM `class_forum_post`
+		WHERE class_forum_id = %d';
+
+		$this->queries['lastPostThread']  = 
+		'SELECT MAX(post_timedate) as last_post_time
+		FROM `class_forum_post`
+		WHERE class_forum_id = %d
+		AND reply_id IS NOT NULL';
 	}
 
 
