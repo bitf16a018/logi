@@ -232,6 +232,14 @@ class ClassForum_Forums {
 	}
 
 
+	function load($postId) {
+		$x = ClassForum::load($postId);
+		$y = new ClassForum_Forums();
+		$y->_dao = $x;
+		return $y;
+	}
+
+
 	/**
 	 * Set Name
 	 */

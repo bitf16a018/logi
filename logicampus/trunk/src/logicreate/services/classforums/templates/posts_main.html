@@ -1,11 +1,13 @@
 <?php echo $t['sectionheader'];?>
 
+<?php if ( !$t['locked'] ) { ?>
 <div align="center" style="width:100%;">
 	<a href="<?=modurl('posts/event=newTopic/forum_id='.$t['forumId']);?>">New Topic</a>
 	|
 	<a href="<?=modurl('posts/event=reply/post_id='.$t['postId']);?>">Post Reply</a>
 </form>
 </div>
+<?php } ?>
 
 <?php if ( ! $x = $t['threadTable']->toHTML() ) { ?>
 	There are no posts to show.
@@ -13,9 +15,11 @@
 	echo $x;
 } ?>
 
+<?php if ( !$t['locked'] ) { ?>
 <div align="center" style="width:100%;">
 	<a href="<?=modurl('posts/event=newTopic/forum_id='.$t['forumId']);?>">New Topic</a>
 	|
 	<a href="<?=modurl('posts/event=reply/post_id='.$t['postId']);?>">Post Reply</a>
 </form>
 </div>
+<?php } ?>
