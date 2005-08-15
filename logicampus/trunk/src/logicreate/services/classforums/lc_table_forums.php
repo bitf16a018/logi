@@ -244,11 +244,14 @@ class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 	function getRenderedValue() {
 		$ret  = '<div style="float:left">posted on : '.date($this->dateTimeFormat,$this->value->getTime()).'</div>';
 		$ret .= '<div align="right">';
+		$forum = $this->value->getForum();
+		if ( !$forum->isLocked() ) {
 		$ret .= '<a href="'.modurl('posts/event=reply/post_id='.$this->value->getPostId()).'">Reply</a> | ';
 		$ret .= '<a href="'.modurl('posts/event=reply/quote=true/post_id='.$this->value->getPostId()).'">Reply &amp; Quote</a> ';
+		}
 		$ret .=  '<!--Edit --></div>';
 
-		$ret .= "<hr>\n\t\t";
+		$ret .= "<hr style=\"clear:both\">\n\t\t";
 		$ret .= $this->value->showMessage();
 		//$ret .= "<hr>\n\t\t";
 		//$ret .= $this->value->getPostId();

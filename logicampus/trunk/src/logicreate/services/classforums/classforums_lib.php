@@ -87,6 +87,11 @@ class ClassForum_Posts {
 	}
 
 
+	function getForum() {
+		return ClassForum_Forums::load($this->_dao->classForumId);
+	}
+
+
 	function getReplyCount() {
 		if ( !$this->threadLoaded ) {
 			$this->getThread();
