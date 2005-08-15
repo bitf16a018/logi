@@ -176,12 +176,16 @@ class LC_Table_ForumThreadModel extends LC_TableModelPaged {
 class LC_TableIconRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
+
+		return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="new posts" alt="new posts">';
+		/*
 		if ($this->row % 2 == 0 ) {
 			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts">';
 		} else {
 			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="new posts" alt="new posts">';
 			return 'no new posts.&nbsp;';
 		}
+		*/
 	}
 }
 
