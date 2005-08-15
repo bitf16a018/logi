@@ -76,6 +76,11 @@ class forum extends StudentService {
 		$forum = ClassForum_Forums::load((int)$lc->getvars['forum_id']);
 		$t['locked'] = $forum->isLocked();
 
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
+		}
+
 		$t['table'] = new LC_TableRenderer($table);
 		$t['forumId'] = (int)$lc->getvars['forum_id'];
 	}

@@ -72,6 +72,12 @@ class posts extends StudentService {
 		$forum = ClassForum_Forums::load($table->getForumId());
 		$t['locked'] = $forum->isLocked();
 
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
+		}
+
+
 		$t['postId'] = $postId;
 		$t['forumId'] = $table->getForumId();
 	}
@@ -95,6 +101,12 @@ class posts extends StudentService {
 		$forum = ClassForum_Forums::load($post->getForumId());
 		if ($forum->isLocked()) {
 			$lc->templateName = 'posts_forumLocked';
+			return;
+		}
+
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
 		}
 
 		$t['postId'] = $postId;
@@ -108,6 +120,10 @@ class posts extends StudentService {
 		$forum = ClassForum_Forums::load((int)$lc->getvars['forum_id']);
 		if ($forum->isLocked()) {
 			$lc->templateName = 'posts_forumLocked';
+		}
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
 		}
 
 		$t['forumId'] = (int) $lc->getvars['forum_id'];
@@ -124,6 +140,10 @@ class posts extends StudentService {
 		$forum = ClassForum_Forums::load($forum_id);
 		if ($forum->isLocked()) {
 			$lc->templateName = 'posts_forumLocked';
+			return;
+		}
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
 			return;
 		}
 
@@ -163,6 +183,11 @@ class posts extends StudentService {
 		$forum = ClassForum_Forums::load($forum_id);
 		if ($forum->isLocked()) {
 			$lc->templateName = 'posts_forumLocked';
+			return;
+		}
+
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
 			return;
 		}
 
