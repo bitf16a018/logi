@@ -54,7 +54,7 @@ class ClassForum_Posts {
 	function getThread($limit=-1, $start=-1) {
 
 		$topicId = intval($this->getPostId());
-		$query =' thread_id='.$topicId.' and reply_id IS NOT NULL ORDER BY is_sticky DESC, post_timedate ASC';
+		$query =' thread_id='.$topicId.' and thread_id IS NOT NULL ORDER BY is_sticky DESC, post_timedate ASC';
 		if ($limit > -1) {
 			$query .= ' LIMIT '.$start.', '.$limit;
 		}
@@ -515,6 +515,12 @@ class ClassForum_Queries {
 		FROM `class_forum_post`
 		WHERE class_forum_id = %d
 		AND thread_id IS NOT NULL';
+
+		$this->queries['postCountThread']  = 
+		'SELECT count(class_forum_post_id) as num
+		FROM `class_forum_post`
+		WHERE class_forum_id = %d
+		AND thread_id = %d';
 
 		$this->queries['replyCountForum']  = 
 		'SELECT count(class_forum_post_id) as num

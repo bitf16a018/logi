@@ -120,6 +120,7 @@ class posts extends StudentService {
 		$post->setForumId(0);
 		$post->set('postTimedate',time());
 */
+		$post->set('postTimedate',time());
 
 		$post->save();
 		$post->setThreadId($post->getPostId());

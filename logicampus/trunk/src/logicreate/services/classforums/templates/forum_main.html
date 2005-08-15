@@ -1,11 +1,13 @@
 <?php echo $t['sectionheader'];?>
-<?php
-		echo $t['table']->toHTML();
-?>
 
+<?php if ( ! $x = $t['table']->toHTML() ) { ?>
+	There are no forums to show.
+<?php } else {
+	echo $x;
+} ?>
 
 <p>&nbsp;</p>
 <?php // TODO: only do this based on permissions ?>
 <form method="GET" action="<?php echo appurl('classforums/posts/event=newTopic/forum_id='.$t['forumId']); ?>">
-	<input type="submit" value="Start New Topic"/>
+	<input type="submit" name="start_topic" id="start_topic" value="Start New Topic"/>
 </form>

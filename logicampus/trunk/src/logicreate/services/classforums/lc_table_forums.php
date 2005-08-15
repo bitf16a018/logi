@@ -6,6 +6,7 @@ include_once(LIB_PATH.'lc_table_renderer.php');
 
 class LC_Table_ForumThread extends LC_TablePaged {
 
+	var $maxRows = -1;
 
 	/**
 	 * Constructor uses an automatic LC_Table_ForumThreadModel
@@ -18,6 +19,18 @@ class LC_Table_ForumThread extends LC_TablePaged {
 		$dataModel = new LC_Table_ForumThreadModel($postId, $cp, $rpp);
 
 		parent::LC_Table($dataModel);
+	}
+
+
+	/**
+	 * Return the forum id of this thread
+	 */
+	function getThreadId() {
+		if ( is_object($this->tableModel->topicObj) ) {
+			return $this->tableModel->topicObj->getThreadId();
+		} else {
+			return false;
+		}
 	}
 
 
@@ -40,12 +53,24 @@ class LC_Table_ForumThread extends LC_TablePaged {
 
 
 	function getPrevUrl() {
-		return $this->getPageUrl($this->currentPage-1);
+		$prevPage = $this->currentPage -1;
+		if ($prevPage < 1) {
+			$prevPage = 1;
+		}
+
+		return $this->getPageUrl($prevPage);
 	}
 
 
 	function getNextUrl() {
-		return $this->getPageUrl($this->currentPage+1);
+		$maxRows = $this->getMaxRows();
+		$pages = ceil($maxRows / $this->rowsPerPage);
+		$nextPage = $this->currentPage +1;
+		if ($nextPage > $pages) {
+			$nextPage = $pages;
+		}
+
+		return $this->getPageUrl($nextPage);
 	}
 
 
@@ -55,7 +80,20 @@ class LC_Table_ForumThread extends LC_TablePaged {
 
 
 	function getMaxRows() {
-		return 100;
+		if ($this->maxRows > -1) {
+			return $this->maxRows;
+		}
+
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('postCountThread',
+			array($this->getForumId(),
+				$this->getThreadId())
+			)
+		);
+
+		$db->nextRecord();
+		return $db->record['num'];
 	}
 
 }
@@ -71,10 +109,7 @@ class LC_Table_ForumThreadModel extends LC_TableModelPaged {
 		$this->currentPage = $cp;
 		$this->topicId = $postId;
 		$this->topicObj = ClassForum_Posts::load($postId);
-		$this->replies = $this->topicObj->getThread($this->rowsPerPage, $this->currentPage);
-		if ($this->currentPage == 1) {
-			$this->replies = array_merge( array($this->topicObj), $this->replies);
-		}
+		$this->replies = $this->topicObj->getThread($this->rowsPerPage, (($this->currentPage-1) * $this->rowsPerPage));
 	}
 
 
@@ -142,9 +177,9 @@ class LC_TableIconRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts">';
 		} else {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="new posts" alt="new posts">';
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="new posts" alt="new posts">';
 			return 'no new posts.&nbsp;';
 		}
 	}
@@ -199,12 +234,14 @@ class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 	function getRenderedValue() {
 		$ret  = '<div style="float:left">posted on : '.date($this->dateTimeFormat,$this->value->getTime()).'</div>';
 		$ret .= '<div align="right">';
-		$ret .= '<a href="'.modurl('posts/event=reply/p_id='.$this->value->getPostId()).'">Reply</a> | ';
-		$ret .= '<a href="'.modurl('posts/event=reply/quote=true/p_id='.$this->value->getPostId()).'">Reply &amp; Quote</a> | ';
+		$ret .= '<a href="'.modurl('posts/event=reply/post_id='.$this->value->getPostId()).'">Reply</a> | ';
+		$ret .= '<a href="'.modurl('posts/event=reply/quote=true/post_id='.$this->value->getPostId()).'">Reply &amp; Quote</a> | ';
 		$ret .=  'Edit</div>';
 
 		$ret .= "<hr>\n\t\t";
 		$ret .= $this->value->showMessage();
+		$ret .= "<hr>\n\t\t";
+		$ret .= $this->value->getPostId();
 
 		$ret .= "\n<br><p>&nbsp;</p>\n\t\t";
 
