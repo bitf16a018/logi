@@ -33,7 +33,7 @@ class classforums extends StudentService {
 
 		$lc->templateName = 'main_main';
 
-		$dm = new MyTableModel();
+		$dm = new MyTableModel($u);
 
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
@@ -57,7 +57,7 @@ class classforums extends StudentService {
 		//make sub headers for forum categories
 
 		//TODO use real class id
-		$categories = ClassForum_Categories::getAll(1);
+		$categories = ClassForum_Categories::getAll($u->activeClassTaken->id_classes);
 
 		foreach($categories as $k=>$v) {
 			$thisCount = $dm->getForumsInCategory($v->getCategoryId());
@@ -107,8 +107,8 @@ class MyTableModel extends LC_TableModel {
 	/**
 	 * make a 5 x 10 grid of nonsense
 	 */
-	function MyTableModel() {
-		$this->forums = ClassForum_Forums::getAll(1);
+	function MyTableModel($u) {
+		$this->forums = ClassForum_Forums::getAll($u->activeClassTaken->id_classes);
 		$newList = array();
 		//throw out "invisible" ones
 		foreach ($this->forums as $k=>$v) {

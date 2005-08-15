@@ -39,7 +39,7 @@ class ForumAdmin extends FacultyService {
 
 		$lc->templateName = 'forumAdmin_main';
 
-		$dm = new LC_Table_ForumModerator();
+		$dm = new LC_Table_ForumModerator($u);
 
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
@@ -271,8 +271,8 @@ class LC_Table_ForumModerator extends LC_TableModel {
 	/**
 	 * make a 5 x 10 grid of nonsense
 	 */
-	function LC_Table_ForumModerator() {
-		$this->forums = ClassForum_Forums::getAll(1);
+	function LC_Table_ForumModerator($u) {
+		$this->forums = ClassForum_Forums::getAll($u->activeClassTaught->id_classes);
 	}
 
 
