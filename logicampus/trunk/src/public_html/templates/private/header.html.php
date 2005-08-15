@@ -159,11 +159,8 @@
 			<td height="20" valign="top" bgcolor="#FFFFFF">
 
 		
-			<table cellpadding="10" cellspacing="0" border="0" width="100%" style="margin-top:-5px;">
-			<tr>
-				<td>
-					<table bgcolor="#FFFFFF" class="content" cellpadding="12" cellspacing="0" width="100%">
+				<table bgcolor="#FFFFFF" class="content" cellpadding="0" cellspacing="0" width="100%">
 					<tr>
-						<td class="content">
+						<td class="content" style="padding: 3px 13px 3px 13px;">
 
 
