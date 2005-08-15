@@ -5,6 +5,7 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
+include_once(SERVICE_PATH.'classforums/classforums_lib.php');
 include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
 
 /**
@@ -37,7 +38,6 @@ class forum extends StudentService {
 	 */
 	function buildAppLinks() {
 		$this->applinks = array (
-//		lct('New Topic') => '%classforums/posts/event=newTopic'
 		);
 
 		global $lcUser;
@@ -73,6 +73,9 @@ class forum extends StudentService {
 		$col_d->cellRenderer = new LC_TableRenderer_ForumTopic();
 		$col_d->justify = 'left';
 
+		$forum = ClassForum_Forums::load((int)$lc->getvars['forum_id']);
+		$t['locked'] = $forum->isLocked();
+
 		$t['table'] = new LC_TableRenderer($table);
 		$t['forumId'] = (int)$lc->getvars['forum_id'];
 	}
@@ -88,7 +91,6 @@ class MyPostTableModel extends LC_TableModel {
 	 * make a 5 x 10 grid of nonsense
 	 */
 	function MyPostTableModel($fid) {
-//		$this->posts = ClassForumPostPeer::doSelect('class_forum_id = '.$fid);
 		$this->posts = ClassForum_Posts::getTopics($fid);
 	}
 

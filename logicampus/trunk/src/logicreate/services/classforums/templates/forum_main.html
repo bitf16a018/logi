@@ -8,6 +8,8 @@
 
 <p>&nbsp;</p>
 <?php // TODO: only do this based on permissions ?>
+<?php if (! $t['locked']) { ?>
 <form method="GET" action="<?php echo appurl('classforums/posts/event=newTopic/forum_id='.$t['forumId']); ?>">
 	<input type="submit" name="start_topic" id="start_topic" value="Start New Topic"/>
 </form>
+<? } ?>
