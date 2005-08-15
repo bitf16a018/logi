@@ -75,7 +75,6 @@ class ClassForum_Posts {
 	function getLastReplyTime() {
 		$db = DB::getHandle();
 		$db->query(
-		//echo(
 			ClassForum_Queries::getQuery('lastPostThread',
 				array($this->_dao->getPrimaryKey())
 			)
@@ -92,11 +91,16 @@ class ClassForum_Posts {
 	}
 
 
+	/**
+	 * getThread returns the entire thread, including the topic starter
+	 * so the number of replies is the thread - 1
+	 * @return int reply count for this post
+	 */
 	function getReplyCount() {
 		if ( !$this->threadLoaded ) {
 			$this->getThread();
 		}
-		return count($this->replies);
+		return count($this->replies)-1;
 	}
 
 
@@ -607,7 +611,7 @@ class ClassForum_Queries {
 		$this->queries['lastPostThread']  = 
 		'SELECT MAX(post_timedate) as last_post_time
 		FROM `class_forum_post`
-		WHERE class_forum_id = %d
+		WHERE thread_id = %d
 		AND reply_id IS NOT NULL';
 	}
 
