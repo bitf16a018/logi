@@ -211,13 +211,13 @@ class LC_TableIconRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		if ($this->value->isLocked() ) {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_locked.png" title="new posts" alt="new posts"><br/>LOCKED';
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_locked.png" title="new posts" alt="new posts"><br/>LOCKED';
 		}
 
 		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts"><br/>NEW&nbsp;POSTS';
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts"><br/>NEW&nbsp;POSTS';
 		} else {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="old posts" alt="old posts">';
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="old posts" alt="old posts">';
 		}
 	}
 }
