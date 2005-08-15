@@ -90,7 +90,7 @@ courseObjectives='".addslashes($this->courseObjectives)."',
 courseReqs='".addslashes($this->courseReqs)."',
 gradingScale='".addslashes($this->gradingScale)."',
 instructionMethods='".addslashes($this->instructionMethods)."',
-emailPolicy='{$this->emailPolicy}' where id_class_syllabuses = '{$this->{$this->_pkey}}'";
+emailPolicy='".addslashes($this->emailPolicy)."' where id_class_syllabuses = '{$this->{$this->_pkey}}'";
 } else {
 $sql = "replace into class_syllabuses   (id_classes,other,courseObjectives,courseReqs,gradingScale,instructionMethods,emailPolicy) values (
 	'".addslashes($this->id_classes)."',
