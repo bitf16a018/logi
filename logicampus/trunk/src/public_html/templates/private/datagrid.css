@@ -37,6 +37,19 @@
 		margin:0px;
 	}
 
+	DIV.forum_moderator_nav {
+
+		background-color:#CECECE;
+		width: 300px;
+		text-align:center;
+		padding:2px;
+		border-top: 1px solid silver;
+		border-left: 1px solid silver;
+		border-right: 1px solid black;
+		border-bottom: 1px solid black;
+	}
+
+
 	DIV.forum_quote_shell {
 		width:90%;
 		margin-left:4%;

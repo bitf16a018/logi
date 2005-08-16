@@ -80,6 +80,7 @@ class posts extends StudentService {
 
 		$t['postId'] = $postId;
 		$t['forumId'] = $table->getForumId();
+		$t['moderator'] = $forum->isModerator($u);
 	}
 
 
@@ -215,6 +216,7 @@ class posts extends StudentService {
 		$t['url'] = appurl('classforums/forum/forum_id='.$forumId);
 		$this->presentor = 'redirectPresentation';
 	}
+
 }
 
 

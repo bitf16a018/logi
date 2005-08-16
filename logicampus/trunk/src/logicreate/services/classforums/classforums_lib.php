@@ -322,6 +322,16 @@ class ClassForum_Forums {
 
 
 	/**
+	 * Is this person a moderator? for right now just check if
+	 * the person is a faculty member, and the forum matches their 
+	 * class id.
+	 */
+	function isModerator($u) {
+		return ($u->isFaculty() && $this->_dao->get('classForumId') == $u->activeClassTaught->id_classes);
+	}
+
+
+	/**
 	 * Save
 	 */
 	function save() {
@@ -363,6 +373,16 @@ class ClassForum_Forums {
 
 	function getCategoryId() {
 		return $this->_dao->classForumCategoryId;
+	}
+
+
+	function getClassId() {
+		return $this->_dao->classId;
+	}
+
+
+	function getForumId() {
+		return $this->_dao->classForumId;
 	}
 
 
@@ -613,6 +633,11 @@ class ClassForum_Queries {
 		FROM `class_forum_post`
 		WHERE thread_id = %d
 		AND reply_id IS NOT NULL';
+
+		$this->queries['moveThreadForum']  = 
+		'UPDATE `class_forum_post`
+		SET class_forum_id = %d
+		WHERE thread_id = %d';
 	}
 
 

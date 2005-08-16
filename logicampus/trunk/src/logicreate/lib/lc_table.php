@@ -201,16 +201,22 @@ class LC_TableModel {
 
 
 
-class LC_TableModelPaged extends LC_TableModel{
+class LC_TableModelPaged extends LC_DefaultTableModel {
 	var $rowsPerPage = 10;
 	var $currentPage = 1;
-
 }
 
 
 
 class LC_DefaultTableModel extends LC_TableModel {
 
+
+	/**
+	 * Returns the number of columns in the model.
+	 */
+	function getColumnCount() {
+		return $this->columnModel->getColumnCount();
+	}
 }
 
 
@@ -266,6 +272,12 @@ class LC_TableColumnModel {
 
 
 	/**
+	 * removes the column at index $i
+	 */
+	function removeColumnAt($i) { }
+
+
+	/**
 	 * return the last column
 	 */
 	function getLastColumn() { }
@@ -281,6 +293,7 @@ class LC_TableColumnModel {
 
 
 class LC_TableDefaultColumnModel extends LC_TableColumnModel {
+
 	var $tableColumns = array();
 
 	/**
@@ -315,6 +328,14 @@ class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 	 */
 	function &getColumnAt($i) { 
 		return $this->tableColumns[$i];
+	}
+
+
+	/**
+	 * return the column at index $i
+	 */
+	function removeColumnAt($i) { 
+		unset( $this->tableColumns[$i] );
 	}
 
 
