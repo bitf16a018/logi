@@ -173,19 +173,19 @@ class LC_Table_ForumThreadModel extends LC_TableModelPaged {
 
 
 
-class LC_TableIconRenderer extends LC_TableCellRenderer {
+class LC_TableNewMessageRenderer extends LC_TableCellRenderer {
+
+	var $u;
 
 	function getRenderedValue() {
-
-		return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="new posts" alt="new posts">';
-		/*
-		if ($this->row % 2 == 0 ) {
+		$x = $this->value->getLastVisit($this->u);
+		$y = $this->value->getLastPostTime();
+		//echo "$x <br>$y <hr>";
+		if ($y > $x ) {
 			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts">';
 		} else {
 			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="new posts" alt="new posts">';
-			return 'no new posts.&nbsp;';
 		}
-		*/
 	}
 }
 

@@ -22,15 +22,15 @@ CREATE TABLE `class_forum` (
 
 	`description` varchar (255),  -- 
 
-	`class_forum_recent_post_timedate` integer (11),  -- 
+	`recent_post_datetime` integer (11),  -- 
 
-	`class_forum_recent_poster` varchar (32),  -- 
+	`recent_poster` varchar (32),  -- 
 
-	`class_forum_thread_count` integer (11),  -- 
+	`thread_count` integer (11),  -- 
 
-	`class_forum_post_count` integer (11),  -- 
+	`post_count` integer (11),  -- 
 
-	`class_forum_unanswered_count` integer (11),  -- 
+	`unanswered_count` integer (11),  -- 
 
 	`class_forum_category_id` integer (11),  -- 
 
@@ -43,7 +43,7 @@ CREATE INDEX class_idx ON class_forum (class_id);
 -- Dumping SQL for project logicampus
 -- entity version: 0.0
 -- DB type: mysql
--- generated on: 08.13.2005
+-- generated on: 08.16.2005
 
 DROP TABLE IF EXISTS `class_forum_post`;
 CREATE TABLE `class_forum_post` (
@@ -53,6 +53,8 @@ CREATE TABLE `class_forum_post` (
 	`class_forum_id` integer (11),  -- 
 
 	`is_sticky` tinyint (1),  -- 
+
+	`is_hidden` tinyint (1),  -- 
 
 	`reply_id` integer (11),  -- 
 
@@ -64,9 +66,11 @@ CREATE TABLE `class_forum_post` (
 
 	`user_id` varchar (32),  -- 
 
-	`post_timedate` integer (11),  -- 
+	`post_datetime` integer (11),  -- 
 
-	`class_forum_post_status` integer (11),  -- 
+	`last_edit_username` varchar (32),  -- 
+
+	`last_edit_datetime` integer (11),  -- 
 
 	PRIMARY KEY (class_forum_post_id)
 )TYPE=InnoDB;
@@ -94,4 +98,26 @@ CREATE TABLE `class_forum_category` (
 )TYPE=InnoDB;
 
 CREATE INDEX class_idx ON class_forum_category (class_id);
+
+-- Dumping SQL for project logicampus
+-- entity version: 0.0
+-- DB type: mysql
+-- generated on: 08.16.2005
+
+DROP TABLE IF EXISTS `class_forum_user_activity`;
+CREATE TABLE `class_forum_user_activity` (
+		
+	`class_forum_user_activity_id` integer (11) NOT NULL auto_increment,  -- 
+
+	`class_forum_id` integer (11),  -- 
+
+	`user_id` integer (11),  -- 
+
+	`views` text,  -- 
+
+	PRIMARY KEY (class_forum_user_activity_id)
+)TYPE=InnoDB;
+
+CREATE INDEX class_forum_idx ON class_forum_user_activity (class_forum_id);  
+CREATE INDEX user_idx ON class_forum_user_activity (user_id);
 

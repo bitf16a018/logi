@@ -51,6 +51,7 @@ class lcUser {
 		$temp->password = $db->Record["password"];
 		$temp->email = $db->Record["email"];
 		$temp->groups = array_merge($temp->groups,explode("|",substr($db->Record['groups'],1,-1)));
+		$temp->userId = $db->Record['pkey'];
 		$temp->loadProfile();
 	return $temp;
 	}
@@ -120,7 +121,6 @@ class lcUser {
 				$temp->_sessionKey = $sessID;
 				$temp->_origSessionData = $origSession;
 				$temp->loggedIn = true;
-				$temp->userId = $db->Record['pkey'];
 			} else
 			if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
@@ -129,7 +129,6 @@ class lcUser {
 				$temp->_origSessionData = $origSession;
 				$temp->loggedIn = true;
 				$temp->loadProfile();
-				$temp->userId = $db->Record['pkey'];
 			}
 			else {
 				$temp = new lcUser();
@@ -505,13 +504,14 @@ class lcUser {
 		$db->query("select * from lcUsers where username = '$this->username'",false);
 		$db->next_record();
 
-		$this->email = $db->Record["email"];
-		$this->password = $db->Record["password"];
-		$this->username = $db->Record["username"];
+		$this->email = $db->Record['email'];
+		$this->password = $db->Record['password'];
+		$this->username = $db->Record['username'];
 		//__FIXME__ what is this fields for??
 		$this->fields = $db->Record;
-		$this->sessionvars["_username"] = $this->username;
-		$this->groups = array_merge($this->groups,explode("|",$db->Record["groups"]));
+		$this->sessionvars['_username'] = $this->username;
+		$this->groups = array_merge($this->groups,explode("|",$db->Record['groups']));
+		$this->userId = $db->Record['pkey'];
 
 		return true;
 	   } else {
