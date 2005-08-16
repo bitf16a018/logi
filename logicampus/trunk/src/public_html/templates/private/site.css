@@ -262,26 +262,79 @@ button{
 	
 	
 	/**
-	 *	Forums
+	 * Forums
 	 */
-	 .forumsection 
-	 {	background-color: #eeeeee;
-	 }
-	  .tabletitle
-	 {	background-color: #9C0000;
-	 	color: white;
+	.forumsection {
+		background-color: #eeeeee;
+	}
+
+	.tabletitle {
+		background-color: #9C0000;
+		color: white;
 		font-size: 120%;
 		font-weight: bold;
-	 }
-	 .titlehead
-	 {	background-color: #9C0000;
-	 	color: white;
-	 }
+	}
+
+	.titlehead {
+		background-color: #9C0000;
+		color: white;
+	}
 	 
-	 table.grayoutline
-	 {	border: 1px solid silver;
-	 }
-	 
+	TABLE.grayoutline {
+		border: 1px solid silver;
+	}
+
+	DIV.hover_button:hover {
+		background-color:silver;
+		border:1px solid gray;
+	}
+
+	DIV.hover_button {
+		border:1px solid white;
+	}
+
+	DIV.forum_moderator_nav {
+
+		background-color:#CECECE;
+		width: 300px;
+		text-align:center;
+		padding:2px;
+		border-top: 1px solid silver;
+		border-left: 1px solid silver;
+		border-right: 1px solid black;
+		border-bottom: 1px solid black;
+	}
+
+	DIV.forum_quote_shell {
+		width:90%;
+		margin-left:4%;
+	}
+
+	BLOCKQUOTE.forum_quote {
+		background-color: #CDCECD;
+		border: 1px dashed black;
+		width:100%;
+		text-align:left;
+		padding:1px 7px 1px 7px;
+		margin:0px;
+	}
+
+	DIV.forum_code_shell {
+		width:90%;
+		margin-left:4%;
+	}
+
+	BLOCKQUOTE.forum_code {
+		background-color: #6C6C6C;
+		color: #18F218;
+		border: 1px dashed black;
+		width:100%;
+		text-align:left;
+		padding:1px 7px 1px 7px;
+		margin:0px;
+	}
+
+
 	/**
 	 *	Private Messages
 	 */

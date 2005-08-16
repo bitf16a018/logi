@@ -270,7 +270,7 @@ class ClassForum_Forums {
 	 * Set Name
 	 */
 	function setName($n) {
-		$this->_dao->set('name',$n);
+		$this->_dao->set('name',htmlentities($n));
 	}
 
 
@@ -278,7 +278,7 @@ class ClassForum_Forums {
 	 * Set Description
 	 */
 	function setDescription($n) {
-		$this->_dao->set('description',$n);
+		$this->_dao->set('description',htmlentities($n));
 	}
 
 
@@ -286,14 +286,14 @@ class ClassForum_Forums {
 	 * Set ClassId
 	 */
 	function setClassId($id) {
-		$this->_dao->set('classId',$id);
+		$this->_dao->set('classId',(int)$id);
 	}
 
 	/**
 	 * Set CategoryId
 	 */
 	function setCategoryId($id) {
-		$this->_dao->set('classForumCategoryId',$id);
+		$this->_dao->set('classForumCategoryId',(int)$id);
 	}
 
 
@@ -383,6 +383,16 @@ class ClassForum_Forums {
 
 	function getForumId() {
 		return $this->_dao->classForumId;
+	}
+
+
+	function getName() {
+		return $this->_dao->get('name');
+	}
+
+
+	function getDescription() {
+		return $this->_dao->get('description');
 	}
 
 
