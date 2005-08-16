@@ -260,6 +260,106 @@ class ForumAdmin extends FacultyService {
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = modurl('forumAdmin/');
 	}
+
+
+	/**
+	 * show a list of forums to which to move this thread
+	 */
+	function moveThreadRun (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forumAdmin_moveThread';
+
+		$dm = new LC_Table_ForumModerator($u);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col_a = &$columnModel->getColumnAt(0);
+		$col_a->cellRenderer = new LC_TableRadioRenderer();
+		$col_a->cellRenderer->fieldName = 'move';
+		$col_a->cellRenderer->idName = 'classForumId';
+		$col_a->cellRenderer->selectedVal = '1';
+		$col_a->maxWidth=35;
+		$col_a->justify = 'center';
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->justify = 'left';
+
+		$col_c = &$columnModel->removeColumnAt(2);
+
+		$col_d = &$columnModel->removeColumnAt(3);
+
+		$col_e = &$columnModel->removeColumnAt(4);
+
+		$col_f = &$columnModel->removeColumnAt(5);
+
+		$col_g = &$columnModel->removeColumnAt(6);
+
+		//make sub headers for forum categories
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+
+			$thisCount = $dm->getForumsInCategory($id);
+			if ($thisCount < 1) { continue; }
+
+			$subHeaderModel = new LC_TableDefaultColumnModel();
+			$sub_col_a = new LC_TableColumn();
+			$sub_col_a->name = lct('Category').': '. $v->getName();
+			$subHeaderModel->addColumn($sub_col_a);
+			$subHeader = new LC_TableHeader($subHeaderModel);
+			$subHeader->row = $forumCount;
+
+			$forumCount += $thisCount;
+
+			$table->addSubHeader($subHeader);
+		}
+
+		$t['table'] = new LC_TableRenderer($table);
+		$t['postId'] = (int)$lc->getvars['post_id'];
+	}
+
+
+	/**
+	 * Save the thread movement
+	 */
+	function postMoveThreadRun (&$db, &$u, &$lc, &$t) {
+
+		$moveToId = (int) $lc->postvars['move'];
+		$postId = (int) $lc->postvars['post_id'];
+
+		//check for ownership of the posted thread and the 
+		// desired destination forum
+		$forum = ClassForum_Forums::load($moveToId);
+		if ($forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+		}
+		$post = ClassForum_Posts::load($postId);
+		$origForum = $post->getForum();
+		if ($origForum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread that you do not own.";
+		}
+
+		if ( strlen($t['message']) > 0 ) {
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+
+		$db->query(
+			ClassForum_Queries::getQuery('moveThreadForum',
+				array($moveToId,$postId)
+			));
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('forum/forum_id='.$moveToId);
+	}
 }
 
 

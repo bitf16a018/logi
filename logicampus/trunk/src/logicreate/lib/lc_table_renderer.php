@@ -155,6 +155,13 @@ class LC_TableRenderer {
 					$justify = '';
 				}
 
+				if ( strlen($tCol->style) > 0 ) {
+					$style = $tCol->style;
+				} else {
+					$style = '';
+				}
+
+
 
 				$colName = $colModel->getColumnName($y);
 				$renderer = $this->table->getCellRenderer($x,$y);
@@ -170,6 +177,9 @@ class LC_TableRenderer {
 					$this->html .= ' class="'.$justify.'"';
 				}
 
+				if ( strlen($style) > 0) {
+					$this->html .= ' style="'.$style.'"';
+				}
 
 				$this->html .='>';
 
@@ -338,6 +348,35 @@ class LC_TableUrlRenderer extends LC_TableCellRenderer {
 			$arglist = $this->argName.'='.urlencode($this->value).'/';
 		}
 		return '<a href="'.$this->url.$arglist.'">'.$this->linkText.'</a>';
+	}
+}
+
+
+
+class LC_TableRadioRenderer extends LC_TableCellRenderer {
+
+	var $selectedVal;
+	var $selectedKey;
+	var $idName;
+	var $fieldName = 'item';
+
+	function getRenderedValue() {
+		//is the value an array ?
+		if ( is_array($this->value) ) {
+			$idValue = $this->value[$this->idName];
+			$selected = ($this->selectedVal == $this->value[$this->selectedKey]) ? ' CHECKED ':'';
+		}
+		//is it a PBDO object wrapper?
+		else if ( is_object($this->value) && is_object($this->value->_dao) ) {
+			$idValue = $this->value->_dao->getPrimaryKey();
+			$selected = ($this->selectedVal == $this->value->_dao->{$this->selectedKey}) ? ' CHECKED ':'';
+		}
+		//is it a regular object?
+		else if ( is_object($this->value) ) {
+			$idValue = $this->value->{$this->idName};
+			$selected = ($this->selectedVal == $this->value->{$this->selectedKey}) ? ' CHECKED ':'';
+		}
+		return '<input id="'.$this->fieldName.'" name="'.$this->fieldName.'" value="'.$idValue.'" '.$selected.' type="radio">';
 	}
 }
 
