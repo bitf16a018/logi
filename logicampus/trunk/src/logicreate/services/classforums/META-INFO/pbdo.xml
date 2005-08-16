@@ -34,26 +34,26 @@
             required="true"
             size="255"
             type="VARCHAR"/>
-    <attribute name="class_forum_recent_post_timedate"
+    <attribute name="recent_post_datetime"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <attribute name="class_forum_recent_poster"
+    <attribute name="recent_poster"
             required="true"
             size="32"
             type="VARCHAR"/>
-    <attribute name="class_forum_thread_count"
+    <attribute name="thread_count"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <attribute name="class_forum_post_count"
+    <attribute name="post_count"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <attribute name="class_forum_unanswered_count"
+    <attribute name="unanswered_count"
             required="true"
             default="0"
             size="11"
@@ -87,7 +87,13 @@
             size="11"
             type="INTEGER"/>
     <attribute name="is_sticky"
-            required="false"
+            required="true"
+            default="0"
+            size="1"
+            type="TINYINT"/>
+    <attribute name="is_hidden"
+            required="true"
+            default="0"
             size="1"
             type="TINYINT"/>
     <attribute name="reply_id"
@@ -110,14 +116,17 @@
             required="true"
             size="32"
             type="VARCHAR"/>
-    <attribute name="post_timedate"
+    <attribute name="post_datetime"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <attribute name="class_forum_post_status"
-            required="true"
-            default="0"
+    <attribute name="last_edit_username"
+            required="false"
+            size="32"
+            type="VARCHAR"/>
+    <attribute name="last_edit_datetime"
+            required="false"
             size="11"
             type="INTEGER"/>
     <foreign-key foreignTable="class_forum">
@@ -158,7 +167,32 @@
     <index>
       <index-column name="class_id"/>
     </index>
-
   </entity>
-
+  <entity  name="class_forum_user_activity">
+    <attribute name="class_forum_user_activity_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_id"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="user_id"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="views"
+            required="true"
+            default="0"
+            type="BLOB"/>
+    <key 
+	    attribute="class_forum_id"
+	    name="class_forum_idx"/>
+    <key 
+	    attribute="user_id"
+	    name="user_idx"/>
+  </entity>
 </project>

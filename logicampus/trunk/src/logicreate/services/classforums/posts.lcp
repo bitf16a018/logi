@@ -52,12 +52,22 @@ class posts extends StudentService {
 		$lc->templateName = 'posts_main';
 		$postId = (int) $lc->getvars['post_id'];
 		$page = (int) $lc->getvars['page'];
+		$topic = ClassForum_Posts::load($postId);
 
 		if($page < 1) {
 			$page = 1;
 		}
 
 		$table = new LC_Table_ForumThread($postId, $page, 10);
+
+		$forum = ClassForum_Forums::load($table->getForumId());
+		$t['locked'] = $forum->isLocked();
+
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
+		}
+
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=100;
@@ -69,13 +79,10 @@ class posts extends StudentService {
 
 		$t['threadTable'] = new LC_TableRendererPaged($table);
 
-		$forum = ClassForum_Forums::load($table->getForumId());
-		$t['locked'] = $forum->isLocked();
 
-		if ( ! $forum->isVisible() ) {
-			$lc->templateName = 'forum_invisible';
-			return;
-		}
+		$x = ClassForum_Settings::getLastThreadVisit($u,$topic);
+
+		ClassForum_Settings::setLastThreadVisit($u,$topic);
 
 
 		$t['postId'] = $postId;

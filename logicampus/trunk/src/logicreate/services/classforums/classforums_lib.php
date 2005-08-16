@@ -39,7 +39,7 @@ class ClassForum_Posts {
 	function getTopics($forumId) {
 
 		$forumId = intval($forumId);
-		$list = ClassForumPostPeer::doSelect(' class_forum_id='.$forumId.' and thread_id = class_forum_post_id ORDER BY is_sticky DESC, post_timedate DESC');
+		$list = ClassForumPostPeer::doSelect(' class_forum_id='.$forumId.' and thread_id = class_forum_post_id ORDER BY is_sticky DESC, post_datetime DESC');
 
 		$objList = array();
 		foreach ($list as $k=>$v) {
@@ -54,7 +54,7 @@ class ClassForum_Posts {
 	function getThread($limit=-1, $start=-1) {
 
 		$topicId = intval($this->getPostId());
-		$query =' thread_id='.$topicId.' and thread_id IS NOT NULL ORDER BY is_sticky DESC, post_timedate ASC';
+		$query =' thread_id='.$topicId.' and thread_id IS NOT NULL ORDER BY is_sticky DESC, post_datetime ASC';
 		if ($limit > -1) {
 			$query .= ' LIMIT '.$start.', '.$limit;
 		}
@@ -75,6 +75,23 @@ class ClassForum_Posts {
 	function getLastReplyTime() {
 		$db = DB::getHandle();
 		$db->query(
+			ClassForum_Queries::getQuery('lastReplyThread',
+				array($this->_dao->getPrimaryKey())
+			)
+		);
+		$db->nextRecord();
+
+		$this->lastPostTime = $db->record['last_post_time'];
+		return (int)$this->lastPostTime;
+	}
+
+
+	/**
+	 * Wrapper function so table render's can call one function
+	 */
+	function getLastPostTime() {
+		$db = DB::getHandle();
+		$db->query(
 			ClassForum_Queries::getQuery('lastPostThread',
 				array($this->_dao->getPrimaryKey())
 			)
@@ -82,7 +99,17 @@ class ClassForum_Posts {
 		$db->nextRecord();
 
 		$this->lastPostTime = $db->record['last_post_time'];
-		return $this->lastPostTime;
+		return (int)$this->lastPostTime;
+	}
+
+
+	/**
+	 * This is a wrapper function for the ClassForum_Settings so
+	 * that the table renderers can call one function, be it against
+	 * a forum or a post
+	 */
+	function getLastVisit($u) {
+		return ClassForum_Settings::getLastThreadVisit($u,$this);
 	}
 
 
@@ -438,7 +465,6 @@ class ClassForum_Forums {
 	function getLastPostTime() {
 		$db = DB::getHandle();
 		$db->query(
-		//echo(
 			ClassForum_Queries::getQuery('lastPostForum',
 				array($this->_dao->getPrimaryKey())
 			)
@@ -447,6 +473,16 @@ class ClassForum_Forums {
 
 		$this->lastPostTime = $db->record['last_post_time'];
 		return $this->lastPostTime;
+	}
+
+
+	/**
+	 * This is a wrapper function for the ClassForum_Settings so
+	 * that the table renderers can call one function, be it against
+	 * a forum or a post
+	 */
+	function getLastVisit($u) {
+		return ClassForum_Settings::getLastForumVisit($u,$this);
 	}
 
 }
@@ -561,6 +597,83 @@ class ClassForum_Categories {
 
 
 /**
+ * Handle settings and last visit time
+ */
+class ClassForum_Settings {
+
+
+	/**
+	 * set a cookie with this forum's ID for one year
+	 */
+	function setLastThreadVisit($u,$thread) {
+		if (! is_object($thread) ) {
+			return 0;
+		}
+		$threadId = $thread->getPostId();
+		$forumId = $thread->getForumId();
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('getUserViews',
+				array ($u->userId, $forumId)
+			)
+		);
+		$db->nextRecord();
+		if ( $db->getNumRows() < 1 ) {
+			$queryName = 'addUserViews';
+		} else {
+			$queryName = 'setUserViews';
+		}
+		$viewStruct = unserialize(base64_decode($db->record['views']));
+		$viewStruct['forum'][$forumId] = time();
+		$viewStruct['thread'][$threadId] = time();
+		$views = base64_encode(serialize($viewStruct));
+		$db->query(
+			ClassForum_Queries::getQuery($queryName,
+				array ($views, $u->userId, $forumId)
+			)
+		);
+	}
+
+
+	function getLastForumVisit($u,$forum) {
+		if (! is_object($forum) ) {
+			return 0;
+		}
+		$forumId = $forum->getForumId();
+
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('getUserViews',
+				array ($u->userId, $forumId)
+			)
+		);
+		$db->nextRecord();
+		$viewStruct = unserialize(base64_decode($db->record['views']));
+		return (int)$viewStruct['forum'][$forumId];
+	}
+
+
+	function getLastThreadVisit($u,$thread) {
+		if (! is_object($thread) ) {
+			return 0;
+		}
+		$threadId = $thread->getPostId();
+		$forumId = $thread->getForumId();
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('getUserViews',
+				array ($u->userId, $forumId)
+			)
+		);
+		$db->nextRecord();
+		$viewStruct = unserialize(base64_decode($db->record['views']));
+		return (int)$viewStruct['thread'][$threadId];
+	}
+}
+
+
+
+/**
  * Holds all the raw queries for the class forums system
  */
 class ClassForum_Queries {
@@ -616,7 +729,7 @@ class ClassForum_Queries {
 		AND thread_id = class_forum_post_id';
 
 		$this->queries['forumsSorted'] = 
-		'SELECT class_forum_id,A.name,A.class_id,is_locked,is_visible,is_moderated,allow_uploads,description,class_forum_recent_post_timedate,class_forum_recent_poster,class_forum_thread_count,class_forum_post_count,class_forum_unanswered_count,A.class_forum_category_id 
+		'SELECT A.*
 		FROM class_forum A
 		LEFT JOIN class_forum_category B
 		  ON A.class_forum_category_id = B.class_forum_category_id
@@ -634,20 +747,43 @@ class ClassForum_Queries {
 		AND class_id = %d';
 
 		$this->queries['lastPostForum']  = 
-		'SELECT MAX(post_timedate) as last_post_time
+		'SELECT MAX(post_datetime) as last_post_time
 		FROM `class_forum_post`
 		WHERE class_forum_id = %d';
 
-		$this->queries['lastPostThread']  = 
-		'SELECT MAX(post_timedate) as last_post_time
+		$this->queries['lastReplyThread']  = 
+		'SELECT MAX(post_datetime) as last_post_time
 		FROM `class_forum_post`
 		WHERE thread_id = %d
 		AND reply_id IS NOT NULL';
+
+		$this->queries['lastPostThread']  = 
+		'SELECT MAX(post_datetime) as last_post_time
+		FROM `class_forum_post`
+		WHERE thread_id = %d';
 
 		$this->queries['moveThreadForum']  = 
 		'UPDATE `class_forum_post`
 		SET class_forum_id = %d
 		WHERE thread_id = %d';
+
+		$this->queries['getUserViews']  = 
+		'SELECT views 
+		FROM `class_forum_user_activity`
+		WHERE user_id = %d
+		AND class_forum_id = %d';
+
+		$this->queries['setUserViews']  = 
+		'UPDATE `class_forum_user_activity`
+		SET views = "%s"
+		WHERE user_id = %d
+		AND class_forum_id = %d';
+
+		$this->queries['addUserViews']  = 
+		'INSERT INTO `class_forum_user_activity`
+		(views, user_id, class_forum_id)
+		VALUES ("%s", %d, %d)';
+
 	}
 
 
@@ -667,3 +803,4 @@ class ClassForum_Queries {
 
 
 ClassForum_Queries::init();
+

@@ -14,11 +14,11 @@ class ClassForumBase {
 	var $isModerated;
 	var $allowUploads;
 	var $description;
-	var $classForumRecentPostTimedate;
-	var $classForumRecentPoster;
-	var $classForumThreadCount;
-	var $classForumPostCount;
-	var $classForumUnansweredCount;
+	var $recentPostDatetime;
+	var $recentPoster;
+	var $threadCount;
+	var $postCount;
+	var $unansweredCount;
 	var $classForumCategoryId;
 
 	var $__attributes = array(
@@ -30,11 +30,11 @@ class ClassForumBase {
 	'isModerated'=>'tinyint',
 	'allowUploads'=>'tinyint',
 	'description'=>'varchar',
-	'classForumRecentPostTimedate'=>'integer',
-	'classForumRecentPoster'=>'varchar',
-	'classForumThreadCount'=>'integer',
-	'classForumPostCount'=>'integer',
-	'classForumUnansweredCount'=>'integer',
+	'recentPostDatetime'=>'integer',
+	'recentPoster'=>'varchar',
+	'threadCount'=>'integer',
+	'postCount'=>'integer',
+	'unansweredCount'=>'integer',
 	'classForumCategoryId'=>'integer');
 
 	function getClassForumCategoryByClassForumCategoryId($dsn='default') {
@@ -135,11 +135,11 @@ class ClassForumPeerBase {
 		$st->fields['is_moderated'] = 'is_moderated';
 		$st->fields['allow_uploads'] = 'allow_uploads';
 		$st->fields['description'] = 'description';
-		$st->fields['class_forum_recent_post_timedate'] = 'class_forum_recent_post_timedate';
-		$st->fields['class_forum_recent_poster'] = 'class_forum_recent_poster';
-		$st->fields['class_forum_thread_count'] = 'class_forum_thread_count';
-		$st->fields['class_forum_post_count'] = 'class_forum_post_count';
-		$st->fields['class_forum_unanswered_count'] = 'class_forum_unanswered_count';
+		$st->fields['recent_post_datetime'] = 'recent_post_datetime';
+		$st->fields['recent_poster'] = 'recent_poster';
+		$st->fields['thread_count'] = 'thread_count';
+		$st->fields['post_count'] = 'post_count';
+		$st->fields['unanswered_count'] = 'unanswered_count';
 		$st->fields['class_forum_category_id'] = 'class_forum_category_id';
 
 		$st->key = $this->key;
@@ -164,11 +164,11 @@ class ClassForumPeerBase {
 		$st->fields['is_moderated'] = $this->isModerated;
 		$st->fields['allow_uploads'] = $this->allowUploads;
 		$st->fields['description'] = $this->description;
-		$st->fields['class_forum_recent_post_timedate'] = $this->classForumRecentPostTimedate;
-		$st->fields['class_forum_recent_poster'] = $this->classForumRecentPoster;
-		$st->fields['class_forum_thread_count'] = $this->classForumThreadCount;
-		$st->fields['class_forum_post_count'] = $this->classForumPostCount;
-		$st->fields['class_forum_unanswered_count'] = $this->classForumUnansweredCount;
+		$st->fields['recent_post_datetime'] = $this->recentPostDatetime;
+		$st->fields['recent_poster'] = $this->recentPoster;
+		$st->fields['thread_count'] = $this->threadCount;
+		$st->fields['post_count'] = $this->postCount;
+		$st->fields['unanswered_count'] = $this->unansweredCount;
 		$st->fields['class_forum_category_id'] = $this->classForumCategoryId;
 
 		$st->key = 'class_forum_id';
@@ -193,11 +193,11 @@ class ClassForumPeerBase {
 		$st->fields['is_moderated'] = $obj->isModerated;
 		$st->fields['allow_uploads'] = $obj->allowUploads;
 		$st->fields['description'] = $obj->description;
-		$st->fields['class_forum_recent_post_timedate'] = $obj->classForumRecentPostTimedate;
-		$st->fields['class_forum_recent_poster'] = $obj->classForumRecentPoster;
-		$st->fields['class_forum_thread_count'] = $obj->classForumThreadCount;
-		$st->fields['class_forum_post_count'] = $obj->classForumPostCount;
-		$st->fields['class_forum_unanswered_count'] = $obj->classForumUnansweredCount;
+		$st->fields['recent_post_datetime'] = $obj->recentPostDatetime;
+		$st->fields['recent_poster'] = $obj->recentPoster;
+		$st->fields['thread_count'] = $obj->threadCount;
+		$st->fields['post_count'] = $obj->postCount;
+		$st->fields['unanswered_count'] = $obj->unansweredCount;
 		$st->fields['class_forum_category_id'] = $obj->classForumCategoryId;
 
 		$st->key = 'class_forum_id';
@@ -264,11 +264,11 @@ class ClassForumPeerBase {
 		$x->isModerated = $row['is_moderated'];
 		$x->allowUploads = $row['allow_uploads'];
 		$x->description = $row['description'];
-		$x->classForumRecentPostTimedate = $row['class_forum_recent_post_timedate'];
-		$x->classForumRecentPoster = $row['class_forum_recent_poster'];
-		$x->classForumThreadCount = $row['class_forum_thread_count'];
-		$x->classForumPostCount = $row['class_forum_post_count'];
-		$x->classForumUnansweredCount = $row['class_forum_unanswered_count'];
+		$x->recentPostDatetime = $row['recent_post_datetime'];
+		$x->recentPoster = $row['recent_poster'];
+		$x->threadCount = $row['thread_count'];
+		$x->postCount = $row['post_count'];
+		$x->unansweredCount = $row['unanswered_count'];
 		$x->classForumCategoryId = $row['class_forum_category_id'];
 
 		$x->_new = false;

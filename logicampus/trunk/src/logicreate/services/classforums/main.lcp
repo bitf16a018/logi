@@ -5,8 +5,8 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
 
-include(LIB_PATH.'lc_table.php');
-include(LIB_PATH.'lc_table_renderer.php');
+include_once(SERVICE_PATH.'classforums/classforums_lib.php');
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
 
 
 /**
@@ -39,7 +39,8 @@ class classforums extends StudentService {
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=64;
-		$col->cellRenderer = new LC_TableIconRenderer();
+		$col->cellRenderer = new LC_TableNewMessageRenderer();
+		$col->cellRenderer->u = $u;
 
 		$col_b = &$columnModel->getColumnAt(2);
 		$col_b->maxWidth=100;
@@ -74,9 +75,6 @@ class classforums extends StudentService {
 
 			$table->addSubHeader($subHeader);
 		}
-
-
-
 
 		$t['table'] = new LC_TableRenderer($table);
 
