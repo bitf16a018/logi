@@ -33,7 +33,7 @@ class LC_Table {
 			$this->columnModel = $columnModel;
 		}
 
-		$this->tableHeader = new LC_TableHeader($this->columnModel);
+		$this->tableHeader = new LC_DefaultTableHeader($this->columnModel);
 	}
 
 
@@ -127,6 +127,14 @@ class LC_Table {
 	function addSubHeader($header) {
 		$this->subHeaders[] = $header;
 		$this->enableSubHeaders = true;
+	}
+
+
+	/**
+	 * set a column name in the tableHeader
+	 */
+	function setColumnNameAt($i,$n) {
+		$this->tableHeader->setColumnName($i,$n);
 	}
 }
 
@@ -260,6 +268,12 @@ class LC_TableColumnModel {
 
 
 	/**
+	 * Returns a default name for the column using spreadsheet conventions: A, B, C, 
+	 */
+	function setColumnName($columnIndex,$columnName) { }
+
+
+	/**
 	 * add a column to the end
 	 */
 	function addColumn($c) { }
@@ -312,6 +326,14 @@ class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 
 
 	/**
+	 * Returns a default name for the column using spreadsheet conventions: A, B, C, 
+	 */
+	function setColumnName($columnIndex,$columnName) { 
+		$this->tableColumns[$columnIndex]->name = $columnName;	
+	}
+
+
+	/**
 	 * add a column to the end
 	 * @return	int	 new index
 	 */
@@ -356,7 +378,6 @@ class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 }
 
 
-
 /**
  * Manages column models for headers
  */
@@ -365,8 +386,45 @@ class LC_TableHeader {
 	var $columnModel;
 	var $row = -1;
 
-	function LC_TableHeader($columnModel) {
+	function LC_TableHeader($columnModel) { }
 
+
+	/**
+	 * return a ref to this column model
+	 */
+	function &getColumnModel() { }
+
+
+	/**
+	 * return the column at index $i
+	 */
+	function &getColumnAt($i) { }
+
+
+	/**
+	 * Asks the data model for a column name
+	 * wrapper function
+	 */
+	function getColumnName($columnIndex) { }
+
+
+	/**
+	 * Sets the name of the column at an index
+	 */
+	function setColumnName($i,$n) { }
+}
+
+
+
+/**
+ * Manages column models for headers
+ */
+class LC_DefaultTableHeader  extends LC_TableHeader {
+
+	var $columnModel;
+	var $row = -1;
+
+	function LC_DefaultTableHeader($columnModel) {
 		$this->columnModel = $columnModel;
 	}
 
@@ -395,6 +453,13 @@ class LC_TableHeader {
 		return $this->columnModel->getColumnName($columnIndex);
 	}
 
+
+	/**
+	 * Sets the name of the column at an index
+	 */
+	function setColumnName($i,$n) { 
+		$this->columnModel->setColumnName($i,$n);
+	}
 
 }
 
