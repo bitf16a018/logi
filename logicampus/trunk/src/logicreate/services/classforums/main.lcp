@@ -67,7 +67,7 @@ class classforums extends StudentService {
 			$sub_col_a = new LC_TableColumn();
 			$sub_col_a->name = lct('Category').': '. $v->getName();
 			$subHeaderModel->addColumn($sub_col_a);
-			$subHeader = new LC_TableHeader($subHeaderModel);
+			$subHeader = new LC_DefaultTableHeader($subHeaderModel);
 			$subHeader->row = $forumCount;
 
 			$forumCount += $thisCount;
@@ -100,7 +100,7 @@ class classforums extends StudentService {
 
 
 
-class MyTableModel extends LC_TableModel {
+class MyTableModel extends LC_DefaultTableModel {
 
 	var $forums = array();
 

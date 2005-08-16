@@ -125,7 +125,7 @@ class ForumAdmin extends FacultyService {
 			$sub_col_a = new LC_TableColumn();
 			$sub_col_a->name = lct('Category').': '. $v->getName();
 			$subHeaderModel->addColumn($sub_col_a);
-			$subHeader = new LC_TableHeader($subHeaderModel);
+			$subHeader = new LC_DefaultTableHeader($subHeaderModel);
 			$subHeader->row = $forumCount;
 
 			$forumCount += $thisCount;
@@ -313,7 +313,7 @@ class ForumAdmin extends FacultyService {
 			$sub_col_a = new LC_TableColumn();
 			$sub_col_a->name = lct('Category').': '. $v->getName();
 			$subHeaderModel->addColumn($sub_col_a);
-			$subHeader = new LC_TableHeader($subHeaderModel);
+			$subHeader = new LC_DefaultTableHeader($subHeaderModel);
 			$subHeader->row = $forumCount;
 
 			$forumCount += $thisCount;

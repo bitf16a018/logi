@@ -121,7 +121,7 @@ class LessonManager extends FacultyService {
 
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=60;
-		$col->name='&nbsp;';
+		$table->setColumnNameAt(0,'&nbsp;');
 		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->selectedKey = 'id_class_lessons';
@@ -129,12 +129,12 @@ class LessonManager extends FacultyService {
 		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
-		$col_b->name='Assignment';
+		$table->setColumnNameAt(1,'Assignment');
 		$col_b->maxWidth=360;
 		$col_b->justify='left';
 
 		$col_c = &$columnModel->getColumnAt(2);
-		$col_c->name='Lesson';
+		$table->setColumnNameAt(2,'Lesson');
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
 		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
@@ -190,19 +190,19 @@ class LessonManager extends FacultyService {
 
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=60;
-		$col->name='&nbsp;';
+		$table->setColumnNameAt(0,'&nbsp;');
 		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 		$col->cellRenderer->idName = 'id_class_links';
 
 		$col_b = &$columnModel->getColumnAt(1);
-		$col_b->name='Web Link';
+		$table->setColumnNameAt(1,'Web Link');
 		$col_b->maxWidth=360;
 		$col_b->justify='left';
 
 		$col_c = &$columnModel->getColumnAt(2);
-		$col_c->name='Lesson';
+		$table->setColumnNameAt(2,'Lesson');
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
 		$col_c->cellRenderer->idName = 'id_class_links';
@@ -260,19 +260,19 @@ class LessonManager extends FacultyService {
 
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=60;
-		$col->name='&nbsp;';
+		$table->setColumnNameAt(0,'&nbsp;');
 		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->idName = 'id_class_objectives';
 		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
-		$col_b->name='Objective';
+		$table->setColumnNameAt(1,'Objective');
 		$col_b->maxWidth=360;
 		$col_b->justify='left';
 
 		$col_c = &$columnModel->getColumnAt(2);
-		$col_c->name='Lesson';
+		$table->setColumnNameAt(2,'Lesson');
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
 		$col_c->cellRenderer->idName = 'id_class_objectives';

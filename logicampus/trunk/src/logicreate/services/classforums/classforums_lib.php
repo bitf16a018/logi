@@ -327,7 +327,7 @@ class ClassForum_Forums {
 	 * class id.
 	 */
 	function isModerator($u) {
-		return ($u->isFaculty() && $this->_dao->get('classForumId') == $u->activeClassTaught->id_classes);
+		return ($u->isFaculty() && $this->_dao->get('classId') == $u->activeClassTaught->id_classes);
 	}
 
 

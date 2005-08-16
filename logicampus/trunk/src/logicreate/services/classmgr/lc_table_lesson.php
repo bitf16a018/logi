@@ -1,7 +1,7 @@
 <?php
 
 
-class LinkedItemsModel extends LC_TableModel {
+class LinkedItemsModel extends LC_DefaultTableModel {
 
 	var $sql = '';
 	var $results = array();
@@ -21,9 +21,11 @@ class LinkedItemsModel extends LC_TableModel {
 		}
 	}
 
+	/*
 	function setColumnNames($array) {
 		$this->columnNames = $array;
 	}
+	*/
 
 
 	//sub-class
@@ -46,10 +48,12 @@ class LinkedItemsModel extends LC_TableModel {
 	/**
 	 * Returns the name of a column.
 	 */
+	 /*
 	function getColumnName($columnIndex) {
 
 		return $this->columnNames[$columnIndex];
 	}
+	*/
 
 
 	/**
