@@ -22,6 +22,7 @@ class lcUser {
 	var $perms;				// nested arrays of available services (key) and actions (values)
 	var $profile;
 	var $loggedIn = false;
+	var $userId = 0;
 
 
 
@@ -119,6 +120,7 @@ class lcUser {
 				$temp->_sessionKey = $sessID;
 				$temp->_origSessionData = $origSession;
 				$temp->loggedIn = true;
+				$temp->userId = $db->Record['pkey'];
 			} else
 			if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
@@ -127,6 +129,7 @@ class lcUser {
 				$temp->_origSessionData = $origSession;
 				$temp->loggedIn = true;
 				$temp->loadProfile();
+				$temp->userId = $db->Record['pkey'];
 			}
 			else {
 				$temp = new lcUser();
@@ -155,7 +158,6 @@ class lcUser {
 	}
 
 
-
 	/**
 	 * Return one user given the database key
 	 *
@@ -167,10 +169,11 @@ class lcUser {
 		$db->query("select * from lcUsers where pkey = $key",false);
 		if ( !$db->next_record() ) {  return new lcUser();  }
 		$temp =   new lcUser();
-		$temp->username = $db->Record[username];
-		$temp->password = $db->Record[password];
+		$temp->username = $db->Record['username'];
+		$temp->password = $db->Record['password'];
 		$temp->email = $db->Record[email];
-		$temp->groups = array_merge($temp->groups,explode("|",$db->Record[groups]));
+		$temp->groups = array_merge($temp->groups,explode("|",$db->Record['groups']));
+		$temp->userId = $db->Record['pkey'];
 	return $temp;
 	}
 
@@ -202,6 +205,7 @@ class lcUser {
 			$temp->password = $db->Record[password];
 			$temp->email = $db->Record[email];
 			$temp->groups = explode('|',substr($db->Record[groups],1,-1));
+			$temp->userId = $db->Record['pkey'];
 
 			if (! in_array('public',$temp->groups) ) 
 				$temp->groups[] = 'public';
