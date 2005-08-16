@@ -1,25 +1,19 @@
 <?php echo $t['sectionheader'];?>
-<style type="text/css">
-	DIV.hover_button:hover {
-		background-color:silver;
-		border:1px solid gray;
-	}
 
-	DIV.hover_button {
-		border:1px solid white;
-	}
-</style>
-
+<h3>Forum Properties</h3>
 
 <form method="POST" action="<?=modurl('forumAdmin/event=saveForum');?>">
 <div style="float:left">
-	Forum name: <input type="text" name="name">
+	Forum name: 
+	<br/>
+	<input size="35" type="text" name="name" value="<?= $t['name'];?>">
 	<br/>
 	Forum description: 
 	<br/>
-	<textarea name="description"></textarea>
+	<textarea cols="35" rows="5" name="description"><?= $t['description'];?></textarea>
 	<br/>
 	<input type="submit" id="submit_forum" value="Submit"/>
+	<input type="hidden" name="forum_id" value="<?=$t['forumId'];?>"/>
 </div>
 
 <div style="width:100px;float:left">
@@ -30,20 +24,14 @@
 	<fieldset>
 		<legend>Choose Category</legend>
 
-		<!--
-		<div class="hover_button" onclick="document.getElementById('radio_1').checked=true;">
-			<input type="radio" value="1" id="radio_1" name="category_id" checked/>
-			General
-		</div>
-		-->
-
 		<? if (is_array($t['categories'])) { ?>
 		<? 
 			$count = 2;
 			foreach($t['categories'] as $categoryKey=>$categoryName) { 
+			$checked = ($categoryKey == $t['categoryId']) ? 'CHECKED' : '';
 			?>
 			<div class="hover_button" onclick="document.getElementById('radio_<?=$count;?>').checked=true;">
-				<input type="radio" value="<?=$categoryKey;?>" id="radio_<?=$count;?>" name="category_id"/>
+				<input type="radio" value="<?=$categoryKey;?>" id="radio_<?=$count;?>" name="category_id" <?=$checked;?>/>
 				<?=$categoryName;?>
 				</div>
 			<?

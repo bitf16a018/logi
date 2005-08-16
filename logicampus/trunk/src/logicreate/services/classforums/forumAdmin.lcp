@@ -132,20 +132,16 @@ class ForumAdmin extends FacultyService {
 
 			$table->addSubHeader($subHeader);
 		}
-
-		// sort the array based alphabetically
-		// NOTE that 'don't move' and 'general' will always still be at the top
-		asort($categoryArray);
 		$t['categoryPulldown'] = makeOptions($categoryArray);
-
 		$t['table'] = new LC_TableRenderer($table);
 	}
+
 
 	/**
 	 * Show the page to add a new forum
 	 */
 	function newForumRun (&$db, &$u, &$lc, &$t) {
-		$lc->templateName = 'forumAdmin_newForum';
+		$lc->templateName = 'forumAdmin_editForum';
 
 		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
 
@@ -158,29 +154,65 @@ class ForumAdmin extends FacultyService {
 			$id 	= $v->getCategoryId();	
 			$categoryArray[$id] = $name;
 		}
-
-		// sort the array based alphabetically
-		// NOTE that 'don't move' and 'general' will always still be at the top
-		asort($categoryArray);
 		$t['categories'] = $categoryArray; 
-
-
 	}
 
 
 	/**
-	 * Add a new forum
+	 * Show the page to add a new forum
+	 */
+	function editForumRun (&$db, &$u, &$lc, &$t) {
+		$lc->templateName = 'forumAdmin_editForum';
+		$forumId = (int)$lc->getvars['forum_id'];
+		$forum = ClassForum_Forums::load($forumId);
+		if ($forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+		$t['name'] = $forum->getName();
+		$t['description'] = $forum->getDescription();
+		$t['categoryId'] = (int)$forum->getCategoryId();
+		$t['forumId'] = $forumId;
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+			$categoryArray[$id] = $name;
+		}
+		$t['categories'] = $categoryArray; 
+	}
+
+
+	/**
+	 * Add a new forum or edit an existing one
 	 */
 	function saveForumRun (&$db, &$u, &$lc, &$t) {
-		$x = new ClassForum_Forums();
+		$forumId = (int)$lc->postvars['forum_id'];
+		if ($forumId > 0 ) {
+			$x = ClassForum_Forums::load($forumId);
+			if ($x->getClassId() != $u->activeClassTaught->id_classes) {
+				$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+				$this->presentor = 'errorMessage';
+				return false;
+			}
+		} else { 
+			$x = new ClassForum_Forums();
+			$x->setClassId( $u->activeClassTaken->id_classes );
+			//visible by default
+			$x->setVisible( true );
+		}
+	
 
 		$x->setName( $lc->postvars['name'] );
 		$x->setDescription( $lc->postvars['description'] );
-		$x->setClassId( $u->activeClassTaken->id_classes );
 		$x->setCategoryId( $lc->postvars['category_id']);
-		//visible by default
-		$x->setVisible( true );
-
 		$x->save();
 
 		$this->presentor = 'redirectPresentation';
@@ -441,7 +473,7 @@ class LC_Table_ForumModerator extends LC_TableModel {
 			case 5:
 				return $forum;
 			case 6:
-				return '<a href="#">[ Edit ]</a> <!--<a href="#">[ People ]</a>-->';
+				return '<a href="'.modurl('forumAdmin/event=editForum/forum_id='.$forum->getForumId()).'">[ Edit ]</a> <!--<a href="#">[ People ]</a>-->';
 		}
 	}
 

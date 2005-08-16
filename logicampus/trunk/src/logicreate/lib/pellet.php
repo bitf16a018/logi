@@ -170,8 +170,7 @@ class BasicAuth extends Service {
 			$t['sectionheader'] = substr($t['sectionheader'],0,-8);
 			$t['sectionheader'] .= '</div>';
 		}
-		$t['sectionheader'] .= '<br>';
-
+		$t['sectionheader'] .= '<div style="margin:5px;"></div>';
 	}
 
 }
@@ -237,8 +236,7 @@ class RegAuth extends Service {
 			$t['sectionheader'] = substr($t['sectionheader'],0,-8);
 			$t['sectionheader'] .= '</div>';
 		}
-		$t['sectionheader'] .= '<br>';
-
+		$t['sectionheader'] .= '<div style="margin:5px;"></div>';
 	}
 	
 }
@@ -404,8 +402,7 @@ class AdminService extends Service {
 			$t['sectionheader'] = substr($t['sectionheader'],0,-8);
 			$t['sectionheader'] .= '</div>';
 		}
-		$t['sectionheader'] .= '<br>';
-
+		$t['sectionheader'] .= '<div style="margin:5px;"></div>';
 	}
 	
 }
@@ -521,7 +518,7 @@ class FacultyService extends Service {
 			$t['sectionheader'] = substr($t['sectionheader'],0,-8);
 			$t['sectionheader'] .= '</div>';
 		}
-		$t['sectionheader'] .= '<br>';
+		$t['sectionheader'] .= '<div style="margin:5px;"></div>';
 	}
 
 
@@ -688,7 +685,7 @@ class StudentService extends Service {
 			$t['sectionheader'] = substr($t['sectionheader'],0,-8);
 			$t['sectionheader'] .= '</div>';
 		}
-		$t['sectionheader'] .= '<br>';
+		$t['sectionheader'] .= '<div style="margin:5px;"></div>';
 	}
 }
 
