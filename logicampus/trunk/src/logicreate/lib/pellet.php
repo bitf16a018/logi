@@ -570,7 +570,7 @@ class StudentService extends Service {
 		'Chat' => 'chat/',
 		'Classmates' => 'classmates/',
 		'Contact Classmates' => 'contactStudents/',
-		'Discussion Board' => 'discussion/',
+		'Discussion Board' => '%classforums/',
 		'FAQs' => 'faq/',
 		'Faculty Profile' => 'facultyProfile/',
 		'Gradebook' => 'gradebook/',
