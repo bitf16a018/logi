@@ -83,7 +83,7 @@ class forum extends StudentService {
 		$col_c = &$columnModel->getColumnAt(4);
 		$col_c->maxWidth=160;
 		$col_c->cellRenderer = new LC_TableRenderer_ForumLastReply();
-		$col_c->cellRenderer->dateFormat = 'M j Y &\n\b\sp;h:i A';
+		$col_c->cellRenderer->dateFormat = 'M j, Y - h:i A';
 
 		$col_d = &$columnModel->getColumnAt(1);
 		$col_d->cellRenderer = new LC_TableRenderer_ForumTopic();

@@ -183,7 +183,7 @@ class ClassForum_Posts {
 	 *
 	 */
 	function getTime() {
-		return $this->_dao->postTimedate;
+		return $this->_dao->postDatetime;
 	}
 
 

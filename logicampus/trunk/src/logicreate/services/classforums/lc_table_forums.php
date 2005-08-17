@@ -239,12 +239,17 @@ class LC_TableRenderer_ForumAuthor extends LC_TableCellRenderer {
 class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 
 	var $dateFormat = 'M d y';
-	var $dateTimeFormat = 'M d \'y - h:i A';
+	var $dateTimeFormat = 'M j, Y - h:i A';
 	var $userIsModerator = false;
 	var $username = '';
 
 	function getRenderedValue() {
-		$ret  = '<div style="float:left">posted on : '.date($this->dateTimeFormat,$this->value->getTime()).'</div>';
+		$ret  = '<div style="float:left">posted on : '.date($this->dateTimeFormat,$this->value->getTime());
+		if ($this->value->_dao->lastEditDatetime > 0 ) {
+			$ret .= "<br/><span style=\"font-weight:bold\">edited on: " .date($this->dateTimeFormat,$this->value->_dao->lastEditDatetime). " by: ".$this->value->_dao->lastEditUsername."</span>";
+		}
+		$ret .= '</div>';
+
 		$ret .= '<div align="right">';
 		$forum = $this->value->getForum();
 		if ( !$forum->isLocked() ) {

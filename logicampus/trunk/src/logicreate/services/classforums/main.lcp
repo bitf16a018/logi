@@ -49,7 +49,7 @@ class classforums extends StudentService {
 		$col_b->maxWidth=100;
 
 		$col_c = &$columnModel->getColumnAt(4);
-		$col_c->cellRenderer = new LC_TableDateRenderer();
+		$col_c->cellRenderer = new LC_TableDateRenderer('M j, Y - h:i A');
 
 		$col_d = &$columnModel->getColumnAt(1);
 		$col_d->cellRenderer = new LC_TableForumRenderer();
