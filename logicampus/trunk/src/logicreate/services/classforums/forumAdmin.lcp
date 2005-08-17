@@ -62,6 +62,7 @@ class ForumAdmin extends FacultyService {
 		$col_c->cellRenderer->selectedVal = '1';
 		$col_c->maxWidth=64;
 
+/*
 		$col_d = &$columnModel->getColumnAt(3);
 		$col_d->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_d->cellRenderer->fieldName = 'moderated';
@@ -69,8 +70,10 @@ class ForumAdmin extends FacultyService {
 		$col_d->cellRenderer->selectedKey = 'isModerated';
 		$col_d->cellRenderer->selectedVal = '1';
 		$col_d->maxWidth=64;
+*/
 
-		$col_e = &$columnModel->getColumnAt(4);
+//		$col_e = &$columnModel->getColumnAt(4);
+		$col_e = &$columnModel->getColumnAt(3);
 		$col_e->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_e->cellRenderer->fieldName = 'visible';
 		$col_e->cellRenderer->idName = 'classForumId';
@@ -78,6 +81,7 @@ class ForumAdmin extends FacultyService {
 		$col_e->cellRenderer->selectedVal = '1';
 		$col_e->maxWidth=64;
 
+/*
 		$col_f = &$columnModel->getColumnAt(5);
 		$col_f->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_f->cellRenderer->fieldName = 'files';
@@ -85,8 +89,10 @@ class ForumAdmin extends FacultyService {
 		$col_f->cellRenderer->selectedKey = 'allowUploads';
 		$col_f->cellRenderer->selectedVal = '1';
 		$col_f->maxWidth=64;
+*/
 
-		$col_g = &$columnModel->getColumnAt(6);
+		//$col_g = &$columnModel->getColumnAt(6);
+		$col_g = &$columnModel->getColumnAt(4);
 		$col_g->maxWidth=90;
 
 
@@ -421,7 +427,7 @@ class LC_Table_ForumModerator extends LC_TableModel {
 	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return 7;
+		return 5;
 	}
 
 
@@ -439,16 +445,20 @@ class LC_Table_ForumModerator extends LC_TableModel {
 			case '2':
 				return 'Locked'; break;
 
+/*
 			case '3':
 				return 'Moderated'; break;
+*/
 
-			case '4':
+			case '3':
 				return 'Visible'; break;
 
+/*
 			case '5':
 				return 'Files'; break;
+*/
 
-			case '6':
+			case '4':
 				return '&nbsp;'; break;
 		}
 	}
@@ -468,11 +478,13 @@ class LC_Table_ForumModerator extends LC_TableModel {
 				return $forum;
 			case 3:
 				return $forum;
+/*
 			case 4:
 				return $forum;
 			case 5:
 				return $forum;
-			case 6:
+*/
+			case 4:
 				return '<a href="'.modurl('forumAdmin/event=editForum/forum_id='.$forum->getForumId()).'">[ Edit ]</a> <!--<a href="#">[ People ]</a>-->';
 		}
 	}
