@@ -27,7 +27,9 @@ need to make 'unimportant feature'
 <?php } ?>
 
 
-
+<div style="float:left;">
+	Back to Forum: <a href="<?= modurl('forum/forum_id='.$t['forumId']);?>"><?=$t['forumName'];?></a>
+</div>
 <?php if ( ! $x = $t['threadTable']->toHTML() ) { ?>
 	There are no posts to show.
 <?php } else {

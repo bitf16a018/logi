@@ -75,6 +75,8 @@ class posts extends StudentService {
 
 		$col_d = &$columnModel->getColumnAt(1);
 		$col_d->cellRenderer = new LC_TableRenderer_ForumPost();
+		$col_d->cellRenderer->userIsModerator = $forum->isModerator($u);
+		$col_d->cellRenderer->username = $u->username;
 		$col_d->justify = 'left';
 
 		$t['threadTable'] = new LC_TableRendererPaged($table);
@@ -87,7 +89,71 @@ class posts extends StudentService {
 
 		$t['postId'] = $postId;
 		$t['forumId'] = $table->getForumId();
+		$t['forumName'] = $forum->getName();
 		$t['moderator'] = $forum->isModerator($u);
+	}
+
+
+	/**
+	 * Show form for editing post
+	 */
+	function editRun (&$db, &$u, &$lc, &$t) {
+		//$lc->templateName = 'posts_edit';
+
+		$postId = (int) $lc->getvars['post_id'];
+		$post = ClassForum_Posts::load($postId);
+		$forum = $post->getForum();
+		if ( ($post->getUser() != $u->username) &&
+			! $forum->isModerator($u) ) {
+			$t['message'] = "You are trying to move a thread that you do not own.";
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$t['subject'] = $post->getSubject();
+		$t['message'] = $post->getMessage();
+		$t['postId'] = $postId;
+	}
+
+
+	function updatePostRun (&$db, &$u, &$lc, &$t) {
+
+		$postId = (int) $lc->postvars['post_id'];
+		$post = ClassForum_Posts::load($postId);
+		$forum = $post->getForum();
+		$forumId = $forum->getForumId();
+		if ( ($post->getUser() != $u->username) &&
+			! $forum->isModerator($u) ) {
+			$t['message'] = "You are trying to move a thread that you do not own.";
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		if (! is_object($forum) ) {
+			trigger_error("Error loading forum");
+			return false;
+		}
+
+		if ($forum->isLocked()) {
+			$lc->templateName = 'posts_forumLocked';
+			return;
+		}
+
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
+		}
+
+
+		$post->setSubject($lc->postvars['subject']);
+		$post->setMessage($lc->postvars['message']);
+		$post->_dao->set('lastEditDatetime',time());
+		$post->_dao->set('lastEditUsername',$u->username);
+
+		$post->save();
+
+		$t['url'] = appurl('classforums/forum/forum_id='.$forumId);
+		$this->presentor = 'redirectPresentation';
 	}
 
 
@@ -166,12 +232,12 @@ class posts extends StudentService {
 		$post->setUser($u->username);
 
 		$post->setForumId($forumId);
-//		$post->set('postTimedate',time());
+//		$post->set('postDatetime',time());
 /* do these in forum->postMessage
 		$post->setForumId(0);
-		$post->set('postTimedate',time());
+		$post->set('postDatetime',time());
 */
-		$post->_dao->set('postTimedate',time());
+		$post->_dao->set('postDatetime',time());
 
 		$post->save();
 		$post->setThreadId($post->getPostId());
@@ -216,7 +282,7 @@ class posts extends StudentService {
 		$post->set('classForumId',$forumId);
 		$post->set('replyId',$postId);
 		$post->set('threadId',$threadId);
-		$post->set('postTimedate',time());
+		$post->set('postDatetime',time());
 
 		$post->save();
 
