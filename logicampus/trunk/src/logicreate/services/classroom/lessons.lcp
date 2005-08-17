@@ -220,7 +220,7 @@ class lessons extends StudentService {
 
 	function viewContentRun(&$db, &$u, &$lc, &$t) {
 
-		$lc->templateName='lessons_content';
+		$lc->templateName='lessons_viewContent';
 		$content_id = intval($lc->getvars['id']);
 
 		// Make sure they're allowed to access this lesson AND
