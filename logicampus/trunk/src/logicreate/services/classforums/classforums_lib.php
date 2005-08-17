@@ -22,6 +22,9 @@ class ClassForum_Posts {
 
 	function load($postId) {
 		$x = ClassForumPost::load($postId);
+		if  (!is_object($x) ) {
+			$x = new ClassForumPost();
+		}
 		$y = new ClassForum_Posts();
 		$y->_dao = $x;
 		return $y;
@@ -143,6 +146,11 @@ class ClassForum_Posts {
 
 	function getThreadId() {
 		return $this->_dao->threadId;
+	}
+
+
+	function getUser() {
+		return $this->_dao->get('userId');
 	}
 
 
@@ -287,6 +295,9 @@ class ClassForum_Forums {
 
 	function load($postId) {
 		$x = ClassForum::load($postId);
+		if  (!is_object($x) ) {
+			$x = new ClassForum();
+		}
 		$y = new ClassForum_Forums();
 		$y->_dao = $x;
 		return $y;

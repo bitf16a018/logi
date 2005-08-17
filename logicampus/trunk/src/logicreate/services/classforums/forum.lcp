@@ -33,6 +33,7 @@ class forum extends StudentService {
 		);
 	}
 
+
 	/**
 	 * Allow for the links to be translated
 	 */
@@ -40,11 +41,13 @@ class forum extends StudentService {
 		$this->applinks = array (
 		);
 
+/*
 		global $lcUser;
 		//need to make this search for moderator status
 		if ( $lcUser->isFaculty() ) {
 			$this->applinks[lct('Admin')]  = 'forumAdmin/';
 		}
+*/
 	}
 
 

@@ -240,6 +240,8 @@ class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 
 	var $dateFormat = 'M d y';
 	var $dateTimeFormat = 'M d \'y - h:i A';
+	var $userIsModerator = false;
+	var $username = '';
 
 	function getRenderedValue() {
 		$ret  = '<div style="float:left">posted on : '.date($this->dateTimeFormat,$this->value->getTime()).'</div>';
@@ -249,7 +251,12 @@ class LC_TableRenderer_ForumPost extends LC_TableCellRenderer {
 		$ret .= '<a href="'.modurl('posts/event=reply/post_id='.$this->value->getPostId()).'">Reply</a> | ';
 		$ret .= '<a href="'.modurl('posts/event=reply/quote=true/post_id='.$this->value->getPostId()).'">Reply &amp; Quote</a> ';
 		}
-		$ret .=  '<!--Edit --></div>';
+
+		if ($this->userIsModerator
+			|| $this->value->getUser() == $this->username) {
+			$ret .= ' | <a href="'.modurl('posts/event=edit/post_id='.$this->value->getPostId()).'">Edit</a> ';
+		}
+		$ret .= '</div>';
 
 		$ret .= "<hr style=\"clear:both\">\n\t\t";
 		$ret .= $this->value->showMessage();

@@ -87,12 +87,12 @@
             size="11"
             type="INTEGER"/>
     <attribute name="is_sticky"
-            required="true"
+            required="false"
             default="0"
             size="1"
             type="TINYINT"/>
     <attribute name="is_hidden"
-            required="true"
+            required="false"
             default="0"
             size="1"
             type="TINYINT"/>
