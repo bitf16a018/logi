@@ -540,9 +540,9 @@ class LessonManager extends FacultyService {
 	function updateRun(&$db,&$u,&$lc,&$t)
 	{
 		$f = new Siteform();
-		$lessonid = $lc->getvars['id'];
+		$lessonId = $lc->getvars['id'];
 
-		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
+		if (!$this->checkAuth($lessonId,$db,$u,$t)) return;
 
 		$activeOn = dateArray2TimestampFull($lc->postvars['activeOn']);
 		$inactiveOn = dateArray2Timestamp($lc->postvars['inactiveOn']);
@@ -552,33 +552,30 @@ class LessonManager extends FacultyService {
 
 		$content_id = intval($lc->postvars['content']);
 
-		// Take care of the lesson table
-		$sql = "UPDATE class_lessons 
-			SET title='%s',
-			description='%s',
-			activeOn=%d,
-			inactiveOn=%d
-			WHERE id_class_lessons='{$lessonid}'";
-
+		//load PBDO Object
+		$lesson = ClassLessons::load($lesson_id);
+		$lesson->set('title',$title);
+		$lesson->set('description',$description);
+		$lesson->set('activeOn',$activeOn);
+		$lesson->set('inactiveOn',$inactiveOn);
+		if($lesson->save()) {
 			$t['msg'] = 'Lesson updated successfully.';
+		} else {
+			$t['msg'] = 'Lesson update failed!';
+		}
 
-		$db->query( sprintf($sql,
-				$title,
-				$desc,
-				$activeOn,
-				$inactiveOn)
-			);
+
 
 		// take care of the content table
 		$db->query( "update class_lesson_content set
 			id_class_lessons=NULL
-			where id_class_lessons='{$lessonid}'" );
+			where id_class_lessons='{$lessonId}'" );
 		$db->query( "update class_lesson_content set
-			id_class_lessons='{$lessonid}'
+			id_class_lessons='{$lessonId}'
 			where id_class_lesson_content=".$content_id );
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonid);
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonId);
 
 	}
 
