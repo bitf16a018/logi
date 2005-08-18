@@ -1,45 +1,43 @@
 <?
 
-class ClassLessonsBase {
+class ClassAnnouncementsBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
 	var $_version = '1.4';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
-	var $idClassLessons;
+	var $idClassAnnouncements;
 	var $idClasses;
-	var $createdOn;
-	var $title;
-	var $description;
-	var $activeOn;
-	var $inactiveOn;
-	var $checkList;
+	var $dtDisplay;
+	var $txTitle;
+	var $txDescription;
+	var $idFacultyCreatedby;
+	var $dtCreated;
 
 	var $__attributes = array(
-	'idClassLessons'=>'integer',
+	'idClassAnnouncements'=>'integer',
 	'idClasses'=>'integer',
-	'createdOn'=>'integer',
-	'title'=>'varchar',
-	'description'=>'longvarchar',
-	'activeOn'=>'integer',
-	'inactiveOn'=>'integer',
-	'checkList'=>'longvarchar');
+	'dtDisplay'=>'datetime',
+	'txTitle'=>'varchar',
+	'txDescription'=>'longvarchar',
+	'idFacultyCreatedby'=>'varchar',
+	'dtCreated'=>'datetime');
 
 
 
 	function getPrimaryKey() {
-		return $this->idClassLessons;
+		return $this->idClassAnnouncements;
 	}
 
 	function setPrimaryKey($val) {
-		$this->idClassLessons = $val;
+		$this->idClassAnnouncements = $val;
 	}
 	
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(ClassLessonsPeer::doInsert($this,$dsn));
+			$this->setPrimaryKey(ClassAnnouncementsPeer::doInsert($this,$dsn));
 		} else {
-			ClassLessonsPeer::doUpdate($this,$dsn);
+			ClassAnnouncementsPeer::doUpdate($this,$dsn);
 		}
 	}
 
@@ -50,14 +48,14 @@ class ClassLessonsBase {
 			}
 			$where = substr($where,0,-5);
 		} else {
-			$where = "id_class_lessons='".$key."'";
+			$where = "id_class_announcements='".$key."'";
 		}
-		$array = ClassLessonsPeer::doSelect($where,$dsn);
+		$array = ClassAnnouncementsPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
 
 	function delete($deep=false,$dsn="default") {
-		ClassLessonsPeer::doDelete($this,$deep,$dsn);
+		ClassAnnouncementsPeer::doDelete($this,$deep,$dsn);
 	}
 
 
@@ -94,29 +92,28 @@ class ClassLessonsBase {
 }
 
 
-class ClassLessonsPeerBase {
+class ClassAnnouncementsPeerBase {
 
-	var $tableName = 'class_lessons';
+	var $tableName = 'class_announcements';
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
 		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_lessons",$where);
-		$st->fields['id_class_lessons'] = 'id_class_lessons';
+		$st = new LC_SelectStatement("class_announcements",$where);
+		$st->fields['id_class_announcements'] = 'id_class_announcements';
 		$st->fields['id_classes'] = 'id_classes';
-		$st->fields['createdOn'] = 'createdOn';
-		$st->fields['title'] = 'title';
-		$st->fields['description'] = 'description';
-		$st->fields['activeOn'] = 'activeOn';
-		$st->fields['inactiveOn'] = 'inactiveOn';
-		$st->fields['checkList'] = 'checkList';
+		$st->fields['dt_display'] = 'dt_display';
+		$st->fields['tx_title'] = 'tx_title';
+		$st->fields['tx_description'] = 'tx_description';
+		$st->fields['id_faculty_createdby'] = 'id_faculty_createdby';
+		$st->fields['dt_created'] = 'dt_created';
 
 		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
-			$array[] = ClassLessonsPeer::row2Obj($db->record);
+			$array[] = ClassAnnouncementsPeer::row2Obj($db->record);
 		}
 		return $array;
 	}
@@ -124,17 +121,16 @@ class ClassLessonsPeerBase {
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
 		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_lessons");
-		$st->fields['id_class_lessons'] = $this->idClassLessons;
+		$st = new LC_InsertStatement("class_announcements");
+		$st->fields['id_class_announcements'] = $this->idClassAnnouncements;
 		$st->fields['id_classes'] = $this->idClasses;
-		$st->fields['createdOn'] = $this->createdOn;
-		$st->fields['title'] = $this->title;
-		$st->fields['description'] = $this->description;
-		$st->fields['activeOn'] = $this->activeOn;
-		$st->fields['inactiveOn'] = $this->inactiveOn;
-		$st->fields['checkList'] = $this->checkList;
+		$st->fields['dt_display'] = $this->dtDisplay;
+		$st->fields['tx_title'] = $this->txTitle;
+		$st->fields['tx_description'] = $this->txDescription;
+		$st->fields['id_faculty_createdby'] = $this->idFacultyCreatedby;
+		$st->fields['dt_created'] = $this->dtCreated;
 
-		$st->key = 'id_class_lessons';
+		$st->key = 'id_class_announcements';
 		$db->executeQuery($st);
 
 		$obj->_new = false;
@@ -147,17 +143,16 @@ class ClassLessonsPeerBase {
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
 		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_lessons");
-		$st->fields['id_class_lessons'] = $obj->idClassLessons;
+		$st = new LC_UpdateStatement("class_announcements");
+		$st->fields['id_class_announcements'] = $obj->idClassAnnouncements;
 		$st->fields['id_classes'] = $obj->idClasses;
-		$st->fields['createdOn'] = $obj->createdOn;
-		$st->fields['title'] = $obj->title;
-		$st->fields['description'] = $obj->description;
-		$st->fields['activeOn'] = $obj->activeOn;
-		$st->fields['inactiveOn'] = $obj->inactiveOn;
-		$st->fields['checkList'] = $obj->checkList;
+		$st->fields['dt_display'] = $obj->dtDisplay;
+		$st->fields['tx_title'] = $obj->txTitle;
+		$st->fields['tx_description'] = $obj->txDescription;
+		$st->fields['id_faculty_createdby'] = $obj->idFacultyCreatedby;
+		$st->fields['dt_created'] = $obj->dtCreated;
 
-		$st->key = 'id_class_lessons';
+		$st->key = 'id_class_announcements';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
@@ -180,7 +175,7 @@ class ClassLessonsPeerBase {
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
 		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_lessons","id_class_lessons = '".$obj->getPrimaryKey()."'");
+		$st = new LC_DeleteStatement("class_announcements","id_class_announcements = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -212,15 +207,14 @@ class ClassLessonsPeerBase {
 
 
 	function row2Obj($row) {
-		$x = new ClassLessons();
-		$x->idClassLessons = $row['id_class_lessons'];
+		$x = new ClassAnnouncements();
+		$x->idClassAnnouncements = $row['id_class_announcements'];
 		$x->idClasses = $row['id_classes'];
-		$x->createdOn = $row['createdOn'];
-		$x->title = $row['title'];
-		$x->description = $row['description'];
-		$x->activeOn = $row['activeOn'];
-		$x->inactiveOn = $row['inactiveOn'];
-		$x->checkList = $row['checkList'];
+		$x->dtDisplay = $row['dt_display'];
+		$x->txTitle = $row['tx_title'];
+		$x->txDescription = $row['tx_description'];
+		$x->idFacultyCreatedby = $row['id_faculty_createdby'];
+		$x->dtCreated = $row['dt_created'];
 
 		$x->_new = false;
 		return $x;
@@ -231,7 +225,7 @@ class ClassLessonsPeerBase {
 
 
 //You can edit this class, but do not change this next line!
-class ClassLessons extends ClassLessonsBase {
+class ClassAnnouncements extends ClassAnnouncementsBase {
 
 
 
@@ -239,7 +233,7 @@ class ClassLessons extends ClassLessonsBase {
 
 
 
-class ClassLessonsPeer extends ClassLessonsPeerBase {
+class ClassAnnouncementsPeer extends ClassAnnouncementsPeerBase {
 
 }
 

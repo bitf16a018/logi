@@ -40,7 +40,6 @@ CREATE TABLE class_assignments_grades (
   KEY id_class_assignments (id_class_assignments)
 ) TYPE=MyISAM;
 
-
 CREATE TABLE class_assignments_link (
   id_class_lessons int(11) unsigned NOT NULL default '0',
   id_class_assignments int(11) unsigned NOT NULL default '0',
@@ -107,18 +106,18 @@ CREATE TABLE class_lesson_objectives (
 ) TYPE=MyISAM;
 
 
-CREATE TABLE class_lessons (
-  id_class_lessons int(11) unsigned NOT NULL auto_increment,
-  id_classes int(10) unsigned NOT NULL default '0',
-  createdOn int(11) NOT NULL default '0',
-  title varchar(255) NOT NULL default '',
-  description text NOT NULL,
-  activeOn int(11) NOT NULL default '0',
-  inactiveOn int(11) NOT NULL default '0',
-  checkList text NOT NULL,
-  PRIMARY KEY  (id_class_lessons),
-  KEY id_classes (id_classes,activeOn,inactiveOn)
-) TYPE=MyISAM;
+CREATE TABLE `class_lessons` (
+        `id_class_lessons` integer (11) NOT NULL auto_increment,  --
+        `id_classes` integer (10),  --
+        `createdOn` integer (11),  --
+        `title` varchar (255),  --
+        `description` longvarchar,  --
+        `activeOn` integer (11),  --
+        `inactiveOn` integer (11),  --
+        `checkList` longvarchar,  --
+        PRIMARY KEY (id_class_lessons)
+)TYPE=MyISAM;
+CREATE INDEX id_classes ON class_lessons (id_classes);
 
 
 CREATE TABLE class_links (
