@@ -9,7 +9,7 @@ include_once(LIB_PATH."gradeBookObj.php");
 include_once(LIB_PATH."LC_html.php");
 include_once(LIB_PATH.'ClassGradebook.php');
 
-class report extends FacultyService {
+class report extends FacultyOnlyService {
 
 	var $presentor='htmlPresentation';
 
@@ -77,7 +77,7 @@ class report extends FacultyService {
 	function fullGridRun(&$db, &$u, &$lc, &$t) {
 
 		// How many entries are displayed per page? (including student name)
-		$columnsPerPage = 10;
+		$columnsPerPage = 12;
 
 		$this->presentor = 'emptyPresentation';
 		$lc->templateName = 'report_classGradesTable';
@@ -153,7 +153,7 @@ class report extends FacultyService {
 			$counter--;
 			while ( $counter != 0 && list($entid,$entry) = each($gradebook->entries) ) {
 			  	$tables[$x][0][] = $entry->gradebookCode.
-					' ('.$entry->totalPoints.')';
+					'<br>('.$entry->totalPoints.')';
 				$counter--;
 			}
 			$counter = $columnsPerPage;
@@ -171,7 +171,7 @@ class report extends FacultyService {
 
 			reset($gradebook->entries);
 			for ( $x=0; $x<$tableCount; $x++ ) {
-				if ($stud->isWithdrawn() ) {
+				if ($stud->isWithdrawn() || $stud->active==0) {
 					$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname . ' W';
 				} else { 
 					$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname;
@@ -200,7 +200,7 @@ class report extends FacultyService {
 
 
 
-			if ( $stud->isWithdrawn() ) {
+			if ( $stud->isWithdrawn() || $stud->active==0) {
 				$tot = 'Withdrawn';
 			} else {
 
