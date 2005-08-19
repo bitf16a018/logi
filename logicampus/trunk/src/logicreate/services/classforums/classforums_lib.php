@@ -1,8 +1,8 @@
 <?php
 
-include_once(INSTALLED_SERVICE_PATH."classforums/ClassForum.php");
-include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumPost.php");
-include_once(INSTALLED_SERVICE_PATH."classforums/ClassForumCategory.php");
+include_once(LIB_PATH."PBDO/classforums/ClassForum.php");
+include_once(LIB_PATH."PBDO/classforums/ClassForumPost.php");
+include_once(LIB_PATH."PBDO/classforums/ClassForumCategory.php");
 
 
 /**
