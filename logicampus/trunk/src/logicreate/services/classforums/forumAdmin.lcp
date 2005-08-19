@@ -408,6 +408,34 @@ class ForumAdmin extends FacultyService {
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = modurl('forum/forum_id='.$moveToId);
 	}
+
+
+	/**
+	 * Trash a thread.
+	 * Move the thread to the trash_posts table
+	 */
+	function trashThreadRun (&$db, &$u, &$lc, &$t) {
+
+		$postId = (int) $lc->getvars['post_id'];
+		$post = ClassForum_Posts::load($postId);
+
+		//check for ownership of the posted thread and the 
+		// desired destination forum
+		$forum = $post->getForum();
+		if ($forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+		}
+
+		if ( strlen($t['message']) > 0 ) {
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$post->trashThread();
+		$lc->templateName = 'forumAdmin_trashThread';
+		$t['forumId'] = $forum->getForumId();
+		$t['forumName'] = $forum->getName();
+	}
 }
 
 
