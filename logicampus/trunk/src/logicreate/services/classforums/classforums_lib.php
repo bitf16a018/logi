@@ -84,20 +84,31 @@ class ClassForum_Posts {
 	 * @static
 	 * @param forumId int id of the forum
 	 */
-	function getTrashTopics($forumId, $limit=-1, $start=-1) {
+	function getTrashTopics($classId, $limit=-1, $start=-1) {
 
-		$query = ' reply_id IS NULL ORDER BY is_sticky DESC, post_datetime DESC';
 		if ($limit > -1) {
-			$query .= ' LIMIT '.$start.', '.$limit;
-		}
-		$list = ClassForumTrashPostPeer::doSelect($query);
+			$query = ClassForum_Queries::getQuery('trashTopicsLimit',
+				array($classId,$start,$limit)
+				);
 
+		} else {
+			$query = ClassForum_Queries::getQuery('trashTopics',
+				array($classId)
+				);
+		}
+
+		$db = DB::getHandle();
+		$db->query(
+			$query
+		);
 		$objList = array();
-		foreach ($list as $k=>$v) {
+		while ( $db->nextRecord() ) {
 			$x = new ClassForum_Posts();
+			$v = ClassForumTrashPostPeer::row2obj($db->record);
 			$x->_dao = $v;
 			$objList[] = $x;
 		}
+
 		return $objList;
 	}
 
@@ -636,12 +647,12 @@ class ClassForum_Forums {
 	 *
 	 * @static
 	 */
-	function staticGetTrashTopicCount($fid=-1) {
+	function staticGetTrashTopicCount($classId) {
 
 		$db = DB::getHandle();
 		$db->query(
 			ClassForum_Queries::getQuery('topicCountTrash',
-				array()
+				array($classId)
 			)
 		);
 		$db->nextRecord();
@@ -919,8 +930,11 @@ class ClassForum_Queries {
 
 		$this->queries['topicCountTrash']  = 
 		'SELECT count(class_forum_trash_post_id) as num
-		FROM `class_forum_trash_post`
-		WHERE reply_id IS NULL';
+		FROM `class_forum_trash_post` A
+		LEFT JOIN class_forum B
+		  ON A.class_forum_id = B.class_forum_id
+		WHERE reply_id IS NULL
+		AND B.class_id = %d';
 
 		$this->queries['forumsSorted'] = 
 		'SELECT A.*
@@ -978,6 +992,20 @@ class ClassForum_Queries {
 		(views, user_id, class_forum_id)
 		VALUES ("%s", %d, %d)';
 
+		$this->queries['trashTopics']  = 
+		'SELECT A.* 
+		FROM class_forum_trash_post A
+		LEFT JOIN class_forum B
+		  ON A.class_forum_id = B.class_forum_id
+		WHERE B.class_id = %d';
+
+		$this->queries['trashTopicsLimit']  = 
+		'SELECT A.* 
+		FROM class_forum_trash_post A
+		LEFT JOIN class_forum B
+		  ON A.class_forum_id = B.class_forum_id
+		WHERE B.class_id = %d
+		LIMIT %d, %d';
 	}
 
 

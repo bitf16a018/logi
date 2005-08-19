@@ -372,14 +372,9 @@ class LC_TableModel_TopicList extends LC_TableModelPaged {
 	function LC_TableModel_TopicList($fid, $rpp, $cp) {
 		$this->rowsPerPage = $rpp;
 		$this->currentPage = $cp;
-		//view the trash
-		if ($fid < 0 ) {
-			$this->posts = ClassForum_Posts::getTrashTopics($fid, $rpp, ($cp-1) * $rpp);
-			$this->maxPosts = ClassForum_Forums::staticGetTrashTopicCount($fid);
-		} else {
-			$this->posts = ClassForum_Posts::getTopics($fid, $rpp, ($cp-1) * $rpp);
-			$this->maxPosts = ClassForum_Forums::staticGetTopicCount($fid);
-		}
+
+		$this->posts = ClassForum_Posts::getTopics($fid, $rpp, ($cp-1) * $rpp);
+		$this->maxPosts = ClassForum_Forums::staticGetTopicCount($fid);
 	}
 
 
@@ -453,9 +448,32 @@ class LC_TableModel_TopicList extends LC_TableModelPaged {
 }
 
 
+
+class LC_TablePaged_TrashTopicList extends LC_TablePaged_TopicList {
+
+	function getPageUrl($i) {
+		return modurl('forumAdmin/event=viewTrash/page='.$i);
+	}
+}
+
+
+
 class LC_TableModel_TrashTopicList extends LC_TableModel_TopicList {
 
 	var $posts = array();
+
+
+	/**
+	 * Paged topic listing of a forum
+	 */
+	function LC_TableModel_TrashTopicList($classId, $rpp, $cp) {
+		$this->rowsPerPage = $rpp;
+		$this->currentPage = $cp;
+
+		$this->posts = ClassForum_Posts::getTrashTopics($classId, $rpp, ($cp-1) * $rpp);
+		$this->maxPosts = ClassForum_Forums::staticGetTrashTopicCount($classId);
+	}
+
 
 	/**
 	 * Returns the number of cols in the model.

@@ -364,6 +364,7 @@ class ClassGradebook extends ClassGradebookBase {
 		if ($possible == 0 ) {
 			return 'E/C';
 		}
+
 		if ($this->calculationType == 1 ) {
 			$score = $points;
 		} else {
@@ -665,7 +666,7 @@ class ClassGradebook extends ClassGradebookBase {
 			$weight = $this->categoryWeights[$entryObj->idClassGradebookCategories]['weight'];
 			$count = $this->categoryWeights[$entryObj->idClassGradebookCategories]['category_count'];
 			# formula is $weight / $count
-			echo "<!--weight=$weight / count=$count-->\n";
+//echo "<!--weight=$weight / count=$count-->\n";
 			// example
 			// category is weight 12% for the total grade, and there are 3 entries
 			// each entry counts as 4%
@@ -767,7 +768,7 @@ class ClassGradebook extends ClassGradebookBase {
 		foreach($this->students AS $username=>$stuObj)
 		{
 			if ( $stuObj->isWithdrawn() ) { continue; }
-			print "\n\n<!-- ".$username."-->\n";
+//print "\n\n<!-- ".$username."-->\n";
 			$categoryPercentSums = array();
 			$totalWeight =0;	// mgk 12/05/03
 
@@ -795,12 +796,12 @@ class ClassGradebook extends ClassGradebookBase {
 					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['count'] ++;
 					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['weight'] += $entryObj->weightedPercent;
 				} else {
-					print "<!-- one E/C grade -->\n"; }
+//print "<!-- one E/C grade -->\n"; }
 
 
 			}
 			//once the vals are sorted by category, find the average
-#			echo "<!--"; debug($categoryPercentSums); echo "-->\n\n";
+//echo "<!--"; debug($categoryPercentSums); echo "-->\n\n";
 // mgk 12/06/03 
 // $totalWeight is what we divide by, not necessarily 100, because
 // we might not have added to 100 yet (earlier in semester)???
@@ -811,7 +812,7 @@ $totalPct=0;
 	$tempAvg = 0;
 	foreach ($categoryPercentSums as $catid => $percentArray ) {
 	$divideby = $totalPct;
-				print "<!-- ".$this->categoryWeights[$catid]['weight'] . " * (". $percentArray['total'] . " / ". $percentArray['count'].")/$divideby -->\n";
+//print "<!-- ".$this->categoryWeights[$catid]['weight'] . " * (". $percentArray['total'] . " / ". $percentArray['count'].")/$divideby -->\n";
 
 				$avg = ($this->categoryWeights[$catid]['weight']/100) * ($percentArray['total']/$percentArray['count']);
 #				$tempAvg += $this->categoryWeights[$catid]['weight'] *( $percentArray['total'] / $percentArray['count']);
@@ -819,7 +820,7 @@ $totalPct=0;
 			}
 			$tempAvg = ($tempAvg/$totalPct) * 100;
 			$stuObj->weightedAverage = sprintf('%.3f',$tempAvg);
-			print "<!-- ".$stuObj->weightedAverage ." -->\n";
+//print "<!-- ".$stuObj->weightedAverage ." -->\n";
 			$this->students[$username] = $stuObj;
 
 		}
@@ -843,7 +844,7 @@ $totalPct=0;
 
 				$score = $this->students[$username]->totalPointsEarned;
 				$poss = $this->students[$username]->possiblePoints;
-				print "<!-- ".$score. " / ". $poss. " -->\n";
+//print "<!-- ".$score. " / ". $poss. " -->\n";
 				$this->students[$username]->percentAverage =
 					sprintf('%0.2f', ($score/$poss)*100);
 			}
