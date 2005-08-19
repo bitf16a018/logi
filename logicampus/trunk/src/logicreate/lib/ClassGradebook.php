@@ -254,6 +254,7 @@ class ClassGradebook extends ClassGradebookBase {
 	var $filterLastname;
 	var $filterActive;
 	var $filterCategory;
+	var $filterSection;
 
 	var $categories = array();
 	var $vals = array();
@@ -275,10 +276,10 @@ class ClassGradebook extends ClassGradebookBase {
 			where s.id_classes="'.$this->idClasses.'"
 			and cls.id_classes="'.$this->idClasses.'" ';
 #			and ss.active=\'1\'';
-// mgk 11/24/03
-if (trim($this->filterBySection)!='') { 
-	$sql .= " and ss.sectionNumber=".$this->filterBySection." ";
-}
+
+		if (strlen($this->filterSection)>0) { 
+			$sql .= " and ss.sectionNumber=".$this->filterSection." ";
+		}
 
 		if ($this->filterLastname)
 			$sql .= ' and lastname like "'.$this->filterLastname.'%"';

@@ -11,7 +11,7 @@ include_once(LIB_PATH."gradeBookObj.php");
 include_once(LIB_PATH."LC_html.php");
 include_once(LIB_PATH.'ClassGradebook.php');
 
-class gradebook extends FacultyService {
+class gradebook extends FacultyOnlyService {
 
 	var $presentor='htmlPresentation';
 
@@ -46,23 +46,35 @@ class gradebook extends FacultyService {
 	 * Input data: course ID
 	 * Output data: display spreadsheet view
 	 */
-	function Run(&$db,&$u,&$lc,&$t) {
+	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName='main_main';
 		$lc->templateStyle = 'private';
 		$this->inactivelinks[] = 'Gradebook Home';
 
-		$filter['filteractive'] =
-			$lc->postvars['filteractive'] ? $lc->postvars['filteractive'] : 'Active';
-		$filter['filterletter'] = $lc->postvars['filterletter'];
-		$filter['filtercat'] = $lc->postvars['filtercat'];
+		if ( $lc->postvars['filteractive'] ) {
+			$filter['filteractive'] = addslashes(trim($lc->postvars['filteractive']));
+		} else {
+			$filter['filteractive'] = 'Active';
+		}
+		if ( intval($lc->postvars['filtersection']) > 0 ) {
+			$filter['filtersection'] = (int)$lc->postvars['filtersection'];
+		}
+
+		$filter['filterletter'] = addslashes(trim($lc->postvars['filterletter']));
+		$filter['filtercat'] = addslashes(trim($lc->postvars['filtercat']));
+
 		$u->sessionvars['filter'] = $filter;
 		$t = array_merge( $t, $filter );
 
-		# Load up all categories for the class
-		$gbook = new ClassGradebook();
+		// Load all gradebook categories 
+		// for the filter drop downs
 		$t['gbCats'] = ClassGradebook::loadCategoryList($u->activeClassTaught->id_classes);
 		$t['gbCats'][0] = 'All Categories';
 
+		// Load all student section numbers
+		// for the filter drop downs
+		$t['sectionNumbers'] = explode("\n",$u->activeClassTaught->sectionNumbers);
+		array_unshift($t['sectionNumbers'],'All Sections');
 
 		// get the semester name
 		$db->queryOne('select semesterTerm, semesterYear from semesters
@@ -74,8 +86,8 @@ class gradebook extends FacultyService {
 			$t['message'] = $u->sessionvars['message'];
 			unset($u->sessionvars['message']);
 		}
-
 	}
+
 
 	/**
 	 * Displays the control panel for the gradebook 
@@ -136,6 +148,8 @@ class gradebook extends FacultyService {
 			$gradebook->filterLastname = $filter['filterletter'];
 		if ( $filter['filtercat'] )
 			$gradebook->filterCategory = $filter['filtercat'];
+		if ( $filter['filtersection'] )
+			$gradebook->filterSection = $filter['filtersection'];
 
 
 		// these four methods are necassary for getting a GB overview table
@@ -143,6 +157,7 @@ class gradebook extends FacultyService {
 		$gradebook->getEntries();
 		$gradebook->getStudents();
 		$gradebook->loadVals();
+
 		// FIX THIS SO STUDENTS DO NOT DISAPPEAR
 if (count($gradebook->students)%$printHeadersEvery ==0) { 
 	$printHeadersEvery +=1;
@@ -170,10 +185,8 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 		$counter--;
 
 
-
-#debug($gradebook,1);
 		//ADD CLOUMN HEADERS TO THE GRADEBOOK TABLE
-		// we need to repeat this every 12 rows or so  (13?)
+		// we need to repeat this every $printHeadersEvery times
 		if ( $gradebook->calculationType == 1 ) {
 			$columnFooter = array( 'Weighted %' );
 		} else {
@@ -183,16 +196,16 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 
 		reset($gradebook->entries);
 		while ( list($entid, $entry) = @each($gradebook->entries) ) {
-			$columnHeaders[] = '<a target="_parent" href="'.modurl('assessment/event=editAsmt/id='
-				.$entid).'">'.$entry->gradebookCode.'</a>';
+
+			$columnHeaders[] = '<a target="_parent" href="'.
+				modurl('assessment/event=editAsmt/id='.$entid).
+				'">'.$entry->gradebookCode.'</a>';
 			$counter--;
 			if ( $counter == 0 ) {
 				$columnHeaders[] = '&nbsp;';
 			}
 
-
-
-		//ADD CLOUMN FOOTERS TO THE GRADEBOOK TABLE
+			//ADD CLOUMN FOOTERS TO THE GRADEBOOK TABLE
 			// Push on totals for each entry
 			if ( $gradebook->calculationType == 1 ) {
 				$columnFooter[] = $entry->weightedPercent;
@@ -229,13 +242,12 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 
 			// build the student's row. start with their name.
 			$counter = $printNamesEvery;
-			#$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
-			$row[] = $stud->lastname.', '.$stud->firstname;
+			$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
 			$counter--;
 
 			reset($gradebook->entries);
 			while ( list($entid,$entry) = @each($gradebook->entries) ) {
-			// http://localhost/tccd/public_html/index.php/assessments/grade/event=view/studentid=adam/id=5
+				// index.php/assessments/grade/event=view/studentid=adam/id=5
 				//use proper decimal places, none for whole integers, one place for fractions
 				if ( isset($stud->vals[$entid]->score) ) {
 					if ( intval($stud->vals[$entid]->score) == $stud->vals[$entid]->score ) {                                                                                                                                                               $stud->vals[$entid]->score = (int)$stud->vals[$entid]->score;
@@ -270,7 +282,7 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 					// but not for each entry because they are all points based
 					// no matter what
 					if ( $gradebook->calculationType == 1 ) {
-						print "<!-- $letter ".$stud->vals[$entid]->score." ".$entry->totalPoints ." -->\n";
+//print "<!-- $letter ".$stud->vals[$entid]->score." ".$entry->totalPoints ." -->\n";
 						$letter = $gradebook->getLetterGrade( 
 							($stud->vals[$entid]->score/$entry->totalPoints )*100
 							,$entry->totalPoints);
@@ -287,14 +299,15 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 
 				}
 
-
+/*
 				if ( $entry->assessmentId ) {
 					$row[] = '<a target="PARENT"  href="'.appurl('assessments/grade/event=view/studentid='
 						.$username.'/id='.$entry->assessmentId).'">'.$text.'</a>';
 				} else {
-					$row[] = popup( modurl('entry/').'event=editSingle/entid='
-						.$entid.'/user='.$username, 200, 400, $text );
-				}
+*/
+				//edit single should work for both assessments and assignments
+				$row[] = popup( modurl('entry/').'event=editSingle/entid='
+					.$entid.'/user='.$username, 200, 400, $text );
 
 				$counter--;
 				if ( $counter == 0 ) {
@@ -341,66 +354,13 @@ note: i'm usinga terany if block becuase its inline.
 			$table[] = $row;
 		}
 
-
-		// Render the table
-		$commoncolor = '#FFFBE4';  // to alternate between white and #FFFBE4 per row
-
-		$currentRow = 1;
-		$t['table'] = "<table cellpadding=5 cellspacing=1 border=0 bgcolor=\"silver\">\n";
-		while ( list($rownum,$row) = @each($table) )
-		{
-			$t['table'] .= "<tr>\n";
-			while ( list($cellnum,$cell) = @each($row) )
-			{
-				if ( $cellnum === 'inactive' ) continue;
-
-				// determine the cell's background color
-				if ( $cell == '&nbsp;' 
-					|| $cell == 'Total Points'
-					|| $cell == 'Weighted %' ) {
-						$bgcol = 'white';
-				} else if ( $table[$rownum][0] == '&nbsp;'
-					|| $table[$rownum][0] == 'Total Points'
-					|| $table[$rownum][0] == 'Weighted %' ) {
-						$bgcol = '#E7E8E7';
-				} else if ( strstr($cell,'*') ) {
-					$bgcol = '#A2CFEF'; 
-				} else if ( $table[$rownum]['inactive'] ) {
-					$bgcol = $droppedStudentRowColor;
-				} else {
-					$bgcol = $commoncolor;
-				}
-
-
-				if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
-					$t['table'] .= "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnHeaders[$cellnum-1]."</th>\n";
-				} else {
-					//disqualified grades
-					// if i do this color swap outside of here, it affects
-					// some of the header cells
-					if ( strstr($cell,'d ') ) {
-						$bgcol = 'E0E0E0'; 
-					}
-
-					$t['table'] .= "\t<td bgcolor=\"$bgcol\" NOWRAP>$cell</td>\n";
-				}
-			}
-			$t['table'] .= "</tr>\n";
-			$commoncolor = $commoncolor == 'white' ? '#FFFBE4' : 'white';
-			//rewind the table when we hit a 'header' row
-			// __FIXME__ don't do this
-			if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
-				prev($table);
-			}
-
-		$currentRow++;
-		}
-		//ADD FOOTER TO TEMPLATE VARIABLE
-		while ( list($cellnum,$cell) = @each($columnFooter) ) {
-			$t['table'] .= "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnFooter[$cellnum]."</th>\n";
-		}
-
-		$t['table'] .= "</table>\n";
+		$t['table'] = $table;
+		$t['columnHeaders'] = $columnHeaders;
+		$t['columnFooter'] = $columnFooter;
+		$t['printHeadersEvery'] = $printHeadersEvery;
+//		unset($table);
+//		unset($columnFooter);
+//		unset($columnHeaders);
 
 		// stupid hack to get a feedback message
 		if ($u->sessionvars['message']) {
@@ -408,7 +368,6 @@ note: i'm usinga terany if block becuase its inline.
 			unset($u->sessionvars['message']);
 		}
 	}
-
 }
 
 ?>
