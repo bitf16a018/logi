@@ -1,5 +1,12 @@
 <?php echo $t['sectionheader'];?>
 
+<div>
+	Back to Forum: <a href="<?= modurl('forum/forum_id='.$t['forumId']);?>"><?=$t['forumName'];?></a>
+	&gt;
+	&gt;
+	Back to Topic: <a href="<?= modurl('posts/post_id='.$t['threadId']);?>"><?=$t['threadName'];?></a>
+</div>
+<hr/>
 
 <form method="POST" action="<?php echo appurl('classforums/posts/event=saveReply');?>">
 

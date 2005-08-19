@@ -1,17 +1,23 @@
 <?php echo $t['sectionheader'];?>
 
+<div>
+	Back to Forum: <a href="<?= modurl('forum/forum_id='.$t['forumId']);?>"><?=$t['forumName'];?></a>
+</div>
+<hr/>
 
 <form method="POST" action="<?php echo appurl('classforums/posts/event=startTopic');?>">
-
-	<input type="text" name="subject" value="Subject"/>
+	<?=lct('Subject');?>:<br/>
+	<input type="text" size="45" name="subject" value="<?=$t['subject'];?>"/>
 	<br/>
-	<textarea rows="15" cols="80" name="message"></textarea>
+	<?=lct('Message');?>:<br/>
+	<textarea rows="15" cols="80" name="message"><?= $t['message'];?></textarea>
 
 	<br/>
 	<br/>
 	<input type="submit" name="submit_topic" id="submit_topic" value="Start Topic"/>
 	<input type="hidden" name="forum_id" id="forum_id" value="<?=$t['forumId'];?>"/>
 </form>
+
 
 <div>
 	<fieldset>

@@ -27,6 +27,8 @@ class forum extends StudentService {
 	var $applinks = array();
 	var $navlinks = array();
 
+	var $forumId;
+
 	function buildNavLinks() {
 		$this->navlinks = array (
 		lct('Class Forums Home') => '%classforums/'
@@ -41,13 +43,7 @@ class forum extends StudentService {
 		$this->applinks = array (
 		);
 
-/*
-		global $lcUser;
-		//need to make this search for moderator status
-		if ( $lcUser->isFaculty() ) {
-			$this->applinks[lct('Admin')]  = 'forumAdmin/';
-		}
-*/
+		$this->applinks[lct('Start New Topic')]  = 'posts/event=newTopic/forum_id='.$this->forumId;
 	}
 
 
@@ -55,6 +51,7 @@ class forum extends StudentService {
 
 		$lc->templateName = 'forum_main';
 		$forumId = (int)$lc->getvars['forum_id'];
+		$this->forumId = (int)$lc->getvars['forum_id'];
 
 		$forum = ClassForum_Forums::load($forumId);
 		$t['locked'] = $forum->isLocked();
