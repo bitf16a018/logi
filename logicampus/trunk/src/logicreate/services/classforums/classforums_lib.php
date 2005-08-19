@@ -278,6 +278,39 @@ class ClassForum_Posts {
 	function save() {
 		return $this->_dao->save();
 	}
+
+
+	/**
+	 * Make a copy of this post and all replies in the trash table
+	 */
+	function trashThread() {
+		$this->getThread();
+		foreach ($this->replies as $x=>$v) {
+			$v->trash();
+		}
+		//the post itself is included in the replies array
+		//get thread is the entire thread
+	}
+
+
+	/**
+	 * Make a copy of this post in the trash table
+	 */
+	function trash() {
+		$attribs = array('classForumId','isHidden','isSticky',
+			'lastEditDatetime','lastEditUsername',
+			'message','postDatetime','replyId',
+			'subject','threadId','userId');
+
+		$trashPost = new ClassForumTrashPost();
+		for ($x=0; $x < count($attribs); ++$x) {
+			$trashPost->set($attribs[$x],$this->_dao->get($attribs[$x]));
+		}
+
+		$okay = $trashPost->save();
+		$okay &= $this->_dao->delete();
+		return $okay;
+	}
 }
 
 
