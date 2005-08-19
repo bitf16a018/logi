@@ -5,6 +5,7 @@
 	Forum: <?=$t['forumName'];?>
 </div>
 <?php if ( ! $x = $t['table']->toHTML() ) { ?>
+	<br style="clear:both;"/>
 	There are no posts in this forum.
 <?php } else {
 	echo $x;

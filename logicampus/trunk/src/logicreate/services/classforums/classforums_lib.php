@@ -33,6 +33,23 @@ class ClassForum_Posts {
 
 
 	/**
+	 * Wraps a different DAO under the same user class
+	 */
+	function loadFromTrash($threadId) {
+		$query = ' thread_id='.$threadId.' and reply_id IS NULL ';
+		$list = ClassForumTrashPostPeer::doSelect($query);
+
+		$x = $list[0];
+		if  (!is_object($x) ) {
+			$x = new ClassForumTrashPost();
+		}
+		$y = new ClassForum_Posts();
+		$y->_dao = $x;
+		return $y;
+	}
+
+
+	/**
 	 * Retrieve a list of all 'topic' posts in a class forums 
 	 * Topics have a null thread ID because they are not
 	 * replying to any particular topic.
@@ -59,6 +76,35 @@ class ClassForum_Posts {
 	}
 
 
+	/**
+	 * Retrieve a list of all 'topic' posts in the trash
+	 * Topics have a null thread ID because they are not
+	 * replying to any particular topic.
+	 *
+	 * @static
+	 * @param forumId int id of the forum
+	 */
+	function getTrashTopics($forumId, $limit=-1, $start=-1) {
+
+		$query = ' reply_id IS NULL ORDER BY is_sticky DESC, post_datetime DESC';
+		if ($limit > -1) {
+			$query .= ' LIMIT '.$start.', '.$limit;
+		}
+		$list = ClassForumTrashPostPeer::doSelect($query);
+
+		$objList = array();
+		foreach ($list as $k=>$v) {
+			$x = new ClassForum_Posts();
+			$x->_dao = $v;
+			$objList[] = $x;
+		}
+		return $objList;
+	}
+
+
+	/**
+	 * get's the entire thread, including topic starter
+	 */
 	function getThread($limit=-1, $start=-1) {
 
 		$topicId = intval($this->getPostId());
@@ -67,6 +113,28 @@ class ClassForum_Posts {
 			$query .= ' LIMIT '.$start.', '.$limit;
 		}
 		$list = ClassForumPostPeer::doSelect($query);
+
+		foreach ($list as $k=>$v) {
+			$x = new ClassForum_Posts();
+			$x->_dao = $v;
+			$this->replies[] = $x;
+		}
+		$this->threadLoaded = true;
+		return $this->replies;
+	}
+
+
+	/**
+	 * get's the entire thread from the trash
+	 */
+	function getTrashThread($limit=-1, $start=-1) {
+
+		$threadId = intval($this->_dao->get('threadId'));
+		$query =' thread_id='.$threadId.' ORDER BY is_sticky DESC, post_datetime ASC';
+		if ($limit > -1) {
+			$query .= ' LIMIT '.$start.', '.$limit;
+		}
+		$list = ClassForumTrashPostPeer::doSelect($query);
 
 		foreach ($list as $k=>$v) {
 			$x = new ClassForum_Posts();
@@ -311,6 +379,39 @@ class ClassForum_Posts {
 		$okay &= $this->_dao->delete();
 		return $okay;
 	}
+
+
+	/**
+	 * Make a copy of this post and all replies in the trash table
+	 */
+	function unTrashThread() {
+		$this->getTrashThread();
+		foreach ($this->replies as $x=>$v) {
+			$v->unTrash();
+		}
+		//the post itself is included in the replies array
+		//get thread is the entire thread
+	}
+
+
+	/**
+	 * Make a copy of this post in the trash table
+	 */
+	function unTrash() {
+		$attribs = array('classForumId','isHidden','isSticky',
+			'lastEditDatetime','lastEditUsername',
+			'message','postDatetime','replyId',
+			'subject','threadId','userId');
+
+		$unTrashPost = new ClassForumPost();
+		for ($x=0; $x < count($attribs); ++$x) {
+			$unTrashPost->set($attribs[$x],$this->_dao->get($attribs[$x]));
+		}
+
+		$okay = $unTrashPost->save();
+		$okay &= $this->_dao->delete();
+		return $okay;
+	}
 }
 
 
@@ -523,6 +624,24 @@ class ClassForum_Forums {
 		$db->query(
 			ClassForum_Queries::getQuery('topicCountForum',
 				array($fid)
+			)
+		);
+		$db->nextRecord();
+		return $db->record['num'];
+	}
+
+
+	/**
+	 * Get a count of topics under the trash
+	 *
+	 * @static
+	 */
+	function staticGetTrashTopicCount($fid=-1) {
+
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('topicCountTrash',
+				array()
 			)
 		);
 		$db->nextRecord();
@@ -797,6 +916,11 @@ class ClassForum_Queries {
 		FROM `class_forum_post`
 		WHERE class_forum_id = %d
 		AND thread_id = class_forum_post_id';
+
+		$this->queries['topicCountTrash']  = 
+		'SELECT count(class_forum_trash_post_id) as num
+		FROM `class_forum_trash_post`
+		WHERE reply_id IS NULL';
 
 		$this->queries['forumsSorted'] = 
 		'SELECT A.*

@@ -37,9 +37,9 @@ class Categories extends FacultyService {
 
 	function buildAppLinks() {
 		$this->applinks = array (
-		lct('Manage Forums') => 'forumAdmin/',
-		lct('Manage Categories') => 'categories/',
 		lct('Add Forum') => 'forumAdmin/event=newForum',
+		lct('Manage Forums') => 'forumAdmin/',
+		lct('Add/Manage Categories') => 'categories/',
 		lct('View Trash') => 'forumAdmin/event=viewTrash'
 		);
 	}
