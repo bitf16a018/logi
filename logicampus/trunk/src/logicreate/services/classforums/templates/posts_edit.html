@@ -1,10 +1,17 @@
 <?php echo $t['sectionheader'];?>
 
+<div>
+	Back to Forum: <a href="<?= modurl('forum/forum_id='.$t['forumId']);?>"><?=$t['forumName'];?></a>
+	&gt;
+	&gt;
+	Back to Topic: <a href="<?= modurl('posts/post_id='.$t['threadId']);?>"><?=$t['threadName'];?></a>
+</div>
+<hr/>
 
 <form method="POST" action="<?php echo appurl('classforums/posts/event=updatePost');?>">
 
 	<?=lct('Subject');?>:<br/>
-	<input type="text" name="subject" value="<?=$t['subject'];?>"/>
+	<input type="text" size="45" name="subject" value="<?=$t['subject'];?>"/>
 	<br/>
 	<?=lct('Message');?>:<br/>
 	<textarea rows="15" cols="80" name="message"><?= $t['message'];?></textarea>
