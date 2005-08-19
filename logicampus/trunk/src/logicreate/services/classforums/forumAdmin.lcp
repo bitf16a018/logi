@@ -454,9 +454,9 @@ class ForumAdmin extends FacultyService {
 		}
 
 		//FIXME check for closed, visibility, etc
-		$dm = new LC_TableModel_TrashTopicList($forumId, $rpp, $cp);
+		$dm = new LC_TableModel_TrashTopicList($u->activeClassTaught->id_classes, $rpp, $cp);
 
-		$table = new LC_TablePaged_TopicList($dm);
+		$table = new LC_TablePaged_TrashTopicList($dm);
 		$table->rowsPerPage = $rpp;
 		$table->currentPage = $cp;
 		$table->forumId = (int) $lc->getvars['forum_id'];
