@@ -40,10 +40,14 @@ class ClassForum_Posts {
 	 * @static
 	 * @param forumId int id of the forum
 	 */
-	function getTopics($forumId) {
+	function getTopics($forumId, $limit=-1, $start=-1) {
 
 		$forumId = intval($forumId);
-		$list = ClassForumPostPeer::doSelect(' class_forum_id='.$forumId.' and thread_id = class_forum_post_id ORDER BY is_sticky DESC, post_datetime DESC');
+		$query = ' class_forum_id='.$forumId.' and thread_id = class_forum_post_id ORDER BY is_sticky DESC, post_datetime DESC';
+		if ($limit > -1) {
+			$query .= ' LIMIT '.$start.', '.$limit;
+		}
+		$list = ClassForumPostPeer::doSelect($query);
 
 		$objList = array();
 		foreach ($list as $k=>$v) {
@@ -469,6 +473,27 @@ class ClassForum_Forums {
 			$this->topicCount = $db->record['num'];
 		}
 		return $this->topicCount;
+	}
+
+
+	/**
+	 * Get a count of topics under this forum
+	 *
+	 * @static
+	 */
+	function staticGetTopicCount($fid=-1) {
+		if ($fid < 0 ) {
+			return 0;
+		}
+
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('topicCountForum',
+				array($fid)
+			)
+		);
+		$db->nextRecord();
+		return $db->record['num'];
 	}
 
 
