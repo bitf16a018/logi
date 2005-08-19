@@ -209,6 +209,15 @@ class LC_TableRenderer_ForumTopic extends LC_TableCellRenderer {
 
 
 
+class LC_TableRenderer_TrashTopic extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<b>'.$this->value->getSubject().'</b> <br/>'.substr($this->value->getMessage(),0,100);
+	}
+}
+
+
+
 class LC_TableRenderer_ForumLastReply extends LC_TableCellRenderer {
 
 	var $dateFormat;
@@ -310,6 +319,187 @@ class LC_TableCheckboxRenderer extends LC_TableCellRenderer {
 		}
 //		$selected = ($this->selectedVal == $this->value[$this->selectedKey]) ? ' CHECKED ':'';
 		return '<input id="'.$this->fieldName.'['.$this->row.']" name="'.$this->fieldName.'['.$this->row.']" value="'.$idValue.'" '.$selected.' type="checkbox">';
+	}
+}
+
+
+
+class LC_TablePaged_TopicList extends LC_TablePaged {
+
+	var $forumId = 0;
+
+	function getMaxRows() {
+		return $this->tableModel->getMaxRows();
+	}
+
+
+	function getPrevUrl() {
+		$prevPage = $this->currentPage -1;
+		if ($prevPage < 1) {
+			$prevPage = 1;
+		}
+
+		return $this->getPageUrl($prevPage);
+	}
+
+
+	function getNextUrl() {
+		$maxRows = $this->getMaxRows();
+		$pages = ceil($maxRows / $this->rowsPerPage);
+		$nextPage = $this->currentPage +1;
+		if ($nextPage > $pages) {
+			$nextPage = $pages;
+		}
+
+		return $this->getPageUrl($nextPage);
+	}
+
+
+	function getPageUrl($i) {
+		return modurl('forum/forum_id='.$this->forumId.'/page='.$i);
+	}
+}
+
+
+
+class LC_TableModel_TopicList extends LC_TableModelPaged {
+
+	var $posts = array();
+
+	/**
+	 * Paged topic listing of a forum
+	 */
+	function LC_TableModel_TopicList($fid, $rpp, $cp) {
+		$this->rowsPerPage = $rpp;
+		$this->currentPage = $cp;
+		//view the trash
+		if ($fid < 0 ) {
+			$this->posts = ClassForum_Posts::getTrashTopics($fid, $rpp, ($cp-1) * $rpp);
+			$this->maxPosts = ClassForum_Forums::staticGetTrashTopicCount($fid);
+		} else {
+			$this->posts = ClassForum_Posts::getTopics($fid, $rpp, ($cp-1) * $rpp);
+			$this->maxPosts = ClassForum_Forums::staticGetTopicCount($fid);
+		}
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->posts));
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getMaxRows() {
+		return $this->maxPosts;
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 5;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return '&nbsp;'; break;
+
+			case '1':
+				return 'Topics'; break;
+
+			case '2':
+				return 'Started By'; break;
+
+			case '3':
+				return 'Replies'; break;
+
+			case '4':
+				return 'Last Reply'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$post = $this->posts[$x];
+		switch ($y) {
+			case 0:
+				return $post;
+			case 1:
+				return $post;
+			case 2:
+				return $post->_dao->userId;
+			case 3:
+				return $post->getReplyCount();
+			case 4:
+				return $post;
+		}
+	}
+}
+
+
+class LC_TableModel_TrashTopicList extends LC_TableModel_TopicList {
+
+	var $posts = array();
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 4;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return 'Threads'; break;
+
+			case '1':
+				return 'Started By'; break;
+
+			case '2':
+				return 'Original Forum'; break;
+
+			case '3':
+				return '&nbsp;'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$post = $this->posts[$x];
+		switch ($y) {
+			case 0:
+				return $post;
+			case 1:
+				return $post->_dao->userId;
+			case 2:
+				$f = $post->getForum(); return $f->getName();
+			case 3:
+				return '<a href="'.modurl('forumAdmin/event=unTrash/thread_id='.$post->_dao->threadId).'">[&nbsp;Un-Trash&nbsp;]</a>';
+		}
 	}
 }
 

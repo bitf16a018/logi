@@ -36,9 +36,9 @@ class ForumAdmin extends FacultyService {
 
 	function buildAppLinks() {
 		$this->applinks = array (
-		lct('Manage Forums') => 'forumAdmin/',
-		lct('Manage Categories') => 'categories/',
 		lct('Add Forum') => 'forumAdmin/event=newForum',
+		lct('Manage Forums') => 'forumAdmin/',
+		lct('Add/Manage Categories') => 'categories/',
 		lct('View Trash') => 'forumAdmin/event=viewTrash'
 		);
 	}
@@ -435,6 +435,63 @@ class ForumAdmin extends FacultyService {
 		$lc->templateName = 'forumAdmin_trashThread';
 		$t['forumId'] = $forum->getForumId();
 		$t['forumName'] = $forum->getName();
+	}
+
+
+	/**
+	 * Show trashed messages
+	 */
+	function viewTrashRun (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forumAdmin_viewTrash';
+		$forumId = -1;
+		$this->forumId = -1;
+
+		$rpp = 15; //rows per page
+		$cp = (int) $lc->getvars['page']; //current page
+		if ($cp < 1) {
+			$cp = 1;
+		}
+
+		//FIXME check for closed, visibility, etc
+		$dm = new LC_TableModel_TrashTopicList($forumId, $rpp, $cp);
+
+		$table = new LC_TablePaged_TopicList($dm);
+		$table->rowsPerPage = $rpp;
+		$table->currentPage = $cp;
+		$table->forumId = (int) $lc->getvars['forum_id'];
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->cellRenderer = new LC_TableRenderer_TrashTopic();
+		$col->justify = 'left';
+
+		$col_b = &$columnModel->getColumnAt(3);
+		$col_b->maxWidth=60;
+
+		$t['table'] = new LC_TableRendererPaged($table);
+	}
+
+
+	/**
+	 * Show trashed messages
+	 */
+	function unTrashRun (&$db, &$u, &$lc, &$t) {
+		$threadId = $lc->getvars['thread_id'];
+		$post = ClassForum_Posts::loadFromTrash($threadId);
+		$forum = $post->getForum();
+		if ( $forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread that you do not own.";
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$post->unTrashThread();
+
+		$lc->templateName = 'forumAdmin_unTrash';
+		$t['forumName'] =  $forum->getName();
+		$t['forumId'] =  $forum->getForumId();
 	}
 }
 
