@@ -147,6 +147,78 @@
 	    attribute="reply_id"
 	    name="reply_id"/>
   </entity>
+  <entity  name="class_forum_trash_post">
+    <attribute name="class_forum_trash_post_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_id"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="is_sticky"
+            required="false"
+            default="0"
+            size="1"
+            type="TINYINT"/>
+    <attribute name="is_hidden"
+            required="false"
+            default="0"
+            size="1"
+            type="TINYINT"/>
+    <attribute name="reply_id"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="thread_id"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="subject"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <attribute name="message"
+            required="true"
+            size=""
+            type="TEXT"/>
+    <attribute name="user_id"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <attribute name="post_datetime"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="last_edit_username"
+            required="false"
+            size="32"
+            type="VARCHAR"/>
+    <attribute name="last_edit_datetime"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+    <foreign-key foreignTable="class_forum">
+	    <reference
+		local="class_forum_id"
+		foreign="class_forum_id"/>
+    </foreign-key>
+    <key 
+	    attribute="is_sticky"
+	    name="is_sticky_idx"/>
+    <key 
+	    attribute="user_id"
+	    name="user_idx"/>
+    <key 
+	    attribute="thread_id"
+	    name="thread_id"/>
+    <key 
+	    attribute="reply_id"
+	    name="reply_id"/>
+  </entity>
   <entity  name="class_forum_category">
     <attribute name="class_forum_category_id"
             required="true"
