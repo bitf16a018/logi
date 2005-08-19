@@ -1,8 +1,9 @@
 <?php
 
-include_once(LIB_PATH."PBDO/classforums/ClassForum.php");
-include_once(LIB_PATH."PBDO/classforums/ClassForumPost.php");
-include_once(LIB_PATH."PBDO/classforums/ClassForumCategory.php");
+include_once(LIB_PATH."PBDO/ClassForum.php");
+include_once(LIB_PATH."PBDO/ClassForumCategory.php");
+include_once(LIB_PATH."PBDO/ClassForumPost.php");
+include_once(LIB_PATH."PBDO/ClassForumTrashPost.php");
 
 
 /**

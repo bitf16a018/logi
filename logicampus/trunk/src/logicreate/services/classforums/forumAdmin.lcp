@@ -34,6 +34,16 @@ class ForumAdmin extends FacultyService {
 		);
 	}
 
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('Manage Forums') => 'forumAdmin/',
+		lct('Manage Categories') => 'categories/',
+		lct('Add Forum') => 'forumAdmin/event=newForum',
+		lct('View Trash') => 'forumAdmin/event=viewTrash'
+		);
+	}
+
+
 
 	function run (&$db, &$u, &$lc, &$t) {
 

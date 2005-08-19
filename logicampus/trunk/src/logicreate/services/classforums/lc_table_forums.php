@@ -9,14 +9,14 @@ class LC_Table_ForumThread extends LC_TablePaged {
 	var $maxRows = -1;
 
 	/**
-	 * Constructor uses an automatic LC_Table_ForumThreadModel
+	 * Constructor uses an automatic LC_TableModel_ForumThread
 	 */
 	function LC_Table_ForumThread($postId, $cp, $rpp) {
 		$this->rowsPerPage = $rpp;
 		$this->currentPage = $cp;
 		$this->postId = $postId;
 
-		$dataModel = new LC_Table_ForumThreadModel($postId, $cp, $rpp);
+		$dataModel = new LC_TableModel_ForumThread($postId, $cp, $rpp);
 
 		parent::LC_Table($dataModel);
 	}
@@ -98,13 +98,13 @@ class LC_Table_ForumThread extends LC_TablePaged {
 
 }
 
-class LC_Table_ForumThreadModel extends LC_TableModelPaged {
+class LC_TableModel_ForumThread extends LC_TableModelPaged {
 
 	var $topicId;
 	var $topicObj;
 	var $replies = array();
 
-	function LC_Table_ForumThreadModel($postId, $cp, $rpp) {
+	function LC_TableModel_ForumThread($postId, $cp, $rpp) {
 		$this->rowsPerPage = $rpp;
 		$this->currentPage = $cp;
 		$this->topicId = $postId;
@@ -178,11 +178,20 @@ class LC_TableNewMessageRenderer extends LC_TableCellRenderer {
 	var $u;
 
 	function getRenderedValue() {
+		if (! is_object($this->value) ) {
+			return '';
+		}
+
+		//posts and forums both use this function, but only forums can be locked
+		if ( method_exists($this->value, 'isLocked') && $this->value->isLocked() ) {
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_locked.png" title="new posts" alt="new posts"><br/>LOCKED';
+		}
+
 		$x = $this->value->getLastVisit($this->u);
 		$y = $this->value->getLastPostTime();
 		//echo "$x <br>$y <hr>";
 		if ($y > $x ) {
-			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts">';
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts"><br/>NEW MESSAGES';
 		} else {
 			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="new posts" alt="new posts">';
 		}
