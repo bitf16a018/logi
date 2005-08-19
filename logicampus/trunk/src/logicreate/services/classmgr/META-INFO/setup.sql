@@ -111,10 +111,10 @@ CREATE TABLE `class_lessons` (
         `id_classes` integer (10),  --
         `createdOn` integer (11),  --
         `title` varchar (255),  --
-        `description` longvarchar,  --
+        `description` TEXT,  --
         `activeOn` integer (11),  --
         `inactiveOn` integer (11),  --
-        `checkList` longvarchar,  --
+        `checkList` TEXT,  --
         PRIMARY KEY (id_class_lessons)
 )TYPE=MyISAM;
 CREATE INDEX id_classes ON class_lessons (id_classes);

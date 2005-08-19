@@ -64,13 +64,24 @@ class forum extends StudentService {
 			return;
 		}
 
+		//how many topcis are read?
 		$x = ClassForum_Settings::getLastForumVisit($u,$forum);
 
 
-		//FIXME check for closed, visibility, etc
-		$dm = new MyPostTableModel($lc->getvars['forum_id']);
+		$rpp = 15; //rows per page
+		$cp = (int) $lc->getvars['page']; //current page
+		if ($cp < 1) {
+			$cp = 1;
+		}
 
-		$table = new LC_Table($dm);
+		//FIXME check for closed, visibility, etc
+		$dm = new LC_TableModel_TopicList($lc->getvars['forum_id'], $rpp, $cp);
+
+		$table = new LC_TablePaged_TopicList($dm);
+		$table->rowsPerPage = $rpp;
+		$table->currentPage = $cp;
+		$table->forumId = (int) $lc->getvars['forum_id'];
+
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
 		$col->maxWidth=64;
@@ -89,22 +100,62 @@ class forum extends StudentService {
 		$col_d->cellRenderer = new LC_TableRenderer_ForumTopic();
 		$col_d->justify = 'left';
 
-		$t['table'] = new LC_TableRenderer($table);
+		$t['table'] = new LC_TableRendererPaged($table);
 		$t['forumId'] = (int)$lc->getvars['forum_id'];
+		$t['forumName'] = $forum->getName();
 	}
 }
 
 
+class LC_TablePaged_TopicList extends LC_TablePaged {
 
-class MyPostTableModel extends LC_TableModel {
+	var $forumId = 0;
+
+	function getMaxRows() {
+		return $this->tableModel->getMaxRows();
+	}
+
+
+	function getPrevUrl() {
+		$prevPage = $this->currentPage -1;
+		if ($prevPage < 1) {
+			$prevPage = 1;
+		}
+
+		return $this->getPageUrl($prevPage);
+	}
+
+
+	function getNextUrl() {
+		$maxRows = $this->getMaxRows();
+		$pages = ceil($maxRows / $this->rowsPerPage);
+		$nextPage = $this->currentPage +1;
+		if ($nextPage > $pages) {
+			$nextPage = $pages;
+		}
+
+		return $this->getPageUrl($nextPage);
+	}
+
+
+	function getPageUrl($i) {
+		return modurl('forum/forum_id='.$this->forumId.'/page='.$i);
+	}
+}
+
+
+class LC_TableModel_TopicList extends LC_TableModelPaged {
 
 	var $posts = array();
 
 	/**
-	 * make a 5 x 10 grid of nonsense
+	 * Paged topic listing of a forum
 	 */
-	function MyPostTableModel($fid) {
-		$this->posts = ClassForum_Posts::getTopics($fid);
+	function LC_TableModel_TopicList($fid, $rpp, $cp) {
+		$this->rowsPerPage = $rpp;
+		$this->currentPage = $cp;
+		$this->posts = ClassForum_Posts::getTopics($fid, $rpp, ($cp-1) * $rpp);
+		$this->maxPosts = ClassForum_Forums::staticGetTopicCount($fid);
 	}
 
 
@@ -114,6 +165,15 @@ class MyPostTableModel extends LC_TableModel {
 	 */
 	function getRowCount() {
 		return (count($this->posts));
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getMaxRows() {
+		return $this->maxPosts;
 	}
 
 

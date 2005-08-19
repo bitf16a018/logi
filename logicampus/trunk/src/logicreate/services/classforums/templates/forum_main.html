@@ -1,5 +1,9 @@
 <?php echo $t['sectionheader'];?>
 
+
+<div style="float:left;">
+	Forum: <?=$t['forumName'];?>
+</div>
 <?php if ( ! $x = $t['table']->toHTML() ) { ?>
 	There are no posts in this forum.
 <?php } else {
