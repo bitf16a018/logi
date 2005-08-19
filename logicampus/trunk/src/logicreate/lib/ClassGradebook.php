@@ -796,7 +796,8 @@ class ClassGradebook extends ClassGradebookBase {
 					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['count'] ++;
 					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['weight'] += $entryObj->weightedPercent;
 				} else {
-//print "<!-- one E/C grade -->\n"; }
+//print "<!-- one E/C grade -->\n"; 
+				}
 
 
 			}
