@@ -33,7 +33,7 @@ class classforums extends StudentService {
 
 		$lc->templateName = 'main_main';
 
-		$dm = new MyTableModel($u);
+		$dm = new LC_TableModel_ForumList($u);
 
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
@@ -98,14 +98,14 @@ class classforums extends StudentService {
 
 
 
-class MyTableModel extends LC_DefaultTableModel {
+class LC_TableModel_ForumList extends LC_DefaultTableModel {
 
 	var $forums = array();
 
 	/**
 	 * make a 5 x 10 grid of nonsense
 	 */
-	function MyTableModel($u) {
+	function LC_TableModel_ForumList($u) {
 		$this->forums = ClassForum_Forums::getAll($u->activeClassTaken->id_classes);
 		$newList = array();
 		//throw out "invisible" ones
@@ -200,34 +200,6 @@ class MyTableModel extends LC_DefaultTableModel {
 		return $ret;
 	}
 }
-
-
-class LC_TableIconRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		if ($this->value->isLocked() ) {
-			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_locked.png" title="new posts" alt="new posts"><br/>LOCKED';
-		}
-		return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="old posts" alt="old posts">';
-
-		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts"><br/>NEW&nbsp;POSTS';
-		} else {
-			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="old posts" alt="old posts">';
-		}
-	}
-}
-
-
-
-/*
-class LC_TableControlRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		return '<a href="'.appurl('classforums/forumAdmin/').'forum_id='.$this->value->classForumId.'">EDIT</a>';
-	}
-}
-*/
 
 
 class LC_TableForumRenderer extends LC_TableCellRenderer {

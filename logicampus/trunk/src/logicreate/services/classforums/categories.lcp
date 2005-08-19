@@ -35,13 +35,19 @@ class Categories extends FacultyService {
 	}
 
 
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('Manage Forums') => 'forumAdmin/',
+		lct('Manage Categories') => 'categories/',
+		lct('Add Forum') => 'forumAdmin/event=newForum',
+		lct('View Trash') => 'forumAdmin/event=viewTrash'
+		);
+	}
+
+
 	function run (&$db, &$u, &$lc, &$t) {
 
-
 		$lc->templateName = 'categories_main';
-
-		//main code
-		include('main_main.html'); //just for the CSS
 
 		$dm = new ForumCategoriesTableModel($u->activeClassTaught->id_classes);
 
@@ -151,17 +157,6 @@ class ForumCategoriesTableModel extends LC_TableModel {
 				return $cat->getCategoryId();
 			default:
 				return $cat;
-		}
-	}
-}
-
-class LC_TableIconRenderer extends LC_TableCellRenderer {
-
-	function getRenderedValue() {
-		if ($this->row % 2 == 0 ) {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
-		} else {
-			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="old posts" alt="old posts">';
 		}
 	}
 }
