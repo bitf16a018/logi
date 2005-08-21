@@ -59,8 +59,6 @@ class assignmentManage extends FacultyService {
         }
 
 
-
-	
 	function rebuildClassDocLibHashesRun($db,&$u,&$lc,&$t)
 	{
 		$db_saver = DB::getHandle();
@@ -92,8 +90,8 @@ class assignmentManage extends FacultyService {
 		echo 'Done...<br>Updated: '. ($i-10). ' (files)';
 		
 	}
-	
-	
+
+
 	function rebuildClassDocLibLinksFromPkeyToHashRun($db,&$u,&$lc,&$t)
 	{
 		$db3 = DB::getHandle();
@@ -315,7 +313,8 @@ class assignmentManage extends FacultyService {
 		}
 		
 	}
-	
+
+
 	function rebuildAssignmentsRun($db,&$u,&$lc,&$t)
 	{
 		if ($u->username == 'kelder')
