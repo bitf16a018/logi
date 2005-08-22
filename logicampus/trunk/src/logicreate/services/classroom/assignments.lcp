@@ -1,10 +1,7 @@
 <?
-/*
- *
+/**
  * Upload assignments and review instructor comments
- *
  */
-
 include_once(LIB_PATH.'datagrid.php');
 include_once(SERVICE_PATH.'pm/privmess.php');
 
@@ -18,38 +15,89 @@ class assignments extends StudentService {
 		'Assignments'
 		);
 	
-/*
- *
- * View submitted assignments and any instructor comments with
- * each.  Also show a form for uploading a new assignment.
- * 
- * Input data: 
- * Output data: 
- *
- */
-		function Run(&$db,&$u,&$lc,&$t) {
-			$lc->templateName='assignments_main';
-			$this->sectionTitle = 'Assignments';
-			
-			$dg = new datagrid($this->module, $this->serviceName);
-			$dg->column = 'id_class_assignments,title,dueDate,noDueDate,dateNoAccept';
-			$dg->table = 'class_assignments';
-			$dg->where = 'activeDate <= '.time().' and id_classes='.$u->activeClassTaken->id_classes;
-			$dg->ignore = array( 'id_class_assignments', 'dateNoAccept', 'noDueDate' );
+	var $assignmentTypes = array(
+		1=>"Upload a file",
+		2=>"Text response",
+		3=>"Upload and text",
+		4=>"Forum post",
+		5=>"None",
+		);
 
-			$dg->headers = array(
-				'title' => 'Title',
-				'dueDate' => 'Due Date',
-				'status' => 'Status'
-			);
-			$dg->prependColumn('<?=strtotime($dateNoAccept) >= time() ? $title : \'<a href="\'.modurl("assignments/event=view/id=$id_class_assignments").\'">\'.$title.\'</a>\';?>', 'title');
-			$dg->postpendColumn('<?=(strtotime($dateNoAccept) >= time() ? \'<a href="\'.modurl("assignments/event=view/id=$id_class_assignments").\'">Turn in</a>\' : "closed");?>', 'status');
-			$dg->overrideColumn('<?=$noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
-			$dg->sortColumns = array( 'title', 'dueDate' );
+	/**
+	 * Show a list of availabe assignments to a student
+	 *
+	 * Input data: 
+	 * Output data: 
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='assignments_main';
+		$this->sectionTitle = 'Assignments';
+		
+		$dg = new datagrid($this->module, $this->serviceName);
+		$dg->column = 'A.id_class_assignments,A.title,A.dueDate,A.noDueDate,A.dateNoAccept,responseType ';
+		$dg->table = 'class_assignments A ';
+		$dg->where = 'activeDate <= '.time().' and id_classes='.$u->activeClassTaken->id_classes;
+		$dg->ignore = array( 'id_class_assignments', 'dateNoAccept', 'noDueDate' ,'responseType');
 
-			$t['table'] = $dg->toHTML();
+		//put all items with no due date at the end
+		$dg->orderby = 'noDueDate ASC, dueDate ';
 
+		if ( $lc->getvars['dgorder'] == 'title' ) {
+			$dg->orderby = 'title';
 		}
+
+		$dg->headers = array(
+			'title' => 'Title',
+			'dueDate' => 'Due date',
+			'dateTurnin'=>'Turned in',
+			'status' => 'Status',
+			'assignmentType' => 'Assignment type'
+		);
+
+		$dg->prependColumn('<?=strtotime($dateNoAccept) >= time() 
+			? $title : \'<a href="\'.modurl("assignments/event=view/id=$id_class_assignments").\'">\'.$title.\'</a>\';?>', 'title');
+		$dg->postpendColumn('<?=(strtotime($dateNoAccept) >= time() 
+			? \'<a href="\'.modurl("assignments/event=view/id=$id_class_assignments").\'">View/Turn in</a>\' : "closed"); ?>', 'status');
+
+
+		// mgk 5/31/05
+		// bug 153
+		// show a turned-in status for each assignment
+		// mak 8/22/05
+		// use a callback column to encapsulate this much logic, rather than an eval column
+		$dg->postpendCallbackColumn('DG_ClassroomAssignmentsStatus', 'dateTurnin');
+
+		//loadup all the turnin statuses for the entire class
+		global $usernameToAssignmentStatus;
+		$usernameToAssignmentStatus = array();
+		$db->query('SELECT * 
+			FROM `class_assignments_turnin` AS A
+			LEFT JOIN class_assignments AS B
+			  ON A.id_class_assignments = B.id_class_assignments
+			WHERE A.id_student = "'.$u->username.'"
+			AND B.id_classes = '.$u->activeClassTaken->id_classes);
+		while ($db->nextRecord()) {
+			$usernameToAssignmentStatus[$db->record['id_class_assignments']] = $db->record;
+		}
+
+
+		// mgk 5/31/05
+		// bug 153
+		// show assignment type
+		// for now, gotta global this - ack
+		// __FIXME__
+		// make a static function that looks-up assignment types in a DB or XML file
+		global $assignmentTypeLookup;	
+		$assignmentTypeLookup = $this->assignmentTypes;
+		$dg->postpendCallbackColumn('DG_ClassroomAssignmentType','assignmentType');
+
+
+		$dg->overrideColumn('<?= $noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
+		$dg->sortColumns = array( 'title', 'dueDate' );
+
+		$t['table'] = $dg->toHTML();
+	}
+
 
 		function viewRun(&$db,&$u,&$lc,&$t) {
 
@@ -61,6 +109,8 @@ class assignments extends StudentService {
 			# the assignment
 			$todays_epoch_date = mktime(23,59,59,date('m'),date('d'),date('y'));
 			$activeDate = "and activeDate <= $todays_epoch_date";
+
+			$lc->getvars['id'] = (int)$lc->getvars['id'];
 
 			while(list ($k, $v) = @each($u->classesTaught) )
 			{
@@ -74,10 +124,23 @@ class assignments extends StudentService {
 					until it is active.</div>';
 				}
 			}
-			$sql = "select * from class_assignments
-				where id_classes='{$u->activeClassTaken->id_classes}'
+
+			//load the gradebook grading type
+			$db->query("SELECT calculation_type
+				FROM class_gradebook 
+				WHERE id_classes = ".$u->activeClassTaken->id_classes);
+			$db->next_record();
+			$t['calculation_type'] = $db->Record['calculation_type'];
+
+
+			//load the assignment
+			$sql = "SELECT A.*, B.total_points, B.id_class_gradebook_entries
+				FROM class_assignments AS A
+				LEFT JOIN class_gradebook_entries AS B
+				  ON B.assignment_id = A.id_class_assignments
+				WHERE A.id_classes='{$u->activeClassTaken->id_classes}'
 				$activeDate
-				and id_class_assignments='{$lc->getvars['id']}'";
+				and A.id_class_assignments='{$lc->getvars['id']}'";
 			$db->queryOne($sql);
 
 			if (!$db->Record['id_class_assignments']) {
@@ -109,7 +172,7 @@ class assignments extends StudentService {
 			$t['f_showform_file'] = false;
 			$t['f_showform_text'] = false;
 			
-			if ((strtotime($db->Record['dateNoAccept'])+86399) > time())
+			if ((strtotime($db->Record['dateNoAccept'])+0) > time())
 			{
 				$t['f_showform'] = true;
 				// we can show the forms for uploading
@@ -182,7 +245,7 @@ class assignments extends StudentService {
 			';
 			$db3 = DB::getHandle();
 			$db3->query($sql);
-			
+
 			while ($db3->next_record()) 
 			{
 				$t['attachments'][] = $db3->Record;	
@@ -231,7 +294,7 @@ class assignments extends StudentService {
 			}
 			$tx_assignment_information = $db->Record;
 			// is this assignment still accepting data?
-			if ((strtotime($db->Record['dateNoAccept'])+86399) > time())
+			if ((strtotime($db->Record['dateNoAccept'])+0) > time())
 			{
 				switch ($db->Record['responseType'])
 				{
@@ -274,7 +337,13 @@ class assignments extends StudentService {
 						dateTurnin=NOW(),
 						id_class_assignments='. (int)$lc->getvars['id'].', 
 						id_student=\''. $u->username.'\',
-						assign_type=1,
+						assign_type=1,';
+// mgk added this line 1/27/05
+// issue brought up that type 'upload and text' wasn't storing text
+// emailed from wissore
+#$sql .='						assign_text=\''. str_replace("'", '\'\'', stripslashes($lc->postvars['assigntext'])).'\'';
+
+$sql.='
 						assign_file_size='. $file['size']. ',
 						assign_file_name=\''. str_replace("'", '\'\'', stripslashes($file['name'])). '\',
 						assign_file_mime=\''. $file['type']. '\',
@@ -375,31 +444,56 @@ class assignments extends StudentService {
 		
 	
 
-/*
- *
- * Take the uploaded file and store in a secure area of the
- * webserver. Store the path, mime info, file size, original
- * file name to a database with a unique ID so that
- * instructors can later download them from the classmgr app.
- * Also store timestamp. Students could reupload another file
- * with the same name, but won't be able to delete the
- * original file (only overwrite it).
- * 
- * Input data: file mime info
- * Output data: 
- *
- */
-		function uploadAssignmentRun(&$db,&$u,&$lc,&$t) {
-			//$t['url']=appurl("classroom/assignments/event=");
-			//$this->presentor='redirect';
-			//return;
+	/**
+	 * Handle the upload of an Assignment
+	 *
+	 * Take the uploaded file and store in a secure area of the
+	 * webserver. Store the path, mime info, file size, original
+	 * file name to a database with a unique ID so that
+	 * instructors can later download them from the classmgr app.
+	 * Also store timestamp. Students could reupload another file
+	 * with the same name, but won't be able to delete the
+	 * original file (only overwrite it).
+	 * 
+	 * Input data: file mime info
+	 * Output data: 
+	 */
+	function uploadAssignmentRun(&$db,&$u,&$lc,&$t) {
+		//$t['url']=appurl("classroom/assignments/event=");
+		//$this->presentor='redirect';
+		//return;
 
-			$lc->templateName='assignments_uploadAssignment';
+		$lc->templateName='assignments_uploadAssignment';
 
-		}
-
-
-
+	}
 }
 
+
+/**
+ * Global helper for the datagrid class
+ *
+ * Shows the turnin status in a column for each student of a class.
+ * Expects a global varaiable $usernameToAssignmentStatus array
+ */
+function DG_ClassroomAssignmentsStatus($row,&$ret) {
+	global $usernameToAssignmentStatus;
+
+	if ($usernameToAssignmentStatus[$row['id_class_assignments']]["dateTurnin"]!="") { 
+		$ret = date("F jS, Y h:i A",strtotime($usernameToAssignmentStatus[$row['id_class_assignments']]["dateTurnin"]));
+	} else { 
+		$ret = "Not yet";
+	}
+}
+
+
+/**
+ * Global helper for the datagrid class
+ *
+ * Shows the turnin status in a column for each student of a class.
+ * Expects a global varaiable $assignmentTypeLookup array
+ */
+function DG_ClassroomAssignmentType($row,&$ret) {
+	global $assignmentTypeLookup; 
+	$ret = $assignmentTypeLookup[$row['responseType']];
+}
 ?>
