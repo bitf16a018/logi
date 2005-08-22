@@ -394,14 +394,34 @@ class ClassForum_Posts {
 
 	/**
 	 * Make a copy of this post and all replies in the trash table
+	 *
+	 * all replies and the topic starter should share the same thread_id
+	 * which is equal to the topic starter's primary key
 	 */
 	function unTrashThread() {
 		$this->getTrashThread();
+		$oldThreadId = $this->getThreadId();
+		//take off the topic starter, which is included in the list of replies
+		$oldTopic = array_shift($this->replies);
+		$newThreadId = $oldTopic->unTrash();
 		foreach ($this->replies as $x=>$v) {
 			$v->unTrash();
 		}
 		//the post itself is included in the replies array
 		//get thread is the entire thread
+
+		//update all the old posts to the new thread id
+		//fix reply_id where it is not null
+		//then match the thread_id to the new pkey
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('updateReplyId',
+				array($newThreadId,$oldThreadId)
+			));
+		$db->query(
+			ClassForum_Queries::getQuery('updateThreadId',
+				array($newThreadId,$oldThreadId)
+			));
 	}
 
 
@@ -419,9 +439,15 @@ class ClassForum_Posts {
 			$unTrashPost->set($attribs[$x],$this->_dao->get($attribs[$x]));
 		}
 
-		$okay = $unTrashPost->save();
-		$okay &= $this->_dao->delete();
-		return $okay;
+		$unTrashPost->save();
+		$pkey = $unTrashPost->getPrimaryKey();
+		$this->_dao->delete();
+		if ( $pkey ) {
+			return $pkey;
+		} else { 
+			trigger_error ('Cannot untrash forum thread.  Insert did not yield primary key.');
+			return false;
+		}
 	}
 }
 
@@ -997,7 +1023,8 @@ class ClassForum_Queries {
 		FROM class_forum_trash_post A
 		LEFT JOIN class_forum B
 		  ON A.class_forum_id = B.class_forum_id
-		WHERE B.class_id = %d';
+		WHERE B.class_id = %d
+		AND reply_id IS NULL';
 
 		$this->queries['trashTopicsLimit']  = 
 		'SELECT A.* 
@@ -1005,7 +1032,19 @@ class ClassForum_Queries {
 		LEFT JOIN class_forum B
 		  ON A.class_forum_id = B.class_forum_id
 		WHERE B.class_id = %d
+		AND reply_id IS NULL
 		LIMIT %d, %d';
+
+		$this->queries['updateReplyId']  = 
+		'UPDATE `class_forum_post`
+		SET reply_id = %d
+		WHERE thread_id = %d
+		AND reply_id IS NOT NULL';
+
+		$this->queries['updateThreadId']  = 
+		'UPDATE `class_forum_post`
+		SET thread_id = %d
+		WHERE thread_id = %d';
 	}
 
 
