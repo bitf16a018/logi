@@ -78,7 +78,9 @@ CREATE TABLE `class_forum_post` (
 CREATE INDEX is_sticky_idx ON class_forum_post (is_sticky);  
 CREATE INDEX user_idx ON class_forum_post (user_id);  
 CREATE INDEX thread_id ON class_forum_post (thread_id);  
-CREATE INDEX reply_id ON class_forum_post (reply_id);
+CREATE INDEX reply_id ON class_forum_post (reply_id);  
+CREATE INDEX class_forum_id ON class_forum_post (class_forum_id);  
+CREATE INDEX post_datetime ON class_forum_post (post_datetime);
 
 -- Dumping SQL for project logicampus
 -- entity version: 0.0
