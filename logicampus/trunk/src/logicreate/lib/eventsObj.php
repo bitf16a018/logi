@@ -1950,6 +1950,15 @@ class assessmentscheduling extends eventItem
 		// you can only see this when the start day has been passed.
 		$start_day = mktime(0,0,0, date('m', $this->startdate), date('d', $this->startdate), date('y', $this->startdate));
 		$end_day = mktime(0,0,0, date('m', $this->enddate), date('d', $this->enddate), date('y', $this->enddate));
+
+		//show it in the calendar no matter when this assessment starts,
+		// if it's the opening or ending day, then show it
+		if ($req_day == $end_day || $req_day == $start_day) {
+			return true;
+		}
+
+		// not sure what the rest of this logic is for !!
+
 		if ($request_label_for_dayview)
 		{	
 			// when to show the label
