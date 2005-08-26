@@ -209,13 +209,6 @@ class LC_TableModel {
 
 
 
-class LC_TableModelPaged extends LC_DefaultTableModel {
-	var $rowsPerPage = 10;
-	var $currentPage = 1;
-}
-
-
-
 class LC_DefaultTableModel extends LC_TableModel {
 
 
@@ -224,6 +217,125 @@ class LC_DefaultTableModel extends LC_TableModel {
 	 */
 	function getColumnCount() {
 		return $this->columnModel->getColumnCount();
+	}
+}
+
+
+
+class LC_TableModelPaged extends LC_DefaultTableModel {
+	var $rowsPerPage = 10;
+	var $currentPage = 1;
+}
+
+
+
+/**
+ * Requires getPrevUrl and getNextUrl functions
+ * @abstract
+ */
+class LC_Table_SqlModel extends LC_TableModelPaged {
+
+	var $query = '';
+	var $rs = array();
+	var $colMap = array();		// 0-based lookup for column names
+	var $titleMap = array();	// 0-based lookup for column headings
+	var $ignore = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function LC_Table_SqlModel($query,$db = '') {
+		$this->query = $query;
+
+		$db->query($query);
+		while($db->nextRecord()) {
+			$this->rs[] = $db->record;
+		}
+
+		$this->setRsNames( array_keys($this->rs[0]) );
+	}
+
+
+	/**
+	 * Add a column to ignore
+	 */
+	function ignoreColumn($name) {
+		$this->ignore[] = $name;
+		$cleanMap = array();
+		for($x=0; $x < count($this->colMap); ++$x) {
+			if ( !in_array( $this->colMap[$x], $this->ignore) ) {
+				$cleanMap[] = $this->colMap[$x];
+			} 
+		}
+		$this->colMap = $cleanMap;
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->rs));
+	}
+
+
+	function getMaxRows() {
+		return (count($this->rs));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return (count($this->rs[0]) - count($this->ignore));
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		if ( strlen($this->titleMap[$columnIndex]) > 0 ) {
+			return $this->titleMap[$columnIndex];
+		} else {
+			//we don't have a map, try to make a nice name
+			$words = str_replace('_', ' ',$this->colMap[$columnIndex]);
+			return ucwords($words);
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 *
+	 * if the given column doesn't exist, return the entire record
+	 */
+	function getValueAt($x,$y) {
+		$r = $this->rs[$x];
+		$colName = $this->colMap[$y];
+		if (strlen($colName) < 1) {
+			return $r;
+		} else {
+			return $r[$colName];
+		}
+	}
+
+
+	/**
+	 * Sets the mapping of column indexes to column titles.
+	 */
+	function setColumnTitles($map) {
+		$this->titleMap = $map;
+	}
+
+
+	/**
+	 * Sets the mapping of column indexes to result set names.
+	 */
+	function setRsNames($map) {
+		$this->colMap = $map;
 	}
 }
 
