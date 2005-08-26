@@ -1,97 +1,94 @@
 <?xml version="1.0"?>
-<!-- MySQL does not support foreign keys. This means   -->
-<!-- that this XML file will not reflect foreign key   -->
-<!-- relationships. You will have to do that yourself. -->
-<database name="logicampus">
-  <table  name="assessment">
-    <column name="assessment_id"
+<project name="logicampus">
+  <entity  name="assessment">
+    <attribute name="assessment_id"
             required="true"
             primaryKey="true"
             size="11"
             type="INTEGER"/>
-    <column name="display_name"
+    <attribute name="display_name"
             required="false"
             size="255"
             type="VARCHAR"/>
-    <column name="class_id"
+    <attribute name="class_id"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="date_available"
+    <attribute name="date_available"
             required="false"
             size="14"
             type="INTEGER"/>
-    <column name="date_unavailable"
+    <attribute name="date_unavailable"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="mail_responses"
+    <attribute name="mail_responses"
             required="false"
             size="1"
             type="TINYINT"/>
-    <column name="auto_publish"
+    <attribute name="auto_publish"
             required="false"
             size="1"
             type="TINYINT"/>
-    <column name="num_retries"
+    <attribute name="num_retries"
             required="false"
             size="4"
             type="TINYINT"/>
-    <column name="minute_limit"
+    <attribute name="minute_limit"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="description"
+    <attribute name="description"
             required="false"
             size=""
             type="LONGVARCHAR"/>
-    <column name="instructions"
+    <attribute name="instructions"
             required="false"
             size=""
             type="LONGVARCHAR"/>
-    <column name="show_result_type"
+    <attribute name="show_result_type"
             required="true"
             default="0"
             size="1"
             type="TINYINT"/>
-    <column name="possible_points"
+    <attribute name="possible_points"
             required="true"
             default="0"
             size=""
             type="FLOAT"/>
-  </table>
-  <table  name="assessment_answer">
-    <column name="assessment_answer_id"
+  </entity>
+  <entity  name="assessment_answer">
+    <attribute name="assessment_answer_id"
             required="true"
             primaryKey="true"
             size="11"
             type="INTEGER"/>
-    <column name="assessment_id"
+    <attribute name="assessment_id"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="assessment_question_id"
+    <attribute name="assessment_question_id"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="student_id"
+    <attribute name="student_id"
             required="false"
             size="32"
             type="VARCHAR"/>
-    <column name="assessment_answer_values"
+    <attribute name="assessment_answer_values"
             required="false"
             size=""
             type="LONGVARCHAR"/>
-    <column name="id_classes"
+    <attribute name="id_classes"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <column name="points_earned"
+    <attribute name="points_earned"
             required="false"
             size=""
             type="FLOAT"/>
-    <column name="points_given"
+    <attribute name="points_given"
             required="false"
             size=""
             type="FLOAT"/>
@@ -101,33 +98,33 @@
       <index-column name="student_id"/>
       <index-column name="id_classes"/>
     </index>
-  </table>
-  <table  name="assessment_log">
-    <column name="id_assessment_log"
+  </entity>
+  <entity  name="assessment_log">
+    <attribute name="id_assessment_log"
             required="true"
             primaryKey="true"
             size="10"
             type="INTEGER"/>
-    <column name="assessment_id"
+    <attribute name="assessment_id"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <column name="id_student"
+    <attribute name="id_student"
             required="true"
             size="32"
             type="VARCHAR"/>
-    <column name="start_date"
+    <attribute name="start_date"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <column name="end_date"
+    <attribute name="end_date"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <column name="id_classes"
+    <attribute name="id_classes"
             required="true"
             default="0"
             size="10"
@@ -135,78 +132,98 @@
     <index>
       <index-column name="assessment_id"/>
     </index>
-  </table>
-  <table  name="assessment_question">
-    <column name="assessment_question_id"
+  </entity>
+  <entity  name="assessment_question">
+    <attribute name="assessment_question_id"
             required="true"
             primaryKey="true"
             size="11"
             type="INTEGER"/>
-    <column name="assessment_id"
+    <attribute name="assessment_id"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="question_type"
+    <attribute name="question_type"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="question_sort"
+    <attribute name="question_sort"
             required="true"
             default="0"
             size="4"
             type="TINYINT"/>
-    <column name="question_points"
+    <attribute name="question_points"
             required="true"
             default="0"
             size=""
             type="FLOAT"/>
-    <column name="question_display"
+    <attribute name="question_display"
             required="false"
             size="255"
             type="VARCHAR"/>
-    <column name="question_text"
+    <attribute name="question_text"
             required="false"
             size=""
             type="MEDIUMTEXT"/>
-    <column name="question_choices"
+    <attribute name="question_choices"
             required="false"
             size=""
             type="LONGVARCHAR"/>
-    <column name="question_input"
+    <attribute name="question_input"
             required="true"
             size=""
             type="LONGVARCHAR"/>
-    <column name="file_hash"
+    <attribute name="file_hash"
             required="true"
             size="32"
             type="VARCHAR"/>
-  </table>
-  <table  name="assessment_grade">
-    <column name="assessment_grade_id"
+  </entity>
+  <entity  name="assessment_grade">
+    <attribute name="assessment_grade_id"
             required="true"
             primaryKey="true"
             size="11"
             type="INTEGER"/>
-    <column name="assessment_id"
+    <attribute name="assessment_id"
             required="false"
             size="11"
             type="INTEGER"/>
-    <column name="student_id"
+    <attribute name="student_id"
             required="true"
             size="32"
             type="VARCHAR"/>
-    <column name="comments"
+    <attribute name="comments"
             required="true"
             size=""
             type="LONGVARCHAR"/>
-    <column name="points"
+    <attribute name="points"
             required="false"
             size="10,2"
             type="FLOAT"/>
-    <column name="points_override"
+    <attribute name="points_override"
             required="false"
             size="10,2"
             type="FLOAT"/>
-  </table>
-</database>
-<!-- END OF MYSQL2TURBINE DUMP -->
+  </entity>
+	<entity name="assessment_event_link">
+		<attribute
+			name = "assessment_event_link_id"
+			type = "int"
+			size = "10"
+			primaryKey  = "true" />
+		<attribute
+			name = "assessment_id"
+			type = "int"
+			size = "10" />
+		<attribute
+			name = "lc_event_id"
+			type = "int"
+			size = "10" />
+		<key
+			name = "assessment_idx"
+			attribute="assessment_id"/>
+		<key
+			name = "lc_event_idx"
+			attribute="lc_event_id"/>
+	</entity>
+</project>

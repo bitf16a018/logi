@@ -69,3 +69,19 @@ CREATE TABLE assessment_grade (
   points_override float(10,2) default NULL,
   PRIMARY KEY  (assessment_grade_id)
 ) TYPE=MyISAM;
+
+
+CREATE TABLE `assessment_event_link` (
+
+	`assessment_event_link_id` int (10) NOT NULL auto_increment,  --
+
+	`assessment_id` int (10),  --
+
+	`lc_event_id` int (10),  --
+
+	PRIMARY KEY (assessment_event_link_id)
+)TYPE=InnoDB;
+
+CREATE INDEX assessment_idx ON assessment_event_link (assessment_id);
+CREATE INDEX lc_event_idx ON assessment_event_link (lc_event_id);
+

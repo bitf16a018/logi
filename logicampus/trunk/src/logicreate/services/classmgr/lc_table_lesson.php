@@ -69,20 +69,6 @@ class LinkedItemsModel extends LC_DefaultTableModel {
 
 
 
-class LC_TableCheckboxRenderer extends LC_TableCellRenderer {
-
-	var $selectedVal;
-	var $selectedKey;
-	var $idName;
-
-	function getRenderedValue() {
-		$selected = ($this->selectedVal == $this->value[$this->selectedKey]) ? ' CHECKED ':'';
-		return '<input name="item['.$this->row.']" value="'.$this->value[$this->idName].'" '.$selected.' type="checkbox">';
-	}
-}
-
-
-
 class LC_TableLessonCheckboxRenderer extends LC_TableCellRenderer {
 
 	var $selectedVal;
