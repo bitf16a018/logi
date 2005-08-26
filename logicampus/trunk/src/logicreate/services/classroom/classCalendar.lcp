@@ -162,7 +162,7 @@ class classCalendar extends StudentService {
 		$ut = strtotime("$mut/$dut/$yut");
 		$start = strtotime("$mut/1/$yut");
 
-		$c = new cali($start,(strtotime("+1 months",$ut)-1), '', $u->activeClassTaken->id_classes, array_unique($u->groups));
+		$c = new cali($start,(strtotime("+1 months",$start)-1), '', $u->activeClassTaken->id_classes, array_unique($u->groups));
 		$c->showTitle=false;
 		$c->showTimes = false;
 		$c->calWidth = '190';
@@ -187,7 +187,7 @@ class classCalendar extends StudentService {
 		$dayView->monthReviewURL = modurl('classCalendar/event=viewDay/d='.$arg->getvars['d']);
 		$dayView->eventDayURL = modurl('classCalendar/event=viewDay');
 		$dayView->eventCountURL = modurl('classCalendar/event=viewDay');
-		
+
 		$t['eventHtml'] = $dayView->renderDayFull();
 		
 		$arg->templateName = "classCalendar_day";

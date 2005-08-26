@@ -56,7 +56,7 @@ class edate extends PersistantObject {
 		if (is_array($this->repeatData)) {
 			$this->repeatData = $this->repeatData['when']."|".$this->repeatData['day'];
 		}
-		$this->_save("lcEvents");
+		return $this->_save("lcEvents");
 	}
 
 	var $pkey;
@@ -741,7 +741,6 @@ class cali {
 			$events = array_merge($events,$e);
 		}
 
-
 		list($m,$d,$y) = split(" ",date("m d Y",$this->start));
 		$startTime = strtotime("$m/$d/$y ".$this->START_HOUR);
 		$endTime = strtotime("$m/$d/$y ".$this->END_HOUR);
@@ -771,11 +770,7 @@ class cali {
 
 					while(list($tkey,$tval) = each($events)) {
 						while(list($key,$val) = each($tval)) {
-// __FIXME__ mgk 8/29/04
-// hack to handle 2 day issues
-if(date("m/d/Y",$loopTime)==date("m/d/Y",$val->startdate+86400)) { 
-	$val->startdate+=86400;
-}
+
 							$thisString = date("h:i A",$val->startdate);
 							// is it just an ordinary calendar type? (world viewable) or specialized ? '' = world
 							if (trim($val->calendarType) != '') {
@@ -786,7 +781,6 @@ if(date("m/d/Y",$loopTime)==date("m/d/Y",$val->startdate+86400)) {
 									//__FIXME__ why don't any of these work?
 									if ($tmp->autoLoad($val) && $tmp->cansee($loopTime, true))
 									{
-									//debug($tmp);
 										if ($tmp->f_allday) {
 											$allday_events[] = $tmp->get_brief_display($loopTime);
 											
@@ -796,13 +790,8 @@ if(date("m/d/Y",$loopTime)==date("m/d/Y",$val->startdate+86400)) {
 										
 										// prevention from reiterating overandoverandover
 										unset($events[$tkey][$key]);
-									
 									}
-
-									
-											
 								}
-								//debug($tmp);
 							} else {
 								// basic shiz
 								if ($rowString == $thisString) {
@@ -1302,26 +1291,34 @@ class eventItem
 			AND calendarType=\''.get_class($this).'\'
 			LIMIT 1
 			';
-			
-			$db = DB::getHandle();
-			$db->RESULT_TYPE = MYSQL_ASSOC;
-			$db->queryOne($sql);
-			
-			if (is_array($db->Record))
-			{
-				foreach($db->Record as $variable => $variable_value)
-				{	$this->{$variable} = $variable_value;
-					$i++;
-				}
-				if ($i)
-				{	return true;
-				}
-			} 
-			/* */
+		} else if ($this->pkey) {
+			$sql = '
+			SELECT *
+			FROM lcEvents
+			WHERE pkey='.$this->pkey.'
+			LIMIT 1
+			';
 		}
+		if ( strlen($sql) < 1 ) {
+			return false;
+		}
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
 		
+		if (is_array($db->Record))
+		{
+			foreach($db->Record as $variable => $variable_value)
+			{	$this->{$variable} = $variable_value;
+				$i++;
+			}
+			if ($i)
+			{	return true;
+			}
+		} 
 	}
-	
+
+
 	function autoLoad(&$object)
 	{	
 		if (is_object($object))
@@ -1400,7 +1397,7 @@ class eventItem
 			$e = new edate();
 			if ($e->autoLoad($this))
 			{	
-				$e->update(); // ugh.. i'd rather have it say "save"
+				return $e->update(); // ugh.. i'd rather have it say "save"
 			}
 			// add the event
 			return true; // this isn't 100% and I need to add better error checking before returning true
@@ -1420,11 +1417,20 @@ class eventItem
 		$this->username = $lcUser->username;	
 
 	}
-	
+
+
+	function setPrimaryKey($pkey) {
+		if (intval($pkey) > 0) {
+			$this->pkey = $pkey;
+		}
+	}
+
+
 	function set_owner($username)
 	{	$this->username = $username;
 	}
-	
+
+
 	function set_description($description)
 	{	$this->description = trim($description);
 	}
@@ -1882,15 +1888,16 @@ class assessmentscheduling extends eventItem
 	
 	
 	function get_brief_display($epochtime=0)
-	{	
+	{
 		$requested_date = mktime(0,0,0, date('m', $epochtime), date('d', $epochtime), date('y', $epochtime));
 		$myenddate =  	mktime(0,0,0, date('m',$this->enddate), date('d',$this->enddate), date('y',$this->enddate));
 		$mystartdate =  mktime(0,0,0, date('m',$this->startdate), date('d',$this->startdate), date('y',$this->startdate));
+//		debug($mystartdate,1);
 		
-		if ($requested_date == $mystartdate)
-		{	$s = '(Available) ';
-		} else
-		{	$s = '(Unavailable) ';
+		if ($requested_date == $mystartdate) {
+			$s = '(Available) ';
+		} else {
+			$s = '(Unavailable) ';
 		}
 
 		if (defined('EVENT_SHOWEXTRACLASSINFO') && EVENT_SHOWEXTRACLASSINFO == true) 
@@ -1912,7 +1919,11 @@ class assessmentscheduling extends eventItem
 			$s = '('.$db->Record['semesterId'].') '.$db->Record['courseFamilyNumber'].' ';
 		}
 		
-	return '<B>Assessment</B>: '.$s. $this->title;
+		if ($requested_date == $mystartdate) {
+			return '<B>Assessment</B>: <a href="'.appurl('classroom/assessments/').'">'.$s. $this->title.'</a>';
+		} else {
+			return '<B>Assessment</B>: '.$s. $this->title;
+		}
 	}
 	
 	
@@ -1936,11 +1947,9 @@ class assessmentscheduling extends eventItem
 	{
 		$today_day = mktime(0,0,0, date('m'), date('d'), date('y'));
 		$req_day = mktime(0,0,0, date('m',$timestamp), date('d',$timestamp), date('y',$timestamp));
-		
 		// you can only see this when the start day has been passed.
 		$start_day = mktime(0,0,0, date('m', $this->startdate), date('d', $this->startdate), date('y', $this->startdate));
 		$end_day = mktime(0,0,0, date('m', $this->enddate), date('d', $this->enddate), date('y', $this->enddate));
-		
 		if ($request_label_for_dayview)
 		{	
 			// when to show the label
@@ -1950,20 +1959,15 @@ class assessmentscheduling extends eventItem
 				// because it's an all day thing
 				// we dont have to worry about hours
 				if ($req_day == $end_day || $req_day == $start_day)
-				{	return true;
+				{
+					return true;
 				}
-				
 			}
-			
-		} else
-		{	if ($start_day <= time())
+		} else {
+			if ($start_day < time())
 			return true;
 		}
-		
-
 	}
-
-
 }
 
 
