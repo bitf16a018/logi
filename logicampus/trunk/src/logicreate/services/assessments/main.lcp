@@ -7,6 +7,7 @@ include_once(LIB_PATH.'AssessmentAnswer.php');
 include_once(LIB_PATH.'AssessmentQuestion.php');
 include_once(LIB_PATH.'AssessmentLib.php');
 include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'PBDO/AssessmentEventLink.php');
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'ClassGradebook.php');
@@ -172,7 +173,7 @@ class assessments extends FacultyService {
 		$gb->idClassGradebookCategories = $lc->postvars['idClassGradebookCategories'];
 		$gb->notes = $lc->postvars['description'];
 		$gb->save();
-			
+
 		$lc->templateStyle = 'private';
 		$this->run($db, $u, $lc, $t);
 		return;
@@ -389,7 +390,7 @@ $t['assessment']->save();
 
 
 	function processAvailabilityRun($db,&$u,&$lc,&$t) {
-	
+		$assessmentId = (int)$lc->getvars['id'];
 		$f = new SiteForm();
 		$t['error'] = $f->validateForm('setavailability', $lc->postvars);
 		if ($t['error'])
@@ -398,56 +399,87 @@ $t['assessment']->save();
 			return;
 		}
 		# Loads the object based on the getvar ID
-		$ast = Assessment::load($lc->getvars['id'], $u->activeClassTaught->id_classes);
-		if (is_object($ast) )
-		{
-			
-		# updates time to unix time
-			$lc->postvars['dateAvailable'] = dateArray2Timestamp($lc->postvars['dateAvailable']);
-			$lc->postvars['dateUnavailable'] = dateArray2Timestamp($lc->postvars['dateUnavailable']);
-	
-			# push postvars onto the object and overwrite what is there 
-			$ast->setArray($lc->postvars);
-	
-			# save it
-			include_once(LIB_PATH.'eventsObj.php');
-			$ast_calendar = new assessmentscheduling();
-			$ast_calendar->set_id_item($ast->assessmentId);
-			$ast_calendar->set_id_class($ast->classId);
-			$ast_calendar->dbLoad();	// try and load it up.. if it can
-			$ast_calendar->set_date_start($ast->dateAvailable);
-			$ast_calendar->set_date_end($ast->dateUnavailable);
-			$ast_calendar->set_title($ast->displayName);
-			$ast_calendar->set_allday(true);
-			if ($ast_calendar->save())
-			{	//echo 'ok it was saved';
-			} else
-			{	//echo 'was not saved.';
-			}
-			
-			$ast->save();
-
-			# Update the gradebook entry
-			$entry = ClassGradebookEntriesPeer::doSelect("assessment_id='".$ast->assessmentId."' AND id_classes='".$u->activeClassTaught->id_classes."'");
-			$entry = $entry[0];
-			$entry->set('totalPoints', $ast->possiblePoints);
-			$entry->set('dateDue', $lc->postvars['dateUnavailable']);
-			if (is_object($entry) )
-			{
-				$entry->publishFlag = $lc->postvars['autoPublish'];
-				$entry->save();
-			} else {
-				$t['message'] = '<h3>Fatal Error</h3>Unable to update gradebook entry. This is a fatal error and needs to be corrected by the database administrator.  Please contact the helpdesk.';
-				$lc->templateName = 'main_error';
-				return;
-			}
-
-		} else {
+		$ast = Assessment::load($assessmentId, $u->activeClassTaught->id_classes);
+		if (!is_object($ast) ) {
 			$t['error'] = '<ul><li>Unable to load assessment.</li></ul>';
 			$this->setAvailabilityRun($db, $u, $lc, $t);
 			return;
-
 		}
+			
+		# updates time to unix time
+		$lc->postvars['dateAvailable'] = dateArray2Timestamp($lc->postvars['dateAvailable']);
+		$lc->postvars['dateUnavailable'] = dateArray2Timestamp($lc->postvars['dateUnavailable']);
+
+		# push postvars onto the object and overwrite what is there 
+		$ast->set('dateAvailable',$lc->postvars['dateAvailable']);
+		$ast->set('dateUnavailable',$lc->postvars['dateUnavailable']);
+		$ast->set('numRetries',$lc->postvars['numRetries']);
+		$ast->set('minuteLimit',$lc->postvars['minuteLimit']);
+		//$ast->set('isPrintable',$lc->postvars['isPrintable']);
+		$ast->set('autoPublish',$lc->postvars['autoPublish']);
+		$ast->set('mailResponses',$lc->postvars['mailResponses']);
+		$ast->set('showResultType',$lc->postvars['showResultType']);
+		//$ast->set('showAfterClose',$lc->postvars['showAfterClose']);
+
+
+		//try to find a calendar event for this assessment
+		//PBDO
+		$eventLink = AssessmentEventLink::load( 
+			array('assessment_id'=>$ast->assessmentId)
+			);
+
+		if (! is_object($eventLink) ) {
+			$eventLink = new AssessmentEventLink();
+		}
+
+		# save it
+		include_once(LIB_PATH.'eventsObj.php');
+		$ast_calendar = new assessmentscheduling();
+		$ast_calendar->setPrimaryKey($eventLink->get('lcEventId'));
+		$ast_calendar->set_id_class($ast->classId);
+		$ast_calendar->dbLoad();	// try and load it up.. if it can
+
+		//TODO, take this out
+		$ast_calendar->set_id_item($ast->assessmentId);
+
+		$ast_calendar->set_date_start($ast->dateAvailable);
+		$ast_calendar->set_date_end($ast->dateUnavailable);
+		$ast_calendar->set_title($ast->displayName);
+		$ast_calendar->set_allday(true);
+
+		$ast_calendar_id = $ast_calendar->save();
+		if ($ast_calendar_id) {
+			//echo 'ok it was saved';
+		} else {
+			//echo 'was not saved.';
+		}
+
+		// Add to calendar (lcEvents)
+		// the id_item column is not enough for reverse lookups
+		$eventLink->set('assessmentId',$assessmentId);
+		$eventLink->set('lcEventId',$ast_calendar_id);
+		if ($eventLink->get('lcEventId') == 0) {
+			$eventLink->set('lcEventId',$ast_calendar->pkey);
+		}
+		$eventLink->save();
+
+		$ast->save();
+
+		# Update the gradebook entry
+		$entry = ClassGradebookEntriesPeer::doSelect("assessment_id='".$ast->assessmentId."' AND id_classes='".$u->activeClassTaught->id_classes."'");
+		$entry = $entry[0];
+		if (is_object($entry) )
+		{
+			$entry->set('totalPoints', $ast->possiblePoints);
+			$entry->set('dateDue', $lc->postvars['dateUnavailable']);
+			$entry->publishFlag = $lc->postvars['autoPublish'];
+			$entry->save();
+		} else {
+			$t['message'] = '<h3>Fatal Error</h3>Unable to update gradebook entry. This is a fatal error and needs to be corrected by the database administrator.  Please contact the helpdesk.';
+			$lc->templateName = 'main_error';
+			return;
+		}
+
 		$this->run($db, $u, $lc, $t);
 		return;
 	}
@@ -608,8 +640,5 @@ debug($questions,1);
 		$t['url']  = modurl('main/event=view/id='.$id);
 		$this->presentor = 'redirectPresentation';
 	}
-
-
-
 }
 ?>

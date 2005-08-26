@@ -1,18 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
-
 include_once(SERVICE_PATH.'menu/menuObj.php');
 
 ////////////////////////////////////////////////////
@@ -214,9 +200,8 @@ class lcSystem {
 
 	function lcSystem() {
 		// global $HTTP_POST_VARS,$HTTP_POST_FILES;
-
 		// doesn't check for magic_quotes_sybase, which may mess things up
-		 if (get_magic_quotes_GPC() ) { 
+		 if (get_magic_quotes_gpc() ) { 
                         $stripquotes = create_function('&$data, $self',
                         'if (is_array($data)) foreach ($data as $k=>$v) $self($data[$k], $self); '.
                         'else $data = stripslashes($data);');
@@ -282,7 +267,7 @@ class lcSystem {
 		 if (!$obj->user->isAnonymous() )
 		 {
 		 	$db = DB::getHandle();
-			$db->queryOne("select count(pkey) as count from privateMessages where
+			$db->queryOne("select count(pkey) as count from privateMessages where sentReceived=0 and
 			messageTo='".$obj->user->username."'",false);
 			$t['_privMsgs'] = $db->Record['count'];
 			if ( isset($obj->user->sessionvars['_privMsgs']) ) {
@@ -762,6 +747,7 @@ class PersistantObject {
 		$db->query("replace into $table set $sql");
 		
 		$this->_lc_insertedKey = $db->getInsertID();
+		return $this->_lc_insertedKey;
 	}
 
 
@@ -827,7 +813,6 @@ class audit {
 	function debug($x, $y='')
 	{
 		echo '<pre>';
-		#		print_r(debug_backtrace());
 		print_r($x);
 		echo '</pre>';
 		
@@ -1081,7 +1066,7 @@ class lcError {
 }
 
 function mylog($file,$string) {
-//return;
+return;
 	$f = fopen($file,"a");
 	$d = date("m/d/Y h:i:s A");
 	global $PHPSESSID;
