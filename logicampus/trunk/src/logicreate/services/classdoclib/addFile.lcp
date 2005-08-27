@@ -85,7 +85,7 @@ class addFile extends classdoclibService {
 
 				$tmp->folder = $arg->postvars['folderID'];
 
-				$newUploads[] = $tmp;
+				//$newUploads[] = $tmp;
 				if(! $tmp->save() ) {
 					$t['baduploads'] .= $tmp->file .'  was not handled properly<p>';
 				} else {

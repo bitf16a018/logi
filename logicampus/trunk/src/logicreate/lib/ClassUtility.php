@@ -20,7 +20,7 @@ class ClassUtility {
 	 * @param int $dest_class_id
 	 * @param array $features an array of feature of the class to copy
 	 */
-	function copyClass($source_class_id,$dest_class_id ,$features ) {
+	function copyClass($source_class_id, $dest_class_id ,$features ) {
 		$db = DB::getHandle();
 		//what to update: 
 		// assignments, assignments_link 
@@ -381,6 +381,139 @@ class ClassUtility {
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Copy the file resources from one class into another
+	 *
+	 * Put all the copied files in a folder called 'Copied From (courseFamilyNumber)
+	 *
+	 * @static
+	 * @param int $source_class_id
+	 * @param int $dest_class_id
+	 * @return array an array with a 'message' of good and bad uploads
+	 */
+	function copyFileResources($source_class_id, $dest_class_id ,$features ) {
+		include_once(LIB_PATH."documentLibraryLib.php");
+
+		$sourceClass = classObj::_getFromDB($source_class_id,'id_classes');
+		$destClass = classObj::_getFromDB($dest_class_id,'id_classes');
+		$sourceFaculty = $sourceClass->facultyId;
+		$destFaculty = $destClass->facultyId;
+
+		//make a new folder in the destination class
+		//TODO: delete the contents if you find a similarly named folder
+		$importFolder = new LC_folder();
+
+		$importFolder->name = 'Copied From ('.$sourceClass->courseFamilyNumber.')';
+		$importFolder->owner = $destFaculty;
+		$importFolder->folderType = 2;	//user definable folder
+
+		$importFolder_pkey = $importFolder->_save('classdoclib_Folders');
+
+		//get a copy of the resources in source class
+		// scan each piece of content for referenced links
+		// then use the hash ids to pull the source files "in use"
+		// only copy those.  The relationship between file and class
+		// was at the folder level, but it has been destroyed.
+		$sourceContent = ClassUtility::getClassContent($source_class_id);
+
+		$finalMatches = array();
+		foreach($sourceContent as $k=>$v) {
+			$matches = array();
+	 		$count = preg_match("/\/fhash=[0-9a-zA-Z]{32}/",$v['txText'],$matches);
+			if ($count > 0 ) {
+				$finalMatches = array_merge($finalMatches,$matches);
+			}
+		}
+		$finalMatches = array_unique($finalMatches);
+
+		//load the full file paths into memory
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		foreach($finalMatches as $k =>$v ) {
+			$v = str_replace('/fhash=','',$v);
+			$db->query("SELECT * FROM classdoclib_Files
+			WHERE daHasha = '$v'");
+			$db->nextRecord();
+			$files[] = $db->record;
+			$filePaths[] = LC_DiskRepository::getFullPath($db->record['diskName']);
+			$oldHashes[] = $v;
+		}
+
+		//re-insert them into the DB, they know how to copy themselves on the disk
+		static $hash_count = 2;
+		$newUploads = array(); //hold the map of old to new hashes
+		foreach ($files as $k => $v) {
+			$tmp = new LC_file();
+			$tmp->size = $v['size'];
+			$tmp->file = $v['file'];
+			$tmp->tmpfile = $filePaths[$k];
+			$tmp->mime = $v['mime'];
+
+			$tmp->daHasha = md5($tmp->size.microtime().$hash_count++.$tmp->file);
+
+			$tmp->displayname = $v['displayname'];
+			$tmp->description = $v['description'];
+			$tmp->owner = $destFaculty;
+			$tmp->filedate = $v['filedate'];
+			$tmp->folder = $importFolder_pkey;
+
+			if(! $tmp->save() ) {
+				$baduploads .= '<p>'.$tmp->file .'  was not handled properly<p>';
+			} else {
+				$gooduploads .= '<li>'.$tmp->file .'</li>';
+				$newUploads[$oldHashes[$k]] = $tmp;
+			}
+		}
+
+		if ($baduploads) {
+			$ret['error_message'] .= 'There was a problem with the file uploads.  Not all of the uploads were successfully processed.<BR>';
+			$ret['error_message'] .= $baduploads;
+		}
+		if ($gooduploads) {
+			$ret['message'] .= '<p>The following files were successfully uploaded and saved: <p><ul>';
+			$ret['message'] .= $gooduploads;
+			$ret['message'] .= '</ul>';
+		}
+
+		//finally, update all the content in the new class
+		$destContent = ClassUtility::getClassContent($dest_class_id);
+		foreach($destContent as $k=>$v) {
+			$temp = $v['txText'];
+			$tempid = $v['id_class_lesson_content'];
+			reset($newUploads);
+			foreach($newUploads as $oldHash=>$newFile) { 
+				$temp = str_replace("/fhash=$oldHash\"",
+				"/fhash=".$newFile->daHasha."\"",$temp);
+			}
+			$temp = addslashes($temp);
+//			debug( $temp );
+			$sql = "update class_lesson_content set txText='$temp' where id_class_lesson_content=$tempid";
+			$db->query($sql);
+		}
+
+		//return the messages
+		return $ret;
+	}
+
+
+	/**
+	 * Retrieve all the content files from a class
+	 *
+	 * @return array Struct of database records
+	 */
+	function getClassContent($class_id) {
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$sql = "select * from class_lesson_content where id_classes=$class_id";
+		$db->query($sql);
+		$ret = array();
+		while($db->nextRecord()) {
+			$ret[] = $db->record;
+		}
+		return $ret;
 	}
 }
 

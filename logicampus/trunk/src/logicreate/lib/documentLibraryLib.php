@@ -97,6 +97,21 @@ class LC_file extends PersistantObject{
 	var $folder;
 
 
+	function getAllByOwner($owner_id) {
+		$ret = array();
+		$db = DB::getHandle();
+		$sql = "select * from classdoclib_Files where owner='$owner_id'";
+
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+		while($db->next_record()) {
+			$x = PersistantObject::createFromArray('LC_file',$db->Record);
+			$ret[$x->pkey] = $x;
+		}
+		return $ret;
+	}
+
+
 	function getFromFolder($folder,$order='') {
 		$ret = array();
 		$db = DB::getHandle();
