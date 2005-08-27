@@ -422,12 +422,16 @@ class ClassUtility {
 		$finalMatches = array();
 		foreach($sourceContent as $k=>$v) {
 			$matches = array();
-	 		$count = preg_match("/\/fhash=[0-9a-zA-Z]{32}/",$v['txText'],$matches);
+	 		$count = preg_match_all("/\/fhash=[0-9a-zA-Z]{32}/",$v['txText'],$matches);
 			if ($count > 0 ) {
-				$finalMatches = array_merge($finalMatches,$matches);
+				$finalMatches = array_merge($finalMatches,$matches[0]);
 			}
+//debug($v['txTitle']);
+//debug($matches[0]);
 		}
+//debug($finalMatches);
 		$finalMatches = array_unique($finalMatches);
+//debug($finalMatches,1);
 
 		//load the full file paths into memory
 		$db = DB::getHandle();
