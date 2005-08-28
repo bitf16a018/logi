@@ -79,10 +79,24 @@ function _saveToDB() {
 $db = DB::GetHandle($this->_dsn);
 if ($this->id_class_announcements =='') {$this->id_class_announcements=$this->_genPkey(); }
 if ($this->__loaded) { // was the object loaded from DB already?
-$sql = "update class_announcements set id_class_announcements='{$this->id_class_announcements}',id_classes='{$this->id_classes}',dt_display='{$this->dt_display}',tx_title='{$this->tx_title}',tx_description='{$this->tx_description}',id_faculty_createdby='{$this->id_faculty_createdby}',dt_created='{$this->dt_created}' where id_class_announcements = '{$this->{$this->_pkey}}'";
+$sql = "update class_announcements set 
+	id_class_announcements='".addslashes($this->id_class_announcements)."',
+	id_classes='".addslashes($this->id_classes)."',
+	dt_display='".addslashes($this->dt_display)."',
+	tx_title='".addslashes($this->tx_title)."',
+	tx_description='".addslashes($this->tx_description)."',
+	id_faculty_createdby='".addslashes($this->id_faculty_createdby)."',
+	dt_created='".addslashes($this->dt_created)."' 
+	where id_class_announcements = '".addslashes($this->{$this->_pkey})."'";
 $db->query($sql);
 } else {
-$sql = "insert into class_announcements   (id_classes,dt_display,tx_title,tx_description,id_faculty_createdby,dt_created) values ('{$this->id_classes}','{$this->dt_display}','{$this->tx_title}','{$this->tx_description}','{$this->id_faculty_createdby}','{$this->dt_created}')";
+$sql = "insert into class_announcements   (id_classes,dt_display,tx_title,tx_description,id_faculty_createdby,dt_created) values (
+	'".addslashes($this->id_classes)."',
+	'".addslashes($this->dt_display)."',
+	'".addslashes($this->tx_title)."',
+	'".addslashes($this->tx_description)."',
+	'".addslashes($this->id_faculty_createdby)."',
+	'".addslashes($this->dt_created)."')";
 $db->query($sql);
 }
 
