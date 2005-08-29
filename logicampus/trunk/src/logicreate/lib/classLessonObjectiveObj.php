@@ -83,10 +83,10 @@ id_class_objectives = '{$this->{$this->_pkey}}'";
 } else {
 // Adam modified this next line
 $sql = "insert into class_objectives   (i_sort,f_hide,id_classes,objective) values (
-	'{$this->i_sort}',
-	'{$this->f_hide}',
-	'{$this->id_classes}',
-	'{$this->objective}')";
+	'".addslashes($this->i_sort)."',
+	'".addslashes($this->f_hide)."',
+	'".addslashes($this->id_classes)."',
+	'".addslashes($this->objective)."')";
 }
 $db->query($sql);
 
