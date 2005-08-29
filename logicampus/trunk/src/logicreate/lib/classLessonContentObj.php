@@ -79,10 +79,10 @@ id_class_lesson_content = '{$this->{$this->_pkey}}'";
 $db->query($sql);
 } else {
 $sql = "insert into class_lesson_content   (id_classes,txTitle,txText,dateCreated) values (
-'{$this->id_classes}',
-'{$this->txTitle}',
-'{$this->txText}',
-'{$this->dateCreated}')";
+'".addslashes($this->id_classes)."',
+'".addslashes($this->txTitle)."',
+'".addslashes($this->txText)."',
+'".addslashes($this->dateCreated)."')";
 $db->query($sql);
 }
 
