@@ -808,7 +808,7 @@ class UserProfile {
 
 		while(list ($k, $v) =@each($this->common_attribs) ) {
 			if ($this->values[$v])
-			$update .= "$v='".$this->values[$v]."', ";
+			$update .= "$v='".addslashes(trim($this->values[$v]))."', ";
 		}
 		$update = substr($update, 0, -2);
 
