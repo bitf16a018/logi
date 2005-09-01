@@ -203,6 +203,5 @@ class contactStudents extends FacultyService
 		$t['emessage'] = '<h3 align="center" style="color: blue;">Mail sent to recipients.</h3>';
 		$this->run($db, $u, $lc, $t);
 	} 
-
 }
 ?>
