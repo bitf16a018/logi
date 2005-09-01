@@ -171,27 +171,38 @@ class contactStudents extends FacultyService
 				$mailer->messageFrom = $u->profile->get('title'). ' '. $u->profile->get('lastname').' <'.$u->email. '>';
 				$mailer->message = stripslashes($lc->postvars['message']);
 				$mailer->subject = $lc->postvars['subject'];
-				
+
+				//send one mail to each recipient,
+				// some classes are too long for sendmail to handle in the To: header
+				// sending all in one To: works fine in postfix
 				foreach($my_email_to_send as $username => $useremail)
 				{
-					$mailer->messageTo .= $useremail. ', ';	
+					$mailer->messageTo = trim($useremail);	
 
+					
+					$header =  "From: ".$mailer->messageFrom."\n";
+					$header .= "Reply-To: ".$mailer->messageFrom. "\n";
+					mail($mailer->messageTo, $mailer->subject, 
+						$mailer->message, $header);
 				}
-				
-				$mailer->messageTo = substr($mailer->messageTo, 0, (strlen($mailer->messageTo)-2));
-				
-				$CC = '';
-				if (strlen(trim($lc->postvars['cc']))  > 5)
-				{	$CC = 'cc: '.trim($lc->postvars['cc']). "\n";
+
+				//additional recipients, no more Bcc and Cc
+				$recipientA = escapeshellcmd(trim($lc->postvars['recipient_a']));
+				if (strlen($recipientA)) {
+					$mailer->messageTo = $recipientA;	
+					$header =  "From: ".$mailer->messageFrom."\n";
+					$header .= "Reply-To: ".$mailer->messageFrom. "\n";
+					mail($mailer->messageTo, $mailer->subject, 
+						$mailer->message, $header);
 				}
-				
-				$BCC = '';
-				if (strlen(trim($lc->postvars['bcc']))  > 5)
-				{	$BCC = 'bcc: '.trim($lc->postvars['bcc']). "\n";
+				$recipientB = escapeshellcmd(trim($lc->postvars['recipient_b']));
+				if (strlen($recipientB)) {
+					$mailer->messageTo = $recipientB;	
+					$header =  "From: ".$mailer->messageFrom."\n";
+					$header .= "Reply-To: ".$mailer->messageFrom. "\n";
+					mail($mailer->messageTo, $mailer->subject, 
+						$mailer->message, $header);
 				}
-				
-				$header = "From: ".$mailer->messageFrom."\nReply-To: ".$mailer->messageFrom. "\n".$CC.$BCC;
-				mail($mailer->messageTo, $mailer->subject, $mailer->message, $header);
 
 				// copy to sender
 				if ($lc->postvars['copy'] == 'copy') { 
@@ -201,18 +212,10 @@ class contactStudents extends FacultyService
 						$mailer->message, 
 						"From: ".$mailer->messageFrom."\nReply-To: ".$mailer->messageFrom."\n"); 
 				}
-				
-
 		}
-		
-		$t['emessage'] = '<h3 align="center" style="color: blue;">Mailer sent out to students</h3>';
-		
+		$t['emessage'] = '<h3 align="center" style="color: blue;">Mail sent to recipients.</h3>';
 		$this->run($db, $u, $lc, $t);
-		
 	} 
 
-
 }
-
-
 ?>
