@@ -1,0 +1,136 @@
+<html>
+<head>
+	<style type="text/css">
+		TD {
+		    color: #000000;
+		    font-family: arial, helvetica, san-serif;
+		    font-size: 12px; 
+		}
+		.admin {
+		    color: #FF0000;
+		    font-family: arial, helvetica, san-serif;
+		    font-size: 12px; 
+		}
+
+		#loaderCover {
+			position:absolute;
+			display:none;
+			height:30%;
+			width:100%;
+			text-align:center;
+			padding:-7px;margin:-7px;
+		}
+		#loaderCover table {
+			margin-top:1em;
+			border:1px solid black;
+		}
+	</style>
+<script language="Javascript">
+
+
+	function mySubmit() {
+		coverOn();
+		window.setTimeout("myPost()",100);
+		return false;
+	}
+
+
+	function myPost() {
+		var myField = document.getElementById('chat_message');
+		xmlhttp.open('POST',"<?=modurl('main/event=post/');?>",false);
+		xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+
+		xmlhttp.send("message="+myField.value);
+		strResult=xmlhttp.responseText;
+		//alert(strResult);
+
+		myField.value = '';
+		window.setTimeout("coverOff()",1000);
+	}
+
+
+	function coverOn() {
+		document.getElementById('loaderCover').style.display = 'block';
+		var myField = document.getElementById('chat_message');
+		myField.disabled = true;
+	}
+
+
+	function coverOff() {
+		document.getElementById('loaderCover').style.display = 'none';
+		var myField = document.getElementById('chat_message');
+		myField.disabled = false;
+		myField.focus();
+	}
+
+
+	//The following is a heavily modified example from
+	// http://jibbering.com/2002/4/httprequest.html
+	// http://jibbering.com/2002/4/httprequest.2004.9.html
+
+	var xmlhttp=false;
+	var divCount=0;
+	/*@cc_on @*/
+	/*@if (@_jscript_version >= 5)
+	// JScript gives us Conditional compilation, we can cope with old IE versions.
+	// and security blocked creation of the objects.
+	 try {
+	  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+	 } catch (e) {
+	  try {
+	   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	  } catch (E) {
+	   xmlhttp = false;
+	  }
+	 }
+	@end @*/
+
+	if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+	  xmlhttp = new XMLHttpRequest();
+	}
+</script>
+</head>
+<body bgcolor="silver" onload="document.getElementById('chat_message').focus();">
+	<div id="loaderCover">
+		<table width="30%" height="100%" align="center">
+			<tr><td align="center" background="<?=IMAGES_URL;?>semi-transparent.gif" >
+					Posting your message...
+			</td></tr>
+		</table>
+	</div>
+
+<div style="float:right">
+	<a href="#" onclick="document.location.reload();">Refresh</a>
+	|
+	<a href="#" onclick="parent.View.toggleTime();">Toggle Time</a>
+</div>
+<form onsubmit="return mySubmit();">
+	<table>
+		<tr><td colspan="1">
+			<?=$t["message"];?>
+		</td></tr>
+		<tr><td colspan="1">
+			Type your message below:
+		</td></tr>
+		<tr><td>
+			<input type="text" name="chat_message" id="chat_message" size="65">
+		</td></tr>
+		<tr><td>
+			<input type="submit" value="Post"> 
+		</td></tr>
+
+	<? if ($t['allowURL']) { ?>
+		<tr><td colspan="1">
+		URL to post 
+		</td></tr>
+		<tr><td>
+			<input type="text" name="url" size="45">
+			<input type="submit" value="Post"> 
+		</td></tr>
+	<? } ?>
+
+	</table>
+</form>
+
+</body>
+</html>
