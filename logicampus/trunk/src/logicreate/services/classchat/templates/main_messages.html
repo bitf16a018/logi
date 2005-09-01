@@ -1,0 +1,229 @@
+<HTML>
+	<HEAD>
+	<style type="text/css">
+	DIV.chat_message_body {
+		display:block;
+		padding:3px 7px 3px 7px;
+		width:auto;
+/* border:1px solid red; */
+	}
+	DIV.chat_message_time {
+		float:left; 
+		padding:3px 3px 3px 7px;
+		font-family:Cursor,Monospace;
+		width:70px;
+		display:block;
+/* border:1px solid green; */
+	}
+	DIV.chat_message_user {
+		float:left; 
+		padding:3px 7px 3px 3px;
+		font-family:Cursor,Monospace;
+		width:70px;
+		display:block;
+/* border:1px solid blue; */
+	}
+
+	</style>
+	<script lang="Javascript">
+
+
+	function chat_getMessages() {
+		xmlhttp.open("GET", "<?= modurl('main/event=getMessages/');?>last="+lastId, true);
+		xmlhttp.onreadystatechange=function() {
+		if (xmlhttp.readyState==4) {
+			//alert(xmlhttp.responseText)
+			if (xmlhttp.responseText != 'null') {
+				//alert (xmlhttp.responseText);
+				writeBody(xmlhttp.responseText);
+			}
+		}
+		}
+		xmlhttp.send(null)
+		setTimeout("chat_getMessages();",3000);
+	}
+
+
+	function writeBody(txt) {
+		var blob = eval(txt);
+		for (var x=0; x < blob.length; ++x) {
+			var blockDiv = document.createElement('div');
+			divCount++;
+			blockDiv.innerHTML = blob[x]['html'];
+			blockDiv.id = "message_"+divCount;
+			blockDiv.style.clear='both';
+			//if the user has toggled time off, turn off the
+			// first div inside blockDiv
+			if (showTime == false) {
+				blockDiv.childNodes[0].style.display='none';
+			}
+			document.body.appendChild(blockDiv);
+			//10 is just some extra padding, doesn't seem to scroll
+			// all the way down all the first time
+			window.scrollBy(0,blockDiv.scrollHeight+10);
+
+			//alternate colors so that multiple messages can
+			// be distinguished
+			if(x%2 == 0) {
+				chat_messageCooldown(divCount,0,"even");
+			} else {
+				chat_messageCooldown(divCount,0,"odd");
+			}
+
+			//update the global lastId to point to the most recently recieved message
+			lastId = blob[x]['id'];
+		}
+	}
+
+
+	/**
+	 * cycle through some colors to give notice to new messages
+	 */
+	function chat_messageCooldown(idNum,colorIndex,colorArray) {
+		//bring in a global variable based on a string
+		// so that we can use setTimeout with just the string.
+		if (colorArray == 'odd') {
+			var colorsToUse = oddColors;
+		} else {
+			var colorsToUse = evenColors;
+		}
+		var newMessage = document.getElementById("message_"+idNum);
+		newMessage.style.backgroundColor = colorsToUse[colorIndex];
+		//newMessage.style.border = '1px solid ' + colorsToUse[colorIndex];
+
+		// select next fader color
+		colorIndex += step; 
+
+		// completely faded in?
+		if (colorIndex >= steps) {
+			step = 1;
+			colorIndex =0;
+			//newMessage.style.border = '1px solid white';
+		} else {
+			setTimeout("chat_messageCooldown("+idNum+","+colorIndex+",'"+colorArray+"');",100);
+		}
+	}
+
+	function toggleTime() {
+	  var divs = document.getElementsByTagName('div');
+	  for( var x = 0; x < divs.length; x++ ) {
+		if (divs[x].className == 'chat_message_time') {
+			if (divs[x].style.display == 'none' ) {
+				divs[x].style.display = 'block';
+				showTime = true;
+			} else {
+				divs[x].style.display = 'none';
+				showTime = false;
+			}
+		}
+	  }
+	  if( !divs.length ) { alert( 'Your browser cannot hide the time that a message was posted.' ); }
+	}
+
+
+var showTime = true; //global state of each time div's display property
+var lastId = 0; //the pkey in the database of the last message recieved
+
+//this code is a heavily modified version of the fading text example at
+// The JavaScript Source ( http://javascriptsource.com )
+// http://javascript.internet.com/messages/fading-text.html
+// modifications include:
+// * even and odd coloring for each row,
+// * local variables in the Cooldown function for multiple divs at a time
+
+var bgcolor1 = "#DDDDFF"; // color to start from, odd rows
+var fcolor1 = "#FFFFFF";  // color to end on, even rows
+
+var bgcolor2 = "#DDFFDD"; // color to start from, odd rows
+var fcolor2 = "#FFFFFF";  // color to end on, even rows
+
+var steps = 10; // number of steps to fade
+var step = 1;
+
+// Do Not Edit Below This Line
+var oddColors = new Array(steps);
+var evenColors = new Array(steps);
+
+getFadeColors(bgcolor1,fcolor1,evenColors);
+getFadeColors(bgcolor2,fcolor2,oddColors);
+
+// note: Colors.length equals the number of steps to fade
+function getFadeColors(ColorA, ColorB, Colors) {
+	len = Colors.length; 
+
+	// strip '#' signs if present 
+	if (ColorA.charAt(0)=='#') ColorA = ColorA.substring(1);
+	if (ColorB.charAt(0)=='#') ColorB = ColorB.substring(1);
+
+	// substract rgb compents from hex string 
+	var r = HexToInt(ColorA.substring(0,2));
+	var g = HexToInt(ColorA.substring(2,4));
+	var b = HexToInt(ColorA.substring(4,6));
+	var r2 = HexToInt(ColorB.substring(0,2));
+	var g2 = HexToInt(ColorB.substring(2,4));
+	var b2 = HexToInt(ColorB.substring(4,6));
+
+	// calculate size of step for each color component
+	var rStep = Math.round((r2 - r) / len);
+	var gStep = Math.round((g2 - g) / len);
+	var bStep = Math.round((b2 - b) / len);
+
+	// fill Colors array with fader colors
+	for (i = 0; i < len-1; i++) {
+		Colors[i] = "#" + IntToHex(r) + IntToHex(g) + IntToHex(b);
+		r += rStep;
+		g += gStep;
+		b += bStep;
+	}
+	Colors[len-1] = ColorB; // make sure we finish exactly at ColorB
+}
+
+
+// HexToInt: converts two digit hex strings into integer.
+function HexToInt(hex) {
+	return parseInt(hex, 16);
+}
+
+
+// IntToHex: converts integers between 0-255 into a two digit hex string.
+function IntToHex(n) {
+	var result = n.toString(16);
+	if (result.length==1) result = "0"+result;
+	return result;
+}
+
+
+//The following is a heavily modified example from
+// http://jibbering.com/2002/4/httprequest.html
+// http://jibbering.com/2002/4/httprequest.2004.9.html
+
+	var xmlhttp=false;
+	var divCount=0;
+	/*@cc_on @*/
+	/*@if (@_jscript_version >= 5)
+	// JScript gives us Conditional compilation, we can cope with old IE versions.
+	// and security blocked creation of the objects.
+	 try {
+	  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+	 } catch (e) {
+	  try {
+	   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	  } catch (E) {
+	   xmlhttp = false;
+	  }
+	 }
+	@end @*/
+
+	if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+	  xmlhttp = new XMLHttpRequest();
+	}
+	setTimeout("chat_getMessages();",1000);
+
+
+	</script>
+	</HEAD>
+
+	<BODY>
+
+	</BODY>
+</HTML>

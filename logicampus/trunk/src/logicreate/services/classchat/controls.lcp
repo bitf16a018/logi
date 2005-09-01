@@ -1,0 +1,34 @@
+<?
+/**
+ * chat
+ * Last updated 8/30/2005
+ * 
+ * Purpose:
+ * Chat system control pane
+ */
+
+include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH."js_serializer.php");
+
+class Controls extends StudentService {
+
+    var $presentor = 'emptyPresentation';
+    var $inactivelinks = array(
+			'Chat'
+		);
+
+	function Controls() {
+		parent::StudentService();
+		$u = lcUser::GetCurrentUser();
+		$class = $u->activeClassTaken;
+		$this->_title = $class->courseName;
+		$this->dateFormat = "G:i:s";
+		$this->chatId = $class->id_classes;
+	}
+
+
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'controls_main';
+	}
+}
+?>
