@@ -50,6 +50,36 @@ class ClassForum_Posts {
 
 
 	/**
+	 * Retrieve a list of all posts written by a user
+	 *
+	 * Only get posts of a certain class
+	 *
+	 * @static
+	 * @param forumId int id of the forum
+	 */
+	function getClassPostsByUser($class_id, $username, $start=-1, $limit=-1) {
+
+		$forumId = intval($forumId);
+
+		$db = DB::getHandle();
+		$db->query(
+			ClassForum_Queries::getQuery('getClassPostsByUser',
+				array($class_id,$username)
+			)
+		);
+
+		$objList = array();
+		while ($db->nextRecord()) {
+			$v = ClassForumPostPeer::row2obj($db->record);
+			$x = new ClassForum_Posts();
+			$x->_dao = $v;
+			$objList[] = $x;
+		}
+		return $objList;
+	}
+
+
+	/**
 	 * Retrieve a list of all 'topic' posts in a class forums 
 	 * Topics have a null thread ID because they are not
 	 * replying to any particular topic.
@@ -283,6 +313,16 @@ class ClassForum_Posts {
 
 
 	/**
+	 * gets the beginning of raw message
+	 *
+	 * show the first 65 characters, and remove the [QUOTE] tags
+	 */
+	function getMessageIntro() {
+		return ClassForum_Posts::swapForumTags( substr($this->_dao->message,0,65));
+	}
+
+
+	/**
 	 * gets the message for showing in HTML
 	 */
 	function showMessage() {
@@ -352,9 +392,16 @@ class ClassForum_Posts {
 
 
 	/**
-	 * Save
+	 * Save.
+	 *
+	 * put the first 25 chars of the post if there's no subject
+	 *
 	 */
 	function save() {
+		if ( strlen ($this->_dao->get('subject')) < 1 ) {
+			$this->_dao->set('subject',
+				substr($this->_dao->get('message'),0,25).'...');
+		}
 		return $this->_dao->save();
 	}
 
@@ -584,6 +631,17 @@ class ClassForum_Forums {
 		return $objList;
 	}
 
+	function getCategoryName() {
+		$x = $this->_dao->getClassForumCategoryByClassForumCategoryId();
+		if (! is_object($x) ) {
+			return 'General';
+		}
+		return $x->getName();
+	}
+
+	function getCategory() {
+		return $this->_dao->getClassForumCategoryByClassForumCategoryId();
+	}
 
 	function getCategoryId() {
 		return $this->_dao->classForumCategoryId;
@@ -1045,6 +1103,14 @@ class ClassForum_Queries {
 		'UPDATE `class_forum_post`
 		SET thread_id = %d
 		WHERE thread_id = %d';
+
+		$this->queries['getClassPostsByUser']  = 
+		'SELECT A.* 
+		FROM class_forum_post A
+		LEFT JOIN class_forum B
+		  using(class_forum_id)
+		WHERE B.class_id = %d
+		AND A.user_id="%s"';
 	}
 
 
