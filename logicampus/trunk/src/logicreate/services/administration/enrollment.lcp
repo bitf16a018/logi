@@ -61,8 +61,7 @@ class enrollment extends AdminService {
 		$t['username'] = $name;
 
       	$f = new SiteForm();
-        $f->getForm('semester', array('semester'=>$u->sessionvars['administratio
-n']['classes']));
+        $f->getForm('semester', array('semester'=>$u->sessionvars['enrollmentSemesterId']));
         $f->action = modurl("enrollment/main/username=$name");
         $t['form'] = $f->ToHTML();
 
