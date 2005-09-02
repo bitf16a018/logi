@@ -493,7 +493,6 @@ class ClassUtility {
 			$sql = "update class_lesson_content set txText='$temp' where id_class_lesson_content=$tempid";
 			$db->query($sql);
 		}
-
 		//return the messages
 		return $ret;
 	}
@@ -512,6 +511,28 @@ class ClassUtility {
 		$ret = array();
 		while($db->nextRecord()) {
 			$ret[] = $db->record;
+		}
+		return $ret;
+	}
+
+
+	/**
+	 * Return a list of usernames in this class
+	 *
+	 * @return array List of usernames
+	 */
+	function getUsernameList($class_id) {
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$sql = "SELECT id_student 
+	       		FROM class_student_sections AS A 
+			LEFT JOIN class_sections AS B
+			using (sectionNumber)
+			WHERE B.id_classes=$class_id";
+		$db->query($sql);
+		$ret = array();
+		while($db->nextRecord()) {
+			$ret[] = $db->record['id_student'];
 		}
 		return $ret;
 	}

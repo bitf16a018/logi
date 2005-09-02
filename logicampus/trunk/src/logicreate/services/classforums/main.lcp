@@ -4,6 +4,7 @@ include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
 
 include_once(LIB_PATH."PBDO/ClassGroup.php");
 include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+include_once(LIB_PATH."ClassUtility.php");
 
 include_once(SERVICE_PATH.'classforums/classforums_lib.php');
 include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
@@ -82,10 +83,74 @@ class classforums extends StudentService {
 
 
 	/**
+	 * Show search form
+	 */
+	function searchRun (&$db, &$u, &$lc, &$t) {
+		$lc->templateName = 'main_search';
+	}
+
+
+	/**
+	 * Search the posts for usernames
+	 * 
+	 * Only supports search by username right now.
+	 * Filter usernames down to ones that exist in this class
+	 */
+	function doSearchRun (&$db, &$u, &$lc, &$t) {
+		$lc->templateName = 'main_search';
+		$username = trim($lc->getvars['username']);
+		$class_id = (int)$u->activeClassTaken->id_classes;
+		$t['search'] = $username;
+
+		if ($class_id == 0 ) {
+			$class_id = (int)$u->activeClassTaught->id_classes;
+		}
+		//get all the users of the class
+		$userList = ClassUtility::getUsernameList($class_id);
+
+		$foundMatch = false;
+		foreach($userList as $k=>$v) {
+			if ($v == $username) {
+				$foundMatch = true;
+				//overwrite input with result from DB for security
+				$username = $v;
+				break;
+			}
+		}
+		if (!$foundMatch) {
+			$t['message'] = "No such username in your class";
+			return;
+		}
+
+
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$posts = ClassForum_Posts::getClassPostsByUser($class_id,$username);
+
+		$dm = new LC_TableModel_SearchTopicList($posts);
+		$table = new LC_TablePaged_TopicList($dm);
+
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(1);
+		$col->maxWidth=64;
+		$col->cellRenderer = new LC_TableForumNameRenderer();
+
+	 	//$table = new LC_TablePaged($dm);
+		$t['renderer'] = new LC_TableRendererPaged($table);
+	}
+
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
+
+	/**
 	 * Allow for the links to be translated
 	 */
 	function buildAppLinks() {
-		$this->applinks = array (
+		$this->applinks = array (lct('Search')=>'main/event=search'
 		);
 
 		global $lcUser;
@@ -210,4 +275,71 @@ class LC_TableForumRenderer extends LC_TableCellRenderer {
 }
 
 
+class LC_TableForumNameRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return $this->value->getCategoryName().'
+		<br/>'.
+		$this->value->getName();
+	}
+}
+
+class LC_TableModel_SearchTopicList extends LC_TableModel_TopicList {
+
+
+	function LC_TableModel_TopicList($topics, $rpp=-1, $cp=-1) {
+		$this->rowsPerPage = $rpp;
+		$this->currentPage = $cp;
+
+		$this->posts = $topics;
+		$this->maxPosts = count($topics);
+	}
+
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 4;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return 'Username'; break;
+
+			case '1':
+				return 'Forum'; break;
+
+			case '2':
+				return 'Post'; break;
+
+			case '3':
+				return 'Date'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$post = $this->posts[$x];
+		switch ($y) {
+			case 0:
+				return $post->_dao->userId;
+			case 1:
+				return $post->getForum();
+			case 2:
+				return '<a href="'.modurl('posts/post_id='.$post->getPostId()).'">'.$post->getMessageIntro().'</a>';
+			case 3:
+				return date('M d Y',$post->_dao->postDatetime);
+		}
+	}
+}
 ?>
