@@ -102,20 +102,26 @@ class LC_TableModel_ForumThread extends LC_TableModelPaged {
 
 	var $topicId;
 	var $topicObj;
-	var $replies = array();
+	var $thread = array();
 
 	function LC_TableModel_ForumThread($postId, $cp, $rpp) {
 		$this->rowsPerPage = $rpp;
 		$this->currentPage = $cp;
 		$this->topicId = $postId;
 		$this->topicObj = ClassForum_Posts::load($postId);
-		$this->replies = $this->topicObj->getThread($this->rowsPerPage, (($this->currentPage-1) * $this->rowsPerPage));
+		$this->thread = $this->topicObj->getThread($this->rowsPerPage, (($this->currentPage-1) * $this->rowsPerPage));
+		//if getThread returns nothing, the post is not
+		// a thread starter, so we will just show only this post.
+		if (count($this->thread) <1) {
+			$this->thread[] =$this->topicObj;
+		}
 	}
 
 
 	function getRowCount() {
 		//FIXME this won't work on the last page
-		$x = count($this->replies);
+		// maybe it will (?)
+		$x = count($this->thread);
 		if ($x > $this->rowsPerPage) {
 			return $this->rowsPerPage;
 		}
@@ -160,7 +166,7 @@ class LC_TableModel_ForumThread extends LC_TableModelPaged {
 	 * return the value at an x,y coord
 	 */
 	function getValueAt($x,$y) {
-		$post = $this->replies[$x];
+		$post = $this->thread[$x];
 
 		switch ($y) {
 			case 0:
