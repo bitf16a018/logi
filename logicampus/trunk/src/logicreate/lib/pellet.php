@@ -552,7 +552,6 @@ class FacultyService extends Service {
 class StudentService extends Service {
 
 	var $authorizer = 'studentAuth';
-	var $navlinks = array();
 	var $applinks = array();
 	var $inactivelinks = array();
 	var $sectionTitle = 'Student Links';

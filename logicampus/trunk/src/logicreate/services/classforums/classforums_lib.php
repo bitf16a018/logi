@@ -611,6 +611,10 @@ class ClassForum_Forums {
 	function getAll($classId) {
 
 		$classId = intval($classId);
+	$foo =		ClassForum_Queries::getQuery('forumsSorted',
+				array($classId)
+			);
+
 		$db = DB::getHandle();
 		$db->query(
 			ClassForum_Queries::getQuery('forumsSorted',
@@ -967,7 +971,7 @@ class ClassForum_Queries {
 
 	function getQuery($name,$args) {
 		$singleton = ClassForum_Queries::singleton();
-		$s_args = array_merge( $singleton->queries[$name], $args);
+		$s_args = array_merge( array($singleton->queries[$name]), $args);
 		return call_user_func_array('sprintf', $s_args);
 	}
 
@@ -1128,6 +1132,4 @@ class ClassForum_Queries {
 	}
 }
 
-
-ClassForum_Queries::init();
 
