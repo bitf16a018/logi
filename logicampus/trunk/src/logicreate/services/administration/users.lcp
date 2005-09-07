@@ -854,6 +854,9 @@ flush();
 
 		$dump = fopen('/tmp/lc_active_student_dump','r');
 		fseek($dump,0);
+		//trim off headers
+		$line = fgets($dump,4096);
+
 		//first, set everyone to inactive, then cycle through the file and 
 		// set each user back to active
 		if ($dump) {
