@@ -3,22 +3,26 @@
 	<style type="text/css">
 	DIV.chat_message_body {
 		display:block;
-		padding:3px 7px 3px 7px;
+		padding:0px 7px 3px 7px;
+		font-family:Cursor,Monospace;
+		font-size:11pt;
 		width:auto;
 /* border:1px solid red; */
 	}
 	DIV.chat_message_time {
 		float:left; 
-		padding:3px 3px 3px 7px;
+		padding:5px 3px 3px 7px;
 		font-family:Cursor,Monospace;
+		font-size:10pt;
 		width:70px;
 		display:block;
 /* border:1px solid green; */
 	}
 	DIV.chat_message_user {
 		float:left; 
-		padding:3px 7px 3px 3px;
+		padding:5px 7px 3px 3px;
 		font-family:Cursor,Monospace;
+		font-size:10pt;
 		width:70px;
 		display:block;
 /* border:1px solid blue; */
@@ -40,7 +44,7 @@
 		}
 		}
 		xmlhttp.send(null)
-		setTimeout("chat_getMessages();",3000);
+		window.setTimeout("chat_getMessages();",3000);
 	}
 
 
@@ -100,7 +104,7 @@
 			colorIndex =0;
 			//newMessage.style.border = '1px solid white';
 		} else {
-			setTimeout("chat_messageCooldown("+idNum+","+colorIndex+",'"+colorArray+"');",100);
+			window.setTimeout("chat_messageCooldown("+idNum+","+colorIndex+",'"+colorArray+"');",100);
 		}
 	}
 
@@ -197,27 +201,30 @@ function IntToHex(n) {
 // http://jibbering.com/2002/4/httprequest.html
 // http://jibbering.com/2002/4/httprequest.2004.9.html
 
+	function createRequestObj() {
+		/*@cc_on @*/
+		/*@if (@_jscript_version >= 5)
+		// JScript gives us Conditional compilation, we can cope with old IE versions.
+		// and security blocked creation of the objects.
+		 try {
+		  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+		 } catch (e) {
+		  try {
+		   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		  } catch (E) {
+		   xmlhttp = false;
+		  }
+		 }
+		@end @*/
+
+		if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+		  xmlhttp = new XMLHttpRequest();
+		}
+	}
 	var xmlhttp=false;
 	var divCount=0;
-	/*@cc_on @*/
-	/*@if (@_jscript_version >= 5)
-	// JScript gives us Conditional compilation, we can cope with old IE versions.
-	// and security blocked creation of the objects.
-	 try {
-	  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-	 } catch (e) {
-	  try {
-	   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	  } catch (E) {
-	   xmlhttp = false;
-	  }
-	 }
-	@end @*/
-
-	if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
-	  xmlhttp = new XMLHttpRequest();
-	}
-	setTimeout("chat_getMessages();",1000);
+	createRequestObj();
+	window.setTimeout("chat_getMessages();",1000);
 
 
 	</script>
