@@ -25,7 +25,7 @@ class chat extends StudentService {
 			'Chat'
 		);
 
-	function chat(&$arg) {
+	function chat() {
 		parent::StudentService();
 		global $lcObj;
 		$this->module_name = $lcObj->moduleName;
