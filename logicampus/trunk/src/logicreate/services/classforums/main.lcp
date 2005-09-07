@@ -126,13 +126,25 @@ class classforums extends StudentService {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$posts = ClassForum_Posts::getClassPostsByUser($class_id,$username);
 
-		$dm = new LC_TableModel_SearchTopicList($posts);
+		$dm = new LC_TableModel_SearchTopicList($posts,20,1);
 		$table = new LC_TablePaged_TopicList($dm);
 
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(1);
 		$col->maxWidth=64;
+		$col->cellRenderer = new LC_TableForumCategoryNameRenderer();
+
+		$col = &$columnModel->getColumnAt(2);
+		$col->maxWidth=64;
 		$col->cellRenderer = new LC_TableForumNameRenderer();
+
+
+		$col = &$columnModel->getColumnAt(3);
+		$col->justify='left';
+
+		$col = &$columnModel->getColumnAt(4);
+		$col->justify='left';
+
 
 	 	//$table = new LC_TablePaged($dm);
 		$t['renderer'] = new LC_TableRendererPaged($table);
@@ -278,16 +290,21 @@ class LC_TableForumRenderer extends LC_TableCellRenderer {
 class LC_TableForumNameRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
-		return $this->value->getCategoryName().'
-		<br/>'.
-		$this->value->getName();
+		return $this->value->getName();
+	}
+}
+
+class LC_TableForumCategoryNameRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return $this->value->getCategoryName();
 	}
 }
 
 class LC_TableModel_SearchTopicList extends LC_TableModel_TopicList {
 
 
-	function LC_TableModel_TopicList($topics, $rpp=-1, $cp=-1) {
+	function LC_TableModel_SearchTopicList($topics, $rpp=-1, $cp=-1) {
 		$this->rowsPerPage = $rpp;
 		$this->currentPage = $cp;
 
@@ -301,7 +318,7 @@ class LC_TableModel_SearchTopicList extends LC_TableModel_TopicList {
 	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return 4;
+		return 6;
 	}
 
 
@@ -314,12 +331,18 @@ class LC_TableModel_SearchTopicList extends LC_TableModel_TopicList {
 				return 'Username'; break;
 
 			case '1':
-				return 'Forum'; break;
+				return 'Category'; break;
 
 			case '2':
-				return 'Post'; break;
+				return 'Forum'; break;
 
 			case '3':
+				return 'Post'; break;
+
+			case '4':
+				return 'Thread'; break;
+
+			case '5':
 				return 'Date'; break;
 		}
 	}
@@ -336,8 +359,13 @@ class LC_TableModel_SearchTopicList extends LC_TableModel_TopicList {
 			case 1:
 				return $post->getForum();
 			case 2:
-				return '<a href="'.modurl('posts/post_id='.$post->getPostId()).'">'.$post->getMessageIntro().'</a>';
+				return $post->getForum();
 			case 3:
+				return $post->getSubject(). '<br/><a href="'.modurl('posts/post_id='.$post->getPostId()).'">Only This Post</a>';
+			case 4:
+				return $post->getSubject().'<br/><a href="'.modurl('posts/post_id='.$post->getThreadId()).'">Entire Thread</a>';
+
+			case 5:
 				return date('M d Y',$post->_dao->postDatetime);
 		}
 	}

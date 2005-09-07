@@ -145,6 +145,9 @@ class ClassForum_Posts {
 
 	/**
 	 * get's the entire thread, including topic starter
+	 *
+	 * if this post is not a topic starter, this function will
+	 * return nothing.
 	 */
 	function getThread($limit=-1, $start=-1) {
 
