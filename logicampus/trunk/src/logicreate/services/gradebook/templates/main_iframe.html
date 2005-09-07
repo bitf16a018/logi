@@ -20,6 +20,18 @@
 		while ( list($rownum,$row) = @each($table) )
 		{
 			echo "<tr>\n";
+			//print the row headers
+			if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
+				while ( list($cellnum,$cell) = @each($row) ) {
+					if ( $cellnum === 'inactive' ) continue;
+					echo "\t<th bgcolor=\"$commoncolor\" NOWRAP>".
+						$columnHeaders[$cellnum-1]."</th>\n";
+				}
+				reset($row);
+				echo "</tr>\n";
+				echo "<tr>\n";
+			}
+
 			while ( list($cellnum,$cell) = @each($row) )
 			{
 				if ( $cellnum === 'inactive' ) continue;
@@ -41,33 +53,24 @@
 					$bgcol = $commoncolor;
 				}
 
-				if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
-					echo "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnHeaders[$cellnum-1]."</th>\n";
-				} else {
-					//disqualified grades
-					// if i do this color swap outside of here, it affects
-					// some of the header cells
-					if ( strstr($cell,'d ') ) {
-						$bgcol = 'E0E0E0'; 
-					}
-
-					echo "\t<td bgcolor=\"$bgcol\" NOWRAP>$cell</td>\n";
+				//disqualified grades
+				// if i do this color swap outside of here, it affects
+				// some of the header cells
+				if ( strstr($cell,'d ') ) {
+					$bgcol = 'E0E0E0'; 
 				}
+
+				echo "\t<td bgcolor=\"$bgcol\" NOWRAP>$cell</td>\n";
 			}
 			echo "</tr>\n";
 			$commoncolor = $commoncolor == 'white' ? '#FFFBE4' : 'white';
-			//rewind the table when we hit a 'header' row
-			// __FIXME__ don't do this
-			if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
-				prev($table);
-			}
 			flush();
 			flush();
 		$currentRow++;
 		}
 		//ADD FOOTER TO TEMPLATE VARIABLE
 		while ( list($cellnum,$cell) = @each($columnFooter) ) {
-			echo "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnFooter[$cellnum]."</th>\n";
+			echo "\t<th bgcolor=\"$commoncolor\" NOWRAP>".$columnFooter[$cellnum]."</th>\n";
 		}
 
 
