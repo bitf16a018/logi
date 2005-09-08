@@ -325,10 +325,17 @@
 
 	<target name="changelog"
 		description="create today's changelog">
+		<!--
 		<cvschangelog dir="."
 			destfile="changelog.xml"
 			start="31 June 2005"
 			end="4 August 2005"/>
+		-->
+
+		<cvschangelog dir="."
+			destfile="changelog.xml"
+			start="4 August 2005"
+			end="29 August 2005"/>
 
 		<style in="changelog.xml" 
 			out="changelog.html" 
