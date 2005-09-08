@@ -510,7 +510,7 @@ class lcUser {
 		//__FIXME__ what is this fields for??
 		$this->fields = $db->Record;
 		$this->sessionvars['_username'] = $this->username;
-		$this->groups = array_merge($this->groups,explode("|",$db->Record['groups']));
+		$this->groups = array_merge($this->groups,explode("|",substr($db->Record['groups'],1,-1)));
 		$this->userId = $db->Record['pkey'];
 
 		return true;
