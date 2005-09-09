@@ -643,7 +643,7 @@ class ClassForum_Forums {
 		if (! is_object($x) ) {
 			return 'General';
 		}
-		return $x->getName();
+		return $x->get('name');
 	}
 
 	function getCategory() {
