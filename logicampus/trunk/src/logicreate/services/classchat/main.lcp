@@ -224,6 +224,10 @@ class ClassChat extends StudentService {
 			$x++;
 		}
 
+		header('Cache-Control: no-cache');
+		header('Pragma: no-cache');
+		header('Expires: -1');
+		header('Content-type: text/plain');
 		echo js_serialize($out);
 		return;
 	}
@@ -284,13 +288,14 @@ class ClassChat extends StudentService {
 		}
 
 		if ( trim($lc->postvars['message'])=='' ) {
+			echo "bad message";
 		       	return;
 		}
 
 		$message = htmlentities($lc->postvars["message"]);
 		$url = $lc->postvars['url'];
 
-		$u->sessionvars["lastPost"] = time();
+		//$u->sessionvars["lastPost"] = time();
 		$username = $u->username;
 		$email = $u->email;
 		if  ( ($username=="")|| (strtolower(trim($username))=='anonymous'))  { 
@@ -301,9 +306,11 @@ class ClassChat extends StudentService {
 		// URL->link
 		$message = addslashes($message);
 
+/*
 		$chatcolor = $u->profile["chatcolor"];
 		//if ($chatcolor=="") { $chatcolor="#000000"; }
 		if ($chatcolor=="") { $chatcolor="1"; }
+*/
 
 
 		if ($this->_queueFirst=="Y") { 
@@ -324,7 +331,7 @@ class ClassChat extends StudentService {
 
 
 	function adminpostRun($db,&$u,&$lc,&$t) {	
-		$u->sessionvars["lastPost"] = time();
+		//$u->sessionvars["lastPost"] = time();
 
 		$username = $u->username;
 		$message = $lc->postvars["text"];
