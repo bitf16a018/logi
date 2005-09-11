@@ -276,9 +276,10 @@
 
 
 	<target name="clean"
-		description="removes temp and dist directories" >
+		description="removes temp directory and defines file" >
 		<!-- Delete the ${build} and ${dist} directory trees -->
 		<delete dir="${build}"/>
+		<delete file="${src}/defines.php"/>
 		<delete>
 			<fileset dir="${dist}" includes="*"/>
 		</delete>
@@ -332,10 +333,16 @@
 			end="4 August 2005"/>
 		-->
 
+		<!--
 		<cvschangelog dir="."
 			destfile="changelog.xml"
 			start="4 August 2005"
 			end="29 August 2005"/>
+		-->
+		<cvschangelog dir="."
+			destfile="changelog.xml"
+			start="30 August 2005"
+			end="12 September 2005"/>
 
 		<style in="changelog.xml" 
 			out="changelog.html" 
