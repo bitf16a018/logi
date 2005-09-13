@@ -284,7 +284,7 @@ class AssessmentQuestionMChoice extends AssessmentQuestion {
 
 	function isCorrect() {
 		$correct = $this->getCorrectAnswer();
-		if (strtolower($this->answer->assessmentAnswerValues) === $correct) {
+		if (strtolower($this->answer->assessmentAnswerValues) === strtolower($correct)) {
 			return TRUE;
 		}
 		return FALSE;
@@ -713,7 +713,7 @@ class AssessmentQuestionFill extends AssessmentQuestion {
 
 	function isCorrect() {
 		$correct = $this->getCorrectAnswer();	
-		if (in_array(strtolower($this->answer->assessmentAnswerValues), $correct)) {
+		if (in_array(strtolower($this->answer->assessmentAnswerValues), strtolower($correct))) {
 			return TRUE;
 		}
 		return FALSE;
