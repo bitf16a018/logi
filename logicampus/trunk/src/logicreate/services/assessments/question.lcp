@@ -168,6 +168,8 @@ class question extends FacultyService {
 	 * template
 	 */
 	 function addRun(&$db,&$u,&$lc,&$t) {
+		$t['questionType'] = urlencode($lc->getvars['type']);
+		$t['id'] = $lc->getvars['id'];
 		switch($lc->getvars['type']) {
 			case 'Multiple Choice':
 				$lc->templateName = 'question_mchoice';
