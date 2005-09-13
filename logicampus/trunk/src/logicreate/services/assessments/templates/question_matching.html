@@ -7,7 +7,7 @@
 </LEGEND>
 Enter your questions in the left column and your answers in the right column.   Answers will automatically be sorted for you when you preview on the next page.  Questions will remain in the order you entered them.  Each time you update this question the answers will be randomly sorted.
 </FIELDSET>
-<form method="POST">
+<form method="POST" action="<?=modurl('question/event=save/id='.$t['id'].'/type='.$t['questionType']);?>">
 	<table border="0" width="100%">
 		<tr>
 			<td>&nbsp;</td>
@@ -93,7 +93,7 @@ Enter your questions in the left column and your answers in the right column.   
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<input type="submit" value="Save -&gt;">
+				<input type="submit" name="submit" value="Save -&gt;">
 				<input type="hidden" name="event" value="save">
 			</td>
 		</tr>
