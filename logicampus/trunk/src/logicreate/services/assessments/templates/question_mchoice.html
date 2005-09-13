@@ -1,7 +1,7 @@
 <?=$t['sectionheader'];?>
 
 <?=$t['error'];?>
-<form method="POST">
+<form method="POST" action="<?=modurl('question/event=save/id='.$t['id'].'/type='.$t['questionType']);?>">
 	<table border="0" width="600">
 		<tr>
 			<td valign="top">*<b>Question</b></td>
@@ -98,7 +98,7 @@
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<input type="submit" value="Continue -&gt;">
+				<input type="submit" name="submit" value="Continue -&gt;">
 				<input type="hidden" name="event" value="save">
 
 </form>
