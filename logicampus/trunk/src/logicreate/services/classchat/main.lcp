@@ -19,6 +19,7 @@ class ClassChat extends StudentService {
 	var $sectionTitle = 'Online Chat';
 	var $_immediatePost = false;
 	var $_allowURL = true;
+	var $initialHistory = 120;	//number of seconds to show upon first login
 
     var $inactivelinks = array(
 			'Chat'
@@ -202,7 +203,7 @@ class ClassChat extends StudentService {
 		$last = (int)$lc->getvars['last'];
 
 		if ($last==0) { 
-			$db->query("select * from chat where chat_id=".$this->chatId." and timeint>".(time()-300)." order by timeint");
+			$db->query("select * from chat where chat_id=".$this->chatId." and timeint>".(time()-$this->initialHistory)." order by timeint");
 		} else { 
 			$db->query("select * from chat where chat_id=".$this->chatId." and pkey>$last order by timeint");
 		}
