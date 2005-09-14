@@ -132,17 +132,15 @@ class take extends StudentService {
 				return;
 			}
 
-			$allTestLogs = AssessmentLog::loadAll($test->assessmentId, $u->username, $u->activeClassTaken->id_classes);
-			//check number of attempts
-			if ($test->numRetries <= count($allTestLogs)) {
-				$lc->templateName = 'take_error';
-				$t['message'] = '<h3>Error</h3>This test is not active or is no longer available.';
-				$this->resetSessionInfo($u);
-				return;
-			}
-
 			if (!$test->log) {
-				$retries = count($allTestLogs);
+				$allTestLogs = AssessmentLog::loadAll($test->assessmentId, $u->username, $u->activeClassTaken->id_classes);
+				//check number of attempts
+				if ($test->numRetries <= count($allTestLogs)) {
+					$lc->templateName = 'take_error';
+					$t['message'] = '<h3>Error</h3>This test is not active or is no longer available.';
+					$this->resetSessionInfo($u);
+					return;
+				}
 			
 				# If we do not have a previous log entry the
 				# student is not taking this test, so let's 
