@@ -289,7 +289,7 @@
 		description="removes temp and dist directories"
 		unless="leavetemp">
 		<!-- Delete the ${build} and ${dist} directory trees -->
-		<delete dir="${build}"/>
+		<delete dir="temp"/>
 	</target>
 
 	<target name="patch"
