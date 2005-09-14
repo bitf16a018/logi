@@ -737,6 +737,7 @@ class cali {
 		
 		$allday_events = array();
 
+		$events = array();
 		while(list($ekey,$e) = @each($this->events)) {
 			$events = array_merge($events,$e);
 		}
