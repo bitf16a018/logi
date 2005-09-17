@@ -76,4 +76,81 @@
               type = "varchar"
               size = "255" />
    </entity>
+   <entity name="lc_event">
+	   <attribute 
+	      name = "lc_event_id"
+	      type = "int"
+	      size = "11" 
+	      extra = "unsigned"
+	      primaryKey  = "true" />
+	   <attribute 
+	      name = "calendar_type"
+	      type = "varchar"
+	      size = "255" />
+	   <attribute 
+	      name = "username"
+	      type = "varchar"
+	      size = "15" />
+	   <attribute 
+	      name = "title"
+	      type = "varchar"
+	      size = "255" />
+	   <attribute 
+	      name = "description"
+	      type = "text"/>
+	   <attribute 
+	      name = "location"
+	      type = "varchar"
+	      size = "255" />
+	   <attribute 
+	      name = "start_date"
+	      type = "int"
+	      size = "11" />
+	   <attribute 
+	      name = "end_date"
+	      type = "int"
+	      size = "11" />
+	   <attribute 
+	      name = "groups"
+	      type = "text"/>
+	   <attribute 
+	      name = "notgroups"
+	      type = "text"/>
+	   <attribute 
+	      name = "last_modified"
+	      type = "timestamp"
+	      size = "11" />
+	   <attribute 
+	      name = "repeat_type"
+	      type = "int"
+	      size = "11" />
+	   <attribute 
+	      name = "repeat_count"
+	      type = "int"
+	      size = "11"
+	      extra = "unsigned" />
+	   <attribute 
+	      name = "repeat_mask"
+	      type = "int"
+	      size = "11"
+	      extra = "unsigned" />
+	   <attribute 
+	      name = "repeat_exclude"
+	      type = "text"
+	      size = "11" />
+	   <attribute 
+	      name = "class_id"
+	      type = "int"
+	      size = "11"
+	      extra = "unsigned" />
+	   <key
+	      attribute="class_id"
+	      name="class_idx"/>
+	   <key
+	      attribute="start_date"
+	      name="start_date_idx"/>
+	   <key
+	      attribute="end_date"
+	      name="end_date_idx"/>
+   </entity>
 </project>
