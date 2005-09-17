@@ -226,6 +226,19 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	}
 
 
+	/**
+	 * Sets things like UNSIGNED
+	 */
+	function setExtra($e) {
+		$this->extra = $e;
+	}
+
+
+	function getExtra() {
+		return $this->extra;
+	}
+
+
 	function createFromXMLObj($obj) {
 		foreach( $obj->attributes as $k=>$v) {
 			if ($v->name == 'name') {
@@ -244,6 +257,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 		}
 		$x->setSize( $obj->getAttribute('size') );
 		$x->description = $obj->getAttribute('description');
+		$x->setExtra($obj->getAttribute('extra'));
 
 		return $x;
 	}

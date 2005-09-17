@@ -158,6 +158,7 @@ class PBDO_ParsedColumn {
 	var $null = true;
 	var $auto = false;
 	var $primary = false;
+	var $xtra = '';
 	var $description = '';
 
 
@@ -170,6 +171,9 @@ class PBDO_ParsedColumn {
 		$ret = "\t`".$this->name."` ".$this->type;
 		if ($this->size > 0 ) {
 			$ret .= " (".$this->size.")";
+		}
+		if ( $this->extra ) {
+			$ret .= " ".$this->extra;
 		}
 		if ( !$this->null ) {
 			$ret .= " NOT NULL";
@@ -189,6 +193,7 @@ class PBDO_ParsedColumn {
 		$x->type = trim( $attrib->type );
 		$x->size = $attrib->getSize();
 		$x->description = $attrib->description;
+		$x->extra = $attrib->extra;
 
 
 		if ($attrib->required == 'true') {
@@ -206,6 +211,10 @@ class PBDO_ParsedColumn {
 		}
 
 
+		if ($x->type=='longvarchar') { 
+			$x->type='text';
+			$x->size='';
+		}
 		if ($x->type=='longtext') { 
 			$x->type='text';
 			$x->size='';
