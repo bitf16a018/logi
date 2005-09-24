@@ -19,6 +19,7 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 *
 */
 	function createGroupCheck($usergroup,$gname='groups') {
+		$group = '';
 		if (is_array($usergroup)) {
 			while(list($key,$val) = each($usergroup)) {
 			if (trim($val)!="") { 
@@ -197,6 +198,7 @@ class lcSystem {
 	var $getvars;
 	var $templateStyle = 'private';
 	var $TRACK_SESSIONS = true;
+	var $cssFile;
 
 	function lcSystem() {
 		// global $HTTP_POST_VARS,$HTTP_POST_FILES;
@@ -226,9 +228,9 @@ class lcSystem {
 	 * To setup the shopping cart, uncomment the lines labeled #CART at the end
 	 */
 	function systemPreTemplate(&$obj,&$t){
-		define(TEMPLATE_PATH,TEMPLATE_PATH_PARTIAL.$obj->templateStyle."/");
-		define(TEMPLATE_URL,TEMPLATE_URL_PARTIAL.$obj->templateStyle."/");
-		define(CSS_FILE,TEMPLATE_URL_PARTIAL.$obj->templateStyle."/".$obj->cssFile);
+		define('TEMPLATE_PATH',TEMPLATE_PATH_PARTIAL.$obj->templateStyle."/");
+		define('TEMPLATE_URL',TEMPLATE_URL_PARTIAL.$obj->templateStyle."/");
+		define('CSS_FILE',TEMPLATE_URL_PARTIAL.$obj->templateStyle."/".$obj->cssFile);
 
                #  Shopping cart includes
                #include_once(INSTALLED_SERVICE_PATH."shop/main.lcp"); #CART
@@ -886,8 +888,10 @@ class ErrorStack {
 
 	function stack($e) {
 		$x =& ErrorStack::_singleton();
+//		if ($x->count > 10 ) {  echo "too many errors. ".$x->count; return;}
 		$x->stack[] = $e;
 		$x->count++;
+//		debug($x->stack);
 	}
 
 	function count() {
@@ -929,7 +933,8 @@ class ErrorStack {
 
 
 	function _errorHandler ($level, $message, $file, $line, $context='error') {
-		static $count;
+//		static $count;
+
 		//drop unintialized variables
 		if ($level == 8 ) return;
 		if ($level == 2 ) return;
@@ -953,7 +958,7 @@ class ErrorStack {
 			print "<h3>".$s->stack[$z]->message ."</h3>\n";
 			for ($x=0; $x < count($bt); ++$x ) {
 				$indent = str_repeat("&nbsp;&nbsp;&nbsp;",$x);
-				if ($bt[$x]['class'] != '' ) {
+				if ( isset($bt[$x]['class']) && strlen($bt[$x]['class']) > 0 ) {
 					print $indent."method : <b>".$bt[$x]['class']."::".$bt[$x]['function']."</b>";
 				} else {
 					print $indent."function : <b>".$bt[$x]['function']."</b>";
