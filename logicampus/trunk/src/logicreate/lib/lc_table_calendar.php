@@ -95,7 +95,7 @@ class LC_Table_ClassCalendar extends LC_Table {
 		$column = new LC_TableColumn();
 		$column->setName('Description');
 		$column->maxWidth = '80%';
-		$column->cellRenderer = new LC_TableCellRenderer_CalendarEventList();
+		$column->cellRenderer = new LC_TableCellRenderer_CalendarEventList($cal->tableModel->targetDate);
 		$column->justify = 'left';
 		$cal->columnModel->addColumn($column);
 
@@ -347,7 +347,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 
 
 	function init($y, $m, $d) {
-		$this->todayDate = new LC_Calendar_DateInfo(time());
+		list ($ty, $tm, $td) = explode(' ', date('Y m d', time()) );
+		$this->todayDate = new LC_Calendar_DateInfo( mktime(0,0,0, $tm, $td, $ty) );
 		$this->targetDate = new LC_Calendar_DateInfo( mktime(0,0,0, $m, $d, $y) );
 		$this->firstOfMonth = new LC_Calendar_DateInfo( 
 			mktime(0,0,0, $this->targetDate->month, 1, $this->targetDate->year)
@@ -878,6 +879,14 @@ class LC_TableRenderer_DayCalendar extends LC_TableRenderer_Calendar {
 
 class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 
+	var $targetDate;		//object that holds date information
+
+
+	function LC_TableCellRenderer_CalendarEventList($target) {
+		$this->targetDate = $target;
+	}
+
+
 	function getRenderedValue() {
 		$now = time();
 		$ret = '<ul>';
@@ -895,6 +904,9 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 			if ( strlen($v['description']) ) {
 				$ret .= '<br/>'.substr($v['description'], 0, 45);
 			}
+			if ($v['enddate'] - $v['startdate'] < (60*60) ) {
+				$ret .= '<br/>Event ends in one hour or less.';
+			}
 			$ret .='</li>';
 		}
 		$ret .= '</ul>';
@@ -906,12 +918,28 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 	 * This should be part of a better events object
 	 */
 	function getEventType($evt) {
+		//events should have their time and date separated at the DB level
+		list($m,$d,$y) = explode(' ', date('m d Y',$evt['startdate']));
+		$evtStart = mktime(0,0,0,$m,$d,$y);
+		list($m,$d,$y) = explode(' ', date('m d Y',$evt['enddate']));
+		$evtEnd = mktime(0,0,0,$m,$d,$y);
+
 		switch( $evt['calendarType'] ) {
 			case 'classroomAssignments':
 				$type = 'Assignment:';
+				if ($evtStart == $this->targetDate->timeStamp) {
+					$type = 'Assignment (Assigned):';
+				} else if ($evtEnd == $this->targetDate->timeStamp) {
+					$type = 'Assignment (Due):';
+				}
 				break;
 			case 'assessmentscheduling':
 				$type = 'Assessment:';
+				if ($evtStart == $this->targetDate->timeStamp) {
+					$type = 'Assessment (Assigned):';
+				} else if ($evtEnd == $this->targetDate->timeStamp) {
+					$type = 'Assessment (Due):';
+				}
 				break;
 			default:
 				$type = '';
@@ -1000,6 +1028,10 @@ class LC_TableCellRenderer_CalendarDate extends LC_TableCellRenderer {
 }
 
 
+
+/**
+ * Hold different views of a single day in memory
+ */
 class LC_Calendar_DateInfo {
 
 	var $dayOfWeek = 0;
