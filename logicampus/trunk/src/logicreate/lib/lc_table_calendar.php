@@ -212,8 +212,19 @@ class LC_Table_ClassCalendar extends LC_Table {
 				$event='viewWeek';
 				list ($m, $d, $y) = explode(' ', date ('m d Y', $this->tableModel->targetDate->timeStamp - $delta) );
 				break;
+			case 'day':
+				//$delta = 86400;
+				$m = $this->getM();
+				$d = $this->getD()-1;
+				if ($m < 1) {
+					$y = $this->getY()-1;
+					$m = 12;
+				} else {
+					$y = $this->getY();
+				}
+
 			default:
-				$delta = $this->getDaysInMonth()*86400;
+				//$delta = $this->getDaysInMonth()*86400;
 				$m = $this->getM()-1;
 				$d = $this->getD();
 				if ($m < 1) {
@@ -552,6 +563,14 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 	 */
 	function displayDate() {
 		return date('F Y', $this->table->tableModel->targetDate->timeStamp);
+	}
+
+
+	/**
+	 * return the month name, day name, date, and year in string format
+	 */
+	function displayDateFull() {
+		return date('l F jS, Y', $this->table->tableModel->targetDate->timeStamp);
 	}
 
 
