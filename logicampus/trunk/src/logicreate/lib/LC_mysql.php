@@ -5,7 +5,7 @@
 class mysql extends DB {
 
 
- 	var $RESULT_TYPE = MYSQL_BOTH;
+ 	var $RESULT_TYPE = MYSQL_ASSOC;
 
 
 	/**
@@ -262,7 +262,6 @@ if ( ($e-$s)>.1) {
 	function getTables() {
 		$this->query("show tables");
 		$j = $this->RESULT_TYPE;
-		$this->RESULT_TYPE = MYSQL_BOTH;
 		while($this->next_record()) {
 			$x[] = $this->Record[0];
 		}

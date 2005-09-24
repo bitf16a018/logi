@@ -104,7 +104,6 @@ class lcUser {
 			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
 		}
 		if ($j) {
-			$db->RESULT_TYPE=MYSQL_BOTH;
 			$sessArr = $temp2;
 			/*
 			$sessArr = unserialize(gzuncompress(base64_decode($db->Record["sessdata"])));
@@ -147,7 +146,6 @@ class lcUser {
 				//trigger_error('we had a cookie submitted from you, but we cannot find your session.');
 				// user might have been logged out
 			}
-			$db->RESULT_TYPE=MYSQL_BOTH;
 			//none found, make new session, return new user
 			sess_open(DB::getHandle(),$sessID);
 			$temp =  new lcUser();
@@ -492,15 +490,15 @@ class lcUser {
 		}
 		*/
 		if(USE_MD5_PASSWORDS==TRUE) { 
-		   	$sql = "select count(username) from lcUsers where username='".$this->username."' and password=md5('".$this->password."')";
+		   	$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password=md5('".$this->password."')";
 	   	} else { 
-			$sql = "select count(username) from lcUsers where username='".$this->username."' and password='".$this->password."'";
+			$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password='".$this->password."'";
 		}
 	   $db->query($sql,false);
 
 	   $db->next_record();
 
-	   if( $db->Record[0] == 1 ) {
+	   if( $db->Record['total'] == 1 ) {
 		$db->query("select * from lcUsers where username = '$this->username'",false);
 		$db->next_record();
 
@@ -536,9 +534,10 @@ class lcUser {
 		$sql = "select mid from lcRegistry where moduleName = '$mname'";
 		$db->query($sql,false);
 		$db->next_record();		//get the moduleID from the registry
-		$mid = $db->Record[0];
+		$mid = $db->Record['mid'];
 		 // usefull for both mid and moduleName values.
 		 
+		$where = '';
 		$sql = "select action from lcPerms where moduleID = '$mid' and (%s)";
 		for ($z=0; $z < count($this->groups); ++$z) {
 			$where .= "groupID = '".$this->groups[$z]."' or ";
@@ -548,8 +547,7 @@ class lcUser {
 		$sql = sprintf($sql,$where);
 		$db->query($sql,false);
 		while ($db->next_record() ) {
-
-			$ret[] = $db->Record[0];
+			$ret[] = $db->Record['action'];
 
 		}
 	$this->perms = $ret;
