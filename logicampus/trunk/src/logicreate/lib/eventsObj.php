@@ -5,8 +5,8 @@
 // admins will get emails
 
 
-include_once(LIB_PATH."calendar.php");
-include_once(LIB_PATH."LC_html.php");
+//include_once(LIB_PATH."calendar.php");
+//include_once(LIB_PATH."LC_html.php");
 
 		
 		

@@ -7,7 +7,7 @@
 class LC_TableRenderer {
 
 	var $html;	//holds the renered html
-	var $t;		//the table to render, must be of type LC_Table
+	var $table;		//the table to render, must be of type LC_Table
 
 	function LC_TableRenderer($t) {
 		$this->table = $t;
@@ -138,7 +138,7 @@ class LC_TableRenderer {
 				}
 			}
 
-			//paint the columsn
+			//paint the columns
 			$class = ($x % 2 == 0) ? 'even':'odd';
 			$this->html .= '<tr class="center_justify '.$class.'">';
 
@@ -162,12 +162,15 @@ class LC_TableRenderer {
 				}
 
 
-
-				$colName = $colModel->getColumnName($y);
 				$renderer = $this->table->getCellRenderer($x,$y);
 				$this->table->prepareRenderer($renderer,$x,$y);
 
-
+				$css = $renderer->getCellCSS();
+				if ( count ($css) > 0 ) {
+					foreach ($css as $i=>$j) {
+						$style .= "$i:$j;";
+					}
+				}
 				$this->html .= '<td';
 				if ($width > -1) {
 					$this->html .= ' width="'.$width.'"';
@@ -255,6 +258,11 @@ class LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		return $this->value;
+	}
+
+
+	function getCellCSS() {
+		return array();
 	}
 }
 
