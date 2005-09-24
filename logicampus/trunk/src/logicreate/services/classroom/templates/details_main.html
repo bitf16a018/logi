@@ -26,8 +26,12 @@
 		</table>
 	
 	</td><td valign="top">
-		<div id="calendar">
-				<?=$t['tinyCal'];?>
+		<div class="calendar_controls" id="calendar_controls">
+			<?=$t['calendarRenderer']->controlsToHTML();?>
+
+		</div>
+		<div class="calendar" id="calendar">
+			<?=$t['calendarRenderer']->toHTML();?>
 		</div>
 	</td>
 

@@ -1,5 +1,6 @@
 <?=$t['sectionheader']?>
 
+<!--
 <h3 align="center">Week: #<?=$t['TX_weeknumber'];?> of <?=$t['TX_year'];?><br><?=$t['TX_day_start_to_end'];?></h3>
 
 <p align="center" id="calendar">
@@ -16,8 +17,13 @@
 
 </p>
 
-<font class="textone">
-	<b>Click on a date to view more information about an event.</b>
-</font>
+-->
 
-<br>
+<div id="calendar_controls">
+	<?=$t['calendarRenderer']->controlsToHTML();?>
+</div>
+
+<div id="calendar">
+	<?=$t['calendarRenderer']->toHTML();?>
+</div>
+

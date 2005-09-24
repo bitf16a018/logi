@@ -1,32 +1,23 @@
 <?=$t['sectionheader'];?>
 
 
-<a href="<?=modurl('classCalendar/');?>">MONTH VIEW</a>
-<h3><?=$t['title']?></h3>
-
-
-<table width="100%" cellpadding="4" cellspacing="1">
-<tr>
-<td width="70%" valign="top">
-<?=$t['eventHtml']?><br>
-</td>
-<td valign='top'>
-<table>
-<tr><td>
-<div id="calendar">
-<?=$t['tinyCal'];?>
-</div>
-</td>
-</tr>
-<tr>
-<td>
-
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td valign="top" align="center"><?=$t[cal]?>
-</tr>
+<p>
+<?= date('m d Y');?>
+</p>
+<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="76%">
+			<div class="calendar" id="day_calendar">
+				<?=$t['dayCalendarRenderer']->toHTML();?>
+			</div>
+		</td>
+		<td width="4%">
+			&nbsp;
+		</td>
+		<td valign="top" width="20%">
+			<div class="calendar" id="calendar">
+				<?=$t['calendarRenderer']->toHTML();?>
+			</div>
+		</td>
+	</tr>
 </table>

@@ -11,6 +11,7 @@ class LC_Table {
 	var $headerRepeat = -1;
 	var $subHeaders = array();
 	var $enableSubHeaders = false;
+	var $repeatHeaders = -1;
 
 	function LC_Table($dataModel, $columnModel = null) {
 
@@ -349,6 +350,7 @@ class LC_TableColumn {
 	var $minWidth=-1;
 	var $modelIndex;
 	var $justify;
+	var $style = '';
 
 
 	function setName($n) {
