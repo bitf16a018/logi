@@ -435,33 +435,31 @@ class AssessmentQuestionMAnswer extends AssessmentQuestion {
 		return $x;
 	}
 
+
 	function isCorrect() {
 		$correct = $this->getCorrectAnswer();
 		$answer = $this->answer->assessmentAnswerValues;
 
 		//array walk doesn't work with built in functions
-		$c_count = count($correct);
-		for ($x=0; $x<$c_count; $x++) {
-			$correct[$x] = strtolower($correct[$x]);
+		foreach($correct as $k=>$v) {
+			$correct[$k] = strtolower($correct[$k]);
 		}
-		$a_count = count($answer);
-		for ($x=0; $x<$a_count; $x++) {
-			$answer[$x] = strtolower($answer[$x]);
+		foreach($answer as $k=>$v) {
+			$answer[$k] = strtolower($answer[$k]);
 		}
 
 
-		for ($x=0; $x<$c_count; $x++) {
-			if (! in_array($correct[$x],$answer) )
+		foreach($correct as $k=>$v) {
+			if (! in_array($correct[$k],$answer) )
 			return FALSE;
 		}
 
-		for ($x=0; $x<$a_count; $x++) {
-			if (! in_array($answer[$x],$correct) )
+		foreach($answer as $k=>$v) {
+			if (! in_array($answer[$k],$correct) )
 			return FALSE;
 		}
 
 		return TRUE;
-	
 	}
 
 
