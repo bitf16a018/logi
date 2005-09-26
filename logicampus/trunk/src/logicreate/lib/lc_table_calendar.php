@@ -11,59 +11,14 @@ include_once(LIB_PATH."lc_table_renderer.php");
  */
 class LC_Table_ClassCalendar extends LC_Table {
 
-//	var $targetDate;
-//	var $firstOfMonth;
-//	var $lastOfMonth;
-
-//	var $startOfWeek;
-//	var $endOfWeek;
-
-//	var $windowStart;
-//	var $windowEnd;
-
 	var $todayDate;
 
-	//var $daysInMonth;
-	//var $firstDayOfWeek;
-	//var $firstOfMonthTS;
-	//var $todayTS= 0;
 	var $eventWindow = 'month';
-
-	/**
-	 * Always 7 days in a week
-	 */
-	/*
-	function getColumnCount() {
-		return $this->;
-	}
-	*/
-
-
-	/*
-	function init($y, $m, $d) {
-		$this->todayDate = new LC_Calendar_DateInfo(time());
-		$this->targetDate = new LC_Calendar_DateInfo( mktime(0,0,0, $m, $d, $y) );
-		$this->firstOfMonth = new LC_Calendar_DateInfo( 
-			mktime(0,0,0, $this->targetDate->month, 1, $this->targetDate->year)
-		);
-		$this->daysInMonth= date('t',$cal->targetDate->timeStamp);
-
-		$weekStart = $d - $this->targetDate->dayOfWeek;
-		$weekEnd = $d + (7-$this->targetDate->dayOfWeek)-1;
-		if ($weekStart < 1 ) { $weekStart = 1; }
-
-		$this->startOfWeek = new LC_Calendar_DateInfo(mktime(0,0,0,$m, $weekStart, $y));
-		$this->endOfWeek = new LC_Calendar_DateInfo(mktime(0,0,0,$m, $weekEnd, $y));
-
-		//debug($this->targetDate,1);
-	}
-	//*/
 
 
 	function getMonthCalendar($classIds, $y, $m, $d) {
 		$dataModel = new LC_TableModel_ClassCalendar($classIds,$y,$m,$d);
 		$cal = new LC_Table_ClassCalendar($dataModel);
-//		$cal->init($y, $m, $d);
 
 		$columnModel = &$cal->getColumnModel();
 		for ($x=0; $x < 7; ++$x) {
@@ -83,7 +38,6 @@ class LC_Table_ClassCalendar extends LC_Table {
 	function getDayCalendar($classIds, $y, $m, $d) {
 		$dataModel = new LC_TableModel_ClassCalendar($classIds,$y,$m,$d,'day');
 		$cal = new LC_Table_ClassCalendar($dataModel);
-//		$cal->init($y,$m,$d);
 		$cal->eventWindow = 'day';
 
 		$cal->columnModel = new LC_TableDefaultColumnModel();
@@ -113,7 +67,6 @@ class LC_Table_ClassCalendar extends LC_Table {
 	function getWeekCalendar($classIds, $y, $m, $d) {
 		$dataModel = new LC_TableModel_ClassCalendar($classIds,$y,$m,$d,'week');
 		$cal = new LC_Table_ClassCalendar($dataModel);
-//		$cal->init($y,$m,$d);
 		$cal->eventWindow = 'week';
 
 		//$cal->firstDayOfMonth = $dataModel->firstDayOfMonth;
@@ -171,7 +124,7 @@ class LC_Table_ClassCalendar extends LC_Table {
 				break;
 			default:
 				$m = $this->getM()+1;
-				$d = $this->getD();
+				$d = 1;
 				if ($m > 12) {
 					$m = 1;
 					$y = $this->getY()+1;
@@ -226,7 +179,7 @@ class LC_Table_ClassCalendar extends LC_Table {
 			default:
 				//$delta = $this->getDaysInMonth()*86400;
 				$m = $this->getM()-1;
-				$d = $this->getD();
+				$d = 1;
 				if ($m < 1) {
 					$y = $this->getY()-1;
 					$m = 12;
@@ -325,23 +278,17 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 
 		$this->init($this->y,$this->m,$this->d);
 
-		//debug($this->daysInMonth);
 
 		$this->eventWindow = $eventWindow;
 
 		if ( $eventWindow == 'month' ) {
-//			$this->firstOfMonthTS = mktime(0,0,0,$this->m,1,$this->y);
-//			$this->endOfMonthTS = mktime(0,0,0,$this->m+1,1,$this->y) -1;
 			$this->windowStartTS = mktime(0,0,0,$this->m,1,$this->y);
 			$this->windowEndTS = mktime(0,0,0,$this->m+1,1,$this->y) -1;
-//			$this->firstDayOfMonth = date('w',$this->firstOfMonthTS);
 		}
 
-		//FIXME
 		if ( $eventWindow == 'week' ) {
 			$this->windowStartTS = mktime(0,0,0,$this->m,$startD,$this->y);
 			$this->windowEndTS = mktime(0,0,0,$this->m,$endD,$this->y) -1;
-//			$this->rowCount = 1;
 		}
 
 		if ( $eventWindow == 'day' ) {
@@ -372,7 +319,6 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 
 		$this->startOfWeek = new LC_Calendar_DateInfo(mktime(0,0,0,$m, $weekStart, $y));
 		$this->endOfWeek = new LC_Calendar_DateInfo(mktime(0,0,0,$m, $weekEnd, $y));
-
 		//debug($this->targetDate,1);
 	}
 
@@ -414,7 +360,13 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 	function getValueAt($x, $y) {
 		$date = $this->coordsToDate($x,$y,$this->firstOfMonth->dayOfWeek);
 		//don't add extra day to the first of month ($date-1)
-		$dateStamp = $this->firstOfMonth->timeStamp + (($date-1) * 86400); //seconds in a day
+		//debug( date ('m d Y h i s A',$this->firstOfMonth->timeStamp));
+		//mktime seems like overkill here, but simple second math is going to break
+		// over Daylight Savings.
+		$dateStamp = mktime(0,0,0,$this->firstOfMonth->month, $date, $this->firstOfMonth->year);
+		//debug( $date);
+		//debug (($date-1) * 86400);
+		//debug( date ('m d Y h i s A',$dateStamp));
 		return $this->countEventsOnDay($dateStamp);
 	}
 
@@ -436,6 +388,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 	 */
 	function getEventsOnDay($dateStamp) {
 		$ret = array();
+//		debug($this->events);
+		//echo "asked for  events on ". date('m d Y', $dateStamp)." $dateStamp<br/>";
 		foreach($this->events as $blank=>$evt) {
 			list($m,$d,$y) = explode(' ', date('m d Y',$evt['startdate']));
 			$evtStart = mktime(0,0,0,$m,$d,$y);
@@ -443,8 +397,14 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 			$evtEnd = mktime(0,0,0,$m,$d,$y);
 
 			if ($evtStart == $dateStamp || $evtEnd == $dateStamp) {
+				//echo "Found an event on day ".date("F d Y", $dateStamp)."<br/>";
+//				//echo "event is <pre>";
+//				print_r($evt); echo "</pre><br/>";
 				$ret[] = $evt;
 			}
+		}
+		if (count($ret)) {
+			//echo "Found ".count($ret)." events on day ".date("F d Y", $dateStamp)."<br/>";
 		}
 		return $ret;
 	}
@@ -649,6 +609,11 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 			$this->html .= '<tr class="center_justify '.$class.'">';
 
 			for ($y = 0; $y < $numCols; ++$y ) {
+				//logic to print dates only in the squares that make sense
+				// not every month begins on a sunday and ends on a saturday
+				$date = ($x*7) + $y - $this->table->tableModel->firstOfMonth->dayOfWeek +1;
+				$date += $this->weekViewOffset;
+
 				$tCol = $colModel->getColumnAt($y);
 				if ($tCol->maxWidth > -1 ) {
 					$width = $tCol->maxWidth;
@@ -669,7 +634,26 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 
 
 				$renderer = $this->table->getCellRenderer($x,$y);
-				$this->table->prepareRenderer($renderer,$x,$y);
+
+				//prevent dates that span months from having highlighted
+				// cells from the getCellCSS function by not preparing
+				// the cell renderers with the number of dates on a given day.
+				// Otherwise we will end up with highlighted days that 
+				// are not part of this month (Ex. test starts on 31st, ends on 1st)
+				//is this the first week?
+				if ($x == 0 && $this->weekViewOffset < 1) {
+					if ($y < $this->table->tableModel->firstOfMonth->dayOfWeek ) {
+						//don't prepare the renderer
+					} else {
+						$this->table->prepareRenderer($renderer,$x,$y);
+					}
+				} else {
+					if ($date > $this->table->tableModel->daysInMonth) {
+						//don't prepare the renderer
+					} else {
+						$this->table->prepareRenderer($renderer,$x,$y);
+					}
+				}
 
 				$css = $renderer->getCellCSS();
 				if ( count ($css) > 0 ) {
@@ -691,10 +675,6 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 				}
 				$this->html .= '>';
 
-				//logic to print dates only in the squares that make sense
-				// not every month begins on a sunday and ends on a saturday
-				$date = ($x*7) + $y - $this->table->tableModel->firstOfMonth->dayOfWeek +1;
-				$date += $this->weekViewOffset;
 /*
 debug($y);
 debug($this->table->firstDayOfWeek);
@@ -709,20 +689,25 @@ debug($date);
 				if ($x == 0 && $this->weekViewOffset < 1) {
 					if ($y < $this->table->tableModel->firstOfMonth->dayOfWeek ) {
 						$this->html .= '';
+						$value = '';
 					} else {
 						$this->html .= $date;
+						//separate the date from the cell value
+						$this->html .= '<br/>';
+						$value = $renderer->getRenderedValue();
 					}
 				} else {
 					if ($date > $this->table->tableModel->daysInMonth) {
 						$this->html .= '';
+						$value = '';
 					} else {
 						$this->html .= $date;
+						//separate the date from the cell value
+						$this->html .= '<br/>';
+						$value = $renderer->getRenderedValue();
 					}
 				}
 
-				//separate the date from the cell value
-				$this->html .= '<br/>';
-				$value = $renderer->getRenderedValue();
 				if ( strlen($value) < 1) {
 					$this->html .= '<br/>';
 				}
