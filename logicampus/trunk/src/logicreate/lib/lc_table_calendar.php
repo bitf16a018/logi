@@ -24,7 +24,7 @@ class LC_Table_ClassCalendar extends LC_Table {
 		for ($x=0; $x < 7; ++$x) {
 			$col = &$columnModel->getColumnAt($x);
 			$col->cellRenderer = new LC_TableCellRenderer_CalendarDate();
-			$col->cellRenderer->row = 8 ;
+			$col->cellRenderer->class = 'cal_weekday' ;
 		}
 
 		return $cal;
@@ -632,7 +632,13 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 				} else {
 					$style = '';
 				}
-
+				//weekday / weekend style
+				if ($y > 0 && $y < 6) {
+					$cellClass = 'cal_weekday';
+					$cellClass .= ($x % 2 == 0) ? '_even':'_odd';
+				} else {
+					$cellClass = '';
+				}
 
 				$renderer = $this->table->getCellRenderer($x,$y);
 				//prevent dates that span months from having highlighted
@@ -667,13 +673,18 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 						$style .= "$i:$j;";
 					}
 				}
+
+				if ($renderer->value > 0 ) {
+					$cellClass = 'cal_event_day';
+				}
+
 				$this->html .= '<td';
 				if ($width > -1) {
 					$this->html .= ' width="'.$width.'"';
 				}
 
-				if ( strlen($justify) > 0) {
-					$this->html .= ' class="'.$justify.'"';
+				if ( strlen($justify) > 0 || strlen($cellClass) > 0) {
+					$this->html .= ' class="'.$cellClass.' '.$justify.'"';
 				}
 
 				if ( strlen($style) > 0) {
@@ -1008,6 +1019,7 @@ class LC_TableCellRenderer_CalendarDate extends LC_TableCellRenderer {
 	 * Return an array of key value pairs for this cell
 	 */
 	function getCellCSS() {
+		return array();
 		//mark days with events as a different color
 		if ($this->value > 0 ) { 
 			return array('class'=>'cal_event_day');

@@ -4,11 +4,11 @@
 		border: 1px dashed black;
 	}
 
-	cal_weekday_odd {
+	.cal_weekday_odd {
 		background-color:#F0EEEE;
 	}
 
-	cal_weekday_even {
+	.cal_weekday_even {
 		background-color:#FFEEEE;
 	}
 
