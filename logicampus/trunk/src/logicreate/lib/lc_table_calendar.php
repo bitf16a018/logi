@@ -1010,13 +1010,13 @@ class LC_TableCellRenderer_CalendarDate extends LC_TableCellRenderer {
 	function getCellCSS() {
 		//mark days with events as a different color
 		if ($this->value > 0 ) { 
-			return array('border'=>'1px dashed black','background-color'=>'#C0FFC0');
+			return array('class'=>'cal_event_day');
 		}
 		if ($this->col > 0 && $this->col < 6) {
 			if ($this->row % 2) {
-				return array('background-color'=>'#F0EEEE');
+				return array('class'=>'cal_weekday_odd');
 			} else {
-				return array('background-color'=>'#FFEEEE');
+				return array('class'=>'cal_weekday_even');
 			}
 		} else {
 			return array();
