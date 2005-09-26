@@ -10,6 +10,7 @@
 
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL.$t['cssFile'];?>">
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL?>datagrid.css">
+	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL?>calendar.css">
 
 <? if (trim($obj->user->activeClassTaken->stylesheet) != '' && $this->module == 'classroom') { ?>
 	<link rel="stylesheet" type="text/css" href="<?=BASE_URL. 'templates/student/';?><?=$obj->user->activeClassTaken->stylesheet;?>">
