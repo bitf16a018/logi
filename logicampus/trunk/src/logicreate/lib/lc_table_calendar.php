@@ -24,6 +24,7 @@ class LC_Table_ClassCalendar extends LC_Table {
 		for ($x=0; $x < 7; ++$x) {
 			$col = &$columnModel->getColumnAt($x);
 			$col->cellRenderer = new LC_TableCellRenderer_CalendarDate();
+			$col->cellRenderer->row = 8 ;
 		}
 
 		return $cal;
@@ -634,7 +635,6 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 
 
 				$renderer = $this->table->getCellRenderer($x,$y);
-
 				//prevent dates that span months from having highlighted
 				// cells from the getCellCSS function by not preparing
 				// the cell renderers with the number of dates on a given day.
@@ -643,13 +643,19 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 				//is this the first week?
 				if ($x == 0 && $this->weekViewOffset < 1) {
 					if ($y < $this->table->tableModel->firstOfMonth->dayOfWeek ) {
-						//don't prepare the renderer
+						//clear the value because in php5 all objects
+						// are passed by reference, so the renderer value
+						// will hold last week's value.
+						$renderer->value = '';
 					} else {
 						$this->table->prepareRenderer($renderer,$x,$y);
 					}
 				} else {
 					if ($date > $this->table->tableModel->daysInMonth) {
-						//don't prepare the renderer
+						//clear the value because in php5 all objects
+						// are passed by reference, so the renderer value
+						// will hold last week's value.
+						$renderer->value = '';
 					} else {
 						$this->table->prepareRenderer($renderer,$x,$y);
 					}
@@ -1004,7 +1010,7 @@ class LC_TableCellRenderer_CalendarDate extends LC_TableCellRenderer {
 	function getCellCSS() {
 		//mark days with events as a different color
 		if ($this->value > 0 ) { 
-			return array('border'=>'1px dashed black','background-color'=>'C0FFC0');
+			return array('border'=>'1px dashed black','background-color'=>'#C0FFC0');
 		}
 		if ($this->col > 0 && $this->col < 6) {
 			if ($this->row % 2) {
