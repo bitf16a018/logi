@@ -102,7 +102,7 @@ class LC_Table_ClassCalendar extends LC_Table {
 				$delta = 7;
 				//if the desired day is not a sunday, only jump forward number of days
 				// to get you to a sunday.
-				if ( $this->tableModel->firstOfMonth->dayOfWeek > 0 ) {
+				if ( $this->tableModel->targetDate->dayOfWeek > 0 ) {
 					$delta = (7-$this->tableModel->firstOfMonth->dayOfWeek);
 				}
 				//if adding a whole week jumps you forwards a month, just go to the 
@@ -288,8 +288,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 		}
 
 		if ( $eventWindow == 'week' ) {
-			$this->windowStartTS = mktime(0,0,0,$this->m,$startD,$this->y);
-			$this->windowEndTS = mktime(0,0,0,$this->m,$endD,$this->y) -1;
+			$this->windowStartTS = mktime(0,0,0,$this->m,$this->startOfWeek->date,$this->y);
+			$this->windowEndTS = mktime(0,0,0,$this->m,$this->endOfWeek->date,$this->y) -1;
 		}
 
 		if ( $eventWindow == 'day' ) {
@@ -314,8 +314,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 		);
 		$this->daysInMonth= date('t',$this->targetDate->timeStamp);
 
-		$weekStart = $d - $this->targetDate->dayOfWeek;
-		$weekEnd = $d + (7-$this->targetDate->dayOfWeek)-1;
+		$weekStart = $d - $this->targetDate->dayOfWeek+1;
+		$weekEnd = $d + (7-$this->targetDate->dayOfWeek);
 		if ($weekStart < 1 ) { $weekStart = 1; }
 
 		$this->startOfWeek = new LC_Calendar_DateInfo(mktime(0,0,0,$m, $weekStart, $y));
@@ -373,7 +373,7 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 
 
 	function coordsToDate($x,$y,$offset) {
-		return ($x*7) + $y - $offset +1;
+		return ($x*7) + $y - $offset + 1 + $this->weekViewOffset;
 	}
 
 
@@ -584,8 +584,9 @@ class LC_TableRenderer_Calendar extends LC_TableRenderer {
 		// and the window start
 		// only use it if we're looking at a week that is not the first week in a month;
 		if ($this->table->eventWindow == 'week' && $this->table->tableModel->startOfWeek->date > 1) {
-			$this->weekViewOffset = (int)($this->table->tableModel->startOfWeek->date + $this->table->tableModel->firstOfMonth->dayOfWeek -1);
+			$this->weekViewOffset = (int)($this->table->tableModel->startOfWeek->date + $this->table->tableModel->firstOfMonth->dayOfWeek -2 );
 			if ($this->weekViewOffset < 0 ) { $this->weekViewOffset = 0; }
+			$this->table->tableModel->weekViewOffset = $this->weekViewOffset;
 		}
 
 		for ($x = 0; $x < $numRows; ++$x) {
