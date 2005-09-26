@@ -77,7 +77,6 @@ class LC_Table {
 		if ($col->cellRenderer != null ) {
 			return $col->cellRenderer;
 		}
-
 		return $this->defaultCellRenderer;
 	}
 
@@ -86,9 +85,9 @@ class LC_Table {
 	 * Set value of renderer from table model
 	 */
 	function prepareRenderer(&$r,$x,$y) {
-		$r->setValue($this->tableModel->getValueAt($x,$y));
 		$r->row = $x;
 		$r->col = $y;
+		$r->setValue($this->tableModel->getValueAt($x,$y));
 	}
 
 
