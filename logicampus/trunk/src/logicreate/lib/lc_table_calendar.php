@@ -417,6 +417,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 	 */
 	function getEventsAtHour($dateStamp) {
 		$ret = array();
+//		echo "Hour is : ".date('G:i:s',$dateStamp);
+//		echo "<br/><br/>";
 		foreach($this->events as $blank=>$evt) {
 			list($m,$d,$y,$g) = explode(' ', date('m d Y G',$evt['startdate']));
 			$evtStart = mktime($g,0,0,$m,$d,$y);
@@ -425,6 +427,9 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 
 			if ($evtStart == $dateStamp || $evtEnd == $dateStamp) {
 				$ret[] = $evt;
+//			} else {
+//				echo "event is not at this hour ".$evt['title']." ". date('m d Y G:i:s', $evt['startdate'])."<br/>";
+//				echo "event is not at this hour ".$evt['title']." ". date('m d Y G:i:s', $evt['enddate'])."<hr/>";
 			}
 		}
 		return $ret;
@@ -863,7 +868,7 @@ class LC_TableRenderer_DayCalendar extends LC_TableRenderer_Calendar {
 				if ($y==0 ) {
 					$renderer->value = $x;
 				} else {
-					$renderer->value = $this->table->tableModel->getEventsAtHour( mktime($x, 0, 0, $this->table->tableModel->m, $this->table->tableModel->d, $this->table->tableModel->y ) );
+					$renderer->value = $this->table->tableModel->getEventsAtHour( mktime($x+1, 0, 0, $this->table->tableModel->m, $this->table->tableModel->d, $this->table->tableModel->y ) );
 				}
 
 				$css = $renderer->getCellCSS();
@@ -924,7 +929,9 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 
 			$ret .=	$v['title'];
 			if ( strlen($v['description']) ) {
-				$ret .= '<br/>'.substr($v['description'], 0, 45);
+				if ( strlen($v['description']) > 85 ) {
+					$ret .= '<br/>'.substr($v['description'], 0, 83). '...';
+				}
 			}
 			if ($v['enddate'] - $v['startdate'] < (60*60) ) {
 				$ret .= '<br/>Event ends in one hour or less.';
@@ -946,8 +953,10 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 		list($m,$d,$y) = explode(' ', date('m d Y',$evt['enddate']));
 		$evtEnd = mktime(0,0,0,$m,$d,$y);
 
-		switch( $evt['calendarType'] ) {
-			case 'classroomAssignments':
+		debug($evt);
+		$evtType = strtolower($evt['calendarType']);
+		switch( $evtType ) {
+			case 'classroomassignments':
 				$type = 'Assignment:';
 				if ($evtStart == $this->targetDate->timeStamp) {
 					$type = 'Assignment (Assigned):';
