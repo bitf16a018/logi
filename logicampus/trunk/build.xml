@@ -179,11 +179,9 @@
 	<filter token="LC_VERSION" value="${lc.version}"/>
 	<filter token="LC_BUILD_DATE" value="${build.date}"/>
 	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/install.php" todir="${build}/public_html/" filtering="true"/>
 
 
-
-	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite='true'/>
+	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite="true"/>
 
 
 	<!-- move the data files to where the installer can get them -->
@@ -211,7 +209,14 @@
 
 	<!-- After license is applied, copy install.php over -->
 	<echo message="copying installation instructions."/>
-	<copy todir="${build}/public_html/" file="${src}/install.php" overwrite='true'/>
+	<copy file="${src}/install.php" todir="${build}/public_html/" overwrite="true">
+		<filterset>
+			<filter token="build.date" value="${build.date}"/>
+			<filter token="version.number" value="${version.number}"/>
+			<filter token="version.extra" value="${version.extra}"/>
+		</filterset>
+	</copy>
+
 
 	<!-- tar up -->
 	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
