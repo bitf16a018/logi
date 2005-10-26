@@ -121,21 +121,21 @@
 
 <script language="Javascript">
 function toggleLegend() {
-	legend = document.getElementById('legend');
+	var legend = document.getElementById('legend');
 	if (legend.style.display=='block') {
-		document.getElementById('legend').style.display='none';
+		legend.style.display='none';
 	} else {
-		document.getElementById('legend').style.display='block';
+		legend.style.display='block';
 	}
 	return false;
 }
 
 function toggleFilter() {
-	legend = document.getElementById('filter');
+	var legend = document.getElementById('filter');
 	if (legend.style.display=='block') {
-		document.getElementById('filter').style.display='none';
+		legend.style.display='none';
 	} else {
-		document.getElementById('filter').style.display='block';
+		legend.style.display='block';
 	}
 	return false;
 }
