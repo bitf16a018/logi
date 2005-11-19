@@ -174,6 +174,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	private $possibleValues;
 	private $codeType;
 	private $isPrimary = false;
+	private $isRequired = false;
 	public $description = '';
 
 
@@ -213,6 +214,19 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 
 	function getSize() {
 		return $this->size;
+	}
+
+
+	/**
+	 * Can the attribute hold a NULL value?
+	 */
+	function setRequired($r) {
+		$this->required = $r;
+	}
+
+
+	function getRequired() {
+		return $this->required;
 	}
 
 
@@ -258,6 +272,7 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 		$x->setSize( $obj->getAttribute('size') );
 		$x->description = $obj->getAttribute('description');
 		$x->setExtra($obj->getAttribute('extra'));
+		$x->setRequired($obj->getAttribute('required'));
 
 		return $x;
 	}
