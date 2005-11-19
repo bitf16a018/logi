@@ -196,6 +196,7 @@ class PBDO_ParsedColumn {
 		$x->extra = $attrib->extra;
 
 
+		print_r($attrib);
 		if ($attrib->required == 'true') {
 			$x->null = false;
 		} else {
