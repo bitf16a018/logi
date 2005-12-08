@@ -361,7 +361,7 @@ class ClassGradebook extends ClassGradebookBase {
 	 */
 	function getLetterGrade($points,$possible)
 	{
-		if ($possible == 0 ) {
+		if ($possible === 0 ) {
 			return 'E/C';
 		}
 
@@ -395,11 +395,10 @@ class ClassGradebook extends ClassGradebookBase {
 		} else {
 			return 'F';
 		}
-
-		$inc = ($max - $min) / 3;
-
-		if ( $score >= $max-$inc ) return "$letter+";
-		if ( $score <  $min+$inc ) return "$letter-";
+// removed per David Wissore email on feb 23, 2004
+		//$inc = ($max - $min) / 3;
+		#if ( $score >= $max-$inc ) return "$letter+";
+		#if ( $score <  $min+$inc ) return "$letter-";
 
 		return $letter;
 	}
@@ -478,18 +477,28 @@ class ClassGradebook extends ClassGradebookBase {
 	function setStudentVals() {
 		$now = time();
 
+//print "<!-- SET STUDENT VALS START -->\n";
+//print "<!-- SET STUDENT VALS: VALOBJ ".get_class($valObj)."  -->\n";
+//print "<!-- \n";
+#print_r($this->vals);
+//print "--> \n";
+
+
 
 		foreach($this->vals as $valId=>$valObj) {
 
 			$entry = $this->entries[$valObj->idClassGradebookEntries];
-			$student = $this->students[$valObj->username];
+			$j = strtolower($valObj->username);
+#			$j = $valObj->username;
+			$student = $this->students[$j];
 			if ( strtolower(get_class($student)) != 'classgradebookstudent' ){
 				continue;
 			}
 
 
 			if ( $entry->publishFlag == 0 ) {
-				$this->students[$valObj->username]->vals[$entry->idClassGradebookEntries] = $valObj;
+				#$this->students[$valObj->username]->vals[$entry->idClassGradebookEntries] = $valObj;
+				$this->students[$j]->vals[$entry->idClassGradebookEntries] = $valObj;
 				continue;
 			}
 			if (($entry->dateDue > 0 && $entry->dateDue < $now) || strlen($valObj->score) > 0 ) {
@@ -503,9 +512,12 @@ class ClassGradebook extends ClassGradebookBase {
 				if (isset($valObj->score)) { 
 					if ( $valObj->score == 0 ) { $valObj->score = 0; }
 				}
-				$this->students[$valObj->username]->vals[$entry->idClassGradebookEntries] = $valObj;
-				$this->students[$valObj->username]->possiblePoints += $entry->totalPoints;
-				$this->students[$valObj->username]->totalPointsEarned += $valObj->score;
+				#$this->students[$valObj->username]->vals[$entry->idClassGradebookEntries] = $valObj;
+				$this->students[$j]->vals[$entry->idClassGradebookEntries] = $valObj;
+				#$this->students[$valObj->username]->possiblePoints += $entry->totalPoints;
+				$this->students[$j]->possiblePoints += $entry->totalPoints;
+				#$this->students[$valObj->username]->totalPointsEarned += $valObj->score;
+				$this->students[$j]->totalPointsEarned += $valObj->score;
 			}
 		}
 
@@ -546,9 +558,12 @@ class ClassGradebook extends ClassGradebookBase {
 			if ( $this->filterCategory 
 				&& $this->entries[$valObj->idClassGradebookEntries]->idClassGradebookCategories 
 				!= $this->filterCategory) {
-				continue;
+		#		continue;
 			}
-
+			// mgk 2/8/04
+			// karen richardson student (and others) had data not showing up
+			// due to this bug.
+			$valObj->username = strtolower($valObj->username);
 			$this->vals[$valObj->idClassGradebookVal] = $valObj;
 		}
 	}
@@ -582,6 +597,7 @@ class ClassGradebook extends ClassGradebookBase {
 
 			foreach($stuObj->vals as $entId=>$valObj) {
 			$catId = $this->entries[$entId]->idClassGradebookCategories;
+			$entObj = $this->entries[$entId];
 			if ( is_array($dropList[$catId]) ) {
 				//definately drop some grades for this category
 
@@ -589,8 +605,19 @@ class ClassGradebook extends ClassGradebookBase {
 				while ( list($blank,$compareId) = @each($dropList[$catId]) ) {
 					unset($tmp);
 					$compareVal = $this->vals[$compareId];
+					//compare scores from percentage based classes properly
+					//points based
+					$scoreA = $valObj->score;
+					$scoreB = $compareVal->score;
 
-					if ( ($valObj->score <= $compareVal->score ) ) {
+					//percentage based
+					if ( $this->isPercentageBased() ) {
+						$compareEnt = $this->entries[$compareVal->idClassGradebookEntries];
+						$scoreA = $valObj->score / $entObj->totalPoints  * 100;
+						$scoreB = $compareVal->score / $compareEnt->totalPoints * 100;
+					}
+
+					if ( ($scoreA <= $scoreB ) ) {
 						//slide remainder of scores up the stack
 						$current = $valObj->idClassGradebookVal;
 						$catSize = count($dropList[$catId]);
@@ -652,7 +679,8 @@ class ClassGradebook extends ClassGradebookBase {
 	 * @return boolean
 	 */
 	function requiresDrop() {
-		return false;
+	// might  be working now 2-24-04
+	//	return false;
 		return $this->hasDropCount;
 	}
 
@@ -764,20 +792,34 @@ class ClassGradebook extends ClassGradebookBase {
                 {
 			return;
 		}
-
-		foreach($this->students AS $username=>$stuObj)
-		{
+		reset($this->students);
+		#debug($this->students);
+		while(list($username,$stuObj) = each($this->students)) { 
+#		foreach($this->students AS $username=>$stuObj) {
 			if ( $stuObj->isWithdrawn() ) { continue; }
-//print "\n\n<!-- ".$username."-->\n";
 			$categoryPercentSums = array();
 			$totalWeight =0;	// mgk 12/05/03
-
-			foreach ($stuObj->vals AS $valId=>$valObj)
-			{
-
+//print "<!-- calculateWeightedAverages \n";
+		#print_r($stuObj->vals);
+		#print " FOREACH1 -->\n";
+			reset($stuObj->vals);
+			foreach ($stuObj->vals as $valId=>$valObj) {
+			// emmanual.aguas =- 3/1/04 -
+			// he had a blank valId  - not sure how/how
+			// put this check in - mgk - to make the system work again.
+			if ($valId==0) { continue; }
 				$entryObj = $this->entries[$valObj->idClassGradebookEntries];
-				if ( $valObj->isDisqualified() ) continue;
-				if ( $entryObj->publishFlag == 0 ) continue;
+//echo "<!--".$valObj->idClassGradebookEntries. " -- ".$valObj->score." - ".$entryObj->weightedPercent." class= ".get_class($valObj)." -->\n";
+//print "<!-- calculateWeightedAverages FOREACH1 -->\n";
+				if ( $valObj->isDisqualified() )  {
+		#		echo "is dis<BR>";
+					continue;
+				}
+//print "<!-- calculateWeightedAverages FOREACH2 -->\n";
+				if ( $entryObj->publishFlag == 0 ) { 
+		#		echo "is <BR>";
+					continue; 
+				}
 
 
 				// don't count due dates that haven't passed yet, and have no score
@@ -791,40 +833,40 @@ class ClassGradebook extends ClassGradebookBase {
 
 
 				// if a score is null, don't count it.
-					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['total'] += $valObj->score / $entryObj->totalPoints * 100;
-#					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['total'] += ($valObj->score / $entryObj->totalPoints) ;
-					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['count'] ++;
-					$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['weight'] += $entryObj->weightedPercent;
+				$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['total'] += $valObj->score / $entryObj->totalPoints * 100;
+#				$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['total'] += ($valObj->score / $entryObj->totalPoints) ;
+				$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['count'] ++;
+				$categoryPercentSums[ $entryObj->idClassGradebookCategories ]['weight'] += $entryObj->weightedPercent;
 				} else {
 //print "<!-- one E/C grade -->\n"; 
 				}
 
-
 			}
 			//once the vals are sorted by category, find the average
-//echo "<!--"; debug($categoryPercentSums); echo "-->\n\n";
+#			echo "<!--"; debug($categoryPercentSums); echo "-->\n\n";
 // mgk 12/06/03 
 // $totalWeight is what we divide by, not necessarily 100, because
 // we might not have added to 100 yet (earlier in semester)???
-$totalPct=0;
-	foreach ($categoryPercentSums as $catid => $percentArray ) {
-		$totalPct += $this->categoryWeights[$catid]['weight'];
-	}
-	$tempAvg = 0;
-	foreach ($categoryPercentSums as $catid => $percentArray ) {
-	$divideby = $totalPct;
+	$totalPct=0;
+			foreach ($categoryPercentSums as $catid => $percentArray ) {
+				$totalPct += $this->categoryWeights[$catid]['weight'];
+			}
+			$tempAvg = 0;
+			foreach ($categoryPercentSums as $catid => $percentArray ) {
+				$divideby = $totalPct;
 //print "<!-- ".$this->categoryWeights[$catid]['weight'] . " * (". $percentArray['total'] . " / ". $percentArray['count'].")/$divideby -->\n";
 
 				$avg = ($this->categoryWeights[$catid]['weight']/100) * ($percentArray['total']/$percentArray['count']);
-#				$tempAvg += $this->categoryWeights[$catid]['weight'] *( $percentArray['total'] / $percentArray['count']);
+		#		$tempAvg += $this->categoryWeights[$catid]['weight'] *( $percentArray['total'] / $percentArray['count']);
 				$tempAvg += $avg;
 			}
 			$tempAvg = ($tempAvg/$totalPct) * 100;
 			$stuObj->weightedAverage = sprintf('%.3f',$tempAvg);
 //print "<!-- ".$stuObj->weightedAverage ." -->\n";
 			$this->students[$username] = $stuObj;
-
 		}
+
+//print "<!-- calculateWeightedAverages DONE -->\n";
         }
 //*/
 
@@ -850,6 +892,15 @@ $totalPct=0;
 					sprintf('%0.2f', ($score/$poss)*100);
 			}
 		}
+	}
+
+
+	/**
+	 * Percentage based gradebooks need to compare percentage
+	 * of values done in them
+	 */
+	function isPercentageBased() {
+		return $this->calculationType == 1;
 	}
 
 }
@@ -905,7 +956,7 @@ class ClassGradebookStudent {
 	 * return true if the student has a withdrawn date
 	 */
 	function isWithdrawn() {
-		if ($this->active == 0) { return false; }
+		if ($this->active==0) { return false; }
 		return $this->dateWithdrawn > 0;
 	}
 
