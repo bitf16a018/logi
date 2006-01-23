@@ -376,6 +376,7 @@ class '.$this->codeName.'Base {
 
 	function loadAll($dsn="default") {
 		$array = '.$this->codeName.'Peer::doSelect(\'\',$dsn);
+		return $array;
 	}
 
 
