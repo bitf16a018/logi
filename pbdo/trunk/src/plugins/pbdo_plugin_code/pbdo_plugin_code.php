@@ -345,10 +345,12 @@ class '.$this->codeName.'Base {
 		return $this->'.$this->getOID().';
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->'.$this->getOID().' = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey('.$this->codeName.'Peer::doInsert($this,$dsn));
@@ -356,6 +358,7 @@ class '.$this->codeName.'Base {
 			'.$this->codeName.'Peer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -369,6 +372,12 @@ class '.$this->codeName.'Base {
 		$array = '.$this->codeName.'Peer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = '.$this->codeName.'Peer::doSelect(\'\',$dsn);
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		'.$this->codeName.'Peer::doDelete($this,$deep,$dsn);
