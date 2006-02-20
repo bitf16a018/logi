@@ -18,7 +18,7 @@ class PBDO_PluginManager {
 			flush();
 			echo "=================================================================\n";
 			echo "Plugin Manager: Initializing Plugin (".$plugin->displayName.")\n";
-			$plugin->initPlugin();
+			$plugin->initPlugin(OUTPUT_DIR);
 			echo "Plugin Manager: Starting Plugin (".$plugin->displayName.")\n";
 			$plugin->startPlugin();
 			echo "Plugin Manager: Destroying Plugin (".$plugin->displayName.")\n";

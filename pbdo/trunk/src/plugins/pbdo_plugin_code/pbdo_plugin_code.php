@@ -14,15 +14,17 @@ class PBDO_Plugin_Code extends PBDO_Plugin {
 	public $displayName = 'PBDO Code Generator';
 
 	private $codeStack = array();
+	private $outputDir = '';
 
 	/**
 	 * create directories for storing the code
 	 * turn internal data model into parsed code objects
 	 */
-	function initPlugin() {
+	function initPlugin($outputDir) {
 		$projectName = $this->dataModel->projectName;
 		$codeExt = 'php';
-		$codePath = 'projects/'.$projectName.'/'.$codeExt.'/';
+		$this->outputDir = $outputDir;
+		$codePath = $this->outputDir.$projectName.'/'.$codeExt.'/';
 
 		echo "Starting Code Generation Plugin\n";
 		echo "Grabbing global data model...\n";
@@ -51,7 +53,7 @@ class PBDO_Plugin_Code extends PBDO_Plugin {
 	function startPlugin() {
 		$projectName = $this->dataModel->projectName;
 		$codeExt = 'php';
-		$codePath = 'projects/'.$projectName.'/'.$codeExt.'/';
+		$codePath = $this->outputDir.$projectName.'/'.$codeExt.'/';
 		foreach($this->codeStack as $v) {
 			//find out if file already exists
 			unset($saved);

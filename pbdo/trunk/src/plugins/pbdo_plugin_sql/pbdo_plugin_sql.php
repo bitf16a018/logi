@@ -17,16 +17,18 @@ class PBDO_Plugin_Sql extends PBDO_Plugin {
 	
 	private $database;
 	private $type = 'mysql';
+	private $outputDir = '';
 
 	/**
 	 * create directories for storing the code
 	 * turn internal data model into parsed code objects
 	 */
-	function initPlugin() {
+	function initPlugin($outputDir) {
 		include('plugins/pbdo_plugin_sql/sqldef.php');
 		$projectName = $this->dataModel->projectName;
 		$sqlExt = 'sql';
-		$codePath = 'projects/'.$projectName.'/'.$sqlExt.'/';
+		$this->outputDir = $outputDir;
+		$codePath = $this->outputDir.$projectName.'/'.$sqlExt.'/';
 
 		echo "Starting Sql Generation Plugin\n";
 		echo "Grabbing global data model...\n";
@@ -71,8 +73,8 @@ class PBDO_Plugin_Sql extends PBDO_Plugin {
 		$projectName = $this->dataModel->projectName;
 		$type = $this->type;
 		foreach($this->database->tables as $k=>$v) {
-			$file = fopen('projects/'.$projectName.'/sql/'.$v->name.'.'.$type.'.sql','w+');
-			print "Writing 'projects/$projectName/sql/".$v->name.'.'.$type.".sql'...\n";
+			$file = fopen($this->outputDir.$projectName.'/sql/'.$v->name.'.'.$type.'.sql','w+');
+			print "Writing '".$this->outputDir."$projectName/sql/".$v->name.'.'.$type.".sql'...\n";
 			$sql = $v->toSQL();
 			fputs($file,$sql,strlen($sql) );
 			fclose($file);
