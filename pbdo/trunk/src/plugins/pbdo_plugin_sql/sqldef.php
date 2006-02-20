@@ -97,26 +97,32 @@ class PBDO_ParsedTable {
 
 
 	function toSQL() {
-		$ret = "-- Dumping SQL for project ".$this->projectName."\n-- entity version: ".$this->version."\n";
-		$ret .= "-- DB type: mysql\n";
-		$ret .="-- generated on: ".date('m.d.Y')."\n\n";
-		$ret .= 'DROP TABLE IF EXISTS `'.$this->name.'`;
+		$comments  = "-- Dumping SQL for project ".$this->projectName."\n-- entity version: ".$this->version."\n";
+		$comments .= "-- DB type: mysql\n";
+		$comments .= "-- generated on: ".date('m.d.Y')."\n\n";
+		$ret = 'DROP TABLE IF EXISTS `'.$this->name.'`;
 ';
 		$ret .= 'CREATE TABLE `'.$this->name.'` (
 		';
 		foreach($this->columns as $cname=>$column) {
-			$ret .= "\n".$column->toSQL();
+			$ret .= "\n".$column->toSQL().", ";
+			if ( strlen($column->description) ) {
+				$comments .= "-- ".$column->name.": ".$column->description."\n";
+			}
 		}
+		$comments .= "\n";
+		$ret = $comments . substr($ret,0,-2);
 
 
 		//add the primary key if it exists, treat differently than
 		// other indexes (SQLite)
 		if ( $this->primaryKey != '' ) {
-			$ret .= "\n\tPRIMARY KEY (".$this->primaryKey."),  ";
+			$ret .= ",\n\tPRIMARY KEY (".$this->primaryKey.") ";
+		} else {
+			//$ret = substr($ret,0,-2);
 		}
 
-		$ret = substr($ret,0,-3);
-		$ret .= "\n)TYPE=InnoDB;\n";
+		$ret .= "\n);\n";
 
 		//add indexes at the end of the table,
 		// works with more databases (SQLite)
@@ -181,9 +187,13 @@ class PBDO_ParsedColumn {
 		if ( $this->auto ) {
 			$ret .= " auto_increment";
 		}
+		/*
 		$ret .= ", ";
-		$ret .= " -- ".$this->description;
+		if ( strlen($this->description) ) {
+			$ret .= " -- ".$this->description;
+		}
 		$ret .= "\n";
+		*/
 	return $ret;
 	}
 
