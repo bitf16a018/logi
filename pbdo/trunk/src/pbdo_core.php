@@ -38,7 +38,7 @@ Possible arguments include:
 
 
 
-function pbdocore($filename,$argv='') { 
+function pbdocore($filename,$argv='',$settings='') { 
 
 for ($qq=0; $qq<@count($argv); ++$qq) {
 
@@ -69,6 +69,8 @@ if (!defined('NO_SQL') ) define('NO_SQL',false);
 if (!defined('OLD_STYLE') ) define('OLD_STYLE',false);
 if (!defined('PGSQL') ) define('PGSQL',false);
 if (!defined('MSSQL') ) define('MSSQL',false);
+
+define('OUTPUT_DIR', $settings['OUTPUT_DIR']);
 
 
 if ( OLD_STYLE ) {
@@ -136,8 +138,8 @@ if ( !OLD_STYLE ) {
 		if ( count($v->widgets) < 1 ) {
 			continue;
 		}
-		$file = fopen('projects/'.$projectName.'/forms/'.$k.'.html','w+');
-		print "Writing 'projects/$projectName/forms/".$k.".html'...\n";
+		$file = fopen(OUTPUT_DIR.$projectName.'/forms/'.$k.'.html','w+');
+		print "Writing ".OUTPUT_DIR."projectName/forms/".$k.".html'...\n";
 		$form = $v->toString();
 		fputs($file,$form,strlen($form));
 		fclose($file);
@@ -170,7 +172,7 @@ if ( !OLD_STYLE ) {
 	} 
 	echo "Importing data files\n--------\n";
 	$datafile = str_replace(".xml",".data.xml",$filename);
-	$sqlpath = ("projects/$projectName/sql/");
+	$sqlpath = (OUTPUT_DIR."$projectName/sql/");
 	if (!file_exists($datafile)) { 
 		echo ("\nCan't load the corresponding data file for $filename \n(looking for $datafile)\n\n");
 	} else { 
@@ -226,14 +228,14 @@ if ( !OLD_STYLE ) {
 	 */
 	function createDirs($projectName) { 
 
-		if (! file_exists("projects/".$projectName) ) {
+		if (! file_exists(OUTPUT_DIR.$projectName) ) {
 			echo "making php dir\n";
-			mkdir ("projects/".$projectName);
+			mkdir (OUTPUT_DIR.$projectName);
 		} else {
-			print "Project directory already exists (projects/".$projectName.")\n";
+			print "Project directory already exists (".OUTPUT_DIR.$projectName.")\n";
 		}
 		print "Making graph dir\n";
-		@mkdir ("projects/".$projectName."/graph/");
+		@mkdir (OUTPUT_DIR.$projectName."/graph/");
 
 /* deprecated
 		if ($this->generateSQL 
