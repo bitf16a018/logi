@@ -1,6 +1,6 @@
 <?php
 
-class LC_SQLStatement {
+class PBDO_SQLStatement {
 
 	var $type;
 	var $fields;
@@ -13,7 +13,7 @@ class LC_SQLStatement {
 	var $tableName = ' ';
 	var $database;
 
-	function LC_SQLStatement($table,$where='') {
+	function PBDO_SQLStatement($table,$where='') {
 		$this->tableName = $table;
 		$this->where = $where;
 	}
@@ -36,7 +36,7 @@ class LC_SQLStatement {
 }
 
 
-class LC_SelectStatement extends LC_SQLStatement {
+class PBDO_SelectStatement extends PBDO_SQLStatement {
 
 	var $type = "select";
 
@@ -55,7 +55,7 @@ class LC_SelectStatement extends LC_SQLStatement {
 	}
 }
 
-class LC_UpdateStatement extends LC_SQLStatement {
+class PBDO_UpdateStatement extends PBDO_SQLStatement {
 
 	var $type = "update";
 
@@ -84,7 +84,7 @@ class LC_UpdateStatement extends LC_SQLStatement {
 	}
 }
 
-class LC_InsertStatement extends LC_SQLStatement {
+class PBDO_InsertStatement extends PBDO_SQLStatement {
 
 	var $type = "insert";
 
@@ -118,7 +118,7 @@ class LC_InsertStatement extends LC_SQLStatement {
 	}
 }
 
-class LC_DeleteStatement extends LC_SQLStatement {
+class PBDO_DeleteStatement extends PBDO_SQLStatement {
 
 	var $type = "delete";
 
