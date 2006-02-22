@@ -288,6 +288,12 @@ class ParsedClass {
 			$q = convertTableName($rel->getEntityB() ."By".ucfirst($lcol));
 			$fCodeName = convertTableName($rel->getEntityB());
 
+			$ret .= "\t/**\n";
+			$ret .= "\t * Retrieves one ".$rel->getEntityB()." object via the foreign key ". $lcol.".\n";
+			$ret .= "\t * \n";
+			$ret .= "\t * @param String \$dsn the name of the data source to use for the sql query.\n";
+			$ret .= "\t * @return Object the related object.\n";
+			$ret .= "\t */\n";
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
 			$ret .= "\t\tif ( \$this->".convertColName($lcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
 			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
@@ -311,6 +317,12 @@ class ParsedClass {
 			$q = convertTableName($rel->getEntityA().$s."By".ucfirst($fcol));
 			$fCodeName = convertTableName($rel->getEntityA());
 
+			$ret .= "\t/**\n";
+			$ret .= "\t * Retrieves an array of ".$rel->getEntityA()." objects via the foreign key ". $fcol.".\n";
+			$ret .= "\t * \n";
+			$ret .= "\t * @param String \$dsn the name of the data source to use for the sql query.\n";
+			$ret .= "\t * @return Array related objects.\n";
+			$ret .= "\t */\n";
 			$ret .= "\tfunction get".$q."(\$dsn='default') {\n";
 			$ret .= "\t\tif ( \$this->".convertColName($lcol)." == '' ) { trigger_error('Peer doSelect with empty key'); return false; }\n";
 			$ret .= "\t\t\$array = ".$fCodeName."Peer::doSelect('".$fcol." = \''.\$this->".convertColName($lcol).".'\'',\$dsn);\n";
@@ -426,8 +438,8 @@ class '.$this->codeName.'PeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("'.$this->tableName.'",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("'.$this->tableName.'",$where);
 ';
 		@reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -449,8 +461,8 @@ class '.$this->codeName.'PeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("'.$this->tableName.'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("'.$this->tableName.'");
 ';
 		@reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -473,8 +485,8 @@ class '.$this->codeName.'PeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("'.$this->tableName.'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("'.$this->tableName.'");
 ';
 		reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -492,11 +504,11 @@ class '.$this->codeName.'PeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -506,8 +518,8 @@ class '.$this->codeName.'PeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("'.$this->tableName.'","'.$this->getPkey().' = \'".$obj->getPrimaryKey()."\'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("'.$this->tableName.'","'.$this->getPkey().' = \'".$obj->getPrimaryKey()."\'");
 ';
 		$ret .='
 		$db->executeQuery($st);
@@ -518,7 +530,7 @@ class '.$this->codeName.'PeerBase {
 		@reset($this->relations);
 		while ( list ($k,$v) = @each($this->relations) ) {
 		$ret .='
-			$st = new LC_DeleteStatement("'.$k.'","'.$v[1].' = \'".$obj->getPrimaryKey()."\'");
+			$st = new PBDO_DeleteStatement("'.$k.'","'.$v[1].' = \'".$obj->getPrimaryKey()."\'");
 			$db->executeQuery($st);';
 		}
 		$ret .='
@@ -538,7 +550,7 @@ class '.$this->codeName.'PeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 ';
 		$ret .='
 		$db->query($sql);
