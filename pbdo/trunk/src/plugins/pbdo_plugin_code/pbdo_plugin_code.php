@@ -449,7 +449,6 @@ class '.$this->codeName.'PeerBase {
 		}
 
 		$ret .='
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
