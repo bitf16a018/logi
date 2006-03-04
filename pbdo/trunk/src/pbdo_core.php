@@ -115,7 +115,7 @@ if (MSSQL) {
 
 //print output
 print "\n";
-print_r(PBDO_Compiler::$model->relationships);
+//print_r(PBDO_Compiler::$model->relationships);
 
 
 /*

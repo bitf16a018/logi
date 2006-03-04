@@ -255,7 +255,7 @@ class ParsedClass {
 
 	function setForeignKey($att,$table) {
 		print " *** set for $att\n";
-		print_r($this->attributes) ; 
+		//print_r($this->attributes) ; 
 		print "\n\n";
 		if ( ! is_object($this->attributes[$att]) ) { die("$this->codeName $att is not an object\n"); }
 		$this->attributes[$att]->type = convertTableName($table);
