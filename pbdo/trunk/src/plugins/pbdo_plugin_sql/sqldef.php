@@ -206,7 +206,7 @@ class PBDO_ParsedColumn {
 		$x->extra = $attrib->extra;
 
 
-		print_r($attrib);
+		//print_r($attrib);
 		if ($attrib->required == 'true') {
 			$x->null = false;
 		} else {
@@ -231,8 +231,8 @@ class PBDO_ParsedColumn {
 			$x->size='';
 		}
 		if ($x->type=='tinytext') { 
-			$x->type='varchar';
-			$x->size=255;
+			$x->type='tinytext';
+			$x->size='';
 		}
 		if ($x->type=='mediumtext') { 
 			$x->type='varchar';
