@@ -221,12 +221,16 @@ class PBDO_ParsedAttribute extends PBDO_InternalModel {
 	 * Can the attribute hold a NULL value?
 	 */
 	function setRequired($r) {
-		$this->required = $r;
+		if ( strtolower($r) == 'false') {
+			$this->isRequired = false;
+		} else {
+			$this->isRequired = true;
+		}
 	}
 
 
 	function getRequired() {
-		return $this->required;
+		return $this->isRequired;
 	}
 
 
