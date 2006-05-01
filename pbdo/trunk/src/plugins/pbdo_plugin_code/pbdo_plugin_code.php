@@ -210,7 +210,7 @@ class ParsedClass {
 		}
 		
 		foreach ($entity->getAttributes() as $a) {
-			$class->addAttribute( new ParsedAttribute($a->name, $a->type, $a->isPrimary() ));
+			$class->addAttribute( new ParsedAttribute($a->name, $a->type, $a->isPrimary(), $a->getRequired() ));
 			if ( $a->isPrimary() ) {
 				$class->setPkey($a->name);
 			}
@@ -238,7 +238,7 @@ class ParsedClass {
 
 
 	function  printAttribArray() {
-		$ret .="\tvar \$__attributes = array(\n";
+		$ret .="\tvar \$__attributes = array( \n";
 		reset ($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			if ($v->complex) {
@@ -248,7 +248,18 @@ class ParsedClass {
 			}
 		}
 		$ret = substr($ret,0,-2);
+		$ret .= ");\n\n";
+
+		$ret .="\tvar \$__nulls = array( \n";
+		reset ($this->attributes);
+		while ( list ($k,$v) = @each($this->attributes) ) {
+			if ($v->disallowNulls == false) {
+				$ret .= "\t'".$v->codeName."'=>'".$v->codeName."',\n";
+			}
+		}
+		$ret = substr($ret,0,-2);
 		$ret .= ");\n";
+
 		return $ret;
 	}
 
@@ -470,6 +481,15 @@ class '.$this->codeName.'PeerBase {
 			$ret .="\n";
 		}
 
+		$ret .="\n";
+		@reset($this->attributes);
+		while ( list ($k,$v) = @each($this->attributes) ) {
+			if (!$v->disallowNulls) {
+			$ret .="\t\t";
+			$ret .= '$st->nulls[\''.$v->colName.'\'] = \''.$v->colName.'\';';
+			$ret .="\n";
+			}
+		}
 
 		$ret .='
 		$st->key = \''.$this->getPkey().'\';
@@ -492,6 +512,16 @@ class '.$this->codeName.'PeerBase {
 			$ret .="\t\t";
 			$ret .= '$st->fields[\''.$v->colName.'\'] = $obj->'.$v->codeName.';';
 			$ret .="\n";
+		}
+
+		$ret .="\n";
+		@reset($this->attributes);
+		while ( list ($k,$v) = @each($this->attributes) ) {
+			if (!$v->disallowNulls) {
+			$ret .="\t\t";
+			$ret .= '$st->nulls[\''.$v->colName.'\'] = \''.$v->colName.'\';';
+			$ret .="\n";
+			}
 		}
 
 		$ret .='
@@ -638,14 +668,16 @@ class ParsedAttribute {
 	var $complex = false;
 	var $possibleValues;
 	var $codeType;
+	var $disallowNulls = false;
 	private $isPrimary = false;
 
 
-	function ParsedAttribute($n, $t, $pk=false) {
+	function ParsedAttribute($n, $t, $pk=false, $null=false) {
 		$t = strtolower($t);
 		$this->codeName = convertColName($n);
 		$this->colName = $n;
 		$this->type = $t;
+		$this->disallowNulls = $null;
 		switch($t) {
 		  case 'image':
 		  case 'text':

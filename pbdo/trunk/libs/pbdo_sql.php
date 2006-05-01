@@ -3,7 +3,8 @@
 class PBDO_SQLStatement {
 
 	var $type;
-	var $fields;
+	var $fields = array();
+	var $nulls = array();
 	var $values;
 	var $key;
 	var $keyValue;
@@ -64,10 +65,15 @@ class PBDO_UpdateStatement extends PBDO_SQLStatement {
 		reset ($this->fields);
 		if ( $this->key != '' ) {
 			foreach ($this->fields as $k=>$v) {
+
 				$v = addslashes($v);
 				if ( $this->key != $k) {
-					$newfields[$k] = $v;
-					$set .= "$k = '$v', ";
+					//allow nulls
+					if (isset($this->nulls[$k]) && $v == null) {
+						$set .= "$k = NULL, ";
+					} else {
+						$set .= "$k = '$v', ";
+					}
 				} else {
 					$keyName = $k;
 					$keyValue = $v;
@@ -94,7 +100,12 @@ class PBDO_InsertStatement extends PBDO_SQLStatement {
 			foreach ($this->fields as $k=>$v) {
 				$v = addslashes($v);
 				if ( $this->key != $k) {
-					$newfields[$k] = $v;
+					//allow nulls
+					if (isset($this->nulls[$k]) && $v == null) {
+						$newfields[$k] = "NULL";
+					} else {
+						$newfields[$k] = "'".$v."'";
+					}
 				}
 			}
 			reset ($this->fields);
@@ -105,12 +116,12 @@ class PBDO_InsertStatement extends PBDO_SQLStatement {
 			$fieldVals = $this->fields;
 		}
 		$ret = "INSERT INTO " .$this->tableName;
-		$ret .="\n(";
-		$ret .= @implode(",",$fieldKeys);
+		$ret .="\n(`";
+		$ret .= @implode("`,`",$fieldKeys);
+		$ret .="`)\n";
+		$ret .="VALUES\n(";
+		$ret .= @implode(",",$fieldVals);
 		$ret .=")\n";
-		$ret .="VALUES\n('";
-		$ret .= @implode("','",$fieldVals);
-		$ret .="')\n";
 		if ($this->where != "" ) {
 			$ret .= "where $this->where";
 		}
