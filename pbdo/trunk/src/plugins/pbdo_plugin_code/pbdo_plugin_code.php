@@ -229,6 +229,7 @@ class ParsedClass {
 
 
 	function  printAttribs() {
+		$ret = '';
 		reset ($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			$ret .= "\t".$v->toPHP().";\n";
@@ -238,6 +239,7 @@ class ParsedClass {
 
 
 	function  printAttribArray() {
+		$ret = '';
 		$ret .="\tvar \$__attributes = array( \n";
 		reset ($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
@@ -288,6 +290,7 @@ class ParsedClass {
 		$model = PBDO_Compiler::getDataModel();
 		//foreign (assume one to many)
 		@reset($model->relationships);
+		$ret = '';
 		while ( list ($q,$rel) = @each($model->relationships) ) {
 			//not a foreign key
 			if ( $rel->getEntityA() != $this->tableName ) { 

@@ -207,7 +207,7 @@ class PBDO_ParsedColumn {
 
 
 		//print_r($attrib);
-		if ($attrib->required == 'true') {
+		if ($attrib->getRequired() == 'true') {
 			$x->null = false;
 		} else {
 			$x->null = true;
