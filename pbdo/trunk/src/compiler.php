@@ -28,7 +28,7 @@ extractNodes($root,$staticNodes);
 */
 
 
-define('PBDO_VERSION',1.5);
+define('PBDO_VERSION',1.6);
 
 function extractNodes($node,&$struct) {
 
