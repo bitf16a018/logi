@@ -4,8 +4,30 @@ class PBDO_DotGraphManager extends PBDO_GraphManager {
 
 
 	function strokeGraph() {
+	$this->createModel();
 		$this->output = "digraph G {\n";
-		parent::strokeGraph();
+		//parent::strokeGraph();
+
+		if ($this->needsLayout() ) {
+			$this->doLayout();
+		}
+
+
+//		$tableList = $this->engine->project->tables;
+		$tableList = PBDO_Compiler::$model->entities;
+
+
+	
+		foreach($this->widgets as $name=>$w) { 
+
+
+			if (!$name) {continue;}
+			$this->drawWidget($name,$w,$tableList[$name]);
+		}
+
+		$this->drawEdges();
+
+
 		$this->output .= "}\n";
 	}
 

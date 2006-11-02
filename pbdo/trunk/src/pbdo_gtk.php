@@ -1,7 +1,6 @@
 <?php
-
 	//use a DOMXML function first to load libxml2, not libxml1
-	@domxml_open_file();
+	domxml_open_file();
 
 	$glade = new GladeXML('./gui/pbdo.glade');
 
