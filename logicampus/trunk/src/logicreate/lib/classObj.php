@@ -304,16 +304,16 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 		}
 // extra faculty
 		$sql = "SELECT
-                        ce.*,cs.*, semesters.semesterID, courses.courseName, CONCAT(profile_facutly.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+                        ce.*,cs.*, semesters.semesterID, courses.courseName, CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
 			FROM classes AS cs
                         LEFT JOIN courses ON cs.id_courses = courses.id_courses
                         LEFT JOIN semesters ON cs.id_semesters = semesters.id_semesters
-			,
-			class_extra_faculty AS ce 
 			LEFT JOIN profile on cs.facultyId=profile.username
 			,
-			profile_faculty AS fac
-			LEFT JOIN fac on fac.username=profile.username
+			class_extra_faculty AS ce 
+			,
+			profile AS pr
+			LEFT JOIN profile_faculty on profile_faculty.username=pr.username
 
 
                         WHERE ce.facultyId = '$uname'
@@ -325,6 +325,7 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		while ($db->next_record() ) {
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
+			print_r($temp);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
