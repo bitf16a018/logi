@@ -940,7 +940,7 @@ class ErrorStack {
 		if ($level == 2 ) return;
 		if ($level == 2048 ) return;
 
-		if ( is_array($context)) $context = 'error';
+		//if ( is_array($context)) $context = 'error';
 		$e = new lcError($level,$message,$context);
 		$bt = debug_backtrace();
 		array_shift($bt);
