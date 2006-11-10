@@ -41,7 +41,7 @@ class classroom extends StudentService {
 						SELECT id_class_assignments, title, activeDate
 						FROM class_assignments
 						WHERE id_classes='".$u->classesTaken[$x]->id_classes."'
-						AND activeDate <= $ut  and (unix_timestamp(dateNoAccept)>$ut or dateNoAccept='0000-00-00 00:00:00') 
+						AND activeDate <= $ut  and (".DB::getFuncName('unix_timestamp','dateNoAccept').">$ut or dateNoAccept='0000-00-00 00:00:00') 
 						ORDER BY dueDate ASC, activeDate DESC 
 						LIMIT 1";
 
