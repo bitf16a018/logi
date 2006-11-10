@@ -319,12 +319,16 @@ class DB {
 	}
 
 
-	function getFuncName($func) {
+	function getFuncName($func,$param1='') {
 		$_dsn = DB::getDSN();
+		$func = strtolower($func);
 		switch ($func) {
-			case 'NOW()':
+			case 'now()':
 				if ( $_dsn['default']['driver'] == 'mysql') { return 'NOW()';}
 				if ( $_dsn['default']['driver'] == 'sqlite') { return 'DATETIME(\'NOW\')';}
+			case 'unix_timestamp':
+				if ( $_dsn['default']['driver'] == 'mysql') { return 'UNIX_TIMESTAMP('.$param1.')';}
+				if ( $_dsn['default']['driver'] == 'sqlite') { return 'strftime(\'%s\','.$param1.')';}
 		}
 	}
 
