@@ -953,7 +953,7 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 		list($m,$d,$y) = explode(' ', date('m d Y',$evt['enddate']));
 		$evtEnd = mktime(0,0,0,$m,$d,$y);
 
-		debug($evt);
+//		debug($evt);
 		$evtType = strtolower($evt['calendarType']);
 		switch( $evtType ) {
 			case 'classroomassignments':
