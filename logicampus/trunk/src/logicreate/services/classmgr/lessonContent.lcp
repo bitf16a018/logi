@@ -313,7 +313,7 @@ Class LessonContent extends FacultyService
 			id_class_lessons=NULL,
 			txTitle='{$lc->postvars['title']}',
 			txText='{$tidied}',
-			dateCreated=NOW()" );
+			dateCreated=".DB::getFuncName('NOW()')."" );
 
 		$t['msg'] = 'Content uploaded successfully.';
 		$this->Run($db,$u,$lc,$t);

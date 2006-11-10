@@ -36,7 +36,7 @@ function getCurrentID()
 	
 	$sql = '
 	SELECT id_semesters from semesters
-	WHERE dateEnd > NOW()
+	WHERE dateEnd > '.DB::getFuncName('NOW()').'
 	ORDER BY dateEnd ASC limit 1';
 
 	$db = DB::getHandle();

@@ -15,6 +15,6 @@ CREATE TABLE privateMessages (
 
 INSERT INTO lcConfig VALUES ('pm', '_displayPerPage', '10', 'text','');
 
-INSERT INTO lcRegistry VALUES ('pm', 'pm', 'Private Messaging', 'MGK', '2002', '||', NOW() , 1);
+INSERT INTO lcRegistry VALUES ('pm', 'pm', 'Private Messaging', 'MGK', '2002', '||', ".DB::getFuncName('NOW()')." , 1);
 INSERT INTO lcConfig VALUES ('pm', '_SystemAdmin', 'zorka', 'text', '');
 INSERT INTO lcPerms VALUES ('reg', 'pm', 'access');

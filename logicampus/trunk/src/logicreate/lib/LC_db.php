@@ -319,6 +319,14 @@ class DB {
 	}
 
 
+	function getFuncName($func) {
+		$_dsn = DB::getDSN();
+		switch ($func) {
+			case 'NOW()':
+				if ( $_dsn['default']['driver'] == 'mysql') { return 'NOW()';}
+				if ( $_dsn['default']['driver'] == 'sqlite') { return 'DATETIME(\'NOW\')';}
+		}
+	}
 
 }
 

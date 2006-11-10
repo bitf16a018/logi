@@ -540,7 +540,7 @@ class faq extends RegAuth
 				(\''.$u->username.'\',
 				 \''.str_replace('\'', '\'\'', stripslashes($lc->postvars['faqquestion'])).'\',
 				 \''.str_replace('\'', '\'\'', stripslashes($lc->postvars['faqanswer'])).'\',
-				 NOW(),
+				 ".DB::getFuncName('NOW()').",
 				 0
 				)
 				';

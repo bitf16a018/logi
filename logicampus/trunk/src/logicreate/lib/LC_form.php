@@ -722,7 +722,7 @@
 			 *	1) determine if it's an array ( date[month] date[year])
 			 *		a) easiest of them, use mktime
 			 *	2) determine if it's not an array
-			 *		a) determine if it's 0 or blank, which would mean a NOW() (current datetime)
+			 *		a) determine if it's 0 or blank, which would mean a ".DB::getFuncName('NOW()')." (current datetime)
 			 *		b) determine if it's completely numeric but not 0 (timestamp, or time())
 			 *		c) last thing that could be sent is a string of information so we turn it to a time() (strtotime()) (works on database datetime or date fields)
 			 *

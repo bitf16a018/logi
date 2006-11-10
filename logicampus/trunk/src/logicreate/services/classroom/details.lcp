@@ -198,7 +198,7 @@ class details extends StudentService {
 			 */
 			$sql = "select * from class_announcements
 				where id_classes='{$u->activeClassTaken->id_classes}'
-				and dt_display <= NOW() order by dt_display DESC";
+				and dt_display <= ".DB::getFuncName('NOW()')." order by dt_display DESC";
 			$db->query($sql);
 			
 			$t['num_announcements'] = $db->getNumRows();

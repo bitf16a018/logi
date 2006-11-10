@@ -60,7 +60,7 @@ class announcements extends StudentService {
 			$sql = "select tx_title, tx_description from class_announcements
 				where id_classes='{$u->activeClassTaken->id_classes}'
 				and id_class_announcements='".(int)$lc->getvars['id']."'
-				and dt_display < NOW()";
+				and dt_display < ".DB::getFuncName('NOW()')."";
 			$db->queryOne($sql);
 
 			$t['announcement_text'] = $db->Record['tx_description'];

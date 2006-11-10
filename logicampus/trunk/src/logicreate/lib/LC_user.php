@@ -333,7 +333,7 @@ class lcUser {
 		{	return -1;
 		}
 		
-		$sql = "insert into lcUsers (groups,username,password,email,createdOn,userType) values ('|".implode("|",$this->groups)."|','".$this->username."','".$this->password."','".$this->email."',NOW(), '".$this->userType."')";
+		$sql = "insert into lcUsers (groups,username,password,email,createdOn,userType) values ('|".implode("|",$this->groups)."|','".$this->username."','".$this->password."','".$this->email."',".DB::getFuncName('NOW()').", '".$this->userType."')";
 		$db->query($sql,false);
 		$pkey = $db->getInsertID();
 
@@ -360,7 +360,7 @@ class lcUser {
 		if ( ($ucount != 0) and ($ecount != 0) ) {
 			return false;
 		}
-		$sql = "insert into lcUsers (groups,username,password,email,createdOn) values ('|".implode("|",$this->groups)."|','".$this->username."','".$this->password."','".$this->email."',NOW())";
+		$sql = "insert into lcUsers (groups,username,password,email,createdOn) values ('|".implode("|",$this->groups)."|','".$this->username."','".$this->password."','".$this->email."',".DB::getFuncName('NOW()').")";
 		$db->query($sql);
 		
 		$pkey = $db->getInsertID();
@@ -490,7 +490,7 @@ class lcUser {
 		}
 		*/
 		if(USE_MD5_PASSWORDS==TRUE) { 
-		   	$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password=md5('".$this->password."')";
+		   	$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password='" . md5($this->password) . "'";
 	   	} else { 
 			$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password='".$this->password."'";
 		}
