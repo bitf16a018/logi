@@ -147,16 +147,23 @@ Here are three different logins you can use:
 <fieldset class="box_standard">
 	<legend>Students</legend>
 	<strong>Student:</strong>
-	<a href="#" onclick="loginAs('nelson.muntz','nelson.muntz');return false;" >login as...</a>
+	<a href="#" onclick="loginAs('student1','student1');return false;" >login as...</a>
 	<br>
-	Login: nelson.muntz<br>
-	Password: nelson.muntz<br>
+	Login: student1<br>
+	Password: student1<br>
 
 	<strong>Student:</strong>
-	<a href="#" onclick="loginAs('bart.simpson','bart.simpson');return false;" >login as...</a>
+	<a href="#" onclick="loginAs('student2','student2');return false;" >login as...</a>
 	<br>
-	Login: bart.simpson<br>
-	Password: bart.simpson<br>
+	Login: student2<br>
+	Password: student2<br>
+
+	<strong>Student:</strong>
+	<a href="#" onclick="loginAs('student3','student3');return false;" >login as...</a>
+	<br>
+	Login: student3<br>
+	Password: student3<br>
+
 </fieldset>
 </div>
 
