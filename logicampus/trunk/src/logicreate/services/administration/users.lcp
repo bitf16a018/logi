@@ -711,7 +711,7 @@ class users extends AdminService {
 
 // add or delete a single student
 	function syncStudentsIndividualRun(&$db, &$u, &$lc, &$t ) {
-		$db->queryOne('select id_semesters from semesters where dateStart <= ".DB::getFuncName('NOW()')." AND dateEnd >= ".DB::getFuncName('NOW()')."');
+		$db->queryOne('select id_semesters from semesters where dateStart <= '.DB::getFuncName("NOW()").' AND dateEnd >= '.DB::getFuncName("NOW()"));
 		$semester_id = sprintf('%d',$db->Record[0]);
 		$button = $lc->postvars['button'];
 		$line = str_replace('"','',$lc->postvars['line']);
@@ -844,7 +844,7 @@ flush();
 	function doSyncStudentsRun(&$db, &$u, &$lc, &$t ) {
 		//find active semester if none submitted
 		if ( ! $lc->postvars['semester_id'] ) {
-			$db->query('select id_semesters from semesters where dateStart <= ".DB::getFuncName('NOW()')." AND dateEnd >= ".DB::getFuncName('NOW()')."');
+			$db->query('select id_semesters from semesters where dateStart <= '.DB::getFuncName('NOW()').' AND dateEnd >= '.DB::getFuncName('NOW()'));
 			$db->next_record();
 			$semester_id = sprintf('%d',$db->Record[0]);
 		} else {
