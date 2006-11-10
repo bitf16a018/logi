@@ -146,7 +146,7 @@ class groups extends AdminService {
 			$this->run($db,$u,$arg,$t);
 			return;
 		}	
-		$sql = "insert into lcGroups (gid,groupName,created) VALUES ('".$arg->postvars[gid]."','".$arg->postvars[groupName]."', NOW())";
+		$sql = "insert into lcGroups (gid,groupName,created) VALUES ('".$arg->postvars[gid]."','".$arg->postvars[groupName]."', ".DB::getFuncName('NOW()').")";
 		$db->query($sql);
 
 		$t[message] = "Group Added";

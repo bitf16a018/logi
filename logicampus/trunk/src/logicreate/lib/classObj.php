@@ -175,8 +175,8 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 
                         WHERE css.id_student = '$uname'
 				AND css.active = 1
-				AND semesters.dateStudentActivation < NOW()
-				AND semesters.dateDeactivation > NOW()
+				AND semesters.dateStudentActivation < ".DB::getFuncName('NOW()')."
+				AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		";		
 	
 		$db->query($sql);
@@ -276,23 +276,26 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 		
 		$ret = array();
 		$db = DB::getHandle();
-		$sql = "SELECT
-                        cs.*, semesters.semesterID, courses.courseName, 
-						CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profile.firstname, ' ', profile.lastname) as facultyName
-/**
-		Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
-						CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
- **/
-                        FROM classes as cs
-                        LEFT JOIN courses ON cs.id_courses = courses.id_courses
-                        LEFT JOIN semesters ON cs.id_semesters = semesters.id_semesters
-			LEFT JOIN profile on cs.facultyId=profile.username
-			LEFT JOIN profile_faculty on profile_faculty.username=profile.username
 
-                        WHERE cs.facultyId = '$uname'
-						and semesters.dateAccountActivation < NOW()
-						and semesters.dateDeactivation > NOW()
-		";
+/**, CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profile.firstname, ' ', profile.lastname) as facultyName
+**/
+/**
+Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
+CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+**/
+$sql = "SELECT
+cs.*, semesters.semesterID, courses.courseName 
+
+FROM classes as cs
+LEFT JOIN courses ON cs.id_courses = courses.id_courses
+LEFT JOIN semesters ON cs.id_semesters = semesters.id_semesters
+LEFT JOIN profile on cs.facultyId=profile.username
+LEFT JOIN profile_faculty on profile_faculty.username=profile.username
+
+WHERE cs.facultyId = '$uname'
+and semesters.dateAccountActivation < ".DB::getFuncName('NOW()')."
+and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
+";
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		while ($db->next_record() ) {
@@ -318,8 +321,8 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 
                         WHERE ce.facultyId = '$uname'
 			and ce.id_classes = cs.id_classes 
-						and semesters.dateAccountActivation < NOW()
-						and semesters.dateDeactivation > NOW()
+						and semesters.dateAccountActivation < ".DB::getFuncName('NOW()')."
+						and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		";
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;

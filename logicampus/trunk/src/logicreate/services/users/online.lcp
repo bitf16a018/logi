@@ -19,13 +19,13 @@ class online extends  RegAuth {
 		}
 		
 		function Run(&$db, &$u, &$arg, &$t) {
-			$db->queryOne("select count(*) as count from lcSessions where unix_timestamp((NOW() + 0 )) - unix_timestamp(gc) < 120 ORDER BY username");
+			$db->queryOne("select count(*) as count from lcSessions where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 120 ORDER BY username");
 			$x = $db->Record[count]; 
 			
 			if ($arg->getvars['showme'] == 'somepictures')
-			{	$db->query("select a.username, b.photo from lcSessions as a LEFT JOIN profile as b ON  a.username=b.username where unix_timestamp((NOW() + 0 )) - unix_timestamp(a.gc) < 120 and a.username!='' ORDER BY a.username" );
+			{	$db->query("select a.username, b.photo from lcSessions as a LEFT JOIN profile as b ON  a.username=b.username where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(a.gc) < 120 and a.username!='' ORDER BY a.username" );
 			} else
-			{	$db->query("select username from lcSessions where unix_timestamp((NOW() + 0 )) - unix_timestamp(gc) < 120 and username!='' ORDER BY username" );
+			{	$db->query("select username from lcSessions where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 120 and username!='' ORDER BY username" );
 			}
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			

@@ -274,7 +274,7 @@
 			$sql = 'SELECT COUNT( B.id_classes ) AS count_classes, A.id_semesters, A.semesterTerm, A.semesterId, A.semesterYear
 					FROM semesters AS A
 					INNER JOIN classes AS B ON A.id_semesters = B.id_semesters
-					WHERE B.facultyId = \''. $lcUser->username. '\' AND A.dateAccountActivation <=NOW()
+					WHERE B.facultyId = \''. $lcUser->username. '\' AND A.dateAccountActivation <='.DB::getFuncName('NOW()').'
 					GROUP BY B.id_semesters
 					ORDER BY A.semesterYear';
 			

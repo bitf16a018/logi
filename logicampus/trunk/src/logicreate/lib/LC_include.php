@@ -804,7 +804,7 @@ class audit {
 		$action = addslashes(stripslashes($action) );
 		global $REMOTE_ADDR;
 		$username = $user->username;
-		$sql = "insert into lcAudit (username,action,ip,timedate) values ('$username','$action','$REMOTE_ADDR',NOW() )";
+		$sql = "insert into lcAudit (username,action,ip,timedate) values ('$username','$action','$REMOTE_ADDR',".DB::getFuncName('NOW()')." )";
 		$db->query($sql,false);
 		return true;
 	}

@@ -334,7 +334,7 @@ class assignments extends StudentService {
 						$sql = '
 						INSERT INTO class_assignments_turnin
 						SET 
-						dateTurnin=NOW(),
+						dateTurnin=".DB::getFuncName('NOW()').",
 						id_class_assignments='. (int)$lc->getvars['id'].', 
 						id_student=\''. $u->username.'\',
 						assign_type=1,';
@@ -388,7 +388,7 @@ $sql.='
 						$sql = $sql_head.'
 						class_assignments_turnin
 						SET
-						'.(($sql_footer == false) ? 'dateTurnin=NOW(),' : '').'
+						'.(($sql_footer == false) ? 'dateTurnin=".DB::getFuncName('NOW()').",' : '').'
 						assign_type=0,
 						id_class_assignments='. (int)$lc->getvars['id'].', 
 						id_student=\''. $u->username.'\',

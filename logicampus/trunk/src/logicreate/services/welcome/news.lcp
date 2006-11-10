@@ -25,12 +25,12 @@ class news extends BasicAuth {
 
 		$groups = createGroupCheck($u->groups);
 		$notgroups = createGroupCheck($u->groups,"notgroups");
-		$db->query("select introtext, title, articles.pkey from articles left join lcCategories on lcCategories.pkey = articles.catid where lcCategories.name = 'Articles' and (articles.startdate <= NOW() and articles.enddate >= NOW()) and ( ($groups) and not ($notgroups)) and status='Active' order by pkey DESC limit 2");
+		$db->query("select introtext, title, articles.pkey from articles left join lcCategories on lcCategories.pkey = articles.catid where lcCategories.name = 'Articles' and (articles.startdate <= ".DB::getFuncName('NOW()')." and articles.enddate >= ".DB::getFuncName('NOW()').") and ( ($groups) and not ($notgroups)) and status='Active' order by pkey DESC limit 2");
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		while ($db->next_record() ) {
 			$t[articles][] = PersistantObject::createFromArray("NewsArticle",$db->Record);
 		}
-		$db->query("select introtext,title,articles.pkey from articles left join lcCategories on lcCategories.pkey = articles.catid where lcCategories.name = 'News' and (articles.startdate <= NOW() and articles.enddate >= NOW()) and ( ($groups) and not ($notgroups)) and status='Active' order by pkey DESC limit 2");
+		$db->query("select introtext,title,articles.pkey from articles left join lcCategories on lcCategories.pkey = articles.catid where lcCategories.name = 'News' and (articles.startdate <= ".DB::getFuncName('NOW()')." and articles.enddate >= ".DB::getFuncName('NOW()').") and ( ($groups) and not ($notgroups)) and status='Active' order by pkey DESC limit 2");
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		while ($db->next_record() ) {
 			$t[news][] = PersistantObject::createFromArray("NewsArticle",$db->Record);

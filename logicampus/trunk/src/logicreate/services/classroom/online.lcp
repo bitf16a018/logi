@@ -48,7 +48,7 @@ class online extends StudentService {
 				return false;
 			}
 				$sql = "AND ($sql)";
-			$query = "select username from lcSessions where unix_timestamp((NOW() + 0 )) - unix_timestamp(gc) < 1800 $sql AND username!=''";
+			$query = "select username from lcSessions where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 1800 $sql AND username!=''";
 
 			$db->query($query);
 			$db->RESULT_TYPE = MYSQL_ASSOC;
