@@ -157,32 +157,33 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 	function getClassesTaken($uname) {
 		$ret = array();
 		$db = DB::getHandle();
-		$sql = "SELECT
-                        classes.*, semesters.semesterID,courses.courseName, 
-		
-						CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profile.firstname, ' ', profile.lastname) as facultyName
+$sql = "SELECT classes.*, semesters.semesterID,courses.courseName, 
+profile_faculty.title, profile.firstname, profile.lastname
 /**
-		Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
-						CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
- **/
-                        FROM class_student_sections as css
-                        LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
-                        LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
-                        LEFT JOIN courses ON classes.id_courses = courses.id_courses
-			LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
-			LEFT JOIN profile on classes.facultyId=profile.username
-			LEFT JOIN profile_faculty on profile_faculty.username=profile.username
+CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profile.firstname, ' ', profile.lastname) as facultyName
 
-                        WHERE css.id_student = '$uname'
-				AND css.active = 1
-				AND semesters.dateStudentActivation < ".DB::getFuncName('NOW()')."
-				AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
-		";		
-	
+Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
+CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+**/
+FROM class_student_sections as css
+LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
+LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
+LEFT JOIN courses ON classes.id_courses = courses.id_courses
+LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
+LEFT JOIN profile on classes.facultyId=profile.username
+LEFT JOIN profile_faculty on profile_faculty.username=profile.username
+
+WHERE css.id_student = '$uname'
+AND css.active = 1
+AND semesters.dateStudentActivation < ".DB::getFuncName('NOW()')."
+AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
+";		
+
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 #		ob_start();
 		while ($db->next_record() ) {
+			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
@@ -203,7 +204,8 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 		$ret = array();
 		$db = DB::getHandle();
 		$sql = "SELECT
-                        css.*,classes.*, class_sections.*, semesters.semesterID,courses.courseName, CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+			css.*,classes.*, class_sections.*, semesters.semesterID,courses.courseName, 
+			profile_faculty.title, profile.firstname, profile.lastname
                         FROM class_student_sections as css
                         LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
                         LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
@@ -220,6 +222,7 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		while ($db->next_record() ) {
+			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
@@ -235,25 +238,27 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 	function getOverAllClassesTaken($uname) {
 		$ret = array();
 		$db = DB::getHandle();
-		$sql = "SELECT
-                        classes.*, semesters.semesterID,courses.courseName, 
-		
-						CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profile.firstname, ' ', profile.lastname) as facultyName
-/**
-		Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
-						CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
- **/
-                        FROM class_student_sections as css
-                        LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
-                        LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
-                        LEFT JOIN courses ON classes.id_courses = courses.id_courses
-			LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
-			LEFT JOIN profile on classes.facultyId=profile.username
-			LEFT JOIN profile_faculty on profile_faculty.username=profile.username
+$sql = "SELECT classes.*, semesters.semesterID,courses.courseName, 
+profile_faculty.title, profile.firstname, profile.lastname
 
-                        WHERE css.id_student = '$uname'
-		";		
-	
+/**
+CONCAT(IF(ISNULL(profile_faculto.tstle), '', profile_faculty.title), ' ', profile.firstme, profile.lastnameuname, ' ', profile.lastname) as facultyName
+
+Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
+CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+**/
+
+FROM class_student_sections as css
+LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
+LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
+LEFT JOIN courses ON classes.id_courses = courses.id_courses
+LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
+LEFT JOIN profile on classes.facultyId=profile.username
+LEFT JOIN profile_faculty on profile_faculty.username=profile.username
+
+WHERE css.id_student = '$uname'
+";		
+
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 #		ob_start();
@@ -305,9 +310,10 @@ and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 			$temp->__loaded = true; 
 			$ret[] = $temp;
 		}
-// extra faculty
+		// extra faculty
+		
 		$sql = "SELECT
-                        ce.*,cs.*, semesters.semesterID, courses.courseName, CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
+                        ce.*,cs.*, semesters.semesterID, courses.courseName, profile_faculty.title, profile.firstname, profile.lastname
 			FROM classes AS cs
                         LEFT JOIN courses ON cs.id_courses = courses.id_courses
                         LEFT JOIN semesters ON cs.id_semesters = semesters.id_semesters
@@ -327,6 +333,7 @@ and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		while ($db->next_record() ) {
+			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
 			print_r($temp);
 			$temp->_dsn = $dsn;
@@ -336,6 +343,7 @@ and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		
 	return $ret;
 	}
+
 }
 
 ?>
