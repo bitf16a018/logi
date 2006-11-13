@@ -707,7 +707,11 @@ class UserProfile {
 	var $specific = true;
 	var $common_attribs = array('firstname','lastname','emailAlternate','homePhone',
 			'workPhone','faxPhone','cellPhone','pagerPhone','photo','address','address2',
-			'city','state','zip','showaddinfo','url','icq','aim',
+			'city','state','zip',
+			//Added when merging self registration Module
+			'country','hphone','education','lastinstitute',
+			//End of addition
+			'showaddinfo','url','icq','aim',
 			'yim','msn','showonlineinfo','occupation','gender','sig','bio',
 			'showbioinfo','emailNotify');
 	var $specific_attribs = array();
