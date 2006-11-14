@@ -1,0 +1,200 @@
+<?PHP
+
+class teacherclass extends FacultyService {
+
+var $presentor = "htmlPresentation";
+
+function Run($db,&$u,&$lc,&$t){
+	$lc->templateName = 'teacherclass_add';
+}
+
+function addRun($db,&$u,&$lc,&$t){
+        $t['myEvizent'] = 'add';
+
+	$lc->templateName = 'teacherclass_add';
+	$this->sectionTitle = 'Add a Class';
+	$this->inactivelinks = array( 'Add a Class' );
+	print_r($u->username);
+	$cf = 0;
+	// course family but really it's course ID and i will retrieve the course family from it and the
+	// teachers that have added it as a preference
+	if ((int)$lc->getvars['cf'] > 0) {
+		$cf = (int)$lc->getvars['cf'];
+	}
+
+	if ($lc->postvars['submit']) {
+		$t['error'] = $f->validateForm('adminclassinfo', $lc->postvars);
+		$this->cleanedArray = $f->cleanedArray;
+
+		$a_sec_numbers = explode("\n", $this->cleanedArray['sectionNumbers']);
+
+		$this->cleanedArray['sectionNumbers'] = ''; //clearing
+		// trying to find out already existing section numbers
+		$sectionnumbers_processed = 0;
+		foreach($a_sec_numbers as $pointer=>$snum) {
+			if ((int)$snum == 0) {
+				continue;
+			}
+
+			$sectionnumbers_processed ++;
+			$this->cleanedArray['sectionNumbers'] .= (int)$snum. "\n";
+
+			$sql = '
+			SELECT count(*) as SECTION_exists
+			FROM class_sections INNER JOIN classes ON classes.id_classes=class_sections.id_classes
+			WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$snum;
+
+			$db->queryOne($sql);
+			if ($db->Record['SECTION_exists']) {
+			       // deny the adding of the class, inform them that section number exists already
+				$t['error'] .= 'Section #'. (int)$snum. ' exists<br>';
+				$f->error = true;
+			}
+
+		}
+
+		if ($sectionnumbers_processed == 0) {
+			$t['error'] .= 'You must have at least 1 section number for a class<br>';
+			$f->error = true;
+		}
+
+		$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
+
+		if ($f->hasErrors() == false) {
+			$a_course = courseObj::_getFromDB($this->cleanedArray['id_courses'], 'id_courses');
+			$this->cleanedArray['courseFamily'] = $a_course->courseFamily;
+			$this->cleanedArray['courseNumber'] = $a_course->courseNumber;
+			$this->cleanedArray['courseFamilyNumber'] = $a_course->courseFamily.$a_course->courseNumber;
+
+			// add class and say Thank you class maker!
+			$classObj = new classObj();
+			$classObj->_loadArray($this->cleanedArray);
+			$classObj->_saveToDB();
+
+// __FIXME__ - use db driver last insert
+			if ($new_id_class = mysql_insert_id()) {
+				// add section numbers
+				foreach ($a_sec_numbers as $pointer=>$snum) {
+					if ((int)$snum <= 0) {
+						continue;
+					}
+
+					$sql = '
+					INSERT INTO class_sections
+					SET sectionNumber='.(int)$snum. ',
+					id_classes='.$new_id_class;
+
+					$db->query($sql);
+
+				}
+
+		// add classdoc folders (Assignments, Web Content, Classroom, Images'
+		include_once(LIB_PATH. 'documentLibraryLib.php');
+
+		$folderObj = new LC_folder();
+		$folderObj->name = 'Trash';
+
+	       $folderObj->folderType= 0;
+		$folderObj->parentKey = 0;
+		$folderObj->owner = $this->cleanedArray['facultyId'];
+		$folderObj->class_id = $new_id_class;
+		$folderObj->notes = 'Place files viewable by your classroom in here.';
+		$folderObj->_save('classdoclib_Folders');
+
+		unset($folderObj);
+
+				$folderObj = new LC_folder();
+		$folderObj->name = 'Classroom';
+		$folderObj->folderType= 1;
+		$folderObj->parentKey = 0;
+		$folderObj->owner = $this->cleanedArray['facultyId'];
+		$folderObj->class_id = $new_id_class;
+		$folderObj->notes = 'Place files viewable by your classroom in here.';
+				$folderObj->_save('classdoclib_Folders');
+
+		unset($folderObj);
+
+		$folderObj = new LC_folder();
+		$folderObj->name = 'Web Images';
+		$folderObj->folderType= 1;
+		$folderObj->parentKey = 0;
+		$folderObj->owner = $this->cleanedArray['facultyId'];
+		$folderObj->notes = 'Place images for your lesson web pages here.';
+		$folderObj->class_id = $new_id_class;
+		$folderObj->_save('classdoclib_Folders');
+
+		unset($folderObj);
+
+		$folderObj = new LC_folder();
+		$folderObj->name = 'Assignments';
+		$folderObj->folderType= 1;
+		$folderObj->parentKey = 0;
+		$folderObj->owner = $this->cleanedArray['facultyId'];
+		$folderObj->class_id = $new_id_class;
+		$folderObj->notes = 'Use this folder to hold
+				assignments for students that were not uploaded
+				via the assignment manager.';
+			$folderObj->_save('classdoclib_Folders');
+
+			// Insert an entry for the Gradeboko Application
+			include_once(LIB_PATH.'ClassGradebook.php');
+			$gradebookObj = new ClassGradebookBase();
+
+			$gradebookObj->set('idClasses', $new_id_class);
+		       $gradebookObj->aLower = 0;
+			$gradebookObj->bLower = 0;
+			$gradebookObj->cLower = 0;
+			$gradebookObj->dLower = 0;
+			$gradebookObj->totalPoints = 0;
+			$gradebookObj->roundScoresUp = 0;
+			$gradebookObj->calculationType = 0;
+			$gradebookObj->colorMissingGrade = '';
+			$gradebookObj->save();
+
+			if ($gradebookObj->idClassGradebook == false) {
+				echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
+			}
+
+				// Insert an entry for the Exam Scheduler Application
+				include_once(LIB_PATH.'ExamScheduleClasses.php');
+				$esc = new ExamScheduleClasses();
+				$esc->idClasses = $new_id_class;
+				$esc->idSemester = $this->cleanedArray['id_semesters'];
+				$esc->status = 0;
+				$esc->southCampus = 0;
+				$esc->southeastCampus = 0;
+				$esc->northeastCampus = 0;
+				$esc->northwestCampus = 0;
+				$esc->receivedDate = '';
+				$esc->note = '';
+				$esc->save();
+
+
+			}
+
+			$u->sessionvars['administration']['classes']['currentsemester'] = $this->cleanedArray['id_semesters'];
+
+			$t['goodtimes'] = '<li>Thank you, your class has been added successfully.';
+
+			$this->run($db, $u, $lc, $t);
+			return;
+
+		} else {
+			$t['error'] .= '<br>Failed to add class, please check your information and try again';
+		}
+
+	}
+
+	//$f->getForm('adminclassinfo', $this->cleanedArray);
+	if ($cf > 0) {
+		// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
+		// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
+		$f->modFormValue('facultyId', 'CHANGEFAMILY'.$cf);
+		$f->modFormValue('id_courses', $cf);
+	}
+
+	//$t['form'] = $f->ToHTML();
+}
+}
+
+?>

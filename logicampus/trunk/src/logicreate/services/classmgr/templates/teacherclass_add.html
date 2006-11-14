@@ -1,0 +1,47 @@
+<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0>
+	<tr><td><big>Add a Class</big></td></tr>
+</table>
+<div id="sectionheader">
+<a href="http://localhost/~will/logicampus/src/public_html/index.php/administration/">Administration Home</a>
+ &bull; 
+<a href="http://localhost/~will/logicampus/src/public_html/index.php/administration/classrestore/">Restore Class</a>
+</div>
+<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;
+<a href="http://localhost/~will/logicampus/src/public_html/index.php/administration/classes/">List Classes</a> &bull; 
+<b>Add a Class</b></div><div style="margin:5px;"></div>
+
+
+<?php if ($t['error']) { ?><span style="color:red;"><?=$t['error'];?></span><?php } ?>
+
+<table width="95%" border="0" cellspacing="0" cellpadding="0"><form action="" method="POST" enctype="application/x-www-form-urlencoded">
+	<tr><td colspan="2" valign="top" class="">Please complete the following fields to add a course to the site.</td></tr>
+	<tr><td valign="top" class="">*Class Name</td>
+		<td valign="top" class=""><input type"text" name="classname"></td></tr>
+<!--
+	<tr><td valign="top" class="">*Type:</td>
+		<td valign="top" class=""><select id="classType" name="classType"  size="1">	
+				<option value="ITV">ITV</option>
+				<option value="Internet">Internet</option>
+				<option value="2WayAudioVideo">2WayAudioVideo</option>
+				</select></td></tr>
+-->		
+		<tr><td valign="top" class="">*Set Start and End Date</td>
+		<td valign="top" class=""><strong>Start:</strong><br>
+					Month:<input type="text" name="startmonth" size=2>
+					Day:<input type="text" name="startday" size=2>
+					Year:<input type="text" name="startyear" size=4><BR>
+					<strong>End:</strong><BR>
+					Month:<input type="text" name="endmonth" size=2>
+                                        Day:<input type="text" name="endday" size=2>
+                                        Year:<input type="text" name="endyear" size=4><BR>
+			</td></tr>
+	<tr><td valign="top" class="" valign="top">*Class Discription</td>
+		<td valign="top" class="">
+			<table cellpadding="0" cellspacing="0" border="0">
+				<tr><td><textarea name="discription" cols="25" rows="10" id="discription"></textarea></td></tr>
+			</table>
+	</td></td>
+		<tr><td valign="top" class=""></td>
+		<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Add Class"></td></tr>
+</form></table><div style="font-size: 85%">*denotes a required field</div>
+
