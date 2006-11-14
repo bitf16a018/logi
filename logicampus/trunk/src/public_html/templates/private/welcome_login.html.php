@@ -125,7 +125,10 @@
 <p>
 The system only allows one login of each username at one time.  Therefore, you may experience disruption in your demo as other people login to the system.  If the system says you don't have permission to do something, this may be because you have been logged out as someone else logs in with the same username.
 </p>
-
+<?PHP if(MODULE_REGISTRATION) { ?>
+<strong>To create your own student login</strong>, click below<BR>
+<a href="<?= BASE_URL . "index.php/register/users/event=new" ?>">Create Account</a><br><br>
+<?PHP } ?>
 <strong>Login Information</strong><br>
 LogiCampus works differently depending on which user you log in as.  
 Here are three different logins you can use:
