@@ -31,12 +31,16 @@ $execution_time=get_microtime();
 	$start = microtime();
 	srand ((double) microtime() * 1000000);
 
-	if (!@include('defines.php') ) {
+	if (!@include('defines.php')) {
 		include('install.php');
 		exit();
 	}
-
-
+	if (!@include('settings.php')) {
+		if (!@include('settings.complete.php')){
+			include('install.php');
+			exit();
+		}
+	}
 
 		/*
 		 * Start session handling

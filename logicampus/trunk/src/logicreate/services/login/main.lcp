@@ -160,7 +160,7 @@ var $presentor = "htmlPresentation";
 		}
 
 		$t['canregister'] = $this->_allowRegister;
-
+		
 		if ($lcObj->getvars['loginredir'] != '') {
 			$t['redir'] = $lcObj->getvars['loginredir'];
 		} else {
@@ -168,7 +168,7 @@ var $presentor = "htmlPresentation";
 			$t['redir'] = $_SERVER['HTTP_REFERER'];
 			$t['redir'] = $HTTP_REFERER;
 		}
-
+		
 		$t["title"] = "Log in";
 		$t["message"] = $lcObj->getvars[1];
 	}

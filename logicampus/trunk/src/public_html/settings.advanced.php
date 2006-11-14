@@ -1,0 +1,10 @@
+<?PHP
+
+define('LOGICAMPUS_MODE',1);
+
+
+define('MODULE_REGISTRATION',0);
+define('MODULE_SELF_ENROLLMENT',0);
+
+
+?>
