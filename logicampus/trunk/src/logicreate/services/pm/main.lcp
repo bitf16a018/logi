@@ -46,7 +46,7 @@ var $presentor = "htmlPresentation";
 			$u->profile->set('emailNotify', 'n');
 			$db->query("update profile set emailnotify='n' where username='".$u->username."'");
 		}
-		$u->updateProfile();
+		$u->profile->save();
 		$this->Run($db,$u,$arg,$t);
 
 	}
@@ -79,9 +79,9 @@ var $presentor = "htmlPresentation";
 		}
 		else{
 			$db->query("select pkey from privateMessages where sentReceived='$viewing' and messageFrom='".$u->username."' order by sentTime DESC limit $start,$max");
-			}
+		}
 		while($db->next_record()) {
-			$x = privMess::load($db->Record[0]);
+			$x = privMess::load($db->Record['pkey']);
 			$user = lcUser::getUserByUsername($x->messageFrom);
 			$x->userFrom = $user->username;
 
