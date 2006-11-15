@@ -10,6 +10,10 @@ class welcome extends NoAuth {
 			$this->presentor = 'native';
 		}
 		$lc->templateName = 'welcome_main';
+
+
+		//message of the day (MOTD)
+		$t['motd'] = LcSettings::getSystemMotd();
 	}
 
 
