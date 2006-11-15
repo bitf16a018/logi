@@ -153,11 +153,7 @@ function Run(&$db,&$u,&$lc,&$t) {
 			/*****
 			 * MOTD
 			 ****/
-			 $file = CONTENT_PATH.'__messageoftheday__';
-			$fp = fopen ($file, 'r');
-			$t['motd'] = fread($fp, filesize($file) );
-			fclose($fp);
-			$t['motd'] = trim($t['motd']);
+			$t['motd'] = LcSettings::getSystemMotd();
 
 			if (strlen($t['motd']) == 0)
 			{

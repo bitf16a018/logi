@@ -696,7 +696,6 @@ class PersistantObject {
 	 * static
 	 */
 	function _load($class,$table,$id,$fields="*",$prime="pkey") {
-
 		$obj = null;
 		$at = array();
 		$db = DB::getHandle();

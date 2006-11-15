@@ -1,1 +1,37 @@
-<h2>You are logged in!</h2>
+<?php
+$user = LcUser::getCurrentUser();
+?>
+
+		<h2>Welcome, <?=$user->profile->get('firstname') .'&nbsp;'. $user->profile->get('lastname');?>!</h2>
+
+
+		<table align="right" cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="250">
+		<tr>
+			<td class="portalbox">System Message</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<?=$t['motd'];?>
+			</td>
+		</tr>
+		</table>
+
+
+		<!--
+		<p>&nbsp;</p>
+		Your Classes:
+		<ul>
+			<li>Stuff
+			<ul>
+				<li>Syllabus</li>
+			</ul>
+			</li>
+			<li>Stuff
+			<ul>
+				<li>Syllabus</li>
+			</ul>
+			</li>
+		</ul>
+
+
+		-->
