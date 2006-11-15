@@ -25,7 +25,7 @@ include_once(LIB_PATH.'semesterObj.php');
 class classmgr extends FacultyService {
 
 	var $presentor='htmlPresentation';
-	var $authorizer = 'teachesClassesAuth';
+	var $authorizer = 'regAuth';
 	var $sectionTitle = 'Classroom Manager';
 	var $navlinks = array (
 		''=>''
@@ -55,9 +55,19 @@ class classmgr extends FacultyService {
 		$lc->templateName='main_main';
 		$lc->templateStyle = 'private';
 		$this->authorizer = 'facultyGroupCheck';
-			
+	
 		if ((int)$lc->postvars['semester'] > 0)
 		{	$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];
+		}
+		else
+		{
+			if(!MODULE_FULL_SEMESTERS){
+			if(count($u->classesTaught)<=0){
+                		$t['url'] = APP_URL . "classmgr/teacherclass/event=add";
+                        	$this->presentor = 'redirectPresentation';
+			}
+                }
+
 		}
 		//$u->sessionvars['classmgr']['currentsemester'] = 0;
 		if ((int)$u->sessionvars['classmgr']['currentsemester'] <= 0)
@@ -81,7 +91,7 @@ class classmgr extends FacultyService {
 		
 		
 		// List out my classes based on the above 'classmgr'currentsemester'
-		
+	
 		if ((int)$u->sessionvars['classmgr']['currentsemester'] <= 0)
 		{ 	
 			$t['classes'] = $u->classesTaught;
@@ -92,7 +102,7 @@ class classmgr extends FacultyService {
 			$sql = '
 			SELECT A.*, B.courseName FROM classes as A
 			INNER JOIN courses as B ON A.id_courses=B.id_courses
-			WHERE A.facultyId=\''.$u->username.'\' AND A.id_semesters='. $u->sessionvars['classmgr']['currentsemester'].'
+			WHERE A.facultyId=\''.$u->username.'\'AND A.id_semesters='. $u->sessionvars['classmgr']['currentsemester'].'
 			ORDER BY B.courseName
 			';
 			$db->query($sql);

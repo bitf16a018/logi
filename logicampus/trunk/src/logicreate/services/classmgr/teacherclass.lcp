@@ -1,33 +1,106 @@
 <?PHP
 
+include_once(LIB_PATH.'inputValidation.php');
+include_once(LIB_PATH.'courseObj.php');
+include_once(LIB_PATH.'semesterObj.php');
+
 class teacherclass extends FacultyService {
 
 var $presentor = "htmlPresentation";
+var $authorizer = 'regAuth';
 
 function Run($db,&$u,&$lc,&$t){
 	$lc->templateName = 'teacherclass_add';
 }
 
-function addRun($db,&$u,&$lc,&$t){
-        $t['myEvizent'] = 'add';
+function makeSemester($db,&$u,&$lc,&$t) {
 
-	$lc->templateName = 'teacherclass_add';
-	$this->sectionTitle = 'Add a Class';
-	$this->inactivelinks = array( 'Add a Class' );
-	print_r($u->username);
-	$cf = 0;
-	// course family but really it's course ID and i will retrieve the course family from it and the
-	// teachers that have added it as a preference
-	if ((int)$lc->getvars['cf'] > 0) {
-		$cf = (int)$lc->getvars['cf'];
+	$semesterObj = new semesterObj();		
+	$startdate = $lc->postvars['startyear'].
+	'-'.$lc->postvars['startmonth'].
+	'-'. $lc->postvars['startday'];
+
+	$enddate = $lc->postvars['endyear'].
+	'-'.$lc->postvars['endmonth'].
+	'-'. $lc->postvars['endday'];
+
+	$starttime = $startdate.' 1:00:00';
+
+	$endtime = $enddate.' 1:00:00';
+
+	$semesterObj->dateStart = $startdate;
+
+	$semesterObj->dateEnd = $enddate;
+
+	//$semesterObj->dateRegistrationStart =  
+	$semesterObj->dateRegistrationEnd = $enddate;
+
+	if ($lc->postvars['dateAccountActivation']['ampm'] == 'PM'){       
+		$lc->postvars['dateAccountActivation']['hours'] +=12;
 	}
 
-	if ($lc->postvars['submit']) {
-		$t['error'] = $f->validateForm('adminclassinfo', $lc->postvars);
-		$this->cleanedArray = $f->cleanedArray;
+	$semesterObj->dateAccountActivation = $starttime;
+
+	$semesterObj->dateDeactivation  = $enddate;
+
+	//$semesterObj->dateCensus =
+
+	$semesterObj->dateFinalDrop = $endtime;
+echo $starttime;
+	$semesterObj->dateStudentActivation = $starttime;
+
+	$semesterObj->dateStudentDeactivation = $endtime;
+
+	$semesterObj->semesterId = "ALL";
+	$semesterObj->semesterYear = $lc->postvars['startyear'];
+	$semesterObj->semesterTerm = $lc->postvars['classname'];
+
+	// make sure to use BIG H for hours
+	$semesterObj->dateEndITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndITVseminar']));
+	$semesterObj->dateStartITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartITVseminar']));
+
+	$semesterObj->dateEndOrientation= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndOrientation']));
+	$semesterObj->dateStartOrientation = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartOrientation']));
+
+	$semesterObj->dateEndTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndTextbook']));
+	$semesterObj->dateStartTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartTextbook']));
+
+	$semesterObj->dateEndExam= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndExam']));
+	$semesterObj->dateStartExam = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartExam']));
+	$semesterObj->_saveToDB();
+
+	if (mysql_insert_id() > 1) {
+		$sql = 'insert into semesters_course_info set id_semesters='.mysql_insert_id();
+		$db->query($sql);
+		/// i need to know if this worked..add error checking later
+	}
+
+	$this->run($db, $u, $lc, $t);
+	return;
+
+
+}
+
+function makeCourse($db, &$u, &$lc, &$t){
+	
+	$courses = new courseObj();
+	$courses->courseFamily = "ALL";
+	//$courses->courseFamily = strtoupper($courses->courseFamily);
+	$courses->courseNumber = md5(time());
+	$courses->courseName = $lc->postvars['classname'];
+	$courses->courseDescription = $lc->postvars['discription'];
+	
+	$courses->_saveToDB();
+
+	$t['msg'] = 'Course added successfully.';
+}
+
+function makeClass($db, &$u, &$lc, &$t){
+		if(validateLength($lc->postvars['classname']))
+			$t['error'][]="* Please enter a class name";
 
 		$a_sec_numbers = explode("\n", $this->cleanedArray['sectionNumbers']);
-
+		print_r($a_sec_numbers);
 		$this->cleanedArray['sectionNumbers'] = ''; //clearing
 		// trying to find out already existing section numbers
 		$sectionnumbers_processed = 0;
@@ -47,20 +120,18 @@ function addRun($db,&$u,&$lc,&$t){
 			$db->queryOne($sql);
 			if ($db->Record['SECTION_exists']) {
 			       // deny the adding of the class, inform them that section number exists already
-				$t['error'] .= 'Section #'. (int)$snum. ' exists<br>';
-				$f->error = true;
+				$t['error'][] = 'Section #'. (int)$snum. ' exists';
 			}
 
 		}
 
 		if ($sectionnumbers_processed == 0) {
-			$t['error'] .= 'You must have at least 1 section number for a class<br>';
-			$f->error = true;
+			$t['error'][] = 'You must have at least 1 section number for a class';
 		}
 
 		$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
 
-		if ($f->hasErrors() == false) {
+		if (count($t['error'])>0) {
 			$a_course = courseObj::_getFromDB($this->cleanedArray['id_courses'], 'id_courses');
 			$this->cleanedArray['courseFamily'] = $a_course->courseFamily;
 			$this->cleanedArray['courseNumber'] = $a_course->courseNumber;
@@ -182,7 +253,46 @@ function addRun($db,&$u,&$lc,&$t){
 		} else {
 			$t['error'] .= '<br>Failed to add class, please check your information and try again';
 		}
+}
 
+function addRun($db,&$u,&$lc,&$t){
+        $t['myEvizent'] = 'add';
+	$lc->templateName = 'teacherclass_add';
+
+	$this->sectionTitle = 'Add a Class';
+	$this->inactivelinks = array( 'Add a Class' );
+
+	$cf = 0;
+	// course family but really it's course ID and i will retrieve the course family from it and the
+	// teachers that have added it as a preference
+	if ((int)$lc->getvars['cf'] > 0) {
+		$cf = (int)$lc->getvars['cf'];
+	}
+	
+	$lc->postvars['semesterYear']['month'] = 1;
+	$lc->postvars['semesterYear']['day'] = 1;
+	
+	$hasErrors = false;
+	
+	$bl_date_start = strtotime($lc->postvars['startmonth']. '/'. $lc->postvars['startday']. '/'.$lc->postvars['startyear']);
+	$bl_date_end   = strtotime($lc->postvars['endmonth']. '/'. $lc->postvars['endday']. '/'.$lc->postvars['endyear']);
+	//Check Start and end date
+	
+	if ($bl_date_start >= $bl_date_end){       
+		$t['error'] .= '<li>Semester date must come before the semester date end.</li>';
+        	$hasErrors = true;
+        }	
+
+	//echo 'reg: '.date('Y-m-d h:i:s', $bl_date_start). '<br>';
+	//echo 'reg: '.date('Y-m-d h:i:s', $bl_date_end). '<br>';
+		
+	if ($lc->postvars['submit']) {
+		if ($hasErrors == false){
+
+			$this->makeSemester($db, $u, $lc, $t);
+			$this->makeCourse($db, $u, $lc, $t);
+			$this->makeClass($db, $u, $lc, $t);
+		}
 	}
 
 	//$f->getForm('adminclassinfo', $this->cleanedArray);
