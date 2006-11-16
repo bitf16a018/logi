@@ -1089,7 +1089,7 @@
 			// making sure we are passing an array (just incase we pass an object for prepopulation
 			if ( is_object($arr) ) $arr = $this->object2array($arr);
 			
-			$this->cleanedArray = $this->cleanInput($tmp, &$arr);
+			$this->cleanedArray = $this->cleanInput($tmp, $arr);
 #			$arr = $this->cleanedArray;
 			#debug($tmp, 1);
 			@reset($this->cleanedArray);
@@ -1518,7 +1518,7 @@
 		# and loops through and cleans it.
 		# If someone tries to post values that are not
 		# pre-defined, it will remove those from this array.
-		function cleanInput($tmp, $ar)
+		function cleanInput($tmp, &$ar)
 		{
 			# Took the following out to reduce a SQL query.
 			# Now it is passsed in from the $this->validateForm().
