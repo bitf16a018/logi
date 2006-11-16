@@ -102,10 +102,10 @@
 			<tr><td>
 
 			<?
-		 	if ($obj->user->username != 'anonymous')
-			{ ?>
+			if ($obj->user->username != 'anonymous') {
+			?>
 			<p>
-			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>$obj->user->profile->values['firstname'])) ?></div>
+			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>$obj->user->profile->get('firstname'))) ?></div>
 			</p>
 
 			<p>
