@@ -356,7 +356,6 @@ class AdminService extends Service {
 		global $lcObj;
 		global $lcUser;
 
-		$lcObj->templateStyle = 'private';
 	}
 
 
@@ -460,7 +459,6 @@ class FacultyService extends Service {
 		}
 //		print "<hr />\n";
 		//*/
-		$lcObj->templateStyle = 'private';
 	}
 
 
@@ -613,7 +611,6 @@ class StudentService extends Service {
 		#}
 		#print "<hr />\n";
 
-		$lcObj->templateStyle = 'private';
 	}
 
 	function preTemplate(&$obj,&$t) {

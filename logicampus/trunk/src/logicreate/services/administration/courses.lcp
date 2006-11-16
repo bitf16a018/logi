@@ -62,7 +62,6 @@ class courses extends AdminService
 		$this->sectionTitle = 'Course Listing';
 		$this->inactivelinks = array( 'List Courses' );
 		$lc->templateName = 'courses_main';
-		$lc->templateStyle = 'private';
 	}
 
 	# Adds a course to the system
@@ -106,7 +105,6 @@ class courses extends AdminService
 		$this->sectionTitle = 'Add Course';
 		$this->inactivelinks = array( 'Add Course' );
 		$lc->templateName = 'courses_addcourse';
-		$lc->templateStyle = 'private';
 
 	}
 
@@ -115,7 +113,6 @@ class courses extends AdminService
 
 		$this->sectionTitle = 'Edit Course';
 
-		$lc->templateStyle = 'private';
 		$f = new Siteform();
 		$courses = courseObj::_getFromDB($lc->getvars['id'], 'id_courses');
 
