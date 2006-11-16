@@ -9,7 +9,8 @@
 
 body {
   color: black;
-  background-color: rgb(240,240,240);
+  /*background-color: rgb(240,240,240);*/
+  background-color: white;
   font-family: verdana, helvetica, arial, sans-serif;
   font-size: 71%;  /* Enables font size scaling in MSIE */
   margin: 0;
@@ -115,6 +116,7 @@ acronym, .titleTip {
   float: left;
   clear: left;
   border-right: 1px solid rgb(153,153,153);
+  background-color: rgb(240,240,240);
 }
 
 #side-bar div {

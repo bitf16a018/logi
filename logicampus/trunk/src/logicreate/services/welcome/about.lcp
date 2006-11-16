@@ -6,7 +6,6 @@ class about extends NoAuth {
 	var $presentor = "htmlPresentation";
 
 	function run($db,&$u,&$lc,&$t) {
-		$lc->templateStyle = 'private';
 		$lc->templateName = 'about_main';
 	}
 

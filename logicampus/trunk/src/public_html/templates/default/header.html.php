@@ -36,7 +36,7 @@
 	<table class='sidebar'>
 		<tr>
 		      <td valign="top" width="140" class="leftnav">
-		      <? while ( list($k,$m) = @each($obj->menu)) print $m->toHTML();?>
+		      <? //while ( list($k,$m) = @each($obj->menu)) print $m->toHTML();?>
 		      </td>
 		</tr>
 	</table>

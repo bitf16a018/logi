@@ -5,7 +5,6 @@ class welcome extends NoAuth {
 	var $presentor = "htmlPresentation";
 
 	function run($db,&$u,&$lc,&$t) {
-		$lc->templateStyle = 'private';
 		if ( $u->isAnonymous() ) {
 			$this->presentor = 'native';
 		}
