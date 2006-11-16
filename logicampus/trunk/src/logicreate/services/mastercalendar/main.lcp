@@ -12,11 +12,7 @@ class mastercalendar extends BasicAuth
 	var $_START_TIME = 2;
 	var $_END_TIME = 18;
 	
-	function Run($db,&$u,&$lc,&$t) 
-	{
-		$lc->templateStyle = 'private';
-		
-		
+	function run($db,&$u,&$lc,&$t) {
 		$t['dropdowns']['overallviews'] = array();
 		
 		$op_taken  = array();

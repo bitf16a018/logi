@@ -45,7 +45,6 @@ class display extends FacultyService {
 		$this->inactivelinks[] = 'Classroom Manager';
 
 		$lc->templateName = 'displayClass_main';	
-		$lc->templateStyle = 'private';
 
 		/*****
 		* MOTD

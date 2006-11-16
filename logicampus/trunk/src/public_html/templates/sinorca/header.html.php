@@ -18,6 +18,7 @@
     <link rel="index"    href="./index.html" title="Site map" />
 
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
+    <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  title="Sinorca (calendar)" />
     <link rel="stylesheet alternative" type="text/css" href="sinorca-screen-alt.css" media="screen" title="Sinorca (alternative)" />
     <link rel="stylesheet" type="text/css" href="sinorca-print.css" media="print" />
 
@@ -55,11 +56,12 @@
 
       <div class="subHeader">
         <span class="doNotDisplay">Navigation:</span>
-        <a href="./index.html">Home</a> |
-        <a href="./index.html" class="highlight">Sinorca 2.0</a> |
-        <a href="./index.html">Other</a> |
-        <a href="./index.html">Header</a> |
-        <a href="./index.html">Links</a>
+
+	<a alt="Home" href="<?=appurl('');?>"><img src="<?=TEMPLATE_URL;?>images/menu-widget.png" height="16" border="0" alt="" /><?=lct('Home Page')?></a> |
+	<a href="<?=appurl('faq/')?>"><?=lct('FAQs')?></a> |
+	<a href="<?=appurl('mastercalendar/')?>"><?=lct('Calendar')?></a> |
+	<a href="<?=appurl('helpdesk/')?>"><?=lct('Help Desk')?></a> |
+	<a style="color: white;" href="<?=APP_URL?>pm/"><?=lct('Messages')?> [<?=(int)$t['_privMsgs']?>]</a>
       </div>
     </div>
 
