@@ -64,6 +64,7 @@ $execution_time=get_microtime();
 		//
 
 include(LIB_PATH."LC_include.php");
+include(LIB_PATH."lc_settings.php");
 include(LIB_PATH."LC_user.php");
 include(LIB_PATH."pellet.php");
 include(LIB_PATH."LC_db.php");
