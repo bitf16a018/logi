@@ -6,12 +6,13 @@
 
 <script>
 
-	function blurme()
-	{	
-		document.getElementById("responseType").blur();
-		alert('You can not change this unless you uncheck [Has no due date]');
+
+	function noduedate() {
+		var obj_responsetype = document.getElementById("responseType");
+		obj_responsetype.selectedIndex = 4;
+		return false;
 	}
-	
+
 	function lookatchange()
 	{	
 		var obj_noduedate = document.getElementById("noDueDate");
@@ -20,8 +21,9 @@
 		if (obj_noduedate.checked)
 		{	
 			obj_responsetype.readonly = true;
+			obj_responsetype.disabled = true;
 			obj_responsetype.selectedIndex = 4;
-			obj_responsetype.onfocus = blurme;
+			obj_responsetype.onchange = noduedate;
 			
 		} else
 		{	
@@ -32,6 +34,6 @@
 	
 	
 	document.getElementById("noDueDate").onchange=lookatchange;
-	lookatchange();
+//	lookatchange();
 	
 </script>
