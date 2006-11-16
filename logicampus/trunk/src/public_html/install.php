@@ -1,4 +1,10 @@
 <?php
+	if ( file_exists('defines.php') ) {
+		include('defines.php');
+		header('Location: '.APP_URL);
+		exit();
+	}
+
 	include('defines.template.php');
 ?><html>
 <body>
@@ -46,7 +52,7 @@
 <br/>
 <br/>
 <?php
-if ($_GET['send'] == 'go') {
+if (isset($_GET['send']) && $_GET['send'] == 'go') {
 	$stats = true;
 	if ( !sendStats('logicampus.com') ) {
 		$stats = sendStats('216.40.247.38');
