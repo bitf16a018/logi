@@ -99,6 +99,16 @@ class assessment extends FacultyOnlyService {
 				return;
 			}
 
+			//SECURITY CHECK
+			$db->query('SELECT id_class_gradebook_entries FROM class_gradebook_entries
+			WHERE id_classes = '.$u->activeClassTaught->id_classes.'
+			AND id_class_gradebook_entries = '.$lc->postvars['entryid']);
+			if( !$db->next_record() ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You don't own this gradebook entry.";
+				return;
+			}
+
 			$postnotes = stripslashes($lc->postvars['notes']);
 			if ( $ent->notes != $postnotes ) {
 				$ent->set( 'notes', $postnotes );
@@ -115,16 +125,6 @@ class assessment extends FacultyOnlyService {
 				$lc->postvars['entryid'] = (int)$lc->postvars['entryid'];
 				$username = trim(addslashes(stripslashes($username)));
 
-
-				//SECURITY CHECK
-				$db->query('SELECT id_class_gradebook_entries FROM class_gradebook_entries
-				WHERE id_classes = '.$u->activeClassTaught->id_classes.'
-				AND id_class_gradebook_entries = '.$lc->postvars['entryid']);
-				if( !$db->next_record() ) {
-					$this->presentor = 'errorMessage';
-					$t['message'] = "You don't own this gradebook entry.";
-					return;
-				}
 
 				$val = ClassGradebookVal::load( array(
 					'username' => $username,
