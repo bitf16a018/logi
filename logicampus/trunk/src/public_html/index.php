@@ -298,7 +298,7 @@ if($event != '' ) {
 			
 			$event_full = $event. 'Run';
 			$_db = DB::getHandle();
-			$service->$event_full($_db,&$lcUser,&$lcObj,&$lcTemplate);
+			$service->$event_full($_db,$lcUser,$lcObj,$lcTemplate);
 			
 		} else { 
 			$lcTemplate[message] = "The function <i>$event</i> does not exist.";
