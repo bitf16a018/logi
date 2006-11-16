@@ -93,7 +93,7 @@ class report extends FacultyOnlyService {
 		
 		// filterActive needs to be null to get aeverything, not 0
 		#$gradebook->filterActive = 0;
-		$gradebook->filterBySection = $lc->postvars['section'];
+		$gradebook->filterSection = $lc->postvars['section'];
 
 		// need to pass this to report page for printing.
 		
@@ -302,7 +302,7 @@ $t['table'] .= "<p style='font-size:8pt;'><i>This document was generated on ".da
 			'id_classes' => $u->activeClassTaught->id_classes,
 		) );
 
-		$gradebook->filterBySection = $lc->postvars['section'];
+		$gradebook->filterSection = $lc->postvars['section'];
 
 		// tell the gradebook object to do a bunch of work
 		$gradebook->loadCategories();
