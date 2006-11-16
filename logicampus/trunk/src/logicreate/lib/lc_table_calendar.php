@@ -788,6 +788,9 @@ debug($date);
 
 
 
+/**
+ * Paints the two column list next to the small calendar on the dayView page
+ */
 class LC_TableRenderer_DayCalendar extends LC_TableRenderer_Calendar {
 
 
@@ -836,7 +839,9 @@ class LC_TableRenderer_DayCalendar extends LC_TableRenderer_Calendar {
 
 		$this->html .= '<tbody>';
 
-		for ($x = 0; $x < 23; ++$x) {
+		//we want to loop until less than 24, or else we miss the hour
+		// between 11pm and 12am
+		for ($x = 0; $x < 24; ++$x) {
 			//paint the columns
 			$class = ($x % 2 == 0) ? 'even':'odd';
 			$this->html .= '<tr class="center_justify '.$class.'">';
@@ -928,9 +933,14 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 
 
 			$ret .=	$v['title'];
-			if ( strlen($v['description']) ) {
-				if ( strlen($v['description']) > 85 ) {
-					$ret .= '<br/>'.substr($v['description'], 0, 83). '...';
+			//might cause HTML table corruption if the description has HTML in it
+			// strip_tags on it.
+			$plainDesc = strip_tags($v['description']);
+			if ( strlen($plainDesc) ) {
+				if ( strlen($plainDesc) > 85 ) {
+					$ret .= '<br/>'.substr($plainDesc, 0, 83). '...';
+				} else {
+					$ret .= '<br/>'.$plainDesc;
 				}
 			}
 			if ($v['enddate'] - $v['startdate'] < (60*60) ) {
@@ -1014,7 +1024,7 @@ class LC_TableCellRenderer_CalendarTime extends LC_TableCellRenderer {
 			return $this->value  . ':00 AM';
 		}
 		if ($this->value > 12 ) {
-			return $this->value -11 . ':00 PM';
+			return $this->value -12 . ':00 PM';
 		}
 		return $this->value . ':00 PM';
 	}
