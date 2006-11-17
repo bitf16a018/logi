@@ -55,14 +55,13 @@ class classmgr extends FacultyService {
 		$lc->templateName='main_main';
 		$lc->templateStyle = 'private';
 		$this->authorizer = 'facultyGroupCheck';
-	
 		if ((int)$lc->postvars['semester'] > 0)
-		{	$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];
+		{	$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];	
 		}
 		else
 		{
 			if(!MODULE_FULL_SEMESTERS){
-			if(count($u->classesTaught)<=0){
+				if(count($u->classesTaught)<=0){
                 		$t['url'] = APP_URL . "classmgr/teacherclass/event=add";
                         	$this->presentor = 'redirectPresentation';
 			}
@@ -75,6 +74,7 @@ class classmgr extends FacultyService {
 			// __FIXME__ need to find a method for loading current semester
 			//pull from db and stuff in session
 			$u->sessionvars['classmgr']['currentsemester'] = semesterObj::getCurrentID();
+			echo $u->sessionvars['classmgr']['currentsemester'];
 		}
 		
 		$id_semesters = (int)$u->sessionvars['classmgr']['currentsemester'];

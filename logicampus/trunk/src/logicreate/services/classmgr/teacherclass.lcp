@@ -29,26 +29,19 @@ function makeSemester($db,&$u,&$lc,&$t) {
 	$endtime = $enddate.' 1:00:00';
 
 	$semesterObj->dateStart = $startdate;
-
 	$semesterObj->dateEnd = $enddate;
 
 	//$semesterObj->dateRegistrationStart =  
 	$semesterObj->dateRegistrationEnd = $enddate;
 
-	if ($lc->postvars['dateAccountActivation']['ampm'] == 'PM'){       
-		$lc->postvars['dateAccountActivation']['hours'] +=12;
-	}
-
-	$semesterObj->dateAccountActivation = $starttime;
-
+	//$semesterObj->dateAccountActivation = $starttime;
 	$semesterObj->dateDeactivation  = $enddate;
 
 	//$semesterObj->dateCensus =
 
 	$semesterObj->dateFinalDrop = $endtime;
-echo $starttime;
-	$semesterObj->dateStudentActivation = $starttime;
 
+	$semesterObj->dateStudentActivation = $starttime;
 	$semesterObj->dateStudentDeactivation = $endtime;
 
 	$semesterObj->semesterId = "ALL";
@@ -56,116 +49,84 @@ echo $starttime;
 	$semesterObj->semesterTerm = $lc->postvars['classname'];
 
 	// make sure to use BIG H for hours
-	$semesterObj->dateEndITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndITVseminar']));
-	$semesterObj->dateStartITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartITVseminar']));
+	//$semesterObj->dateEndITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndITVseminar']));
+	//$semesterObj->dateStartITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartITVseminar']));
 
-	$semesterObj->dateEndOrientation= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndOrientation']));
-	$semesterObj->dateStartOrientation = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartOrientation']));
+	$semesterObj->dateEndOrientation= $endtime;
+	//$semesterObj->dateStartOrientation =
 
-	$semesterObj->dateEndTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndTextbook']));
-	$semesterObj->dateStartTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartTextbook']));
+	//$semesterObj->dateEndTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndTextbook']));
+	//$semesterObj->dateStartTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartTextbook']));
 
-	$semesterObj->dateEndExam= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndExam']));
-	$semesterObj->dateStartExam = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartExam']));
+	$semesterObj->dateEndExam= $endtime;
+	//$semesterObj->dateStartExam = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartExam']));
+	
 	$semesterObj->_saveToDB();
-
-	if (mysql_insert_id() > 1) {
-		$sql = 'insert into semesters_course_info set id_semesters='.mysql_insert_id();
+	$id =  mysql_insert_id();
+	if($id == null)
+		$id = 1;
+	if ($id >= 1) {
+		$sql = 'insert into semesters_course_info set id_semesters='.$id;
 		$db->query($sql);
+		return $id;
 		/// i need to know if this worked..add error checking later
 	}
-
-	$this->run($db, $u, $lc, $t);
-	return;
-
-
 }
 
 function makeCourse($db, &$u, &$lc, &$t){
 	
 	$courses = new courseObj();
-	$courses->courseFamily = "ALL";
+	$courses->courseFamily = $lc->postvars['courseFamily'];
 	//$courses->courseFamily = strtoupper($courses->courseFamily);
-	$courses->courseNumber = md5(time());
-	$courses->courseName = $lc->postvars['classname'];
+	$courses->courseNumber = $lc->postvars['coursenumber'];
+	$courses->courseName = $lc->postvars['coursename'];
 	$courses->courseDescription = $lc->postvars['discription'];
 	
 	$courses->_saveToDB();
-
-	$t['msg'] = 'Course added successfully.';
+	return mysql_insert_id();
 }
 
 function makeClass($db, &$u, &$lc, &$t){
-		if(validateLength($lc->postvars['classname']))
-			$t['error'][]="* Please enter a class name";
 
-		$a_sec_numbers = explode("\n", $this->cleanedArray['sectionNumbers']);
-		print_r($a_sec_numbers);
-		$this->cleanedArray['sectionNumbers'] = ''; //clearing
-		// trying to find out already existing section numbers
-		$sectionnumbers_processed = 0;
-		foreach($a_sec_numbers as $pointer=>$snum) {
-			if ((int)$snum == 0) {
+	$a_sec_numbers = explode("\n", $lc->postvars['sectionnumbers']);
+	
+	$classObj = new classObj();
+	$classObj->id_courses = $lc->postvars['id_course'];
+	$classObj->id_semesters = $lc->postvars['id_semester'];
+	$classObj->sectionNumbers = $lc->postvars['sectionnumbers'];
+	$classObj->classType  = $lc->postvars['classtype'];
+//	$classObj->stylesheet
+//	$classObj->id_class_resource
+	$classObj->facultyId = $u->username;
+
+	$classObj->courseFamily = $lc->postvars['courseFamily'];
+	$classObj->courseNumber = $lc->postvars['coursenumber'];
+	$classObj->courseFamilyNumber = $lc->postvars['courseFamily'].$lc->postvars['coursenumber'];
+	$classObj->courseName = $lc->postvars['coursename'];
+
+	$classObj->_saveToDB();
+
+	if ($new_id_class = mysql_insert_id()) {
+		// add section numbers
+		foreach ($a_sec_numbers as $pointer=>$snum) {
+			if ((int)$snum <= 0) {
 				continue;
 			}
-
-			$sectionnumbers_processed ++;
-			$this->cleanedArray['sectionNumbers'] .= (int)$snum. "\n";
-
 			$sql = '
-			SELECT count(*) as SECTION_exists
-			FROM class_sections INNER JOIN classes ON classes.id_classes=class_sections.id_classes
-			WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$snum;
+			INSERT INTO class_sections
+			SET sectionNumber='.(int)$snum. ',
+			id_classes='.$new_id_class;
 
-			$db->queryOne($sql);
-			if ($db->Record['SECTION_exists']) {
-			       // deny the adding of the class, inform them that section number exists already
-				$t['error'][] = 'Section #'. (int)$snum. ' exists';
-			}
+			$db->query($sql);
 
 		}
-
-		if ($sectionnumbers_processed == 0) {
-			$t['error'][] = 'You must have at least 1 section number for a class';
-		}
-
-		$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
-
-		if (count($t['error'])>0) {
-			$a_course = courseObj::_getFromDB($this->cleanedArray['id_courses'], 'id_courses');
-			$this->cleanedArray['courseFamily'] = $a_course->courseFamily;
-			$this->cleanedArray['courseNumber'] = $a_course->courseNumber;
-			$this->cleanedArray['courseFamilyNumber'] = $a_course->courseFamily.$a_course->courseNumber;
-
-			// add class and say Thank you class maker!
-			$classObj = new classObj();
-			$classObj->_loadArray($this->cleanedArray);
-			$classObj->_saveToDB();
-
-// __FIXME__ - use db driver last insert
-			if ($new_id_class = mysql_insert_id()) {
-				// add section numbers
-				foreach ($a_sec_numbers as $pointer=>$snum) {
-					if ((int)$snum <= 0) {
-						continue;
-					}
-
-					$sql = '
-					INSERT INTO class_sections
-					SET sectionNumber='.(int)$snum. ',
-					id_classes='.$new_id_class;
-
-					$db->query($sql);
-
-				}
-
 		// add classdoc folders (Assignments, Web Content, Classroom, Images'
 		include_once(LIB_PATH. 'documentLibraryLib.php');
 
 		$folderObj = new LC_folder();
 		$folderObj->name = 'Trash';
 
-	       $folderObj->folderType= 0;
+		$folderObj->folderType= 0;
 		$folderObj->parentKey = 0;
 		$folderObj->owner = $this->cleanedArray['facultyId'];
 		$folderObj->class_id = $new_id_class;
@@ -174,14 +135,14 @@ function makeClass($db, &$u, &$lc, &$t){
 
 		unset($folderObj);
 
-				$folderObj = new LC_folder();
+		$folderObj = new LC_folder();
 		$folderObj->name = 'Classroom';
 		$folderObj->folderType= 1;
 		$folderObj->parentKey = 0;
 		$folderObj->owner = $this->cleanedArray['facultyId'];
 		$folderObj->class_id = $new_id_class;
 		$folderObj->notes = 'Place files viewable by your classroom in here.';
-				$folderObj->_save('classdoclib_Folders');
+		$folderObj->_save('classdoclib_Folders');
 
 		unset($folderObj);
 
@@ -205,54 +166,45 @@ function makeClass($db, &$u, &$lc, &$t){
 		$folderObj->notes = 'Use this folder to hold
 				assignments for students that were not uploaded
 				via the assignment manager.';
-			$folderObj->_save('classdoclib_Folders');
+		$folderObj->_save('classdoclib_Folders');
 
-			// Insert an entry for the Gradeboko Application
-			include_once(LIB_PATH.'ClassGradebook.php');
-			$gradebookObj = new ClassGradebookBase();
+		// Insert an entry for the Gradeboko Application
+		include_once(LIB_PATH.'ClassGradebook.php');
+		$gradebookObj = new ClassGradebookBase();
 
-			$gradebookObj->set('idClasses', $new_id_class);
-		       $gradebookObj->aLower = 0;
-			$gradebookObj->bLower = 0;
-			$gradebookObj->cLower = 0;
-			$gradebookObj->dLower = 0;
-			$gradebookObj->totalPoints = 0;
-			$gradebookObj->roundScoresUp = 0;
-			$gradebookObj->calculationType = 0;
-			$gradebookObj->colorMissingGrade = '';
-			$gradebookObj->save();
+		$gradebookObj->set('idClasses', $new_id_class);
+		$gradebookObj->aLower = 0;
+		$gradebookObj->bLower = 0;
+		$gradebookObj->cLower = 0;
+		$gradebookObj->dLower = 0;
+		$gradebookObj->totalPoints = 0;
+		$gradebookObj->roundScoresUp = 0;
+		$gradebookObj->calculationType = 0;
+		$gradebookObj->colorMissingGrade = '';
+		$gradebookObj->save();
 
-			if ($gradebookObj->idClassGradebook == false) {
-				echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
-			}
-
-				// Insert an entry for the Exam Scheduler Application
-				include_once(LIB_PATH.'ExamScheduleClasses.php');
-				$esc = new ExamScheduleClasses();
-				$esc->idClasses = $new_id_class;
-				$esc->idSemester = $this->cleanedArray['id_semesters'];
-				$esc->status = 0;
-				$esc->southCampus = 0;
-				$esc->southeastCampus = 0;
-				$esc->northeastCampus = 0;
-				$esc->northwestCampus = 0;
-				$esc->receivedDate = '';
-				$esc->note = '';
-				$esc->save();
-
-
-			}
-
-			$u->sessionvars['administration']['classes']['currentsemester'] = $this->cleanedArray['id_semesters'];
-
-			$t['goodtimes'] = '<li>Thank you, your class has been added successfully.';
-
-			$this->run($db, $u, $lc, $t);
-			return;
-
-		} else {
-			$t['error'] .= '<br>Failed to add class, please check your information and try again';
+		if ($gradebookObj->idClassGradebook == false) {
+			echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
 		}
+
+			// Insert an entry for the Exam Scheduler Application
+			include_once(LIB_PATH.'ExamScheduleClasses.php');
+			$esc = new ExamScheduleClasses();
+			$esc->idClasses = $new_id_class;
+			$esc->idSemester = $lc->postvars['id_semester'];
+			$esc->status = 0;
+			$esc->southCampus = 0;
+			$esc->southeastCampus = 0;
+			$esc->northeastCampus = 0;
+			$esc->northwestCampus = 0;
+			$esc->receivedDate = '';
+			$esc->note = '';
+			$esc->save();
+		
+		$u->sessionvars['administration']['classes']['currentsemester'] = $lc->postvars['id_semester'];
+
+		$t['goodtimes'] = '<li>Thank you, your class has been added successfully.</li>';
+	}
 }
 
 function addRun($db,&$u,&$lc,&$t){
@@ -271,7 +223,9 @@ function addRun($db,&$u,&$lc,&$t){
 	
 	$lc->postvars['semesterYear']['month'] = 1;
 	$lc->postvars['semesterYear']['day'] = 1;
-	
+	$lc->postvars['courseFamily'] = "ALL";
+	$lc->postvars['classtype'] = "Test";
+
 	$hasErrors = false;
 	
 	$bl_date_start = strtotime($lc->postvars['startmonth']. '/'. $lc->postvars['startday']. '/'.$lc->postvars['startyear']);
@@ -279,23 +233,23 @@ function addRun($db,&$u,&$lc,&$t){
 	//Check Start and end date
 	
 	if ($bl_date_start >= $bl_date_end){       
-		$t['error'] .= '<li>Semester date must come before the semester date end.</li>';
-        	$hasErrors = true;
+		$t['error'][] = '* Semester date must come before the semester date end';
         }	
-
-	//echo 'reg: '.date('Y-m-d h:i:s', $bl_date_start). '<br>';
-	//echo 'reg: '.date('Y-m-d h:i:s', $bl_date_end). '<br>';
-		
+	if(!validateLength($lc->postvars['coursename'],1))
+		$t['error'][] = '* Please enter a class name';
+	
 	if ($lc->postvars['submit']) {
-		if ($hasErrors == false){
+		if (count($t['error']) > 0){
+			$t['error'][] = 'Please fix the problems above then resubmit the form';
+		}else{
+			$lc->postvars['id_semester'] = $this->makeSemester($db, $u, $lc, $t);
 
-			$this->makeSemester($db, $u, $lc, $t);
-			$this->makeCourse($db, $u, $lc, $t);
+
+			$lc->postvars['id_course'] = $this->makeCourse($db, $u, $lc, $t);
 			$this->makeClass($db, $u, $lc, $t);
 		}
 	}
 
-	//$f->getForm('adminclassinfo', $this->cleanedArray);
 	if ($cf > 0) {
 		// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
 		// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
@@ -303,8 +257,8 @@ function addRun($db,&$u,&$lc,&$t){
 		$f->modFormValue('id_courses', $cf);
 	}
 
-	//$t['form'] = $f->ToHTML();
 }
+
 }
 
 ?>

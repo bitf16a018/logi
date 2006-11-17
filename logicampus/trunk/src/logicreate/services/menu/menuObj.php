@@ -193,6 +193,7 @@ class MenuObj extends PersistantObject {
 	 *  classes that they are TAKING, and a Classroom Portal link.
 	 **/
 	function getStudentMenu($userObj) {
+
 		if (count($userObj->classesTaken) > 0 )
 		{
 		$ret = '<a class="menuitem" href="'.appurl('classroom/').'">Classroom Portal</a><br/><br/>';
