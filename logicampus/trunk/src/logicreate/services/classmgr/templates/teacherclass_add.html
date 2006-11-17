@@ -20,17 +20,13 @@ foreach ($t['error'] as $num=>$k){
 <table width="95%" border="0" cellspacing="0" cellpadding="0">
 	<form action="" method="POST" enctype="application/x-www-form-urlencoded">
 	<tr><td colspan="2" valign="top" class="">Please complete the following fields to add a course to the site.</td></tr>
-	<tr><td valign="top" class="">*Class Name</td>
-		<td valign="top" class=""><input type"text" name="classname"></td></tr>
-<!--
-	<tr><td valign="top" class="">*Type:</td>
-		<td valign="top" class=""><select id="classType" name="classType"  size="1">	
-				<option value="ITV">ITV</option>
-				<option value="Internet">Internet</option>
-				<option value="2WayAudioVideo">2WayAudioVideo</option>
-				</select></td></tr>
--->		
-		<tr><td valign="top" class="">*Set Start and End Date</td>
+	<tr><td valign="top" class="">*Course Name</td>
+		<td valign="top" class=""><input type"text" name="coursename"></td></tr>
+	<tr><td valign="top" class="">*Course Number</td>
+                <td valign="top" class=""><input type"text" name="coursenumber" size="8"></td></tr>
+	<tr><td valign="top" class="">*Section Numbers<BR><i><i>place one section per line</i></td>
+		<td valign="top" class=""><textarea name="sectionnumbers" cols="15" rows="10" id="discription"></textarea></td></tr>
+	<tr><td valign="top" class="">*Set Start and End Date</td>
 		<td valign="top" class=""><strong>Start:</strong><br>
 					Month:<input type="text" name="startmonth" value="06" size=2>
 					Day:<input type="text" name="startday" value="08" size=2>
@@ -43,9 +39,9 @@ foreach ($t['error'] as $num=>$k){
 	<tr><td valign="top" class="" valign="top">*Class Discription</td>
 		<td valign="top" class="">
 			<table cellpadding="0" cellspacing="0" border="0">
-				<tr><td><textarea name="discription" cols="25" rows="10" id="discription"></textarea></td></tr>
+				<tr><td><textarea name="discription" cols="30" rows="5" id="discription"></textarea></td></tr>
 			</table>
-	</td></td>
+	</td></tr>
 		<tr><td valign="top" class=""></td>
 		<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Add Class"></td></tr>
 </form></table><div style="font-size: 85%">*denotes a required field</div>

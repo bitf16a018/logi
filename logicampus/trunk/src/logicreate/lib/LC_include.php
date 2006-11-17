@@ -197,6 +197,7 @@ class lcSystem {
 	var $postvars;
 	var $getvars;
 	var $templateStyle = 'private';
+	//var $templateStyle = 'sinorcaa';
 	var $TRACK_SESSIONS = true;
 	var $cssFile;
 
