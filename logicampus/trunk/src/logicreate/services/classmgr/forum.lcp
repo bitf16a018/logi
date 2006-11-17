@@ -27,9 +27,7 @@ class forum extends FacultyService {
 
 	var $presentor = "htmlPresentation";
 
-	function forum()
-	{	global $lcObj;
-		$lcObj->templateStyle='private';
+	function forum(){
 	}	
 
 	/* Added by Mike on 9/31/02 
@@ -47,9 +45,9 @@ class forum extends FacultyService {
 	}
 
 
-	function Run($db,&$u,&$lcObj,&$t) {	
+	function Run($db,&$u,&$lc,&$t) {	
 
-		$lcObj->templateName='forum_main';
+		$lc->templateName='forum_main';
 
 		$frm = new forums();
 //		$group = createGroupCheck($u->groups);
@@ -117,7 +115,7 @@ class forum extends FacultyService {
 	 * forum.  Does this allow for result set browsing?
 	 */
 
-	function listRun($db,&$u,&$lcObj,&$t) {
+	function listRun($db,&$u,&$lc,&$t) {
 		$t["allowHTML"] = htmlspecialchars($this->_allowTags);
 		$t["postedMessage"] = $u->sessionvars["postedMessage"];
 		unset($u->sessionvars["postedMessage"]);
@@ -126,14 +124,14 @@ class forum extends FacultyService {
 		$t["return"] = base64_encode($PATH_INFO);
 
 
-		if ($lcObj->postvars) {
-			$lcObj->getvars = array_merge($lcObj->getvars,$lcObj->postvars);	
+		if ($lc->postvars) {
+			$lc->getvars = array_merge($lc->getvars,$lc->postvars);	
 		}
-		$search = $lcObj->getvars["search"];
-		$forumID = $lcObj->getvars["fid"];
+		$search = $lc->getvars["search"];
+		$forumID = $lc->getvars["fid"];
 		$post = new forumpost();
 		$frm = new forums();
-		if ($lcObj->getvars["start"]) { $lcObj->postvars["start"] = $lcObj->getvars["start"]; } 
+		if ($lc->getvars["start"]) { $lc->postvars["start"] = $lc->getvars["start"]; } 
 		$group = createGroupCheck($u->groups);
 
 
@@ -160,9 +158,9 @@ class forum extends FacultyService {
 				$limit=0;
 			}
 
-			$start = intval($lcObj->postvars["start"]);
+			$start = intval($lc->postvars["start"]);
 			if ($start>0) { 
-				$start = ($lcObj->postvars["start"]-1) * $this->_postsPerPage;
+				$start = ($lc->postvars["start"]-1) * $this->_postsPerPage;
 			}
 			$foruminfo = $nf->_get();
 			$t["forumname"] = $foruminfo["forumname"];
@@ -189,7 +187,7 @@ while($db->next_record()) {
 // and do a page dropdown if needed
 //
 		if ($threadcount>$this->_postsPerPage) { 
-			$start = $lcObj->postvars["start"];
+			$start = $lc->postvars["start"];
 			$pages = ceil($threadcount / $this->_postsPerPage);
 			$startcount =1;
 			while($startcount<=$pages) { 
@@ -232,7 +230,7 @@ while($db->next_record()) {
 		$t["_title"] = "Forums: ".$foruminfo["forumname"];
 
 
-		$lcObj->templateName = "forum_forumview";
+		$lc->templateName = "forum_forumview";
 	}
 
 
@@ -241,13 +239,13 @@ while($db->next_record()) {
 	 * show a message and all the approved replies to it.
 	 * if a user cannot see this post, redirect to main forum list.
 	 */
-	function readRun($db,&$u,&$lcObj,&$t) {	
+	function readRun($db,&$u,&$lc,&$t) {	
 		$t["postedMessage"] = $u->sessionvars["postedMessage"];
 		unset($u->sessionvars["postedMessage"]);
 		$t["allowHTML"] = htmlspecialchars($this->_allowTags);
 
-		$forumID = $lcObj->getvars["fid"];
-		$message = $lcObj->getvars["m"];
+		$forumID = $lc->getvars["fid"];
+		$message = $lc->getvars["m"];
 		$frm = new forums();
 		$group = createGroupCheck($u->groups);
 
@@ -289,7 +287,7 @@ while($db->next_record()) {
 		}
 
 		$t["messagethread"] = $html;
-		$lcObj->templateName = "forum_messageview";
+		$lc->templateName = "forum_messageview";
 
 		$t["_title"] = "Forums: ".$foruminfo["forumname"];
 
@@ -306,8 +304,8 @@ while($db->next_record()) {
 	 * email all persons who opted in to email broadcasting
 	 * of a particular forum ID (fid)
 	 */
-	function postRun($db,&$u,&$lcObj,&$t) {	
-		$forumID = $lcObj->postvars["fid"];
+	function postRun($db,&$u,&$lc,&$t) {	
+		$forumID = $lc->postvars["fid"];
 		$post = new forumpost();
 		$nf = new newForum($forumID);
 		$foruminfo = $nf->_get();
@@ -316,12 +314,12 @@ while($db->next_record()) {
 
 		$toemail = split(',',$foruminfo["email"]);
 
-		$body = $lcObj->postvars["body"];
-		$message = $lcObj->postvars["message"];
+		$body = $lc->postvars["body"];
+		$message = $lc->postvars["message"];
 		// No body, no post
 		if ($body == "") 
 			{	
-				redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"]))); 
+				redirect($db,modurl("forum/".base64_decode($lc->getvars["return"]))); 
 			}
 		if ($nf->hasPerm("post",$u->groups)) { 
 			$isValid = true;
@@ -329,7 +327,7 @@ while($db->next_record()) {
 
 		if ($isValid) { 
 
-			arrayIntoObject($post,$lcObj->postvars);
+			arrayIntoObject($post,$lc->postvars);
 
 			// clean up the body
 			$post->body = nl2br($post->body);
@@ -421,8 +419,8 @@ while($db->next_record()) {
 		if ($post->status != "y") { 
 			$u->sessionvars["postedMessage"] .= "It may be reviewed before it is \'live\', and therefore may not be viewable immediately.";
 		}
-		$lcObj->getvars["fid"] = $forumID;
-		redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
+		$lc->getvars["fid"] = $forumID;
+		redirect($db,modurl("forum/".base64_decode($lc->getvars["return"])));
 
 
 	}
@@ -431,22 +429,22 @@ while($db->next_record()) {
 
 
 
-	function mod_approveRun($db,&$u,&$lcObj,&$t) {	
-		$fid = $lcObj->getvars["fid"];
-		$pkey = $lcObj->getvars["pkey"];
+	function mod_approveRun($db,&$u,&$lc,&$t) {	
+		$fid = $lc->getvars["fid"];
+		$pkey = $lc->getvars["pkey"];
 // new forum object???
 		$nf = new newForum($fid);
 		$canModerate = $nf->hasPerm("moderate",$u->groups);
 		if ($canModerate) { 
 			$db->query("update forumPosts set status='y' where pkey=$pkey and fid='$fid'");
 		}
-		redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
-		$this->run($db,$u,$lcObj,$t);
+		redirect($db,modurl("forum/".base64_decode($lc->getvars["return"])));
+		$this->run($db,$u,$lc,$t);
 	}
 
-	function mod_deleteRun($db,&$u,&$lcObj,&$t) {	
-		$fid = $lcObj->getvars["fid"];
-		$pkey = $lcObj->getvars["pkey"];
+	function mod_deleteRun($db,&$u,&$lc,&$t) {	
+		$fid = $lc->getvars["fid"];
+		$pkey = $lc->getvars["pkey"];
 
 		/****  Update Replies ******
 		** Test to see if item being deleted is a parent or a reply, if it is a reply, then update the count 
@@ -476,26 +474,26 @@ $this->updateforum($fid);
 		if ($parent == 0) 
 			{ 
 				redirect($db, modurl("forum/event=list/fid=$fid")); 
-				$this->run($db,$u,$lcObj,$t);
+				$this->run($db,$u,$lc,$t);
 			} 
 		    	else   // send them back where they came from
 				{
-					redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
-					$this->run($db,$u,$lcObj,$t);
+					redirect($db,modurl("forum/".base64_decode($lc->getvars["return"])));
+					$this->run($db,$u,$lc,$t);
 				}
 	}
 
-	function mod_suspendRun($db,&$u,&$lcObj,&$t) {	
-		$fid = $lcObj->getvars["fid"];
-		$pkey = $lcObj->getvars["pkey"];
+	function mod_suspendRun($db,&$u,&$lc,&$t) {	
+		$fid = $lc->getvars["fid"];
+		$pkey = $lc->getvars["pkey"];
 // new forum object???
 		$nf = new newForum($fid);
 		$canModerate = $nf->hasPerm("moderate",$u->groups);
 		if ($canModerate) { 
 			$db->query("update forumPosts set status='' where pkey=$pkey and fid='$fid'");
 		}
-		redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
-		$this->run($db,$u,$lcObj,$t);
+		redirect($db,modurl("forum/".base64_decode($lc->getvars["return"])));
+		$this->run($db,$u,$lc,$t);
 	}
 
 

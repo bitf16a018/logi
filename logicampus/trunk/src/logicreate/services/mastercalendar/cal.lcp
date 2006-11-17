@@ -76,7 +76,6 @@ class cal extends RegAuth
 			return;
 		}
 		
-		$lc->templateStyle = 'private';
 		
 		$this->inactivelinks = array( 'Schedule event' );
 		$t['obj'] =&$lc;
@@ -112,7 +111,6 @@ class cal extends RegAuth
 			return;
 		}
 		
-		$lc->templateStyle = 'private';
 		
 		$this->inactivelinks = array( 'View scheduled events' );
 		$x = new datagrid('classmgr', 'cal');
