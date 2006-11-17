@@ -46,7 +46,6 @@ class classSetup extends FacultyService {
 	function run(&$db,&$u,&$lc,&$t) 
 	{
 		$lc->templateName='classsetup_main';
-		$lc->templateStyle = 'private';
 
 		$classObj = classObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
 
@@ -98,7 +97,7 @@ class classSetup extends FacultyService {
 	{
 		$a_styles = array();
 		
-		$dir = dir('./templates/private/');
+		$dir = dir('./templates/'.$this->templateStyle);
 		
 		while ($f = $dir->read())
 		{	

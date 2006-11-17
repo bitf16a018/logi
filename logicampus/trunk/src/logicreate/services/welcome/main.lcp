@@ -20,7 +20,13 @@ class welcome extends NoAuth {
 	function presentation (&$obj,&$t) {
 		//put the template and content together to form a 
 		// basic html page
-		include(TEMPLATE_PATH."welcome_login.html.php");
+		if (!@include(TEMPLATE_PATH."welcome_login.html.php") ) { 
+			//fallback to "private"
+
+			if (!include(TEMPLATE_PATH."../private/welcome_login.html.php") ) { 
+				echo "can't find welcome file.";
+			}
+		}
 	}
 
 

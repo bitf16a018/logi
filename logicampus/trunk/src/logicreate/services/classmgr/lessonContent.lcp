@@ -58,7 +58,6 @@ Class LessonContent extends FacultyService
 	 * Show the main page of the lesson manager
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
-		$lc->templateStyle = 'private';
 		$lc->templateName = 'lessonContent';
 		$this->sectionTitle = 'Lesson Content';
 		
