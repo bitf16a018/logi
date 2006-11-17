@@ -72,7 +72,10 @@ class users extends NoAuth {
 		
 		$newuser = new lcUser();
 		$newuser->username = $arg->postvars['username'];
-		$newuser->password = $arg->postvars['password'];
+		if(USE_MD5_PASSWORDS==TRUE)
+			$newuser->password = md5($arg->postvars['password']);
+		else
+			$newuser->password = $arg->postvars['password'];
 		$newuser->email = $arg->postvars['email'];
 		$newuser->userType = $arg->postvars['userType'];
 		$newuser->groups[] = 'reg';     //add user to register group
@@ -112,11 +115,12 @@ class users extends NoAuth {
 	
 		# Try creating the account
 		$key = $newuser->administrationAddNewUser($db);
+		
 		if ($key < 0)
 			{	// user already exists, append to error message
 				$t['error'] .= '<br><ul><li>User already exists, try another username.</li></ul>';
 				$this->newRun($db, $u, $arg, $t);
-				//return;
+				return;
 				
 			}
 		
