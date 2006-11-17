@@ -18,7 +18,7 @@
     <link rel="index"    href="./index.html" title="Site map" />
 
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
-    <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  title="Sinorca (calendar)" />
+    <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  media="screen" title="Sinorca (screen)" />
     <link rel="stylesheet alternative" type="text/css" href="sinorca-screen-alt.css" media="screen" title="Sinorca (alternative)" />
     <link rel="stylesheet" type="text/css" href="sinorca-print.css" media="print" />
 
