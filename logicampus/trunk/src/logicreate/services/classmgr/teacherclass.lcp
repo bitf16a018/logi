@@ -4,63 +4,138 @@ include_once(LIB_PATH.'inputValidation.php');
 include_once(LIB_PATH.'courseObj.php');
 include_once(LIB_PATH.'semesterObj.php');
 
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+
 class teacherclass extends FacultyService {
 
 var $presentor = "htmlPresentation";
 var $authorizer = 'regAuth';
 
 function Run($db,&$u,&$lc,&$t){
-	$lc->templateName = 'teacherclass_add';
+	
+	$lc->templateName = 'teacherclass_list';
+
+	$this->sectionTitle = 'lists Classes';
+	$this->inactivelinks = array( 'lists Classes' );
+
+///////////////////////////////////////////////////////////////
+
+	if ((int)$lc->postvars['semester'] > 0) {
+		$u->sessionvars['administration']['classes']['currentsemester'] = (int)$lc->postvars['semester'];
+	}
+	if ((int)$u->sessionvars['administration']['classes']['currentsemester'] <= 0) {
+
+		// @@@ we need to load up the current semester
+		$u->sessionvars['administration']['classes']['currentsemester']= semesterObj::getCurrentID();
+	}
+	//echo $u->sessionvars['administration']['classes']['currentsemester'];
+
+	# __FIX_ME__ when there is no semester it cannot figure out
+	# what to load up
+
+	if($u->sessionvars['administration']['classes']['currentsemester']) {
+		$semesterObj = semesterObj::_getFromDB((int)$u->sessionvars['administration']['classes']['currentsemester'], 'id_semesters');
+		$t['semesterDisplay'] = $semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
+	} else {
+		$t['nosemester'] = TRUE;
+		return;
+	}
+	$datagrid = new SearchGrid($this->module,$this->serviceName);
+	$datagrid->table = 'classes as a';
+	$datagrid->headerClass = 'classheader';
+	$datagrid->class = 'datagrid';
+
+	$datagrid->column = 'c.courseName, a.id_classes, concat(b.lastname, ", ",b.firstname) as Faculty, a.classType, a.courseFamily, a.courseNumber, a.sectionNumbers ';
+	//$datagrid->where = 'a.id_semesters='. (int)$u->sessionvars['administration']['classes']['currentsemester'];
+	$datagrid->where = 'a.facultyId="' . $u->username . '"';
+	$datagrid->joins = 'LEFT JOIN profile AS b ON a.facultyId=b.username INNER JOIN courses AS c ON a.id_courses=c.id_courses';
+
+	if ($lc->getvars[$this->sortVar]) {
+		if ($lc->getvars[$datagrid->sortVar] == 'Faculty') {
+			$datagrid->orderby = 'b.lastname';
+		} elseif($lc->getvars[$datagrid->sortVar] == 'courseName') {
+			$datagrid->orderby = 'c.courseName';
+		} else {
+			$datagrid->orderby = 'a.'.$lc->getvars[$datagrid->sortVar];
+		}
+		// add whatever other custom sortables here (outside tables)
+	}
+
+	$datagrid->ignore = array('id_courses', 'id_semesters', 'priority', 'courseFamilyNumber');
+	$datagrid->sortColumns = array('id_classes', 'courseName', 'sectionNumbers', "courseFamily", "courseNumber", 'Faculty', 'classType');
+	$datagrid->headers = array(
+		'sectionNumbers' => 'Section #',
+		'id_classes' => 'CLASS ID',
+		'courseName'=>'Class Title',
+		'courseFamily'=>'Course Family',
+		'courseNumber'=>'Course #',
+		'Faculty'=>'Faculty',
+		"classType"=>"Class Type",
+		'end'=>' ');
+
+	$datagrid->overrideColumn('<?=nl2br($sectionNumbers);?>','sectionNumbers');
+	$datagrid->setCellWidth('courseNumber', '55');
+	$datagrid->setCellAlign('courseNumber', 'center');
+
+	$datagrid->setCellWidth('classType', '80');
+	$datagrid->setCellAlign('classType', 'center');
+
+	$datagrid->setCellWidth('Faculty', '20%');
+
+	$datagrid->setCellWidth('end', '80');
+	$datagrid->setCellAlign('end', 'center');
+
+	$datagrid->postpendColumn('<a onclick="if (confirm(\'Warning you are about to remove this class, please be absolutely sure before continuing. Click [ OK ] to remove this class.\')) { return true; } else { return false; }" href="<?=modurl("teacherclass/event=delete/id=$id_classes");?>">delete</a>','end');
+
+	$this->sectionTitle = 'List Classes for '.$t['semesterDisplay'];
+	$this->inactivelinks = array( 'List Classes' );
+
+	$datagrid->addInstructorSelectFilter('Instructor', 'a.facultyId');
+	$datagrid->addClassTypeSelectFilter('Class Type', 'a.classType');
+	$datagrid->addCourseFamilySelectFilter('Course Family', 'a.courseFamily');
+	$datagrid->addInputFilter('Class ID', 'a.id_classes', true);
+	$datagrid->addInputFilter('Class Title', 'c.courseName');
+	$datagrid->addInputFilter('Section Number', 'a.sectionNumbers');
+	$t['table'] = $datagrid->toHTML();
+
+
 }
 
 function makeSemester($db,&$u,&$lc,&$t) {
 
 	$semesterObj = new semesterObj();		
+	
 	$startdate = $lc->postvars['startyear'].
-	'-'.$lc->postvars['startmonth'].
-	'-'. $lc->postvars['startday'];
-
+		'-'.$lc->postvars['startmonth'].
+		'-'. $lc->postvars['startday'];
 	$enddate = $lc->postvars['endyear'].
-	'-'.$lc->postvars['endmonth'].
-	'-'. $lc->postvars['endday'];
-
+		'-'.$lc->postvars['endmonth'].
+		'-'. $lc->postvars['endday'];
 	$starttime = $startdate.' 1:00:00';
-
-	$endtime = $enddate.' 1:00:00';
+	$endtime = $enddate.' 23:59:59';
 
 	$semesterObj->dateStart = $startdate;
 	$semesterObj->dateEnd = $enddate;
-
 	//$semesterObj->dateRegistrationStart =  
 	$semesterObj->dateRegistrationEnd = $enddate;
-
 	//$semesterObj->dateAccountActivation = $starttime;
 	$semesterObj->dateDeactivation  = $enddate;
-
 	//$semesterObj->dateCensus =
-
 	$semesterObj->dateFinalDrop = $endtime;
-
 	$semesterObj->dateStudentActivation = $starttime;
 	$semesterObj->dateStudentDeactivation = $endtime;
-
-	$semesterObj->semesterId = "ALL";
+	$semesterObj->semesterId = $lc->postvars['coursefamily'];
 	$semesterObj->semesterYear = $lc->postvars['startyear'];
 	$semesterObj->semesterTerm = $lc->postvars['coursename'];
-
-	// make sure to use BIG H for hours
-	//$semesterObj->dateEndITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndITVseminar']));
+	$semesterObj->dateEndITVseminar = $endtime;
 	//$semesterObj->dateStartITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartITVseminar']));
-
 	$semesterObj->dateEndOrientation= $endtime;
 	//$semesterObj->dateStartOrientation =
-
-	//$semesterObj->dateEndTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndTextbook']));
+	$semesterObj->dateEndTextbook = $endtime;
 	//$semesterObj->dateStartTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartTextbook']));
-
 	$semesterObj->dateEndExam= $endtime;
 	//$semesterObj->dateStartExam = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartExam']));
-	
 	$semesterObj->_saveToDB();
 	$id =  mysql_insert_id();
 	if($id == null)
@@ -76,12 +151,11 @@ function makeSemester($db,&$u,&$lc,&$t) {
 function makeCourse($db, &$u, &$lc, &$t){
 	
 	$courses = new courseObj();
-	$courses->courseFamily = $lc->postvars['courseFamily'];
+	$courses->courseFamily = strtoupper($lc->postvars['coursefamily']);
 	//$courses->courseFamily = strtoupper($courses->courseFamily);
 	$courses->courseNumber = $lc->postvars['coursenumber'];
 	$courses->courseName = $lc->postvars['coursename'];
 	$courses->courseDescription = $lc->postvars['discription'];
-	
 	$courses->_saveToDB();
 	return mysql_insert_id();
 }
@@ -89,19 +163,15 @@ function makeCourse($db, &$u, &$lc, &$t){
 function makeClass($db, &$u, &$lc, &$t){
 
 	$a_sec_numbers = explode("\n", $lc->postvars['sectionnumbers']);
-	
 	$classObj = new classObj();
 	$classObj->id_courses = $lc->postvars['id_course'];
 	$classObj->id_semesters = $lc->postvars['id_semester'];
 	$classObj->sectionNumbers = $lc->postvars['sectionnumbers'];
 	$classObj->classType  = $lc->postvars['classtype'];
-//	$classObj->stylesheet
-//	$classObj->id_class_resource
 	$classObj->facultyId = $u->username;
-
 	$classObj->courseFamily = $lc->postvars['courseFamily'];
 	$classObj->courseNumber = $lc->postvars['coursenumber'];
-	$classObj->courseFamilyNumber = $lc->postvars['courseFamily'].$lc->postvars['coursenumber'];
+	$classObj->courseFamilyNumber = $lc->postvars['coursefamily'].$lc->postvars['coursenumber'];
 	$classObj->courseName = $lc->postvars['coursename'];
 
 	$classObj->_saveToDB();
@@ -187,20 +257,20 @@ function makeClass($db, &$u, &$lc, &$t){
 			echo '*** ALERT:: Gradebook::Entry failed to insert, please alert a programmer in regards to *id_classes='.$new_id_class.'"*';
 		}
 
-			// Insert an entry for the Exam Scheduler Application
-			include_once(LIB_PATH.'ExamScheduleClasses.php');
-			$esc = new ExamScheduleClasses();
-			$esc->idClasses = $new_id_class;
-			$esc->idSemester = $lc->postvars['id_semester'];
-			$esc->status = 0;
-			$esc->southCampus = 0;
-			$esc->southeastCampus = 0;
-			$esc->northeastCampus = 0;
-			$esc->northwestCampus = 0;
-			$esc->receivedDate = '';
-			$esc->note = '';
-			$esc->save();
-		
+		// Insert an entry for the Exam Scheduler Application
+		include_once(LIB_PATH.'ExamScheduleClasses.php');
+		$esc = new ExamScheduleClasses();
+		$esc->idClasses = $new_id_class;
+		$esc->idSemester = $lc->postvars['id_semester'];
+		$esc->status = 0;
+		$esc->southCampus = 0;
+		$esc->southeastCampus = 0;
+		$esc->northeastCampus = 0;
+		$esc->northwestCampus = 0;
+		$esc->receivedDate = '';
+		$esc->note = '';
+		$esc->save();
+	
 		$u->sessionvars['administration']['classes']['currentsemester'] = $lc->postvars['id_semester'];
 
 		$t['goodtimes'] = '<li>Thank you, your class has been added successfully.</li>';
@@ -208,22 +278,13 @@ function makeClass($db, &$u, &$lc, &$t){
 }
 
 function addRun($db,&$u,&$lc,&$t){
-        $t['myEvizent'] = 'add';
-	$lc->templateName = 'teacherclass_add';
+        $lc->templateName = 'teacherclass_add';
 
 	$this->sectionTitle = 'Add a Class';
 	$this->inactivelinks = array( 'Add a Class' );
 
-	$cf = 0;
-	// course family but really it's course ID and i will retrieve the course family from it and the
-	// teachers that have added it as a preference
-	if ((int)$lc->getvars['cf'] > 0) {
-		$cf = (int)$lc->getvars['cf'];
-	}
-	
 	$lc->postvars['semesterYear']['month'] = 1;
 	$lc->postvars['semesterYear']['day'] = 1;
-	$lc->postvars['courseFamily'] = "ALL";
 	$lc->postvars['classtype'] = "Test";
 
 	$hasErrors = false;
@@ -235,29 +296,128 @@ function addRun($db,&$u,&$lc,&$t){
 	if ($bl_date_start >= $bl_date_end){       
 		$t['error'][] = '* Semester date must come before the semester date end';
         }	
+
 	if(!validateLength($lc->postvars['coursename'],1))
 		$t['error'][] = '* Please enter a class name';
-	
+
 	if ($lc->postvars['submit']) {
 		if (count($t['error']) > 0){
 			$t['error'][] = 'Please fix the problems above then resubmit the form';
 		}else{
 			$lc->postvars['id_semester'] = $this->makeSemester($db, $u, $lc, $t);
-
-
 			$lc->postvars['id_course'] = $this->makeCourse($db, $u, $lc, $t);
 			$this->makeClass($db, $u, $lc, $t);
 		}
 	}
 
-	if ($cf > 0) {
-		// MAJOR HACK DO NOT TOUCH! IT's so i can repopulate a database populated select element
-		// goes off of SiteForm.php so if you are going to change something here.. change it in siteforms.
-		$f->modFormValue('facultyId', 'CHANGEFAMILY'.$cf);
-		$f->modFormValue('id_courses', $cf);
-	}
-
 }
+
+function deleteRun($db,&$u,&$lc,&$t){
+
+	//MAKE SURE TO ADD CHECK TO DISALLOW TEACHERS FROM DELEATING OTHER TEACHER'S CLASSES
+        $classObj = classObj::_getFromDB($lc->getvars['id'], 'id_classes');
+
+	$id_semesters = $classObj->id_semesters;
+	$id_courses = $classObj->id_courses;
+	
+	if (is_object($classObj) && $classObj->id_classes <= 0) {
+		$t['error'] = '<blockquote><b>Error:</b> Could not find the requested class to remove.</blockquote>';
+	}else{
+		$id_classes = $classObj->id_classes;
+		
+		$sql[] = 'DELETE FROM class_announcements WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM chat WHERE chat_id='.$id_classes;
+		$sql[] = 'DELETE FROM class_faqs WHERE id_classes='.$id_classes;
+
+		$sql_string = 'SELECT id_class_assignments FROM class_assignments WHERE id_classes='.$id_classes;
+		$db->query($sql_string);
+		while ($db->next_record()) {
+			$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+			$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+			$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+		}
+		$sql[] = 'DELETE FROM class_assignments WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM class_gradebook WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM class_gradebook_categories WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM class_gradebook_entries WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM class_gradebook_val WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM class_lesson_content WHERE id_classes='.$id_classes;
+
+		$sql_string = 'SELECT id_class_lessons FROM class_lessons WHERE id_classes='.$id_classes;
+		$db->query($sql_string);
+		while ($db->next_record()) {
+			$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->Record['id_class_lessons'];
+			$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->Record['id_class_lessons'];
+		}
+		$sql[] = 'DELETE FROM class_lessons WHERE id_classes='.$id_classes;
+
+		// get lesson id's that belong to the class
+
+		$sql[] = 'DELETE FROM class_links WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM class_links_categories WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM class_objectives WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM class_presentations WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM class_syllabuses WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM lcEvents WHERE id_classes='.$id_classes;
+	       
+		// @@@ NOTICE..  I'm not sure what I should do about class_student_sections.
+		// do i just let that table go and have the import keep that information in sync and not worry
+		// or should i track down that information to this class and purge it?
+		
+		$sql[] = 'DELETE FROM class_sections WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM exam_schedule_classes WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM exam_schedule_classes_dates WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM orientation_classes WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM seminar_classes_dates WHERE id_classes='.$id_classes;
+
+		$sql[] = 'DELETE FROM textbook WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM textbook_classes WHERE id_classes='.$id_classes;
+
+		$sql_string = 'SELECT assessment_id FROM assessment WHERE class_id='.$id_classes;
+		$db->query($sql_string);
+		while ($db->next_record()) {
+			$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->Record['assessment_id'];
+		}
+
+		$sql[] = 'DELETE FROM assessment WHERE class_id='.$id_classes;
+		$sql[] = 'DELETE FROM assessment_answer WHERE id_classes='.$id_classes;
+		$sql[] = 'DELETE FROM assessment_log WHERE id_classes='.$id_classes;
+		
+		//Time to Remove Course information and Semester information
+
+		$sql[] = 'DELETE FROM courses WHERE id_courses='.$id_courses;
+		$sql[] = 'DELETE FROM semesters WHERE id_semesters='.$id_semesters;
+		$sql[] = 'DELETE FROM semesters_course_info WHERE id_semesters='.$id_semesters;
+
+		// get pkey for files_folderid
+		$sql_string = 'SELECT pkey FROM classdoclib_Folders WHERE class_id='.$id_classes;
+		$db->query($sql_string);
+
+		while ($db->next_record()) {
+			$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->Record['pkey'];
+		}
+
+		$sql[] = 'DELETE FROM classdoclib_Folders WHERE class_id='.$id_classes;
+
+		foreach($sql as $sql_exec) {
+			$db->query($sql_exec);
+			if (mysql_errno()) echo 'Err: '. mysql_error(). '<br>';
+		}
+		
+		$classObj->_deleteFromDB();
+
+	}
+	
+	$this->run($db, $u, $lc, $t);
+}
+
 
 }
 

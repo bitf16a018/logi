@@ -73,8 +73,11 @@ class classmgr extends FacultyService {
 		{	
 			// __FIXME__ need to find a method for loading current semester
 			//pull from db and stuff in session
-			$u->sessionvars['classmgr']['currentsemester'] = semesterObj::getCurrentID();
 			
+			//au->sessionvars['classmgr']['currentsemester'] =
+			$db->queryOne("SELECT semesters.id_semesters FROM semesters INNER JOIN classes ON semesters.id_semesters=classes.id_semesters WHERE facultyId='". $u->username ."'");
+			$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];
+			//$u->sessionvars['classmgr']['currentsemester'] = semesterObj::getCurrentID();
 		}
 		
 		$id_semesters = (int)$u->sessionvars['classmgr']['currentsemester'];
