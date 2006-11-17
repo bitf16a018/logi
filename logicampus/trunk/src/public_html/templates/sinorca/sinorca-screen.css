@@ -74,10 +74,12 @@ acronym, .titleTip {
 .midHeader {
   color: rgb(39,78,144);
   background-color: rgb(140,170,230);
+  padding:2px;
+  margin:none;
 }
 
 .headerTitle {
-  font-size: 266%;
+  font-size: 237%;
   font-weight: normal;
   margin: 0 0 0 4mm;
   padding: 0.25ex 0;
@@ -107,6 +109,15 @@ acronym, .titleTip {
   color: rgb(253,160,91);
   background-color: transparent;
 }
+
+.box_standard {
+  width:90%;
+  float: left;
+  clear: left;
+  border-right: 1px solid rgb(153,153,153);
+  background-color: rgb(240,240,240);
+}
+
 
 
 /* ##### Side Bar ##### */
