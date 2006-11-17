@@ -271,7 +271,7 @@
 			$arr = array();
 			$a_semester = array('Fall'=>'Fall', 'Winter'=>'Winter', 'Spring'=>'Spring', 'Summer'=>'Summer', 'Summer Mini'=>'Summer Mini', 'Summer I'=>'Summer I', 'Summer II'=>'Summer II', 'Spring Mini'=>'Spring Mini', 'Fall Mini'=>'Fall Mini', 'Winter Mini'=>'Winter Mini');
 			
-			$sql = 'SELECT COUNT( B.id_classes ) AS count_classes, A.id_semesters, A.semesterTerm, A.semesterId, A.semesterYear
+			$sql = 'SELECT COUNT( B.id_classes ) AS count_classes, A.id_semesters, A.semesterTerm, A.semesterId, A.semesterYear, B.*
 					FROM semesters AS A
 					INNER JOIN classes AS B ON A.id_semesters = B.id_semesters
 					WHERE B.facultyId = \''. $lcUser->username. '\' AND A.dateAccountActivation <='.DB::getFuncName('NOW()').'
@@ -280,19 +280,29 @@
 			
 			// @@@ Now i need to know if we are to show semesters that have been deactivated?
 			$this->db->query($sql);
-			while($this->db->next_record() )
-			{
-				$arr[$this->db->Record['id_semesters']] = $this->db->Record['id_semesters'].'='.'[ '. $this->db->Record['count_classes']. ' ] '. $a_semester[$this->db->Record['semesterTerm']].' '.$this->db->Record['semesterYear'];
+			while($this->db->next_record() ) {
+				if ( in_array($this->db->Record['semesterTerm'],$a_semester) ) {
+					$arr[$this->db->Record['id_semesters']] = 
+						$this->db->Record['id_semesters'].'='.
+						'[ '. $this->db->Record['count_classes']. ' ] '. 
+						$a_semester[$this->db->Record['semesterTerm']].' '.
+						$this->db->Record['semesterYear'];
+				} else {
+					$arr[$this->db->Record['id_semesters']] = 
+						$this->db->Record['id_semesters'].'='.
+						'[ '. $this->db->Record['count_classes']. ' ] '. 
+						$this->db->Record['courseFamilyNumber'];
+				}
 			}
-			
+
 			if (count($arr) == 0)
 			{	// nothing found
 				$arr[0]='0=No Semesters Available';
 			}
 			$v['selectOptions'] = @implode($arr, ",");
 			#debug($v, 1);
-			$HTML = $this->selectToHTML($v);						
-			return $HTML;							
+			$HTML = $this->selectToHTML($v);
+			return $HTML;
 		}
 
 
