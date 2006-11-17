@@ -149,8 +149,7 @@ n']['classes']));
 // only dealing with current semester right now
 // 
 		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
-		$semesterId = $db->Record[0];
-
+		$semesterId = $db->Record['id_semesters'];
 		$name = addslashes(stripslashes($lc->getvars['username']));
 		$sectionNumber = (int)$lc->getvars['id'];
 		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");

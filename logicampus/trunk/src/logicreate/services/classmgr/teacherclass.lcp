@@ -46,7 +46,7 @@ function makeSemester($db,&$u,&$lc,&$t) {
 
 	$semesterObj->semesterId = "ALL";
 	$semesterObj->semesterYear = $lc->postvars['startyear'];
-	$semesterObj->semesterTerm = $lc->postvars['classname'];
+	$semesterObj->semesterTerm = $lc->postvars['coursename'];
 
 	// make sure to use BIG H for hours
 	//$semesterObj->dateEndITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndITVseminar']));

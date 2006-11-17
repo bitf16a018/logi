@@ -65,15 +65,16 @@ down and press "Go".')?>
 </table>
 </td>
 </tr>
-<?
-if(HCM_SIMPLE_MODE)
-{?>
-	<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=add' ?>">Create a new class</a>
-			
-<?	}			
-?>	
+
 </table>
 
+<? if(MODULE_SELF_ENROLLMENT){ ?>
 
+<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+<tr><td class="portalbox"><b>Class Management</b></td></tr>
+<tr><td style="font-size: 9px;">
+<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=add' ?>">add new class</a></tr>
+</table>
+<? } ?>
 
 
