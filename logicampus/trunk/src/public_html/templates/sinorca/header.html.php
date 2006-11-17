@@ -62,6 +62,15 @@
 	<a href="<?=appurl('mastercalendar/')?>"><?=lct('Calendar')?></a> |
 	<a href="<?=appurl('helpdesk/')?>"><?=lct('Help Desk')?></a> |
 	<a style="color: white;" href="<?=APP_URL?>pm/"><?=lct('Messages')?> [<?=(int)$t['_privMsgs']?>]</a>
+
+	<?
+		if ($obj->user->username != 'anonymous') {
+	?>
+	| <a href="<?=appurl('login/out/');?>"><?=lct('Logout')?></a>
+	<?php
+		}
+	?>
+
       </div>
     </div>
 
@@ -73,7 +82,7 @@
 		if ($t['_classesTaught'] != '') { 
 	?>
         	<p class="sideBarTitle"><?=lct('classroom manager')?></p>
-		<a class="menuitem" href="<?=APP_URL?>'classmgr"><?=lct('Faculty Overview')?></a>
+		<a class="menuitem" href="<?=APP_URL?>classmgr"><?=lct('Faculty Overview')?></a>
 		<ul>
 	<?php
 		foreach($obj->user->classesTaught as $k => $v )
@@ -95,7 +104,7 @@
 		if ($t['_classesTaken'] != '') { 
 	?>
         	<p class="sideBarTitle"><?=lct('my classes')?></p>
-		<a class="menuitem" href="'.appurl('classroom/').'"><?=lct('Classroom Portal');?></a>
+		<a class="menuitem" href="<?=appurl('classroom/')?>"><?=lct('Classroom Portal');?></a>
 		<ul>
 	<?php
 
