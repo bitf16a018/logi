@@ -41,7 +41,7 @@ class studentPresentation extends FacultyService {
 	function run(&$db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'studentPresentation_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 		$datagrid = new SearchGrid($this->module,$this->serviceName);
 		$datagrid->column = 'class_presentations.*, CONCAT(profile.lastname, ", ", profile.firstname) as fullname';
@@ -107,7 +107,7 @@ class studentPresentation extends FacultyService {
 	// make sure we got a valid id, and delete the entry if we did.
 	function deletePresentationRun(&$db,&$u,&$lc,&$t)
 	{
-		$lc->templateStyle = 'private';		
+//auto-comment		$lc->templateStyle = 'private';		
 
 		$pres = presentationObj::_getFromDB($lc->getvars['id'], 'id_presentations');
 		if (is_object($pres)) {

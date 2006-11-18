@@ -70,7 +70,7 @@ var $presentor = "htmlPresentation";
 			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",2,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
 			$lcUser->username="anonymous";
 			$lcTemplate[message] ="There was an error with your username or password.  Please try again.";
-			$lcObj->templateStyle = 'private';
+//auto-comment			$lcObj->templateStyle = 'private';
 			$this->presentor = "errorMessage";
 			return;
 		} else {

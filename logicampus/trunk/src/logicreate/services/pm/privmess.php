@@ -8,7 +8,7 @@ class privMess extends PersistantObject {
 	 */
 	function privMess() {
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
         function load($pkey) {

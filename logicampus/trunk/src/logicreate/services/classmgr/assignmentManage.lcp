@@ -675,7 +675,7 @@ class assignmentManage extends FacultyService {
 			$this->sectionTitle = "Assignment Manager";
 			$this->inactivelinks[] = 'List Assignments';
 			$lc->templateName='assignmentManage_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 		}
 
 
@@ -1108,7 +1108,7 @@ class assignmentManage extends FacultyService {
 				$this->inactivelinks[] = 'Add Assignment';
 			}
 			$lc->templateName='assignmentManage_editAssignment';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 		}
 
 	function getFileRun($db,&$u,&$lc,&$t)

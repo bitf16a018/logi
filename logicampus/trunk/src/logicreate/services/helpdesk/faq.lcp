@@ -185,7 +185,7 @@ class faq extends RegAuth
 		$t['is_staff'] = false;
 		
 		$lc->templateName 	= 'faq_main';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 
 		/** 
 		 *	Grabs all categories and counts the number of approved faqs w/in each category
@@ -274,7 +274,7 @@ class faq extends RegAuth
 		$id_faq_category = 0;
 		
 		$lc->templateName 	= 'faq_showquestions';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 		
 		if ((int)$lc->getvars[2] > 0)
 		{	$id_faq_category = (int)$lc->getvars[2];
@@ -323,7 +323,7 @@ class faq extends RegAuth
 		$id_faq = 0;
 		
 		$lc->templateName 	= 'faq_showanswer';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 		
 		/**
 		 *	Making sure the id_faq (which lives in _GET position 2
@@ -518,7 +518,7 @@ class faq extends RegAuth
 		$this->inactivelinks[] = 'Submit FAQ';
 		
 		$lc->templateName 	= 'faq_ask';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 		
 		if ($lc->postvars['submit'] == 'Submit Question')
 		{
@@ -581,7 +581,7 @@ class faq extends RegAuth
 		$this->sectionTitle = $this->sectionTitle .= ' - FAQ Editor';
 		
 		$lc->templateName 	= 'faq_review';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 		
 		if ((int)$lc->getvars[2] > 0)
 		{	$id_faq = (int)$lc->getvars[2];
@@ -767,7 +767,7 @@ class faq extends RegAuth
 		$a_category = array();
 		
 		$lc->templateName 	= 'faq_category';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 		
 		$this->inactivelinks[] = 'Manage FAQ categories';
 		$this->sectionTitle = $this->sectionTitle .= ' - Category Administration';
@@ -877,7 +877,7 @@ class faq extends RegAuth
 		$fl_searching = false;
 		
 		$lc->templateName 	= 'faq_search';
-		$lc->templateStyle 	= 'private';
+//auto-comment		$lc->templateStyle 	= 'private';
 		
 		$this->inactivelinks[] = 'Search FAQs';
 		$this->sectionTitle = $this->sectionTitle .= ' - Searching';

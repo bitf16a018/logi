@@ -39,7 +39,7 @@ class servicePermissions extends AdminService
 	function Run(&$db,&$u,&$lc,&$t)
 	{
 		$this->inactivelinks[] = 'Module Selection';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$lc->templateName = 'servicePermissions_main';
 	}
 
@@ -68,7 +68,7 @@ class servicePermissions extends AdminService
 		}
 		$t['list'] .= '<ul>';
 		$t['mod'] = $lc->getvars['module'];
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$lc->templateName = 'servicePermissions_chooseService';
 	}
 
@@ -95,7 +95,7 @@ class servicePermissions extends AdminService
 		$t['form'] .= '</form>';
 
 		$this->sectionTitle = 'Permissions for '.$t['svc'];
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$lc->templateName = 'servicePermissions_groupPerms';
 	}
 

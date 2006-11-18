@@ -165,7 +165,7 @@ class LessonObjectives extends FacultyService {
 	{
 		if (!$this->checkAuth($lc->getvars['id'],$db,$u,$t)) return;
 
-		$lc->templateStyle = 'private';		
+//auto-comment		$lc->templateStyle = 'private';		
 
 		$obj = classLessonObjectiveObj::_getFromDB($lc->getvars['id'], 'id_class_objectives');
 		if (is_object($obj)) {

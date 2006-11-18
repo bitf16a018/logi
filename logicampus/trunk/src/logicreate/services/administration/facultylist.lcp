@@ -20,7 +20,7 @@ class facultylist extends AdminService
 	function Run($db,&$u,&$lc,&$t)
 	{
 		$lc->templateName = 'facultylist_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 		$where_extra = '';
 		if ($lc->getvars[1])

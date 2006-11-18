@@ -37,7 +37,7 @@ class LessonWebliography extends FacultyService {
 	 * Show the main page of the lesson manager
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$lc->templateName = 'lessonWebliography';
 		
 		$tree = new TreeList();

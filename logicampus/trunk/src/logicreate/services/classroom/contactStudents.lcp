@@ -18,7 +18,7 @@ class contactStudents extends StudentService
 	function run( &$db, &$u, &$lc, &$t) 
 	{
 		$lc->templateName = "contactStudents_main";
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 		if (count($t['students']) == false)
 		{	
@@ -67,7 +67,7 @@ class contactStudents extends StudentService
 	function submitRun(&$db, &$u, &$lc, &$t) 
 	{
 		$lc->templateName = "contactStudents_main";
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 		// getting a list of classroom students
 		$sql = '

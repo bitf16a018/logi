@@ -79,7 +79,7 @@ class dataexchange extends FacultyService
 
 		$this->presentor = 'htmlPresentation';
 		$lc->templateName='dataexchange_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 	}
 	
@@ -100,7 +100,7 @@ class dataexchange extends FacultyService
 		$this->obj_zip->add_dir('assignments/');
  
 		$lc->templateName='dataexchange_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 		$id_classes = $u->activeClassTaught->id_classes;
 		$this->id_classes = $id_classes;
@@ -1345,7 +1345,7 @@ class dataexchange extends FacultyService
        
 	function exportClassRun(&$db,&$u,&$lc,&$t) {
             $lc->templateName='dataexchange_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
        }       
 }

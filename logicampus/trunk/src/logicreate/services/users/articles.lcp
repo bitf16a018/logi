@@ -14,7 +14,7 @@ class articles extends RegAuth {
 	function articles()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	function run(&$db,&$u,&$arg,&$t) {

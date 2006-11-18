@@ -26,7 +26,7 @@ class testdates extends BasicAuth {
 	function Run($db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'testdates_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->sectionTitle = 'Exam Scheduler - List Testing Periods';
 		$this->inactivelinks[] = 'List Semester Dates';
 
@@ -74,7 +74,7 @@ class testdates extends BasicAuth {
 
 
 		$lc->templateName = 'testdates_edit';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->sectionTitle = 'Exam Scheduler - Edit Testing Periods';
 
 		$esd = ExamScheduleDates::load( array( 'id_exam_schedule_dates' => (int)$lc->getvars['id'] ) );

@@ -64,7 +64,7 @@ class announcements extends FacultyService
 		}
 		
 		$this->sectionTitle = 'Announcements';
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'announcements_main';
 	}
 

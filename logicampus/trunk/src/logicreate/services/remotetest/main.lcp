@@ -20,7 +20,7 @@ class remotetest extends RegAuth {
 	function remotetest()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 /*

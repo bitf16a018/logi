@@ -33,7 +33,7 @@ class textbookmgr extends BasicAuth {
 	function textbookmgr()
 	{
 		global  $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 		
 	}
 	

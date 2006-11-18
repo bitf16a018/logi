@@ -41,11 +41,11 @@ class search extends AdminService
 		/**
 		 *	Template chooser, based on which groups you are in
 		 */
-		if (in_array('faculty', $u->groups) || in_array('admin', $u->groups))
-		{	$lc->templateStyle = 'private';
-		} else
-		{	if (in_array('student', $u->groups))
-			{	$lc->templateStyle = 'student';
+		if (in_array('faculty', $u->groups) || in_array('admin', $u->groups)) {
+//auto-comment			$lc->templateStyle = 'private';
+		} else {
+			if (in_array('student', $u->groups)) {
+				$lc->templateStyle = 'student';
 			}	
 		}
 		

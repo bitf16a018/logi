@@ -39,7 +39,7 @@ class semestercopy extends FacultyService  {
 	
 	# Displays Classes by default (chooses current semster by default)	
 	function Run($db,&$u,&$lc,&$t) {
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_main';
 
 		/**
@@ -96,7 +96,7 @@ class semestercopy extends FacultyService  {
 		$fl_ismyclass = false;
 		$id_classes = (int)$lc->postvars['id_classes_update'];
 		
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_selectClass';
 		
 		/**
@@ -148,7 +148,7 @@ class semestercopy extends FacultyService  {
 		$id_classes = (int)$lc->postvars['id_classes_update_to'];
 		$id_classes_with = (int)$lc->postvars['id_classes_update_from'];
 		
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_selectWith';
 		
 		/**
@@ -186,7 +186,7 @@ class semestercopy extends FacultyService  {
 		$id_classes_from = (int)$lc->postvars['id_classes_with'];
 		$ic_sure = $lc->postvars['ic_sure'];
 
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_selectWith';
 
 
@@ -508,7 +508,7 @@ class semestercopy extends FacultyService  {
 
 	function doneRun($db, &$u, &$lc, &$t)
 	{
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'semestercopy_done';
 	}
 	

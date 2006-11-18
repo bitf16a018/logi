@@ -29,7 +29,7 @@ class seminars extends BasicAuth {
 	function seminars()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	function Run($db,&$u,&$lc,&$t) {

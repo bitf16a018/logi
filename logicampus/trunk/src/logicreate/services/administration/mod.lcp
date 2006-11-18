@@ -18,7 +18,7 @@ class mod extends AdminService
 	{
 		
 		$lc->templateName = 'mod_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 		$t['mod'] =  @implode(file(CONTENT_PATH.'__messageoftheday__'), '');
 	}

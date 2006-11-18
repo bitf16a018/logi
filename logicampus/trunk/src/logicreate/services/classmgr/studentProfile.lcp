@@ -35,7 +35,7 @@ class studentProfile  extends FacultyService {
 
 	function studentProfile() {
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 
 	}
 

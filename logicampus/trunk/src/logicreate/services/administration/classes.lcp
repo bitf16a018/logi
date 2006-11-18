@@ -278,7 +278,7 @@ class classes extends AdminService
 
 	# Displays Classes by default (chooses current semster by default)	
 	function Run($db,&$u,&$lc,&$t) {
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'classes_main';
 		
 		if ((int)$lc->postvars['semester'] > 0) {

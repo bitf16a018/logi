@@ -32,7 +32,7 @@ class helpdesk extends RegAuth {
 
 	function helpdesk() { 
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 	 
 	/** 
@@ -43,7 +43,7 @@ class helpdesk extends RegAuth {
 	{
 		$this->inactivelinks[] = 'List Tickets';
 		
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 
 		// get a list of categories
 		$t['categories'][0] = '<i>uncategorized</i>';
@@ -121,7 +121,7 @@ class helpdesk extends RegAuth {
 			$this->applinks['User Accounts'] = '%administration/users';
 		}
 
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 		
 		// get a list of statuses
 		$db->query("select * from helpdesk_status");
@@ -235,7 +235,7 @@ class helpdesk extends RegAuth {
 		}
 		
 		$arg->templateName = "main_hdadmin2";
-		$arg->templateStyle = "private";
+//auto-comment		$arg->templateStyle = 'private'";
 		
 	}
 

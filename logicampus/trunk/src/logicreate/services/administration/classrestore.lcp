@@ -64,7 +64,7 @@ class classrestore extends AdminService
 	# Displays Classes by default (chooses current semster by default)	
 	function Run($db,&$u,&$lc,&$t)
 	{
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'restore_main';
 
 		$a_semester = array('Fall'=>'Fall', 'Winter'=>'Winter', 'Spring'=>'Spring', 'Summer'=>'Summer', 'Summer Mini'=>'Summer Mini', 'Summer I'=>'Summer I', 'Summer II'=>'Summer II', 'Spring Mini'=>'Spring Mini', 'Fall Mini'=>'Fall Mini', 'Winter Mini'=>'Winter Mini');

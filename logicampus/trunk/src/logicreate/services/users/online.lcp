@@ -15,7 +15,7 @@ class online extends  RegAuth {
 		function online()
 		{
 			global $lcObj;
-			$lcObj->templateStyle = 'private';
+//auto-comment			$lcObj->templateStyle = 'private';
 		}
 		
 		function Run(&$db, &$u, &$arg, &$t) {

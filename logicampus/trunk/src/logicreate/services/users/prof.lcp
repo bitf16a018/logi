@@ -14,7 +14,7 @@ var $presentor = "htmlPresentation";
 	function prof()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	function Run($db,&$lcUser,&$lcObj,&$lcTemplate) {	

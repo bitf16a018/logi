@@ -109,7 +109,7 @@ class assessments extends FacultyService {
 		}
 
 		$lc->templateName = 'main_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 	}
 
 
@@ -120,7 +120,7 @@ class assessments extends FacultyService {
 	function addRun($db,&$u,&$lc,&$t) {
 		
 		$lc->templateName = 'main_add';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$f = new SiteForm();
 		$f->getform('addassessment', $lc->postvars);
 		$t['form'] = $f->ToHTML();
@@ -174,7 +174,7 @@ class assessments extends FacultyService {
 		$gb->notes = $lc->postvars['description'];
 		$gb->save();
 
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->run($db, $u, $lc, $t);
 		return;
 	}

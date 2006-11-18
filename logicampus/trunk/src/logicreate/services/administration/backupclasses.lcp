@@ -73,7 +73,7 @@ class backupclasses extends AdminService
 		$t['a_semester'] = $a_semester;
 		
 		$lc->templateName  = 'backupclasses_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 	}
 	
@@ -1414,7 +1414,7 @@ class backupclasses extends AdminService
        
 	function exportClassRun(&$db,&$u,&$lc,&$t) {
             $lc->templateName='dataexchange_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
        }       
 }

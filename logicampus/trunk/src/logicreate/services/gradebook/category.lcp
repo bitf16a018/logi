@@ -74,14 +74,14 @@ class category extends FacultyService {
 
 
 			$lc->templateName='category_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 
 
 		}
 
 		function addRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='category_add';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 
 			# Load up the category form
 			$f = new SiteForm();
@@ -104,7 +104,7 @@ class category extends FacultyService {
 		{
 
 			$lc->templateName='category_add';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
 			$gbCat = ClassGradebookCategories::load((int)$lc->getvars['id']);
 

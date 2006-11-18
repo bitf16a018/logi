@@ -35,7 +35,7 @@ class helpdeskView extends RegAuth {
 
 	function run(&$db,&$u,&$arg,&$t) 
 	{ 
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 		
 		$id = (int)$arg->getvars[1];
 
@@ -112,7 +112,7 @@ class helpdeskView extends RegAuth {
 // because a helpdeskadmin user will have the 'username' 
 // option in the form
 	function addrun(&$db,&$u,&$arg,&$t) { 
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 		
 		$f = new Siteform();
 		if (in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) ) {

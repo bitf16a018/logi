@@ -31,7 +31,7 @@ class editProfile extends RegAuth {
 	function editProfile()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 

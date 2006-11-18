@@ -17,7 +17,7 @@ class maillist extends RegAuth {
 	function maillist()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	/*  display all maillist to users */

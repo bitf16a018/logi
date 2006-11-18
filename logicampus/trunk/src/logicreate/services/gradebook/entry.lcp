@@ -47,7 +47,7 @@ class entry extends FacultyService {
 
 		function Run(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='entry_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$this->sectionTitle = 'Gradebook Entries';
 
 			$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_categories, title');
@@ -65,7 +65,7 @@ class entry extends FacultyService {
 
 		function addRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='entry_add';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$this->sectionTitle = 'Add Entry';
 
 			// Make sure there are categories
@@ -97,7 +97,7 @@ class entry extends FacultyService {
 
 			$this->sectionTitle = 'Edit Entry';
 			$lc->templateName='entry_add';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$gbEntry = ClassGradebookEntries::load( array(
 				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
 				'id_classes' => $u->activeClassTaught->id_classes

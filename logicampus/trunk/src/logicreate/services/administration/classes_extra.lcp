@@ -65,7 +65,7 @@ class classes_extra extends AdminService
 		$t['classes'] = makeOptions($x);
 
 		$lc->templateName = 'classes_extra_main';
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 	}
 
 	

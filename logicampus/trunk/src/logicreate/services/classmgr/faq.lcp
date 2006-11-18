@@ -106,7 +106,7 @@ class faq extends FacultyService
 		$t['form'] = $f->ToHTML();
 		$t['classObj'] = $lcUser->activeClassTaught;
 		
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName="faq_edit";
 		
 	}
@@ -155,7 +155,7 @@ class faq extends FacultyService
 		$t['form'] = $f->ToHTML();
 		$t['classObj'] = $lcUser->activeClassTaught;
 
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName="faq_edit";
 	}
 
@@ -180,7 +180,7 @@ class faq extends FacultyService
 
 	function Run($db,&$lcUser,&$lc,&$t) {
 		
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName='faq_main';
 		$this->sectionTitle = 'FAQ Listing';
 		$this->inactivelinks[] ='List Faqs';

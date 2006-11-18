@@ -45,7 +45,7 @@ class hdStatus extends RegAuth {
 // security hack, but it works for now
 		if ( !(in_array("hdadmin", $u->groups) || in_array('hdadmin', $u->groups)) ) { 
 			$arg->templateName = 'access_denied';
-			$arg->templateStyle = 'private';
+//auto-comment			$arg->templateStyle = 'private';
 			return;
 		}
 		
@@ -71,7 +71,7 @@ class hdStatus extends RegAuth {
 // security hack, but it works for now
 	if ( !(in_array("hdadmin", $u->groups) || in_array('admin', $u->groups)) ) { 
 		$arg->templateName = 'access_denied';
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 		return;
 	}
 		$id = $arg->postvars['helpdesk_status_id'];

@@ -50,7 +50,7 @@ class chat extends StudentService {
 	}
 
 	function Run($db,&$u,&$lcObj,&$t) {	
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 		$t['pageDisplay'] = $this->_defaultPageText;
 		$lcObj->templateName = "chat_main";
 #		$db->query("select pkey,chatName,chatDesc from chatArchives ORDER BY pkey DESC");

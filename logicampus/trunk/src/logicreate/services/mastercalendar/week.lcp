@@ -15,7 +15,7 @@ class week extends BasicAuth
 
 	function Run($db,&$u,&$lc,&$t) 
 	{
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		
 		$lc->templateName = 'week_main';
 		

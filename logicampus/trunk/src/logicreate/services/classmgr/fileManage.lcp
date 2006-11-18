@@ -42,7 +42,7 @@ class fileManage extends FacultyService {
 			//$t['url']=appurl("classmgr/fileManage/event=");
 			//$this->presentor='redirect';
 			//return;
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$lc->templateName='fileManage_addFile';
 
 		}
@@ -61,7 +61,7 @@ class fileManage extends FacultyService {
 			//$t['url']=appurl("classmgr/fileManage/event=");
 			//$this->presentor='redirect';
 			//return;
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$lc->templateName='fileManage_deleteFile';
 
 		}
@@ -78,7 +78,7 @@ class fileManage extends FacultyService {
  */
 		function Run(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='fileManage_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 		}
 
 

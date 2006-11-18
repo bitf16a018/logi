@@ -147,7 +147,7 @@ class examschedule extends FacultyService {
 		$t['hasapproved'] = false;
 		
 		$lc->templateName = 'examschedule_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 		$classid = $t['classid'] = $u->activeClassTaught->id_classes;
 
@@ -209,7 +209,7 @@ class examschedule extends FacultyService {
 	function editRun(&$db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'examschedule_edit';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->sectionTitle = 'Editing Class Exam Dates';
 
 		define( 'ONLYFILLEDOUT', false );

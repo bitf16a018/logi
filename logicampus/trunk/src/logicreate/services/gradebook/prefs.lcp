@@ -40,11 +40,11 @@ class prefs extends FacultyService {
  */
 		function Run(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='prefs_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 		}
 
-		function chooseGradeOptionRun(&$db,&$u,&$lc,&$t)
-		{	$lc->templateStyle = 'private';
+		function chooseGradeOptionRun(&$db,&$u,&$lc,&$t) {
+//auto-comment			$lc->templateStyle = 'private';
 			$lc->templateName='prefs_chooseGradeOption';
 
 			$gb = ClassGradebook::load( array(
@@ -100,7 +100,7 @@ class prefs extends FacultyService {
 		
 		function chooseColorOptionRun(&$db,&$u,&$lc,&$t)
 		{	
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$lc->templateName='prefs_chooseColorOption';
 
 			$gb = ClassGradebook::load( array(
@@ -116,8 +116,8 @@ class prefs extends FacultyService {
 			$t['color'] = $gb->colorMissingGrade;
 		}
 		
-		function chooseColorOptionUpdateRun(&$db,&$u,&$lc,&$t)
-		{	$lc->templateStyle = 'private';
+		function chooseColorOptionUpdateRun(&$db,&$u,&$lc,&$t) {
+//auto-comment			$lc->templateStyle = 'private';
 
 			$gb = ClassGradebook::load( array(
 				'id_classes' => $u->activeClassTaught->id_classes

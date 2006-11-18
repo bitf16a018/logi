@@ -43,7 +43,7 @@ class semesters extends AdminService
 	function Run($db,&$u,&$lc,&$t)
 	{
 		$lc->templateName = 'semesters_listing';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		unset($this->inactivelinks);
 		$this->inactivelinks[] = 'List Semesters';
 		
@@ -81,7 +81,7 @@ class semesters extends AdminService
 	 */
 	function addRun($db,&$u,&$lc,&$t)
 	{
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$lc->templateName = 'semesters_add';
 		$this->inactivelinks[] = 'Add Semester';
 		
