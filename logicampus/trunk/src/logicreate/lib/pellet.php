@@ -554,27 +554,6 @@ class StudentService extends Service {
 	var $inactivelinks = array();
 	var $sectionTitle = 'Student Links';
 
-	// these are the same for all pages
-	var	$navlinks = array(
-		'Classroom Home' => 'details/',
-		'Announcements' => 'announcements/',
-		'Assessments' => 'assessments/',
-		'Assignments' => 'assignments/',
-		'Calendar' => 'classCalendar/',
-		'Chat' => '%classchat/',
-		'Classmates' => 'classmates/',
-		'Contact Classmates' => 'contactStudents/',
-		'Discussion Board' => '%classforums/',
-		'FAQs' => 'faq/',
-		'Faculty Profile' => 'facultyProfile/',
-		'Gradebook' => 'gradebook/',
-		'Lessons' => 'lessons/',
-		'Presentations' => 'presentations/',
-		'Syllabus' => 'syllabus/',
-		'Who\'s Online' => 'online/',
-		'Webliography' => 'webliography/',
-		'Dictionary / Thesaurus' =>'details/event=showtools'
-	);
 
 	/**
 	 * constructor
@@ -682,6 +661,33 @@ class StudentService extends Service {
 			$t['sectionheader'] .= '</div>';
 		}
 		$t['sectionheader'] .= '<div style="margin:5px;"></div>';
+	}
+
+
+	/**
+	 * these are the same for all pages
+	 */
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Classroom Home') => 'details/',
+		lct('Announcements') => 'announcements/',
+		lct('Assessments') => 'assessments/',
+		lct('Assignments') => 'assignments/',
+		lct('Calendar') => 'classCalendar/',
+		lct('Chat') => '%classchat/',
+		lct('Classmates') => 'classmates/',
+		lct('Contact Classmates') => 'contactStudents/',
+		lct('Discussion Board') => '%classforums/',
+		lct('FAQs') => 'faq/',
+		lct('Faculty Profile') => 'facultyProfile/',
+		lct('Gradebook') => 'gradebook/',
+		lct('Lessons') => 'lessons/',
+		lct('Presentations') => 'presentations/',
+		lct('Syllabus') => 'syllabus/',
+		lct('Who\'s Online') => 'online/',
+		lct('Webliography') => 'webliography/',
+		lct('Dictionary / Thesaurus') =>'details/event=showtools'
+		);
 	}
 }
 
