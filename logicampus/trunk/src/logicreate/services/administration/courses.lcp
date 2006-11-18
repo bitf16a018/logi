@@ -150,7 +150,7 @@ class courses extends AdminService
 	// make sure we got a valid id, and delete the entry if we did.
 	function deleteCourseRun(&$db,&$u,&$lc,&$t)
 	{
-		$lc->templateStyle = 'private';		
+//auto-comment		$lc->templateStyle = 'private';		
 
 		$courses = courseObj::_getFromDB($lc->getvars['id'], 'id_courses');
 		if (is_object($courses)) {
@@ -205,7 +205,7 @@ class courses extends AdminService
 		$this->sectionTitle = 'View Course: '.$t['courseData']['courseName']
 			.' ('.$t['courseFamilyNumber'].')';
 		$lc->templateName = 'courses_viewcourse';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 	}
 
 	/**
@@ -236,7 +236,7 @@ class courses extends AdminService
 		}
 		
 		$lc->templateName = 'courses_semesterInfo';
-		$lc->templateStyle = 'private';		
+//auto-comment		$lc->templateStyle = 'private';		
 	}
 
 
@@ -284,7 +284,7 @@ class courses extends AdminService
 		}
 
 		$lc->templateName = 'courses_semesterInfo';
-		$lc->templateStyle = 'private';		
+//auto-comment		$lc->templateStyle = 'private';		
 	}
 
 
@@ -314,7 +314,7 @@ class courses extends AdminService
 			$lc->templateName = 'courses_semesterInfo_thankyou';	
 			return;
 		}		
-		$lc->templateStyle = 'private';		
+//auto-comment		$lc->templateStyle = 'private';		
 
 	}
 	

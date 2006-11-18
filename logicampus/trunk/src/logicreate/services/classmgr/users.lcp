@@ -256,7 +256,7 @@ n']['classes']));
 	function anySearchRun(&$db, &$u, &$lc, &$t) {
 		
 		$lc->templateName = 'users_main';
-		$lc->templateStyle = 'private'; 
+//auto-comment		$lc->templateStyle = 'private'; 
 		
 		$lc->getvars['firstletter'] != ''? $firstletter = $lc->getvars[firstletter]:$firstletter = $lc->postvars[firstletter];
 		// generic $where and $order set in each 

@@ -15,7 +15,7 @@ var $presentor = "htmlPresentation";
 
 	function Run($db,&$lcUser,&$lcObj,&$lcTemplate) {
 		
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 		
 	if ($this->_allowRegister == "y") {
 		$g = $lcObj->getvars[0];

@@ -27,6 +27,6 @@ class register extends noAuth
 	function Run($db,&$u,&$lc,&$t)
 	{
 		$lc->templateName = 'user_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 	}
 }

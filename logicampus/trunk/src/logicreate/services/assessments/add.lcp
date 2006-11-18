@@ -34,7 +34,7 @@ class add extends FacultyService {
 	function run($db,&$u,&$lc,&$t) {
 	
 		$lc->templateName = 'add_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$f = new SiteForm();
 		$f->getform('addassessment', $this->data);
 		$t['form'] = $f->ToHTML();
@@ -145,7 +145,7 @@ class add extends FacultyService {
 
 
 		$lc->templateName = 'add_insert';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 	}
 
 

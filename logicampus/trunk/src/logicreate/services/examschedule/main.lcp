@@ -56,7 +56,7 @@ class examschedule extends BasicAuth {
 			$this->inactivelinks[] = 'Test list';
 		}
 
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 		if ($lc->getvars['print']=='yes') { 
 			$this->presentor= 'emptyPresentation';
@@ -135,7 +135,7 @@ class examschedule extends BasicAuth {
 	function Run($db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'main_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->inactivelinks[] = 'List Schedules';
 
 		if ( $lc->postvars['semester'] )
@@ -204,7 +204,7 @@ class examschedule extends BasicAuth {
 	function viewRun(&$db,&$u,&$lc,&$t) {
 	
 		$lc->templateName = 'main_view';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->sectionTitle = 'Exam Scheduler - View';
 
 		$t['semid'] = $u->sessionvars['semesterid'] =
@@ -254,7 +254,7 @@ class examschedule extends BasicAuth {
 	function editRun(&$db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'main_edit';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->sectionTitle = 'Exam Scheduler - Edit Dates';
 
 		$t['semid'] = $u->sessionvars['semesterid'] =
@@ -521,7 +521,7 @@ class examschedule extends BasicAuth {
 	function altRun($db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'main_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->inactivelinks[] = 'Alternate Activity Chosen';
 
 		if ( $lc->postvars['semester'] )

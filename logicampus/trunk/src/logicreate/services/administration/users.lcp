@@ -41,7 +41,7 @@ class users extends AdminService {
 		
 		$this->inactivelinks[] = 'List Users';
 		$arg->templateName = 'users_main';
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 		$this->sectionTitle = 'List Users';
 
 		//fix for a bug in the searching
@@ -63,7 +63,7 @@ class users extends AdminService {
 	function anySearchRun(&$db, &$u, &$arg, &$t) {
 		
 		$arg->templateName = 'users_main';
-		$arg->templateStyle = 'private'; 
+//auto-comment		$arg->templateStyle = 'private'; 
 		
 		$arg->getvars[firstletter] != ''? $firstletter = $arg->getvars[firstletter]:$firstletter = $arg->postvars[firstletter];
 		// generic $where and $order set in each 
@@ -292,7 +292,7 @@ class users extends AdminService {
 	function newRun (&$db, &$u, &$arg, &$t) {
 		
 		$arg->templateName = "users_new";
-		$arg->templateStyle = 'private';
+//auto-comment		$arg->templateStyle = 'private';
 		
 		$f = new SiteForm();
 		$f->getForm('createaccount', $this->cleanedArray);

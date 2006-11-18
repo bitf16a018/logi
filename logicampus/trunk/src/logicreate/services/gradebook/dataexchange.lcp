@@ -39,7 +39,7 @@ class dataexchange extends NoAuth {
  */
 		function Run(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='prefs_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 		}
 
 		
@@ -55,7 +55,7 @@ class dataexchange extends NoAuth {
  */		
 		function exportRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='dataexchange_export';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 		}
 		
 }

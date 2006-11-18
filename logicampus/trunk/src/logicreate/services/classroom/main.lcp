@@ -21,7 +21,7 @@ class classroom extends StudentService {
 function Run(&$db,&$u,&$lc,&$t) {
 	$ut = time();
 	$lc->templateName='main_main';
-	$lc->templateStyle='private';
+//auto-comment	$lc->templateStyle='private';
 				
 	/*****
 	* CLASS SPECIFIC INFORMATION

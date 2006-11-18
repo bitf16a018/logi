@@ -33,7 +33,7 @@ class seminarcal extends BasicAuth {
 	function seminarcal()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 		
 	}
 	

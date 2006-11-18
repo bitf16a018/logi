@@ -25,7 +25,7 @@ class announcements extends StudentService {
 		function Run(&$db,&$u,&$lc,&$t) {
 
 			$lc->templateName = 'announcements_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 
 			$min = (int)$lc->getvars['limit'];
 			$max = $min + 5;
@@ -55,7 +55,7 @@ class announcements extends StudentService {
 		function viewRun(&$db,&$u,&$lc,&$t) {
 
 			$lc->templateName='announcements_view';
-			$lc->templateStyle='private';
+//auto-comment			$lc->templateStyle='private';
 
 			$sql = "select tx_title, tx_description from class_announcements
 				where id_classes='{$u->activeClassTaken->id_classes}'

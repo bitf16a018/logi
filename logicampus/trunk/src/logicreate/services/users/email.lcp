@@ -26,7 +26,7 @@ if (!UPDATE_MAILSERVER_DB) {
 }
 
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	function run($db,&$lcUser,&$lcObj,&$lcTemplate) {	

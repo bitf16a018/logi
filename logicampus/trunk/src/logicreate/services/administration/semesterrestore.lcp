@@ -75,7 +75,7 @@ class semesterrestore extends AdminService
 		$a_backup_file = array();
 		$a_import_enabled = array(); // semesters that have no classes attached and can have imports on them
 		
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'semesterrestore_main';
 
 		

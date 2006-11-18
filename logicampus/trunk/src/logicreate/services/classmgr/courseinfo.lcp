@@ -36,7 +36,7 @@ class courseinfo extends FacultyService {
  */
 	function editRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='courseinfo_edit';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			$f = new form();
 			$f->getForm(200049, $this->cleanedArray);
 			$t['form'] = $f->ToHTML();
@@ -50,7 +50,7 @@ class courseinfo extends FacultyService {
  */
 
 	function saveRun(&$db,&$u,&$lc,&$t) {
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 	}
 

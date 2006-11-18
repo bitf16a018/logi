@@ -21,7 +21,7 @@ class view extends RegAuth {
 	function view()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	function run($db,&$u,$arg,&$t) {

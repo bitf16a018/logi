@@ -34,7 +34,7 @@ class orientations extends BasicAuth
 	function orientations()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 		
 	}
 

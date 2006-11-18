@@ -48,7 +48,7 @@ class gradebook extends FacultyOnlyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName='main_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->inactivelinks[] = 'Gradebook Home';
 
 		if ( $lc->postvars['filteractive'] ) {
@@ -98,7 +98,7 @@ class gradebook extends FacultyOnlyService {
 	 */
 	function controlPanelRun(&$db,&$u,&$lc,&$t) {
 		$lc->templateName='main_controlpanel';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 		$this->sectionTitle = 'Gradebook Control Panel';
 
@@ -124,7 +124,7 @@ class gradebook extends FacultyOnlyService {
 
 		$lc->templateName='main_iframe';
 		$this->presentor = 'EmptyPresentation';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 
 		// repeat student names every ? columns
 		$printNamesEvery = 8;

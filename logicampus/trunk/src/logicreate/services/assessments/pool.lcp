@@ -138,7 +138,7 @@ class pool extends FacultyService {
 		$t['table'] = $dg->toHTML();
 
 		$lc->templateName = 'pool_pickQuestions';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 	}
 
 	function copyQuestionsRun(&$db,&$u,&$lc,&$t) {

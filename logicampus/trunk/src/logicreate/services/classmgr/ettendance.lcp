@@ -93,7 +93,7 @@ class ettendance extends FacultyService
 		$t['students'] = $student;
 		$t['studentCount'] = $studentCount;	
 	
-		$lc->templateStyle='private';
+//auto-comment		$lc->templateStyle='private';
 		$lc->templateName="ettendance_main";
 		
 	}

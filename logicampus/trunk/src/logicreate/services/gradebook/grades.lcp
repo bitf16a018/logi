@@ -110,7 +110,7 @@ class grades extends FacultyService {
  */
 		function entryDeleteRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='grades_entryDelete';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
 		}
 
@@ -124,7 +124,7 @@ class grades extends FacultyService {
  */
 		function Run(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='grades_main';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 
 		}
 
@@ -180,7 +180,7 @@ class grades extends FacultyService {
  */
 		function updateEntryRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='grades_updateEntry';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
 			$f = new form();
 			$f->getForm(100056, $this->cleanedArray);
@@ -193,7 +193,7 @@ class grades extends FacultyService {
 		
 		function updateEntryPostRun(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='grades_updateEntry';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
 			$f = new form();
 			$t['error'] = $f->validateForm(100056,$lc->postvars);
@@ -215,7 +215,7 @@ class grades extends FacultyService {
 		function updateWeightedTotalsRun(&$db,&$u,&$lc,&$t) {
 			
 			$lc->templateName='grades_updateWeightedTotals';
-			$lc->templateStyle = 'private';
+//auto-comment			$lc->templateStyle = 'private';
 			
 			if ($lc->postvars['action'] == 'update')
 			{

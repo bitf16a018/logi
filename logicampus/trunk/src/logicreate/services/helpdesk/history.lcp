@@ -32,7 +32,7 @@ class history extends RegAuth {
 	 
 	function history() { 
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	/** 

@@ -24,7 +24,7 @@ class seminarorientation extends BasicAuth {
 	function seminarorientation()
 	{
 		global $lcObj;
-		$lcObj->templateStyle = 'private';
+//auto-comment		$lcObj->templateStyle = 'private';
 	}
 
 	function Run($db,&$u,&$lc,&$t) {

@@ -53,7 +53,7 @@ class classmgr extends FacultyService {
 	function Run(&$db,&$u,&$lc,&$t) 
 	{
 		$lc->templateName='main_main';
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 		$this->authorizer = 'facultyGroupCheck';
 		if ((int)$lc->postvars['semester'] > 0)
 		{	$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];	
@@ -131,7 +131,7 @@ class classmgr extends FacultyService {
 
 	function selectSemesterRun(&$db,&$u,&$lc,&$t) {
 		$lc->templateName = 'displaySemesters_main';	
-		$lc->templateStyle = 'private';
+//auto-comment		$lc->templateStyle = 'private';
 	}
 
 }
