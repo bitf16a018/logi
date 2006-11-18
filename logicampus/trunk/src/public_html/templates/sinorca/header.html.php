@@ -19,10 +19,20 @@
 
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  media="screen" title="Sinorca (screen)" />
-    <link rel="stylesheet alternative" type="text/css" href="sinorca-screen-alt.css" media="screen" title="Sinorca (alternative)" />
-    <link rel="stylesheet" type="text/css" href="sinorca-print.css" media="print" />
+    <link rel="stylesheet alternative" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen-alt.css" media="screen" title="Sinorca (alternative)" />
+    <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-print.css" media="print" />
 
-    <title>Sinorca 2.0</title>
+    <script type="text/javascript" src="<?=BASE_URL;?>htmlarea/htmlarea.js"></script>
+    <script type="text/javascript" src="<?=BASE_URL;?>htmlarea/htmlarea-lang-en.js"></script>
+    <script type="text/javascript" src="<?=BASE_URL;?>htmlarea/dialog.js"></script>
+    <script type="text/javascript" src="<?=BASE_URL;?>htmlarea/popupwin.js"></script>
+
+    <style type="text/css">
+	@import url(<?=BASE_URL;?>htmlarea/htmlarea.css);
+    </style>
+
+
+    <title>LogiCampus</title>
   </head>
 
   <body>
