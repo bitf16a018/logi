@@ -75,7 +75,7 @@ acronym, .titleTip {
   color: rgb(39,78,144);
   background-color: rgb(140,170,230);
   padding:2px;
-  margin:none;
+  margin:0px;
 }
 
 .headerTitle {
@@ -110,20 +110,11 @@ acronym, .titleTip {
   background-color: transparent;
 }
 
-.box_standard {
-  width:90%;
-  float: left;
-  clear: left;
-  border-right: 1px solid rgb(153,153,153);
-  background-color: rgb(240,240,240);
-}
-
-
 
 /* ##### Side Bar ##### */
 
 #side-bar {
-  width: 15em;
+  width: 13em;
   float: left;
   clear: left;
   border-right: 1px solid rgb(153,153,153);
@@ -208,7 +199,7 @@ acronym, .titleTip {
   background-color: white;
   text-align: justify;
   line-height: 1.5em;
-  margin: 0 0 0 15em;
+  margin: 0 0 0 13em;
   padding: 0.5mm 5mm 5mm 5mm;
   border-left: 1px solid rgb(153,153,153);
 }
@@ -218,11 +209,6 @@ acronym, .titleTip {
   padding: 0;
 }
 
-#main-copy a {
-  color: rgb(0,102,204);
-  background-color: transparent;
-  text-decoration: underline;
-}
 
 #main-copy a:hover {
   text-decoration: none;
@@ -242,7 +228,7 @@ acronym, .titleTip {
   background-color: rgb(100,135,220);
   font-size: larger;
   font-weight: bold;
-  padding: none;
+  padding: 0;
 }
 
 
@@ -309,3 +295,34 @@ dd {
 #footer a:hover {
   text-decoration: none;
 }
+/* ##### LC SPECIFIC ###### */
+.bartitle {
+  color: white;
+  background-color: rgb(0,51,153);
+  margin: 0;
+  padding:0;
+}
+
+.bartitle a {
+  color: white;
+  background-color: rgb(0,51,153);
+  font-weight:bold;
+  padding:0px;
+}
+
+.box_standard {
+  width:90%;
+  float: left;
+  clear: left;
+  border-right: 1px solid rgb(153,153,153);
+  background-color: rgb(240,240,240);
+}
+
+#main-copy tr.bartitle {
+  line-height: 1.0em;
+  padding: 0px;
+  margin:0px;
+}
+
+
+
