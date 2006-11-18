@@ -329,6 +329,8 @@ dd {
   background-color:#f0f0f0;
   border:1px solid silver;
   padding:3px;
+  line-height:1.1em;
+  font-size:smaller;
 }
 
 #sectionheader a {
