@@ -60,7 +60,7 @@ class classmgr extends FacultyService {
 		}
 		else
 		{
-			if(!MODULE_FULL_SEMESTERS){
+			if(!MODULE_SIMPLE_MODE){
 				if(count($u->classesTaught)<=0){
                 		$t['url'] = APP_URL . "classmgr/teacherclass/event=add";
                         	$this->presentor = 'redirectPresentation';
@@ -74,10 +74,9 @@ class classmgr extends FacultyService {
 			// __FIXME__ need to find a method for loading current semester
 			//pull from db and stuff in session
 			
-			//au->sessionvars['classmgr']['currentsemester'] =
+			
 			$db->queryOne("SELECT semesters.id_semesters FROM semesters INNER JOIN classes ON semesters.id_semesters=classes.id_semesters WHERE facultyId='". $u->username ."'");
-			$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];
-			//$u->sessionvars['classmgr']['currentsemester'] = semesterObj::getCurrentID();
+			$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];		
 		}
 		
 		$id_semesters = (int)$u->sessionvars['classmgr']['currentsemester'];

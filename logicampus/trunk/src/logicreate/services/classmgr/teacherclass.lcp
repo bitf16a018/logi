@@ -24,22 +24,20 @@ function Run($db,&$u,&$lc,&$t){
 	if ((int)$lc->postvars['semester'] > 0) {
 		$u->sessionvars['administration']['classes']['currentsemester'] = (int)$lc->postvars['semester'];
 	}
+	else {
+		$u->sessionvars['administration']['classes']['currentsemester'] = 0;
+	}
 	if ((int)$u->sessionvars['administration']['classes']['currentsemester'] <= 0) {
 
 		// @@@ we need to load up the current semester
 		$u->sessionvars['administration']['classes']['currentsemester']= semesterObj::getCurrentID();
 	}
-	//echo $u->sessionvars['administration']['classes']['currentsemester'];
-
-	# __FIX_ME__ when there is no semester it cannot figure out
-	# what to load up
-
+	
 	if($u->sessionvars['administration']['classes']['currentsemester']) {
 		$semesterObj = semesterObj::_getFromDB((int)$u->sessionvars['administration']['classes']['currentsemester'], 'id_semesters');
 		$t['semesterDisplay'] = $semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
 	} else {
 		$t['nosemester'] = TRUE;
-		return;
 	}
 	$datagrid = new SearchGrid($this->module,$this->serviceName);
 	$datagrid->table = 'classes as a';
@@ -98,7 +96,7 @@ function Run($db,&$u,&$lc,&$t){
 	$datagrid->addInputFilter('Class Title', 'c.courseName');
 	$datagrid->addInputFilter('Section Number', 'a.sectionNumbers');
 	$t['table'] = $datagrid->toHTML();
-
+	
 
 }
 
@@ -152,7 +150,6 @@ function makeCourse($db, &$u, &$lc, &$t){
 	
 	$courses = new courseObj();
 	$courses->courseFamily = strtoupper($lc->postvars['coursefamily']);
-	//$courses->courseFamily = strtoupper($courses->courseFamily);
 	$courses->courseNumber = $lc->postvars['coursenumber'];
 	$courses->courseName = $lc->postvars['coursename'];
 	$courses->courseDescription = $lc->postvars['discription'];
@@ -169,7 +166,7 @@ function makeClass($db, &$u, &$lc, &$t){
 	$classObj->sectionNumbers = $lc->postvars['sectionnumbers'];
 	$classObj->classType  = $lc->postvars['classtype'];
 	$classObj->facultyId = $u->username;
-	$classObj->courseFamily = $lc->postvars['courseFamily'];
+	$classObj->courseFamily = $lc->postvars['coursefamily'];
 	$classObj->courseNumber = $lc->postvars['coursenumber'];
 	$classObj->courseFamilyNumber = $lc->postvars['coursefamily'].$lc->postvars['coursenumber'];
 	$classObj->courseName = $lc->postvars['coursename'];
@@ -293,23 +290,25 @@ function addRun($db,&$u,&$lc,&$t){
 	$bl_date_end   = strtotime($lc->postvars['endmonth']. '/'. $lc->postvars['endday']. '/'.$lc->postvars['endyear']);
 	//Check Start and end date
 	
-	if ($bl_date_start >= $bl_date_end){       
-		$t['error'][] = '* Semester date must come before the semester date end';
-        }	
-
-	if(!validateLength($lc->postvars['coursename'],1))
-		$t['error'][] = '* Please enter a class name';
-
 	if ($lc->postvars['submit']) {
+
+		if ($bl_date_start >= $bl_date_end){       
+			$t['error'][] = '* Semester date must come before the semester date end';
+		}	
+
+		if(!validateLength($lc->postvars['coursename'],1))
+			$t['error'][] = '* Please enter a class name';
+
 		if (count($t['error']) > 0){
 			$t['error'][] = 'Please fix the problems above then resubmit the form';
 		}else{
 			$lc->postvars['id_semester'] = $this->makeSemester($db, $u, $lc, $t);
 			$lc->postvars['id_course'] = $this->makeCourse($db, $u, $lc, $t);
 			$this->makeClass($db, $u, $lc, $t);
+			$lc->templateName = 'teacherclass_added';	
 		}
+		updateSessionVars($db, $u);
 	}
-
 }
 
 function deleteRun($db,&$u,&$lc,&$t){
@@ -414,7 +413,7 @@ function deleteRun($db,&$u,&$lc,&$t){
 		$classObj->_deleteFromDB();
 
 	}
-	
+	updateSessionVars($db, $u);
 	$this->run($db, $u, $lc, $t);
 }
 

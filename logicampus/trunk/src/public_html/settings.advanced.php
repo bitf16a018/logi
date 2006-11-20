@@ -1,6 +1,6 @@
 <?PHP
 
-define('LOGICAMPUS_MODE',1);
+define('LOGICAMPUS_SIMPLE_MODE',0);
 
 
 define('MODULE_REGISTRATION',0);

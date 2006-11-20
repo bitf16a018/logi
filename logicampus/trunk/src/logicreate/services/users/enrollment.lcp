@@ -130,6 +130,9 @@ n']['classes']));
 		$sectionNumber = (int)$lc->postvars['id'];
 		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
 		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
+		
+		updateSessionVars($db,$u);
+
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
 	}
@@ -153,6 +156,8 @@ n']['classes']));
 		$name = addslashes(stripslashes($lc->getvars['username']));
 		$sectionNumber = (int)$lc->getvars['id'];
 		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+		updateSessionVars($db,$u);
+
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
 

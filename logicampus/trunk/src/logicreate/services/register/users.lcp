@@ -144,8 +144,6 @@ class users extends NoAuth {
 		}		
 	
 	}
-	//$this->presentor='redirectPresentation';
-	//$t['url']= BASE_URL."index.php/register/users/event=login";
 	$arg->templateName = "users_login";
      }
 
