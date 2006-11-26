@@ -24,7 +24,7 @@
 
 
 // do some static setting up of the DB
-DB::getDSN($dsn);
+DB::DSN($dsn);
 $gdb = DB::getHandle();
 
 class DB {
@@ -69,7 +69,7 @@ class DB {
 		static $handles = array();
 
 		//get the list of connection setups
-		$_dsn = DB::getDSN();
+		$_dsn = DB::DSN();
 
 		// if a connection has already been made and in the handles array
 		// get it out
@@ -267,8 +267,15 @@ class DB {
 	}
 
 
-
-	function &getDSN($d='') {
+/**
+ * get or set the DSN array
+ * set to a singleton
+ * 
+ * @param array DSN array of database connection info
+ * @return array DSN array 
+ *
+ */
+	function &DSN($d='') {
 		static $dsn;
 		if (isset($dsn) ) {
 			return $dsn;
@@ -277,6 +284,7 @@ class DB {
 				$dsn = $d;
 			}
 		}
+		return $dsn;
 	}
 		
 
@@ -320,7 +328,7 @@ class DB {
 
 
 	function getFuncName($func,$param1='') {
-		$_dsn = DB::getDSN();
+		$_dsn = DB::DSN();
 		$func = strtolower($func);
 		switch ($func) {
 			case 'now()':
