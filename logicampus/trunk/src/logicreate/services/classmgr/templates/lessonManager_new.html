@@ -39,6 +39,7 @@ if ( strlen($t['message']) > 0 ) { ?>
 			$struct['displayName'] = 'Active On';
 			$struct['fieldName'] = 'activeOn';
 			$struct['dateTimeBit'] = 255;
+			$struct['endYear'] = 4;
 			echo Form::dateDropDownToHTML($struct);
 			?>	
 			</td>
@@ -49,6 +50,7 @@ if ( strlen($t['message']) > 0 ) { ?>
 			$struct['displayName'] = 'Inactive On';
 			$struct['fieldName'] = 'inactiveOn';
 			$struct['dateTimeBit'] = 7;
+			$struct['endYear'] = 4;
 			echo Form::dateDropDownToHTML($struct);
 			?>
 		</tr>
