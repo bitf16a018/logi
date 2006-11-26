@@ -208,6 +208,7 @@ if ( ($e-$s)>.1) {
 	 *
 	 */
 	function setResultType($type="ASSOC") {
+		$type = strtoupper($type);
 		$types['ASSOC'] = MYSQL_ASSOC;
 		$types['NUM'] = MYSQL_NUM;
 		$types['BOTH'] = MYSQL_BOTH;
