@@ -150,9 +150,37 @@ class DB {
 	 * Short hand for query() and next_record().
 	 *
 	 * @param string $sql SQL Command
+	 * @return array One row of result set as array
 	 */
 	function queryOne($sql) {
 
+	}
+
+
+
+	/**
+	 * Helper method to easily get all rows in query
+	 *
+	 * @param string $sql SQL Command
+	 * @return array 2D array of all rows in result set
+	 */
+	function queryGetAll($sql) {
+		$this->query($sql);
+		while($this->next_record()) {
+			$array[] = $this->Record;
+		}
+		return $array;
+	}
+
+	/**
+	 * Helper method to easily get all rows in query 
+	 * alias for queryGetAll()
+	 * @see queryGetAll
+	 * @param string $sql SQL Command
+	 * @return array 2D array of all rows in result set
+	 */
+	function queryAll($sql) {
+		return $this->queryGetAll($sql);
 	}
 
 	/**
