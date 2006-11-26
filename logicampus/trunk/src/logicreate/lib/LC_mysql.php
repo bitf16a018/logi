@@ -202,6 +202,19 @@ if ( ($e-$s)>.1) {
 
 
 	/**
+	 * set result type to ASSOC, NUM or BOTH
+	 *
+	 * @param string TYPE (default to ASSOC)
+	 *
+	 */
+	function setResultType($type="ASSOC") {
+		$types['ASSOC'] = MYSQL_ASSOC;
+		$types['NUM'] = MYSQL_NUM;
+		$types['BOTH'] = MYSQL_BOTH;
+		$this->RESULT_TYPE = $types[$type];
+	}
+
+	/**
 	 * Moves resultSet cursor to beginning
 	 * @return void
 	 */
