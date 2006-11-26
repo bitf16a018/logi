@@ -15,6 +15,7 @@ class LinkedItemsModel extends LC_DefaultTableModel {
 	 * Get sql results 
 	 */
 	function LinkedItemsModel($sql,$db) {
+		$db->setResultType('BOTH');
 		$db->query($sql);
 		while ($db->next_record()) {
 			$this->results[] = $db->Record;
