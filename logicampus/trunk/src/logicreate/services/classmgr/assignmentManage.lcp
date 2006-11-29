@@ -46,7 +46,7 @@ class assignmentManage extends FacultyService {
 	var $applinks = array(
 		'List Assignments' => 'assignmentManage/',
 		'Add Assignment' => 'assignmentManage/event=editAssignment/',
-		'Add a Lesson' => 'lessonManager/event=edit/'
+		'Add a Lesson' => 'lessonNew/event=add/'
 	);
 
 
@@ -613,70 +613,77 @@ class assignmentManage extends FacultyService {
 	}
 	
 
-/*
- *
- * Show a list of courses assigned to instructor.
- * 
- * Input data: 
- * Output data: list of courses
- *
- */
-		function Run(&$db,&$u,&$lc,&$t) {
+	/**
+	 * Show a list of assignments in a datagrid
+	 * 
+	 * Input data: 
+	 * Output data: list of courses
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
 
-			$class_id = $u->activeClassTaught->id_classes;
-			$datagrid = new DataGrid($this->module,$this->serviceName);
+		$class_id = $u->activeClassTaught->id_classes;
+		$datagrid = new DataGrid($this->module,$this->serviceName);
 
-			$datagrid->table = 'class_assignments';
-			$datagrid->column = 'dueDate,noDueDate,title,id_class_assignments';
-			$datagrid->where = 'id_classes='.$u->activeClassTaught->id_classes;
+		$datagrid->table = 'class_assignments';
+		$datagrid->column = 'dueDate,noDueDate,title,id_class_assignments';
+		$datagrid->where = 'id_classes='.$u->activeClassTaught->id_classes;
 
-			$datagrid->ignore = array('id_class_assignments', 'noDueDate');
-			$datagrid->headers = array(
-				'title' => 'Assignment',
-				'dueDate' => 'Due Date',
-				'lesson_titles' => 'Lessons',
-				'links' => ' '
-			);
-			$datagrid->sortColumns = array('title', 'dueDate');
-			$datagrid->class = 'datagrid';
-			$datagrid->overrideColumn('<?=$noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
+		$datagrid->ignore = array('id_class_assignments', 'noDueDate');
+		$datagrid->headers = array(
+			'title' => 'Assignment',
+			'dueDate' => 'Due Date',
+			'lesson_titles' => 'Lessons',
+			'links' => ' '
+		);
+		$datagrid->setCellWidth('links', '10%');
 
+		$datagrid->sortColumns = array('title', 'dueDate');
+		$datagrid->class = 'datagrid';
+		$datagrid->overrideColumn('<?=$noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
+		//put all items with no due date at the end
+		$datagrid->orderby = 'noDueDate ASC, dueDate';
 
-			//show the one to many relationship of lessons in one column
-			// using LessonRenderer
-			// also, correct the checkbox selection state with a one to
-			// many lookup
-			$sql = "SELECT A.id_class_assignments, A.id_class_lessons, B.title
-				FROM class_assignments_link AS A
-				LEFT JOIN class_lessons AS B
-				  ON A.id_class_lessons = B.id_class_lessons
-				WHERE B.id_classes = ".$class_id."
-				ORDER BY B.title";
-			$db->query($sql);
-
-			global $classmgr_itemsToTitles;
-			$classmgr_itemsToTitles = array();
-
-			while ($db->next_record()) {
-				$classmgr_itemsToTitles[$db->Record['id_class_assignments']][] = $db->Record['title'];
-			}
-			//collapse the double array into one string
-			//Also, N'JECT data into the datagrid's internal memory so that it
-			// becomes exposed to the internal column eval() statements
-			foreach($classmgr_itemsToTitles as $k=>$v) {
-				$classmgr_itemsToTitles[$k] = implode(" <br/>", $v);
-			}
-
-			$datagrid->postpendCallbackColumn('classmgr_injectLessonTitles', 'lesson_titles');
-
-			$datagrid->postpendColumn(' <a href="<?=appurl("classmgr/assignmentManage/event=viewAssignment/id_class_assignments=$id_class_assignments/");?>">view</a> | <a href="<?=appurl("classmgr/assignmentManage/event=editAssignment/id_class_assignments=$id_class_assignments/");?>">edit</a> | <a href="<?=appurl("classmgr/assignmentManage/event=deleteAssignment/id_class_assignments=$id_class_assignments/");?>" onclick="if (confirm(\'Are you SURE you want to delete this assignment?\')) { return true; } else { return false; }">delete</a>', 'links');
-			$t['table'] = $datagrid->toHTML();
-
-			$this->sectionTitle = "Assignment Manager";
-			$this->inactivelinks[] = 'List Assignments';
-			$lc->templateName='assignmentManage_main';
-//auto-comment			$lc->templateStyle = 'private';
+		if ( $lc->getvars['dgorder'] == 'title' ) {
+			$datagrid->orderby = 'title';
 		}
+
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_assignments, A.id_class_lessons, B.title
+			FROM class_assignments_link AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+
+		global $classmgr_itemsToTitles;
+		$classmgr_itemsToTitles = array();
+
+		while ($db->next_record()) {
+			$classmgr_itemsToTitles[$db->Record['id_class_assignments']][] = $db->Record['title'];
+		}
+		//collapse the double array into one string
+		//Also, N'JECT data into the datagrid's internal memory so that it
+		// becomes exposed to the internal column eval() statements
+		foreach($classmgr_itemsToTitles as $k=>$v) {
+			$classmgr_itemsToTitles[$k] = implode(" <br/>", $v);
+		}
+
+		$datagrid->postpendCallbackColumn('DG_classmgr_injectLessonTitles', 'lesson_titles');
+
+		$datagrid->postpendCallbackColumn('DG_classmgr_assignmentActions', 'links');
+
+		$t['table'] = $datagrid->toHTML();
+
+		$this->sectionTitle = "Assignment Manager";
+		$this->inactivelinks[] = 'List Assignments';
+		$lc->templateName='assignmentManage_main';
+		$lc->templateStyle = 'private';
+	}
 
 
 	
@@ -1180,10 +1187,23 @@ class assignmentManage extends FacultyService {
 /**
  * works with datagrid to generate data for column 'Lesson Titles'
  */
-function classmgr_injectLessonTitles($row, &$ret) {
+function DG_classmgr_injectLessonTitles($row, &$ret) {
 	global $classmgr_itemsToTitles;
 	$ret = $classmgr_itemsToTitles[$row['id_class_assignments']];
 }
 
+
+/**
+ * works with datagrid to generate data for column action links
+ */
+function DG_classmgr_assignmentActions($row, &$ret) {
+	$ret = '
+		<ul style="margin:0px;padding-left:15px">
+		<li><a href="'.appurl("classmgr/assignmentManage/event=viewAssignment/id_class_assignments=".$row['id_class_assignments']."/").'">View</a></li>
+		<li><a href="'.appurl("classmgr/assignmentManage/event=editAssignment/id_class_assignments=".$row['id_class_assignments']."/").'">Edit</a></li>
+		<li><a href="'.appurl("classmgr/assignmentManage/event=deleteAssignment/id_class_assignments=".$row['id_class_assignments']."/").'" onclick="if (confirm(\'Are you SURE you want to delete this assignment?\')) { return true; } else { return false; }">Delete</a></li>
+		</ul>';
+
+}
 
 ?>

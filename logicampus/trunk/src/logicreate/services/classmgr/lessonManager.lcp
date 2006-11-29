@@ -68,8 +68,18 @@ class LessonManager extends FacultyService {
 		if ($lc->getvars['gdorder']=='') {
 			$lc->getvars['dgorder'] = 'activeOn';
 		}
-		$dg->sortColumns = array( 'createdOn', 'activeOn', 'title' );
-		$dg->postpendColumn('<a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">view</a> | <a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">edit</a> | <a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">delete</a>', 'links'); 
+		$dg->sortColumns = array( 'activeOn', 'title' );
+		$dg->postpendColumn('
+			<ul style="margin:0px;padding-left:15px">
+			<li><a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">View</a></li>
+			<li><a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">Edit</a></li>
+			<li><a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">Delete</a></li>
+			<li><a href="<?=appurl("classmgr/adjustLessonDates/lesson_id=$id_class_lessons");?>">Dates</a></li>
+			</ul>',
+			'links'); 
+		$dg->setCellWidth('links',65);
+		$dg->setCellAlign('links','left');
+
 		$t['content'] = $dg->toHTML();
 	}
 
@@ -277,6 +287,75 @@ class LessonManager extends FacultyService {
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
 		$col_c->cellRenderer->idName = 'id_class_objectives';
 		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Edit the assessments to this lesson
+	 */
+	function linkAssessmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Assessments';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveAssessments';
+		$t['pageHeading'] = 'Lesson Assessments';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
+		$sql = "SELECT A.assessment_id, A.display_name
+			FROM assessment AS A
+			WHERE A.class_id = ".$class_id."
+			ORDER BY A.display_name";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.assessment_id, A.lesson_id, B.title
+			FROM assessment_lesson_link AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.lesson_id = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['assessment_id']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['assessment_id']][] = $db->Record['lesson_id'];
+		}
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->idName = 'assessment_id';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Assessment');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+		$col_c->cellRenderer->idName = 'assessment_id';
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -531,6 +610,18 @@ class LessonManager extends FacultyService {
 		$db->query($sql);
 		while ( $db->next_record() )
 			$t['assignments'][] = $db->Record['title'];
+
+		// get the ssessments
+		$sql = "SELECT A.assessment_id, A.display_name
+			FROM assessment AS A
+			LEFT JOIN assessment_lesson_link  AS B
+			  ON A.assessment_id=B.assessment_id
+			WHERE B.lesson_id='{$lesson_id}'
+			AND A.class_id = '{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['assessments'][] = $db->Record['display_name'];
+
 	}
 
 
@@ -550,21 +641,43 @@ class LessonManager extends FacultyService {
 		$title = htmlentities($lc->postvars['title']);
 		$desc = htmlentities($lc->postvars['description']);
 
-		$content_id = intval($lc->postvars['content']);
-
-		//load PBDO Object
-		$lesson = ClassLessons::load($lesson_id);
-		$lesson->set('title',$title);
-		$lesson->set('description',$description);
-		$lesson->set('activeOn',$activeOn);
-		$lesson->set('inactiveOn',$inactiveOn);
-		if($lesson->save()) {
-			$t['msg'] = 'Lesson updated successfully.';
-		} else {
-			$t['msg'] = 'Lesson update failed!';
+		$errors = array();
+		if ( strlen($title) < 3 ) {
+			$errors[] = "The title is not long enough.";
 		}
 
+		if ( strlen($desc) < 3 ) {
+			$errors[] = "The description is not long enough.";
+		}
 
+		if ( count($errors) > 0 ) {
+			$t['errors'] = $errors;
+			$this->editRun($db,$u,$lc,$t);
+			//keep the user values
+			$t['title'] = $lc->postvars['title'];
+			$t['description'] = $lc->postvars['description'];
+			$t['activeOn'] = $lc->postvars['activeOn'];
+			$t['inactiveOn'] = $lc->postvars['inactiveOn'];
+			$t['content'] = intval($lc->postvars['content']);
+
+			$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+			$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+			return;
+		}
+
+		$content_id = intval($lc->postvars['content']);
+
+                //load PBDO Object
+                $lesson = ClassLessons::load($lessonid);
+                $lesson->set('title',$lc->postvars['title']);
+                $lesson->set('description',$lc->postvars['description']);
+                $lesson->set('activeOn',$activeOn);
+                $lesson->set('inactiveOn',$inactiveOn);
+                if($lesson->save()) {
+                        $t['msg'] = 'Lesson updated successfully.';
+                } else {
+                        $t['msg'] = 'Lesson update failed!';
+                }
 
 		// take care of the content table
 		$db->query( "update class_lesson_content set
@@ -673,6 +786,70 @@ class LessonManager extends FacultyService {
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
 	}
+
+
+	/**
+	 * Save the assessments to this lesson
+	 */
+	function saveAssessmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.assessment_id
+			FROM assessment AS A
+			WHERE A.class_id = ".$class_id;
+		$db->query($sql);
+		while ($db->next_record()) {
+			$allowableItems[] = $db->Record['assessment_id'];
+		}
+
+		//clean input array to match allowable items
+		$validEntry = false;
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+				$validEntry = true;
+			}
+		}
+
+		/* don't need to enforce one assessment per lesson
+		if (!$validEntry) {
+			$this->linkAssessmentsRun($db,$u,$lc,$t);
+			$t['message'] = "You need to choose at least one assessment.";
+			return false;
+		}
+		*/
+
+
+		//wipe all previous assessments links for this lesson
+		$db->query('DELETE from assessment_lesson_link 
+			WHERE lesson_id = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO assessment_lesson_link
+		(assessment_id,lesson_id)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
 
 
 	/**

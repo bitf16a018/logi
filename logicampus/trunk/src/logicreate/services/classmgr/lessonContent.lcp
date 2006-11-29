@@ -61,6 +61,11 @@ Class LessonContent extends FacultyService
 		$lc->templateName = 'lessonContent';
 		$this->sectionTitle = 'Lesson Content';
 		
+		//default sort
+		if ( strlen($lc->getvars['dgorder']) < 1 ) {
+			$lc->getvars['dgorder'] = 'dateCreated';
+		}
+
 		$datagrid = new DataGrid($this->module,$this->serviceName);
 
 		$datagrid->joins = ' LEFT JOIN classes as l ON t.id_classes=l.id_classes LEFT JOIN courses as o ON l.id_courses=o.id_courses LEFT JOIN class_lessons as e on e.id_class_lessons=t.id_class_lessons';
@@ -74,8 +79,9 @@ Class LessonContent extends FacultyService
 		//$this->column = '';
 		$datagrid->usePageDropdown(true);
 		$datagrid->setCellWidth('end', '10%');
-		$datagrid->setCellAlign('end', 'center');
-		
+		$datagrid->setCellAlign('end', 'left');
+		//$datagrid->setCellWidth('end', '75');
+
 		$datagrid->setCellWidth('dateCreated', '10%');
 		$datagrid->setCellAlign('dateCreated', 'center');
 		
@@ -88,10 +94,11 @@ Class LessonContent extends FacultyService
 			'end'=>' ');
 		$datagrid->setCellWidth('end', '150');
 
-		$datagrid->overrideColumn('<?=date("F jS", strtotime($dateCreated));?>', 'dateCreated');
+		$datagrid->overrideColumn('<?=date("m-d-Y", strtotime($dateCreated));?>', 'dateCreated');
 		$datagrid->overrideColumn('<?=($etitle ? "<a href=\"'.MOD_URL.'lessonManager/event=edit/id=$id_class_lessons\">$etitle</a>" : "<i>no lesson assigned</i>");?>', 'etitle');
 		
-		$datagrid->postpendColumn('<a href="<?=modurl("lessonContent/event=process/id=$id_class_lesson_content");?>">edit</a> | <a href="<?=modurl("lessonContent/event=duplicate/id=$id_class_lesson_content");?>">duplicate</a> | <a onclick="if (confirm(\'Warning you are about to remove lesson content, please be absolutely sure before continuing. Click [ OK ] to remove this content item.\')) { return true; } else { return false; }" href="<?=modurl("lessonContent/event=process/subev=delete/id=$id_class_lesson_content");?>">delete</a>','end');
+
+		$datagrid->postpendCallbackColumn('DG_classmgr_contentActions', 'end');
 
 		$t['datagrid'] = $datagrid->toHTML();
 		
@@ -126,10 +133,8 @@ Class LessonContent extends FacultyService
 	 *	One function to bind them
 	 *	One function to rule them all
 	 */
-	function processRun(&$db,&$u,&$lc,&$t)
-	{
-		if ($t['form'] == false)
-		{
+	function processRun(&$db,&$u,&$lc,&$t) {
+		if ($t['form'] == false) {
 			$formObj = new SiteForm();
 			$formObj->getForm('classcontentlesson');
 			$formObj->action = modurl('lessonContent'); // i should do this in the manager/form itself
@@ -331,6 +336,20 @@ Class LessonContent extends FacultyService
 			return false;
 		} else return true;
 	}
-
 }
+
+
+
+/**
+ * works with datagrid to generate data for column action links
+ */
+function DG_classmgr_contentActions($row, &$ret) {
+	$ret = '
+		<ul style="margin:0px;padding-left:15px">
+		<li><a href="'.modurl("lessonContent/event=process/id=".$row['id_class_lesson_content']).'">Edit</a></li>
+		<li><a href="'.modurl("lessonContent/event=duplicate/id=".$row['id_class_lesson_content']).'">Duplicate</a></li>
+		<li><a onclick="if (confirm(\'Warning you are about to remove lesson content, please be absolutely sure before continuing. Click [ OK ] to remove this content item.\')) { return true; } else { return false; }" href="'.modurl("lessonContent/event=process/subev=delete/id=".$row['id_class_lesson_content']).'">Delete</a></li>
+		</ul>';
+}
+
 ?>
