@@ -125,6 +125,7 @@ button{
 	#sectionheader {
 		padding: 3px;
 		background-color:#003062;
+		color:white;
 	}
 	#sectionheader th {
 		color: white;
