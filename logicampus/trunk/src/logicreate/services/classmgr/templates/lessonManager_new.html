@@ -7,24 +7,35 @@ if ( strlen($t['message']) > 0 ) { ?>
 	<h3 style="margin:0px;color:red;"><?= $t['message'];?></h3>
 <?php } ?>
 
+<?php
+if ( is_array($t['errors']) ) {
+echo '<div class="error_message">Some errors occurred when processing your request:<ul>';
+	foreach($t['errors'] as $blank=>$error) {
+		echo '<li>'.$error.'</li>';
+	}
+	echo '</div></ul>';
+}
+?>
+
+
 
 <form action="" method="POST" enctype="application/x-www-form-urlencoded">
 	<table width="" border="0" cellspacing="3" cellpadding="0">
 		<tr>
 			<td valign="top" class="">*Title</td>
-			<td valign="top" class=""><input type="text" id="title" name="title" value="" size="65" maxlength="255"/></td>
+			<td valign="top" class=""><input type="text" id="title" name="title" value="<?= $t['title'];?>" size="65" maxlength="255"/></td>
 		</tr>
 		<tr>
 			<td valign="top" class="" valign="top">*Description</td>
 			<td valign="top" class="">
-				<textarea name="description" cols="62" rows="7" id="description"></textarea>
+				<textarea name="description" cols="62" rows="7" id="description"><?=$t['description'];?></textarea>
 			</td>
 		</tr>
 		<tr>
 			<td valign="top" class="">*Content Page</td>
 			<td valign="top" class="">
 				<select id="content" name="content"  size="1">
-					<?php echo makeOptions($t['contentPages']); ?>
+					<?php echo makeOptions($t['contentPages'],$t['content']); ?>
 				</select>
 			</td>
 		</tr>
@@ -35,23 +46,13 @@ if ( strlen($t['message']) > 0 ) { ?>
 	<table width="" border="0" cellspacing="3" cellpadding="0">
 		<tr>
 			<?php
-			$struct['defaultValue'] = time();
-			$struct['displayName'] = 'Active On';
-			$struct['fieldName'] = 'activeOn';
-			$struct['dateTimeBit'] = 255;
-			$struct['endYear'] = 4;
-			echo Form::dateDropDownToHTML($struct);
+			echo Form::dateDropDownToHTML($t['activeOnStruct']);
 			?>	
 			</td>
 		</tr>
 		<tr>
 			<?php
-			$struct['defaultValue'] = (time()+86400);
-			$struct['displayName'] = 'Inactive On';
-			$struct['fieldName'] = 'inactiveOn';
-			$struct['dateTimeBit'] = 7;
-			$struct['endYear'] = 4;
-			echo Form::dateDropDownToHTML($struct);
+			echo Form::dateDropDownToHTML($t['inactiveOnStruct']);
 			?>
 		</tr>
 	</table>

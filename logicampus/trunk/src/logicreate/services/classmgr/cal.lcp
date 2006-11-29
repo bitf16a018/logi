@@ -367,7 +367,8 @@ class cal extends FacultyService {
 	$x->extra_url = '/event=schedule';	
 		$x->table = "lcEvents";
 		$x->showHeader =true;
-		$x->showNavLinks = false;
+		$x->showNavLinks = true;
+		$x->sortColumns = array("dates","title");
 		$x->where = 'id_classes='.$u->activeClassTaught->id_classes. ' AND calendarType=\'\'';
 		$x->headers = array("title"=>"Event", "location"=>"Location", "dates"=>"Date", "times"=>"Time","className"=>"Class", "activityName"=>"Class", "edit"=>" ", "delete"=>' ', 'repeats'=>"Repeating");
 		$x->ignore = array('id_item_sub', "startdate","enddate", 'calendarType', "description", "lastmodified", "pkey","id_classes", "id_item", "f_allday", "f_showwhenactive", "activityDescription", "calendarID", "username","class", "repeatType","repeatData", "repeatExclude","repeatUntil", "repeatCount", "groups","notgroups");

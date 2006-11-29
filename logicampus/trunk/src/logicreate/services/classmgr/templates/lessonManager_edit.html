@@ -1,6 +1,16 @@
 <?php 
 print $t['sectionheader'];
 ?>
+
+<?php
+if ( is_array($t['errors']) ) {
+echo '<div class="error_message">Some errors occurred when processing your request:<ul>';
+	foreach($t['errors'] as $blank=>$error) {
+		echo '<li>'.$error.'</li>';
+	}
+	echo '</div></ul>';
+}
+?>
 <form action="" method="POST" enctype="application/x-www-form-urlencoded">
 	<table width="" border="0" cellspacing="3" cellpadding="0">
 		<tr>
@@ -137,6 +147,28 @@ print $t['sectionheader'];
 			<ul>
 				<?php
 				foreach ($t['assignments'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	
+	<p style="clear:both;">&nbsp;</p>
+
+	<div style="width:48%;float:left;">
+		<fieldset>
+			<legend>Assessments</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssessments/id='.$t['lessonId']);?>">Change Assessments</a>
+			<?php
+			if ( ! is_array($t['assessments']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Assessments</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['assessments'] as $k=>$v) {
 				?>
 				<li><?= $v;?></li>
 				<?php } ?>

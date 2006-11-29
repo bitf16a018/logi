@@ -26,8 +26,14 @@ class contactStudents extends FacultyService
 	function run( &$db, &$u, &$lc, &$t) 
 	{
 		$lc->templateName = "contactStudents_main";
-//auto-comment		$lc->templateStyle = 'private';
-		
+		$lc->templateStyle = 'private';
+
+		$section = (int)$lc->getvars['section'];
+		if ($section > 0 ) {
+			$sectionFilter = ' AND B.sectionNumber = '.$section.' ';
+		}
+		$t['section'] = $section;
+	
 		if (count($t['students']) == false)
 		{	
 			$sql = '
@@ -54,6 +60,7 @@ class contactStudents extends FacultyService
 				C.semester_id = A.id_semesters AND
 				C.active=1			
 				)
+				'.$sectionFilter.'
 			ORDER BY D.lastname ASC';
 			
 			$db->query($sql);
@@ -67,6 +74,17 @@ class contactStudents extends FacultyService
 		if (count($t['students']) == 0)
 		{
 			$t['emessage'] = '<h2 align="center" style="color: red;">No students available in this class</h2>';
+		}
+
+		$t['sectionNumbers'] = array (0=>'All');
+		$sql = "SELECT * 
+			FROM class_sections
+			WHERE id_classes = ".$u->activeClassTaught->id_classes;
+
+		$db->query($sql);
+
+		while ($db->nextRecord()) {
+			$t['sectionNumbers'][$db->record['sectionNumber']] = $db->record['sectionNumber'];
 		}
 	}
 
@@ -100,6 +118,7 @@ class contactStudents extends FacultyService
 			B.id_classes = '.$u->activeClassTaught->id_classes.' AND
 			C.active=1				
 			)
+			'.$sectionFilter.'
 			ORDER BY D.lastname ASC';
 		$db->query($sql);
 
@@ -143,13 +162,19 @@ class contactStudents extends FacultyService
 				$privateMsg->subject = $lc->postvars['subject'];
 				$privateMsg->sentTime = time();
 #debug($privateMsg);exit();				
+				$putCopyInSent = TRUE;
 				foreach($my_email_to_send as $username => $useremail)
 				{
 					$privateMsg->messageTo = $username;	
-					$privateMsg->add();
+					$privateMsg->add($putCopyInSent);
+					if ($putCopyInSent==TRUE) { 
+						$putCopyInSent=FALSE;
+					}
 				}
 				
-				if ($lc->postvars['copy'] == 'copy') { $privateMsg->messageTo = $u->username; $privateMsg->subject .= ' [copy to sender]'; $privateMsg->add(); }
+				if ($lc->postvars['copy'] == 'copy') { 
+					$privateMsg->messageTo = $u->username; $privateMsg->subject .= ' [copy to sender]'; $privateMsg->add(FALSE); 
+				}
 				if ($lc->postvars['type'] != 'both') break;	// i want it to continue down the line if we're using BOTH
 				
 			case 'email':
@@ -200,7 +225,7 @@ class contactStudents extends FacultyService
 						"From: ".$mailer->messageFrom."\nReply-To: ".$mailer->messageFrom."\n"); 
 				}
 		}
-		$t['emessage'] = '<h3 align="center" style="color: blue;">Mail sent to recipients.</h3>';
+		$t['emessage'] = '<h3 align="center" style="color: blue;">Mail sent out to recipients.</h3>';
 		$this->run($db, $u, $lc, $t);
 	} 
 }

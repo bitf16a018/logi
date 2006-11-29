@@ -1,17 +1,4 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
  
 // test
 include_once(LIB_PATH. 'datagrid.php');
@@ -28,15 +15,19 @@ class faq extends FacultyService
 	
 	// links
 	var $navlinks = array (
-		'Classroom Manager' => 'display',
-		'Lessons' => 'lessonManager/',
-		'Webliography' => 'lessonWebliography/',
-		'FAQ' => 'faq/',
+		'Classroom Manager' => 'display/',
+		'Announcements'=>'announcements/',
+		'Assessment Manager' => '%assessments/',
 		'Assignments' => 'assignmentManage/',
 		'Content' => 'lessonContent/',
-		'Presentations' => 'studentPresentation',
-		'Objectives' => 'lessonObjectives/'
+		'FAQ' => 'faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => 'lessonManager/',
+		'Objectives' => 'lessonObjectives/',
+		'Webliography' => 'lessonWebliography/'
 	);
+	// links
 	var $applinks = array(
 		'List FAQs' => 'faq/',
 		'Add FAQ' => 'faq/event=add'

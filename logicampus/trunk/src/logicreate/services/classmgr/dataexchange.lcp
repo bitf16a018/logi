@@ -145,14 +145,15 @@ class dataexchange extends FacultyService
 		$root =& $xmlObj->getRoot();
 		
 		$classroom_node[] = new xml_node('CLASSROOM', 
-								array(	'ID'=>$db->Record['id_classes'], 
-										'CLASSTYPE'=>$db->Record['classType'],
-										'ID_SEMESTERS'=>$db->Record['id_semesters'],
-										'STYLESHEET'=>$db->Record['stylesheet'], 
-										'SECTIONNUMBERS'=>$db->Record['sectionNumbers'],
-										'NOEXAM'=>$db->Record['noexam']
-									 )
-								);
+						array(	'ID'=>$db->Record['id_classes'], 
+								'CLASSTYPE'=>$db->Record['classType'],
+								'ID_SEMESTERS'=>$db->Record['id_semesters'],
+								'STYLESHEET'=>$db->Record['stylesheet'], 
+								'FACULTYID'=>$db->Record['facultyId'],
+								'SECTIONNUMBERS'=>$db->Record['sectionNumbers'],
+								'NOEXAM'=>$db->Record['noexam']
+							 )
+						);
 
 		$root->children =& $classroom_node;
 		
@@ -227,10 +228,15 @@ class dataexchange extends FacultyService
         
         fclose($fh);
         ob_end_clean();
-        
-	
-        header("Cache-control: public");
-		//header("Content-type: text/html");
+
+	if (ini_get('zlib.output_compression'))
+		ini_set('zlib.output_compression', 'Off');
+
+        //header("Cache-control: public");
+	header('Cache-Control: no-store, no-cache, must-revalidate');
+	header('Cache-Control: post-check=0, pre-check=0', false);
+	header('Pragma: no-cache');
+        		//header("Content-type: text/html");
 		header("Content-type: application/zip");
 		header("Content-length: ". strlen($wiky));
 		header("Content-Disposition: attachment; filename=$filename");
