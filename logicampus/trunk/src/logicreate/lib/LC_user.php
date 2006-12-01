@@ -77,13 +77,11 @@ class lcUser {
 			$db->query("DELETE from lcSessions WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) > gc",false);
 		}
 		$db->query("select * from lcSessions where sesskey = '$sessID'",false);
-		$db->RESULT_TYPE=MYSQL_ASSOC;
 		$j = $db->next_record();
 
 		if (!$j) {
 			//trigger_error('second try to get session for: '.$sessID);
 			$db->query("select * from lcSessions where sesskey = '$sessID'",false);
-			$db->RESULT_TYPE=MYSQL_ASSOC;
 			$j = $db->next_record();
 		}
 
@@ -96,10 +94,7 @@ class lcUser {
 		if (!$temp2) { 
 			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
 		}
-		ob_start();
-		print_r($temp2);
-		$tt = ob_get_contents();
-		ob_end_clean();
+
 		if ($temp2['_userobj']->username!='anonymous') { 
 			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
 		}
@@ -378,6 +373,9 @@ class lcUser {
 	 */
 
 	function saveSession() {
+		$this->sessionvars['__sysMessages'] = $this->sysMessages;
+		$this->sysMessages = array();
+
 		if ($this->_sessionKey == "") { return; }
 		if ($this->username == "") { print "no username"; exit();}
 		//unhook session from user, reverse rolse
@@ -555,7 +553,23 @@ class lcUser {
 	}
 
 
+	/**
+	 * Save a message in the session so it can be displayed on the
+	 * next page
+	 */
+	function addSessionMessage($msg) {
+		$this->sysMessages[] = $msg;
+	}
 
+	/**
+	 * return system messages and clean them
+	 * @return array list of messages.
+	 */
+	function getSessionMessages() {
+		$msg = $this->sessionvars['__sysMessages'];
+		$this->sessionvars['__sysMessages'] = '';
+		return $msg;
+	}
 
 
 	/**
