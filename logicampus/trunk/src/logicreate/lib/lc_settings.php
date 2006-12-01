@@ -15,6 +15,24 @@ class LcSettings {
 		return trim($t['motd']);
 	}
 
+
+	function isModuleOn($name) {
+		if (defined($name) && constant($name) == true) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	function isModuleOff($name) {
+		if (defined($name) && constant($name) == false) {
+			return true;
+		}
+		if (! defined ($name) ) {
+			return true;
+		}
+		return false;
+	}
 }
 
 
