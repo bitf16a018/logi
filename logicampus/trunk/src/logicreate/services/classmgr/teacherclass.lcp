@@ -104,13 +104,13 @@ function makeSemester($db,&$u,&$lc,&$t) {
 
 	$semesterObj = new semesterObj();		
 	
-	$startdate = $lc->postvars['startyear'].
-		'-'.$lc->postvars['startmonth'].
-		'-'. $lc->postvars['startday'];
-	$enddate = $lc->postvars['endyear'].
-		'-'.$lc->postvars['endmonth'].
-		'-'. $lc->postvars['endday'];
-	$starttime = $startdate.' 1:00:00';
+	$startdate = $lc->postvars['startdate']['year'].
+		'-'.$lc->postvars['startdate']['month'].
+		'-'. $lc->postvars['startdate']['day'];
+	$enddate = $lc->postvars['enddate']['year'].
+		'-'.$lc->postvars['enddate']['month'].
+		'-'. $lc->postvars['enddate']['day'];
+	$starttime = $startdate.' 00:00:00';
 	$endtime = $enddate.' 23:59:59';
 
 	$semesterObj->dateStart = $startdate;
@@ -156,6 +156,7 @@ function makeCourse($db, &$u, &$lc, &$t){
 	$courses->_saveToDB();
 	return mysql_insert_id();
 }
+
 
 function makeClass($db, &$u, &$lc, &$t){
 
@@ -274,27 +275,37 @@ function makeClass($db, &$u, &$lc, &$t){
 	}
 }
 
-function addRun($db,&$u,&$lc,&$t){
-        $lc->templateName = 'teacherclass_add';
+	/**
+	 * Show the form to add a course/class
+	 * this is intended only for simple mode
+	 */
+	function newClassRun($db,&$u,&$lc,&$t){
+		$this->sectionTitle = 'Add a Class';
+		$this->inactivelinks = array( 'Add a Class' );
 
-	$this->sectionTitle = 'Add a Class';
-	$this->inactivelinks = array( 'Add a Class' );
+		$lc->postvars['semesterYear']['month'] = 1;
+		$lc->postvars['semesterYear']['day'] = 1;
 
-	$lc->postvars['semesterYear']['month'] = 1;
-	$lc->postvars['semesterYear']['day'] = 1;
-	$lc->postvars['classtype'] = "Test";
+		$t['startDateValue'] = 0;
+		$t['startDateName'] = 'startdate';
 
-	$hasErrors = false;
-	
-	$bl_date_start = strtotime($lc->postvars['startmonth']. '/'. $lc->postvars['startday']. '/'.$lc->postvars['startyear']);
-	$bl_date_end   = strtotime($lc->postvars['endmonth']. '/'. $lc->postvars['endday']. '/'.$lc->postvars['endyear']);
-	//Check Start and end date
-	
-	if ($lc->postvars['submit']) {
+		$t['endDateValue'] = time()+ (86400*365); //one year form now
+		$t['endDateName'] = 'enddate';
+
+	}
+
+
+	function saveClassRun($db,&$u,&$lc,&$t){
+		$hasErrors = false;
+		
+		//Check Start and end date
+		$bl_date_start = strtotime($lc->postvars['startdate']['month']. '/'. $lc->postvars['startdate']['day']. '/'.$lc->postvars['startdate']['year']);
+		$bl_date_end   = strtotime($lc->postvars['enddate']['month']. '/'. $lc->postvars['enddate']['day']. '/'.$lc->postvars['enddate']['year']);
+
 
 		if ($bl_date_start >= $bl_date_end){       
 			$t['error'][] = '* Semester date must come before the semester date end';
-		}	
+		}
 
 		if(!validateLength($lc->postvars['coursename'],1))
 			$t['error'][] = '* Please enter a class name';
@@ -304,12 +315,24 @@ function addRun($db,&$u,&$lc,&$t){
 		}else{
 			$lc->postvars['id_semester'] = $this->makeSemester($db, $u, $lc, $t);
 			$lc->postvars['id_course'] = $this->makeCourse($db, $u, $lc, $t);
+			$lc->postvars['classtype'] = "Inet";
 			$this->makeClass($db, $u, $lc, $t);
-			$lc->templateName = 'teacherclass_added';	
+			updateSessionVars($db, $u);
+
+			$this->presentor = 'redirectPresentation';
+			$u->addSessionMessage("Class was successfully added.");
+			$t['url'] = appurl('classmgr');
+return;
 		}
-		updateSessionVars($db, $u);
+
+		//if errors, use old template name.
+		$lc->templateName = 'teacherclass_newClass';
+		$t['endDateName'] = 'enddate';
+		$t['endDateValue'] = $bl_date_end;
+		$t['startDateName'] = 'startdate';
+		$t['endDateValue'] = $bl_date_start;
 	}
-}
+
 
 function deleteRun($db,&$u,&$lc,&$t){
 

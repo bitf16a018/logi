@@ -1,14 +1,13 @@
 <?
-/*
- *
- * Service will act as a gateway into the rest of the
- * application.
- *
- */
 
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_class.php');
  
+/**
+ * Service acts as a gateway into the managing all aspects
+ * of a classroom.
+ */
 class classmgr extends FacultyService {
 
 	var $presentor='htmlPresentation';
@@ -17,54 +16,27 @@ class classmgr extends FacultyService {
 	var $navlinks = array (
 		''=>''
 		);
-	/*var $navlinks = array (
-		'Classroom Manager' => 'display',
-		'Lessons' => 'lessonManager/',
-		'Objectives' => 'lessonObjectives/',
-		'Webliography' => 'lessonWebliography/',
-		'Assignments' => 'assignmentManage/',
-		'Content' => 'lessonContent/',
-		'Presentations' => 'studentPresentation/'
-	);
-*/
 
-/*
- *
- * Event will present a list of all available activities in the
- * classmgr app.
- *
- * Input data:
- * Output data:
- *
- */
-	function Run(&$db,&$u,&$lc,&$t) 
-	{
+
+	/**
+	 * Event will present a list of all available activities in the
+	 * classmgr app.
+	 *
+	 * Input data:
+	 * Output data:
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName='main_main';
-//auto-comment		$lc->templateStyle = 'private';
 		$this->authorizer = 'facultyGroupCheck';
-		if ((int)$lc->postvars['semester'] > 0)
-		{	$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];	
+		if ((int)$lc->postvars['semester'] > 0) {
+			$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];	
+		} else {
+/*
+                	}
+//*/
 		}
-		else
-		{
-			if(!MODULE_SIMPLE_MODE){
-				if(count($u->classesTaught)<=0){
-                		$t['url'] = APP_URL . "classmgr/teacherclass/event=add";
-                        	$this->presentor = 'redirectPresentation';
-			}
-                }
 
-		}
-		//$u->sessionvars['classmgr']['currentsemester'] = 0;
-		if ((int)$u->sessionvars['classmgr']['currentsemester'] <= 0)
-		{	
-			// __FIXME__ need to find a method for loading current semester
-			//pull from db and stuff in session
-			
-			
-			$db->queryOne("SELECT semesters.id_semesters FROM semesters INNER JOIN classes ON semesters.id_semesters=classes.id_semesters WHERE facultyId='". $u->username ."'");
-			$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];		
-		}
 		
 		$id_semesters = (int)$u->sessionvars['classmgr']['currentsemester'];
 		if ($id_semesters > 0 ) {
@@ -79,47 +51,8 @@ class classmgr extends FacultyService {
 		$t['form'] = $f->ToHTML();
 		
 		
-		// List out my classes based on the above 'classmgr'currentsemester'
-	
-		if ((int)$u->sessionvars['classmgr']['currentsemester'] <= 0)
-		{ 	
-			$t['classes'] = $u->classesTaught;
-			// roll through user active classes or something
-			
-		} else 
-		{			
-			$sql = '
-			SELECT A.*, B.courseName FROM classes as A
-			INNER JOIN courses as B ON A.id_courses=B.id_courses
-			WHERE A.facultyId=\''.$u->username.'\'AND A.id_semesters='. $u->sessionvars['classmgr']['currentsemester'].'
-			ORDER BY B.courseName
-			';
-			$db->query($sql);
-			//echo '<h1 style="color: red" align="center"><blink>Under Construction</blink></h1>';
-			$t['classes'] = array(); // casting 
-			
-			while ($db->next_record())
-			{
-				$t['classes'][] = $db->Record;
-			}
-			
-		}
-		
+		$t['classes'] = LC_Class::getActiveClassesForFaculty($u->username);
 	}
-		
-/*
- * Displays the current defined semesters 
- *
- * Input data: semester ID
- * Output data: send data to template with dynamic links mapping to a list of
- * classes being taught in the specific semester 
- */
-
-	function selectSemesterRun(&$db,&$u,&$lc,&$t) {
-		$lc->templateName = 'displaySemesters_main';	
-//auto-comment		$lc->templateStyle = 'private';
-	}
-
 }
 
 ?>
