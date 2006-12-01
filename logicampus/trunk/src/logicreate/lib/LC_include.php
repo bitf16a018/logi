@@ -316,7 +316,7 @@ class lcSystem {
 			$obj->user->sessionvars['_privMsgs'] = $t['_privMsgs'];
 		 }
 
-			if (DEBUG) {
+			if (defined('DEBUG') && DEBUG) {
 				$e =& ErrorStack::_singleton();
 				if ($e->count) { 
 
@@ -414,7 +414,7 @@ END;
 				system("echo $log >> /tmp/lcerrlog/$date.log");
 				}
 			}
-			
+
 	}
 
 }
