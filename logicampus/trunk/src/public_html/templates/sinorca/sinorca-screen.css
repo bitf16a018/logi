@@ -202,6 +202,11 @@ acronym, .titleTip {
   margin: 0 0 0 13em;
   padding: 0.5mm 5mm 5mm 5mm;
   border-left: 1px solid rgb(153,153,153);
+  /* complete hack for IE5 to have a specific width */
+  width:800px;
+  voice-family: "\"}\"";
+  /* leave other browsers to decide the width */
+  width:auto;
 }
 
 #main-copy p {
