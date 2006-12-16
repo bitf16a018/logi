@@ -177,9 +177,14 @@ function makeClass($db, &$u, &$lc, &$t){
 	if ($new_id_class = mysql_insert_id()) {
 		// add section numbers
 		foreach ($a_sec_numbers as $pointer=>$snum) {
+/*
+//MAK
+//continue to add section numbers even if they are 0.
+// this is required for other linking in the system.
 			if ((int)$snum <= 0) {
 				continue;
 			}
+*/
 			$sql = '
 			INSERT INTO class_sections
 			SET sectionNumber='.(int)$snum. ',
