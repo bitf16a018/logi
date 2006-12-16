@@ -92,33 +92,6 @@ button{
 
 	
 	/**
-	 *	Datagrid
-	 */
-	#datagrid table 
-	{	border: 1px solid silver;
-	}
-	#datagrid table tr th 
-	{	background-color: #9C0000;
-		color: white;
-	}
-	#datagrid table tr th a 
-	{	color: white;
-	}
-	#datagrid table tr td 
-	{	padding: 3px;
-	}
-
-	#datagrid table tr td.error 
-	{	background-color: #FF84BD;
-	}
-	#datagrid table tr.even 
-	{	/*background-color: white; */
-	}
-	#datagrid table tr.odd 
-	{	background-color: #EEEEEE;
-	}
-	
-	/**
 	 *	Section Header
 	 */
 

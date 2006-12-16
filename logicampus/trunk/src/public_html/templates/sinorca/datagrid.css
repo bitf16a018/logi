@@ -1,4 +1,3 @@
-
 	/**
 	 *	Old Datagrid
 	 */
@@ -51,7 +50,7 @@
 		border: 1px solid silver;
 	}
 	#datagrid table tr th {
-		background-color: #9C0000;
+		background-color: #003399;
 		color: white;
 	}
 	#datagrid table tr th a {

@@ -19,6 +19,7 @@
 
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  media="screen" title="Sinorca (screen)" />
+    <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>datagrid.css"  media="screen" title="Sinorca (screen)" />
     <link rel="stylesheet alternative" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen-alt.css" media="screen" title="Sinorca (alternative)" />
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-print.css" media="print" />
 
