@@ -112,28 +112,52 @@ class enrollment extends AdminService {
 		$db->query("select classes.*, courses.* from classes, courses 
 				where classes.id_semesters=$semesterId 
 				and classes.id_courses = courses.id_courses order by courses.courseFamily, courses.courseNumber, courseName");
-		while($db->next_record()) {
-			$x = explode("\n",$db->Record['sectionNumbers']);
+		while($db->nextRecord()) {
+			$x = explode("\n",$db->record['sectionNumbers']);
 			foreach($x as $k=>$v) { 
-				$c[$v] = $db->Record['courseFamily']." ".
-				$db->Record['courseNumber']." - ".$db->Record['courseName']." - ".
-				" ($v) - ".$db->Record['facultyId'];
+				$classSectionId = $db->record['id_classes']."_".sprintf('%04d',$v);
+				$c[$classSectionId] = $db->record['courseFamily']." ".
+				$db->record['courseNumber']." - ".$db->record['courseName']." - ".
+				" (sec: ".sprintf('%04d',$v).") - ".$db->record['facultyId'];
 			}
 		}
 		$t['courses'] = makeOptions($c);
 	}
 
 
-	function addrun(&$db,&$u,&$lc,&$t) {
-		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$semesterId = (int)$u->sessionvars['enrollmentSemesterId'];
 
 		$name = addslashes(stripslashes($lc->postvars['username']));
-		$sectionNumber = (int)$lc->postvars['id'];
+
+		list($classId, $sectionNumber) = explode('_',$lc->postvars['id']);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
+
 		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+
+
 		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
+
+
+
+		$db->query("SELECT pkey from lcUsers where username = '".$name."'");
+		$db->nextRecord();
+		$userId = $db->record['pkey'];
+
+		$db->query("DELETE FROM class_enrollment 
+			WHERE student_id='".$userId."' 
+			AND class_id=".$classId." 
+			AND section_number=".$sectionNumber." 
+			AND semester_id=".$semesterId);
+
+		$db->query("INSERT INTO class_enrollment (class_id,student_id,section_number,active,semester_id,enrolled_on) 
+			VALUES ('".$classId."','".$userId."','".$sectionNumber."',1,".$semesterId.",".time().")");
+
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
 	}
+
 
 	function activaterun (&$db,&$u,&$lc,&$t) {
 		$name = addslashes(stripslashes($lc->getvars['username']));

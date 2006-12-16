@@ -9,7 +9,7 @@ Use the form below to add the student <i><?=$t['username'];?></i> to the
 selected class/section. 
 <form method='post' action='<?=modurl("enrollment/event=add");?>'>
 	<input type='hidden' name='username' value='<?=$t['username'];?>'>
-	<select name='id'><?=$t['courses'];?></select>
+	<select name="id"><?=$t['courses'];?></select>
 	<input id="submit_enrollment" type="submit" value='Add'>
 </form>
 <hr>
