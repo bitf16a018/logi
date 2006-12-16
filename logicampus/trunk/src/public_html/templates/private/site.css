@@ -1,271 +1,315 @@
-  body, td, table, p, a {
-    font-family: Arial, Helvetica;
-    font-size: 11px;
-  }
-
-  H1, H2, H3, H4, H5 {
-	  margin:1px;
-  }
-
-  UL {
-	  margin:0px;
-	  padding-left:15px
-  }
-
-  .lightbackground
-  {
-  	background-color: #eeeeee;
-  }
-
-  .grayoutline
-  {
-  	border: 1px solid silver;
-  }
-
-	#tabs table tr td a {
-		color:white; 
-		padding:2px 10px;
-	}
-
-	#tabs table tr td.home {
-		font-weight:bold;
-		font-variant:small-caps;
-	}
-
-	#tabs table tr td.last_tab {
-		background: url("nonexistant.png") #036;
-	}
-
-	#menu table tr td {
-		padding: 2px 2px 2px 10px;
-	}
-
-	#menu table tr td.menu_head {
-		padding: 2px 2px 2px 10px;
-		font-variant:small-caps;
-		font-size:100%;
-		color:#669;
-		background: #CCC;
-		font-weight: bold;
-	}
-
-	#menu table tr td.menuitem:after {
-		content: '<hr>';
-	}
-
-
-	#colored table tr td.blue {
-		color:white; 
-		background: #036;
-		padding:2px 10px;
-	}
-textarea{
-  border: 1px solid #777777;
-  background: #efefef;
-  font: 11px verdana;
-  color: #333333;
-
+body,td,table,p,a
+{
+        font-family:Arial, Helvetica;
+        font-size:11px;
 }
 
-select{
-  border: 1px solid #777777;
-  background: #efefef;
-  font: 11px verdana;
-  color: #333333;
+H1,H2,H3,H4,H5
+{
+        margin:1px;
 }
 
-input{
-  border: 1px solid #999999;
-  background: #efefef;
-  font: 11px verdana;
-  color: #333333;
+UL
+{
+        padding-left:15px;
+        margin:0;
 }
 
-button{
-  background-color: #efefef;
-  font: 11px verdana;
-  color: #333333;
-  border: 1px solid #333333;
+.lightbackground
+{
+        background-color:#eee;
 }
 
+.grayoutline
+{
+        border:1px solid silver;
+}
 
+#tabs table tr td a
+{
+        color:#FFF;
+        padding:2px 10px;
+}
 
-	
-	/**
-	 *	Section Header
-	 */
+#tabs table tr td.home
+{
+        font-weight:700;
+        font-variant:small-caps;
+}
 
-	#sectionheader {
-		padding: 3px;
-		background-color:#003062;
-		color:white;
-	}
-	#sectionheader th {
-		color: white;
-	}
-	#sectionheader a {
-		color: white;
-		padding:1px 7px 2px 7px;
-	}
-	#sectionheader b {
-		padding: 4px;
-		color:#F0F8FF;
-	}
-	#sectionheader H3 {
-		margin-bottom:2px;
-		margin-top:2px;
-	}
-	#applinks {
-		background-color:#EEEEEE;
-		border-top: 1px solid white;
-		padding: 3px;
-	}
-	#applinks b.title {
-		padding: 3px;
-		color: #36c;
-		font-weight: bold;
-		background-color: #EEEEEE;
-	}
-	
-	#applinks b, #applinks b a {
-		padding: 4px;
-		color: white;
-		background-color:#003062;
-	}
-		
-	#applinks a.visited {
-		color: blue;
-	}	
-	
-	
-	
-	/**
-	 *	Other
-	 */
-	td.coursemaintitle {
-		background-color: #9C0000;
-		font-weight: bold;
-		padding-left: 15px;
-		margin-bottom: 3px;
-		color: white;
-	}
-	tr.bartitle {
-		background-color: #9C0000;
-		color: white;
-	}
-	tr.bartitle td a {
-		color: white;
-		font-weight:bold;
-	}
+#tabs table tr td.last_tab
+{
+        background:url("nonexistant.png") #036;
+}
 
-	.bartitle td {
-	  padding-left: .4em;
-	  padding-top: .4em;
-	  padding-bottom: .4em;
-	}
+#menu table tr td
+{
+        padding:2px 2px 2px 10px;
+}
 
+#menu table tr td.menu_head
+{
+        font-variant:small-caps;
+        font-size:100%;
+        color:#669;
+        background:#CCC;
+        font-weight:700;
+        padding:2px 2px 2px 10px;
+}
 
-	TD.portalbox {
-		background-color: #9C0000;
-		font-weight: bold;
-		color: white;
-		font-size: 9pt;
-		text-align: center;
-		font-family: verdana, helvetica, sans-serif;
-	}
-	
-	TD.portalbox a
-	{	color: white;
-	}
-	TD.portalbox a:hover
-	{	color: white;
-	}
-	
-	
-	/**
-	 * Forums
-	 */
-	.forumsection {
-		background-color: #eeeeee;
-	}
+#menu table tr td.menuitem:after
+{
+        content:'<hr>';
+}
 
-	.tabletitle {
-		background-color: #9C0000;
-		color: white;
-		font-size: 120%;
-		font-weight: bold;
-	}
+#colored table tr td.blue
+{
+        color:#FFF;
+        background:#036;
+        padding:2px 10px;
+}
 
-	.titlehead {
-		background-color: #9C0000;
-		color: white;
-	}
-	 
-	TABLE.grayoutline {
-		border: 1px solid silver;
-	}
+textarea
+{
+        border:1px solid #777;
+        background:#efefef;
+        font:11px verdana;
+        color:#333;
+}
 
-	DIV.hover_button:hover {
-		background-color:silver;
-		border:1px solid gray;
-	}
+select
+{
+        border:1px solid #777;
+        background:#efefef;
+        font:11px verdana;
+        color:#333;
+}
 
-	DIV.hover_button {
-		border:1px solid white;
-	}
+input
+{
+        border:1px solid #999;
+        background:#efefef;
+        font:11px verdana;
+        color:#333;
+}
 
-	DIV.forum_moderator_nav {
-
-		background-color:#CECECE;
-		width: 300px;
-		text-align:center;
-		padding:2px;
-		border-top: 1px solid silver;
-		border-left: 1px solid silver;
-		border-right: 1px solid black;
-		border-bottom: 1px solid black;
-	}
-
-	DIV.forum_quote_shell {
-		width:90%;
-		margin-left:4%;
-	}
-
-	BLOCKQUOTE.forum_quote {
-		background-color: #CDCECD;
-		border: 1px dashed black;
-		width:100%;
-		text-align:left;
-		padding:1px 7px 1px 7px;
-		margin:0px;
-	}
-
-	DIV.forum_code_shell {
-		width:90%;
-		margin-left:4%;
-	}
-
-	BLOCKQUOTE.forum_code {
-		background-color: #6C6C6C;
-		color: #18F218;
-		border: 1px dashed black;
-		width:100%;
-		text-align:left;
-		padding:1px 7px 1px 7px;
-		margin:0px;
-	}
-
+button
+{
+        background-color:#efefef;
+        font:11px verdana;
+        color:#333;
+        border:1px solid #333;
+}
 
 	/**
-	 *	Private Messages
-	 */
-	.pmmessage_header
-	{	background-color: #003062;
-		color: white;
-	}
-	tr.row1
-	{	background-color: #eeeeee;
-	}
-	td.header2
-	{	background-color: #eeeeee;
-	}
+         *      Section Header
+         */
+#sectionheader
+{
+        background-color:#003062;
+        color:#FFF;
+        padding:3px;
+}
+
+#sectionheader th
+{
+        color:#FFF;
+}
+
+#sectionheader a
+{
+        color:#FFF;
+        padding:1px 7px 2px;
+}
+
+#sectionheader b
+{
+        color:#F0F8FF;
+        padding:4px;
+}
+
+#sectionheader H3
+{
+        margin-bottom:2px;
+        margin-top:2px;
+}
+
+#applinks
+{
+        background-color:#EEE;
+        border-top:1px solid #FFF;
+        padding:3px;
+}
+
+#applinks b.title
+{
+        color:#36c;
+        font-weight:700;
+        background-color:#EEE;
+        padding:3px;
+}
+
+#applinks b,#applinks b a
+{
+        color:#FFF;
+        background-color:#003062;
+        padding:4px;
+}
+
+#applinks a.visited
+{
+        color:blue;
+}
+
+	/**
+         *      Other
+         */
+td.coursemaintitle
+{
+        background-color:#9C0000;
+        font-weight:700;
+        padding-left:15px;
+        margin-bottom:3px;
+        color:#FFF;
+}
+
+tr.bartitle
+{
+        background-color:#9C0000;
+        color:#FFF;
+}
+
+tr.bartitle td a
+{
+        color:#FFF;
+        font-weight:700;
+}
+
+.bartitle td
+{
+        padding-left:.4em;
+        padding-top:.4em;
+        padding-bottom:.4em;
+}
+
+TD.portalbox
+{
+        background-color:#9C0000;
+        font-weight:700;
+        color:#FFF;
+        font-size:9pt;
+        text-align:center;
+        font-family:verdana, helvetica, sans-serif;
+}
+
+TD.portalbox a
+{
+        color:#FFF;
+}
+
+TD.portalbox a:hover
+{
+        color:#FFF;
+}
+
+	/**
+         * Forums
+         */
+.forumsection
+{
+        background-color:#eee;
+}
+
+.tabletitle
+{
+        background-color:#9C0000;
+        color:#FFF;
+        font-size:120%;
+        font-weight:700;
+}
+
+.titlehead
+{
+        background-color:#9C0000;
+        color:#FFF;
+}
+
+TABLE.grayoutline
+{
+        border:1px solid silver;
+}
+
+DIV.hover_button:hover
+{
+        background-color:silver;
+        border:1px solid gray;
+}
+
+DIV.hover_button
+{
+        border:1px solid #FFF;
+}
+
+DIV.forum_moderator_nav
+{
+        background-color:#CECECE;
+        width:300px;
+        text-align:center;
+        border-top:1px solid silver;
+        border-left:1px solid silver;
+        border-right:1px solid #000;
+        border-bottom:1px solid #000;
+        padding:2px;
+}
+
+DIV.forum_quote_shell
+{
+        width:90%;
+        margin-left:4%;
+}
+
+BLOCKQUOTE.forum_quote
+{
+        background-color:#CDCECD;
+        border:1px dashed #000;
+        width:100%;
+        text-align:left;
+        margin:0;
+        padding:1px 7px;
+}
+
+DIV.forum_code_shell
+{
+        width:90%;
+        margin-left:4%;
+}
+
+BLOCKQUOTE.forum_code
+{
+        background-color:#6C6C6C;
+        color:#18F218;
+        border:1px dashed #000;
+        width:100%;
+        text-align:left;
+        margin:0;
+        padding:1px 7px;
+}
+
+	/**
+         *      Private Messages
+         */
+.pmmessage_header
+{
+        background-color:#003062;
+        color:#FFF;
+}
+
+tr.row1
+{
+        background-color:#eee;
+}
+
+td.header2
+{
+        background-color:#eee;
+}
