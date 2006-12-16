@@ -22,7 +22,7 @@ class gradesbystudent extends FacultyService {
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
 		'View Grades by Student' => 'gradesbystudent/',
-		'Control Panel' => 'main/event=controlPanel/'
+		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
 	function Run(&$db,&$u,&$lc,&$t) {
