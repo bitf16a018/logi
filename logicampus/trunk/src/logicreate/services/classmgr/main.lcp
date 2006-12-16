@@ -32,12 +32,10 @@ class classmgr extends FacultyService {
 		if ((int)$lc->postvars['semester'] > 0) {
 			$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];	
 		} else {
-/*
-                	}
+//*
+               	}
 //*/
-		}
 
-		
 		$id_semesters = (int)$u->sessionvars['classmgr']['currentsemester'];
 		if ($id_semesters > 0 ) {
 			$semesterObj = semesterObj::_getFromDB($id_semesters, 'id_semesters');	
@@ -49,9 +47,19 @@ class classmgr extends FacultyService {
 		$f->getForm('semestersfaculty', array('semester'=>$u->sessionvars['classmgr']['currentsemester']));
 		$f->action = modurl('main/');
 		$t['form'] = $f->ToHTML();
-		
-		
+
+
 		$t['classes'] = LC_Class::getActiveClassesForFaculty($u->username);
+
+		foreach ($t['classes'] as $classObj) {
+			$db->query('
+				SELECT count(class_enrollment_id) as total_enrollment
+				FROM class_enrollment
+				WHERE
+					class_id='.$classObj->id_classes);
+			$db->nextRecord();
+			$t['classEnrollmentStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_enrollment']);
+		}
 	}
 }
 
