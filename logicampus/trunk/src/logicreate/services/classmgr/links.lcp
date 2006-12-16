@@ -19,7 +19,7 @@
  * output: table view of links and sub-links
  */
 
- include_once(LIB_PATH.'LC_Categories.php');
+ include_once(LIB_PATH.'lc_categories.php');
 class links extends FacultyService   {
 
 	var $presentor = "htmlPresentation";

@@ -16,7 +16,7 @@
  * Also, form names used in templates should also be the same name as what was in the DB.
  */
 
-include_once(LIB_PATH."LC_Categories.php");
+include_once(LIB_PATH."lc_categories.php");
 include_once(LIB_PATH."LC_html.php");
 include_once(LIB_PATH."SiteForms.php");
 include_once(LIB_PATH."documentLibraryLib.php");
