@@ -35,7 +35,7 @@ class gradebook extends FacultyOnlyService {
 		'Add Entry' => 'entry/event=add/',
 		'View Grades by Student' => 'gradesbystudent/',
 		'Build Printable Report' => 'report/',
-		'Control Panel' => 'main/event=controlPanel/'
+		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
 	var $inactivelinks = array('Gradebook');
@@ -100,7 +100,7 @@ class gradebook extends FacultyOnlyService {
 		$lc->templateName='main_controlpanel';
 //auto-comment		$lc->templateStyle = 'private';
 
-		$this->sectionTitle = 'Gradebook Control Panel';
+		$this->sectionTitle = 'Gradebook Setup';
 
 		if ($u->sessionvars['message']) {
 			$t['message'] = $u->sessionvars['message'];

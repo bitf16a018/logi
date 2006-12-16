@@ -36,7 +36,7 @@ class student extends FacultyService {
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
-		'Control Panel' => 'main/event=controlPanel/'
+		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
 	function Run(&$db,&$u,&$lc,&$t) {

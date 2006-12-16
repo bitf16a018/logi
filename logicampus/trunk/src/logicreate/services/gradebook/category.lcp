@@ -41,7 +41,7 @@ class category extends FacultyService {
 		'Add Category' => 'category/event=add/',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
-		'Control Panel' => 'main/event=controlPanel/'
+		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
 	var $sectionTitle = 'Category';

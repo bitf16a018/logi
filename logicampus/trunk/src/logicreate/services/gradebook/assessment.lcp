@@ -27,7 +27,7 @@ class assessment extends FacultyOnlyService {
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
-		'Control Panel' => 'main/event=controlPanel/'
+		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
 /*

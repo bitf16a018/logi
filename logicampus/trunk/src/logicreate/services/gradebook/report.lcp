@@ -28,7 +28,7 @@ class report extends FacultyOnlyService {
 		'Add Entry' => 'entry/event=add/',
 		'View Grades by Student' => 'gradesbystudent/',
 		'Build Printable Report' => 'report/',
-		'Control Panel' => 'main/event=controlPanel/'
+		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
 /*
