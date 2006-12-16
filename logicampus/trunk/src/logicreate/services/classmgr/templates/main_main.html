@@ -1,15 +1,30 @@
 
 <h3><?=lct('Classroom Overview')?> - <?=$t['semesterDisplay'];?></h3>
 
-<?=lct('The following is a list of classes you are teaching. To select
-another semester, select the semester you wish to view in the drop
-down and press "Go".')?>
-
 <table cellpadding="2" cellspacing="2" border="0" bgcolor="silver" width="100%">
 <tr>
 	<td bgcolor="white">
 
+<? if( LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE') ){ ?>
+<?=lct('The following is a list of classes you are teaching. To select
+another semester, select the semester you wish to view in the drop
+down and press "Go".')?>
+
+
 	<?=$t['form'];?>
+<? } ?>
+
+<? if( LcSettings::isModuleOn('MODULE_SELF_ENROLLMENT') ){ ?>
+
+<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+<tr><td class="portalbox"><b>Class Management</b></td></tr>
+<tr><td style="font-size: 9px;"></td></tr>
+<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=newClass' ?>">Add New Class</a></td></tr>
+<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/' ?>">Delete a Class</a></td></tr>		
+</table>
+<? } ?>
+
+
 	<table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<?php
 		
@@ -39,7 +54,7 @@ down and press "Go".')?>
 				<tr class="bartitle">
 					<td>&nbsp;<a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>"><?=$class_record['courseName'];?></a></td>
 					<td align="right"><a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>"><?=lct('classroom manager')?></a>&nbsp;</td>
-					<td width="19"><a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>"><img width="19" src="<?=IMAGES_URL;?>lblue_arrow.gif" border="0"></a></td>
+					<td width="19"><a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>">&raquo;</a></td>
 				</tr>
 				<tr>
 					<td valign="top">
@@ -89,15 +104,4 @@ down and press "Go".')?>
 </tr>
 
 </table>
-
-<? if(MODULE_SELF_ENROLLMENT){ ?>
-
-<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
-<tr><td class="portalbox"><b>Class Management</b></td></tr>
-<tr><td style="font-size: 9px;"></td></tr>
-<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=newClass' ?>">Add New Class</a></td></tr>
-<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/' ?>">Delete a Class</a></td></tr>		
-</table>
-<? } ?>
-
 
