@@ -222,7 +222,7 @@ class itemEditor extends HercAuth {
 		$t['mid'] = $arg->getvars['mid'];
 
 		include_once(LIB_PATH."LC_html.php");
-		include_once(LIB_PATH."LC_Categories.php");
+		include_once(LIB_PATH."lc_categories.php");
 		include_once(LIB_PATH."Tree.php");
 		$link = MenuItem::get($arg->getvars[3]);
 		$t[menuItem] = $link;

@@ -20,7 +20,7 @@
  * MGK
  */
 
-include_once(LIB_PATH."LC_Categories.php");
+include_once(LIB_PATH."lc_categories.php");
 include_once(LIB_PATH."LC_html.php");
 
 

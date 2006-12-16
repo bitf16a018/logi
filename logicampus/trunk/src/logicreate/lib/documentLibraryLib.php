@@ -13,7 +13,7 @@
  ***************************************************/
 
 
-include_once(LIB_PATH."LC_Categories.php");
+include_once(LIB_PATH."lc_categories.php");
 
 define (FOLDER_EDIT,2);
 define (FOLDER_BROWSE,1);
