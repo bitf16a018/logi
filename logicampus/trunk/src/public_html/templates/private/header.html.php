@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 	
-	<TITLE><?=$t['title']?></TITLE>
+	<TITLE>LogiCampus <?=$t['title']?></TITLE>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 	<meta http-equiv="keywords" content="">
