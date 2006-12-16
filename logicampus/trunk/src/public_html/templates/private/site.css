@@ -176,18 +176,24 @@ button{
 		margin-bottom: 3px;
 		color: white;
 	}
-	tr.bartitle
-	{	background-color: #9C0000;
+	tr.bartitle {
+		background-color: #9C0000;
 		color: white;
 	}
-	tr.bartitle td a
-	{	color: white;
+	tr.bartitle td a {
+		color: white;
 		font-weight:bold;
 	}
-	
-	
-	TD.portalbox
-	{	background-color: #9C0000;
+
+	.bartitle td {
+	  padding-left: .4em;
+	  padding-top: .4em;
+	  padding-bottom: .4em;
+	}
+
+
+	TD.portalbox {
+		background-color: #9C0000;
 		font-weight: bold;
 		color: white;
 		font-size: 9pt;

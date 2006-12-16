@@ -306,12 +306,17 @@ dd {
   background-color: rgb(0,51,153);
   margin: 0;
   font-weight:bold;
-  padding-left: 2mm;
+}
+
+
+.bartitle td {
+  padding-left: .4em;
+  padding-top: .4em;
+  padding-bottom: .4em;
 }
 
 .bartitle a {
   color: white;
-  background-color: rgb(0,51,153);
   font-weight:bold;
   padding:0px;
 }
