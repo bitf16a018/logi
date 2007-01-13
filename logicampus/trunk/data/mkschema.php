@@ -34,7 +34,7 @@ while ($entry =  $d->read() ) {
 	if ($entry == '.' || $entry == '..') continue;
 	$file = $location.$entry.'/META-INFO/setup.sql';
 	if (file_exists($file) ) {
-		$filesToProcess[$entry] = $file;
+		$filesToProcess['serv_'.$entry] = $file;
 	}
 }
 $d->close();

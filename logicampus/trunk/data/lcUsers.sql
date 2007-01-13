@@ -12,4 +12,3 @@ INSERT INTO lcUsers VALUES (16,'student7',MD5('student7'),'student7@localhost','
 INSERT INTO lcUsers VALUES (17,'student8',MD5('student8'),'student8@localhost','|public|reg|student|',NOW(),2);
 INSERT INTO lcUsers VALUES (18,'student9',MD5('student9'),'student9@localhost','|public|reg|student|',NOW(),2);
 INSERT INTO lcUsers VALUES (19,'student10',MD5('student10'),'student10@localhost','|public|reg|student|',NOW(),2);
-
