@@ -1,21 +1,32 @@
-<?php
-	if ( file_exists('defines.php') ) {
-		include('defines.php');
-		header('Location: '.APP_URL);
-		exit();
-	}
-
-	include('defines.template.php');
-?><html>
+<html>
+<head><title>LogiCampus Installation</title></head>
 <body>
 
 
-	<h2 style="margin:1px;">Installation</h2>
+	<h2 style="margin:1px;">First Run</h2>
 <div style="background-color:#9C0000;color:white">
 &nbsp;
 </div>
 
-<br/>
+<p>
+This is your first run, you must setup a database connection.
+</p>
+<fieldset style="background-color:#DDE;font-family:Helvetica,Arial;">
+<legend style="font-size:120%;">Database</legend>
+	<ul>
+		<li>Database Host: localhost</li>
+		<li>Database User: root</li>
+		<li>Database Pass: <i>(leave unset)</i></li>
+		<li>Database Name: campus</li>
+	</ul>
+</fieldset>
+
+<p>
+Once you are done creating the database, you can try to reload this page again with the following button.
+
+<form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
+<input type="submit" value="Retry Installation."/>
+</form>
 
 <form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
 <fieldset style="background-color:#DDE;font-family:Helvetica,Arial;">
@@ -77,7 +88,7 @@ if (isset($_GET['send']) && $_GET['send'] == 'go') {
 		<ol>
 			<li>Web Server Name and/or IP Address: <?php echo $_SERVER['HTTP_HOST'].'/'.$_SERVER['SERVER_ADDR'];?></li>
 			<li>Browser Type: <?php echo $_SERVER['HTTP_USER_AGENT'];?></li>
-			<li>Campus Version: @version.number@@version.extra@</li>
+			<li>Campus Version: 1.1.6a</li>
 			<li>PHP Version: <?php echo PHP_VERSION;?></li>
 			<li>Today's Date: <?php echo  date('m.d.Y');?></li>
 		</ol>
@@ -130,7 +141,7 @@ Build Date: <?php echo LOGICAMPUS_BUILD_DATE;?>
 		$post .="\n";
 		$post .= '&user_agent='.$_SERVER['HTTP_USER_AGENT'];
 		$post .="\n";
-		$post .= '&campus_version=@version.number@@version.extra@';
+		$post .= '&campus_version=1.1.6a';
 		$post .="\n";
 		$post .= '&php_version='.$PHP_VERSION;
 		$post .="\n";

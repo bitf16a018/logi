@@ -73,6 +73,10 @@ include_once(LIB_PATH."lc_SQL.php");
 include_once(LIB_PATH."LC_html.php");
 
 
+	//first time
+	if (file_exists('first_time.php') ) {
+		include('first_time.php');
+	}
 
 // ************* I18N ******************************
 //if get vars, switchlocale, then set a cookie
