@@ -37,7 +37,7 @@ CREATE TABLE `class_forum` (
 	PRIMARY KEY (class_forum_id)
 )TYPE=InnoDB;
 
-CREATE INDEX class_forum_category_idx ON class_forum (class_forum_category_id);  
+CREATE INDEX class_forum_category_idx ON class_forum (class_forum_category_id);
 CREATE INDEX class_idx ON class_forum (class_id);
 
 -- Dumping SQL for project logicampus
@@ -75,11 +75,11 @@ CREATE TABLE `class_forum_post` (
 	PRIMARY KEY (class_forum_post_id)
 )TYPE=InnoDB;
 
-CREATE INDEX is_sticky_idx ON class_forum_post (is_sticky);  
-CREATE INDEX user_idx ON class_forum_post (user_id);  
-CREATE INDEX thread_id ON class_forum_post (thread_id);  
-CREATE INDEX reply_id ON class_forum_post (reply_id);  
-CREATE INDEX class_forum_id ON class_forum_post (class_forum_id);  
+CREATE INDEX is_sticky_idx ON class_forum_post (is_sticky);
+CREATE INDEX user_idx ON class_forum_post (user_id);
+CREATE INDEX thread_id ON class_forum_post (thread_id);
+CREATE INDEX reply_id ON class_forum_post (reply_id);
+CREATE INDEX class_forum_id ON class_forum_post (class_forum_id);
 CREATE INDEX post_datetime ON class_forum_post (post_datetime);
 
 -- Dumping SQL for project logicampus
@@ -120,7 +120,7 @@ CREATE TABLE `class_forum_user_activity` (
 	PRIMARY KEY (class_forum_user_activity_id)
 )TYPE=InnoDB;
 
-CREATE INDEX class_forum_idx ON class_forum_user_activity (class_forum_id);  
+CREATE INDEX class_forum_idx ON class_forum_user_activity (class_forum_id);
 CREATE INDEX user_idx ON class_forum_user_activity (user_id);
 
 -- Dumping SQL for project logicampus
@@ -158,8 +158,8 @@ CREATE TABLE `class_forum_trash_post` (
 	PRIMARY KEY (class_forum_trash_post_id)
 )TYPE=InnoDB;
 
-CREATE INDEX is_sticky_idx ON class_forum_trash_post (is_sticky);  
-CREATE INDEX user_idx ON class_forum_trash_post (user_id);  
-CREATE INDEX thread_id ON class_forum_trash_post (thread_id);  
+CREATE INDEX is_sticky_idx ON class_forum_trash_post (is_sticky);
+CREATE INDEX user_idx ON class_forum_trash_post (user_id);
+CREATE INDEX thread_id ON class_forum_trash_post (thread_id);
 CREATE INDEX reply_id ON class_forum_trash_post (reply_id);
 
