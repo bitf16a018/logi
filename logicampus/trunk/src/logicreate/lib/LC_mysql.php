@@ -16,7 +16,6 @@ class mysql extends DB {
 	 */
 	function connect() {
 
-
 		if ( $this->driverID == 0 ) {
                 #echo "g<Br>";
                 if ($this->persistent=='y') {
@@ -28,7 +27,12 @@ class mysql extends DB {
 				$this->halt();
 			}
 		}
-		mysql_select_db($this->database,$this->driverID);
+
+		if (! @mysql_select_db($this->database,$this->driverID) ) {
+			$this->errorMessage = "Can't select DB (".$this->database.")";
+			return false;
+		}
+		return true;
 	}
 
 
@@ -56,23 +60,15 @@ class mysql extends DB {
 		$resSet = mysql_query($queryString,$this->driverID);
 		$this->row = 0;
 		if ( !$resSet ) {
+
 		    $this->errorNumber = mysql_errno();
 		    $this->errorMessage = mysql_error();
-		    if (substr(strtolower($queryString),0,6)=='select') { 
-#			$f = fopen("/tmp/dberr.txt","a");
-#			$s = date("m/d/y h:i:s A");
-#			$s .= " - ".$_SERVER['REMOTE_ADDR']." - ";
-#			global $PHPSESSID;
-#			$s .= $PHPSESSID." - ".$this->errorNumber." - ".$this->errorMessage."\n-----\n";
-#			$s .= $queryString."\n====================\n";
-#			fputs($f,$s);
-#			fclose($f);
-			}
 			if ($log) {
 			trigger_error('database error: ('.$this->errorNumber.') '.$this->errorMessage.' 
 			<br/> statement was: <br/>
 			'.$queryString);
 			}
+		return false;
 		}
 		if (is_resource($resSet) )
 			$this->resultSet[] = $resSet;
@@ -85,6 +81,7 @@ if ( ($e-$s)>.1) {
 #mail("michael@tapinternet.com","slow query","$queryString");
 }
 		if ($debugmode=="y") {	print "<br>".microtime()."<hr>\n"; }
+		return true;
 	}
 
 
