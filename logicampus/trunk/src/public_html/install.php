@@ -10,6 +10,9 @@
 
 <p>
 This is your first run, you must setup a database connection.
+<?php if ($_GET['install']) { 
+print_r($results);
+ } ?>
 </p>
 <fieldset style="background-color:#DDE;font-family:Helvetica,Arial;">
 <legend style="font-size:120%;">Database</legend>
@@ -25,7 +28,8 @@ This is your first run, you must setup a database connection.
 Once you are done creating the database, you can try to reload this page again with the following button.
 
 <form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
-<input type="submit" value="Retry Installation."/>
+<input type="submit" value="Attempt Installation"/>
+<input type="hidden" name="install" value="1"/>
 </form>
 
 <form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
