@@ -16,14 +16,18 @@ $schemas['registry'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/lcUsers.sql'));
 $schemas['users'] = explode(";\n",$setupFile);
 
-$setupFile = trim(file_get_contents('../data/lcForms_and_lcFormInfo.sql'));
-$schemas['forms'] = explode(";\n",$setupFile);
+$setupFile = trim(file_get_contents('../data/lcForms.sql'));
+$data['forms'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lcFormInfo.sql'));
+$data['forminfo'] = explode(";\n",$setupFile);
+
 
 $setupFile = trim(file_get_contents('../data/lcPerms.sql'));
-$schemas['perms'] = explode(";\n",$setupFile);
+$data['perms'] = explode(";\n",$setupFile);
 
 $setupFile = trim(file_get_contents('../data/lcConfig.sql'));
-$schemas['config'] = explode(";\n",$setupFile);
+$data['config'] = explode(";\n",$setupFile);
 
 $setupFile = trim(file_get_contents('../data/lcGroups.sql'));
 $schemas['groups'] = explode(";\n",$setupFile);
@@ -63,73 +67,85 @@ foreach ($schemas as $filename => $manyDefs) {
 			if (trim($line) == '--') {continue;}
 			if (trim($line) == '#') {continue;}
 			if (trim($line) == '# ') {continue;}
+			if (preg_match("/^#/",trim($line))) {continue;}
+			if (preg_match("/^--/",trim($line))) {continue;}
 
-//			if (strstr($line, '-- ') ) {
-//				continue;
-//			}
 			$cleaner .= $line."\n";
 		}
-		$cleanSchemas[$filename][] = trim($cleaner).";\n";
+		$cleanSchemas[$filename][] = trim($cleaner)."\n";
 	}
 }
-echo "<?\n";
+
+foreach ($data as $filename => $manyDefs) {
+	foreach ($manyDefs as $fullDef) {
+		$lines = explode("\n",$fullDef);
+		$cleaner = '';
+		foreach ($lines as $line) {
+
+			if (trim($line) == '') {continue;}
+			if (trim($line) == '--') {continue;}
+			if (trim($line) == '#') {continue;}
+			if (trim($line) == '# ') {continue;}
+			if (preg_match("/^#/",trim($line))) {continue;}
+			if (preg_match("/^--/",trim($line))) {continue;}
+
+			$cleaner .= $line."\n";
+		}
+		$cleanData[$filename][] = trim($cleaner)."\n";
+	}
+}
+
 foreach ($cleanSchemas as $secionName => $section) {
+	$fileContents = '';
 	foreach ($section as $def) {
 		if (trim ($def) == '') { continue; }
-		echo "\$table = <<<campusdelimeter\n";
-		echo $def;
-		echo "campusdelimeter;\n";
-		echo "\$installTableSchemas[] = \$table;\n";
+		$fileContents .= "\$table = <<<campusdelimeter\n";
+		$fileContents .= $def;
+		$fileContents .= "campusdelimeter;\n";
+		$fileContents .= "\$installTableSchemas[] = \$table;\n";
+		if (strlen($fileContents) > 40000) {
+			writeOutSchemas($fileContents,++$c);
+			$fileContents = '';
+		}
 	}
+	writeOutSchemas($fileContents,++$c);
 }
-echo "\n?>";
+
+$c = 0;
+foreach ($cleanData as $secionName => $section) {
+	$fileContents = '';
+	foreach ($section as $def) {
+		if (trim ($def) == '') { continue; }
+		$fileContents .= "\$table = <<<campusdelimeter\n";
+		$fileContents .= $def;
+		$fileContents .= "campusdelimeter;\n";
+		$fileContents .= "\$installTableSchemas[] = \$table;\n";
+		if (strlen($fileContents) > 40000) {
+			writeOutSchemas($fileContents,++$c,'data_');
+			$fileContents = '';
+		}
+	}
+	writeOutSchemas($fileContents,++$c,'data_');
+}
+
+
+
+
+function writeOutSchemas($contents, $c, $prefix='schema_') {
+	$fileContents = '';
+	$fileContents = "<?\n";
+	$fileContents .= "\$installTableSchemas = array();\n";
+	$fileContents .= $contents;
+
+	$fileContents .= "\n?>";
+	$f = fopen('../src/public_html/install/'.$prefix.sprintf('%02d',$c).'.php','w');
+	fputs($f,$fileContents);
+	fclose($f);
+}
+
+
 /*
  *
- *
- *
-
-if [ ! $3 ]
-then
-	db='logicampus';
-else
-	db=$3;
-fi
-
-if [ -d '../src/' ] 
-then
-	location='../src/logicreate/services/'
-fi
-
-
-if [ -d '../services/' ] 
-then
-	location='../services/'
-fi
-
-if [ ! $location ]
-then
-	echo 'you need to run this from either the cvs/data dir or'
-	echo 'src/logicreate/scripts/'
-	exit 1
-fi
-
-
-for x in `find $location -name 'META-INFO'`
-do
-	echo 'installing setup.sql in '$x;
-	mysql -u $1 -p$2 $db < $x/setup.sql;
-done
-
-
-
-
-
-
-
-
-
-
-
 for x in `echo 'SHOW TABLES' | mysql -u $1 -p$2 $db | tail +2`
 do
 	echo 'DROPPING '$x' from '$db
