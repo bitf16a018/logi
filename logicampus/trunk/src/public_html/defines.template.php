@@ -1,5 +1,22 @@
 <?
 
+
+
+//CHANGE THESE SETTINGS TO MATCH YOUR DATABASE SETUP
+$dsn['default'] = array(
+        'driver'=>'@db.driver@',
+        'host'=>'@db.host@',
+        'user'=>'@db.user@',
+        'password'=>'@db.password@',
+        'database'=>'@db.database@',
+        'persistent'=>'n');
+
+//If you change the default directory layout after unzipping, 
+//  change $relpath, on line 40 of this file.
+//
+//Example, you can place the "logicreate" folder under your Document root
+//  by setting $relpath to "./logicreate/" instead of "../logicreate/";
+
 /*
  * Define base constants
  * DOCUMENT_ROOT	= server's DOCUMENT_ROOT variable
@@ -9,7 +26,6 @@
  * DEFAULT_URL		= if 'no service' in URL, redirect to this URL
  * PICS_URL		= main directory for graphics - use in templates if needed
  */
-
 
 define('LOGICAMPUS_VERSION','@version.number@');
 define('LOGICAMPUS_VERSION_STATUS','@version.extra@');
@@ -21,6 +37,13 @@ define('SITE_DISPLAY_NAME','LogiCampus');
 //	        ^----base      ^------tail
 
 $relpath='../logicreate/';
+if (! file_exists($relpath)) {
+	$relpath='./logicreate/';
+	if (! file_exists($relpath)) {
+		$relpath='../../logicreate/';
+	}
+}
+
 extract($HTTP_SERVER_VARS);
 $PHPSESSID = @$_COOKIE['PHPSESSID'];
 
@@ -93,16 +116,6 @@ $dsn['default'] = array(
         'database'=>'campus',
         'persistent'=>'n');
 */
-
-
-//CHANGE THESE SETTINGS TO MATCH YOUR DATABASE SETUP
-$dsn['default'] = array(
-        'driver'=>'@db.driver@',
-        'host'=>'@db.host@',
-        'user'=>'@db.user@',
-        'password'=>'@db.password@',
-        'database'=>'@db.database@',
-        'persistent'=>'n');
 
 
 #logusagedb_define(LOG_USAGE_DB,<!--logusagedb-->);

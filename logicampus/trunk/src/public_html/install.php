@@ -1,4 +1,11 @@
-<html>
+<?php
+if ($_GET['action']) {
+	header('Content-type: text/plain');
+	header('Content-disposition: attachment;filename="defines.php"');
+	echo (file_get_contents('defines.template.php'));
+	exit();
+}
+?><html>
 <head><title>LogiCampus Installation</title></head>
 <body>
 
@@ -9,7 +16,7 @@
 </div>
 
 <p>
-This is your first run, you must setup a database connection.
+If this is your first run, you must setup a database connection.
 <?php if ($_GET['install']) { 
 print_r($results);
  } ?>
@@ -25,7 +32,7 @@ print_r($results);
 </fieldset>
 
 <p>
-Once you are done creating the database, you can try to reload this page again with the following button.
+Once you are done creating the database, you can try to install LogiCampus with the following button.
 
 <form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
 <input type="submit" value="Attempt Installation"/>
@@ -34,37 +41,18 @@ Once you are done creating the database, you can try to reload this page again w
 
 <form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
 <fieldset style="background-color:#DDE;font-family:Helvetica,Arial;">
-<legend style="font-size:120%;">Instructions</legend>
+<legend style="font-size:120%;">Advanced Installation</legend>
 	<p>
-	It seems as though the site has not been installed yet.  To complete the installation 
-	you need to:
-		<ol>
-			<li>Edit the file called <em>'defines.template.php'</em>.</li>
-			<li>Change the database settings near the bottom
-			of the file and save it as a file called <em>'defines.php'</em>.</li>
-			<li>Save or upload this file to the 
-			same folder that has the <em>'defines.template.php'</em> file.</li>
-		</ol>
+	For an advanced installation you can change the default settings by downloading the following file and saving it as <i><?= dirname(__FILE__);?>/defines.php</i>.
 	</p>
+	<p>
+	<a href="install.php?action=getdefines.php">Download the configuration file (defines.template.php)</a>
 
 	<p>
-	After you setup the configuration file you will need to populate the database.
-	A bash script called <i>'wipe_clean.sh'</i> is provided in the <i>'logicampus/scripts/'</i> directory.  It will <em><u>erase ALL TABLES</u></em> in the given database and
-	insert the proper LogiCampus tables.  It is important to use a new database and to 
-	remove the <i>'logicampus/scripts/'</i> directory after running <i>'wipe_clean.sh'</i>.
-	</p>
-
-	<p>
-	<pre>
-	# cd logicampus/scripts/
-	# sh ./wipe_clean.sh db_user db_pass db_name
-	</pre>
+	For a manual setup, please execute all the sql files in <i><?=dirname(__FILE__);?>/install/</i>.
 	</p>
 </fieldset>
 
-<br/>
-<a href="<?php echo $PHP_SELF;?>">Click here</a> to reload the page when you're done with the installation.
-<br/>
 <br/>
 <?php
 if (isset($_GET['send']) && $_GET['send'] == 'go') {
