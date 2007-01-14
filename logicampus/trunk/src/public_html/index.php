@@ -73,6 +73,9 @@ include_once(LIB_PATH."lc_SQL.php");
 include_once(LIB_PATH."LC_html.php");
 
 
+	//start the error system
+	$lcObj = new lcSystem();
+
 	//first time
 	if (file_exists('first_time.php') ) {
 		include('first_time.php');
@@ -98,7 +101,6 @@ if (!@include_once(LANG_PATH."lct.".LOCALE.".php") ) {
 
 
 
-$lcObj = new lcSystem();
 $lcTemplate = array('cssFile'=>'site.css');
 define('HERC',false);
 
