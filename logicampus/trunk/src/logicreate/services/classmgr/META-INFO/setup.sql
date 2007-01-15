@@ -221,7 +221,6 @@ CREATE TABLE classdoclib_Folders (
   KEY class_id (class_id,owner)
 ) TYPE=MyISAM AUTO_INCREMENT=2526 ;
 
-
 CREATE TABLE classdoclib_Sharing (
   folderKey int(10) unsigned NOT NULL default '0',
   action int(10) unsigned NOT NULL default '0',
@@ -247,13 +246,12 @@ CREATE TABLE `class_group` (
   `class_id` int(11) NOT NULL default '0',
   PRIMARY KEY  (`class_group_id`),
   KEY class_id (class_id)
-) TYPE=MyISAM; 
+) TYPE=MyISAM;
 
 CREATE TABLE `class_group_member` (
   `class_group_member_id` int(10) unsigned NOT NULL auto_increment,
   `class_group_id` int(11) NOT NULL default '0',
   `student_id` varchar(32) NOT NULL default '0',
   PRIMARY KEY  (`class_group_member_id`)
-) TYPE=MyISAM; 
-
+) TYPE=MyISAM;
 
