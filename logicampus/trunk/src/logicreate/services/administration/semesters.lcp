@@ -40,7 +40,7 @@ class semesters extends AdminService
 	);
 	
 
-	function Run($db,&$u,&$lc,&$t)
+	function run($db,&$u,&$lc,&$t)
 	{
 		$lc->templateName = 'semesters_listing';
 //auto-comment		$lc->templateStyle = 'private';

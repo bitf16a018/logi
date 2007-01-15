@@ -204,21 +204,21 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		$ret = array();
 		$db = DB::getHandle();
 		$sql = "SELECT
-			css.*,classes.*, class_sections.*, semesters.semesterID,courses.courseName, 
+			classes.*, class_sections.*, semesters.semesterID,courses.courseName, 
 			profile_faculty.title, profile.firstname, profile.lastname
-                        FROM class_student_sections as css
-                        LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
-                        LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
+                        FROM class_enrollment as css
+                        LEFT JOIN classes ON css.class_id = classes.id_classes
+                        LEFT JOIN class_sections ON css.section_number = class_sections.sectionNumber
                         LEFT JOIN courses ON classes.id_courses = courses.id_courses
 			LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
 			LEFT JOIN profile on classes.facultyId=profile.username
 			LEFT JOIN profile_faculty on profile_faculty.username=profile.username
+			LEFT JOIN lcUsers on css.student_id=lcUsers.pkey
 
-                        WHERE css.id_student = '$uname'
-			and css.semester_id = $semesterId
+                        WHERE lcUsers.username = '$uname'
+			and (css.semester_id = $semesterId OR css.semester_id = 0)
 			and classes.id_semesters = $semesterId
 		";		
-		
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		while ($db->next_record() ) {

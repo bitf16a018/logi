@@ -411,10 +411,13 @@ class classes extends AdminService
 				
 			}
 			
+/*
+//MAK don't force section numbers.
 			if ($sectionnumbers_processed == 0) {
 				$t['error'] .= 'You must have at least 1 section number for a class<br>';
 				$f->error = true;
 			}
+*/
 			
 			$this->cleanedArray['sectionNumbers'] = trim($this->cleanedArray['sectionNumbers']); // triming that bad char
 			
