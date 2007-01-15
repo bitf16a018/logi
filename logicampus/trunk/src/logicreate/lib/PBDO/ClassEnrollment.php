@@ -30,12 +30,12 @@ class ClassEnrollmentBase {
 
 
 	function getPrimaryKey() {
-		return $this->withdrewOn;
+		return $this->classEnrollmentId;
 	}
 
 
 	function setPrimaryKey($val) {
-		$this->withdrewOn = $val;
+		$this->classEnrollmentId = $val;
 	}
 
 
@@ -55,7 +55,7 @@ class ClassEnrollmentBase {
 			}
 			$where = substr($where,0,-5);
 		} else {
-			$where = "withdrew_on='".$key."'";
+			$where = "class_enrollment_id='".$key."'";
 		}
 		$array = ClassEnrollmentPeer::doSelect($where,$dsn);
 		return $array[0];
@@ -146,7 +146,7 @@ class ClassEnrollmentPeerBase {
 		$st->fields['withdrew_on'] = $this->withdrewOn;
 
 
-		$st->key = 'withdrew_on';
+		$st->key = 'class_enrollment_id';
 		$db->executeQuery($st);
 
 		$obj->_new = false;
@@ -170,7 +170,7 @@ class ClassEnrollmentPeerBase {
 		$st->fields['withdrew_on'] = $obj->withdrewOn;
 
 
-		$st->key = 'withdrew_on';
+		$st->key = 'class_enrollment_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
@@ -193,7 +193,7 @@ class ClassEnrollmentPeerBase {
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_DeleteStatement("class_enrollment","withdrew_on = '".$obj->getPrimaryKey()."'");
+		$st = new PBDO_DeleteStatement("class_enrollment","class_enrollment_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 

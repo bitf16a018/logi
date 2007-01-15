@@ -1,61 +1,37 @@
 <?
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
 
 class AssessmentAnswerBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $assessmentAnswerId;
 	var $assessmentId;
 	var $assessmentQuestionId;
 	var $studentId;
-	var $idClasses;
 	var $assessmentAnswerValues;
+	var $idClasses;
 	var $pointsEarned;
 	var $pointsGiven;
 
-	var $__attributes = array(
-	'assessmentAnswerId'=>'int',
-	'assessmentId'=>'Assessment',
-	'assessmentQuestionId'=>'AssessmentQuestion',
-	'studentId'=>'LcUsers',
-	'idClasses'=>'int',
-	'assessmentAnswerValues'=>'text',
+	var $__attributes = array( 
+	'assessmentAnswerId'=>'integer',
+	'assessmentId'=>'integer',
+	'assessmentQuestionId'=>'integer',
+	'studentId'=>'varchar',
+	'assessmentAnswerValues'=>'longvarchar',
+	'idClasses'=>'integer',
 	'pointsEarned'=>'float',
 	'pointsGiven'=>'float');
 
-	function getAssessment() {
-		if ( $this->assessmentId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = AssessmentPeer::doSelect('assessment_id = \''.$this->assessmentId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
-
-	function getAssessmentQuestion() {
-		if ( $this->assessmentQuestionId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = AssessmentQuestionPeer::doSelect('assessment_question_id = \''.$this->assessmentQuestionId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
-
-	function getLcUsers() {
-		if ( $this->username == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = LcUsersPeer::doSelect('username = \''.$this->studentId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
+	var $__nulls = array( 
+	'assessmentId'=>'assessmentId',
+	'assessmentQuestionId'=>'assessmentQuestionId',
+	'studentId'=>'studentId',
+	'assessmentAnswerValues'=>'assessmentAnswerValues',
+	'pointsEarned'=>'pointsEarned',
+	'pointsGiven'=>'pointsGiven');
 
 
 
@@ -63,20 +39,22 @@ class AssessmentAnswerBase {
 		return $this->assessmentAnswerId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->assessmentAnswerId = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(AssessmentAnswerPeer::doInsert($this));
+			$this->setPrimaryKey(AssessmentAnswerPeer::doInsert($this,$dsn));
 		} else {
-			AssessmentAnswerPeer::doUpdate($this);
+			AssessmentAnswerPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -85,99 +63,100 @@ class AssessmentAnswerBase {
 		} else {
 			$where = "assessment_answer_id='".$key."'";
 		}
-		$array = AssessmentAnswerPeer::doSelect($where);
+		$array = AssessmentAnswerPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = AssessmentAnswerPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		AssessmentAnswerPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['studentId'])
-			$this->studentId = $array['studentId'];
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['assessmentAnswerValues'])
-			$this->assessmentAnswerValues = $array['assessmentAnswerValues'];
-		if ($array['pointsEarned'])
-			$this->pointsEarned = $array['pointsEarned'];
-		if ($array['pointsGiven'])
-			$this->pointsGiven = $array['pointsGiven'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class AssessmentAnswerPeer {
+class AssessmentAnswerPeerBase {
 
 	var $tableName = 'assessment_answer';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("assessment_answer",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("assessment_answer",$where);
 		$st->fields['assessment_answer_id'] = 'assessment_answer_id';
 		$st->fields['assessment_id'] = 'assessment_id';
 		$st->fields['assessment_question_id'] = 'assessment_question_id';
 		$st->fields['student_id'] = 'student_id';
-		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['assessment_answer_values'] = 'assessment_answer_values';
+		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['points_earned'] = 'points_earned';
 		$st->fields['points_given'] = 'points_given';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
-//		echo $st->toString();exit();
 		while($db->nextRecord() ) {
 			$array[] = AssessmentAnswerPeer::row2Obj($db->record);
 		}
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("assessment_answer");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("assessment_answer");
 		$st->fields['assessment_answer_id'] = $this->assessmentAnswerId;
 		$st->fields['assessment_id'] = $this->assessmentId;
 		$st->fields['assessment_question_id'] = $this->assessmentQuestionId;
 		$st->fields['student_id'] = $this->studentId;
-		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['assessment_answer_values'] = $this->assessmentAnswerValues;
-		if ($st->fields['points_earned']!='NULL')  
-			$st->fields['points_earned'] = $this->pointsEarned;
-		if ($st->fields['points_given']!='NULL')  
-			$st->fields['points_given'] = $this->pointsGiven;
+		$st->fields['id_classes'] = $this->idClasses;
+		$st->fields['points_earned'] = $this->pointsEarned;
+		$st->fields['points_given'] = $this->pointsGiven;
+
+		$st->nulls['assessment_id'] = 'assessment_id';
+		$st->nulls['assessment_question_id'] = 'assessment_question_id';
+		$st->nulls['student_id'] = 'student_id';
+		$st->nulls['assessment_answer_values'] = 'assessment_answer_values';
+		$st->nulls['points_earned'] = 'points_earned';
+		$st->nulls['points_given'] = 'points_given';
 
 		$st->key = 'assessment_answer_id';
 		$db->executeQuery($st);
@@ -189,20 +168,25 @@ class AssessmentAnswerPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("assessment_answer");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("assessment_answer");
 		$st->fields['assessment_answer_id'] = $obj->assessmentAnswerId;
 		$st->fields['assessment_id'] = $obj->assessmentId;
 		$st->fields['assessment_question_id'] = $obj->assessmentQuestionId;
 		$st->fields['student_id'] = $obj->studentId;
-		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['assessment_answer_values'] = $obj->assessmentAnswerValues;
-		if ($st->fields['points_earned']!='NULL')  
-			$st->fields['points_earned'] = $obj->pointsEarned;
-		if ($st->fields['points_given']!='NULL')  
-			$st->fields['points_given'] = $obj->pointsGiven;
+		$st->fields['id_classes'] = $obj->idClasses;
+		$st->fields['points_earned'] = $obj->pointsEarned;
+		$st->fields['points_given'] = $obj->pointsGiven;
+
+		$st->nulls['assessment_id'] = 'assessment_id';
+		$st->nulls['assessment_question_id'] = 'assessment_question_id';
+		$st->nulls['student_id'] = 'student_id';
+		$st->nulls['assessment_answer_values'] = 'assessment_answer_values';
+		$st->nulls['points_earned'] = 'points_earned';
+		$st->nulls['points_given'] = 'points_given';
 
 		$st->key = 'assessment_answer_id';
 		$db->executeQuery($st);
@@ -210,25 +194,28 @@ class AssessmentAnswerPeer {
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("assessment_answer","assessment_answer_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("assessment_answer","assessment_answer_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -238,6 +225,22 @@ class AssessmentAnswerPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new AssessmentAnswer();
@@ -245,8 +248,8 @@ class AssessmentAnswerPeer {
 		$x->assessmentId = $row['assessment_id'];
 		$x->assessmentQuestionId = $row['assessment_question_id'];
 		$x->studentId = $row['student_id'];
-		$x->idClasses = $row['id_classes'];
 		$x->assessmentAnswerValues = $row['assessment_answer_values'];
+		$x->idClasses = $row['id_classes'];
 		$x->pointsEarned = $row['points_earned'];
 		$x->pointsGiven = $row['points_given'];
 
@@ -254,6 +257,7 @@ class AssessmentAnswerPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -261,6 +265,12 @@ class AssessmentAnswerPeer {
 class AssessmentAnswer extends AssessmentAnswerBase {
 
 
+
+}
+
+
+
+class AssessmentAnswerPeer extends AssessmentAnswerPeerBase {
 
 }
 

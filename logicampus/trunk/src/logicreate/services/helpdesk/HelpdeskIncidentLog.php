@@ -4,6 +4,8 @@ class HelpdeskIncidentLogBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $helpdeskIncidentLogId;
 	var $helpdeskId;
 	var $action;
@@ -11,20 +13,15 @@ class HelpdeskIncidentLogBase {
 	var $comment;
 	var $userid;
 
-	var $__attributes = array(
-	'helpdeskIncidentLogId'=>'INTEGER',
-	'helpdeskId'=>'HelpdeskIncident',
+	var $__attributes = array( 
+	'helpdeskIncidentLogId'=>'integer',
+	'helpdeskId'=>'integer',
 	'action'=>'varchar',
 	'timedate'=>'integer',
-	'comment'=>'text',
+	'comment'=>'longvarchar',
 	'userid'=>'varchar');
 
-	function getHelpdeskIncident() {
-		if ( $this->helpdeskId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = HelpdeskIncidentPeer::doSelect('helpdesk_id = \''.$this->helpdeskId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
+	var $__nulls = array();
 
 
 
@@ -32,20 +29,22 @@ class HelpdeskIncidentLogBase {
 		return $this->helpdeskIncidentLogId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->helpdeskIncidentLogId = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(HelpdeskIncidentLogPeer::doInsert($this));
+			$this->setPrimaryKey(HelpdeskIncidentLogPeer::doInsert($this,$dsn));
 		} else {
-			HelpdeskIncidentLogPeer::doUpdate($this);
+			HelpdeskIncidentLogPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -54,64 +53,63 @@ class HelpdeskIncidentLogBase {
 		} else {
 			$where = "helpdesk_incident_log_id='".$key."'";
 		}
-		$array = HelpdeskIncidentLogPeer::doSelect($where);
+		$array = HelpdeskIncidentLogPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = HelpdeskIncidentLogPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		HelpdeskIncidentLogPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['action'])
-			$this->action = $array['action'];
-		if ($array['timedate'])
-			$this->timedate = $array['timedate'];
-		if ($array['comment'])
-			$this->comment = $array['comment'];
-		if ($array['userid'])
-			$this->userid = $array['userid'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class HelpdeskIncidentLogPeer {
+class HelpdeskIncidentLogPeerBase {
 
 	var $tableName = 'helpdesk_incident_log';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("helpdesk_incident_log",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("helpdesk_incident_log",$where);
 		$st->fields['helpdesk_incident_log_id'] = 'helpdesk_incident_log_id';
 		$st->fields['helpdesk_id'] = 'helpdesk_id';
 		$st->fields['action'] = 'action';
@@ -119,8 +117,8 @@ class HelpdeskIncidentLogPeer {
 		$st->fields['comment'] = 'comment';
 		$st->fields['userid'] = 'userid';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = HelpdeskIncidentLogPeer::row2Obj($db->record);
@@ -128,10 +126,10 @@ class HelpdeskIncidentLogPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("helpdesk_incident_log");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("helpdesk_incident_log");
 		$st->fields['helpdesk_incident_log_id'] = $this->helpdeskIncidentLogId;
 		$st->fields['helpdesk_id'] = $this->helpdeskId;
 		$st->fields['action'] = $this->action;
@@ -139,6 +137,7 @@ class HelpdeskIncidentLogPeer {
 		$st->fields['comment'] = $this->comment;
 		$st->fields['userid'] = $this->userid;
 
+
 		$st->key = 'helpdesk_incident_log_id';
 		$db->executeQuery($st);
 
@@ -149,10 +148,10 @@ class HelpdeskIncidentLogPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("helpdesk_incident_log");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("helpdesk_incident_log");
 		$st->fields['helpdesk_incident_log_id'] = $obj->helpdeskIncidentLogId;
 		$st->fields['helpdesk_id'] = $obj->helpdeskId;
 		$st->fields['action'] = $obj->action;
@@ -160,31 +159,35 @@ class HelpdeskIncidentLogPeer {
 		$st->fields['comment'] = $obj->comment;
 		$st->fields['userid'] = $obj->userid;
 
+
 		$st->key = 'helpdesk_incident_log_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("helpdesk_incident_log","helpdesk_incident_log_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("helpdesk_incident_log","helpdesk_incident_log_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -194,6 +197,22 @@ class HelpdeskIncidentLogPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new HelpdeskIncidentLog();
@@ -208,6 +227,7 @@ class HelpdeskIncidentLogPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -215,6 +235,12 @@ class HelpdeskIncidentLogPeer {
 class HelpdeskIncidentLog extends HelpdeskIncidentLogBase {
 
 
+
+}
+
+
+
+class HelpdeskIncidentLogPeer extends HelpdeskIncidentLogPeerBase {
 
 }
 

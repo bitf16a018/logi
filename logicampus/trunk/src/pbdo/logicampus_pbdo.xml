@@ -153,4 +153,51 @@
 	      attribute="end_date"
 	      name="end_date_idx"/>
    </entity>
+   <entity name="class_enrollment" description="hold enrollment info for one student in one class and section">
+		<attribute
+			name = "class_enrollment_id"
+			type = "int"
+			size = "11"
+			primaryKey  = "true" />
+		<attribute
+			name = "student_id"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "semester_id"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "class_id"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "section_number"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "enrolled_on"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "active"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "withdrew_on"
+			type = "int"
+			size = "11" />
+	   <key
+	      attribute="student_id"
+	      name="student_idx"/>
+	   <key
+	      attribute="semester_id"
+	      name="semester_idx"/>
+	   <key
+	      attribute="class_id"
+	      name="class_idx"/>
+	   <key
+	      attribute="active"
+	      name="active_idx"/>
+	</entity>
 </project>

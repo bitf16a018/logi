@@ -4,16 +4,18 @@ class AssessmentEventLinkBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $assessmentEventLinkId;
 	var $assessmentId;
 	var $lcEventId;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'assessmentEventLinkId'=>'int',
 	'assessmentId'=>'int',
 	'lcEventId'=>'int');
+
+	var $__nulls = array();
 
 
 
@@ -21,10 +23,12 @@ class AssessmentEventLinkBase {
 		return $this->assessmentEventLinkId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->assessmentEventLinkId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(AssessmentEventLinkPeer::doInsert($this,$dsn));
@@ -32,6 +36,7 @@ class AssessmentEventLinkBase {
 			AssessmentEventLinkPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -45,6 +50,13 @@ class AssessmentEventLinkBase {
 		$array = AssessmentEventLinkPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = AssessmentEventLinkPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		AssessmentEventLinkPeer::doDelete($this,$deep,$dsn);
@@ -90,13 +102,12 @@ class AssessmentEventLinkPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("assessment_event_link",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("assessment_event_link",$where);
 		$st->fields['assessment_event_link_id'] = 'assessment_event_link_id';
 		$st->fields['assessment_id'] = 'assessment_id';
 		$st->fields['lc_event_id'] = 'lc_event_id';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -108,11 +119,12 @@ class AssessmentEventLinkPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("assessment_event_link");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("assessment_event_link");
 		$st->fields['assessment_event_link_id'] = $this->assessmentEventLinkId;
 		$st->fields['assessment_id'] = $this->assessmentId;
 		$st->fields['lc_event_id'] = $this->lcEventId;
+
 
 		$st->key = 'assessment_event_link_id';
 		$db->executeQuery($st);
@@ -126,11 +138,12 @@ class AssessmentEventLinkPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("assessment_event_link");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("assessment_event_link");
 		$st->fields['assessment_event_link_id'] = $obj->assessmentEventLinkId;
 		$st->fields['assessment_id'] = $obj->assessmentId;
 		$st->fields['lc_event_id'] = $obj->lcEventId;
+
 
 		$st->key = 'assessment_event_link_id';
 		$db->executeQuery($st);
@@ -140,11 +153,11 @@ class AssessmentEventLinkPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -154,8 +167,8 @@ class AssessmentEventLinkPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("assessment_event_link","assessment_event_link_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("assessment_event_link","assessment_event_link_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -177,7 +190,7 @@ class AssessmentEventLinkPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

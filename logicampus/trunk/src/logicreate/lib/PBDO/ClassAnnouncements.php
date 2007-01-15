@@ -4,7 +4,7 @@ class ClassAnnouncementsBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $idClassAnnouncements;
 	var $idClasses;
@@ -14,7 +14,7 @@ class ClassAnnouncementsBase {
 	var $idFacultyCreatedby;
 	var $dtCreated;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'idClassAnnouncements'=>'integer',
 	'idClasses'=>'integer',
 	'dtDisplay'=>'datetime',
@@ -23,16 +23,20 @@ class ClassAnnouncementsBase {
 	'idFacultyCreatedby'=>'varchar',
 	'dtCreated'=>'datetime');
 
+	var $__nulls = array();
+
 
 
 	function getPrimaryKey() {
 		return $this->idClassAnnouncements;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassAnnouncements = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassAnnouncementsPeer::doInsert($this,$dsn));
@@ -40,6 +44,7 @@ class ClassAnnouncementsBase {
 			ClassAnnouncementsPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -53,6 +58,13 @@ class ClassAnnouncementsBase {
 		$array = ClassAnnouncementsPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ClassAnnouncementsPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		ClassAnnouncementsPeer::doDelete($this,$deep,$dsn);
@@ -98,8 +110,8 @@ class ClassAnnouncementsPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_announcements",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_announcements",$where);
 		$st->fields['id_class_announcements'] = 'id_class_announcements';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['dt_display'] = 'dt_display';
@@ -108,7 +120,6 @@ class ClassAnnouncementsPeerBase {
 		$st->fields['id_faculty_createdby'] = 'id_faculty_createdby';
 		$st->fields['dt_created'] = 'dt_created';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -120,8 +131,8 @@ class ClassAnnouncementsPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_announcements");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_announcements");
 		$st->fields['id_class_announcements'] = $this->idClassAnnouncements;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['dt_display'] = $this->dtDisplay;
@@ -129,6 +140,7 @@ class ClassAnnouncementsPeerBase {
 		$st->fields['tx_description'] = $this->txDescription;
 		$st->fields['id_faculty_createdby'] = $this->idFacultyCreatedby;
 		$st->fields['dt_created'] = $this->dtCreated;
+
 
 		$st->key = 'id_class_announcements';
 		$db->executeQuery($st);
@@ -142,8 +154,8 @@ class ClassAnnouncementsPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_announcements");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_announcements");
 		$st->fields['id_class_announcements'] = $obj->idClassAnnouncements;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['dt_display'] = $obj->dtDisplay;
@@ -151,6 +163,7 @@ class ClassAnnouncementsPeerBase {
 		$st->fields['tx_description'] = $obj->txDescription;
 		$st->fields['id_faculty_createdby'] = $obj->idFacultyCreatedby;
 		$st->fields['dt_created'] = $obj->dtCreated;
+
 
 		$st->key = 'id_class_announcements';
 		$db->executeQuery($st);
@@ -160,11 +173,11 @@ class ClassAnnouncementsPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -174,8 +187,8 @@ class ClassAnnouncementsPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_announcements","id_class_announcements = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_announcements","id_class_announcements = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -197,7 +210,7 @@ class ClassAnnouncementsPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

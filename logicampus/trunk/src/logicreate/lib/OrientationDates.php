@@ -4,18 +4,22 @@ class OrientationDatesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idOrientationDates;
 	var $idSemesters;
 	var $date;
 	var $timeStart;
 	var $timeEnd;
 
-	var $__attributes = array(
-	'idOrientationDates'=>'int',
-	'idSemesters'=>'int',
+	var $__attributes = array( 
+	'idOrientationDates'=>'integer',
+	'idSemesters'=>'integer',
 	'date'=>'date',
 	'timeStart'=>'time',
 	'timeEnd'=>'time');
+
+	var $__nulls = array();
 
 
 
@@ -23,20 +27,22 @@ class OrientationDatesBase {
 		return $this->idOrientationDates;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idOrientationDates = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(OrientationDatesPeer::doInsert($this));
+			$this->setPrimaryKey(OrientationDatesPeer::doInsert($this,$dsn));
 		} else {
-			OrientationDatesPeer::doUpdate($this);
+			OrientationDatesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -45,72 +51,71 @@ class OrientationDatesBase {
 		} else {
 			$where = "id_orientation_dates='".$key."'";
 		}
-		$array = OrientationDatesPeer::doSelect($where);
+		$array = OrientationDatesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = OrientationDatesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		OrientationDatesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idSemesters'])
-			$this->idSemesters = $array['idSemesters'];
-		if ($array['date'])
-			$this->date = $array['date'];
-		if ($array['timeStart'])
-			$this->timeStart = $array['timeStart'];
-		if ($array['timeEnd'])
-			$this->timeEnd = $array['timeEnd'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class OrientationDatesPeer {
+class OrientationDatesPeerBase {
 
 	var $tableName = 'orientation_dates';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("orientation_dates",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("orientation_dates",$where);
 		$st->fields['id_orientation_dates'] = 'id_orientation_dates';
 		$st->fields['id_semesters'] = 'id_semesters';
 		$st->fields['date'] = 'date';
 		$st->fields['time_start'] = 'time_start';
 		$st->fields['time_end'] = 'time_end';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = OrientationDatesPeer::row2Obj($db->record);
@@ -118,16 +123,17 @@ class OrientationDatesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("orientation_dates");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("orientation_dates");
 		$st->fields['id_orientation_dates'] = $this->idOrientationDates;
 		$st->fields['id_semesters'] = $this->idSemesters;
 		$st->fields['date'] = $this->date;
 		$st->fields['time_start'] = $this->timeStart;
 		$st->fields['time_end'] = $this->timeEnd;
 
+
 		$st->key = 'id_orientation_dates';
 		$db->executeQuery($st);
 
@@ -138,41 +144,45 @@ class OrientationDatesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("orientation_dates");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("orientation_dates");
 		$st->fields['id_orientation_dates'] = $obj->idOrientationDates;
 		$st->fields['id_semesters'] = $obj->idSemesters;
 		$st->fields['date'] = $obj->date;
 		$st->fields['time_start'] = $obj->timeStart;
 		$st->fields['time_end'] = $obj->timeEnd;
 
+
 		$st->key = 'id_orientation_dates';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("orientation_dates","id_orientation_dates = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("orientation_dates","id_orientation_dates = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -182,6 +192,22 @@ class OrientationDatesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new OrientationDates();
@@ -195,6 +221,7 @@ class OrientationDatesPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -202,6 +229,12 @@ class OrientationDatesPeer {
 class OrientationDates extends OrientationDatesBase {
 
 
+
+}
+
+
+
+class OrientationDatesPeer extends OrientationDatesPeerBase {
 
 }
 

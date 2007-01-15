@@ -4,18 +4,20 @@ class ClassForumUserActivityBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $classForumUserActivityId;
 	var $classForumId;
 	var $userId;
 	var $views;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'classForumUserActivityId'=>'integer',
 	'classForumId'=>'integer',
 	'userId'=>'integer',
 	'views'=>'blob');
+
+	var $__nulls = array();
 
 
 
@@ -23,10 +25,12 @@ class ClassForumUserActivityBase {
 		return $this->classForumUserActivityId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->classForumUserActivityId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassForumUserActivityPeer::doInsert($this,$dsn));
@@ -34,6 +38,7 @@ class ClassForumUserActivityBase {
 			ClassForumUserActivityPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -47,6 +52,13 @@ class ClassForumUserActivityBase {
 		$array = ClassForumUserActivityPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ClassForumUserActivityPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		ClassForumUserActivityPeer::doDelete($this,$deep,$dsn);
@@ -92,14 +104,13 @@ class ClassForumUserActivityPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_forum_user_activity",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_forum_user_activity",$where);
 		$st->fields['class_forum_user_activity_id'] = 'class_forum_user_activity_id';
 		$st->fields['class_forum_id'] = 'class_forum_id';
 		$st->fields['user_id'] = 'user_id';
 		$st->fields['views'] = 'views';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -111,12 +122,13 @@ class ClassForumUserActivityPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_forum_user_activity");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_forum_user_activity");
 		$st->fields['class_forum_user_activity_id'] = $this->classForumUserActivityId;
 		$st->fields['class_forum_id'] = $this->classForumId;
 		$st->fields['user_id'] = $this->userId;
 		$st->fields['views'] = $this->views;
+
 
 		$st->key = 'class_forum_user_activity_id';
 		$db->executeQuery($st);
@@ -130,12 +142,13 @@ class ClassForumUserActivityPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_forum_user_activity");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_forum_user_activity");
 		$st->fields['class_forum_user_activity_id'] = $obj->classForumUserActivityId;
 		$st->fields['class_forum_id'] = $obj->classForumId;
 		$st->fields['user_id'] = $obj->userId;
 		$st->fields['views'] = $obj->views;
+
 
 		$st->key = 'class_forum_user_activity_id';
 		$db->executeQuery($st);
@@ -145,11 +158,11 @@ class ClassForumUserActivityPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -159,8 +172,8 @@ class ClassForumUserActivityPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_forum_user_activity","class_forum_user_activity_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_forum_user_activity","class_forum_user_activity_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -182,7 +195,7 @@ class ClassForumUserActivityPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

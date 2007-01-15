@@ -4,7 +4,7 @@ class ClassForumBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $classForumId;
 	var $name;
@@ -21,7 +21,7 @@ class ClassForumBase {
 	var $unansweredCount;
 	var $classForumCategoryId;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'classForumId'=>'integer',
 	'name'=>'varchar',
 	'classId'=>'integer',
@@ -37,6 +37,15 @@ class ClassForumBase {
 	'unansweredCount'=>'integer',
 	'classForumCategoryId'=>'integer');
 
+	var $__nulls = array( 
+	'classForumCategoryId'=>'classForumCategoryId');
+
+	/**
+	 * Retrieves one class_forum_category object via the foreign key class_forum_category_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Object the related object.
+	 */
 	function getClassForumCategoryByClassForumCategoryId($dsn='default') {
 		if ( $this->classForumCategoryId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
 		$array = ClassForumCategoryPeer::doSelect('class_forum_category_id = \''.$this->classForumCategoryId.'\'',$dsn);
@@ -44,9 +53,27 @@ class ClassForumBase {
 		return $array[0];
 	}
 
+	/**
+	 * Retrieves an array of class_forum_post objects via the foreign key class_forum_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Array related objects.
+	 */
 	function getClassForumPostsByClassForumId($dsn='default') {
 		if ( $this->classForumId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
 		$array = ClassForumPostPeer::doSelect('class_forum_id = \''.$this->classForumId.'\'',$dsn);
+		return $array;
+	}
+
+	/**
+	 * Retrieves an array of class_forum_trash_post objects via the foreign key class_forum_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Array related objects.
+	 */
+	function getClassForumTrashPostsByClassForumId($dsn='default') {
+		if ( $this->classForumId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = ClassForumTrashPostPeer::doSelect('class_forum_id = \''.$this->classForumId.'\'',$dsn);
 		return $array;
 	}
 
@@ -56,10 +83,12 @@ class ClassForumBase {
 		return $this->classForumId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->classForumId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassForumPeer::doInsert($this,$dsn));
@@ -67,6 +96,7 @@ class ClassForumBase {
 			ClassForumPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -80,6 +110,13 @@ class ClassForumBase {
 		$array = ClassForumPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ClassForumPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		ClassForumPeer::doDelete($this,$deep,$dsn);
@@ -125,8 +162,8 @@ class ClassForumPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_forum",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_forum",$where);
 		$st->fields['class_forum_id'] = 'class_forum_id';
 		$st->fields['name'] = 'name';
 		$st->fields['class_id'] = 'class_id';
@@ -142,7 +179,6 @@ class ClassForumPeerBase {
 		$st->fields['unanswered_count'] = 'unanswered_count';
 		$st->fields['class_forum_category_id'] = 'class_forum_category_id';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -154,8 +190,8 @@ class ClassForumPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_forum");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_forum");
 		$st->fields['class_forum_id'] = $this->classForumId;
 		$st->fields['name'] = $this->name;
 		$st->fields['class_id'] = $this->classId;
@@ -171,6 +207,8 @@ class ClassForumPeerBase {
 		$st->fields['unanswered_count'] = $this->unansweredCount;
 		$st->fields['class_forum_category_id'] = $this->classForumCategoryId;
 
+		$st->nulls['class_forum_category_id'] = 'class_forum_category_id';
+
 		$st->key = 'class_forum_id';
 		$db->executeQuery($st);
 
@@ -183,8 +221,8 @@ class ClassForumPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_forum");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_forum");
 		$st->fields['class_forum_id'] = $obj->classForumId;
 		$st->fields['name'] = $obj->name;
 		$st->fields['class_id'] = $obj->classId;
@@ -200,6 +238,8 @@ class ClassForumPeerBase {
 		$st->fields['unanswered_count'] = $obj->unansweredCount;
 		$st->fields['class_forum_category_id'] = $obj->classForumCategoryId;
 
+		$st->nulls['class_forum_category_id'] = 'class_forum_category_id';
+
 		$st->key = 'class_forum_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -208,11 +248,11 @@ class ClassForumPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -222,8 +262,8 @@ class ClassForumPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_forum","class_forum_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_forum","class_forum_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -245,7 +285,7 @@ class ClassForumPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

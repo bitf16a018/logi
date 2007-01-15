@@ -4,6 +4,8 @@ class AssessmentLogBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idAssessmentLog;
 	var $assessmentId;
 	var $idStudent;
@@ -11,13 +13,15 @@ class AssessmentLogBase {
 	var $endDate;
 	var $idClasses;
 
-	var $__attributes = array(
-	'idAssessmentLog'=>'int',
-	'assessmentId'=>'int',
+	var $__attributes = array( 
+	'idAssessmentLog'=>'integer',
+	'assessmentId'=>'integer',
 	'idStudent'=>'varchar',
-	'startDate'=>'int',
-	'endDate'=>'int',
-	'idClasses'=>'int');
+	'startDate'=>'integer',
+	'endDate'=>'integer',
+	'idClasses'=>'integer');
+
+	var $__nulls = array();
 
 
 
@@ -25,20 +29,22 @@ class AssessmentLogBase {
 		return $this->idAssessmentLog;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idAssessmentLog = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(AssessmentLogPeer::doInsert($this));
+			$this->setPrimaryKey(AssessmentLogPeer::doInsert($this,$dsn));
 		} else {
-			AssessmentLogPeer::doUpdate($this);
+			AssessmentLogPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -47,66 +53,63 @@ class AssessmentLogBase {
 		} else {
 			$where = "id_assessment_log='".$key."'";
 		}
-		$array = AssessmentLogPeer::doSelect($where);
+		$array = AssessmentLogPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = AssessmentLogPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		AssessmentLogPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['assessmentId'])
-			$this->assessmentId = $array['assessmentId'];
-		if ($array['idStudent'])
-			$this->idStudent = $array['idStudent'];
-		if ($array['startDate'])
-			$this->startDate = $array['startDate'];
-		if ($array['endDate'])
-			$this->endDate = $array['endDate'];
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class AssessmentLogPeer {
+class AssessmentLogPeerBase {
 
 	var $tableName = 'assessment_log';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("assessment_log",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("assessment_log",$where);
 		$st->fields['id_assessment_log'] = 'id_assessment_log';
 		$st->fields['assessment_id'] = 'assessment_id';
 		$st->fields['id_student'] = 'id_student';
@@ -114,8 +117,8 @@ class AssessmentLogPeer {
 		$st->fields['end_date'] = 'end_date';
 		$st->fields['id_classes'] = 'id_classes';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = AssessmentLogPeer::row2Obj($db->record);
@@ -123,10 +126,10 @@ class AssessmentLogPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("assessment_log");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("assessment_log");
 		$st->fields['id_assessment_log'] = $this->idAssessmentLog;
 		$st->fields['assessment_id'] = $this->assessmentId;
 		$st->fields['id_student'] = $this->idStudent;
@@ -134,6 +137,7 @@ class AssessmentLogPeer {
 		$st->fields['end_date'] = $this->endDate;
 		$st->fields['id_classes'] = $this->idClasses;
 
+
 		$st->key = 'id_assessment_log';
 		$db->executeQuery($st);
 
@@ -144,10 +148,10 @@ class AssessmentLogPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("assessment_log");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("assessment_log");
 		$st->fields['id_assessment_log'] = $obj->idAssessmentLog;
 		$st->fields['assessment_id'] = $obj->assessmentId;
 		$st->fields['id_student'] = $obj->idStudent;
@@ -155,31 +159,35 @@ class AssessmentLogPeer {
 		$st->fields['end_date'] = $obj->endDate;
 		$st->fields['id_classes'] = $obj->idClasses;
 
+
 		$st->key = 'id_assessment_log';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("assessment_log","id_assessment_log = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("assessment_log","id_assessment_log = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -189,6 +197,22 @@ class AssessmentLogPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new AssessmentLog();
@@ -203,37 +227,20 @@ class AssessmentLogPeer {
 		return $x;
 	}
 
+		
 }
 
 
 //You can edit this class, but do not change this next line!
 class AssessmentLog extends AssessmentLogBase {
 
-	# Total number of log entries the user has for the assessment
-	var $logCount = '';
-
-	function AssessmentLog() {
-
-		$this->startDate = time();
-		$this->endDate = time()+3600;
-
-	}
 
 
-	function loadAll($assessmentId, $username, $id_classes)
-	{
-		$logs = AssessmentLogPeer::doSelect("id_student='".$username."' AND assessment_id='$assessmentId' AND id_classes='$id_classes'");
-		return $logs;
-	}
+}
 
-	function updateTotalCount()
-	{
-		$db = DB::getHandle();
-		$db->RESULT_TYPE = MYSQL_ASSOC;
-		 $sql = "select count(*) as count from assessment_log where id_student='".$this->idStudent."' AND assessment_id='".$this->assessmentId."' AND id_classes='".$this->idClasses."'";
-		$db->queryOne($sql);
-		$this->logCount = $db->Record['count'];
-	}
+
+
+class AssessmentLogPeer extends AssessmentLogPeerBase {
 
 }
 

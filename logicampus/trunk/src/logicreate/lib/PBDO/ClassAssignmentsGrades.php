@@ -4,20 +4,23 @@ class ClassAssignmentsGradesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
-	var $_entityVersion = '0.0';	//Source version number
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idClassAssignmentsGrades;
 	var $idClassAssignments;
 	var $idStudent;
 	var $comments;
 	var $grade;
 
-	var $__attributes = array(
-	'idClassAssignmentsGrades'=>'int',
-	'idClassAssignments'=>'int',
+	var $__attributes = array( 
+	'idClassAssignmentsGrades'=>'integer',
+	'idClassAssignments'=>'integer',
 	'idStudent'=>'varchar',
-	'comments'=>'text',
+	'comments'=>'longvarchar',
 	'grade'=>'float');
+
+	var $__nulls = array( 
+	'grade'=>'grade');
 
 
 
@@ -25,10 +28,12 @@ class ClassAssignmentsGradesBase {
 		return $this->idClassAssignmentsGrades;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassAssignmentsGrades = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassAssignmentsGradesPeer::doInsert($this,$dsn));
@@ -36,6 +41,7 @@ class ClassAssignmentsGradesBase {
 			ClassAssignmentsGradesPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -50,6 +56,13 @@ class ClassAssignmentsGradesBase {
 		return $array[0];
 	}
 
+
+	function loadAll($dsn="default") {
+		$array = ClassAssignmentsGradesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
 	function delete($deep=false,$dsn="default") {
 		ClassAssignmentsGradesPeer::doDelete($this,$deep,$dsn);
 	}
@@ -59,43 +72,30 @@ class ClassAssignmentsGradesBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idClassAssignments'])
-			$this->idClassAssignments = $array['idClassAssignments'];
-		if ($array['idStudent'])
-			$this->idStudent = $array['idStudent'];
-		if ($array['comments'])
-			$this->comments = $array['comments'];
-		if ($array['grade'])
-			$this->grade = $array['grade'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -107,15 +107,14 @@ class ClassAssignmentsGradesPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_assignments_grades",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_assignments_grades",$where);
 		$st->fields['id_class_assignments_grades'] = 'id_class_assignments_grades';
 		$st->fields['id_class_assignments'] = 'id_class_assignments';
 		$st->fields['id_student'] = 'id_student';
 		$st->fields['comments'] = 'comments';
 		$st->fields['grade'] = 'grade';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -127,13 +126,15 @@ class ClassAssignmentsGradesPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_assignments_grades");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_assignments_grades");
 		$st->fields['id_class_assignments_grades'] = $this->idClassAssignmentsGrades;
 		$st->fields['id_class_assignments'] = $this->idClassAssignments;
 		$st->fields['id_student'] = $this->idStudent;
 		$st->fields['comments'] = $this->comments;
 		$st->fields['grade'] = $this->grade;
+
+		$st->nulls['grade'] = 'grade';
 
 		$st->key = 'id_class_assignments_grades';
 		$db->executeQuery($st);
@@ -147,13 +148,15 @@ class ClassAssignmentsGradesPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_assignments_grades");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_assignments_grades");
 		$st->fields['id_class_assignments_grades'] = $obj->idClassAssignmentsGrades;
 		$st->fields['id_class_assignments'] = $obj->idClassAssignments;
 		$st->fields['id_student'] = $obj->idStudent;
 		$st->fields['comments'] = $obj->comments;
 		$st->fields['grade'] = $obj->grade;
+
+		$st->nulls['grade'] = 'grade';
 
 		$st->key = 'id_class_assignments_grades';
 		$db->executeQuery($st);
@@ -163,20 +166,22 @@ class ClassAssignmentsGradesPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
+	/**
+	 * remove an object
+	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_assignments_grades","id_class_assignments_grades = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_assignments_grades","id_class_assignments_grades = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -190,6 +195,22 @@ class ClassAssignmentsGradesPeerBase {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new ClassAssignmentsGrades();

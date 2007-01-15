@@ -4,6 +4,8 @@ class OrientationClassesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idOrientationClasses;
 	var $idClasses;
 	var $status;
@@ -25,27 +27,29 @@ class OrientationClassesBase {
 	var $finalSessionLength;
 	var $finalCampus;
 
-	var $__attributes = array(
-	'idOrientationClasses'=>'int',
-	'idClasses'=>'int',
-	'status'=>'int',
-	'firstDateId'=>'int',
+	var $__attributes = array( 
+	'idOrientationClasses'=>'integer',
+	'idClasses'=>'integer',
+	'status'=>'integer',
+	'firstDateId'=>'integer',
 	'firstCampusLocation'=>'varchar',
-	'firstAllottedMinutes'=>'int',
+	'firstAllottedMinutes'=>'integer',
 	'firstPreferredTime'=>'time',
 	'firstTimeRangeStart'=>'time',
 	'firstTimeRangeEnd'=>'time',
-	'secondDateId'=>'int',
+	'secondDateId'=>'integer',
 	'secondCampusLocation'=>'varchar',
-	'secondAllottedMinutes'=>'int',
+	'secondAllottedMinutes'=>'integer',
 	'secondPreferredTime'=>'time',
 	'secondTimeRangeStart'=>'time',
 	'secondTimeRangeEnd'=>'time',
-	'instructions'=>'text',
-	'notes'=>'text',
+	'instructions'=>'longvarchar',
+	'notes'=>'longvarchar',
 	'finalDateTime'=>'datetime',
-	'finalSessionLength'=>'int',
+	'finalSessionLength'=>'integer',
 	'finalCampus'=>'char');
+
+	var $__nulls = array();
 
 
 
@@ -53,20 +57,22 @@ class OrientationClassesBase {
 		return $this->idOrientationClasses;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idOrientationClasses = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(OrientationClassesPeer::doInsert($this));
+			$this->setPrimaryKey(OrientationClassesPeer::doInsert($this,$dsn));
 		} else {
-			OrientationClassesPeer::doUpdate($this);
+			OrientationClassesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -75,94 +81,63 @@ class OrientationClassesBase {
 		} else {
 			$where = "id_orientation_classes='".$key."'";
 		}
-		$array = OrientationClassesPeer::doSelect($where);
+		$array = OrientationClassesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = OrientationClassesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		OrientationClassesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['status'])
-			$this->status = $array['status'];
-		if ($array['firstDateId'])
-			$this->firstDateId = $array['firstDateId'];
-		if ($array['firstCampusLocation'])
-			$this->firstCampusLocation = $array['firstCampusLocation'];
-		if ($array['firstAllottedMinutes'])
-			$this->firstAllottedMinutes = $array['firstAllottedMinutes'];
-		if ($array['firstPreferredTime'])
-			$this->firstPreferredTime = $array['firstPreferredTime'];
-		if ($array['firstTimeRangeStart'])
-			$this->firstTimeRangeStart = $array['firstTimeRangeStart'];
-		if ($array['firstTimeRangeEnd'])
-			$this->firstTimeRangeEnd = $array['firstTimeRangeEnd'];
-		if ($array['secondDateId'])
-			$this->secondDateId = $array['secondDateId'];
-		if ($array['secondCampusLocation'])
-			$this->secondCampusLocation = $array['secondCampusLocation'];
-		if ($array['secondAllottedMinutes'])
-			$this->secondAllottedMinutes = $array['secondAllottedMinutes'];
-		if ($array['secondPreferredTime'])
-			$this->secondPreferredTime = $array['secondPreferredTime'];
-		if ($array['secondTimeRangeStart'])
-			$this->secondTimeRangeStart = $array['secondTimeRangeStart'];
-		if ($array['secondTimeRangeEnd'])
-			$this->secondTimeRangeEnd = $array['secondTimeRangeEnd'];
-		if ($array['instructions'])
-			$this->instructions = $array['instructions'];
-		if ($array['notes'])
-			$this->notes = $array['notes'];
-		if ($array['finalDateTime'])
-			$this->finalDateTime = $array['finalDateTime'];
-		if ($array['finalSessionLength'])
-			$this->finalSessionLength = $array['finalSessionLength'];
-		if ($array['finalCampus'])
-			$this->finalCampus = $array['finalCampus'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class OrientationClassesPeer {
+class OrientationClassesPeerBase {
 
 	var $tableName = 'orientation_classes';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("orientation_classes",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("orientation_classes",$where);
 		$st->fields['id_orientation_classes'] = 'id_orientation_classes';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['status'] = 'status';
@@ -184,8 +159,8 @@ class OrientationClassesPeer {
 		$st->fields['finalSessionLength'] = 'finalSessionLength';
 		$st->fields['finalCampus'] = 'finalCampus';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = OrientationClassesPeer::row2Obj($db->record);
@@ -193,10 +168,10 @@ class OrientationClassesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("orientation_classes");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("orientation_classes");
 		$st->fields['id_orientation_classes'] = $this->idOrientationClasses;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['status'] = $this->status;
@@ -218,6 +193,7 @@ class OrientationClassesPeer {
 		$st->fields['finalSessionLength'] = $this->finalSessionLength;
 		$st->fields['finalCampus'] = $this->finalCampus;
 
+
 		$st->key = 'id_orientation_classes';
 		$db->executeQuery($st);
 
@@ -228,10 +204,10 @@ class OrientationClassesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("orientation_classes");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("orientation_classes");
 		$st->fields['id_orientation_classes'] = $obj->idOrientationClasses;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['status'] = $obj->status;
@@ -253,31 +229,35 @@ class OrientationClassesPeer {
 		$st->fields['finalSessionLength'] = $obj->finalSessionLength;
 		$st->fields['finalCampus'] = $obj->finalCampus;
 
+
 		$st->key = 'id_orientation_classes';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("orientation_classes","id_orientation_classes = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("orientation_classes","id_orientation_classes = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -287,6 +267,22 @@ class OrientationClassesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new OrientationClasses();
@@ -315,6 +311,7 @@ class OrientationClassesPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -322,6 +319,12 @@ class OrientationClassesPeer {
 class OrientationClasses extends OrientationClassesBase {
 
 
+
+}
+
+
+
+class OrientationClassesPeer extends OrientationClassesPeerBase {
 
 }
 

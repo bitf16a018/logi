@@ -4,56 +4,35 @@ class ClassGradebookEntriesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idClassGradebookEntries;
 	var $idClasses;
 	var $idClassGradebookCategories;
-	var $assessmentId = 0;
 	var $title;
 	var $gradebookCode;
-	var $assignmentId = 0;
-	var $dateDue = 0;
-	var $totalPoints = 0;
-	var $publishFlag = 0;
+	var $totalPoints;
+	var $publishFlag;
+	var $dateDue;
 	var $notes;
+	var $assessmentId;
+	var $assignmentId;
 
-	var $__attributes = array(
-	'idClassGradebookEntries'=>'int',
-	'idClasses'=>'Classes',
-	'idClassGradebookCategories'=>'ClassGradebookCategories',
-	'assessmentId'=>'int',
+	var $__attributes = array( 
+	'idClassGradebookEntries'=>'integer',
+	'idClasses'=>'integer',
+	'idClassGradebookCategories'=>'integer',
 	'title'=>'varchar',
 	'gradebookCode'=>'varchar',
-	'assignmentId'=>'ClassAssignments',
-	'dateDue'=>'int',
 	'totalPoints'=>'float',
 	'publishFlag'=>'tinyint',
-	'notes'=>'text');
+	'dateDue'=>'integer',
+	'notes'=>'longvarchar',
+	'assessmentId'=>'integer',
+	'assignmentId'=>'integer');
 
-	function getClassGradebookVals() {
-		$array = ClassGradebookValPeer::doSelect('id_class_gradebook_entries = \''.$this->getPrimaryKey().'\'');
-		return $array;
-	}
-
-	function getClassGradebookCategories() {
-		if ( $this->idClassGradebookCategories == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = ClassGradebookCategoriesPeer::doSelect('id_class_gradebook_categories = \''.$this->idClassGradebookCategories.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
-
-	function getClasses() {
-		if ( $this->idClasses == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = ClassesPeer::doSelect('id_classes = \''.$this->idClasses.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
-
-	function getClassAssignments() {
-		if ( $this->idClassAssignments == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = ClassAssignmentsPeer::doSelect('id_class_assignments = \''.$this->assignmentId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
+	var $__nulls = array( 
+	'notes'=>'notes');
 
 
 
@@ -61,19 +40,22 @@ class ClassGradebookEntriesBase {
 		return $this->idClassGradebookEntries;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassGradebookEntries = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(ClassGradebookEntriesPeer::doInsert($this));
+			$this->setPrimaryKey(ClassGradebookEntriesPeer::doInsert($this,$dsn));
 		} else {
-			ClassGradebookEntriesPeer::doUpdate($this);
+			ClassGradebookEntriesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -82,59 +64,50 @@ class ClassGradebookEntriesBase {
 		} else {
 			$where = "id_class_gradebook_entries='".$key."'";
 		}
-		$array = ClassGradebookEntriesPeer::doSelect($where);
+		$array = ClassGradebookEntriesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ClassGradebookEntriesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		ClassGradebookEntriesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['assessmentId'])
-			$this->assessmentId = $array['assessmentId'];
-		if ($array['title'])
-			$this->title = $array['title'];
-		if ($array['gradebookCode'])
-			$this->gradebookCode = $array['gradebookCode'];
-		if ($array['assignmentId'])
-			$this->assignmentId = $array['assignmentId'];
-		if ($array['dateDue'])
-			$this->dateDue = $array['dateDue'];
-		if ($array['totalPoints'])
-			$this->totalPoints = $array['totalPoints'];
-		if ($array['publishFlag'])
-			$this->publishFlag = $array['publishFlag'];
-		if ($array['notes'])
-			$this->notes = $array['notes'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -144,24 +117,24 @@ class ClassGradebookEntriesPeerBase {
 
 	var $tableName = 'class_gradebook_entries';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("class_gradebook_entries",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_gradebook_entries",$where);
 		$st->fields['id_class_gradebook_entries'] = 'id_class_gradebook_entries';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['id_class_gradebook_categories'] = 'id_class_gradebook_categories';
-		$st->fields['assessment_id'] = 'assessment_id';
 		$st->fields['title'] = 'title';
 		$st->fields['gradebook_code'] = 'gradebook_code';
-		$st->fields['assignment_id'] = 'assignment_id';
-		$st->fields['date_due'] = 'date_due';
 		$st->fields['total_points'] = 'total_points';
 		$st->fields['publish_flag'] = 'publish_flag';
+		$st->fields['date_due'] = 'date_due';
 		$st->fields['notes'] = 'notes';
+		$st->fields['assessment_id'] = 'assessment_id';
+		$st->fields['assignment_id'] = 'assignment_id';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = ClassGradebookEntriesPeer::row2Obj($db->record);
@@ -169,21 +142,23 @@ class ClassGradebookEntriesPeerBase {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("class_gradebook_entries");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_gradebook_entries");
 		$st->fields['id_class_gradebook_entries'] = $this->idClassGradebookEntries;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['id_class_gradebook_categories'] = $this->idClassGradebookCategories;
-		$st->fields['assessment_id'] = $this->assessmentId;
 		$st->fields['title'] = $this->title;
 		$st->fields['gradebook_code'] = $this->gradebookCode;
-		$st->fields['assignment_id'] = $this->assignmentId;
-		$st->fields['date_due'] = $this->dateDue;
 		$st->fields['total_points'] = $this->totalPoints;
 		$st->fields['publish_flag'] = $this->publishFlag;
+		$st->fields['date_due'] = $this->dateDue;
 		$st->fields['notes'] = $this->notes;
+		$st->fields['assessment_id'] = $this->assessmentId;
+		$st->fields['assignment_id'] = $this->assignmentId;
+
+		$st->nulls['notes'] = 'notes';
 
 		$st->key = 'id_class_gradebook_entries';
 		$db->executeQuery($st);
@@ -195,21 +170,23 @@ class ClassGradebookEntriesPeerBase {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("class_gradebook_entries");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_gradebook_entries");
 		$st->fields['id_class_gradebook_entries'] = $obj->idClassGradebookEntries;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['id_class_gradebook_categories'] = $obj->idClassGradebookCategories;
-		$st->fields['assessment_id'] = $obj->assessmentId;
 		$st->fields['title'] = $obj->title;
 		$st->fields['gradebook_code'] = $obj->gradebookCode;
-		$st->fields['assignment_id'] = $obj->assignmentId;
-		$st->fields['date_due'] = $obj->dateDue;
 		$st->fields['total_points'] = $obj->totalPoints;
 		$st->fields['publish_flag'] = $obj->publishFlag;
+		$st->fields['date_due'] = $obj->dateDue;
 		$st->fields['notes'] = $obj->notes;
+		$st->fields['assessment_id'] = $obj->assessmentId;
+		$st->fields['assignment_id'] = $obj->assignmentId;
+
+		$st->nulls['notes'] = 'notes';
 
 		$st->key = 'id_class_gradebook_entries';
 		$db->executeQuery($st);
@@ -217,28 +194,29 @@ class ClassGradebookEntriesPeerBase {
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("class_gradebook_entries","id_class_gradebook_entries = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_gradebook_entries","id_class_gradebook_entries = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
-			$st = new LC_DeleteStatement("class_gradebook_val","id_class_gradebook_entries = '".$obj->getPrimaryKey()."'");
-			$db->executeQuery($st);
 		}
 
 		$obj->_new = false;
@@ -247,25 +225,42 @@ class ClassGradebookEntriesPeerBase {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new ClassGradebookEntries();
 		$x->idClassGradebookEntries = $row['id_class_gradebook_entries'];
 		$x->idClasses = $row['id_classes'];
 		$x->idClassGradebookCategories = $row['id_class_gradebook_categories'];
-		$x->assessmentId = $row['assessment_id'];
 		$x->title = $row['title'];
 		$x->gradebookCode = $row['gradebook_code'];
-		$x->assignmentId = $row['assignment_id'];
-		$x->dateDue = $row['date_due'];
 		$x->totalPoints = $row['total_points'];
 		$x->publishFlag = $row['publish_flag'];
+		$x->dateDue = $row['date_due'];
 		$x->notes = $row['notes'];
+		$x->assessmentId = $row['assessment_id'];
+		$x->assignmentId = $row['assignment_id'];
 
 		$x->_new = false;
 		return $x;
 	}
 
+		
 }
 
 
@@ -273,41 +268,10 @@ class ClassGradebookEntriesPeerBase {
 class ClassGradebookEntries extends ClassGradebookEntriesBase {
 
 
-	/**
-	 * Update associated assignments if neccessary
-	 */
-	function updateAssignmentGradeForStudent($val,$id_student) {
-		if ( $this->assignmentId < 1) {
-			//we're not tied to an assignment
-			return false;
-		}
 
-		if ( strlen($id_student) < 1) {
-			//something is wrong
-			// can't guarantee atomic updates
-			return false;
-		}
-
-		$db = DB::getHandle();
-		$db->query("UPDATE class_assignments_grades
-			SET grade = '".$val->score."',
-			comments = '".addslashes($val->comments)."'
-			WHERE id_class_assignments = '".$this->assignmentId."'
-			AND id_student = '".$id_student."'");
-
-
-		if (! $db->getNumRows() ) {
-			$db->query("INSERT INTO class_assignments_grades
-			(comments,grade,id_class_assignments,id_student)
-			VALUES ('".addslashes($val->comments)."',
-				".$val->score.",
-				".$this->assignmentId.",
-				'".$id_student."')");
-		}
-
-		return true;
-	}
 }
+
+
 
 class ClassGradebookEntriesPeer extends ClassGradebookEntriesPeerBase {
 

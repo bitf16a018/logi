@@ -4,7 +4,7 @@ class ClassLessonsBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $idClassLessons;
 	var $idClasses;
@@ -15,7 +15,7 @@ class ClassLessonsBase {
 	var $inactiveOn;
 	var $checkList;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'idClassLessons'=>'integer',
 	'idClasses'=>'integer',
 	'createdOn'=>'integer',
@@ -25,16 +25,20 @@ class ClassLessonsBase {
 	'inactiveOn'=>'integer',
 	'checkList'=>'longvarchar');
 
+	var $__nulls = array();
+
 
 
 	function getPrimaryKey() {
 		return $this->idClassLessons;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassLessons = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassLessonsPeer::doInsert($this,$dsn));
@@ -42,6 +46,7 @@ class ClassLessonsBase {
 			ClassLessonsPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -55,6 +60,13 @@ class ClassLessonsBase {
 		$array = ClassLessonsPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ClassLessonsPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		ClassLessonsPeer::doDelete($this,$deep,$dsn);
@@ -100,8 +112,8 @@ class ClassLessonsPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_lessons",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_lessons",$where);
 		$st->fields['id_class_lessons'] = 'id_class_lessons';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['createdOn'] = 'createdOn';
@@ -111,7 +123,6 @@ class ClassLessonsPeerBase {
 		$st->fields['inactiveOn'] = 'inactiveOn';
 		$st->fields['checkList'] = 'checkList';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -123,8 +134,8 @@ class ClassLessonsPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_lessons");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_lessons");
 		$st->fields['id_class_lessons'] = $this->idClassLessons;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['createdOn'] = $this->createdOn;
@@ -133,6 +144,7 @@ class ClassLessonsPeerBase {
 		$st->fields['activeOn'] = $this->activeOn;
 		$st->fields['inactiveOn'] = $this->inactiveOn;
 		$st->fields['checkList'] = $this->checkList;
+
 
 		$st->key = 'id_class_lessons';
 		$db->executeQuery($st);
@@ -146,8 +158,8 @@ class ClassLessonsPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_lessons");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_lessons");
 		$st->fields['id_class_lessons'] = $obj->idClassLessons;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['createdOn'] = $obj->createdOn;
@@ -157,6 +169,7 @@ class ClassLessonsPeerBase {
 		$st->fields['inactiveOn'] = $obj->inactiveOn;
 		$st->fields['checkList'] = $obj->checkList;
 
+
 		$st->key = 'id_class_lessons';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -165,11 +178,11 @@ class ClassLessonsPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -179,8 +192,8 @@ class ClassLessonsPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_lessons","id_class_lessons = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_lessons","id_class_lessons = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -202,7 +215,7 @@ class ClassLessonsPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

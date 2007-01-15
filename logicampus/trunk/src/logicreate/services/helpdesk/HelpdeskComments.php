@@ -4,14 +4,18 @@ class HelpdeskCommentsBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $helpdeskCommentsId;
 	var $userid;
 	var $comment;
 
-	var $__attributes = array(
-	'helpdeskCommentsId'=>'INTEGER',
+	var $__attributes = array( 
+	'helpdeskCommentsId'=>'integer',
 	'userid'=>'varchar',
-	'comment'=>'text');
+	'comment'=>'longvarchar');
+
+	var $__nulls = array();
 
 
 
@@ -19,19 +23,22 @@ class HelpdeskCommentsBase {
 		return $this->helpdeskCommentsId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->helpdeskCommentsId = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(HelpdeskCommentsPeer::doInsert($this));
+			$this->setPrimaryKey(HelpdeskCommentsPeer::doInsert($this,$dsn));
 		} else {
-			HelpdeskCommentsPeer::doUpdate($this);
+			HelpdeskCommentsPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -40,47 +47,50 @@ class HelpdeskCommentsBase {
 		} else {
 			$where = "helpdesk_comments_id='".$key."'";
 		}
-		$array = HelpdeskCommentsPeer::doSelect($where);
+		$array = HelpdeskCommentsPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = HelpdeskCommentsPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		HelpdeskCommentsPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['userid'])
-			$this->userid = $array['userid'];
-		if ($array['comment'])
-			$this->comment = $array['comment'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -90,16 +100,16 @@ class HelpdeskCommentsPeerBase {
 
 	var $tableName = 'helpdesk_comments';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("helpdesk_comments",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("helpdesk_comments",$where);
 		$st->fields['helpdesk_comments_id'] = 'helpdesk_comments_id';
 		$st->fields['userid'] = 'userid';
 		$st->fields['comment'] = 'comment';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = HelpdeskCommentsPeer::row2Obj($db->record);
@@ -107,14 +117,15 @@ class HelpdeskCommentsPeerBase {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("helpdesk_comments");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("helpdesk_comments");
 		$st->fields['helpdesk_comments_id'] = $this->helpdeskCommentsId;
 		$st->fields['userid'] = $this->userid;
 		$st->fields['comment'] = $this->comment;
 
+
 		$st->key = 'helpdesk_comments_id';
 		$db->executeQuery($st);
 
@@ -125,39 +136,43 @@ class HelpdeskCommentsPeerBase {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("helpdesk_comments");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("helpdesk_comments");
 		$st->fields['helpdesk_comments_id'] = $obj->helpdeskCommentsId;
 		$st->fields['userid'] = $obj->userid;
 		$st->fields['comment'] = $obj->comment;
 
+
 		$st->key = 'helpdesk_comments_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("helpdesk_comments","helpdesk_comments_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("helpdesk_comments","helpdesk_comments_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -167,6 +182,22 @@ class HelpdeskCommentsPeerBase {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new HelpdeskComments();
@@ -178,6 +209,7 @@ class HelpdeskCommentsPeerBase {
 		return $x;
 	}
 
+		
 }
 
 

@@ -4,8 +4,8 @@ class ClassAssignmentsBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
-	var $_entityVersion = '0.0';	//Source version number
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idClassAssignments;
 	var $title;
 	var $instructions;
@@ -18,18 +18,20 @@ class ClassAssignmentsBase {
 	var $idForum;
 	var $idForumThread;
 
-	var $__attributes = array(
-	'idClassAssignments'=>'int',
+	var $__attributes = array( 
+	'idClassAssignments'=>'integer',
 	'title'=>'varchar',
-	'instructions'=>'text',
-	'dueDate'=>'int',
+	'instructions'=>'longvarchar',
+	'dueDate'=>'integer',
 	'noDueDate'=>'tinyint',
-	'activeDate'=>'int',
+	'activeDate'=>'integer',
 	'responseType'=>'tinyint',
-	'idClasses'=>'int',
+	'idClasses'=>'integer',
 	'dateNoAccept'=>'datetime',
-	'idForum'=>'int',
-	'idForumThread'=>'int');
+	'idForum'=>'integer',
+	'idForumThread'=>'integer');
+
+	var $__nulls = array();
 
 
 
@@ -37,10 +39,12 @@ class ClassAssignmentsBase {
 		return $this->idClassAssignments;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassAssignments = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassAssignmentsPeer::doInsert($this,$dsn));
@@ -48,6 +52,7 @@ class ClassAssignmentsBase {
 			ClassAssignmentsPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -62,6 +67,13 @@ class ClassAssignmentsBase {
 		return $array[0];
 	}
 
+
+	function loadAll($dsn="default") {
+		$array = ClassAssignmentsPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
 	function delete($deep=false,$dsn="default") {
 		ClassAssignmentsPeer::doDelete($this,$deep,$dsn);
 	}
@@ -71,55 +83,30 @@ class ClassAssignmentsBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['title'])
-			$this->title = $array['title'];
-		if ($array['instructions'])
-			$this->instructions = $array['instructions'];
-		if ($array['dueDate'])
-			$this->dueDate = $array['dueDate'];
-		if ($array['noDueDate'])
-			$this->noDueDate = $array['noDueDate'];
-		if ($array['activeDate'])
-			$this->activeDate = $array['activeDate'];
-		if ($array['responseType'])
-			$this->responseType = $array['responseType'];
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['dateNoAccept'])
-			$this->dateNoAccept = $array['dateNoAccept'];
-		if ($array['idForum'])
-			$this->idForum = $array['idForum'];
-		if ($array['idForumThread'])
-			$this->idForumThread = $array['idForumThread'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -131,8 +118,8 @@ class ClassAssignmentsPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_assignments",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_assignments",$where);
 		$st->fields['id_class_assignments'] = 'id_class_assignments';
 		$st->fields['title'] = 'title';
 		$st->fields['instructions'] = 'instructions';
@@ -145,7 +132,6 @@ class ClassAssignmentsPeerBase {
 		$st->fields['id_forum'] = 'id_forum';
 		$st->fields['id_forum_thread'] = 'id_forum_thread';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -157,8 +143,8 @@ class ClassAssignmentsPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_assignments");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_assignments");
 		$st->fields['id_class_assignments'] = $this->idClassAssignments;
 		$st->fields['title'] = $this->title;
 		$st->fields['instructions'] = $this->instructions;
@@ -170,6 +156,7 @@ class ClassAssignmentsPeerBase {
 		$st->fields['dateNoAccept'] = $this->dateNoAccept;
 		$st->fields['id_forum'] = $this->idForum;
 		$st->fields['id_forum_thread'] = $this->idForumThread;
+
 
 		$st->key = 'id_class_assignments';
 		$db->executeQuery($st);
@@ -183,8 +170,8 @@ class ClassAssignmentsPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_assignments");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_assignments");
 		$st->fields['id_class_assignments'] = $obj->idClassAssignments;
 		$st->fields['title'] = $obj->title;
 		$st->fields['instructions'] = $obj->instructions;
@@ -197,6 +184,7 @@ class ClassAssignmentsPeerBase {
 		$st->fields['id_forum'] = $obj->idForum;
 		$st->fields['id_forum_thread'] = $obj->idForumThread;
 
+
 		$st->key = 'id_class_assignments';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -205,20 +193,22 @@ class ClassAssignmentsPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
+	/**
+	 * remove an object
+	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_assignments","id_class_assignments = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_assignments","id_class_assignments = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -232,6 +222,22 @@ class ClassAssignmentsPeerBase {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new ClassAssignments();
