@@ -8,6 +8,10 @@
 include_once(LIB_PATH."gradeBookObj.php");
 include_once(LIB_PATH."LC_html.php");
 include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
 
 class report extends FacultyOnlyService {
 
