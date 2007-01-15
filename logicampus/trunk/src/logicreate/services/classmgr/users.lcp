@@ -231,6 +231,7 @@ n']['classes']));
 		$this->run($db,$u,$lc,$t);
 	}
 
+
 	function activateRun (&$db,&$u,&$lc,&$t) {
 		$studentId = (int)$lc->getvars['student_id'];
 		$sectionNumber = (int)$lc->getvars['section'];
@@ -249,7 +250,7 @@ n']['classes']));
 	}
 
 
-	function removerun (&$db,&$u,&$lc,&$t) {
+	function removeRun (&$db,&$u,&$lc,&$t) {
 // only dealing with current semester right now
 // 
 		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
@@ -267,8 +268,7 @@ n']['classes']));
 	/**
 	 * Search for users based on any criteria
 	 *
-   */ 
-
+	 */ 
 	function anySearchRun(&$db, &$u, &$lc, &$t) {
 		
 		$lc->templateName = 'users_main';

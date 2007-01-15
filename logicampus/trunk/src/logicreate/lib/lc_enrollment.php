@@ -12,10 +12,10 @@ class lcClassEnrollment {
 	var $semesterId = -1;
 	var $classEnrollmentDos= array();
 
-	function lcClassEnrollment($classId=0, $semesterId=0) {
+	function lcClassEnrollment($classId=0, $semesterId=-1) {
 		$this->classId = (int)$classId;
 		$this->semesterId = (int)$semesterId;
-		if ($this->semesterId > 0 ){
+		if ($this->semesterId > -1 ){
 			$this->classEnrollmentDos = ClassEnrollmentPeer::doSelect(' class_id = '.$this->classId. ' AND semester_id = '.$this->semesterId);
 		} else {
 			$this->classEnrollmentDos = ClassEnrollmentPeer::doSelect(' class_id = '.$this->classId);

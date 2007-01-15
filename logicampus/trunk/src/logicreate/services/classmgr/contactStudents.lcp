@@ -34,42 +34,38 @@ class contactStudents extends FacultyService
 		}
 		$t['section'] = $section;
 	
-		if (count($t['students']) == false)
-		{	
-			$sql = '
-			SELECT DISTINCT D.firstname, D.lastname, D.username, Z.email
-			
-			FROM classes as A
-			
-				INNER JOIN class_sections AS B 
-					ON A.id_classes = B.id_classes
-			
-				INNER JOIN class_student_sections AS C 
-					ON B.sectionNumber = C.sectionNumber
-			
-				INNER JOIN lcUsers as Z
-					ON C.id_student = Z.username
-			
-				INNER JOIN profile AS D 
-					ON Z.username = D.username
+		$sql = '
+		SELECT DISTINCT D.firstname, D.lastname, D.username, Z.email
+		
+		FROM classes as A
+		
+			LEFT JOIN class_sections AS B 
+				ON A.id_classes = B.id_classes
+		
+			INNER JOIN class_enrollment AS C 
+				ON A.id_classes = C.class_id
+		
+			INNER JOIN lcUsers as Z
+				ON C.student_id = Z.pkey
+		
+			INNER JOIN profile AS D 
+				ON Z.username = D.username
 
-			WHERE
-				( 
-				A.id_classes = '.$u->activeClassTaught->id_classes.' AND 
-				B.id_classes = '.$u->activeClassTaught->id_classes.' AND
-				C.semester_id = A.id_semesters AND
-				C.active=1			
-				)
-				'.$sectionFilter.'
-			ORDER BY D.lastname ASC';
-			
-			$db->query($sql);
-			
-			while ($db->next_record())
-			{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
-			}
-
+		WHERE
+			( 
+			A.id_classes = '.$u->activeClassTaught->id_classes.' AND 
+			C.semester_id = A.id_semesters AND
+			C.active=1			
+			)
+			'.$sectionFilter.'
+		ORDER BY D.lastname ASC';
+		
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
 		}
+
 
 		if (count($t['students']) == 0)
 		{
