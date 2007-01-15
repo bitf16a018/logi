@@ -69,7 +69,7 @@ include(LIB_PATH."LC_user.php");
 include(LIB_PATH."pellet.php");
 include(LIB_PATH."LC_db.php");
 include_once(LIB_PATH."LC_registry.php");
-include_once(LIB_PATH."lc_SQL.php");
+include_once(LIB_PATH."pbdo_sql.php");
 include_once(LIB_PATH."LC_html.php");
 
 
