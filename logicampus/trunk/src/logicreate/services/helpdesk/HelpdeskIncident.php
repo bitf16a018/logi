@@ -259,6 +259,35 @@ class HelpdeskIncidentPeerBase {
 class HelpdeskIncident extends HelpdeskIncidentBase {
 
 
+	function loadHistoryForUsername($name) {
+		$name = (string)trim($name);
+
+
+		$db = lcDB::getHandle();
+		$st = new PBDO_SelectStatement("helpdesk_incident","userid = '$name'");
+		$st->fields['helpdesk_id'] = 'helpdesk_id';
+		$st->fields['timedate_open'] = 'timedate_open';
+		$st->fields['timedate_close'] = 'timedate_close';
+		$st->fields['status'] = 'status';
+		$st->fields['summary'] = 'summary';
+		$st->fields['userid'] = 'userid';
+		$st->fields['category'] = 'category';
+		$st->fields['assigned_to'] = 'assigned_to';
+		$st->fields['helpdesk_status.helpdesk_status_label'] = 'helpdesk_status.helpdesk_status_label';
+		$st->join = 'left join helpdesk_status on helpdesk_status.helpdesk_status_id = helpdesk_incident.status ';
+
+		$st->key = $this->key;
+
+		$db->executeQuery($st);
+		while($db->nextRecord() ) {
+			$x = HelpdeskIncidentPeer::row2Obj($db->record);
+			$x->helpdeskStatusLabel = $db->record['helpdesk_status_label'];
+			$array[] = $x;
+		}
+		return $array;
+	}
+
+
 
 }
 
