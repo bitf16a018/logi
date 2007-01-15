@@ -29,8 +29,11 @@ $data['perms'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/lcConfig.sql'));
 $data['config'] = explode(";\n",$setupFile);
 
+$setupFile = trim(file_get_contents('../data/profile.sql'));
+$data['profile'] = explode(";\n",$setupFile);
+
 $setupFile = trim(file_get_contents('../data/lcGroups.sql'));
-$schemas['groups'] = explode(";\n",$setupFile);
+$data['groups'] = explode(";\n",$setupFile);
 
 $location = '../src/logicreate/services/';
 $d = dir($location);
