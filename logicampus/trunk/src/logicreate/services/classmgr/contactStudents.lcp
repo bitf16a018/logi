@@ -23,10 +23,8 @@ class contactStudents extends FacultyService
 	var $sectionTitle = 'Contact Students';
 	
 	
-	function run( &$db, &$u, &$lc, &$t) 
-	{
+	function run( &$db, &$u, &$lc, &$t) {
 		$lc->templateName = "contactStudents_main";
-		$lc->templateStyle = 'private';
 
 		$section = (int)$lc->getvars['section'];
 		if ($section > 0 ) {
@@ -88,7 +86,6 @@ class contactStudents extends FacultyService
 	function submitRun(&$db, &$u, &$lc, &$t) 
 	{
 		$lc->templateName = "contactStudents_main";
-//auto-comment		$lc->templateStyle = 'private';
 		
 		// getting a list of classroom students
 		$sql = '
