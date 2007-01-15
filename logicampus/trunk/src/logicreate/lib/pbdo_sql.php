@@ -1,20 +1,20 @@
 <?php
 
-class LC_SQLStatement {
+class PBDO_SQLStatement {
 
 	var $type;
-	var $fields;
+	var $fields = array();
+	var $nulls = array();
 	var $values;
 	var $key;
 	var $keyValue;
 	var $where;
-	var $join;
 	var $limit;
 	var $offset;
 	var $tableName = ' ';
 	var $database;
 
-	function LC_SQLStatement($table,$where='') {
+	function PBDO_SQLStatement($table,$where='') {
 		$this->tableName = $table;
 		$this->where = $where;
 	}
@@ -37,7 +37,7 @@ class LC_SQLStatement {
 }
 
 
-class LC_SelectStatement extends LC_SQLStatement {
+class PBDO_SelectStatement extends PBDO_SQLStatement {
 
 	var $type = "select";
 
@@ -50,13 +50,13 @@ class LC_SelectStatement extends LC_SQLStatement {
 			$ret .= $this->join;
 		}
 		if ($this->where != "" ) {
-			$ret .= " where $this->where ";
+			$ret .= "where $this->where";
 		}
 	return $ret;
 	}
 }
 
-class LC_UpdateStatement extends LC_SQLStatement {
+class PBDO_UpdateStatement extends PBDO_SQLStatement {
 
 	var $type = "update";
 
@@ -65,14 +65,15 @@ class LC_UpdateStatement extends LC_SQLStatement {
 		reset ($this->fields);
 		if ( $this->key != '' ) {
 			foreach ($this->fields as $k=>$v) {
+
 				$v = addslashes($v);
 				if ( $this->key != $k) {
-					$newfields[$k] = $v;
-
-					if ( is_null($this->fields[$k]) )
+					//allow nulls
+					if (isset($this->nulls[$k]) && $v == null) {
 						$set .= "$k = NULL, ";
-					else
+					} else {
 						$set .= "$k = '$v', ";
+					}
 				} else {
 					$keyName = $k;
 					$keyValue = $v;
@@ -80,10 +81,6 @@ class LC_UpdateStatement extends LC_SQLStatement {
 			}
 		}
 		reset ($this->fields);
-		if ($keyName == '' || $keyValue == '' ) {
-			trigger_error("unwilling to update entire table, keyName or keyValue is blank.");
-			return false;
-		}
 
 		$ret = "UPDATE " .$this->tableName;
 		$ret .="\nSET ";
@@ -93,7 +90,7 @@ class LC_UpdateStatement extends LC_SQLStatement {
 	}
 }
 
-class LC_InsertStatement extends LC_SQLStatement {
+class PBDO_InsertStatement extends PBDO_SQLStatement {
 
 	var $type = "insert";
 
@@ -103,13 +100,12 @@ class LC_InsertStatement extends LC_SQLStatement {
 			foreach ($this->fields as $k=>$v) {
 				$v = addslashes($v);
 				if ( $this->key != $k) {
-					//add quotes or NULL
-					if ( is_null($this->fields[$k]) )
-						$v = 'NULL';
-					else
-						$v  = "'$v'";
-
-					$newfields[$k] = $v;
+					//allow nulls
+					if (isset($this->nulls[$k]) && $v == null) {
+						$newfields[$k] = "NULL";
+					} else {
+						$newfields[$k] = "'".$v."'";
+					}
 				}
 			}
 			reset ($this->fields);
@@ -120,9 +116,9 @@ class LC_InsertStatement extends LC_SQLStatement {
 			$fieldVals = $this->fields;
 		}
 		$ret = "INSERT INTO " .$this->tableName;
-		$ret .="\n(";
-		$ret .= @implode(",",$fieldKeys);
-		$ret .=")\n";
+		$ret .="\n(`";
+		$ret .= @implode("`,`",$fieldKeys);
+		$ret .="`)\n";
 		$ret .="VALUES\n(";
 		$ret .= @implode(",",$fieldVals);
 		$ret .=")\n";
@@ -133,7 +129,7 @@ class LC_InsertStatement extends LC_SQLStatement {
 	}
 }
 
-class LC_DeleteStatement extends LC_SQLStatement {
+class PBDO_DeleteStatement extends PBDO_SQLStatement {
 
 	var $type = "delete";
 
