@@ -1,6 +1,10 @@
 <?
 
 include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
 include_once(LIB_PATH.'LC_user.php');
 include_once(LIB_PATH.'Assessment.php');
 

@@ -7,6 +7,10 @@
 
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
 
 class prefs extends FacultyService {
 
