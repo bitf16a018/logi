@@ -288,28 +288,8 @@ WHERE css.id_student = '$uname'
 Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
 CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
 **/
-$sql = "SELECT
-cs.*, semesters.semesterID, courses.courseName 
+		$ret = LC_Class::getActiveClassesForFaculty($uname);
 
-FROM classes as cs
-LEFT JOIN courses ON cs.id_courses = courses.id_courses
-LEFT JOIN semesters ON cs.id_semesters = semesters.id_semesters
-LEFT JOIN profile on cs.facultyId=profile.username
-LEFT JOIN profile_faculty on profile_faculty.username=profile.username
-
-WHERE cs.facultyId = '$uname'
-and semesters.dateAccountActivation < ".DB::getFuncName('NOW()')."
-and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
-";
-		$db->query($sql);
-		$db->RESULT_TYPE=MYSQL_ASSOC;
-		while ($db->next_record() ) {
-
-			$temp = PersistantObject::createFromArray('classObj',$db->Record);
-			$temp->_dsn = $dsn;
-			$temp->__loaded = true; 
-			$ret[] = $temp;
-		}
 		// extra faculty
 		
 		$sql = "SELECT

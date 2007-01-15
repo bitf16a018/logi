@@ -39,7 +39,7 @@ class display extends FacultyService {
  * Output data: main class page
  *
  */
-	function Run(&$db,&$u,&$lc,&$t) 
+	function run(&$db,&$u,&$lc,&$t) 
 	{
 		$t['classObj'] = $u->activeClassTaught;
 		$this->inactivelinks[] = 'Classroom Manager';
@@ -49,17 +49,12 @@ class display extends FacultyService {
 		/*****
 		* MOTD
 		****/
-		$file = CONTENT_PATH.'__messageoftheday__';
-		$fp = fopen ($file, 'r');
-		$t['motd'] = fread($fp, filesize($file) );
-		fclose($fp);
-		$t['motd'] = trim($t['motd']);
+		$t['motd'] = LcSettings::getSystemMotd();
 
 		if (strlen($t['motd']) == 0)
 		{
 			unset($t['motd']);
 		}
-		#debug($u);
 		if ($u->activeClassTaught->classType == 'ITV')
 		{
 			$t['ITVClass'] = true;
@@ -71,8 +66,6 @@ class display extends FacultyService {
 		}
 		
 	}
-		
-
 }
 
 ?>
