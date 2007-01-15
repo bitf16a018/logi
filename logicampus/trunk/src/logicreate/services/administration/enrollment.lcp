@@ -4,6 +4,7 @@ include_once(LIB_PATH.'LC_html.php');
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_enrollment.php');
 
 class enrollment extends AdminService {
 
@@ -134,16 +135,23 @@ class enrollment extends AdminService {
 		$sectionNumber = (int)$sectionNumber;
 		$classId = (int)$classId;
 
-		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+//		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
 
 
-		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
+//		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
 
 
 
 		$db->query("SELECT pkey from lcUsers where username = '".$name."'");
 		$db->nextRecord();
 		$userId = $db->record['pkey'];
+
+		$classEnrollment = new lcClassEnrollment($classId);
+		$classEnrollment->addStudent($userId);
+		$classEnrollment->save();
+
+
+/*
 
 		$db->query("DELETE FROM class_enrollment 
 			WHERE student_id='".$userId."' 
@@ -153,6 +161,7 @@ class enrollment extends AdminService {
 
 		$db->query("INSERT INTO class_enrollment (class_id,student_id,section_number,active,semester_id,enrolled_on) 
 			VALUES ('".$classId."','".$userId."','".$sectionNumber."',1,".$semesterId.",".time().")");
+*/
 
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
