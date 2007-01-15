@@ -12,24 +12,12 @@
  * http://www.tapinternet.com/
  ***************************************************/
 
-/*************************************************** 
- *
- * This file is under the LogiCreate Public License
- *
- * A copy of the license is in your LC distribution
- * called license.txt.  If you are missing this
- * file you can obtain the latest version from
- * http://logicreate.com/license.html
- *
- * LogiCreate is copyright by Tap Internet, Inc.
- * http://www.tapinternet.com/
- ***************************************************/
-
-
 include_once(LIB_PATH.'LC_html.php');
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'semesterObj.php');
+
+include_once(LIB_PATH.'lc_enrollment.php');
 
 class users extends FacultyService {
 
@@ -62,19 +50,40 @@ class users extends FacultyService {
 		$lc->templateName = 'users_main';
 		$this->sectionTitle = 'Student Management';
 
-		$sql = 'select username, CONCAT(lastname,", ", firstname," (",username,")") as fullname,ss.* from profile as p left join class_student_sections as ss on ss.id_student=p.username left join class_sections as s on s.sectionNumber=ss.sectionNumber where s.id_classes=\''.$u->activeClassTaught->id_classes.'\' order by fullname';
-		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$classEnrollment = new lcClassEnrollment($u->activeClassTaught->id_classes);
+
+		$userIdList = '';
+		foreach ($classEnrollment->classEnrollmentDos as $enrollmentDo) {
+			$userIdList .= $enrollmentDo->get('studentId').',';
+		}
+		$userIdList = substr($userIdList,0,-1);
+
+		$sql = 'SELECT B.pkey, B.username, CONCAT(lastname,", ", firstname," (",A.username,")") as fullname
+		FROM lcUsers AS B
+		LEFT JOIN profile AS A 
+		  ON B.username = A.username
+		WHERE B.pkey IN ('.$userIdList.') 
+		ORDER BY fullname';
+
 		$db->query($sql);
 
-		while($db->next_record() )
-		{
-			$t['students'][] = $db->Record;
+		while($db->nextRecord()) {
+			//inject data for datagrid
+			if ($classEnrollment->isStudentActive($db->record['pkey'])) {
+				$db->record['active'] = 1;
+			} else {
+				$db->record['active'] = 0;
+			}
+
+			$t['students'][] = $db->record;
 		}
+
 
 		$dg = new datagrid('classmgr','users');
 		$dg->rowsPerPage = 100;
 		$dg->setRows($t['students']);
 		$dg->ignore = array (
+			'pkey',
 			'id_student',
 			'semester_id',
 			'dateWithdrawn',
@@ -89,8 +98,8 @@ class users extends FacultyService {
 			'activate'=>'Action',
 			'userinfo'=>'User Info'
 		);
-		$dg->prependColumn('<? if ($active==1) { $activate="Drop"; $act=0; } else { $activate="Activate"; $act=1; } ?><a href="<?=modurl("users/event=activate/active=$act/semester=$semester_id/username=".$username."/id=".$sectionNumber);?>"><?=$activate;?></a>',"activate");
-		$dg->prependColumn('<a href="<?=modurl("users/event=showUser/username=$username")?>">User Info</a>', 'userinfo');
+		$dg->prependColumn('<? if ($active==1) { $activate="Drop"; $act=0; } else { $activate="Activate"; $act=1; } ?><a href="<?=modurl("users/event=activate/active=$act/semester=$semester_id/student_id=".$pkey."/section=".$sectionNumber);?>"><?=$activate;?></a>',"activate");
+		$dg->prependColumn('<a href="<?=modurl("users/event=showUser/student_id=$pkey")?>">User Info</a>', 'userinfo');
 
 		$dg->overrideColumn('<? if ($active == 1)
 			{
@@ -211,7 +220,7 @@ n']['classes']));
 	}
 
 
-	function addrun(&$db,&$u,&$lc,&$t) {
+	function addRun(&$db,&$u,&$lc,&$t) {
 		$semesterId = $u->sessionvars['enrollmentSemesterId'];
 
 		$name = addslashes(stripslashes($lc->postvars['username']));
@@ -222,12 +231,19 @@ n']['classes']));
 		$this->run($db,$u,$lc,$t);
 	}
 
-	function activaterun (&$db,&$u,&$lc,&$t) {
-		$name = addslashes(stripslashes($lc->getvars['username']));
-		$sectionNumber = (int)$lc->getvars['id'];
+	function activateRun (&$db,&$u,&$lc,&$t) {
+		$studentId = (int)$lc->getvars['student_id'];
+		$sectionNumber = (int)$lc->getvars['section'];
 		$active= (int)$lc->getvars['active'];
 
-		$db->query("update class_student_sections set active=$active where id_student='$name' and sectionNumber=$sectionNumber");
+		$classEnrollment = new lcClassEnrollment($u->activeClassTaught->id_classes);
+		if ($active) {
+			$classEnrollment->activateStudent($studentId);
+		} else {
+			$classEnrollment->deActivateStudent($studentId);
+		}
+		$classEnrollment->save();
+
 		$lc->templateName = 'users_updateEnrollment';
 		$this->run($db,$u,$lc,$t);
 	}
