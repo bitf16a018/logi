@@ -4,6 +4,8 @@ class TextbookClassesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idTextbookClasses;
 	var $idClasses;
 	var $author;
@@ -19,8 +21,8 @@ class TextbookClassesBase {
 	var $status;
 	var $note;
 
-	var $__attributes = array(
-	'idTextbookClasses'=>'int',
+	var $__attributes = array( 
+	'idTextbookClasses'=>'integer',
 	'idClasses'=>'bigint',
 	'author'=>'varchar',
 	'title'=>'varchar',
@@ -28,12 +30,20 @@ class TextbookClassesBase {
 	'edition'=>'varchar',
 	'copyright'=>'year',
 	'isbn'=>'varchar',
-	'required'=>'int',
-	'bundled'=>'int',
-	'bundledItems'=>'text',
+	'required'=>'integer',
+	'bundled'=>'integer',
+	'bundledItems'=>'longvarchar',
 	'type'=>'varchar',
 	'status'=>'tinyint',
-	'note'=>'text');
+	'note'=>'longvarchar');
+
+	var $__nulls = array( 
+	'edition'=>'edition',
+	'copyright'=>'copyright',
+	'required'=>'required',
+	'bundled'=>'bundled',
+	'bundledItems'=>'bundledItems',
+	'note'=>'note');
 
 
 
@@ -41,20 +51,22 @@ class TextbookClassesBase {
 		return $this->idTextbookClasses;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idTextbookClasses = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(TextbookClassesPeer::doInsert($this));
+			$this->setPrimaryKey(TextbookClassesPeer::doInsert($this,$dsn));
 		} else {
-			TextbookClassesPeer::doUpdate($this);
+			TextbookClassesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -63,82 +75,63 @@ class TextbookClassesBase {
 		} else {
 			$where = "id_textbook_classes='".$key."'";
 		}
-		$array = TextbookClassesPeer::doSelect($where);
+		$array = TextbookClassesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = TextbookClassesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		TextbookClassesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['author'])
-			$this->author = $array['author'];
-		if ($array['title'])
-			$this->title = $array['title'];
-		if ($array['publisher'])
-			$this->publisher = $array['publisher'];
-		if ($array['edition'])
-			$this->edition = $array['edition'];
-		if ($array['copyright'])
-			$this->copyright = $array['copyright'];
-		if ($array['isbn'])
-			$this->isbn = $array['isbn'];
-		if ($array['required'])
-			$this->required = $array['required'];
-		if ($array['bundled'])
-			$this->bundled = $array['bundled'];
-		if ($array['bundledItems'])
-			$this->bundledItems = $array['bundledItems'];
-		if ($array['type'])
-			$this->type = $array['type'];
-		if ($array['status'])
-			$this->status = $array['status'];
-		if ($array['note'])
-			$this->note = $array['note'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class TextbookClassesPeer {
+class TextbookClassesPeerBase {
 
 	var $tableName = 'textbook_classes';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("textbook_classes",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("textbook_classes",$where);
 		$st->fields['id_textbook_classes'] = 'id_textbook_classes';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['author'] = 'author';
@@ -154,8 +147,8 @@ class TextbookClassesPeer {
 		$st->fields['status'] = 'status';
 		$st->fields['note'] = 'note';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = TextbookClassesPeer::row2Obj($db->record);
@@ -163,10 +156,10 @@ class TextbookClassesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("textbook_classes");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("textbook_classes");
 		$st->fields['id_textbook_classes'] = $this->idTextbookClasses;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['author'] = $this->author;
@@ -182,6 +175,13 @@ class TextbookClassesPeer {
 		$st->fields['status'] = $this->status;
 		$st->fields['note'] = $this->note;
 
+		$st->nulls['edition'] = 'edition';
+		$st->nulls['copyright'] = 'copyright';
+		$st->nulls['required'] = 'required';
+		$st->nulls['bundled'] = 'bundled';
+		$st->nulls['bundled_items'] = 'bundled_items';
+		$st->nulls['note'] = 'note';
+
 		$st->key = 'id_textbook_classes';
 		$db->executeQuery($st);
 
@@ -192,10 +192,10 @@ class TextbookClassesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("textbook_classes");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("textbook_classes");
 		$st->fields['id_textbook_classes'] = $obj->idTextbookClasses;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['author'] = $obj->author;
@@ -211,31 +211,41 @@ class TextbookClassesPeer {
 		$st->fields['status'] = $obj->status;
 		$st->fields['note'] = $obj->note;
 
+		$st->nulls['edition'] = 'edition';
+		$st->nulls['copyright'] = 'copyright';
+		$st->nulls['required'] = 'required';
+		$st->nulls['bundled'] = 'bundled';
+		$st->nulls['bundled_items'] = 'bundled_items';
+		$st->nulls['note'] = 'note';
+
 		$st->key = 'id_textbook_classes';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("textbook_classes","id_textbook_classes = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("textbook_classes","id_textbook_classes = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -245,6 +255,22 @@ class TextbookClassesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new TextbookClasses();
@@ -267,62 +293,21 @@ class TextbookClassesPeer {
 		return $x;
 	}
 
+		
 }
+
 
 //You can edit this class, but do not change this next line!
 class TextbookClasses extends TextbookClassesBase {
 
-	# Finds all user accounts in system in the seminar
-	# manager group and emails them.
-	function  mailAdmin($msg)
-	{
-		$db = DB::getHandle();
-		$sql = "SELECT email FROM lcUsers where groups LIKE
-		'%|tbadmin|%'";
-		$db->query($sql);
-		while($db->next_record() )
-		{
-			$emailTo .= $db->Record['email'].',';	
-		}
-		$emailTo = substr($emailTo, 0, -1);
-		mail($emailTo, "Textbook Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");
-	}
+
 
 }
 
-function getStatus($x)
-	{
-		switch($x)
-		{
-			case 1;
-			return 'New';
 
-			case 0;
-			return 'N/A';
 
-			case 2;
-			return 'Pending';
+class TextbookClassesPeer extends TextbookClassesPeerBase {
 
-			case 3;
-			return 'Approved';
-
-			case 4;
-			return 'Waiting on Instructor';
-			
-			default:
-			return 'N/A';
-		}
-			
-	}
-	
-function printyesno($x)
-{
-	if ($x)
-	{
-		return 'Yes';
-	}
-	return 'No';
 }
-
 
 ?>

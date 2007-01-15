@@ -1,21 +1,23 @@
 <?
 
-include_once(LIB_PATH.'ExamScheduleClassesDates.php');
-
 class ExamScheduleDatesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idExamScheduleDates;
 	var $idSemester;
 	var $dateStart;
 	var $dateEnd;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'idExamScheduleDates'=>'bigint',
 	'idSemester'=>'bigint',
 	'dateStart'=>'datetime',
 	'dateEnd'=>'datetime');
+
+	var $__nulls = array();
 
 
 
@@ -23,20 +25,22 @@ class ExamScheduleDatesBase {
 		return $this->idExamScheduleDates;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idExamScheduleDates = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(ExamScheduleDatesPeer::doInsert($this));
+			$this->setPrimaryKey(ExamScheduleDatesPeer::doInsert($this,$dsn));
 		} else {
-			ExamScheduleDatesPeer::doUpdate($this);
+			ExamScheduleDatesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -45,69 +49,70 @@ class ExamScheduleDatesBase {
 		} else {
 			$where = "id_exam_schedule_dates='".$key."'";
 		}
-		$array = ExamScheduleDatesPeer::doSelect($where);
+		$array = ExamScheduleDatesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ExamScheduleDatesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		ExamScheduleDatesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idSemester'])
-			$this->idSemester = $array['idSemester'];
-		if ($array['dateStart'])
-			$this->dateStart = $array['dateStart'];
-		if ($array['dateEnd'])
-			$this->dateEnd = $array['dateEnd'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class ExamScheduleDatesPeer {
+class ExamScheduleDatesPeerBase {
 
 	var $tableName = 'exam_schedule_dates';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("exam_schedule_dates",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("exam_schedule_dates",$where);
 		$st->fields['id_exam_schedule_dates'] = 'id_exam_schedule_dates';
 		$st->fields['id_semester'] = 'id_semester';
 		$st->fields['date_start'] = 'date_start';
 		$st->fields['date_end'] = 'date_end';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = ExamScheduleDatesPeer::row2Obj($db->record);
@@ -115,15 +120,16 @@ class ExamScheduleDatesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("exam_schedule_dates");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("exam_schedule_dates");
 		$st->fields['id_exam_schedule_dates'] = $this->idExamScheduleDates;
 		$st->fields['id_semester'] = $this->idSemester;
 		$st->fields['date_start'] = $this->dateStart;
 		$st->fields['date_end'] = $this->dateEnd;
 
+
 		$st->key = 'id_exam_schedule_dates';
 		$db->executeQuery($st);
 
@@ -134,40 +140,44 @@ class ExamScheduleDatesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("exam_schedule_dates");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("exam_schedule_dates");
 		$st->fields['id_exam_schedule_dates'] = $obj->idExamScheduleDates;
 		$st->fields['id_semester'] = $obj->idSemester;
 		$st->fields['date_start'] = $obj->dateStart;
 		$st->fields['date_end'] = $obj->dateEnd;
 
+
 		$st->key = 'id_exam_schedule_dates';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("exam_schedule_dates","id_exam_schedule_dates = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("exam_schedule_dates","id_exam_schedule_dates = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -177,6 +187,22 @@ class ExamScheduleDatesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new ExamScheduleDates();
@@ -189,56 +215,20 @@ class ExamScheduleDatesPeer {
 		return $x;
 	}
 
+		
 }
 
 
-// You can edit this class, but do not change this next line!
+//You can edit this class, but do not change this next line!
 class ExamScheduleDates extends ExamScheduleDatesBase {
 
-	// returns an array of ExamScheduleClassesDates objects with extra data
-	// from ExamScheduleDates. Some of the ExamScheduleDates
-	function getAllDates( $classid, $semesterid, $showEnteredDatesOnly ) {
 
-		$escds = array();
 
-		$esds = ExamScheduleDatesPeer::doSelect( "id_semester='$semesterid'" );
-		while ( list(,$esd) = @each($esds) ) {
-			$escd = ExamScheduleClassesDates::load( array(
-				'id_classes' => $classid,
-				'id_exam_schedule_dates' => $esd->idExamScheduleDates
-			) );
-			if ( !is_object($escd) ) {
+}
 
-				// don't make an empty object; they only want to see dates that were entered
-				//if ( $showEnteredDatesOnly ) continue;
 
-				$escd = new ExamScheduleClassesDates();
-				$escd->set( 'idClasses', $classid );
-				$escd->set( 'idExamScheduleDates', $esd->idExamScheduleDates );
-				$escd->set( 'status', 1 ); // not approved
-			}
-			$escd->dateStart = $esd->dateStart;
-			$escd->dateEnd = $esd->dateEnd;
-			$escds[$esd->idExamScheduleDates] = $escd;
-		}
-		return $escds;
-	}
 
-	# Finds all user accounts in system in the exam
-	# manager group and emails them.
-	function mailAdmin( $msg, $subject='' )
-	{
-		$db = DB::getHandle();
-		$sql = "SELECT email FROM lcUsers where groups LIKE
-		'%|exammgr|%'";
-		$db->query($sql);
-		while($db->next_record() )
-		{
-			$emailTo .= $db->Record['email'].',';	
-		}
-		$emailTo = substr($emailTo, 0, -1);
-		mail($emailTo, "Exam Date Added / Modified".$subject, $msg, "From: ".WEBMASTER_EMAIL."\r\n");
-	}
+class ExamScheduleDatesPeer extends ExamScheduleDatesPeerBase {
 
 }
 

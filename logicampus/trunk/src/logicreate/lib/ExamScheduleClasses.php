@@ -4,6 +4,8 @@ class ExamScheduleClassesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idExamScheduleClasses;
 	var $idClasses;
 	var $idSemester;
@@ -15,17 +17,19 @@ class ExamScheduleClassesBase {
 	var $northwestCampus;
 	var $note;
 
-	var $__attributes = array(
-	'idExamScheduleClasses'=>'int',
-	'idClasses'=>'int',
-	'idSemester'=>'int',
-	'status'=>'int',
+	var $__attributes = array( 
+	'idExamScheduleClasses'=>'integer',
+	'idClasses'=>'integer',
+	'idSemester'=>'integer',
+	'status'=>'integer',
 	'receivedDate'=>'datetime',
-	'southCampus'=>'int',
-	'southeastCampus'=>'int',
-	'northeastCampus'=>'int',
-	'northwestCampus'=>'int',
-	'note'=>'text');
+	'southCampus'=>'integer',
+	'southeastCampus'=>'integer',
+	'northeastCampus'=>'integer',
+	'northwestCampus'=>'integer',
+	'note'=>'longvarchar');
+
+	var $__nulls = array();
 
 
 
@@ -33,20 +37,22 @@ class ExamScheduleClassesBase {
 		return $this->idExamScheduleClasses;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idExamScheduleClasses = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(ExamScheduleClassesPeer::doInsert($this));
+			$this->setPrimaryKey(ExamScheduleClassesPeer::doInsert($this,$dsn));
 		} else {
-			ExamScheduleClassesPeer::doUpdate($this);
+			ExamScheduleClassesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -55,74 +61,63 @@ class ExamScheduleClassesBase {
 		} else {
 			$where = "id_exam_schedule_classes='".$key."'";
 		}
-		$array = ExamScheduleClassesPeer::doSelect($where);
+		$array = ExamScheduleClassesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ExamScheduleClassesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		ExamScheduleClassesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['idSemester'])
-			$this->idSemester = $array['idSemester'];
-		if ($array['status'])
-			$this->status = $array['status'];
-		if ($array['receivedDate'])
-			$this->receivedDate = $array['receivedDate'];
-		if ($array['southCampus'])
-			$this->southCampus = $array['southCampus'];
-		if ($array['southeastCampus'])
-			$this->southeastCampus = $array['southeastCampus'];
-		if ($array['northeastCampus'])
-			$this->northeastCampus = $array['northeastCampus'];
-		if ($array['northwestCampus'])
-			$this->northwestCampus = $array['northwestCampus'];
-		if ($array['note'])
-			$this->note = $array['note'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class ExamScheduleClassesPeer {
+class ExamScheduleClassesPeerBase {
 
 	var $tableName = 'exam_schedule_classes';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("exam_schedule_classes",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("exam_schedule_classes",$where);
 		$st->fields['id_exam_schedule_classes'] = 'id_exam_schedule_classes';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['id_semester'] = 'id_semester';
@@ -134,8 +129,8 @@ class ExamScheduleClassesPeer {
 		$st->fields['northwest_campus'] = 'northwest_campus';
 		$st->fields['note'] = 'note';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = ExamScheduleClassesPeer::row2Obj($db->record);
@@ -143,10 +138,10 @@ class ExamScheduleClassesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("exam_schedule_classes");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("exam_schedule_classes");
 		$st->fields['id_exam_schedule_classes'] = $this->idExamScheduleClasses;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['id_semester'] = $this->idSemester;
@@ -158,6 +153,7 @@ class ExamScheduleClassesPeer {
 		$st->fields['northwest_campus'] = $this->northwestCampus;
 		$st->fields['note'] = $this->note;
 
+
 		$st->key = 'id_exam_schedule_classes';
 		$db->executeQuery($st);
 
@@ -168,10 +164,10 @@ class ExamScheduleClassesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("exam_schedule_classes");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("exam_schedule_classes");
 		$st->fields['id_exam_schedule_classes'] = $obj->idExamScheduleClasses;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['id_semester'] = $obj->idSemester;
@@ -183,31 +179,35 @@ class ExamScheduleClassesPeer {
 		$st->fields['northwest_campus'] = $obj->northwestCampus;
 		$st->fields['note'] = $obj->note;
 
+
 		$st->key = 'id_exam_schedule_classes';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("exam_schedule_classes","id_exam_schedule_classes = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("exam_schedule_classes","id_exam_schedule_classes = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -217,6 +217,22 @@ class ExamScheduleClassesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new ExamScheduleClasses();
@@ -235,6 +251,7 @@ class ExamScheduleClassesPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -242,6 +259,12 @@ class ExamScheduleClassesPeer {
 class ExamScheduleClasses extends ExamScheduleClassesBase {
 
 
+
+}
+
+
+
+class ExamScheduleClassesPeer extends ExamScheduleClassesPeerBase {
 
 }
 

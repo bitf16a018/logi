@@ -4,6 +4,8 @@ class SeminarClassesDatesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idSeminarClassesDates;
 	var $idClasses;
 	var $numSeminar;
@@ -22,10 +24,10 @@ class SeminarClassesDatesBase {
 	var $entryStatus;
 	var $note;
 
-	var $__attributes = array(
-	'idSeminarClassesDates'=>'int',
-	'idClasses'=>'int',
-	'numSeminar'=>'int',
+	var $__attributes = array( 
+	'idSeminarClassesDates'=>'integer',
+	'idClasses'=>'integer',
+	'numSeminar'=>'integer',
 	'southDate'=>'datetime',
 	'southTimeStart'=>'time',
 	'southTimeEnd'=>'time',
@@ -38,8 +40,23 @@ class SeminarClassesDatesBase {
 	'southeastDate'=>'datetime',
 	'southeastTimeStart'=>'time',
 	'southeastTimeEnd'=>'time',
-	'entryStatus'=>'int',
-	'note'=>'text');
+	'entryStatus'=>'integer',
+	'note'=>'longvarchar');
+
+	var $__nulls = array( 
+	'southDate'=>'southDate',
+	'southTimeStart'=>'southTimeStart',
+	'southTimeEnd'=>'southTimeEnd',
+	'northeastDate'=>'northeastDate',
+	'northeastTimeStart'=>'northeastTimeStart',
+	'northeastTimeEnd'=>'northeastTimeEnd',
+	'northwestDate'=>'northwestDate',
+	'northwestTimeStart'=>'northwestTimeStart',
+	'northwestTimeEnd'=>'northwestTimeEnd',
+	'southeastDate'=>'southeastDate',
+	'southeastTimeStart'=>'southeastTimeStart',
+	'southeastTimeEnd'=>'southeastTimeEnd',
+	'note'=>'note');
 
 
 
@@ -47,20 +64,22 @@ class SeminarClassesDatesBase {
 		return $this->idSeminarClassesDates;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idSeminarClassesDates = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(SeminarClassesDatesPeer::doInsert($this));
+			$this->setPrimaryKey(SeminarClassesDatesPeer::doInsert($this,$dsn));
 		} else {
-			SeminarClassesDatesPeer::doUpdate($this);
+			SeminarClassesDatesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -69,88 +88,63 @@ class SeminarClassesDatesBase {
 		} else {
 			$where = "id_seminar_classes_dates='".$key."'";
 		}
-		$array = SeminarClassesDatesPeer::doSelect($where);
+		$array = SeminarClassesDatesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = SeminarClassesDatesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		SeminarClassesDatesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['numSeminar'])
-			$this->numSeminar = $array['numSeminar'];
-		if ($array['southDate'])
-			$this->southDate = $array['southDate'];
-		if ($array['southTimeStart'])
-			$this->southTimeStart = $array['southTimeStart'];
-		if ($array['southTimeEnd'])
-			$this->southTimeEnd = $array['southTimeEnd'];
-		if ($array['northeastDate'])
-			$this->northeastDate = $array['northeastDate'];
-		if ($array['northeastTimeStart'])
-			$this->northeastTimeStart = $array['northeastTimeStart'];
-		if ($array['northeastTimeEnd'])
-			$this->northeastTimeEnd = $array['northeastTimeEnd'];
-		if ($array['northwestDate'])
-			$this->northwestDate = $array['northwestDate'];
-		if ($array['northwestTimeStart'])
-			$this->northwestTimeStart = $array['northwestTimeStart'];
-		if ($array['northwestTimeEnd'])
-			$this->northwestTimeEnd = $array['northwestTimeEnd'];
-		if ($array['southeastDate'])
-			$this->southeastDate = $array['southeastDate'];
-		if ($array['southeastTimeStart'])
-			$this->southeastTimeStart = $array['southeastTimeStart'];
-		if ($array['southeastTimeEnd'])
-			$this->southeastTimeEnd = $array['southeastTimeEnd'];
-		if ($array['entryStatus'])
-			$this->entryStatus = $array['entryStatus'];
-		if ($array['note'])
-			$this->note = $array['note'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class SeminarClassesDatesPeer {
+class SeminarClassesDatesPeerBase {
 
 	var $tableName = 'seminar_classes_dates';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("seminar_classes_dates",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("seminar_classes_dates",$where);
 		$st->fields['id_seminar_classes_dates'] = 'id_seminar_classes_dates';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['num_seminar'] = 'num_seminar';
@@ -169,8 +163,8 @@ class SeminarClassesDatesPeer {
 		$st->fields['entry_status'] = 'entry_status';
 		$st->fields['note'] = 'note';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = SeminarClassesDatesPeer::row2Obj($db->record);
@@ -178,10 +172,10 @@ class SeminarClassesDatesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("seminar_classes_dates");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("seminar_classes_dates");
 		$st->fields['id_seminar_classes_dates'] = $this->idSeminarClassesDates;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['num_seminar'] = $this->numSeminar;
@@ -200,6 +194,20 @@ class SeminarClassesDatesPeer {
 		$st->fields['entry_status'] = $this->entryStatus;
 		$st->fields['note'] = $this->note;
 
+		$st->nulls['south_date'] = 'south_date';
+		$st->nulls['south_time_start'] = 'south_time_start';
+		$st->nulls['south_time_end'] = 'south_time_end';
+		$st->nulls['northeast_date'] = 'northeast_date';
+		$st->nulls['northeast_time_start'] = 'northeast_time_start';
+		$st->nulls['northeast_time_end'] = 'northeast_time_end';
+		$st->nulls['northwest_date'] = 'northwest_date';
+		$st->nulls['northwest_time_start'] = 'northwest_time_start';
+		$st->nulls['northwest_time_end'] = 'northwest_time_end';
+		$st->nulls['southeast_date'] = 'southeast_date';
+		$st->nulls['southeast_time_start'] = 'southeast_time_start';
+		$st->nulls['southeast_time_end'] = 'southeast_time_end';
+		$st->nulls['note'] = 'note';
+
 		$st->key = 'id_seminar_classes_dates';
 		$db->executeQuery($st);
 
@@ -210,10 +218,10 @@ class SeminarClassesDatesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("seminar_classes_dates");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("seminar_classes_dates");
 		$st->fields['id_seminar_classes_dates'] = $obj->idSeminarClassesDates;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['num_seminar'] = $obj->numSeminar;
@@ -232,31 +240,48 @@ class SeminarClassesDatesPeer {
 		$st->fields['entry_status'] = $obj->entryStatus;
 		$st->fields['note'] = $obj->note;
 
+		$st->nulls['south_date'] = 'south_date';
+		$st->nulls['south_time_start'] = 'south_time_start';
+		$st->nulls['south_time_end'] = 'south_time_end';
+		$st->nulls['northeast_date'] = 'northeast_date';
+		$st->nulls['northeast_time_start'] = 'northeast_time_start';
+		$st->nulls['northeast_time_end'] = 'northeast_time_end';
+		$st->nulls['northwest_date'] = 'northwest_date';
+		$st->nulls['northwest_time_start'] = 'northwest_time_start';
+		$st->nulls['northwest_time_end'] = 'northwest_time_end';
+		$st->nulls['southeast_date'] = 'southeast_date';
+		$st->nulls['southeast_time_start'] = 'southeast_time_start';
+		$st->nulls['southeast_time_end'] = 'southeast_time_end';
+		$st->nulls['note'] = 'note';
+
 		$st->key = 'id_seminar_classes_dates';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("seminar_classes_dates","id_seminar_classes_dates = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("seminar_classes_dates","id_seminar_classes_dates = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -266,6 +291,22 @@ class SeminarClassesDatesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new SeminarClassesDates();
@@ -291,68 +332,21 @@ class SeminarClassesDatesPeer {
 		return $x;
 	}
 
+		
 }
 
 
 //You can edit this class, but do not change this next line!
 class SeminarClassesDates extends SeminarClassesDatesBase {
-	
-	/**
-	 * @return void
-	 * @desc Mails all admins if an entry is added or updated
-	 */
-	function  mailAdmin($msg)
-	{
-		$db = DB::getHandle();
-		$sql = "SELECT email FROM lcUsers where groups LIKE
-		'%|semmgr|%'";
-		$db->query($sql);
-		while($db->next_record() )
-		{
-			$emailTo .= $db->Record['email'].',';	
-		}
-		
-		$emailTo = substr($emailTo, 0, -1);
-		mail($emailTo, "Seminar Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");
-	}
+
+
+
 }
 
-function getStatus($x)
-	{
-		switch($x)
-		{
-			case 1;
-			return 'New';
-
-			case 0;
-			return 'N/A';
-
-			case 2;
-			return 'Pending';
-
-			case 3;
-			return 'Approved';
-
-			case 4;
-			return 'Waiting on Inst.';
-		}
-			
-	}
 
 
-# Converts the 00:00:00 format of the TIME field in the database
-# to 8:00 AM or 1:15 PM
-function convertTime($time)
-{
-	$date = date('Y-m-d');
-	$ut = strtotime("$date $time");
-	return date('h:i A', $ut);
+class SeminarClassesDatesPeer extends SeminarClassesDatesPeerBase {
+
 }
-
-function convertDateTime($date)
-{
-	return date('D F dS, Y h:i A', strtotime($date));
-}
-
 
 ?>

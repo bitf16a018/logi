@@ -4,16 +4,18 @@ class LcActionLogTypeBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lcActionLogTypeId;
 	var $actionCode;
 	var $displayName;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'lcActionLogTypeId'=>'int',
 	'actionCode'=>'varchar',
 	'displayName'=>'varchar');
+
+	var $__nulls = array();
 
 
 
@@ -21,10 +23,12 @@ class LcActionLogTypeBase {
 		return $this->lcActionLogTypeId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->lcActionLogTypeId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(LcActionLogTypePeer::doInsert($this,$dsn));
@@ -32,6 +36,7 @@ class LcActionLogTypeBase {
 			LcActionLogTypePeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -45,6 +50,13 @@ class LcActionLogTypeBase {
 		$array = LcActionLogTypePeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = LcActionLogTypePeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		LcActionLogTypePeer::doDelete($this,$deep,$dsn);
@@ -90,13 +102,12 @@ class LcActionLogTypePeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("lc_action_log_type",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("lc_action_log_type",$where);
 		$st->fields['lc_action_log_type_id'] = 'lc_action_log_type_id';
 		$st->fields['action_code'] = 'action_code';
 		$st->fields['display_name'] = 'display_name';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -108,11 +119,12 @@ class LcActionLogTypePeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("lc_action_log_type");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("lc_action_log_type");
 		$st->fields['lc_action_log_type_id'] = $this->lcActionLogTypeId;
 		$st->fields['action_code'] = $this->actionCode;
 		$st->fields['display_name'] = $this->displayName;
+
 
 		$st->key = 'lc_action_log_type_id';
 		$db->executeQuery($st);
@@ -126,11 +138,12 @@ class LcActionLogTypePeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("lc_action_log_type");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("lc_action_log_type");
 		$st->fields['lc_action_log_type_id'] = $obj->lcActionLogTypeId;
 		$st->fields['action_code'] = $obj->actionCode;
 		$st->fields['display_name'] = $obj->displayName;
+
 
 		$st->key = 'lc_action_log_type_id';
 		$db->executeQuery($st);
@@ -140,11 +153,11 @@ class LcActionLogTypePeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -154,8 +167,8 @@ class LcActionLogTypePeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("lc_action_log_type","lc_action_log_type_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("lc_action_log_type","lc_action_log_type_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -177,7 +190,7 @@ class LcActionLogTypePeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

@@ -4,7 +4,7 @@ class HelpdeskIncidentBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $helpdeskId;
 	var $timedateOpen;
@@ -17,7 +17,7 @@ class HelpdeskIncidentBase {
 	var $category;
 	var $assignedTo;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'helpdeskId'=>'integer',
 	'timedateOpen'=>'integer',
 	'timedateClose'=>'integer',
@@ -29,16 +29,20 @@ class HelpdeskIncidentBase {
 	'category'=>'integer',
 	'assignedTo'=>'varchar');
 
+	var $__nulls = array();
+
 
 
 	function getPrimaryKey() {
 		return $this->helpdeskId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->helpdeskId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(HelpdeskIncidentPeer::doInsert($this,$dsn));
@@ -46,6 +50,7 @@ class HelpdeskIncidentBase {
 			HelpdeskIncidentPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -60,6 +65,13 @@ class HelpdeskIncidentBase {
 		return $array[0];
 	}
 
+
+	function loadAll($dsn="default") {
+		$array = HelpdeskIncidentPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
 	function delete($deep=false,$dsn="default") {
 		HelpdeskIncidentPeer::doDelete($this,$deep,$dsn);
 	}
@@ -69,19 +81,30 @@ class HelpdeskIncidentBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
 
+	/**
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
+	 */
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -93,8 +116,8 @@ class HelpdeskIncidentPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("helpdesk_incident",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("helpdesk_incident",$where);
 		$st->fields['helpdesk_id'] = 'helpdesk_id';
 		$st->fields['timedate_open'] = 'timedate_open';
 		$st->fields['timedate_close'] = 'timedate_close';
@@ -106,7 +129,6 @@ class HelpdeskIncidentPeerBase {
 		$st->fields['category'] = 'category';
 		$st->fields['assigned_to'] = 'assigned_to';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -118,8 +140,8 @@ class HelpdeskIncidentPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("helpdesk_incident");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("helpdesk_incident");
 		$st->fields['helpdesk_id'] = $this->helpdeskId;
 		$st->fields['timedate_open'] = $this->timedateOpen;
 		$st->fields['timedate_close'] = $this->timedateClose;
@@ -130,6 +152,7 @@ class HelpdeskIncidentPeerBase {
 		$st->fields['userid'] = $this->userid;
 		$st->fields['category'] = $this->category;
 		$st->fields['assigned_to'] = $this->assignedTo;
+
 
 		$st->key = 'helpdesk_id';
 		$db->executeQuery($st);
@@ -143,8 +166,8 @@ class HelpdeskIncidentPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("helpdesk_incident");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("helpdesk_incident");
 		$st->fields['helpdesk_id'] = $obj->helpdeskId;
 		$st->fields['timedate_open'] = $obj->timedateOpen;
 		$st->fields['timedate_close'] = $obj->timedateClose;
@@ -156,6 +179,7 @@ class HelpdeskIncidentPeerBase {
 		$st->fields['category'] = $obj->category;
 		$st->fields['assigned_to'] = $obj->assignedTo;
 
+
 		$st->key = 'helpdesk_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -164,11 +188,11 @@ class HelpdeskIncidentPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -178,8 +202,8 @@ class HelpdeskIncidentPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("helpdesk_incident","helpdesk_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("helpdesk_incident","helpdesk_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -201,7 +225,7 @@ class HelpdeskIncidentPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 
@@ -235,33 +259,6 @@ class HelpdeskIncidentPeerBase {
 class HelpdeskIncident extends HelpdeskIncidentBase {
 
 
-	function loadHistoryForUsername($name) {
-		$name = (string)trim($name);
-
-
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("helpdesk_incident","userid = '$name'");
-		$st->fields['helpdesk_id'] = 'helpdesk_id';
-		$st->fields['timedate_open'] = 'timedate_open';
-		$st->fields['timedate_close'] = 'timedate_close';
-		$st->fields['status'] = 'status';
-		$st->fields['summary'] = 'summary';
-		$st->fields['userid'] = 'userid';
-		$st->fields['category'] = 'category';
-		$st->fields['assigned_to'] = 'assigned_to';
-		$st->fields['helpdesk_status.helpdesk_status_label'] = 'helpdesk_status.helpdesk_status_label';
-		$st->join = 'left join helpdesk_status on helpdesk_status.helpdesk_status_id = helpdesk_incident.status ';
-
-		$st->key = $this->key;
-
-		$db->executeQuery($st);
-		while($db->nextRecord() ) {
-			$x = HelpdeskIncidentPeer::row2Obj($db->record);
-			$x->helpdeskStatusLabel = $db->record['helpdesk_status_label'];
-			$array[] = $x;
-		}
-		return $array;
-	}
 
 }
 

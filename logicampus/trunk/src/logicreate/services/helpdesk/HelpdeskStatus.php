@@ -4,12 +4,18 @@ class HelpdeskStatusBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $helpdeskStatusId;
 	var $helpdeskStatusLabel;
+	var $helpdeskStatusSort;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'helpdeskStatusId'=>'integer',
-	'helpdeskStatusLabel'=>'varchar');
+	'helpdeskStatusLabel'=>'varchar',
+	'helpdeskStatusSort'=>'integer');
+
+	var $__nulls = array();
 
 
 
@@ -17,20 +23,22 @@ class HelpdeskStatusBase {
 		return $this->helpdeskStatusId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->helpdeskStatusId = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(HelpdeskStatusPeer::doInsert($this));
+			$this->setPrimaryKey(HelpdeskStatusPeer::doInsert($this,$dsn));
 		} else {
-			HelpdeskStatusPeer::doUpdate($this);
+			HelpdeskStatusPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -39,63 +47,69 @@ class HelpdeskStatusBase {
 		} else {
 			$where = "helpdesk_status_id='".$key."'";
 		}
-		$array = HelpdeskStatusPeer::doSelect($where);
+		$array = HelpdeskStatusPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = HelpdeskStatusPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		HelpdeskStatusPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['helpdeskStatusLabel'])
-			$this->helpdeskStatusLabel = $array['helpdeskStatusLabel'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class HelpdeskStatusPeer {
+class HelpdeskStatusPeerBase {
 
 	var $tableName = 'helpdesk_status';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("helpdesk_status",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("helpdesk_status",$where);
 		$st->fields['helpdesk_status_id'] = 'helpdesk_status_id';
 		$st->fields['helpdesk_status_label'] = 'helpdesk_status_label';
+		$st->fields['helpdesk_status_sort'] = 'helpdesk_status_sort';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = HelpdeskStatusPeer::row2Obj($db->record);
@@ -103,12 +117,14 @@ class HelpdeskStatusPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("helpdesk_status");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("helpdesk_status");
 		$st->fields['helpdesk_status_id'] = $this->helpdeskStatusId;
 		$st->fields['helpdesk_status_label'] = $this->helpdeskStatusLabel;
+		$st->fields['helpdesk_status_sort'] = $this->helpdeskStatusSort;
+
 
 		$st->key = 'helpdesk_status_id';
 		$db->executeQuery($st);
@@ -120,12 +136,14 @@ class HelpdeskStatusPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("helpdesk_status");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("helpdesk_status");
 		$st->fields['helpdesk_status_id'] = $obj->helpdeskStatusId;
 		$st->fields['helpdesk_status_label'] = $obj->helpdeskStatusLabel;
+		$st->fields['helpdesk_status_sort'] = $obj->helpdeskStatusSort;
+
 
 		$st->key = 'helpdesk_status_id';
 		$db->executeQuery($st);
@@ -133,25 +151,28 @@ class HelpdeskStatusPeer {
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("helpdesk_status","helpdesk_status_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("helpdesk_status","helpdesk_status_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -161,16 +182,34 @@ class HelpdeskStatusPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new HelpdeskStatus();
 		$x->helpdeskStatusId = $row['helpdesk_status_id'];
 		$x->helpdeskStatusLabel = $row['helpdesk_status_label'];
+		$x->helpdeskStatusSort = $row['helpdesk_status_sort'];
 
 		$x->_new = false;
 		return $x;
 	}
 
+		
 }
 
 
@@ -178,6 +217,12 @@ class HelpdeskStatusPeer {
 class HelpdeskStatus extends HelpdeskStatusBase {
 
 
+
+}
+
+
+
+class HelpdeskStatusPeer extends HelpdeskStatusPeerBase {
 
 }
 

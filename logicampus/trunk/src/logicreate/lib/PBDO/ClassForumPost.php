@@ -4,7 +4,7 @@ class ClassForumPostBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $classForumPostId;
 	var $classForumId;
@@ -19,7 +19,7 @@ class ClassForumPostBase {
 	var $lastEditUsername;
 	var $lastEditDatetime;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'classForumPostId'=>'integer',
 	'classForumId'=>'integer',
 	'isSticky'=>'tinyint',
@@ -33,6 +33,20 @@ class ClassForumPostBase {
 	'lastEditUsername'=>'varchar',
 	'lastEditDatetime'=>'integer');
 
+	var $__nulls = array( 
+	'isSticky'=>'isSticky',
+	'isHidden'=>'isHidden',
+	'replyId'=>'replyId',
+	'threadId'=>'threadId',
+	'lastEditUsername'=>'lastEditUsername',
+	'lastEditDatetime'=>'lastEditDatetime');
+
+	/**
+	 * Retrieves one class_forum object via the foreign key class_forum_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Object the related object.
+	 */
 	function getClassForumByClassForumId($dsn='default') {
 		if ( $this->classForumId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
 		$array = ClassForumPeer::doSelect('class_forum_id = \''.$this->classForumId.'\'',$dsn);
@@ -46,10 +60,12 @@ class ClassForumPostBase {
 		return $this->classForumPostId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->classForumPostId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassForumPostPeer::doInsert($this,$dsn));
@@ -57,6 +73,7 @@ class ClassForumPostBase {
 			ClassForumPostPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -70,6 +87,13 @@ class ClassForumPostBase {
 		$array = ClassForumPostPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = ClassForumPostPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		ClassForumPostPeer::doDelete($this,$deep,$dsn);
@@ -115,8 +139,8 @@ class ClassForumPostPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_forum_post",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_forum_post",$where);
 		$st->fields['class_forum_post_id'] = 'class_forum_post_id';
 		$st->fields['class_forum_id'] = 'class_forum_id';
 		$st->fields['is_sticky'] = 'is_sticky';
@@ -130,7 +154,6 @@ class ClassForumPostPeerBase {
 		$st->fields['last_edit_username'] = 'last_edit_username';
 		$st->fields['last_edit_datetime'] = 'last_edit_datetime';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -142,8 +165,8 @@ class ClassForumPostPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_forum_post");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_forum_post");
 		$st->fields['class_forum_post_id'] = $this->classForumPostId;
 		$st->fields['class_forum_id'] = $this->classForumId;
 		$st->fields['is_sticky'] = $this->isSticky;
@@ -157,6 +180,13 @@ class ClassForumPostPeerBase {
 		$st->fields['last_edit_username'] = $this->lastEditUsername;
 		$st->fields['last_edit_datetime'] = $this->lastEditDatetime;
 
+		$st->nulls['is_sticky'] = 'is_sticky';
+		$st->nulls['is_hidden'] = 'is_hidden';
+		$st->nulls['reply_id'] = 'reply_id';
+		$st->nulls['thread_id'] = 'thread_id';
+		$st->nulls['last_edit_username'] = 'last_edit_username';
+		$st->nulls['last_edit_datetime'] = 'last_edit_datetime';
+
 		$st->key = 'class_forum_post_id';
 		$db->executeQuery($st);
 
@@ -169,8 +199,8 @@ class ClassForumPostPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_forum_post");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_forum_post");
 		$st->fields['class_forum_post_id'] = $obj->classForumPostId;
 		$st->fields['class_forum_id'] = $obj->classForumId;
 		$st->fields['is_sticky'] = $obj->isSticky;
@@ -184,6 +214,13 @@ class ClassForumPostPeerBase {
 		$st->fields['last_edit_username'] = $obj->lastEditUsername;
 		$st->fields['last_edit_datetime'] = $obj->lastEditDatetime;
 
+		$st->nulls['is_sticky'] = 'is_sticky';
+		$st->nulls['is_hidden'] = 'is_hidden';
+		$st->nulls['reply_id'] = 'reply_id';
+		$st->nulls['thread_id'] = 'thread_id';
+		$st->nulls['last_edit_username'] = 'last_edit_username';
+		$st->nulls['last_edit_datetime'] = 'last_edit_datetime';
+
 		$st->key = 'class_forum_post_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -192,11 +229,11 @@ class ClassForumPostPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -206,8 +243,8 @@ class ClassForumPostPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_forum_post","class_forum_post_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_forum_post","class_forum_post_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -229,7 +266,7 @@ class ClassForumPostPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

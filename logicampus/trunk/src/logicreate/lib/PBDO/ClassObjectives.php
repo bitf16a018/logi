@@ -4,20 +4,22 @@ class ClassObjectivesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
-	var $_entityVersion = '0.0';	//Source version number
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idClassObjectives;
 	var $idClasses;
 	var $objective;
 	var $fHide;
 	var $iSort;
 
-	var $__attributes = array(
-	'idClassObjectives'=>'int',
-	'idClasses'=>'int',
-	'objective'=>'text',
-	'fHide'=>'int',
-	'iSort'=>'int');
+	var $__attributes = array( 
+	'idClassObjectives'=>'integer',
+	'idClasses'=>'integer',
+	'objective'=>'longvarchar',
+	'fHide'=>'integer',
+	'iSort'=>'integer');
+
+	var $__nulls = array();
 
 
 
@@ -25,10 +27,12 @@ class ClassObjectivesBase {
 		return $this->idClassObjectives;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassObjectives = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(ClassObjectivesPeer::doInsert($this,$dsn));
@@ -36,6 +40,7 @@ class ClassObjectivesBase {
 			ClassObjectivesPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -50,6 +55,13 @@ class ClassObjectivesBase {
 		return $array[0];
 	}
 
+
+	function loadAll($dsn="default") {
+		$array = ClassObjectivesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
 	function delete($deep=false,$dsn="default") {
 		ClassObjectivesPeer::doDelete($this,$deep,$dsn);
 	}
@@ -59,43 +71,30 @@ class ClassObjectivesBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['idClasses'])
-			$this->idClasses = $array['idClasses'];
-		if ($array['objective'])
-			$this->objective = $array['objective'];
-		if ($array['fHide'])
-			$this->fHide = $array['fHide'];
-		if ($array['iSort'])
-			$this->iSort = $array['iSort'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -107,15 +106,14 @@ class ClassObjectivesPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("class_objectives",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_objectives",$where);
 		$st->fields['id_class_objectives'] = 'id_class_objectives';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['objective'] = 'objective';
 		$st->fields['f_hide'] = 'f_hide';
 		$st->fields['i_sort'] = 'i_sort';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -127,13 +125,14 @@ class ClassObjectivesPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("class_objectives");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_objectives");
 		$st->fields['id_class_objectives'] = $this->idClassObjectives;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['objective'] = $this->objective;
 		$st->fields['f_hide'] = $this->fHide;
 		$st->fields['i_sort'] = $this->iSort;
+
 
 		$st->key = 'id_class_objectives';
 		$db->executeQuery($st);
@@ -147,13 +146,14 @@ class ClassObjectivesPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("class_objectives");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_objectives");
 		$st->fields['id_class_objectives'] = $obj->idClassObjectives;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['objective'] = $obj->objective;
 		$st->fields['f_hide'] = $obj->fHide;
 		$st->fields['i_sort'] = $obj->iSort;
+
 
 		$st->key = 'id_class_objectives';
 		$db->executeQuery($st);
@@ -163,20 +163,22 @@ class ClassObjectivesPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
+	/**
+	 * remove an object
+	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("class_objectives","id_class_objectives = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_objectives","id_class_objectives = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -190,6 +192,22 @@ class ClassObjectivesPeerBase {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new ClassObjectives();

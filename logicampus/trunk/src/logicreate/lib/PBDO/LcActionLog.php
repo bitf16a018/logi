@@ -4,7 +4,7 @@ class LcActionLogBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lcActionLogId;
 	var $lcActionLogTypeId;
@@ -18,7 +18,7 @@ class LcActionLogBase {
 	var $classId;
 	var $semesterId;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'lcActionLogId'=>'int',
 	'lcActionLogTypeId'=>'int',
 	'actionDatetime'=>'int',
@@ -31,16 +31,20 @@ class LcActionLogBase {
 	'classId'=>'int',
 	'semesterId'=>'int');
 
+	var $__nulls = array();
+
 
 
 	function getPrimaryKey() {
 		return $this->lcActionLogId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->lcActionLogId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(LcActionLogPeer::doInsert($this,$dsn));
@@ -48,6 +52,7 @@ class LcActionLogBase {
 			LcActionLogPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -61,6 +66,13 @@ class LcActionLogBase {
 		$array = LcActionLogPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = LcActionLogPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		LcActionLogPeer::doDelete($this,$deep,$dsn);
@@ -106,8 +118,8 @@ class LcActionLogPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("lc_action_log",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("lc_action_log",$where);
 		$st->fields['lc_action_log_id'] = 'lc_action_log_id';
 		$st->fields['lc_action_log_type_id'] = 'lc_action_log_type_id';
 		$st->fields['action_datetime'] = 'action_datetime';
@@ -120,7 +132,6 @@ class LcActionLogPeerBase {
 		$st->fields['class_id'] = 'class_id';
 		$st->fields['semester_id'] = 'semester_id';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -132,8 +143,8 @@ class LcActionLogPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("lc_action_log");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("lc_action_log");
 		$st->fields['lc_action_log_id'] = $this->lcActionLogId;
 		$st->fields['lc_action_log_type_id'] = $this->lcActionLogTypeId;
 		$st->fields['action_datetime'] = $this->actionDatetime;
@@ -145,6 +156,7 @@ class LcActionLogPeerBase {
 		$st->fields['message'] = $this->message;
 		$st->fields['class_id'] = $this->classId;
 		$st->fields['semester_id'] = $this->semesterId;
+
 
 		$st->key = 'lc_action_log_id';
 		$db->executeQuery($st);
@@ -158,8 +170,8 @@ class LcActionLogPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("lc_action_log");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("lc_action_log");
 		$st->fields['lc_action_log_id'] = $obj->lcActionLogId;
 		$st->fields['lc_action_log_type_id'] = $obj->lcActionLogTypeId;
 		$st->fields['action_datetime'] = $obj->actionDatetime;
@@ -172,6 +184,7 @@ class LcActionLogPeerBase {
 		$st->fields['class_id'] = $obj->classId;
 		$st->fields['semester_id'] = $obj->semesterId;
 
+
 		$st->key = 'lc_action_log_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -180,11 +193,11 @@ class LcActionLogPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -194,8 +207,8 @@ class LcActionLogPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("lc_action_log","lc_action_log_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("lc_action_log","lc_action_log_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -217,7 +230,7 @@ class LcActionLogPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

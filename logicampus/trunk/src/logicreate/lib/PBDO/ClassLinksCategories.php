@@ -4,20 +4,22 @@ class ClassLinksCategoriesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
-	var $_entityVersion = '0.0';	//Source version number
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $idClassLinksCategories;
 	var $idClassLinksCategoriesParent;
 	var $idClasses;
 	var $txTitle;
 	var $sortOrder;
 
-	var $__attributes = array(
-	'idClassLinksCategories'=>'int',
-	'idClassLinksCategoriesParent'=>'int',
-	'idClasses'=>'int',
+	var $__attributes = array( 
+	'idClassLinksCategories'=>'integer',
+	'idClassLinksCategoriesParent'=>'integer',
+	'idClasses'=>'integer',
 	'txTitle'=>'varchar',
-	'sortOrder'=>'int');
+	'sortOrder'=>'integer');
+
+	var $__nulls = array();
 
 
 
@@ -25,19 +27,22 @@ class ClassLinksCategoriesBase {
 		return $this->idClassLinksCategories;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->idClassLinksCategories = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(ClassLinksCategoriesPeer::doInsert($this));
+			$this->setPrimaryKey(ClassLinksCategoriesPeer::doInsert($this,$dsn));
 		} else {
-			ClassLinksCategoriesPeer::doUpdate($this);
+			ClassLinksCategoriesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -46,12 +51,19 @@ class ClassLinksCategoriesBase {
 		} else {
 			$where = "id_class_links_categories='".$key."'";
 		}
-		$array = ClassLinksCategoriesPeer::doSelect($where);
+		$array = ClassLinksCategoriesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
 
-	function delete($deep=false) {
-		ClassLinksCategoriesPeer::doDelete($this,$deep);
+
+	function loadAll($dsn="default") {
+		$array = ClassLinksCategoriesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		ClassLinksCategoriesPeer::doDelete($this,$deep,$dsn);
 	}
 
 
@@ -59,43 +71,30 @@ class ClassLinksCategoriesBase {
 		return $this->_new;
 	}
 
+
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ( !empty($array['idClassLinksCategoriesParent']) || strlen($array['idClassLinksCategoriesParent']) != 0 )
-			$this->idClassLinksCategoriesParent = $array['idClassLinksCategoriesParent'];
-		if ( !empty($array['idClasses']) || strlen($array['idClasses']) != 0 )
-			$this->idClasses = $array['idClasses'];
-		if ( !empty($array['txTitle']) || strlen($array['txTitle']) != 0 )
-			$this->txTitle = $array['txTitle'];
-		if ( !empty($array['sortOrder']) || strlen($array['sortOrder']) != 0 )
-			$this->sortOrder = $array['sortOrder'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -105,88 +104,81 @@ class ClassLinksCategoriesPeerBase {
 
 	var $tableName = 'class_links_categories';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-//		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("class_links_categories",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("class_links_categories",$where);
 		$st->fields['id_class_links_categories'] = 'id_class_links_categories';
 		$st->fields['id_class_links_categories_parent'] = 'id_class_links_categories_parent';
 		$st->fields['id_classes'] = 'id_classes';
 		$st->fields['txTitle'] = 'txTitle';
 		$st->fields['sortOrder'] = 'sortOrder';
 
-		$st->key = $this->key;
 
 		$array = array();
-//		$db->executeQuery($st);
-/*
+		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = ClassLinksCategoriesPeer::row2Obj($db->record);
-		}
-		*/
-
-		$res = mysql_query($st->toString());
-		while ($row = mysql_fetch_array($res)) {
-			$array[] = ClassLinksCategoriesPeer::row2Obj($row);
 		}
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-//		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("class_links_categories");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("class_links_categories");
 		$st->fields['id_class_links_categories'] = $this->idClassLinksCategories;
 		$st->fields['id_class_links_categories_parent'] = $this->idClassLinksCategoriesParent;
 		$st->fields['id_classes'] = $this->idClasses;
 		$st->fields['txTitle'] = $this->txTitle;
 		$st->fields['sortOrder'] = $this->sortOrder;
 
-		$st->key = 'id_class_links_categories';
-//		$db->executeQuery($st);
 
-		mysql_query($st->toString());
+		$st->key = 'id_class_links_categories';
+		$db->executeQuery($st);
+
 		$obj->_new = false;
 		$obj->_modified = false;
-//		$id =  $db->getInsertID();
-		$id = mysql_insert_id();
+		$id =  $db->getInsertID();
 		return $id;
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-//		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("class_links_categories");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("class_links_categories");
 		$st->fields['id_class_links_categories'] = $obj->idClassLinksCategories;
 		$st->fields['id_class_links_categories_parent'] = $obj->idClassLinksCategoriesParent;
 		$st->fields['id_classes'] = $obj->idClasses;
 		$st->fields['txTitle'] = $obj->txTitle;
 		$st->fields['sortOrder'] = $obj->sortOrder;
 
-		$st->key = 'id_class_links_categories';
-//		$db->executeQuery($st);
-		mysql_query($st->toString());
 
+		$st->key = 'id_class_links_categories';
+		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$deep=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-//		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("class_links_categories","id_class_links_categories = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("class_links_categories","id_class_links_categories = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -206,11 +198,11 @@ class ClassLinksCategoriesPeerBase {
 	/**
 	 * send a raw query
 	 */
-	function doQuery($sql,$dsn="default") {
+	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-//		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
-		mysql_query($sql);
+		$db->query($sql);
 
 	  	return;
 	}

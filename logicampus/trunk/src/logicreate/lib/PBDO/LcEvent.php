@@ -4,7 +4,7 @@ class LcEventBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.4';	//PBDO version number
+	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lcEventId;
 	var $calendarType;
@@ -23,7 +23,7 @@ class LcEventBase {
 	var $repeatExclude;
 	var $classId;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'lcEventId'=>'int',
 	'calendarType'=>'varchar',
 	'username'=>'varchar',
@@ -41,16 +41,20 @@ class LcEventBase {
 	'repeatExclude'=>'text',
 	'classId'=>'int');
 
+	var $__nulls = array();
+
 
 
 	function getPrimaryKey() {
 		return $this->lcEventId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->lcEventId = $val;
 	}
-	
+
+
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
 			$this->setPrimaryKey(LcEventPeer::doInsert($this,$dsn));
@@ -58,6 +62,7 @@ class LcEventBase {
 			LcEventPeer::doUpdate($this,$dsn);
 		}
 	}
+
 
 	function load($key,$dsn="default") {
 		if (is_array($key) ) {
@@ -71,6 +76,13 @@ class LcEventBase {
 		$array = LcEventPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = LcEventPeer::doSelect('',$dsn);
+		return $array;
+	}
+
 
 	function delete($deep=false,$dsn="default") {
 		LcEventPeer::doDelete($this,$deep,$dsn);
@@ -116,8 +128,8 @@ class LcEventPeerBase {
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_SelectStatement("lc_event",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("lc_event",$where);
 		$st->fields['lc_event_id'] = 'lc_event_id';
 		$st->fields['calendar_type'] = 'calendar_type';
 		$st->fields['username'] = 'username';
@@ -135,7 +147,6 @@ class LcEventPeerBase {
 		$st->fields['repeat_exclude'] = 'repeat_exclude';
 		$st->fields['class_id'] = 'class_id';
 
-		$st->key = $this->key;
 
 		$array = array();
 		$db->executeQuery($st);
@@ -147,8 +158,8 @@ class LcEventPeerBase {
 
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_InsertStatement("lc_event");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("lc_event");
 		$st->fields['lc_event_id'] = $this->lcEventId;
 		$st->fields['calendar_type'] = $this->calendarType;
 		$st->fields['username'] = $this->username;
@@ -166,6 +177,7 @@ class LcEventPeerBase {
 		$st->fields['repeat_exclude'] = $this->repeatExclude;
 		$st->fields['class_id'] = $this->classId;
 
+
 		$st->key = 'lc_event_id';
 		$db->executeQuery($st);
 
@@ -178,8 +190,8 @@ class LcEventPeerBase {
 
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_UpdateStatement("lc_event");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("lc_event");
 		$st->fields['lc_event_id'] = $obj->lcEventId;
 		$st->fields['calendar_type'] = $obj->calendarType;
 		$st->fields['username'] = $obj->username;
@@ -197,6 +209,7 @@ class LcEventPeerBase {
 		$st->fields['repeat_exclude'] = $obj->repeatExclude;
 		$st->fields['class_id'] = $obj->classId;
 
+
 		$st->key = 'lc_event_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
@@ -205,11 +218,11 @@ class LcEventPeerBase {
 
 	function doReplace($obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
@@ -219,8 +232,8 @@ class LcEventPeerBase {
 	 */
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
-		$st = new LC_DeleteStatement("lc_event","lc_event_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("lc_event","lc_event_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -242,7 +255,7 @@ class LcEventPeerBase {
 	 */
 	function doQuery(&$sql,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle($dsn);
+		$db = DB::getHandle($dsn);
 
 		$db->query($sql);
 

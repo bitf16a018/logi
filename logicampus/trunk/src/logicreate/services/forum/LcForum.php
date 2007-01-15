@@ -4,6 +4,8 @@ class LcForumBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $lcForumId;
 	var $lcForumParentId;
 	var $lcForumName;
@@ -18,55 +20,25 @@ class LcForumBase {
 	var $lcForumNumericLink;
 	var $lcForumCharLink;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'lcForumId'=>'integer',
-	'lcForumParentId'=>'LcForum',
+	'lcForumParentId'=>'integer',
 	'lcForumName'=>'varchar',
 	'lcForumDescription'=>'varchar',
-	'lcForumRecentPostId'=>'int',
-	'lcForumRecentPostTimedate'=>'int',
+	'lcForumRecentPostId'=>'integer',
+	'lcForumRecentPostTimedate'=>'integer',
 	'lcForumRecentPoster'=>'varchar',
-	'lcForumThreadCount'=>'int',
-	'lcForumPostCount'=>'int',
-	'lcForumUnansweredCount'=>'int',
-	'lcForumSectionId'=>'LcForumSection',
-	'lcForumNumericLink'=>'int',
-	'lcForumCharLink'=>'varchar',
-	);
+	'lcForumThreadCount'=>'integer',
+	'lcForumPostCount'=>'integer',
+	'lcForumUnansweredCount'=>'integer',
+	'lcForumSectionId'=>'integer',
+	'lcForumNumericLink'=>'integer',
+	'lcForumCharLink'=>'varchar');
 
-	function getLcForums() {
-		$array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\'');
-		return $array;
-	}
-
-	function getLcForumPosts() {
-		$array = LcForumPostPeer::doSelect('lc_forum_id = \''.$this->getPrimaryKey().'\'');
-		return $array;
-	}
-
-	function getLcForumModerators() {
-		$array = LcForumModeratorPeer::doSelect('lc_forum_id = \''.$this->getPrimaryKey().'\'');
-		return $array;
-	}
-
-	function getLcForumPerms() {
-		$array = LcForumPermPeer::doSelect('lc_forum_id = \''.$this->getPrimaryKey().'\'');
-		return $array;
-	}
-
-	function getLcForum() {
-		if ( $this->lcForumId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = LcForumPeer::doSelect('lc_forum_id = \''.$this->lcForumParentId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
-
-	function getLcForumSection() {
-		if ( $this->lcForumSectionId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
-		$array = LcForumSectionPeer::doSelect('lc_forum_section_id = \''.$this->lcForumSectionId.'\'');
-		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
-		return $array[0];
-	}
+	var $__nulls = array( 
+	'lcForumParentId'=>'lcForumParentId',
+	'lcForumNumericLink'=>'lcForumNumericLink',
+	'lcForumCharLink'=>'lcForumCharLink');
 
 
 
@@ -74,19 +46,22 @@ class LcForumBase {
 		return $this->lcForumId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->lcForumId = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(LcForumPeer::doInsert($this));
+			$this->setPrimaryKey(LcForumPeer::doInsert($this,$dsn));
 		} else {
-			LcForumPeer::doUpdate($this);
+			LcForumPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -95,65 +70,50 @@ class LcForumBase {
 		} else {
 			$where = "lc_forum_id='".$key."'";
 		}
-		$array = LcForumPeer::doSelect($where);
+		$array = LcForumPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = LcForumPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		LcForumPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['lcForumParentId'])
-			$this->lcForumParentId = $array['lcForumParentId'];
-		if ($array['lcForumName'])
-			$this->lcForumName = $array['lcForumName'];
-		if ($array['lcForumDescription'])
-			$this->lcForumDescription = $array['lcForumDescription'];
-		if ($array['lcForumRecentPostId'])
-			$this->lcForumRecentPostId = $array['lcForumRecentPostId'];
-		if ($array['lcForumRecentPostTimedate'])
-			$this->lcForumRecentPostTimedate = $array['lcForumRecentPostTimedate'];
-		if ($array['lcForumRecentPoster'])
-			$this->lcForumRecentPoster = $array['lcForumRecentPoster'];
-		if ($array['lcForumThreadCount'])
-			$this->lcForumThreadCount = $array['lcForumThreadCount'];
-		if ($array['lcForumPostCount'])
-			$this->lcForumPostCount = $array['lcForumPostCount'];
-		if ($array['lcForumUnansweredCount'])
-			$this->lcForumUnansweredCount = $array['lcForumUnansweredCount'];
-		if ($array['lcForumNumericLink'])
-			$this->lcForumNumericLink = $array['lcForumNumericLink'];
-		if ($array['lcForumCharLink'])
-			$this->lcForumCharLink = $array['lcForumCharLink'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
@@ -163,10 +123,10 @@ class LcForumPeerBase {
 
 	var $tableName = 'lc_forum';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("lc_forum",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("lc_forum",$where);
 		$st->fields['lc_forum_id'] = 'lc_forum_id';
 		$st->fields['lc_forum_parent_id'] = 'lc_forum_parent_id';
 		$st->fields['lc_forum_name'] = 'lc_forum_name';
@@ -180,8 +140,9 @@ class LcForumPeerBase {
 		$st->fields['lc_forum_section_id'] = 'lc_forum_section_id';
 		$st->fields['lc_forum_numeric_link'] = 'lc_forum_numeric_link';
 		$st->fields['lc_forum_char_link'] = 'lc_forum_char_link';
-		$st->key = $this->key;
 
+
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = LcForumPeer::row2Obj($db->record);
@@ -189,10 +150,10 @@ class LcForumPeerBase {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("lc_forum");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("lc_forum");
 		$st->fields['lc_forum_id'] = $this->lcForumId;
 		$st->fields['lc_forum_parent_id'] = $this->lcForumParentId;
 		$st->fields['lc_forum_name'] = $this->lcForumName;
@@ -206,6 +167,11 @@ class LcForumPeerBase {
 		$st->fields['lc_forum_section_id'] = $this->lcForumSectionId;
 		$st->fields['lc_forum_numeric_link'] = $this->lcForumNumericLink;
 		$st->fields['lc_forum_char_link'] = $this->lcForumCharLink;
+
+		$st->nulls['lc_forum_parent_id'] = 'lc_forum_parent_id';
+		$st->nulls['lc_forum_numeric_link'] = 'lc_forum_numeric_link';
+		$st->nulls['lc_forum_char_link'] = 'lc_forum_char_link';
+
 		$st->key = 'lc_forum_id';
 		$db->executeQuery($st);
 
@@ -216,10 +182,10 @@ class LcForumPeerBase {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("lc_forum");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("lc_forum");
 		$st->fields['lc_forum_id'] = $obj->lcForumId;
 		$st->fields['lc_forum_parent_id'] = $obj->lcForumParentId;
 		$st->fields['lc_forum_name'] = $obj->lcForumName;
@@ -234,40 +200,39 @@ class LcForumPeerBase {
 		$st->fields['lc_forum_numeric_link'] = $obj->lcForumNumericLink;
 		$st->fields['lc_forum_char_link'] = $obj->lcForumCharLink;
 
+		$st->nulls['lc_forum_parent_id'] = 'lc_forum_parent_id';
+		$st->nulls['lc_forum_numeric_link'] = 'lc_forum_numeric_link';
+		$st->nulls['lc_forum_char_link'] = 'lc_forum_char_link';
+
 		$st->key = 'lc_forum_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("lc_forum","lc_forum_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("lc_forum","lc_forum_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
-			$st = new LC_DeleteStatement("lc_forum","lc_forum_id = '".$obj->getPrimaryKey()."'");
-			$db->executeQuery($st);
-			$st = new LC_DeleteStatement("lc_forum_post","lc_forum_id = '".$obj->getPrimaryKey()."'");
-			$db->executeQuery($st);
-			$st = new LC_DeleteStatement("lc_forum_moderator","lc_forum_id = '".$obj->getPrimaryKey()."'");
-			$db->executeQuery($st);
-			$st = new LC_DeleteStatement("lc_forum_perm","lc_forum_id = '".$obj->getPrimaryKey()."'");
-			$db->executeQuery($st);
 		}
 
 		$obj->_new = false;
@@ -276,6 +241,22 @@ class LcForumPeerBase {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new LcForum();
@@ -292,128 +273,22 @@ class LcForumPeerBase {
 		$x->lcForumSectionId = $row['lc_forum_section_id'];
 		$x->lcForumNumericLink = $row['lc_forum_numeric_link'];
 		$x->lcForumCharLink = $row['lc_forum_char_link'];
+
 		$x->_new = false;
 		return $x;
 	}
 
+		
 }
 
 
 //You can edit this class, but do not change this next line!
 class LcForum extends LcForumBase {
 
-// overridden because we don't want to normally pull ALL posts
-// related, just the top level posts - we'll drill down in a post
-// to see the responses, but technically they still belong
-// to the forum too
 
 
-        function getLcForumPosts() {
-                $array = LcForumPostPeer::doSelect('lc_forum_id = \''.$this->getPrimaryKey().'\' and lc_forum_post_parent_id=0');
-                return $array;
-        }
-// only get forums not linked to any classes
-// via the generic numeric_link (default to 0)
-
-        function getLcForums() {
-                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' and lc_forum_numeric_link=0');
-                return $array;
-        }
-
-        function getLcForumsStudentGroups($studentGroups) {
-		while(list($k,$v) = @each($studentGroups)) { 
-			$x[] = "lc_forum_char_link='g_$v'";
-		}
-		if ( is_array($x) ) {
-			$where = " and (";
-			$where .= implode(" or ",$x);
-			$where .= ")";
-		}
-
-                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' '.$where);
-                return $array;
-        }
-
-
-// get forum (singular) for a class
-// based on ID
-// only one forum per class - executive decision by mgk
-        function getLcForumForClass($class_id) {
-                $array = LcForumPeer::doSelect('lc_forum_numeric_link='.$class_id);
-                if (!is_array($array)) { // didn't get a forum for a class
-                                        // so we make a new one
-                        $x = new lcForum();
-                        $x->lcForumName= "Classroom forum";
-                        $x->lcForumNumericLink = $class_id;
-			$x->lcForumDescription = ' ';
-			$x->lcForumRecentPostId = 0;
-			$x->lcForumRecentPostTimedate = 0;
-			$x->lcForumRecentPoster = '';
-			$x->lcForumThreadCount = 0;
-			$x->lcForumPostCount = 0;
-			$x->lcForumUnansweredCount = 0;
-			$x->lcForumSectionId = 0;
-			$x->lcForumCharLink = '';
-			$x->lcForumParentId = 0;
-			$x->lcForumFile1Name= '';
-			$x->lcForumFile1SysName= '';
-			$x->lcForumFile1Size= '';
-			$x->lcForumFile1MIME= '';
-			$x->lcForumFile2Name= '';
-			$x->lcForumFile2SysName= '';
-			$x->lcForumFile2Size= '';
-			$x->lcForumFile2MIME= '';
-                        $x->save();
-                        return $x;
-                }
-                return $array[0];
-        }
-
-        function getLcForumForClassStudentGroups($class_id,$studentGroups) {
-		while(list($k,$v) = @each($studentGroups)) { 
-			$x[] = "lc_forum_char_link='g_$v'";
-		}
-		$where = "lc_forum_numeric_link=$class_id and (";
-		$where .= implode(" or ",$x);
-		$where .= ")";
-	        $array = LcForumPeer::doSelect($where);
-                return $array[0];
-        }
- 
-        function updateStats() {
-                $db =db::getHandle();
-		$forumId = intval($this->lcForumId);
-                // __FIX_ME
-                // check 'status' in here too eventually?
-                $db->queryOne("SELECT count(lc_forum_post_id) 
-			FROM lc_forum_post 
-			WHERE lc_forum_id=".$forumId." 
-			AND  (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
-                $this->lcForumPostCount = $db->Record[0];
-
-                $db->queryOne("SELECT count(lc_forum_post_id) 
-			FROM lc_forum_post 
-			WHERE lc_forum_id=".$forumId . " 
-			AND lc_forum_post_parent_id=0 
-			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
-                $this->lcForumThreadCount = $db->Record[0];
-
-                $db->queryOne("SELECT max(lc_forum_post_id) 
-			FROM lc_forum_post 
-			WHERE lc_forum_id=".$forumId. " 
-			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
-                $max = sprintf('%d',$db->Record[0]);
-
-                $db->queryOne("SELECT * 
-			FROM lc_forum_post 
-			WHERE lc_forum_post_id=$max 
-			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
-                $this->lcForumRecentPostTimedate= $db->Record['lc_forum_post_timedate'];
-                $this->lcForumRecentPoster = $db->Record['lc_forum_post_username'];
-                $this->lcForumRecentPostId = $max;
-                $this->save();  
-        }
 }
+
 
 
 class LcForumPeer extends LcForumPeerBase {

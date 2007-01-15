@@ -4,12 +4,16 @@ class HelpdeskCategoriesBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
+	var $_version = '1.6';	//PBDO version number
+	var $_entityVersion = '';	//Source version number
 	var $helpdeskCategoryId;
 	var $helpdeskCategoryLabel;
 
-	var $__attributes = array(
+	var $__attributes = array( 
 	'helpdeskCategoryId'=>'integer',
 	'helpdeskCategoryLabel'=>'varchar');
+
+	var $__nulls = array();
 
 
 
@@ -17,20 +21,22 @@ class HelpdeskCategoriesBase {
 		return $this->helpdeskCategoryId;
 	}
 
+
 	function setPrimaryKey($val) {
 		$this->helpdeskCategoryId = $val;
 	}
-	
-	function save() {
+
+
+	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(HelpdeskCategoriesPeer::doInsert($this));
+			$this->setPrimaryKey(HelpdeskCategoriesPeer::doInsert($this,$dsn));
 		} else {
-			HelpdeskCategoriesPeer::doUpdate($this);
+			HelpdeskCategoriesPeer::doUpdate($this,$dsn);
 		}
 	}
 
-	function load($key) {
-		$this->_new = false;
+
+	function load($key,$dsn="default") {
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -39,63 +45,68 @@ class HelpdeskCategoriesBase {
 		} else {
 			$where = "helpdesk_category_id='".$key."'";
 		}
-		$array = HelpdeskCategoriesPeer::doSelect($where);
+		$array = HelpdeskCategoriesPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
+
+
+	function loadAll($dsn="default") {
+		$array = HelpdeskCategoriesPeer::doSelect('',$dsn);
+		return $array;
+	}
+
+
+	function delete($deep=false,$dsn="default") {
+		HelpdeskCategoriesPeer::doDelete($this,$deep,$dsn);
+	}
+
 
 	function isNew() {
 		return $this->_new;
 	}
+
 
 	function isModified() {
 		return $this->_modified;
 
 	}
 
+
 	function get($key) {
 		return $this->{$key};
 	}
 
-	function set($key,$val) {
-		$this->_modified = true;
-		$this->{$key} = $val;
-
-	}
 
 	/**
-	 * set all properties of an object that aren't
-	 * keys.  Relation attributes must be set manually
-	 * by the programmer to ensure security
+	 * only sets if the new value is !== the current value
+	 * returns true if the value was updated
+	 * also, sets _modified to true on success
 	 */
-	function setArray($array) {
-		if ($array['helpdeskCategoryLabel'])
-			$this->helpdeskCategoryLabel = $array['helpdeskCategoryLabel'];
-
-		$this->_modified = true;
-	}
-
-	function getPea() {
-		$p = new BasePea();
-		$p->setAttributes($this->__attributes);
-		return $p;
+	function set($key,$val) {
+		if ($this->{$key} !== $val) {
+			$this->_modified = true;
+			$this->{$key} = $val;
+			return true;
+		}
+		return false;
 	}
 
 }
 
 
-class HelpdeskCategoriesPeer {
+class HelpdeskCategoriesPeerBase {
 
 	var $tableName = 'helpdesk_categories';
 
-	function doSelect($where) {
+	function doSelect($where,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_SelectStatement("helpdesk_categories",$where);
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_SelectStatement("helpdesk_categories",$where);
 		$st->fields['helpdesk_category_id'] = 'helpdesk_category_id';
 		$st->fields['helpdesk_category_label'] = 'helpdesk_category_label';
 
-		$st->key = $this->key;
 
+		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
 			$array[] = HelpdeskCategoriesPeer::row2Obj($db->record);
@@ -103,13 +114,14 @@ class HelpdeskCategoriesPeer {
 		return $array;
 	}
 
-	function doInsert(&$obj) {
+	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_InsertStatement("helpdesk_categories");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_InsertStatement("helpdesk_categories");
 		$st->fields['helpdesk_category_id'] = $this->helpdeskCategoryId;
 		$st->fields['helpdesk_category_label'] = $this->helpdeskCategoryLabel;
 
+
 		$st->key = 'helpdesk_category_id';
 		$db->executeQuery($st);
 
@@ -120,38 +132,42 @@ class HelpdeskCategoriesPeer {
 
 	}
 
-	function doUpdate(&$obj) {
+	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_UpdateStatement("helpdesk_categories");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_UpdateStatement("helpdesk_categories");
 		$st->fields['helpdesk_category_id'] = $obj->helpdeskCategoryId;
 		$st->fields['helpdesk_category_label'] = $obj->helpdeskCategoryLabel;
 
+
 		$st->key = 'helpdesk_category_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
 	}
 
-	function doReplace($obj) {
+	function doReplace($obj,$dsn="default") {
 		//use this tableName
+		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
-			$db->executeQuery(new LC_InsertStatement($criteria));
+			$db->executeQuery(new PBDO_InsertStatement($criteria));
 		} else {
-			$db->executeQuery(new LC_UpdateStatement($criteria));
+			$db->executeQuery(new PBDO_UpdateStatement($criteria));
 		}
 	}
 
 
-
-	function doDelete(&$obj,$shallow=false) {
+	/**
+	 * remove an object
+	 */
+	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
-		$db = lcDB::getHandle();
-		$st = new LC_DeleteStatement("helpdesk_categories","helpdesk_category_id = '".$obj->getPrimaryKey()."'");
+		$db = DB::getHandle($dsn);
+		$st = new PBDO_DeleteStatement("helpdesk_categories","helpdesk_category_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
-		if ( !$shallow ) {
+		if ( $deep ) {
 
 		}
 
@@ -161,6 +177,22 @@ class HelpdeskCategoriesPeer {
 		return $id;
 
 	}
+
+
+
+	/**
+	 * send a raw query
+	 */
+	function doQuery(&$sql,$dsn="default") {
+		//use this tableName
+		$db = DB::getHandle($dsn);
+
+		$db->query($sql);
+
+	  	return;
+	}
+
+
 
 	function row2Obj($row) {
 		$x = new HelpdeskCategories();
@@ -171,6 +203,7 @@ class HelpdeskCategoriesPeer {
 		return $x;
 	}
 
+		
 }
 
 
@@ -178,6 +211,12 @@ class HelpdeskCategoriesPeer {
 class HelpdeskCategories extends HelpdeskCategoriesBase {
 
 
+
+}
+
+
+
+class HelpdeskCategoriesPeer extends HelpdeskCategoriesPeerBase {
 
 }
 
