@@ -146,7 +146,7 @@ class enrollment extends AdminService {
 		$db->nextRecord();
 		$userId = $db->record['pkey'];
 
-		$classEnrollment = new lcClassEnrollment($classId);
+		$classEnrollment = new lcClassEnrollment($classId,$semesterId);
 		$classEnrollment->addStudent($userId);
 		$classEnrollment->save();
 
@@ -179,15 +179,25 @@ class enrollment extends AdminService {
 	}
 
 
-	function removerun (&$db,&$u,&$lc,&$t) {
+	function removeRun (&$db,&$u,&$lc,&$t) {
 // only dealing with current semester right now
 // 
 		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
-		$semesterId = $db->Record[0];
+//		$semesterId = (int)$db->Record['id_semesters'];
 
 		$name = addslashes(stripslashes($lc->getvars['username']));
+		$studentId = (int)$lc->getvars['student_id'];
 		$sectionNumber = (int)$lc->getvars['id'];
-		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+
+		$db->query("SELECT pkey FROM lcUsers  WHERE username='".$name."'");
+		$db->nextRecord();
+		$studentId = $db->record['pkey'];
+
+		$db->query("DELETE FROM class_enrollment 
+			WHERE student_id='".$studentId."' 
+			AND section_number=".$sectionNumber." 
+			AND semester_id=".$semesterId);
+
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
 
