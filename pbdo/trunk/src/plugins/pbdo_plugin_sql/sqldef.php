@@ -131,7 +131,7 @@ class PBDO_ParsedTable {
 		}
 
 		if ( is_array($this->indexes) && count($this->indexes) > 0) {
-			$ret = substr($ret,0,-2);
+//			$ret = substr($ret,0,-2);
 			$ret .= "\n\n";
 		}
 
@@ -303,10 +303,10 @@ class PBDO_ParsedIndex {
 
 	function toSQL() {
 		if ($this->isUnique() ) {
-			return "CREATE UNIQUE INDEX ".$this->name." ON ".$this->table." (".$this->columns[0].");  ";
+			return "CREATE UNIQUE INDEX ".$this->name." ON ".$this->table." (".$this->columns[0].");";
 		}
 
-		return "CREATE INDEX ".$this->name." ON ".$this->table." (".$this->columns[0].");  ";
+		return "CREATE INDEX ".$this->name." ON ".$this->table." (".$this->columns[0].");";
 	}
 
 
