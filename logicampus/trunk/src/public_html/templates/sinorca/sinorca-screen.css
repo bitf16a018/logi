@@ -351,3 +351,10 @@ dd {
   color: white;
   background-color: rgb(0,51,153);
 }
+
+.tabletitle {
+  background-color: rgb(0,51,153);
+  color:#FFF;
+  font-size:120%;
+  font-weight:700;
+}
