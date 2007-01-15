@@ -35,13 +35,7 @@ class sqlite extends DB {
 		global $debugmode,$REMOTE_ADDR;
 		$start = microtime();
 		if ($debugmode=="y") {	print microtime()."<br>\n"; printf("Debug: query = %s<br>\n", $queryString)."<br>\n"; print strlen($queryString)."<br>\n"; flush(); }
-/*		if ($log ) {
-			DB::logQuery($queryString);
-		}
-		*/
-		global $PHPSESSID;
-		$d = date("Ymd");
-//		mylog("/tmp/query_$d"."_$PHPSESSID",$queryString);
+
 		if ($this->driverID == 0 ) {$this->connect();}
 
 		$resSet = sqlite_query($this->driverID, $queryString);

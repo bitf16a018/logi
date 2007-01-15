@@ -44,43 +44,25 @@ class mysql extends DB {
 	 * @param 	string	$queryString	SQL command to send
 	 */
 	function query($queryString,$log=true) {
-		$this->queryString = $queryString;
 		global $debugmode,$REMOTE_ADDR;
-		$start = microtime();
-		if ($debugmode=="y") {	print microtime()."<br>\n"; printf("Debug: query = %s<br>\n", $queryString)."<br>\n"; print strlen($queryString)."<br>\n"; flush(); }
-/*		if ($log ) {
-			DB::logQuery($queryString);
-		}
-		*/
-		global $PHPSESSID;
-		$d = date("Ymd");
-//		mylog("/tmp/query_$d"."_$PHPSESSID",$queryString);
+		$this->queryString = $queryString;
+
 		if ($this->driverID == 0 ) {$this->connect();}
 
 		$resSet = mysql_query($queryString,$this->driverID);
 		$this->row = 0;
 		if ( !$resSet ) {
-
-		    $this->errorNumber = mysql_errno();
-		    $this->errorMessage = mysql_error();
-			if ($log) {
-			trigger_error('database error: ('.$this->errorNumber.') '.$this->errorMessage.' 
-			<br/> statement was: <br/>
-			'.$queryString);
+			$this->errorNumber = mysql_errno($this->driverID);
+			$this->errorMessage = mysql_error($this->driverID);
+			if (!strstr($this->queryString, 'lcUsers')) {
+				//print_r($this);
+				//die($this->queryString);
 			}
-		return false;
+			return false;
 		}
-		if (is_resource($resSet) )
+		if (is_resource($resSet)) {
 			$this->resultSet[] = $resSet;
-$end = microtime();
-$j = split(" ",$start);
-$s = $j[1] = $j[0];
-$f = split(" ",$end);
-$e = $f[1] = $f[0];
-if ( ($e-$s)>.1) { 
-#mail("michael@tapinternet.com","slow query","$queryString");
-}
-		if ($debugmode=="y") {	print "<br>".microtime()."<hr>\n"; }
+		}
 		return true;
 	}
 
