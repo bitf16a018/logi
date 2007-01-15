@@ -54,7 +54,7 @@ if ($results['connect'] ) {
 
 function tryToMakeTables(&$gdb) {
 
-	for ($x=1; $x <= 20; $x++) {
+	for ($x=1; $x <= 19; $x++) {
 		include('install/schema_'.sprintf('%02d',$x).'.php');
 		if (! is_array($installTableSchemas) ) {
 			return false;
@@ -68,7 +68,7 @@ function tryToMakeTables(&$gdb) {
 			}
 		}
 	}
-	for ($x=1; $x <= 13; $x++) {
+	for ($x=1; $x <= 15; $x++) {
 		include('install/data_'.sprintf('%02d',$x).'.php');
 		if (! is_array($installTableSchemas) ) {
 			return false;
