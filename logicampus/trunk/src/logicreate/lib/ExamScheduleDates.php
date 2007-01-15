@@ -222,6 +222,51 @@ class ExamScheduleDatesPeerBase {
 //You can edit this class, but do not change this next line!
 class ExamScheduleDates extends ExamScheduleDatesBase {
 
+	// returns an array of ExamScheduleClassesDates objects with extra data
+	// from ExamScheduleDates. Some of the ExamScheduleDates
+	function getAllDates( $classid, $semesterid, $showEnteredDatesOnly ) {
+
+		$escds = array();
+
+		$esds = ExamScheduleDatesPeer::doSelect( "id_semester='$semesterid'" );
+		while ( list(,$esd) = @each($esds) ) {
+			$escd = ExamScheduleClassesDates::load( array(
+				'id_classes' => $classid,
+				'id_exam_schedule_dates' => $esd->idExamScheduleDates
+			) );
+			if ( !is_object($escd) ) {
+
+				// don't make an empty object; they only want to see dates that were entered
+				//if ( $showEnteredDatesOnly ) continue;
+
+				$escd = new ExamScheduleClassesDates();
+				$escd->set( 'idClasses', $classid );
+				$escd->set( 'idExamScheduleDates', $esd->idExamScheduleDates );
+				$escd->set( 'status', 1 ); // not approved
+			}
+			$escd->dateStart = $esd->dateStart;
+			$escd->dateEnd = $esd->dateEnd;
+			$escds[$esd->idExamScheduleDates] = $escd;
+		}
+		return $escds;
+	}
+
+	# Finds all user accounts in system in the exam
+	# manager group and emails them.
+	function mailAdmin( $msg, $subject='' )
+	{
+		$db = DB::getHandle();
+		$sql = "SELECT email FROM lcUsers where groups LIKE
+		'%|exammgr|%'";
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$emailTo .= $db->Record['email'].',';	
+		}
+		$emailTo = substr($emailTo, 0, -1);
+		mail($emailTo, "Exam Date Added / Modified".$subject, $msg, "From: ".WEBMASTER_EMAIL."\r\n");
+	}
+
 
 
 }
