@@ -179,6 +179,11 @@
 	<filter token="LC_VERSION" value="${lc.version}"/>
 	<filter token="LC_BUILD_DATE" value="${build.date}"/>
 	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/defines.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/defines.template.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/settings.advanced.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/settings.complete.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/first_run.php" todir="${build}/public_html/" filtering="true"/>
 
 
 	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite="true"/>
@@ -196,16 +201,7 @@
 	-->
 
 	<!-- After license is applied, copy defines.php over -->
-	<echo message="copying defines template."/>
-	<copy todir="${build}/public_html/" file="${src}/defines.template.php" overwrite='true'>
-		<filterset>
-			<filter token="build.date" value="${build.date}"/>
-			<filter token="version.number" value="${version.number}"/>
-			<filter token="version.extra" value="${version.extra}"/>
-		</filterset>
-	</copy>
-
-
+	<antcall target="setup"/>
 
 	<!-- After license is applied, copy install.php over -->
 	<echo message="copying installation instructions."/>
@@ -225,7 +221,6 @@
 	<antcall target="cleantemp"/>
 	<echo message="Archive saved in 'dist/' directory!" />
   </target>
-
 
 
 	<target name="copy_data"
@@ -252,18 +247,18 @@
 
 
 
-	<target name="translate"
+	<target name="translate" depends="init"
 		description="uses php to build translation tables out of XML files">
 		<echo message="Translating [english,spanish,chinese] ..." />
-		<exec executable="php" dir="lang/" failonerror="true">
+		<exec executable="php4" dir="lang/" failonerror="true">
 			<arg value="buildtrans.php"/>
 			<arg value="en_US"/>
 		</exec>
-		<exec executable="php" dir="lang/" failonerror="false">
+		<exec executable="php4" dir="lang/" failonerror="false">
 			<arg value="buildtrans.php"/>
 			<arg value="es_MX"/>
 		</exec>
-		<exec executable="php" dir="lang/" failonerror="false">
+		<exec executable="php4" dir="lang/" failonerror="false">
 			<arg value="buildtrans.php"/>
 			<arg value="zh_CN"/>
 		</exec>
