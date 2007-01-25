@@ -93,7 +93,12 @@ class prefs extends FacultyService {
 				$gb->set('roundScoresUp', 0);
 			}
 
-			$gb->setArray( $f->cleanedArray );
+			$gb->set('calculationType', $f->cleanedArray['calculationType']);
+			$gb->set('totalPoints', $f->cleanedArray['totalPoints']);
+			$gb->set('aLower', $f->cleanedArray['aLower']);
+			$gb->set('bLower', $f->cleanedArray['bLower']);
+			$gb->set('cLower', $f->cleanedArray['cLower']);
+			$gb->set('dLower', $f->cleanedArray['dLower']);
 			$gb->save();
 
 			$u->sessionvars['message'] = 'Gradebook preferences are saved.';
