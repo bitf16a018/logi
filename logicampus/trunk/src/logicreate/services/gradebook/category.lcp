@@ -164,10 +164,10 @@ class category extends FacultyService {
 			# We've got this far, we are good
 			if ($lc->getvars['event'] == 'edit') {
 				$gbCat = ClassGradebookCategories::load((int)$lc->getvars['id']);
-				$gbCat->setArray($f->cleanedArray);
+				$gbCat->set('label',$f->cleanedArray['label']);
 			} else {
 				$gbCat = new ClassGradebookCategories();
-				$gbCat->setArray($f->cleanedArray);
+				$gbCat->set('label',$f->cleanedArray['label']);
 				$gbCat->set( 'idClasses', $u->activeClassTaught->id_classes );
 			}
 
