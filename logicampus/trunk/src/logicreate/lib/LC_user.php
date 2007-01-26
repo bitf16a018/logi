@@ -95,11 +95,9 @@ class lcUser {
 			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
 		}
 
-		/*
 		if ($temp2['_userobj']->username!='anonymous') { 
 			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
 		}
-		 */
 		if ($j) {
 			$sessArr = $temp2;
 			/*
@@ -110,16 +108,15 @@ class lcUser {
 			*/
 
 			$origSession = crc32($db->Record['sessdata']);
-			/*
-			if ($sessArr['_userobj'] != "" && $sessArr['_userobj']->userType > 0) {
+			if ( is_object($sessArr['_userobj']) && $sessArr['_userobj']->userType > 0) {
 				$temp = $sessArr['_userobj'];
+//				$temp = lcUser::getUserByUsername($sessArr['_userobj']->username);
 				unset($sessArr['_userobj']);
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
 				$temp->_origSessionData = $origSession;
 				$temp->loggedIn = true;
 			} else
-			 */
 			if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
 				$temp->sessionvars = $sessArr;
@@ -391,7 +388,7 @@ class lcUser {
 		// $val is not defined, doesn't make sense
 		//$this->newval = crc32($val);
 
-//		$sessBlob['_userobj'] = $this;
+		$sessBlob['_userobj'] = $this;
 		if (function_exists("gzcompress")) { 
 			$val = gzcompress(serialize($sessBlob));
 		} else { 
@@ -412,7 +409,7 @@ class lcUser {
 
 		$db->query($s,true);
 		//sess_close(DB::getHandle(),$this->uid,serialize($this->session));
-//		$sessBlob['_userobj'] = '';
+		$sessBlob['_userobj'] = '';
 		$this->sessionvars = $sessBlob;
 	}
 
@@ -512,7 +509,7 @@ class lcUser {
 		$this->sessionvars['_username'] = $this->username;
 		$this->groups = array_merge($this->groups,explode("|",substr($db->Record['groups'],1,-1)));
 		$this->userId = $db->Record['pkey'];
-		$this->userType = $db->Record['userType'];
+//		$this->userType = $db->Record['userType'];
 
 		return true;
 	   } else {

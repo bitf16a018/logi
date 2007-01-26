@@ -83,6 +83,7 @@ var $presentor = "htmlPresentation";
 			// create a brand new user (userType and sub-classes)
 			if ( $oldUsername != $username && $oldUsername  != '') {
 				$lcUser = LcUser::getUserByUsername(addslashes($username));
+				$lcUser->loadProfile();
 				updateSessionVars($db,$lcUser);
 			}
 
