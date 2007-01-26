@@ -754,8 +754,7 @@ function noAuth(&$lc,&$u) {
 
 
 function adminAuth(&$lc,&$u) {
-	if (in_array('admin', $u->groups) )
-	{
+	if (in_array('admin', $u->groups) ) {
 		return true;
 	}
 	return false;

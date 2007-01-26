@@ -15,8 +15,6 @@ class LC_Class {
 		$db = DB::getHandle();
 
 
-
-
 		$sql = "SELECT
 		cs.*, semesters.semesterID, courses.courseName 
 
