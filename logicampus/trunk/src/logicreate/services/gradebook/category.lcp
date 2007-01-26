@@ -165,9 +165,11 @@ class category extends FacultyService {
 			if ($lc->getvars['event'] == 'edit') {
 				$gbCat = ClassGradebookCategories::load((int)$lc->getvars['id']);
 				$gbCat->set('label',$f->cleanedArray['label']);
+				$gbCat->set('weight',$f->cleanedArray['weight']);
 			} else {
 				$gbCat = new ClassGradebookCategories();
 				$gbCat->set('label',$f->cleanedArray['label']);
+				$gbCat->set('weight',$f->cleanedArray['weight']);
 				$gbCat->set( 'idClasses', $u->activeClassTaught->id_classes );
 			}
 

@@ -1,4 +1,8 @@
 <?
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
 
 class ClassGradebookBase {
 
