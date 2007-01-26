@@ -442,10 +442,10 @@ class FacultyService extends Service {
 			//__FIXME__ add constraint against classesTaught array;
 
 			foreach ( $lcUser->classesTaught as $k => $v) {
-				if ($v->id_classes == $lcObj->getvars['id_classes'])
+				if ($v->id_classes == $lcObj->getvars['id_classes']) {
 					$lcUser->activeClassTaught = $lcUser->classesTaught[$k];
+				}
 			}
-			reset($lcUser->classesTaught);
 		}
 		// moved out so that it's always called to avoid caching issues
 		// 8/23/03 - mgk
@@ -457,7 +457,7 @@ class FacultyService extends Service {
 		while ( list($k,$v) = @each($lcUser->classesTaught) ) {
 			print "$v->id_classes, ";
 		}
-//		print "<hr />\n";
+		print "<hr />\n";
 		//*/
 	}
 
