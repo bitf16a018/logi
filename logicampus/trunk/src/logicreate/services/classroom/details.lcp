@@ -31,32 +31,23 @@ class details extends StudentService {
 	 *
 	 *	@event
 	 */
-	function showtoolsRun($db, &$u, &$lc, &$t)
-	{	
+	function showtoolsRun($db, &$u, &$lc, &$t) {	
 		$this->inactivelinks = array('Dictionary / Thesaurus');
 		$this->sectionTitle = 'Dictionary & Thesaurus';
 		$lc->templateName = 'details_showtools';
 	}
-	
+
 	
 	function viewMOTDRun($db,&$u, &$lc, &$t) { 
-			/*****
-			* MOTD
-			****/
-			$file = CONTENT_PATH.'__messageoftheday__';
-			$fp = fopen ($file, 'r');
-			$t['motd'] = fread($fp, filesize($file) );
-			fclose($fp);
-			$t['motd'] = trim($t['motd']);
-	
-			if (strlen($t['motd']) == 0)
-			{
-				unset($t['motd']);
-			}
+		/*****
+		* MOTD
+		****/
+		$t['motd'] = LcSettings::getSystemMotd();
+		$t['currentTime'] = time();
+
 		$lc->templateName = 'details_motd';
-
-
 	}
+
 /*
  *
  * Default event
