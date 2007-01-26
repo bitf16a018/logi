@@ -61,6 +61,12 @@ var $presentor = "htmlPresentation";
 		$username = $lcObj->postvars["username"];
 		$password = $lcObj->postvars["password"];
 		$redir = $lcObj->postvars["redir"];
+		if (!$lcUser->isAnonymous() ) {
+			$oldUsername = $lcUser->username;
+		} else {
+			$oldUsername = '';
+		}
+
 		$lcUser->username = $username;
 		$lcUser->password = $password;
 		$agent = new phpSniff($_SERVER['HTTP_USER_AGENT']);
@@ -69,11 +75,17 @@ var $presentor = "htmlPresentation";
 		if (!$lcUser->validateLogin($db)) {
 			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",2,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
 			$lcUser->username="anonymous";
-			$lcTemplate[message] ="There was an error with your username or password.  Please try again.";
-//auto-comment			$lcObj->templateStyle = 'private';
+			$lcTemplate['message'] ="There was an error with your username or password.  Please try again.";
 			$this->presentor = "errorMessage";
 			return;
 		} else {
+			//if a logged in user attempts to login as someone else
+			// create a brand new user (userType and sub-classes)
+			if ( $oldUsername != $username && $oldUsername  != '') {
+				$lcUser = LcUser::getUserByUsername(addslashes($username));
+				updateSessionVars($db,$lcUser);
+			}
+
 			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",1,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
 			$lcUser->bindSession();
 			$lcUser->loadProfile();
@@ -108,9 +120,11 @@ var $presentor = "htmlPresentation";
 			// do a test on if we're faculty/student/visitingguest/admin whoever
 			// MAK 10-20-2003, if the above conditions don't match, then we do this
 			// almost like custom DEFAULT_URLs
-			switch($lcUser->fields['userType'])
-			{
-				case '3':
+
+
+			if ($lcUser->isAdmin()) {
+				$lcTemplate['url'] = appurl('administration/');
+			} else if ($lcUser->isFaculty()) {
 				if ($lcUser->sessionvars['first_login']) { 
 //  remove profile nag screen - mgk
 					#$lcTemplate['url'] = appurl('users/editProfile/');
@@ -119,9 +133,7 @@ var $presentor = "htmlPresentation";
 					$lcTemplate['url'] = appurl('classmgr/');
 				}
 				#$lcTemplate['url'] = appurl('classmgr/');
-				break;
-
-				case '2':
+			} else  if ($lcUser->isStudent()) {
 				if ($lcUser->sessionvars['first_login']) { 
 //  remove profile nag screen - mgk
 					#$lcTemplate['url'] = appurl('users/editProfile/');
@@ -129,15 +141,8 @@ var $presentor = "htmlPresentation";
 				} else { 
 					$lcTemplate['url'] = appurl('classroom/');
 				}
-				break;
-
-				case '1':
-				$lcTemplate['url'] = appurl('administration/');
-				break;
-
-				default:
+			} else {
 				$lcTemplate['url'] = appurl('classmgr/');
-				break;
 			}
 		}
 	}

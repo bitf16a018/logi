@@ -95,9 +95,11 @@ class lcUser {
 			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
 		}
 
+		/*
 		if ($temp2['_userobj']->username!='anonymous') { 
 			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
 		}
+		 */
 		if ($j) {
 			$sessArr = $temp2;
 			/*
@@ -108,6 +110,7 @@ class lcUser {
 			*/
 
 			$origSession = crc32($db->Record['sessdata']);
+			/*
 			if ($sessArr['_userobj'] != "" && $sessArr['_userobj']->userType > 0) {
 				$temp = $sessArr['_userobj'];
 				unset($sessArr['_userobj']);
@@ -116,6 +119,7 @@ class lcUser {
 				$temp->_origSessionData = $origSession;
 				$temp->loggedIn = true;
 			} else
+			 */
 			if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
 				$temp->sessionvars = $sessArr;
@@ -387,7 +391,7 @@ class lcUser {
 		// $val is not defined, doesn't make sense
 		//$this->newval = crc32($val);
 
-		$sessBlob['_userobj'] = $this;
+//		$sessBlob['_userobj'] = $this;
 		if (function_exists("gzcompress")) { 
 			$val = gzcompress(serialize($sessBlob));
 		} else { 
@@ -408,7 +412,7 @@ class lcUser {
 
 		$db->query($s,true);
 		//sess_close(DB::getHandle(),$this->uid,serialize($this->session));
-		$sessBlob['_userobj'] = '';
+//		$sessBlob['_userobj'] = '';
 		$this->sessionvars = $sessBlob;
 	}
 
@@ -429,7 +433,7 @@ class lcUser {
 			setcookie("PHPSESSID",$PHPSESSID,0,$tail);
 			$this->_sessionKey = $PHPSESSID;
 		}
-		$this->sessionvars[_username] = $this->username;
+		$this->sessionvars['_username'] = $this->username;
 		if (function_exists("gzcompress")) { 
 			$val = base64_encode(gzcompress(serialize($this->sessionvars)));
 		} else {
@@ -504,10 +508,11 @@ class lcUser {
 		$this->password = $db->Record['password'];
 		$this->username = $db->Record['username'];
 		//__FIXME__ what is this fields for??
-		$this->fields = $db->Record;
+		//$this->fields = $db->Record;
 		$this->sessionvars['_username'] = $this->username;
 		$this->groups = array_merge($this->groups,explode("|",substr($db->Record['groups'],1,-1)));
 		$this->userId = $db->Record['pkey'];
+		$this->userType = $db->Record['userType'];
 
 		return true;
 	   } else {
@@ -684,23 +689,23 @@ Thank you,
 
 		# Returns true if the user is a student
 		# False is user is not a student
-		function isStudent()
-		{
+		function isStudent() {
+			return $this->userType == USERTYPE_STUDENT;
+//			return false;
+		}
+
+		function isAdmin() {
+			if (in_array('admin', $this->groups) ) {
+				return true;
+			}
 			return false;
 		}
 
-		function isAdmin()
-		{
+		function isFaculty() {
 			return false;
 		}
 
-		function isFaculty()
-		{
-			return false;
-		}
-
-		function isStandard()
-		{
+		function isStandard() {
 			return false;
 		}
 

@@ -69,41 +69,45 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 
 	}
 
-	function updateSessionVars(&$db, &$u)
-	{
-	$db->queryOne("SELECT semesters.id_semesters FROM semesters INNER JOIN classes ON semesters.id_semesters=classes.id_semesters WHERE facultyId='". $u->username ."'");
-	if($db->Record['id_semesters']==null)
-		$u->sessionvars['classmgr']['currentsemester'] = 0;
-	else
-		$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];
+	function updateSessionVars(&$db, &$u) {
+		include_once(LIB_PATH.'lc_class.php');
 
-	if ($id_semesters > 0 ) {
-		$semesterObj = semesterObj::_getFromDB($id_semesters, 'id_semesters');
-	}
-	
-	include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
-	
-	$u->classesTaken = classObj::getClassesTaken($u->username);
-	$u->classesTaught = classObj::getClassesTaught($u->username);
+		$db->queryOne("SELECT semesters.id_semesters FROM semesters INNER JOIN classes ON semesters.id_semesters=classes.id_semesters WHERE facultyId='". $u->username ."'");
+		if($db->Record['id_semesters']==null)
+			$u->sessionvars['classmgr']['currentsemester'] = 0;
+		else
+			$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];
 
-	switch($u->userType)
-	{
-	case USERTYPE_STUDENT: 
-		$u->classesTaken = classObj::getClassesTaken($u->username);
-		$u->sessionvars['myClassesMenu'] = menuObj::getStudentMenu($u);
-		break;
-	case USERTYPE_FACULTY:
-		$u->classesTaught = classObj::getClassesTaught($u->username);
-		$u->classesTaken = classObj::getClassesTaken($u->username);
-		$u->classesTaken = array_merge($u->classesTaken, classObj::getClassesTaught($u->username));
+		if ($id_semesters > 0 ) {
+			$semesterObj = semesterObj::_getFromDB($id_semesters, 'id_semesters');
+		}
 		
-		$u->sessionvars['myClassesMenu'] = menuObj::getStudentMenu($u);
-		break;
+		include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
+		
+		$u->classesTaken = classObj::getClassesTaken($u->username);
+		$u->classesTaught = classObj::getClassesTaught($u->username);
 
+		switch($u->userType) {
+			case USERTYPE_STUDENT: 
+				$u->classesTaken = classObj::getClassesTaken($u->username);
+				$u->sessionvars['myClassesMenu'] = menuObj::getStudentMenu($u);
+				break;
+			case USERTYPE_FACULTY:
+				$u->classesTaught = classObj::getClassesTaught($u->username);
+				$u->classesTaken = classObj::getClassesTaken($u->username);
+				$u->classesTaken = array_merge($u->classesTaken, classObj::getClassesTaught($u->username));
+				
+				$u->sessionvars['myClassesMenu'] = menuObj::getStudentMenu($u);
+				break;
+			case USERTYPE_STANDARD: 
+				$u->classesTaught = array();
+				$u->classesTaken = array();
+				$u->classesTaken = array();
+				$u->sessionvars = array();
+				break;
+
+		}
 	}
-	
-	
-}
 
 	
 /**
@@ -231,8 +235,8 @@ class lcSystem {
 
 	var $postvars;
 	var $getvars;
-	//var $templateStyle = 'private';
-	var $templateStyle = 'sinorca';
+	var $templateStyle = 'private';
+	//var $templateStyle = 'sinorca';
 	var $TRACK_SESSIONS = true;
 	var $cssFile;
 

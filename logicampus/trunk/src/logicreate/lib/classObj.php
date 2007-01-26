@@ -5,6 +5,8 @@
  *       to include the courseName from the courses table.
  */
 // primarily mapped against database table 
+include_once(LIB_PATH.'lc_class.php');
+
 class classObj {
 	var $id_classes;		// (number) - 
 	var $id_courses;		// (number) - 
@@ -278,7 +280,7 @@ WHERE css.id_student = '$uname'
 	 * get all classes someone is teaching
 	 */
 	function getClassesTaught($uname) {
-		
+
 		$ret = array();
 		$db = DB::getHandle();
 
@@ -315,12 +317,11 @@ CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as 
 		while ($db->next_record() ) {
 			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
-			print_r($temp);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
 		}
-		
+
 	return $ret;
 	}
 
