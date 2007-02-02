@@ -61,31 +61,40 @@ var $presentor = "htmlPresentation";
 		$username = $lcObj->postvars["username"];
 		$password = $lcObj->postvars["password"];
 		$redir = $lcObj->postvars["redir"];
+		$newUser = lcUser::getUserByUsername($username);
+
+		/*
 		if (!$lcUser->isAnonymous() ) {
 			$oldUsername = $lcUser->username;
 		} else {
 			$oldUsername = '';
 		}
+		 */
 
+		/*
 		$lcUser->username = $username;
 		$lcUser->password = $password;
-		$agent = new phpSniff($_SERVER['HTTP_USER_AGENT']);
-		
+		 */
+		$newUser->password = $password;
 
-		if (!$lcUser->validateLogin($db)) {
+		$agent = new phpSniff($_SERVER['HTTP_USER_AGENT']);
+
+		if (!$newUser->validateLogin($db)) {
 			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",2,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
-			$lcUser->username="anonymous";
+			$newUser->username="anonymous";
 			$lcTemplate['message'] ="There was an error with your username or password.  Please try again.";
 			$this->presentor = "errorMessage";
 			return;
 		} else {
 			//if a logged in user attempts to login as someone else
 			// create a brand new user (userType and sub-classes)
-			if ( $oldUsername != $username && $oldUsername  != '') {
-				$lcUser = LcUser::getUserByUsername(addslashes($username));
-				$lcUser->loadProfile();
-				updateSessionVars($db,$lcUser);
+			// if the logged in user was anonymous, copy the session
+			if ($lcUser->isAnonymous() ) {
+				$newUser->sessionvars = $lcUser->sessionvars;
 			}
+			$newUser->_sessionKey = $lcUser->_sessionKey;
+			$lcUser = $newUser;
+
 
 			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",1,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
 			$lcUser->bindSession();
