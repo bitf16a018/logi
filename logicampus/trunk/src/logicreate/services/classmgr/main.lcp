@@ -11,7 +11,6 @@ include_once(LIB_PATH.'lc_class.php');
 class classmgr extends FacultyService {
 
 	var $presentor='htmlPresentation';
-	var $authorizer = 'regAuth';
 	var $sectionTitle = 'Classroom Manager';
 	var $navlinks = array (
 		''=>''
