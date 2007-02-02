@@ -123,7 +123,6 @@
 		# Check if faculty is a student in a class
 		function isStudent()
 		{
-			global $lcObj;	
 			//if and id_classes is in getvars
 			//make sure it's in classes taken,
 			// then set it to the active class
@@ -200,23 +199,19 @@
 		
 		# Returns true if the user is a student
 		# False is user is not a student
-		function isStudent()
-		{
-			return (count($this->classesTaken));
+		function isStudent() {
+			return true;
 		}
 		
-		function isAdmin()
-		{
+		function isAdmin() {
 			return false;
 		}
 
-		function isFaculty()
-		{
+		function isFaculty() {
 			return false;
 		}
 		
-		function doesTeach($classID)
-		{
+		function doesTeach($classID) {
 			return false;
 		}
 

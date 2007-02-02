@@ -8,12 +8,12 @@ include_once(LIB_PATH.'semesterObj.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'SiteForms.php');
 
+
 class teacherclass extends FacultyService {
 
 var $presentor = "htmlPresentation";
-var $authorizer = 'regAuth';
 
-function Run($db,&$u,&$lc,&$t){
+function run($db,&$u,&$lc,&$t){
 	
 	$lc->templateName = 'teacherclass_list';
 
