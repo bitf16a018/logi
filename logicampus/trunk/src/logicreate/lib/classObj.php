@@ -159,6 +159,7 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 	function getClassesTaken($uname) {
 		$ret = array();
 		$db = DB::getHandle();
+		/*
 $sql = "SELECT classes.*, semesters.semesterID,courses.courseName, 
 profile_faculty.title, profile.firstname, profile.lastname
 /**
@@ -167,6 +168,7 @@ CONCAT(IF(ISNULL(profile_faculty.title), '', profile_faculty.title), ' ', profil
 Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
 CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
 **/
+		/*
 FROM class_student_sections as css
 LEFT JOIN class_sections ON css.sectionNumber = class_sections.sectionNumber
 LEFT JOIN classes ON class_sections.id_classes = classes.id_classes
@@ -181,9 +183,14 @@ AND semesters.dateStudentActivation < ".DB::getFuncName('NOW()')."
 AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 ";		
 
+
+
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
-#		ob_start();
+		 */
+
+		$ret = LC_Class::getActiveClassesForStudent($uname);
+
 		while ($db->next_record() ) {
 			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
