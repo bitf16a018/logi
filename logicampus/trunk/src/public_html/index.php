@@ -71,6 +71,7 @@ include(LIB_PATH."LC_db.php");
 include_once(LIB_PATH."LC_registry.php");
 include_once(LIB_PATH."pbdo_sql.php");
 include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH."inputValidation.php");
 
 
 	//start the error system

@@ -178,10 +178,12 @@ class entry extends FacultyService {
 				}
 			} 
 
-			$gbEntry->setArray($lc->postvars);
+			$gbEntry->set('title', inputCleanString($lc->postvars['title']));
+			$gbEntry->set('gradebookCode',inputCleanString($lc->postvars['gradebookCode']));
+
 			$gbEntry->set( 'idClassGradebookCategories', $lc->postvars['category'] );
 			$gbEntry->set( 'publishFlag', $lc->postvars['publishFlag'] ? 1 : 0 );
-			$gbEntry->set( 'totalPoints', $lc->postvars['totalPoints'] );
+			$gbEntry->set( 'totalPoints', intval($lc->postvars['totalPoints']) );
 			$gbEntry->save();
 			
 			if (!$e = ErrorStack::PullError('db'))
