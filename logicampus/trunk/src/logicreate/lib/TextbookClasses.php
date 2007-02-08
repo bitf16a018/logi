@@ -300,8 +300,53 @@ class TextbookClassesPeerBase {
 //You can edit this class, but do not change this next line!
 class TextbookClasses extends TextbookClassesBase {
 
+	# Finds all user accounts in system in the seminar
+	# manager group and emails them.
+	function  mailAdmin($msg) {
+		$db = DB::getHandle();
+		$sql = "SELECT email FROM lcUsers where groups LIKE
+		'%|tbadmin|%'";
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$emailTo .= $db->Record['email'].',';	
+		}
+		$emailTo = substr($emailTo, 0, -1);
+		mail($emailTo, "Textbook Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");
+	}
 
 
+	function getStatus($x) {
+		switch($x) {
+			case 1;
+			return 'New';
+
+			case 0;
+			return 'N/A';
+
+			case 2;
+			return 'Pending';
+
+			case 3;
+			return 'Approved';
+
+			case 4;
+			return 'Waiting on Instructor';
+			
+			default:
+			return 'N/A';
+		}
+			
+	}
+	
+
+	function printyesno($x) {
+		if ($x)
+		{
+			return 'Yes';
+		}
+		return 'No';
+	}
 }
 
 

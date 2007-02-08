@@ -339,6 +339,59 @@ class SeminarClassesDatesPeerBase {
 //You can edit this class, but do not change this next line!
 class SeminarClassesDates extends SeminarClassesDatesBase {
 
+	/**
+	 * @return void
+	 * @desc Mails all admins if an entry is added or updated
+	 */
+	function  mailAdmin($msg)
+	{
+		$db = DB::getHandle();
+		$sql = "SELECT email FROM lcUsers where groups LIKE
+		'%|semmgr|%'";
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$emailTo .= $db->Record['email'].',';	
+		}
+		
+		$emailTo = substr($emailTo, 0, -1);
+		mail($emailTo, "Seminar Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");
+	}
+
+
+	function getStatus($x) {
+		switch($x)
+		{
+			case 1;
+			return 'New';
+
+			case 0;
+			return 'N/A';
+
+			case 2;
+			return 'Pending';
+
+			case 3;
+			return 'Approved';
+
+			case 4;
+			return 'Waiting on Inst.';
+		}
+			
+	}
+
+
+	# Converts the 00:00:00 format of the TIME field in the database
+	# to 8:00 AM or 1:15 PM
+	function convertTime($time) {
+		$date = date('Y-m-d');
+		$ut = strtotime("$date $time");
+		return date('h:i A', $ut);
+	}
+
+	function convertDateTime($date) {
+		return date('D F dS, Y h:i A', strtotime($date));
+	}
 
 
 }

@@ -252,8 +252,21 @@ class TextbookPeerBase {
 //You can edit this class, but do not change this next line!
 class Textbook extends TextbookBase {
 
+	/**
+	 * Overides one above, I did this because I am using 0's and 1's
+	 * and with the above code if it is a 0 it doesn't update, however
+	 * i am relying on the 0 to be in the database.
+	 */
+	function setArray($array) {
+			$this->idClasses = $array['idClasses'];
+			$this->southCampus = $array['southCampus'];
+			$this->southeastCampus = $array['southeastCampus'];
+			$this->northeastCampus = $array['northeastCampus'];
+			$this->northwestCampus = $array['northwestCampus'];
+			$this->noTextbooks = $array['noTextbooks'];
 
-
+			$this->_modified = true;
+	}
 }
 
 
