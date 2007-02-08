@@ -798,13 +798,8 @@ class assignmentManage extends FacultyService {
 			}
 
 
-
-
 			#return;
-
-		} else
-		{
-			
+		} else {
 			// give me a class list
 			$sql = '
 			SELECT B.id_student, C.firstname, C.lastname, C.username

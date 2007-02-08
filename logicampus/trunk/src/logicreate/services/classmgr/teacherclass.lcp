@@ -297,7 +297,7 @@ function makeClass($db, &$u, &$lc, &$t){
 
 		$t['endDateValue'] = time()+ (86400*365); //one year form now
 		$t['endDateName'] = 'enddate';
-
+		$lc->templateName = 'teacherclass_add';
 	}
 
 
