@@ -252,14 +252,210 @@ class ClassGradebookValPeerBase {
 //You can edit this class, but do not change this next line!
 class ClassGradebookVal extends ClassGradebookValBase {
 
+	var $disqualified = false;
+
+	/*
+	// Given an entry id, I will return an array of ClassGradebookVal objects, ordered
+	// by the students' last names.
+	function getValsByEntry($entryid) {
+
+		global $lcUser;
+		$arr = array();
+
+		$db = DB::getHandle();
+
+		$db->query('select id_class_gradebook_val from class_gradebook_val
+			where id_class_gradebook_entries="'.$entryid.'"
+			and id_classes="'.$lcUser->activeClassTaught->id_classes.'"');
+
+//		$db->query('select v.id_class_gradebook_val,e.title,e.id_class_gradebook_entries
+//			from class_gradebook_entries as e
+//			left join class_gradebook_val as v on e.id_class_gradebook_entries');
+
+		while ($db->next_record()) {
+			$arr[] = ClassGradebookVal::load($db->Record['id_class_gradebook_val']);
+		}
+
+		return $arr;
+
+	}
+	*/
 
 
+	function isDisqualified() {
+		return $this->disqualified;
+	}
+
+
+	// given a student username, I will return an array of ClassGradebookVal objects
+	function getValsByStudent($username) {
+
+		global $lcUser;
+
+		$db = DB::getHandle();
+		$entries = array();  // all entries for the class
+		$vals = array();     // all vals for the user/class that exist
+		$arr = array();      // the array of objects to ultimately be returned
+
+		/*
+		$sql = 'select v.id_class_gradebook_val,e.title,e.id_class_gradebook_entries
+			from class_gradebook_entries as e
+			left join class_gradebook_val as v on e.id_class_gradebook_entries=v.id_class_gradebook_entries
+			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"
+			and username="'.$username.'"';
+		*/
+		// Get all entries for the class
+		$db->query('select e.title,e.id_class_gradebook_entries from class_gradebook_entries as e
+			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"');
+		while ( $db->next_record() )
+			$entries[$db->Record['id_class_gradebook_entries']] = $db->Record['title'];
+
+		// Get all values for the user/class
+		$db->query('select id_class_gradebook_val,id_class_gradebook_entries from class_gradebook_val
+			where id_classes="'.$lcUser->activeClassTaught->id_classes.'"
+			and username="'.$username.'"');
+		while ( $db->next_record() )
+			$vals[$db->Record['id_class_gradebook_entries']] = $db->Record['id_class_gradebook_val'];
+
+		// build the array of objects to return. create new val objects if they're missing
+		while ( list($eid,$title) = @each($entries) ) {
+			if ( $vals[$eid] ) {
+				// they already have a val for this entry. load it up.
+				$val = ClassGradebookVal::load($vals[$eid]);
+			} else {
+				// they dont't have a val for this entry. create a new one.
+				$val = new ClassGradebookVal();
+			}
+			$val->set( 'title', $title );
+			$val->set( 'idClassGradebookEntries', $eid );
+			$arr[] = $val;
+		}
+
+		return $arr;
+
+	}
+
+	// given a student username, I will return an array of ClassGradebookVal objects
+	function getValsByEntry($entryid) {
+		global $lcUser;
+
+		$db = DB::getHandle();
+		$entries = array();  // all entries for the class
+		$students = array(); // all vals for the user/class that exist
+		$arr = array();      // the array of objects to ultimately be returned
+
+		/*
+		$sql = 'select v.id_class_gradebook_val,e.title,e.id_class_gradebook_entries
+			from class_gradebook_entries as e
+			left join class_gradebook_val as v on e.id_class_gradebook_entries=v.id_class_gradebook_entries
+			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"
+			and username="'.$username.'"';
+		*/
+		// Get the entry title
+		$db->queryOne('select title from class_gradebook_entries as e
+			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"
+			and id_class_gradebook_entries="'.$entryid.'"');
+		$etitle = $db->Record['title'];
+		
+		// Get all the students in the class
+		$sql = 'select p.firstname,p.lastname,p.username from profile as p
+			left join class_student_sections as ss on ss.id_student=p.username
+			left join class_sections as s on s.sectionNumber=ss.sectionNumber
+			where s.id_classes="'.$lcUser->activeClassTaught->id_classes.'" 
+			AND active=\'1\' 
+			ORDER BY p.lastname';
+		$db->query($sql);
+		while ($db->next_record()) {
+			$students[$db->Record['username']] = array(
+				'firstname' => $db->Record['firstname'],
+				'lastname' => $db->Record['lastname'],
+			);
+		}
+
+		// Get all values for the entry/class
+		$db->query('select id_class_gradebook_val,id_class_gradebook_entries from class_gradebook_val
+			where id_classes="'.$lcUser->activeClassTaught->id_classes.'"
+			and id_class_gradebook_entries="'.$entryid.'"');
+		while ( $db->next_record() )
+			$vals[$db->Record['id_class_gradebook_entries']] = $db->Record['id_class_gradebook_val'];
+
+
+		// build the array of objects to return. create new val objects if they're missing
+		while ( list($user,$namearr) = @each($students) ) {
+			$val = ClassGradebookVal::load( array(
+				'id_classes' => $lcUser->activeClassTaught->id_classes,
+				'username' => $user,
+				'id_class_gradebook_entries' => $entryid
+			) );
+			if ( !is_object($val) ) {
+				$val = new ClassGradebookVal();
+				$val->title = $etitle;
+				$val->set( 'idClassGradebookEntries', $entryid );
+				$val->set( 'username', $user );
+			}
+			$val->title =  $title;
+			$val->idClasses = $lcUser->activeClassTaught->id_classes;
+			$arr[] = $val;
+		}
+
+		return $arr;
+
+	}
+
+
+	/**
+	 * override to ensure good dateCreated and dateModified values
+	 */
+	function save() {
+		$this->comments = stripslashes($this->comments);
+		if ( is_numeric($this->score) ) {
+			$this->score = sprintf('%.2f',$this->score);
+		} else {
+			$this->score = null;
+		}
+
+		if ( $this->_originalScore != $this->score || $this->_originalComments != $this->comments) {
+
+			$msg = "One of your grades has changed, click the following link to view it.
+http://dl.tccd.edu/index.php/classroom/gradebook/id_classes=".$this->idClasses;
+
+/*
+   __FIXME__ THIS NEEDS TO BE CUSTOMIZED TO NOTIFY PEOPLE OF GRADE CHANGES 
+    
+			mail($this->username.'@dl.tccd.edu','Gradebook Value Changed',$msg, "From: ".WEBMASTER_EMAIL);
+*/
+			//mylog("/tmp/email_".$this->username,$msg);
+		} else {
+			//$msg = "originalScore = ".$this->_originalScore."\n";
+			//$msg .= "score = ".$this->score."\n";
+			//$msg .= "originalComments = ".$this->_originalComments."\n";
+			//$msg .= "comments = ".$this->comments."\n";
+			//mylog("/tmp/failed_email_".$this->username,$msg);
+		}
+		$this->set('dateModified',time());
+		if ( $this->isNew() ) {
+			$this->set('dateCreated',time());
+			$this->setPrimaryKey(ClassGradebookValPeer::doInsert($this));
+		} else {
+			ClassGradebookValPeer::doUpdate($this);
+		}
+	}
 }
 
 
 
 class ClassGradebookValPeer extends ClassGradebookValPeerBase {
 
+	/**
+	 * override to find changed comments and score, email student if
+	 * either of those two changed
+	 */
+	function row2Obj($row) {
+		$x = parent::row2Obj($row);
+		$x->_originalComments = $x->comments;
+		$x->_originalScore = sprintf('%.2f',$x->score);
+	return $x;
+	}
 }
 
 ?>

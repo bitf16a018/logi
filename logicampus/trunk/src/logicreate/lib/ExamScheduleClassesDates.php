@@ -294,8 +294,23 @@ class ExamScheduleClassesDatesPeerBase {
 //You can edit this class, but do not change this next line!
 class ExamScheduleClassesDates extends ExamScheduleClassesDatesBase {
 
-
-
+	/**
+	 * __FIXME__ what does this function do?
+	 */
+	function loadClassDates($id_classes) {
+		$db = DB::getHandle();
+		$sql = "SELECT * 
+			FROM `exam_schedule_dates` AS a 
+			RIGHT JOIN exam_schedule_classes_dates AS d 
+			ON d.id_exam_schedule_dates=a.id_exam_schedule_dates 
+			WHERE d.id_classes='$id_classes' and status=3
+			ORDER BY a.date_start";
+		$db->query($sql);
+		while($db->nextRecord() ) {
+			$array[] = ExamScheduleClassesDatesPeer::row2Obj($db->record);
+		}
+		return $array;
+	}
 }
 
 
