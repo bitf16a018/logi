@@ -234,7 +234,31 @@ class AssessmentLogPeerBase {
 //You can edit this class, but do not change this next line!
 class AssessmentLog extends AssessmentLogBase {
 
+	# Total number of log entries the user has for the assessment
+	var $logCount = '';
 
+	function AssessmentLog() {
+
+		$this->startDate = time();
+		$this->endDate = time()+3600;
+
+	}
+
+
+	function loadAll($assessmentId, $username, $id_classes)
+	{
+		$logs = AssessmentLogPeer::doSelect("id_student='".$username."' AND assessment_id='$assessmentId' AND id_classes='$id_classes'");
+		return $logs;
+	}
+
+	function updateTotalCount()
+	{
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		 $sql = "select count(*) as count from assessment_log where id_student='".$this->idStudent."' AND assessment_id='".$this->assessmentId."' AND id_classes='".$this->idClasses."'";
+		$db->queryOne($sql);
+		$this->logCount = $db->Record['count'];
+	}
 
 }
 

@@ -79,8 +79,6 @@ class LC_Class {
 		$db->query($sql);
 		$ret = array();
 		while ($db->nextRecord() ) {
-			debug($db->record);
-
 			$temp = PersistantObject::createFromArray('classObj',$db->record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 

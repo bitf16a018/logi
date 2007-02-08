@@ -73,21 +73,21 @@ class DB {
 
 		// if a connection has already been made and in the handles array
 		// get it out
-        if (@is_object($handles[$dsn]) ) {
+		if (@is_object($handles[$dsn]) ) {
 			$x = $handles[$dsn];
-        } else {
+		} else {
 			//make sure the driver is loaded
 			$driver = $_dsn[$dsn]['driver'];
-       			include_once(LIB_PATH.'LC_'.$driver.'.php');
+			include_once(LIB_PATH.'LC_'.$driver.'.php');
 			// and make a new one
-            $x = new $driver();
+		    $x = new $driver();
 			$x->host = $_dsn[$dsn]['host'];
 			$x->database = $_dsn[$dsn]['database'];
 			$x->user = $_dsn[$dsn]['user'];
 			$x->password = $_dsn[$dsn]['password'];
 			$x->persistent = $_dsn[$dsn]['persistent'];
-		    	$x->connect(); 
-		    	$handles[$dsn] = $x;
+			$x->connect(); 
+			$handles[$dsn] = $x;
 		}
 
 		//return by value (copy) to make sure
