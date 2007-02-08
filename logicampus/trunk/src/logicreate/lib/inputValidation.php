@@ -23,4 +23,13 @@ function validateLength($string,$minlength="0",$maxlength="255"){
 	return 0;	
 }
 
+function inputCleanString($string) {
+
+	if (ini_set('magic_quotes_gqc') ) {
+		$string = stripslashes($string);
+	}
+	$string = htmlentities($string,ENT_QUOTES);
+
+return $string;
+}
 ?>
