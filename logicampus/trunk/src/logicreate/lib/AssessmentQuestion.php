@@ -273,8 +273,139 @@ class AssessmentQuestionPeerBase {
 //You can edit this class, but do not change this next line!
 class AssessmentQuestion extends AssessmentQuestionBase {
 
+	var $allowMultiple = false;
+	var $questionPoints = 5;
+
+	function setQuestionText($t) {
+		$this->questionText = $t;
+	}
 
 
+	/**
+	 * this is needed because each question talks to the
+	 * template differently.  Squeezing all these logic
+	 * if's into one code base is getting confusing
+	 */
+	function resetLabels($postvars) {
+		$this->questionChoices = array();
+
+		while (list ($k,$v) = each($postvars['labels']) ) {
+			if ( trim($v) == '' ) {
+				continue;
+			}
+
+			$qc = new AssessmentChoice();
+			$qc->label = stripslashes($v);
+			$qc->correct = ($postvars['correct'][$k] == 'On') ? true:false;
+			$this->questionChoices[] = $qc;
+		}
+	}
+
+
+
+	/**
+	 * Sometimes we only want to change the correct choice
+	 * i.e. when editing an in-progress test
+	 */
+	function setCorrectChoice($postvars) {
+		while (list ($k,$v) = each($postvars['labels']) ) {
+			while (list ($kk,$vv) = each($this->questionChoices) ) {
+				if ($vv->label ==  $v) {
+					$this->questionChoices[$kk]->correct = true;
+				} else {
+					$this->questionChoices[$kk]->correct = false;
+				}
+			}
+		}
+	}
+
+
+	function save() {
+
+		$this->questionChoices = base64_encode(serialize($this->questionChoices));
+		$this->questionInput = base64_encode(serialize($this->questionInput));
+
+		if ( $this->isNew() ) {
+			$this->setPrimaryKey(AssessmentQuestionPeer::doInsert($this));
+		} else {
+			AssessmentQuestionPeer::doUpdate($this);
+		}
+		$this->questionChoices = unserialize(base64_decode($this->questionChoices));
+		$this->questionInput = unserialize(base64_decode($this->questionInput));
+
+	}
+
+
+	function toHTML() {
+
+		$ret .= "<FIELDSET>\n";
+		$ret .= "<LEGEND>".$this->questionDisplay ."</LEGEND>\n";
+		$ret .= "<p>".$this->questionText."</p>\n";
+		$ret .= $this->questionInput->render();
+		$ret .= "</FIELDSET>\n";
+		return $ret;
+	}
+
+
+	/*
+	 * We overrode this load method for classes security
+	 * If you use it, you HAVE to pass in the class_id
+	 */
+	function load($key, $id_classes) {
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$sql = "select * from assessment_question q
+			left join assessment as a on a.assessment_id=q.assessment_id 
+			where a.class_id='$id_classes' AND q.assessment_question_id='$key'";
+		if ($db->queryOne($sql) ) {
+			$superObj = AssessmentQuestionPeer::row2Obj($db->Record);
+		}
+
+		switch($superObj->questionType) {
+			case QUESTION_TRUEFALSE:
+				$subObj = new AssessmentQuestionTrueFalse();
+				break;
+			case QUESTION_MCHOICE:
+				$subObj = new AssessmentQuestionMChoice();
+				break;
+			case QUESTION_MANSWER:
+				$subObj = new AssessmentQuestionMAnswer();
+				break;
+			case QUESTION_MATCHING:
+				$subObj = new AssessmentQuestionMatching();
+				break;
+			case QUESTION_FILLINBLANK:
+				$subObj = new AssessmentQuestionFill();
+				break;
+			case QUESTION_ESSAY:
+				$subObj = new AssessmentQuestionEssay();
+				break;
+		}
+
+
+
+		if( $superObj->assessmentQuestionId )
+			$subObj->_new = false;
+		else
+			$subObj->_new = true;
+
+		$subObj->_modified = false;
+		$subObj->assessmentQuestionId = $superObj->assessmentQuestionId;
+		$subObj->assessmentId = $superObj->assessmentId;
+		$subObj->questionType = $superObj->questionType;
+		$subObj->questionSort = $superObj->questionSort;
+		$subObj->questionDisplay = $superObj->questionDisplay;
+		$subObj->questionText =  $superObj->questionText;
+		$subObj->questionPoints = $superObj->questionPoints;
+		$subObj->questionChoices = $superObj->questionChoices;
+		$subObj->fileHash = $superObj->fileHash;
+
+		// Adam added this here.. it seemed necessary
+		//$subObj->questionChoices = unserialize(base64_decode($subObj->questionChoices));
+		// Commented out by Keith since this needs to be in row2Obj above
+
+	return $subObj;
+	}
 }
 
 

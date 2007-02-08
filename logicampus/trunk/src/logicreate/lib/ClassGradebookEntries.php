@@ -267,8 +267,40 @@ class ClassGradebookEntriesPeerBase {
 //You can edit this class, but do not change this next line!
 class ClassGradebookEntries extends ClassGradebookEntriesBase {
 
+	/**
+	 * Update associated assignments if neccessary
+	 */
+	function updateAssignmentGradeForStudent($val,$id_student) {
+		if ( $this->assignmentId < 1) {
+			//we're not tied to an assignment
+			return false;
+		}
+
+		if ( strlen($id_student) < 1) {
+			//something is wrong
+			// can't guarantee atomic updates
+			return false;
+		}
+
+		$db = DB::getHandle();
+		$db->query("UPDATE class_assignments_grades
+			SET grade = '".$val->score."',
+			comments = '".addslashes($val->comments)."'
+			WHERE id_class_assignments = '".$this->assignmentId."'
+			AND id_student = '".$id_student."'");
 
 
+		if (! $db->getNumRows() ) {
+			$db->query("INSERT INTO class_assignments_grades
+			(comments,grade,id_class_assignments,id_student)
+			VALUES ('".addslashes($val->comments)."',
+				".$val->score.",
+				".$this->assignmentId.",
+				'".$id_student."')");
+		}
+
+		return true;
+	}
 }
 
 

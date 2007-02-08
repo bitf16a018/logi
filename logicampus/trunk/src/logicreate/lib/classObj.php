@@ -197,11 +197,7 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
-#			debug($temp);
 		}
-#		$x = ob_get_contents();
-#		ob_end_clean();
-#		mail("michael@tapinternet.com","Classes for $uname",$x,"From: ".WEBMASTER_EMAIL);
 	return $ret;
 	}
 
@@ -270,17 +266,12 @@ WHERE css.id_student = '$uname'
 
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
-#		ob_start();
 		while ($db->next_record() ) {
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
-#			debug($temp);
 		}
-#		$x = ob_get_contents();
-#		ob_end_clean();
-#		mail("michael@tapinternet.com","Classes for $uname",$x,"From: ".WEBMASTER_EMAIL);
 	return $ret;
 	}
 	/**
