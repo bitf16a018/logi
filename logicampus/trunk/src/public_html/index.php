@@ -36,7 +36,7 @@ $execution_time=get_microtime();
 		exit();
 	}
 	if (!@include('settings.php')) {
-		if (!@include('settings.complete.php')){
+		if (!@include('settings.simple.php')){
 			include('install.php');
 			exit();
 		}
