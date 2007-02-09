@@ -15,47 +15,57 @@ class contactStudents extends StudentService
 	);
 	
 	
-	function run( &$db, &$u, &$lc, &$t) 
-	{
+	function run( &$db, &$u, &$lc, &$t) {
 		$lc->templateName = "contactStudents_main";
 //auto-comment		$lc->templateStyle = 'private';
 		
 		if (count($t['students']) == false)
 		{	
 			$sql = '
-			SELECT DISTINCT D.firstname, D.lastname, D.username, Z.email
+			SELECT DISTINCT D.firstname, D.lastname, D.username, D.photo, Z.email
 			
 			FROM classes as A
 			
-				INNER JOIN class_sections AS B 
-					ON A.id_classes = B.id_classes
-			
-				INNER JOIN class_student_sections AS C 
-					ON B.sectionNumber = C.sectionNumber
-			
+				INNER JOIN class_enrollment AS C 
+					ON A.id_classes = C.class_id
+
 				INNER JOIN lcUsers as Z
-					ON C.id_student = Z.username
-			
+					ON C.student_id = Z.pkey
+
 				INNER JOIN profile AS D 
 					ON Z.username = D.username
 
 			WHERE
 				( 
 				A.id_classes = '.$u->activeClassTaken->id_classes.' AND 
-				B.id_classes = '.$u->activeClassTaken->id_classes.'	AND
 				A.id_semesters = C.semester_id AND
-				C.active=1			
+				C.active=1
 				)
 				ORDER BY D.lastname ASC
 			';
 			
 			$db->query($sql);
 			
-			while ($db->next_record())
-			{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
+			while ($db->next_record()) {
+				$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
+
+				$photo = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
+					? 'photos/'.$db->Record['photo']
+					: 'noimage.png';
+
+				$t['students'][$db->Record['username']] .= '<a href="'.appurl('users/view/'.$db->Record['username']).'">'
+				.'<img align="middle" border="0" src="'.IMAGES_URL.$photo.'" alt="'
+				.$db->Record['lastname'].', '.$db->Record['firstname'].'" /></a>';
 			}
 
+		if (count($tbl))
+			$t['table'] = htmlTable( $tbl, 4, '100%', '', 5, 2, 0, 'center' );
+		else
+			$t['table'] = '<i>Sorry, it seems that there aren\'t any students enrolled in this class. If you believe this not to be true, please contact the help desk.</i>';
+
+
 		}
+
 
 		if (count($t['students']) == 0)
 		{
@@ -78,19 +88,16 @@ class contactStudents extends StudentService
 			INNER JOIN class_sections AS B 
 				ON A.id_classes = B.id_classes
 		
-			INNER JOIN class_student_sections AS C 
-				ON B.sectionNumber = C.sectionNumber
-		
 			INNER JOIN lcUsers as Z
-				ON C.id_student = Z.username
-		
+				ON C.student_id = Z.pkey
+	
 			INNER JOIN profile AS D 
 				ON Z.username = D.username
 
 		WHERE
 			( 
 			A.id_classes = '.$u->activeClassTaken->id_classes.' AND 
-			B.id_classes = '.$u->activeClassTaken->id_classes.'	AND
+			A.id_semesters = C.semester_id AND
 			C.active=1
 			)
 			ORDER BY D.lastname
