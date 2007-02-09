@@ -61,14 +61,14 @@ down and press "Go".')?>
 						Overview
 						<ul>
 							<li>Enrollment: <?= $t['classEnrollmentStats'][$class_record['id_classes']];?> students</li>
-							<li>Gradebook: 0 entries</li>
+							<li>Gradebook: <?= $t['classEntriesStats'][$class_record['id_classes']];?> entries</li>
 						</ul>
 					</td>
 					<td colspan="2" valign="top">
 						Upcoming in the next 5 days
 						<ul>
-							<li>Tests: 0 students</li>
-							<li>Assignments: 0 entries</li>
+							<li>Tests: <?= $t['classAssessmentsStats'][$class_record['id_classes']];?> tests</li>
+							<li>Assignments: <?= $t['classAssignmentsStats'][$class_record['id_classes']];?> assignments</li>
 						</ul>
 					</td>
 				</tr>

@@ -56,7 +56,11 @@ class users extends FacultyService {
 		foreach ($classEnrollment->classEnrollmentDos as $enrollmentDo) {
 			$userIdList .= $enrollmentDo->get('studentId').',';
 		}
-		$userIdList = substr($userIdList,0,-1);
+		if ( strlen($userIdList) ) {
+			$userIdList = substr($userIdList,0,-1);
+		} else {
+			$userIdList = 0;
+		}
 
 		$sql = 'SELECT B.pkey, B.username, CONCAT(lastname,", ", firstname," (",A.username,")") as fullname
 		FROM lcUsers AS B

@@ -58,6 +58,34 @@ class classmgr extends FacultyService {
 					class_id='.$classObj->id_classes);
 			$db->nextRecord();
 			$t['classEnrollmentStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_enrollment']);
+
+			$db->query('
+				SELECT count(id_class_gradebook_entries) as total_entries
+				FROM class_gradebook_entries
+				WHERE
+					id_classes='.$classObj->id_classes);
+			$db->nextRecord();
+			$t['classEntriesStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_entries']);
+
+
+			$db->query('
+				SELECT count(assessment_id) as total_assessments
+				FROM assessment
+				WHERE
+					class_id='.$classObj->id_classes.'
+					AND date_available >= '.(time()+86400*5));
+			$db->nextRecord();
+			$t['classAssessmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assessments']);
+
+			$db->query('
+				SELECT count(id_class_assignments) as total_assignments
+				FROM class_assignments
+				WHERE
+					id_classes='.$classObj->id_classes.'
+					AND activeDate >= '.(time()+86400*5));
+			$db->nextRecord();
+			$t['classAssignmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assignments']);
+
 		}
 	}
 }
