@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/php4
 <?
 //STEP 1: parse arguments
 $argv = $_SERVER['argv'];

@@ -182,7 +182,7 @@
 	<copy file="${src}/defines.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/defines.template.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/settings.advanced.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/settings.complete.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/settings.simple.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/first_run.php" todir="${build}/public_html/" filtering="true"/>
 
 
