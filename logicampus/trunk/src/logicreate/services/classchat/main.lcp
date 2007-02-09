@@ -20,10 +20,12 @@ class ClassChat extends StudentService {
 	var $_immediatePost = false;
 	var $_allowURL = true;
 	var $initialHistory = 120;	//number of seconds to show upon first login
+	var $applinks = array();
+	var $navlinks = array();
 
-    var $inactivelinks = array(
-			'Chat'
-		);
+	var $inactivelinks = array(
+		'Chat'
+	);
 
 	function ClassChat() {
 		parent::StudentService();
@@ -400,6 +402,34 @@ if ($chatstyle=="") { $chatstyle="2"; }
 		$this->viewQRun($db,$u,$lc,$t);
 		
 	}
+
+
+	/**
+	 * these are the same for all pages
+	 */
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Classroom Home') => '%classroom/details/',
+		lct('Announcements') => '%classroom/announcements/',
+		lct('Assessments') => '%classroom/assessments/',
+		lct('Assignments') => '%classroom/assignments/',
+		lct('Calendar') => '%classroom/classCalendar/',
+		lct('Chat') => '%classchat/',
+		lct('Classmates') => '%classroom/classmates/',
+		lct('Contact Classmates') => '%classroom/contactStudents/',
+		lct('Discussion Board') => '%classforums/',
+		lct('FAQs') => '%classroom/faq/',
+		lct('Faculty Profile') => '%classroom/facultyProfile/',
+		lct('Gradebook') => '%classroom/gradebook/',
+		lct('Lessons') => '%classroom/lessons/',
+		lct('Presentations') => '%classroom/presentations/',
+		lct('Syllabus') => '%classroom/syllabus/',
+		lct('Who\'s Online') => '%classroom/online/',
+		lct('Webliography') => '%classroom/webliography/',
+		lct('Dictionary / Thesaurus') =>'%classroom/details/event=showtools'
+		);
+	}
+
 
 
 }
