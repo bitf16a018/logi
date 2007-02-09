@@ -27,9 +27,7 @@ class facultyProfile extends StudentService {
 	function run(&$db,&$u,&$lc,&$t) {
 
 		$this->inactivelinks[] = 'Faculty Profile';
-#		$this->sectionTitle = 'User Profile for '.$t['user']['title'].' '
-#			.$t['user']['firstname'].' '.$t['user']['lastname'];
-		
+
 		$lc->templateName = 'facultyProfile_main';
 
 		$name = $t['username'] = $u->activeClassTaken->facultyId;
@@ -54,6 +52,8 @@ class facultyProfile extends StudentService {
 		$t['admin'] = @in_array('admin', $u->groups);
 
 		$t['workaddy'] = addressByLocation( $t['user']['campusLocation'] );
+
+		$t['showPm'] = LcSettings::isModuleOn('MODULE_PRIVATE_MESSAGING');
 
 	}
 }

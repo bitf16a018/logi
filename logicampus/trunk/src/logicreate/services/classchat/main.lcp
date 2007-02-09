@@ -419,7 +419,6 @@ if ($chatstyle=="") { $chatstyle="2"; }
 		lct('Contact Classmates') => '%classroom/contactStudents/',
 		lct('Discussion Board') => '%classforums/',
 		lct('FAQs') => '%classroom/faq/',
-		lct('Faculty Profile') => '%classroom/facultyProfile/',
 		lct('Gradebook') => '%classroom/gradebook/',
 		lct('Lessons') => '%classroom/lessons/',
 		lct('Presentations') => '%classroom/presentations/',
