@@ -220,18 +220,6 @@ n']['classes']));
 	}
 
 
-	function addRun(&$db,&$u,&$lc,&$t) {
-		$semesterId = $u->sessionvars['enrollmentSemesterId'];
-
-		$name = addslashes(stripslashes($lc->postvars['username']));
-		$sectionNumber = (int)$lc->postvars['id'];
-		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
-		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
-		$lc->templateName = 'users_updateEnrollment';
-		$this->run($db,$u,$lc,$t);
-	}
-
-
 	function activateRun (&$db,&$u,&$lc,&$t) {
 		$studentId = (int)$lc->getvars['student_id'];
 		$sectionNumber = (int)$lc->getvars['section'];
