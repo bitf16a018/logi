@@ -48,7 +48,7 @@ class classmgr extends FacultyService {
 		$t['form'] = $f->ToHTML();
 
 
-		$t['classes'] = LC_Class::getActiveClassesForFaculty($u->username);
+		$t['classes'] = LcClass::getActiveClassesForFaculty($u->username);
 
 		foreach ($t['classes'] as $classObj) {
 			$db->query('

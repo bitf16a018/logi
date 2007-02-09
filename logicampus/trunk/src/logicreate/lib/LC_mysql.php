@@ -58,6 +58,7 @@ class mysql extends DB {
 				//print_r($this);
 				//die($this->queryString);
 			}
+			lcError::throwError(9,$this->errorMessage);
 			return false;
 		}
 		if (is_resource($resSet)) {

@@ -100,13 +100,13 @@ class Service {
 	//__FIXME__
 	function buildAppLinks() {
 
-		if ( !is_array($this->navlinks) ) return;
+		if ( !is_array($this->applinks) ) return;
 		$newlinks = array();
-		while ( list ($k,$v) = each($this->navlinks) ) {
+		while ( list ($k,$v) = each($this->applinks) ) {
 			$newlinks[ lct($k) ] = $v;
 		}
 
-		$this->navlinks = $newlinks;
+		$this->applinks = $newlinks;
 	}
 }
 
@@ -853,7 +853,6 @@ function facultyAuth(&$lc,&$u) {
         }
 
 
-
 	if ($u->activeClassTaught->id_classes != '') {
 		return true;
 	}
@@ -861,6 +860,8 @@ function facultyAuth(&$lc,&$u) {
 	if ($u->activeClassTaught->id_classes != '') {
 		return true;
 	}
+
+	if ($u->userType == USERTYPE_FACULTY) { return true; }
 
 	$lcTemplate['reason'] = 'It seems that you do not have a class that you teach loaded in memory.';
 	ob_end_clean();

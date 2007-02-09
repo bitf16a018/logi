@@ -62,17 +62,25 @@ class enrollment extends RegAuth {
 		$this->sectionTitle .= ' for <u><a style="font-size: 100%;">'.$name.'</a></u>';
 		$t['username'] = $name;
 
-      	$f = new SiteForm();
-        $f->getForm('semester', array('semester'=>$u->sessionvars['administratio
-n']['classes']));
-        $f->action = modurl("enrollment/main/username=$name");
-        $t['form'] = $f->ToHTML();
 
-		# Take active semesterId out of sessionvar
-		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+		//only show semesters if simple mode is off
+		if (LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')) {
 
-// get classes taken
-		$classes = classObj::getAllClassesTaken($name, $semesterId);
+			$f = new SiteForm();
+			$f->getForm('semester', array('semester'=>$u->sessionvars['administratio
+		n']['classes']));
+			$f->action = modurl("enrollment/main/username=$name");
+			$t['form'] = $f->ToHTML();
+
+			# Take active semesterId out of sessionvar
+			$semesterId = $u->sessionvars['enrollmentSemesterId'];
+			// get classes taken
+			$classes = classObj::getAllClassesTaken($name, $semesterId);
+		} else {
+			// get classes taken
+			$classes = classObj::getAllClassesTaken($name);
+		}
+
 		$d = new datagrid('administration','enrollment');
 		$d->sortColumns = array("courseNumber",'facultyId');
 		$d->headers = array(
@@ -90,7 +98,7 @@ n']['classes']));
 			'semesterID'=>'Semester',
 			'courseNumber'=>'Course Number'
 			);
-		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>">Drop</a>',"del");
+		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$id_classes);?>">Drop</a>',"del");
 		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
 		$d->setRows($classes);
 		$d->ignore = array (
@@ -110,17 +118,15 @@ n']['classes']));
 		$t['classes'] = $d->toHTML();
 		$lc->templateName = 'enrollment_main';
 		
-		$db->query("select classes.*, courses.* from classes, courses 
-				WHERE classes.id_semesters=$semesterId 
-				AND classes.id_courses = courses.id_courses 
-				order by courses.courseFamily, courses.courseNumber, courseName");
-		while($db->nextRecord()) {
-			$x = explode("\n",$db->record['sectionNumbers']);
+
+		$classArray = LcClass::getAvailableClasses();
+		foreach ($classArray as $idx => $classObj) {
+			$x = explode("\n",$classObj->sectionNumbers);
 			foreach($x as $k=>$v) { 
-				$optId = sprintf('%d_%d',$db->record['id_classes'],$v);
-				$c[$optId] = $db->record['courseFamily']." ".
-				$db->record['courseNumber']." - ".$db->record['courseName']." - ".
-				" ($v) - ".$db->record['facultyId'];
+				$optId = sprintf('%d_%d',$classObj->id_classes,$v);
+				$c[$optId] = $classObj->courseFamily." ".
+				$classObj->courseNumber." - ".$classObj->courseName." - ".
+				" ($v) - ".$classObj->facultyId;
 			}
 		}
 		$t['courses'] = makeOptions($c);
@@ -145,7 +151,7 @@ n']['classes']));
 		$this->run($db,$u,$lc,$t);
 	}
 
-	function activaterun (&$db,&$u,&$lc,&$t) {
+	function activateRun (&$db,&$u,&$lc,&$t) {
 		$name = addslashes(stripslashes($lc->getvars['username']));
 		$sectionNumber = (int)$lc->getvars['id'];
 		$active= (int)$lc->getvars['active'];
@@ -156,14 +162,17 @@ n']['classes']));
 	}
 
 
-	function removerun (&$db,&$u,&$lc,&$t) {
-// only dealing with current semester right now
-// 
-		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
-		$semesterId = $db->Record['id_semesters'];
-		$name = addslashes(stripslashes($lc->getvars['username']));
-		$sectionNumber = (int)$lc->getvars['id'];
-		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+	function removeRun (&$db,&$u,&$lc,&$t) {
+		// only dealing with current semester right now
+		// 
+
+		$classId = (int)$lc->getvars['id'];
+		$classEnrollment = new lcClassEnrollment($classId);
+
+		$classEnrollment->removeStudent($u->userId);
+
+
+//		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
 		updateSessionVars($db,$u);
 
 		$lc->templateName = 'enrollment_main';

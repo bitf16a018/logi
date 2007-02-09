@@ -1,7 +1,51 @@
 <?php
 
 
-class LC_Class {
+class lcClass {
+
+
+	/**
+	 * returns an array of classes 
+	 * In simple mode this will return all classes regardless of semester.
+	 * In full mode this will return all classes for the current semester.
+	 * If passed a semseter, it will return classes only for that semester.
+	 *
+	 * @static
+	 */
+	function getAvailableClasses($semesterId=0) {
+
+		$db = DB::getHandle();
+
+
+		$sql = "SELECT
+		cs.*, semesters.semesterID, courses.courseName 
+
+		FROM classes as cs
+		LEFT JOIN courses ON cs.id_courses = courses.id_courses
+		LEFT JOIN semesters ON cs.id_semesters = semesters.id_semesters
+		";
+
+
+		if(LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')){
+			$sql .="
+			and semesters.dateAccountActivation < ".DB::getFuncName('NOW()')."
+			and semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
+			";
+		}
+
+		$sql .= "
+		ORDER BY courses.courseFamily, courses.courseNumber, courseName";
+
+		$db->query($sql);
+		while ($db->nextRecord() ) {
+
+			$temp = PersistantObject::createFromArray('classObj',$db->record);
+			$temp->_dsn = $dsn;
+			$temp->__loaded = true; 
+			$ret[] = $temp;
+		}
+		return $ret;
+	}
 
 
 	/**
@@ -66,7 +110,8 @@ class LC_Class {
 		LEFT JOIN lcUsers AS U ON U.pkey = E.student_id
 
 		WHERE U.username = '$studentUsername'
-		AND E.active = 1";
+		AND E.active = 1
+		AND class_sections.id_classes = E.class_id";
 
 
 		if(LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')){

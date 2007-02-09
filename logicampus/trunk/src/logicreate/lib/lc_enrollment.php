@@ -12,6 +12,7 @@ class lcClassEnrollment {
 	var $semesterId = -1;
 	var $classEnrollmentDos= array();
 
+
 	function lcClassEnrollment($classId=0, $semesterId=-1) {
 		$this->classId = (int)$classId;
 		$this->semesterId = (int)$semesterId;
@@ -22,6 +23,7 @@ class lcClassEnrollment {
 		}
 	}
 
+
 	function save() {
 		foreach ($this->classEnrollmentDos as $do) {
 			if ($do->isNew() || $do->isModified()) {
@@ -29,6 +31,7 @@ class lcClassEnrollment {
 			}
 		}
 	}
+
 
 	function addStudent($studentId) {
 		$studentId = (int)$studentId;
@@ -47,6 +50,18 @@ class lcClassEnrollment {
 		}
 		$this->classEnrollmentDos[] = $enrollmentDo;
 		return true;
+	}
+
+
+	function removeStudent($studentId) {
+		$studentId = (int)$studentId;
+		foreach ($this->classEnrollmentDos as $do) {
+			if ($do->get('studentId') ==  $studentId) {
+				$do->delete();
+				return true;
+			}
+		}
+		return false;
 	}
 
 

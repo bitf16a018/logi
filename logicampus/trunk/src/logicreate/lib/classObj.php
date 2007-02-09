@@ -189,7 +189,7 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		 */
 
-		$ret = LC_Class::getActiveClassesForStudent($uname);
+		$ret = LcClass::getActiveClassesForStudent($uname);
 
 		while ($db->next_record() ) {
 			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
@@ -205,7 +205,7 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 	 * get all classes someone is taking, regardless of active/not
 	 * or semester dates
 	 */
-	function getAllClassesTaken($uname, $semesterId) {
+	function getAllClassesTaken($uname, $semesterId=0) {
 		$ret = array();
 		$db = DB::getHandle();
 		$sql = "SELECT
@@ -213,17 +213,21 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 			profile_faculty.title, profile.firstname, profile.lastname
                         FROM class_enrollment as css
                         LEFT JOIN classes ON css.class_id = classes.id_classes
-                        LEFT JOIN class_sections ON css.section_number = class_sections.sectionNumber
+                        LEFT JOIN class_sections ON css.class_id = class_sections.id_classes
                         LEFT JOIN courses ON classes.id_courses = courses.id_courses
 			LEFT JOIN semesters ON classes.id_semesters = semesters.id_semesters
 			LEFT JOIN profile on classes.facultyId=profile.username
 			LEFT JOIN profile_faculty on profile_faculty.username=profile.username
 			LEFT JOIN lcUsers on css.student_id=lcUsers.pkey
 
-                        WHERE lcUsers.username = '$uname'
+			WHERE lcUsers.username = '$uname'";
+
+		if ($semesterId > 0 ) {
+			$sql .= "
 			and (css.semester_id = $semesterId OR css.semester_id = 0)
-			and classes.id_semesters = $semesterId
-		";		
+			and classes.id_semesters = $semesterId";		
+		}
+
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		while ($db->next_record() ) {
@@ -288,7 +292,7 @@ WHERE css.id_student = '$uname'
 Removed this, if profile_faculty.title was null CONCAT just nulls it all out.. the one above checks for null
 CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as facultyName
 **/
-		$ret = LC_Class::getActiveClassesForFaculty($uname);
+		$ret = LcClass::getActiveClassesForFaculty($uname);
 
 		// extra faculty
 		
