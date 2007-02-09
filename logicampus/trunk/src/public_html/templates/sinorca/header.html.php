@@ -137,6 +137,14 @@
 
 
       <div class="lighterBackground">
+        <p class="sideBarTitle">&nbsp;</p>
+      </div>
+
+      <div>
+        <p class="sideBarTitle">&nbsp;</p>
+      </div>
+<!--
+      <div class="lighterBackground">
         <p class="sideBarTitle">Alternative stylesheet</p>
         <span class="sideBarText">
           Sinorca contains an alternative stylesheet that renders this side bar differently.
@@ -149,6 +157,8 @@
         </span>
       </div>
     
+-->
+<!--
       <div>
         <p class="sideBarTitle">Validation</p>
         <span class="sideBarText">
@@ -156,6 +166,7 @@
           <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> of this page.
         </span>
       </div>
+-->
     </div>
 
     <!-- ##### Main Copy ##### -->
