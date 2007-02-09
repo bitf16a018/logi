@@ -34,7 +34,7 @@ print_r($results);
 <p>
 Once you are done creating the database, you can try to install LogiCampus with the following button.
 
-<form method="GET" style="padding:0px;margin:0px;" action="<?php echo $PHP_SELF;?>">
+<form method="GET" style="padding:0px;margin:0px;" action="<?php echo BASE_URL;?>">
 <input type="submit" value="Attempt Installation"/>
 <input type="hidden" name="install" value="1"/>
 </form>

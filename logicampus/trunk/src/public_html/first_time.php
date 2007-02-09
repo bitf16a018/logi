@@ -54,7 +54,7 @@ if ($results['connect'] ) {
 
 function tryToMakeTables(&$gdb) {
 
-	for ($x=1; $x <= 19; $x++) {
+	for ($x=1; $x <= 20; $x++) {
 		include('install/schema_'.sprintf('%02d',$x).'.php');
 		if (! is_array($installTableSchemas) ) {
 			return false;
@@ -62,6 +62,7 @@ function tryToMakeTables(&$gdb) {
 		foreach ($installTableSchemas as $schema) {
 			if (trim($schema) == '') { continue;}
 			if (!$gdb->query($schema)) {
+				echo "query failed. ($x)\n";
 				print_r($schema);
 				exit();
 				return false;
@@ -76,6 +77,7 @@ function tryToMakeTables(&$gdb) {
 		foreach ($installTableSchemas as $schema) {
 			if (trim($schema) == '') { continue;}
 			if (!$gdb->query($schema)) {
+				echo "query 2 failed.\n";
 				print_r($schema);
 				exit();
 				return false;

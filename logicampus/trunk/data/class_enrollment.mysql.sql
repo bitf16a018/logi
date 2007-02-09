@@ -18,8 +18,8 @@ CREATE TABLE `class_enrollment` (
 	PRIMARY KEY (class_enrollment_id) 
 );
 
-CREATE INDEX student_idx ON class_enrollment (student_id);  
-CREATE INDEX semester_idx ON class_enrollment (semester_id);  
-CREATE INDEX class_idx ON class_enrollment (class_id);  
+CREATE INDEX student_idx ON class_enrollment (student_id);
+CREATE INDEX semester_idx ON class_enrollment (semester_id);
+CREATE INDEX class_idx ON class_enrollment (class_id);
 CREATE INDEX active_idx ON class_enrollment (active);
 

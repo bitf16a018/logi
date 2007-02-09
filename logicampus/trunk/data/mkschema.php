@@ -49,6 +49,7 @@ while ($entry =  $d->read() ) {
 }
 $d->close();
 
+
 foreach ($filesToProcess as $service => $file) {
 	$setupFile = trim(file_get_contents($file));
 	$schemas[$service] = explode(";\n",$setupFile);
