@@ -7,8 +7,9 @@ foreach ($t['error'] as $num=>$k){
 ?><?=$k;?><BR><?php }
 }	?>
 </span>
+
 <table width="95%" border="0" cellspacing="3" cellpadding="4">
-	<form action="" method="POST" enctype="application/x-www-form-urlencoded">
+	<form method="POST" enctype="application/x-www-form-urlencoded" action="<?=appurl('classmgr/teacherclass/event=saveClass');?>">
 	<tr><th colspan="2" valign="top" class="">Complete the following fields to add a course to the site.</th></tr>
 	<tr><td valign="top" width="33%" class="">*Course Name<br/><i>Example:  Introduction to American Literature</i></td>
 		<td valign="top" class="">

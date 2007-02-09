@@ -11,14 +11,17 @@ include_once(LIB_PATH.'SiteForms.php');
 
 class teacherclass extends FacultyService {
 
-var $presentor = "htmlPresentation";
+	var $presentor = "htmlPresentation";
+	var $applinks = array();
+	var $navlinks = array();
+
 
 function run($db,&$u,&$lc,&$t){
 	
 	$lc->templateName = 'teacherclass_list';
 
 	$this->sectionTitle = 'lists Classes';
-	$this->inactivelinks = array( 'lists Classes' );
+	$this->applinks = array();
 
 ///////////////////////////////////////////////////////////////
 
@@ -287,8 +290,9 @@ function makeClass($db, &$u, &$lc, &$t){
 	 */
 	function newClassRun($db,&$u,&$lc,&$t){
 		$this->sectionTitle = 'Add a Class';
-		$this->inactivelinks = array( 'Add a Class' );
 
+		$this->applinks = array();
+		$this->navlinks = array();
 		$lc->postvars['semesterYear']['month'] = 1;
 		$lc->postvars['semesterYear']['day'] = 1;
 
@@ -297,7 +301,7 @@ function makeClass($db, &$u, &$lc, &$t){
 
 		$t['endDateValue'] = time()+ (86400*365); //one year form now
 		$t['endDateName'] = 'enddate';
-		$lc->templateName = 'teacherclass_add';
+		$lc->templateName = 'teacherclass_newClass';
 	}
 
 
@@ -446,6 +450,20 @@ function deleteRun($db,&$u,&$lc,&$t){
 	$this->run($db, $u, $lc, $t);
 }
 
+
+	/**
+	 *  This service is special, you need to be able to
+	 * access it without any classes. so kill the applinks and navlinks.
+	 */
+	function buildNavLinks() {
+	}
+
+	/**
+	 *  This service is special, you need to be able to
+	 * access it without any classes. so kill the applinks and navlinks.
+	 */
+	function buildAppLinks() {
+	}
 
 }
 
