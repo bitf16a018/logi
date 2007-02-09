@@ -33,7 +33,6 @@ class enrollment extends RegAuth {
 	 * and give option to add to new classes
 	 *
 	 */
-
 	function run (&$db,&$u,&$lc,&$t) {
 
 		# Update active semester and store in user session
@@ -81,22 +80,19 @@ class enrollment extends RegAuth {
 			$classes = classObj::getAllClassesTaken($name);
 		}
 
-		$d = new datagrid('administration','enrollment');
-		$d->sortColumns = array("courseNumber",'facultyId');
+		$d = new datagrid('users','enrollment');
 		$d->headers = array(
 			"del"=>" ", 
 			"sectionNumber"=>"Section",
-			"facultyName"=>"Faculty", 
-			"courseName"=>"Course name",
-			"courseFamilyNumber"=>"Course",
-			"courseFamily"=>"Family",
+			"firstname"=>"First Name", 
+			"lastname"=>"Last Name", 
+			"courseName"=>"Course Name",
+			"courseFamily"=>"Course Family",
+			'courseNumber'=>'Course Number',
 			"classType"=>"Type",
-			"id_classes"=>"Class ID",
-			"id_semesters"=>"Semester ID",
 			"facultyId"=>'Facutly ID',
 			"id_student"=>"Student ID",
-			'semesterID'=>'Semester',
-			'courseNumber'=>'Course Number'
+			'semesterID'=>'Semester'
 			);
 		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$id_classes);?>">Drop</a>',"del");
 		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
@@ -111,7 +107,14 @@ class enrollment extends RegAuth {
 				'active',
 				'dateWithdrawn',
 				'noexam',
+				'id_semesters',
+				'id_classes',
 				'facultyId',
+				'facultyName',
+				'courseFamilyNumber',
+				'title',
+				'classType',
+				'section',
 				'__loaded',
 				'semester_id'
 		);
@@ -133,6 +136,9 @@ class enrollment extends RegAuth {
 	}
 
 
+	/**
+	 *
+	 */
 	function addRun(&$db,&$u,&$lc,&$t) {
 		$semesterId = $u->sessionvars['enrollmentSemesterId'];
 
@@ -151,17 +157,11 @@ class enrollment extends RegAuth {
 		$this->run($db,$u,$lc,$t);
 	}
 
-	function activateRun (&$db,&$u,&$lc,&$t) {
-		$name = addslashes(stripslashes($lc->getvars['username']));
-		$sectionNumber = (int)$lc->getvars['id'];
-		$active= (int)$lc->getvars['active'];
-
-		$db->query("update class_student_sections set active=$active where id_student='$name' and sectionNumber=$sectionNumber");
-		$lc->templateName = 'enrollment_main';
-		$this->run($db,$u,$lc,$t);
-	}
 
 
+	/**
+	 *
+	 */
 	function removeRun (&$db,&$u,&$lc,&$t) {
 		// only dealing with current semester right now
 		// 
@@ -171,8 +171,6 @@ class enrollment extends RegAuth {
 
 		$classEnrollment->removeStudent($u->userId);
 
-
-//		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
 		updateSessionVars($db,$u);
 
 		$lc->templateName = 'enrollment_main';
