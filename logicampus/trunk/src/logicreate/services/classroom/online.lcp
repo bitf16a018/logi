@@ -1,4 +1,7 @@
 <?
+
+include_once(LIB_PATH.'lc_enrollment.php');
+
 /*
  *
  * Displays class members that are online.
@@ -22,33 +25,30 @@ class online extends StudentService {
  * Output data: 
  *
  */
-		function Run(&$db,&$u,&$lc,&$t) {
+		function run(&$db,&$u,&$lc,&$t) {
 			$lc->templateName='online_main';
 			$sections = explode("\n",
 			$u->activeClassTaken->sectionNumbers);
-			while (list($k, $v) = @each($sections) )
-			{
-				$sectionNumbers .= "sectionNumber=$v OR ";
+
+			$enrollmentObj = new lcClassEnrollment($u->activeClassTaken->id_classes);
+
+			$userIdArray = array();
+			foreach ($enrollmentObj->classEnrollmentDos as $enrollmentDo ) {
+				$userIdArray[] = $enrollmentDo->studentId;
 			}
-			$sectionNumbers = substr($sectionNumbers, 0, -3);
-
-			$allStudents = "SELECT id_student from
-			class_student_sections WHERE active=1 AND ($sectionNumbers) ";
-
-			$db->query($allStudents);
-			while($db->next_record() )
-			{
-				$sql .= "username='".$db->Record['id_student']."' OR ";
+			if (count($userIdArray) < 1) {
+				$userIdArray[] = 0;
 			}
-
-			$sql = substr($sql, 0, -3);
+			$idList = '('.implode(',',$userIdArray).')';
 			
-			if ($sql == "")
-			{
-				return false;
-			}
-				$sql = "AND ($sql)";
-			$query = "select username from lcSessions where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 1800 $sql AND username!=''";
+			$query = "
+				SELECT lcSessions.username 
+				FROM lcSessions 
+				LEFT JOIN lcUsers on lcSessions.username = lcUsers.username
+ 
+				WHERE lcUsers.pkey in ".$idList."
+				AND (unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 1800)  
+				AND lcSessions.username!=''";
 
 			$db->query($query);
 			$db->RESULT_TYPE = MYSQL_ASSOC;
@@ -56,13 +56,7 @@ class online extends StudentService {
 				$t['users'][]= $db->Record;
 			}
 			$t['loggedin'] = count($t['users']);
-			
-			
-
 		}
-
-
-
 }
 
 ?>
