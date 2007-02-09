@@ -18,6 +18,7 @@ include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'semesterObj.php');
 include_once(LIB_PATH.'lc_class.php');
+include_once(LIB_PATH.'lc_enrollment.php');
 
 class enrollment extends RegAuth {
 
@@ -110,28 +111,34 @@ n']['classes']));
 		$lc->templateName = 'enrollment_main';
 		
 		$db->query("select classes.*, courses.* from classes, courses 
-				where classes.id_semesters=$semesterId 
-				and classes.id_courses = courses.id_courses order by courses.courseFamily, courses.courseNumber, courseName");
-		while($db->next_record()) {
-			$x = explode("\n",$db->Record['sectionNumbers']);
+				WHERE classes.id_semesters=$semesterId 
+				AND classes.id_courses = courses.id_courses 
+				order by courses.courseFamily, courses.courseNumber, courseName");
+		while($db->nextRecord()) {
+			$x = explode("\n",$db->record['sectionNumbers']);
 			foreach($x as $k=>$v) { 
-				$c[$v] = $db->Record['courseFamily']." ".
-				$db->Record['courseNumber']." - ".$db->Record['courseName']." - ".
-				" ($v) - ".$db->Record['facultyId'];
+				$optId = sprintf('%d_%d',$db->record['id_classes'],$v);
+				$c[$optId] = $db->record['courseFamily']." ".
+				$db->record['courseNumber']." - ".$db->record['courseName']." - ".
+				" ($v) - ".$db->record['facultyId'];
 			}
 		}
 		$t['courses'] = makeOptions($c);
 	}
 
 
-	function addrun(&$db,&$u,&$lc,&$t) {
+	function addRun(&$db,&$u,&$lc,&$t) {
 		$semesterId = $u->sessionvars['enrollmentSemesterId'];
 
 		$name = addslashes(stripslashes($lc->postvars['username']));
-		$sectionNumber = (int)$lc->postvars['id'];
-		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
-		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
-		
+		$classSectionNumber = (int)$lc->postvars['id'];
+		list($classId,$sectionNumber) = explode('_',$classSectionNumber);
+
+		$classEnrollment = new lcClassEnrollment($classId,$semesterId);
+		$classEnrollment->addStudent($u->userId);
+
+		$classEnrollment->save();
+
 		updateSessionVars($db,$u);
 
 		$lc->templateName = 'enrollment_main';
