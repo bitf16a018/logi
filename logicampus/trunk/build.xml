@@ -183,7 +183,7 @@
 	<copy file="${src}/defines.template.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/settings.advanced.php" todir="${build}/public_html/" filtering="true"/>
 	<copy file="${src}/settings.simple.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/first_run.php" todir="${build}/public_html/" filtering="true"/>
+	<copy file="${src}/first_time.php" todir="${build}/public_html/" filtering="true"/>
 
 
 	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite="true"/>
@@ -216,6 +216,7 @@
 
 	<!-- tar up -->
 	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
+	<zip destfile="${dist}/logicampus-${lc.version}.zip" basedir="temp/"/>
 
 	<!-- clean up temp-->
 	<antcall target="cleantemp"/>
@@ -339,25 +340,34 @@
 			start="4 August 2005"
 			end="29 August 2005"/>
 		-->
+		<!--
 		<cvschangelog dir="."
 			destfile="changelog.xml"
 			start="12 September 2005"
 			end="21 September 2005"/>
+		-->
 
-		<style in="changelog.xml" 
+		<!--
+		<cvschangelog dir="."
+			destfile="changelog.xml"
+			start="10 March 2006"
+			end="08 February 2007"/>
+		-->
+
+		<xslt in="changelog.xml" 
 			out="changelog.html" 
 			style="${ant.home}/etc/changelog.xsl">
 			<param name="title" expression="LogiCampus ChangeLog"/>
 			<param name="module" expression="logicampus"/>
-			<param name="cvsweb" expression="http://cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
-		</style>
-		<style in="changelog.xml" 
+			<param name="cvsweb" expression="http://logicampus.cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
+		</xslt>
+		<xslt in="changelog.xml" 
 			out="changelog.txt" 
-			style="${ant.home}/etc/changelog-text.xsl">
+			style="build/changelog-text.xsl">
 			<param name="title" expression="LogiCampus ChangeLog"/>
 			<param name="module" expression="logicampus"/>
-			<param name="cvsweb" expression="http://cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
-		</style>
+			<param name="cvsweb" expression="http://logicampus.cvs.sourceforge.net/viewcvs.py/logicampus/logicampus/"/>
+		</xslt>
 	</target>
 
 
