@@ -228,8 +228,59 @@ class LcForumPermPeerBase {
 //You can edit this class, but do not change this next line!
 class LcForumPerm extends LcForumPermBase {
 
+	/**
+	 * Load a list of LcForums based on the user's groups and section id
+	 *
+	 * @return: array
+	 * @throws: Permission error
+	 */
+	function secureLoadBySection($u,$s) {
+		//trigger_error('loading all forums for user '.$u->username.' under section ' .$s->lcForumSectionName);
+		$db = lcDB::getHandle();
+		$st = new PBDO_SelectStatement("lc_forum",$where);
+		$st->fields['lc_forum_id'] = 'lc_forum.lc_forum_id';
+		$st->fields['lc_forum_parent_id'] = 'lc_forum_parent_id';
+		$st->fields['lc_forum_name'] = 'lc_forum_name';
+		$st->fields['lc_forum_description'] = 'lc_forum_description';
+		$st->fields['lc_forum_recent_post_id'] = 'lc_forum_recent_post_id';
+		$st->fields['lc_forum_recent_post_timedate'] = 'lc_forum_recent_post_timedate';
+		$st->fields['lc_forum_recent_poster'] = 'lc_forum_recent_poster';
+		$st->fields['lc_forum_thread_count'] = 'lc_forum_thread_count';
+		$st->fields['lc_forum_post_count'] = 'lc_forum_post_count';
+		$st->fields['lc_forum_unanswered_count'] = 'lc_forum_unanswered_count';
+		$st->fields['lc_forum_section_id'] = 'lc_forum.lc_forum_section_id';
+		$st->fields['lc_forum_numeric_link'] = 'lc_forum_numeric_link';
+		$st->fields['lc_forum_char_link'] = 'lc_forum_char_link';
+
+		$st->key = $s->key;
+
+		$st->join = 'LEFT JOIN lc_forum_section s ON s.lc_forum_section_id = lc_forum.lc_forum_section_id
+					LEFT JOIN lc_forum_perm as p ON lc_forum.lc_forum_id=p.lc_forum_id
+					';
+		//use a big or clause here
+		$x = "p.lc_forum_perm_group=\"".implode("\" or p.lc_forum_perm_group=\"", $u->groups)."\"";
+		$st->where = '('.$x.') 
+					  AND s.lc_forum_section_id = '.$s->lcForumSectionId;
+
+		$db->executeQuery($st);
+		while($db->nextRecord() ) {
+		//trigger_error('found one forum');
+			$array[$db->record['lc_forum_id']] = LcForumPeer::row2Obj($db->record);
+		}
+		return $array;
+	}
 
 
+	/**
+	 * Load one forum based on user's groups and the lc_forum_perm table
+	 *
+	 * @return: LcForum object or null
+	 * @throws: Permission error
+	 */
+	function secureLoadForum($u,$s) {
+
+
+	}
 }
 
 

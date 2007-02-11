@@ -64,8 +64,8 @@ class groups extends AdminService {
 		//grab the permissions that they have
 		$db->query("select displayName, lcPerms.action, mid from lcRegistry left join lcPerms on lcRegistry.mid = lcPerms.moduleID and lcPerms.groupID = '".$arg->getvars[1]."' order by displayName");
 		while ($db->next_record() ) {
-			$t[modNames][$db->Record[0]][id] = $db->Record[2];
-			$temp[$db->Record[0]][] = $db->Record[1];
+			$t[modNames][$db->Record['displayName']][id] = $db->Record['mid'];
+			$temp[$db->Record['displayName']][] = $db->Record['action'];
 		}
 
 		$t[perms] = $temp;
@@ -87,7 +87,7 @@ class groups extends AdminService {
 
 		//a few other UI things
 		$db->queryOne("Select groupName from lcGroups where  gid = '".$arg->getvars[1]."'");
-		$t[gName] = $db->Record[0];
+		$t[gName] = $db->Record['groupName'];
 		$t[gid] = $arg->getvars[1];
 		$arg->templateName = "groups_show";
 	}

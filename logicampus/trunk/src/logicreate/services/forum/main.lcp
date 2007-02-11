@@ -20,7 +20,7 @@ class forum extends NoAuth {
 	var $presentor = "htmlPresentation";
 
 
-	function Run($db,&$u,&$lc,&$t) {	
+	function run($db,&$u,&$lc,&$t) {	
 		$key = (int)$lc->getvars['id'];
 		if($key) { 
 			$forumsections = lcforumSectionPeer::doSelect(" lc_forum_section_parent_id=$key");
@@ -29,8 +29,8 @@ class forum extends NoAuth {
 		}
 /*
 		foreach $sections
-			$forums[] = LcForumPerms::secureLoadBySection($u,$s);
-			$forum = LcForumPerms::secureLoadForum($u,$fid);
+			$forums[] = LcForumPerm::secureLoadBySection($u,$s);
+			$forum = LcForumPerm::secureLoadForum($u,$fid);
 */
 
 		while(list($k,$sec) = each($forumsections)) {

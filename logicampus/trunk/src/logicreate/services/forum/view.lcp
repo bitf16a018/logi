@@ -20,15 +20,18 @@ class view extends NoAuth {
 	var $presentor = "htmlPresentation";
 
 
-	function Run($db,&$u,&$lc,&$t) {	
+	function run($db,&$u,&$lc,&$t) {	
 		$key = (int)$lc->getvars[1];
 // get permissions for this forum
 
 		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
-		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
+		$db->query("select distinct lc_forum_perm_action AS action
+			FROM lc_forum_perm 
+			WHERE lc_forum_id=".(int)$key." and $x");
 		while($db->next_record()) {
-			$t['perms'][$db->Record[0]] = true;
+			$t['perms'][$db->Record['action']] = true;
 		}
+
 		if (!$t['perms']['read']) { 
 			echo "You can't read this forum"; exit();
 		}

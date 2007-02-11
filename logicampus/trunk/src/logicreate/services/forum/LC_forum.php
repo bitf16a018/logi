@@ -26,8 +26,8 @@ class newForum {
 		$db = DB::getHandle();
 		$g = @implode("' or groups='",$groups);
 		$fid = $this->fid;
-		$db->queryOne("select count(fid) from forumPerms where perm='$perm' and fid='$fid' and (groups='$g')");
-		$x = $db->Record[0];
+		$db->queryOne("select count(fid) AS total from forumPerms where perm='$perm' and fid='$fid' and (groups='$g')");
+		$x = $db->Record['total'];
 		unset($db);
 		if ($x>0) { return true; } else { return false; }
 	}
@@ -116,10 +116,10 @@ $fid = $this->fid;
 		$sql = "select * from forums where fid = '$fid'";
 		$db->query($sql);
 		while($db->next_record()) {
-			$sql = "select count(pkey) from forumPosts where fid='$fid' and status<>'y'";
+			$sql = "select count(pkey) AS total from forumPosts where fid='$fid' and status<>'y'";
 			$db2->query($sql);
 			$db2->next_record();
-			$count = intval($db2->Record[0]);
+			$count = intval($db2->Record['total']);
 			$this->off = $count;
 			$this->forumname = $db->Record["forumname"];
 			$this->forumdesc = $db->Record["forumdesc"];
@@ -133,10 +133,10 @@ $fid = $this->fid;
 
 	function addForum() {
 		$db = DB::getHandle();
-		$sql = "select count(fid) from forums where fid='".$this->fid."'";
+		$sql = "select count(fid) AS total from forums where fid='".$this->fid."'";
 		$db->query($sql);
 		$db->next_record();
-		$count = intval($db->Record[0]);
+		$count = intval($db->Record['total']);
 		if ($count>0) {
 			return false;
 		} else {
@@ -207,7 +207,7 @@ $fid = $this->fid;
 		}
 		$db->query("select pkey from forumPosts where stamptime = $stamp and username='".$this->username."' and body='".$this->body."'");
 		$db->next_record();
-		$this->messageid = $db->Record[0];
+		$this->messageid = $db->Record['pkey'];
 	}
 
 
@@ -369,9 +369,9 @@ class ForumPost extends baseObject {
 			}
 
 			if (intval($count)==0) {
-				$db->query("select count(pkey) from forumPosts where parent=$pkey and status='y'");
+				$db->query("select count(pkey) AS total from forumPosts where parent=$pkey and status='y'");
 				$db->next_record();
-				$count = intval($db->Record[0]);	
+				$count = intval($db->Record['total']);	
 			}
 			
 			$views = $val["views"];
@@ -442,8 +442,8 @@ class forums {
 
 	function isValid($forumID,$groups) {
 		$db = DB::getHandle();
-		$db->queryOne("select count(fid) from forums where 1=1 and ".createGroupCheck($groups)." and fid='$forumID'");
-		return $db->Record[0];
+		$db->queryOne("select count(fid) AS total from forums where 1=1 and ".createGroupCheck($groups)." and fid='$forumID'");
+		return $db->Record['total'];
 	}
 
 	function addAttach($filename,$location,$filedesc="") {

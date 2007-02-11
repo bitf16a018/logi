@@ -163,9 +163,9 @@ class MenuObj extends PersistantObject {
 
 		$db->query("select menuObj from menuCache $where order by rank",false);
 		$db->RESULT_TYPE= MYSQL_BOTH;
-		while($db->next_record() )
-			$menus[$db->Record[0]['pkey']] = unserialize($db->Record[0]);
-			$menus[$db->Record[0]['menuid']] = unserialize($db->Record[0]);
+		while($db->nextRecord() )
+			$menus[$db->record[0]['pkey']] = unserialize($db->record[0]);
+			$menus[$db->record[0]['menuid']] = unserialize($db->record[0]);
 #		print_r($menus);
 	return $menus;
 	}

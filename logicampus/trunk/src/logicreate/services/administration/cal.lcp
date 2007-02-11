@@ -374,8 +374,8 @@ class edit {
 		$t[groups] = $arr;
 		*/
 		$db->query("select gid,groupname from lcGroups order by groupname");
-		while($db->next_record()) {
-			$t['groups'][$db->Record[0]] = $db->Record[1];
+		while($db->nextRecord()) {
+			$t['groups'][$db->record['gid']] = $db->record['groupname'];
 		}
 
 
