@@ -163,15 +163,13 @@ class faq extends FacultyService
 			//$db->query('delete from class_faqs where id_class_faqs='.$faqs->id_class_faqs);
 		}
 
-		$this->Run(&$db,&$lcUser,&$lc,&$t);
+		$this->run($db,$lcUser,$lc,$t);
 
 	}
 
 
+	function run($db,&$lcUser,&$lc,&$t) {
 
-	function Run($db,&$lcUser,&$lc,&$t) {
-		
-//auto-comment		$lc->templateStyle='private';
 		$lc->templateName='faq_main';
 		$this->sectionTitle = 'FAQ Listing';
 		$this->inactivelinks[] ='List Faqs';

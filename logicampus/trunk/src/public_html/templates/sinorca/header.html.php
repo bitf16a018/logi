@@ -138,11 +138,18 @@
 
       <div class="lighterBackground">
         <p class="sideBarTitle">&nbsp;</p>
+<?php
+		menuObj::getCachedById('memberservices', $obj->user->groups);
+?>
       </div>
 
       <div>
-        <p class="sideBarTitle">&nbsp;</p>
+	<p class="sideBarTitle">
+<?php
+		menuObj::getCachedById('administration', $obj->user->groups);
+?></p>
       </div>
+
 <!--
       <div class="lighterBackground">
         <p class="sideBarTitle">Alternative stylesheet</p>
