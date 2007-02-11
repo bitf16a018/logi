@@ -298,7 +298,7 @@ class chat extends StudentService {
 			$message = addslashes($message);
 			$username = addslashes($username);
 
-			$chatcolor = $u->profile["chatcolor"];
+			$chatcolor = $u->profile->values["chatcolor"];
 			//if ($chatcolor=="") { $chatcolor="#000000"; }
 			if ($chatcolor=="") { $chatcolor="1"; }
 

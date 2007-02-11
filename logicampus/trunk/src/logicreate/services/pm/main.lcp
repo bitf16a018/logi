@@ -103,7 +103,7 @@ var $presentor = "htmlPresentation";
 		} else {
 			$user = lcUser::getUserByUsername($mess->messageFrom);
 			$mess->userFrom = $user->username;
-			if ($user->profile['username']==' - ') { 
+			if ($user->profile->values['username']==' - ') { 
 				$mess->userFrom= $mess->messageFrom;
 				$mess->outside = true;
 			}
