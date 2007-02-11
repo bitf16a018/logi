@@ -64,8 +64,11 @@ var $presentor = "htmlPresentation";
 		$t['start'] = $start;
 		$t['max'] = $max;
 		$t['emailNotify'] = $u->profile->get('emailNotify');
-		$db->queryOne("select count(pkey) from privateMessages where sentReceived='$viewing' and messageTo='".$u->username."'"); 
-		$count = $db->Record[0];
+		$db->queryOne("select count(pkey) AS total
+			FROM privateMessages 
+			WHERE sentReceived='$viewing' 
+			AND messageTo='".$u->username."'"); 
+		$count = $db->Record['total'];
 		if ( ( ($max+$start) < $count)  && ($start<$count)) { 
 
 			$t['next'] =  true;
@@ -167,7 +170,7 @@ var $presentor = "htmlPresentation";
 			extract($db->Record);
 			$db2->query("select username from lcUsers where groups like '%$gid%'");
 			while($db2->next_record()) {
-				$username = $db2->Record[0];
+				$username = $db2->Record['username'];
 				$x = lcUser::getUserByUsername($username);
 				$list[$username] = $x->username;
 			}

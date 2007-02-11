@@ -25,7 +25,7 @@ class pm extends HercAuth {
 	              $mess->message = $arg->postvars['message'];
 		          $mess->sentTime = time();
 	                 $mess->messageFrom =  "SYSTEM ADMIN";
-	               $mess->messageTo = $db->Record[0];
+	               $mess->messageTo = $db->Record['username'];
                       $mess->add();
 		}
              $t['message'] = "Message sent";

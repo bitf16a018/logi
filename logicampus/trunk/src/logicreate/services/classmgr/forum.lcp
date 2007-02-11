@@ -36,11 +36,15 @@ class forum extends FacultyService {
 	 */
 	function updateforum($fid) { 
 		$db = DB::getHandle();
-		$db->queryOne("select count(pkey) from forumPosts where parent=0 and fid='$fid' and status='y'");
-		$count = $db->Record[0];
+		$db->queryOne("select count(pkey) AS total 
+			FROM forumPosts 
+			WHERE parent=0 and fid='$fid' and status='y'");
+		$count = $db->Record['total'];
 		$db->query("update forums set numthreads=$count where fid='$fid'");
-		$db->queryOne("select count(pkey) from forumPosts where fid='$fid' and status='y'");
-		$count = $db->Record[0];
+		$db->queryOne("select count(pkey) AS total
+			FROM forumPosts 
+			WHERE fid='$fid' and status='y'");
+		$count = $db->Record['total'];
 		$db->query("update forums set validposts=$count where fid='$fid'");
 	}
 

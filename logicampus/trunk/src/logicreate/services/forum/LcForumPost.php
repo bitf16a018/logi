@@ -282,8 +282,39 @@ class LcForumPostPeerBase {
 //You can edit this class, but do not change this next line!
 class LcForumPost extends LcForumPostBase {
 
+        function getLcForumPosts() {
+                $array = LcForumPostPeer::doSelect('lc_forum_post_thread_id = \''.$this->getPrimaryKey().'\' order by lc_forum_post_id');
+                return $array;
+        }
 
 
+        function updateStats() {
+                $db =db::getHandle();
+                // __FIX_ME
+                // check 'status' in here too eventually?
+
+                // how many replies
+                $db->queryOne("SELECT count(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE (lc_forum_post_thread_id=".$this->lcForumPostId . ") 
+			AND (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
+                $this->lcForumReplyCount= $db->Record[0];
+
+                $db->queryOne("select max(lc_forum_post_id) as foo 
+			FROM lc_forum_post 
+			WHERE (lc_forum_post_id=".$this->lcForumPostId." or lc_forum_post_thread_id=".$this->lcForumPostId.") 
+			AND (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
+                $max = sprintf('%d',$db->Record['foo']);
+
+                $db->queryOne("select * 
+			FROM lc_forum_post 
+			WHERE lc_forum_post_id=$max 
+			AND (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
+                $this->lcForumRecentPostTimedate= $db->Record['lc_forum_post_timedate'];
+                $this->lcForumRecentPoster = $db->Record['lc_forum_post_username'];
+                $this->lcForumRecentPostId = $max;
+                $this->save();  
+        }
 }
 
 

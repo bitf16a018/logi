@@ -285,8 +285,117 @@ class LcForumPeerBase {
 //You can edit this class, but do not change this next line!
 class LcForum extends LcForumBase {
 
+// overridden because we don't want to normally pull ALL posts
+// related, just the top level posts - we'll drill down in a post
+// to see the responses, but technically they still belong
+// to the forum too
 
 
+        function getLcForumPosts() {
+                $array = LcForumPostPeer::doSelect('lc_forum_id = \''.$this->getPrimaryKey().'\' and lc_forum_post_parent_id=0');
+                return $array;
+        }
+// only get forums not linked to any classes
+// via the generic numeric_link (default to 0)
+
+        function getLcForums() {
+                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' and lc_forum_numeric_link=0');
+                return $array;
+        }
+
+        function getLcForumsStudentGroups($studentGroups) {
+		while(list($k,$v) = @each($studentGroups)) { 
+			$x[] = "lc_forum_char_link='g_$v'";
+		}
+		if ( is_array($x) ) {
+			$where = " and (";
+			$where .= implode(" or ",$x);
+			$where .= ")";
+		}
+
+                $array = LcForumPeer::doSelect('lc_forum_parent_id = \''.$this->getPrimaryKey().'\' '.$where);
+                return $array;
+        }
+
+
+// get forum (singular) for a class
+// based on ID
+// only one forum per class - executive decision by mgk
+        function getLcForumForClass($class_id) {
+                $array = LcForumPeer::doSelect('lc_forum_numeric_link='.$class_id);
+                if (!is_array($array)) { // didn't get a forum for a class
+                                        // so we make a new one
+                        $x = new lcForum();
+                        $x->lcForumName= "Classroom forum";
+                        $x->lcForumNumericLink = $class_id;
+			$x->lcForumDescription = ' ';
+			$x->lcForumRecentPostId = 0;
+			$x->lcForumRecentPostTimedate = 0;
+			$x->lcForumRecentPoster = '';
+			$x->lcForumThreadCount = 0;
+			$x->lcForumPostCount = 0;
+			$x->lcForumUnansweredCount = 0;
+			$x->lcForumSectionId = 0;
+			$x->lcForumCharLink = '';
+			$x->lcForumParentId = 0;
+			$x->lcForumFile1Name= '';
+			$x->lcForumFile1SysName= '';
+			$x->lcForumFile1Size= '';
+			$x->lcForumFile1MIME= '';
+			$x->lcForumFile2Name= '';
+			$x->lcForumFile2SysName= '';
+			$x->lcForumFile2Size= '';
+			$x->lcForumFile2MIME= '';
+                        $x->save();
+                        return $x;
+                }
+                return $array[0];
+        }
+
+        function getLcForumForClassStudentGroups($class_id,$studentGroups) {
+		while(list($k,$v) = @each($studentGroups)) { 
+			$x[] = "lc_forum_char_link='g_$v'";
+		}
+		$where = "lc_forum_numeric_link=$class_id and (";
+		$where .= implode(" or ",$x);
+		$where .= ")";
+	        $array = LcForumPeer::doSelect($where);
+                return $array[0];
+        }
+ 
+        function updateStats() {
+                $db =db::getHandle();
+		$forumId = intval($this->lcForumId);
+                // __FIX_ME
+                // check 'status' in here too eventually?
+                $db->queryOne("SELECT count(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE lc_forum_id=".$forumId." 
+			AND  (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
+                $this->lcForumPostCount = $db->Record[0];
+
+                $db->queryOne("SELECT count(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE lc_forum_id=".$forumId . " 
+			AND lc_forum_post_parent_id=0 
+			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
+                $this->lcForumThreadCount = $db->Record[0];
+
+                $db->queryOne("SELECT max(lc_forum_post_id) 
+			FROM lc_forum_post 
+			WHERE lc_forum_id=".$forumId. " 
+			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
+                $max = sprintf('%d',$db->Record[0]);
+
+                $db->queryOne("SELECT * 
+			FROM lc_forum_post 
+			WHERE lc_forum_post_id=$max 
+			AND (lc_forum_post_status=0 OR lc_forum_post_status IS NULL)");
+                $this->lcForumRecentPostTimedate= $db->Record['lc_forum_post_timedate'];
+                $this->lcForumRecentPoster = $db->Record['lc_forum_post_username'];
+                $this->lcForumRecentPostId = $max;
+                $this->save();  
+        }
 }
 
 
