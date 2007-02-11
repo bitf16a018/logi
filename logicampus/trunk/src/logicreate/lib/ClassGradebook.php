@@ -288,13 +288,13 @@ class ClassGradebook extends ClassGradebookBase {
 
 		$db = DB::getHandle();
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.dateWithdrawn from profile as p
-			left join class_student_sections as ss on ss.id_student=p.username
-			left join class_sections as s on s.sectionNumber=ss.sectionNumber
-			left join classes as cls on cls.id_semesters=ss.semester_id
-			where s.id_classes="'.$this->idClasses.'"
-			and cls.id_classes="'.$this->idClasses.'" ';
-#			and ss.active=\'1\'';
+		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.withdrew_on 
+			FROM class_enrollment as ss
+			left join lcUsers as u on ss.student_id = u.pkey
+			left join profile as p on u.username=p.username
+			left join class_sections as s on s.sectionNumber=ss.section_number
+			left join classes as cls on cls.id_classes=ss.class_id
+			where ss.class_id="'.$this->idClasses.'" ';
 
 		if (strlen($this->filterSection)>0) { 
 			$sql .= " and ss.sectionNumber=".$this->filterSection." ";
@@ -306,6 +306,7 @@ class ClassGradebook extends ClassGradebookBase {
 			$sql .= ' and ss.active="'.$this->filterActive.'"';
 
 		$sql .= ' order by p.lastname, p.firstname';
+
 		$db->query($sql);
 		while ($db->next_record()) {
 			$db->Record['username'] = strtolower($db->Record['username']);

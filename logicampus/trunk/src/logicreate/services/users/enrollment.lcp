@@ -140,7 +140,6 @@ class enrollment extends RegAuth {
 	 *
 	 */
 	function addRun(&$db,&$u,&$lc,&$t) {
-		$semesterId = $u->sessionvars['enrollmentSemesterId'];
 
 		$name = addslashes(stripslashes($lc->postvars['username']));
 		$classSectionNumber = $lc->postvars['id'];
@@ -149,7 +148,10 @@ class enrollment extends RegAuth {
 		$sectionNumber = (int)$sectionNumber;
 		$classId = (int)$classId;
 
-		$classEnrollment = new lcClassEnrollment($classId,$semesterId);
+
+//		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+
+		$classEnrollment = new lcClassEnrollment($classId);
 		$classEnrollment->addStudent($u->userId,$sectionNumber);
 
 		$classEnrollment->save();
