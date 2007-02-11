@@ -66,8 +66,7 @@ class enrollment extends RegAuth {
 		if (LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')) {
 
 			$f = new SiteForm();
-			$f->getForm('semester', array('semester'=>$u->sessionvars['administratio
-		n']['classes']));
+			$f->getForm('semester', array('semester'=>$u->sessionvars['administration']['classes']));
 			$f->action = modurl("enrollment/main/username=$name");
 			$t['form'] = $f->ToHTML();
 
@@ -94,7 +93,8 @@ class enrollment extends RegAuth {
 			"id_student"=>"Student ID",
 			'semesterID'=>'Semester'
 			);
-		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$id_classes);?>">Drop</a>',"del");
+
+		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$id_classes."_".$sectionNumber);?>">Drop</a>',"del");
 		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
 		$d->setRows($classes);
 		$d->ignore = array (
@@ -143,11 +143,14 @@ class enrollment extends RegAuth {
 		$semesterId = $u->sessionvars['enrollmentSemesterId'];
 
 		$name = addslashes(stripslashes($lc->postvars['username']));
-		$classSectionNumber = (int)$lc->postvars['id'];
+		$classSectionNumber = $lc->postvars['id'];
+
 		list($classId,$sectionNumber) = explode('_',$classSectionNumber);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
 
 		$classEnrollment = new lcClassEnrollment($classId,$semesterId);
-		$classEnrollment->addStudent($u->userId);
+		$classEnrollment->addStudent($u->userId,$sectionNumber);
 
 		$classEnrollment->save();
 
@@ -166,10 +169,17 @@ class enrollment extends RegAuth {
 		// only dealing with current semester right now
 		// 
 
-		$classId = (int)$lc->getvars['id'];
-		$classEnrollment = new lcClassEnrollment($classId);
 
-		$classEnrollment->removeStudent($u->userId);
+		$classSectionNumber = $lc->getvars['id'];
+
+		list($classId,$sectionNumber) = explode('_',$classSectionNumber);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
+
+		$classEnrollment = new lcClassEnrollment($classId);
+		$classEnrollment->withdrawStudent($u->userId,$sectionNumber);
+
+		$classEnrollment->save();
 
 		updateSessionVars($db,$u);
 
