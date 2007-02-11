@@ -296,6 +296,7 @@ class ClassChat extends StudentService {
 		}
 
 		$message = htmlentities($lc->postvars["message"]);
+		$message = $lc->postvars["message"];
 		$url = $lc->postvars['url'];
 
 		//$u->sessionvars["lastPost"] = time();
