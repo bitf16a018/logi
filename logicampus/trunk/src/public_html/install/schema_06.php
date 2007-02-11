@@ -79,12 +79,33 @@ CREATE TABLE assessment_grade (
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
+DROP TABLE IF EXISTS `assessment_lesson_link`
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE `assessment_lesson_link` (
+	`assessment_lesson_link_id` integer (11) NOT NULL auto_increment,  --
+	`assessment_id` integer (11),  --
+	`lesson_id` integer (11),  --
+	PRIMARY KEY (assessment_lesson_link_id)
+)TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE INDEX assessment_id ON assessment_lesson_link (assessment_id)
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE INDEX lesson_id ON assessment_lesson_link (lesson_id)
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
 CREATE TABLE `assessment_event_link` (
 	`assessment_event_link_id` int (10) NOT NULL auto_increment,  --
 	`assessment_id` int (10),  --
 	`lc_event_id` int (10),  --
 	PRIMARY KEY (assessment_event_link_id)
-)TYPE=InnoDB
+)TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
