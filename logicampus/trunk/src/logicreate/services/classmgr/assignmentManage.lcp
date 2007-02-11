@@ -706,7 +706,7 @@ class assignmentManage extends FacultyService {
 
 // mgk 4/17/05
 // per davidw/markk
-		if (!facultyOnlyAuth(&$lc,&$u)) { 
+		if (!facultyOnlyAuth($lc,$u)) { 
 			$lc->templateName = "assignmentManage_viewAssignment_observer";
 			return;
 		}
@@ -1196,7 +1196,6 @@ function DG_classmgr_assignmentActions($row, &$ret) {
 		<li><a href="'.appurl("classmgr/assignmentManage/event=editAssignment/id_class_assignments=".$row['id_class_assignments']."/").'">Edit</a></li>
 		<li><a href="'.appurl("classmgr/assignmentManage/event=deleteAssignment/id_class_assignments=".$row['id_class_assignments']."/").'" onclick="if (confirm(\'Are you SURE you want to delete this assignment?\')) { return true; } else { return false; }">Delete</a></li>
 		</ul>';
-
 }
 
 ?>

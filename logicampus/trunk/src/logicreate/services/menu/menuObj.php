@@ -140,8 +140,8 @@ class MenuObj extends PersistantObject {
         $db = DB::getHandle();
         $sql = "select menuObj from menuCache where (menuid= '$key' and (($groups) and not ($notgroups)))"; 
 		$db->query($sql,false);
-        $db->next_record();
-        $menu = unserialize($db->Record[0]);
+        $db->nextRecord();
+        $menu = unserialize($db->record['menuObj']);
         if (is_object($menu) )
         {
             $menu->hideMenu = (boolean)$fl_hidemenu;
