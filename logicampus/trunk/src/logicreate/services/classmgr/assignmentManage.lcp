@@ -802,22 +802,22 @@ class assignmentManage extends FacultyService {
 		} else {
 			// give me a class list
 			$sql = '
-			SELECT B.id_student, C.firstname, C.lastname, C.username
-			FROM class_sections AS A
-			INNER JOIN class_student_sections as B
-				ON A.sectionNumber=B.sectionNumber			
+			SELECT A.student_id, C.firstname, C.lastname, C.username
+			FROM class_enrollment AS A
+
+			INNER JOIN lcUsers AS B 
+				ON A.student_id = B.pkey
 			INNER JOIN profile AS C 
-				ON B.id_student = C.username
-			
+				ON B.username = C.username
 			WHERE 
-				A.id_classes='.$u->activeClassTaught->id_classes.' AND 
-				B.active=1
+				A.class_id='.$u->activeClassTaught->id_classes.' AND 
+				A.active=1
 			ORDER BY C.lastname ASC
 			';
 			
 			$db->query($sql);
 			while ($db->next_record()) {
-				$a_student_list[$db->Record['id_student']] = $db->Record;
+				$a_student_list[$db->Record['student_id']] = $db->Record;
 //				$a_student_list[] = $db->Record;
 			}
 			
