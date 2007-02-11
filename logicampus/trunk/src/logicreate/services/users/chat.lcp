@@ -339,7 +339,7 @@ class chat extends StudentService {
 				$message = addslashes($message);
 				$username = addslashes($username);
 //print_r($u->profile);
-$chatstyle = $u->profile["chatstyle"];
+$chatstyle = $u->profile->values["chatstyle"];
 if ($chatstyle=="") { $chatstyle="2"; }
 		$db->query("insert into chat (style,color,username,timedate,timeint,message) values ('$chatstyle','$chatstyle','$username','".date("Y-m-d H:i:s")."',".time().",'$message')");
 
