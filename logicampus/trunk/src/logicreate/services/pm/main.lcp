@@ -40,7 +40,7 @@ var $presentor = "htmlPresentation";
 		$notify= $arg->getvars['val'];
 		if ($notify=='yes') {
 			$u->profile->set('emailNotify', 'y');
-			$u->profile['emailNotify']= 'y';
+			$u->profile->values['emailNotify']= 'y';
 			$db->query("update profile set emailnotify='y' where username='".$u->username."'");
 		} else { 
 			$u->profile->set('emailNotify', 'n');
