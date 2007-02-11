@@ -71,6 +71,28 @@ CREATE TABLE assessment_grade (
 ) TYPE=MyISAM;
 
 
+
+-- Dumping SQL for project logicampus
+-- entity version: 0.0
+-- DB type: mysql
+-- generated on: 08.08.2005
+
+DROP TABLE IF EXISTS `assessment_lesson_link`;
+CREATE TABLE `assessment_lesson_link` (
+
+	`assessment_lesson_link_id` integer (11) NOT NULL auto_increment,  --
+
+	`assessment_id` integer (11),  --
+
+	`lesson_id` integer (11),  --
+
+	PRIMARY KEY (assessment_lesson_link_id)
+)TYPE=MyISAM;
+
+CREATE INDEX assessment_id ON assessment_lesson_link (assessment_id);
+CREATE INDEX lesson_id ON assessment_lesson_link (lesson_id);
+
+
 CREATE TABLE `assessment_event_link` (
 
 	`assessment_event_link_id` int (10) NOT NULL auto_increment,  --
@@ -80,7 +102,7 @@ CREATE TABLE `assessment_event_link` (
 	`lc_event_id` int (10),  --
 
 	PRIMARY KEY (assessment_event_link_id)
-)TYPE=InnoDB;
+)TYPE=MyISAM;
 
 CREATE INDEX assessment_idx ON assessment_event_link (assessment_id);
 CREATE INDEX lc_event_idx ON assessment_event_link (lc_event_id);
