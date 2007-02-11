@@ -519,7 +519,12 @@ class DataGrid {
 					ob_start();eval("?>$v<? ");$j = ob_get_contents();ob_end_clean();
 				} else if ( in_array("$k", $this->callbackCols) ) {
 					$f = $this->postpend[$k];
-					call_user_func($f,$array,&$j);
+					//call user func can't properly pass
+					// references, so use this "eval"
+					// type calling style.
+					if( function_exists($f) ) {
+						$f($array,$j);
+					}
 				} else {
 				       	$j = $v; 
 				}
