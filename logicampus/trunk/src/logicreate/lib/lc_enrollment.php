@@ -33,7 +33,7 @@ class lcClassEnrollment {
 	}
 
 
-	function addStudent($studentId) {
+	function addStudent($studentId, $sectionNumber=0) {
 		$studentId = (int)$studentId;
 		foreach ($this->classEnrollmentDos as $do) {
 			if ($do->get('studentId') ==  $studentId) {
@@ -45,6 +45,11 @@ class lcClassEnrollment {
 		$enrollmentDo->set('classId', $this->classId);
 		$enrollmentDo->set('enrolledOn', time());
 		$enrollmentDo->set('active',true);
+
+		if ($sectionNumber > 0 ) {
+			$enrollmentDo->set('sectionNumber',$sectionNumber);
+		}
+
 		if ($this->semesterId >0 ) {
 			$enrollmentDo->set('semesterId', $this->semesterId);
 		}
@@ -63,6 +68,30 @@ class lcClassEnrollment {
 		}
 		return false;
 	}
+
+
+	function withdrawStudent($studentId,$sectionNumber=0) {
+		$studentId = (int)$studentId;
+		foreach ($this->classEnrollmentDos as $idx => $do) {
+			if ($do->get('studentId') ==  $studentId) {
+				if ($sectionNumber > 0) { 
+					if ($do->get('sectionNumber') == $sectionNumber ) {
+						$do->set('active',0);
+						$do->set('withdrewOn',time());
+						$this->classEnrollmentDos[$idx] = $do;
+						return true;
+					}
+				} else {
+					$do->set('active',0);
+					$do->set('withdrewOn',time());
+					$this->classEnrollmentDos[$idx] = $do;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 
 	/**
