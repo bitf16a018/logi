@@ -29,6 +29,7 @@ class classSetup extends FacultyService {
         var $presentor='htmlPresentation';
 	var $cleanedArray = array();
 
+/*
 	var $navlinks = array (
 		'Classroom Manager' => 'display',
 		'Lessons' => 'lessonManager/',
@@ -39,7 +40,8 @@ class classSetup extends FacultyService {
 		'Presentations' => 'studentPresentation',
 		'Objectives' => 'lessonObjectives/'
 	);
-	var $inactivelinks = array( 'Select Classroom Style' );
+*/
+//	var $inactivelinks = array( 'Select Classroom Style' );
 	var $sectionTitle = 'Select Classroom Style';
 	
 	
@@ -50,15 +52,19 @@ class classSetup extends FacultyService {
 		$classObj = classObj::_getFromDB($u->activeClassTaught->id_classes, 'id_classes');
 
 		$t['stylesheet_inuse'] = $classObj->stylesheet;
+		$this->templateStyle = $lc->templateStyle;
 		$t['stylesheet_array'] = $this->get_stylesheet_array();
 
 		# LOAD UP THE CURRENT CLASS RESOURCE
 
+/*
+//don't deal with orientations yet.
 		$sql = "SELECT id_class_resource, id_class_orientation FROM classes WHERE
 		id_classes='".$u->activeClassTaught->id_classes."'";
 		$db->queryOne($sql);
 		$current_id_class_resource = $db->Record['id_class_resource'];
 		$current_id_class_orientation= $db->Record['id_class_orientation'];
+*/
 
 		# GRAB ALL CONTENT FOR THE CLASS
 		$sql = "SELECT id_class_lesson_content, id_classes, txTitle FROM 
@@ -110,7 +116,6 @@ class classSetup extends FacultyService {
 		$a_styles = array();
 		
 		$dir = dir('./templates/'.$this->templateStyle);
-		
 		while ($f = $dir->read())
 		{	
 			if (substr($f, 0, 9) == 'classroom')
