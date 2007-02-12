@@ -824,34 +824,34 @@ class assignmentManage extends FacultyService {
 
 			// I hate to do this but damn... This is soooooo inefficent.. but how often is something going to use this?
 
-			foreach($a_student_list as $k=>$student)
-			{
+			foreach($a_student_list as $k=>$student) {
 				// getting grade
 //don't need this, i added it to the join up above
 
 				$sql = '
 				SELECT A.*
 				FROM class_assignments_grades as A
+				LEFT JOIN lcUsers AS B on B.username = A.id_student
 				WHERE 
-				A.id_student=\''.$student['id_student'].'\' AND
+				B.pkey=\''.$student['student_id'].'\' AND
 				A.id_class_assignments='.$assignment->id_class_assignments.'
 				';
-				
+
 				$db->queryOne($sql);
 //*/
 				$a_student_list[$k]['grade'] = $db->Record['grade'];
 
 				$sql = 'SELECT COUNT(id_class_assignments) as completed, dateTurnin
-				FROM class_assignments_turnin
-				WHERE id_class_assignments = '.$assignment->id_class_assignments.' AND
-				id_student=\''.$student['id_student'].'\'
+				FROM class_assignments_turnin AS A
+				LEFT JOIN lcUsers AS B on B.username = A.id_student
+				WHERE id_class_assignments = '.$assignment->id_class_assignments.' 
+				AND B.pkey=\''.$student['student_id'].'\'
 				GROUP BY id_class_assignments';
 				$db->queryOne($sql);
-#echo $sql."<BR>";
+
 				$a_student_list[$k]['datecompleted'] = (($db->Record['dateTurnin'] != null) ? date('F j Y g:i a',strtotime($db->Record['dateTurnin'])) : '');
 				$a_student_list[$k]['completed'] = $db->Record['completed'];
 				++$c;
-			#	if ($c>5) { echo 'c=6'; exit(); }
 			}
 			
 			$t['student_list'] = $a_student_list;

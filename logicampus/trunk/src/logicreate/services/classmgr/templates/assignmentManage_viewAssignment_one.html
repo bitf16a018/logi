@@ -71,10 +71,9 @@
 	
 <?php
 
-if (is_array($t['student_list']) && count($t['student_list']))
-{
-	foreach($t['student_list'] as $k=>$v)
-	{
+if (is_array($t['student_list']) && count($t['student_list'])) {
+
+	foreach($t['student_list'] as $k=>$v) {
 		?>
 		<tr style="<?=((++$i%2) ? 'background-color: #e7e7e7;': '');?>">
 			<td><?=$v['lastname']. ', '.$v['firstname'];?></td>
@@ -84,9 +83,7 @@ if (is_array($t['student_list']) && count($t['student_list']))
 			<td><a href="<?=appurl('classmgr/assignmentManage/event=viewAssignment/id_class_assignments='. $obj->getvars['id_class_assignments'].'/student='. $v['username']);?>">Grade</a></td>
 		</tr>
 		<?php
-
 	}
-
 }
 
 ?>
