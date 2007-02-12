@@ -1151,20 +1151,6 @@ class assignmentManage extends FacultyService {
 	}
 
 
-
-	function buildNavLinks() {
-		$this->navlinks = array ();
-		$this->navlinks[ lct('Classroom Overview') ] = 'display/';
-		$this->navlinks[ lct('Lessons') ] = 'lessonManager/';
-		$this->navlinks[ lct('Webliography') ] = 'lessonWebliography/';
-		$this->navlinks[ lct('FAQs') ] = 'faq/';
-		$this->navlinks[ lct('Assignments') ] = 'assignmentManage/';
-		$this->navlinks[ lct('Content') ] = 'lessonContent/';
-		$this->navlinks[ lct('Presentations') ] = 'studentPresentation';
-		$this->navlinks[ lct('Objectives') ] = 'lessonObjectives/';
-	}
-
-
 	function buildAppLinks() {
 		$this->applinks = array(
 		lct('List Assignments') => 'assignmentManage/',
