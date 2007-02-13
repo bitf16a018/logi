@@ -52,6 +52,9 @@ if (! file_exists($relpath)) {
 	$relpath='./logicreate/';
 	if (! file_exists($relpath)) {
 		$relpath='../../logicreate/';
+		if (! file_exists($relpath)) {
+			die("Cannot find logicreate directory.");
+		}
 	}
 }
 

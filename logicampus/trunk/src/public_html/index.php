@@ -63,15 +63,15 @@ $execution_time=get_microtime();
 		// create system object
 		//
 
-include(LIB_PATH."LC_include.php");
-include(LIB_PATH."lc_settings.php");
-include(LIB_PATH."LC_user.php");
-include(LIB_PATH."pellet.php");
-include(LIB_PATH."LC_db.php");
-include_once(LIB_PATH."LC_registry.php");
-include_once(LIB_PATH."pbdo_sql.php");
-include_once(LIB_PATH."LC_html.php");
-include_once(LIB_PATH."inputValidation.php");
+@include_once(LIB_PATH."LC_include.php");
+@include_once(LIB_PATH."lc_settings.php");
+@include_once(LIB_PATH."LC_user.php");
+@include_once(LIB_PATH."pellet.php");
+@include_once(LIB_PATH."LC_db.php");
+@include_once(LIB_PATH."LC_registry.php");
+@include_once(LIB_PATH."pbdo_sql.php");
+@include_once(LIB_PATH."LC_html.php");
+@include_once(LIB_PATH."inputValidation.php");
 
 
 	//start the error system
