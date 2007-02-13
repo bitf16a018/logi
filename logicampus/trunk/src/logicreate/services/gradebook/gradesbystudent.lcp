@@ -26,13 +26,15 @@ class gradesbystudent extends FacultyService {
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
 		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
 		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
-	function Run(&$db,&$u,&$lc,&$t) {
+
+	function run(&$db,&$u,&$lc,&$t) {
 
 		$lc->templateName = 'gradesbystudent_main';
-		$lc->inactivelinks[] = 'View Grades by Student';
+		$this->inactivelinks[] = 'View Grades by Student';
 
 		$gradebook = ClassGradebook::load(
 			array( 'id_classes' => $u->activeClassTaught->id_classes ) );
@@ -50,7 +52,10 @@ class gradesbystudent extends FacultyService {
 	}
 
 	function viewRun(&$db,&$u,&$lc,&$t) {
+
+		$this->inactivelinks[] = 'View Grades by Student';
 		$lc->templateName = 'gradesbystudent_view';
+
 		$uname = $lc->getvars['user'];
 
 		if ( $lc->getvars['print'] ) {
@@ -58,10 +63,6 @@ class gradesbystudent extends FacultyService {
 		} else {
 			$this->applinks['Printer Friendly'] = 'gradesbystudent/event=view/user='.$uname.'/print=yes';
 		}
-
-
-
-
 
 
 
@@ -78,7 +79,6 @@ class gradesbystudent extends FacultyService {
 				the help desk immediately and report this.';
 			return;
 		}
-
 
 
 		$gradebook->loadCategories();

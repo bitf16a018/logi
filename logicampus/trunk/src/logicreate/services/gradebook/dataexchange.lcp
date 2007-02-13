@@ -6,7 +6,7 @@
  */
 
 include_once(LIB_PATH.'LC_form.php');
-class dataexchange extends NoAuth {
+class dataexchange extends FacultyService {
 
 	var $presentor='htmlPresentation';
 	var $cleanedArray = array();

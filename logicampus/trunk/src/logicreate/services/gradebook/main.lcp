@@ -36,7 +36,8 @@ class gradebook extends FacultyOnlyService {
 		'Lessons' => '%classmgr/lessonManager/',
 		'Objectives' => '%classmgr/lessonObjectives/',
 		'Webliography' => '%classmgr/lessonWebliography/'
-	);var $applinks = array(
+	);
+	var $applinks = array(
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
@@ -104,8 +105,9 @@ class gradebook extends FacultyOnlyService {
 	 * Output data: display static template
 	 */
 	function controlPanelRun(&$db,&$u,&$lc,&$t) {
+
+		$this->inactivelinks[] = 'Gradebook Setup';
 		$lc->templateName='main_controlpanel';
-//auto-comment		$lc->templateStyle = 'private';
 
 		$this->sectionTitle = 'Gradebook Setup';
 

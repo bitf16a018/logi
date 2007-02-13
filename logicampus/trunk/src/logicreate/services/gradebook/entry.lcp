@@ -40,13 +40,18 @@ class entry extends FacultyService {
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
 		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
+
 
 	# Holds cleaned postvar data
 	var $data = array();
 
-		function Run(&$db,&$u,&$lc,&$t) {
+		function run(&$db,&$u,&$lc,&$t) {
+
+			$this->inactivelinks[] = 'List Entries';
 			$lc->templateName='entry_main';
 //auto-comment			$lc->templateStyle = 'private';
 			$this->sectionTitle = 'Gradebook Entries';
@@ -65,9 +70,11 @@ class entry extends FacultyService {
 		}
 
 		function addRun(&$db,&$u,&$lc,&$t) {
+
+			$this->inactivelinks[] = 'Add Entry';
 			$lc->templateName='entry_add';
-//auto-comment			$lc->templateStyle = 'private';
 			$this->sectionTitle = 'Add Entry';
+
 
 			// Make sure there are categories
 			$db->queryOne('select count(id_class_gradebook_categories) as cnt from class_gradebook_categories

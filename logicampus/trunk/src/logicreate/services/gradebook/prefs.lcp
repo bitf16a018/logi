@@ -26,13 +26,17 @@ class prefs extends FacultyService {
 		'Contact Students' => '%classmgr/contactStudents/',
 		'Assessments' => 'jack',
 	);
-	var $inactivelinks = array( 'Assessments' );
+
+	var $inactivelinks = array('Gradebook', 'Gradebook Setup');
 	var $applinks = array(
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
 		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
+
 
 /*
  *
@@ -42,13 +46,13 @@ class prefs extends FacultyService {
  * Output data: 
  *
  */
-		function Run(&$db,&$u,&$lc,&$t) {
-			$lc->templateName='prefs_main';
-//auto-comment			$lc->templateStyle = 'private';
-		}
+	function run(&$db,&$u,&$lc,&$t) {
+		$this->inactivelinks[] = 'Gradebook Setup';
+		$lc->templateName='prefs_main';
+	}
 
 		function chooseGradeOptionRun(&$db,&$u,&$lc,&$t) {
-//auto-comment			$lc->templateStyle = 'private';
+			$this->inactivelinks[] = 'Gradebook Setup';
 			$lc->templateName='prefs_chooseGradeOption';
 
 			$gb = ClassGradebook::load( array(
@@ -68,7 +72,9 @@ class prefs extends FacultyService {
 			$t['form'] = $f->ToHTML();			
 		}
 
+
 		function chooseGradeOptionUpdateRun(&$db,&$u,&$lc,&$t) {
+			$this->inactivelinks[] = 'Gradebook Setup';
 			
 			$f = new Siteform();
 			$t['error'] = $f->validateform( 'gboptions', $lc->postvars );
@@ -107,9 +113,10 @@ class prefs extends FacultyService {
 
 		}
 		
-		function chooseColorOptionRun(&$db,&$u,&$lc,&$t)
-		{	
-//auto-comment			$lc->templateStyle = 'private';
+
+		function chooseColorOptionRun(&$db,&$u,&$lc,&$t) {
+
+			$this->inactivelinks[] = 'Gradebook Setup';
 			$lc->templateName='prefs_chooseColorOption';
 
 			$gb = ClassGradebook::load( array(
@@ -126,8 +133,8 @@ class prefs extends FacultyService {
 		}
 		
 		function chooseColorOptionUpdateRun(&$db,&$u,&$lc,&$t) {
-//auto-comment			$lc->templateStyle = 'private';
 
+			$this->inactivelinks[] = 'Gradebook Setup';
 			$gb = ClassGradebook::load( array(
 				'id_classes' => $u->activeClassTaught->id_classes
 			) );
