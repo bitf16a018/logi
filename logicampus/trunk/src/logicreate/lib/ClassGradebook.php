@@ -315,18 +315,18 @@ class ClassGradebook extends ClassGradebookBase {
 	}
 
 	// This was added for classroom/gradebook to load up a SINGLE student
-	function getStudent( $username )
-	{
+	function getStudent( $username ) {
 		//__FIXME__ make sure this uses proper constraints against class/semester/section
 		$db = DB::getHandle();
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 
-		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.dateWithdrawn from profile as p
-			left join class_student_sections as ss on ss.id_student=p.username
-			left join class_sections as s on s.sectionNumber=ss.sectionNumber
-			left join classes as cls on cls.id_semesters=ss.semester_id
+		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.withdrew_on 
+			FROM class_enrollment as ss
+			left join lcUsers as u on ss.student_id = u.pkey
+			left join profile as p on u.username=p.username
+			left join class_sections as s on s.sectionNumber=ss.section_number
+			left join classes as cls on cls.id_classes=ss.class_id
 			where s.id_classes="'.$this->idClasses.'"
-			and cls.id_classes="'.$this->idClasses.'" 
 			and p.username="'.$username.'" ';
 
 		$db->queryOne($sql);

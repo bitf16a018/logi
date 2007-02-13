@@ -43,7 +43,9 @@ class report extends FacultyOnlyService {
  * Output data: display
  *
  */
-	function Run(&$db,&$u,&$lc,&$t) {
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$this->inactivelinks[] = 'Build Printable Report';
 		$lc->templateName='report_main';
 
 		$t['cats'] = ClassGradebookCategoriesPeer::doSelect(
