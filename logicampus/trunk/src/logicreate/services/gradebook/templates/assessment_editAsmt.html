@@ -49,10 +49,10 @@
 <form action="<?=modurl('assessment/event=updateAsmt/');?>" method="post">
 <table cellpadding="2" cellspacing="2" border="0" width="100%">
 
-<tr>
-	<td bgcolor="#FFCE7B"><b>Student</b></td>
-	<td bgcolor="#FFCE7B"><b>Score</b></td>
-	<td bgcolor="#FFCE7B"><b>Comments</b></td>
+<tr class="tabletitle">
+	<td><b>Student</b></td>
+	<td><b>Score</b></td>
+	<td><b>Comments</b></td>
 </tr>
 <? while ( list(,$val) = @each($t['vals']) ) {
 	//$user = lcUser::getUserByUsername($val->username);
@@ -86,8 +86,8 @@
 </tr>
 
 <? if ( !$t['entry']->assessmentId ) { ?>
-<tr>
-	<td colspan="3" bgcolor="#FFCE7B"><b>Adjustments</b></td>
+<tr class="tabletitle">
+	<td colspan="3"><b>Adjustments</b></td>
 </tr>
 <tr>
 	<td>Curve</td>
@@ -152,8 +152,8 @@
 <tr>
 	<td colspan="2">&nbsp;</td>
 </tr>
-<tr>
-	<td colspan="3" bgcolor="#FFCE7B"><b>Gradebook Entry Notes</b></td>
+<tr class="tabletitle">
+	<td colspan="3"><b>Gradebook Entry Notes</b></td>
 </tr>
 <tr>
 	<td valign="top">Notes</td>

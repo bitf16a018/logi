@@ -18,7 +18,8 @@ class gradebook extends StudentService {
 		'Gradebook',
 	);
 
-	function Run(&$db,&$u,&$lc,&$t) {
+
+	function run(&$db,&$u,&$lc,&$t) {
 
 		$lc->templateName='gradebook_main';
 
@@ -69,7 +70,6 @@ class gradebook extends StudentService {
 			if ($score > $usersScore) $t['rank']++;
 			$t['totalRanks']++;
 		}
-
 
 		//loop through all categories and all vals for this one student,
 		// build up all info to pass to template

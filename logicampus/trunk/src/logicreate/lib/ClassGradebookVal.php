@@ -356,12 +356,14 @@ class ClassGradebookVal extends ClassGradebookValBase {
 			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"
 			and id_class_gradebook_entries="'.$entryid.'"');
 		$etitle = $db->Record['title'];
-		
+
+
 		// Get all the students in the class
-		$sql = 'select p.firstname,p.lastname,p.username from profile as p
-			left join class_student_sections as ss on ss.id_student=p.username
-			left join class_sections as s on s.sectionNumber=ss.sectionNumber
-			where s.id_classes="'.$lcUser->activeClassTaught->id_classes.'" 
+		$sql = 'SELECT p.firstname,p.lastname,p.username 
+			FROM class_enrollment AS ss
+			left join lcUsers as U on ss.student_id=U.pkey
+			left join profile as p on p.username=U.username
+			where ss.class_id="'.$lcUser->activeClassTaught->id_classes.'" 
 			AND active=\'1\' 
 			ORDER BY p.lastname';
 		$db->query($sql);
