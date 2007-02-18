@@ -147,7 +147,7 @@ class formMgr extends AdminService{
 			return;
 		} else 
 		{
-			$this->addModifyFormRun(&$db, &$u, &$arg, &$t);
+			$this->addModifyFormRun($db, $u, $arg, $t);
 		}		
 				
 	}	
@@ -315,7 +315,7 @@ class formMgr extends AdminService{
 		{
 			#echo "i'm here and stoppping";
 			#exit();
-			$this->addModifyFormFieldRun($db, $u, $arg, &$t);
+			$this->addModifyFormFieldRun($db, $u, $arg, $t);
 			return;
 		}
 		
@@ -345,7 +345,7 @@ class formMgr extends AdminService{
 		$t['message'] = "Field Updated";
 		#pass the formId as pkey 
 		$arg->getvars['pkey'] = $arg->postvars['formId'];
-		$this->viewFormRun(&$db, &$u, &$arg, &$t);
+		$this->viewFormRun($db, $u, $arg, $t);
 		
 	}	
 
@@ -452,7 +452,7 @@ class formMgr extends AdminService{
 		 	$t['message'] = "This row is already at the end and cannot be moved any higher or lower.";
 		 	# set the pkey from the formId so viewFormRun will work
 		 	$arg->getvars['pkey'] = $formId;
-		 	$this->viewFormRun($db, $u, &$arg, &$t);
+		 	$this->viewFormRun($db, $u, $arg, $t);
 		 	return;
 		 }     	 
      	 # update the key to the new value
@@ -486,7 +486,7 @@ class formMgr extends AdminService{
      	 
      	 # set the pkey to the formId so viewFormRun will work
 		 $arg->getvars['pkey'] = $formId;
-       	 $this->viewFormRun($db, $u, &$arg, &$t);		
+       	 $this->viewFormRun($db, $u, $arg, $t);		
 	}	
 	
 	function resetOrderRun (&$db, &$u, &$arg, &$t)
