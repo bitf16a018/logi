@@ -34,7 +34,6 @@
 	</td>
 </tr>
 
-
 <tr>
 
 	<td colspan="2">
@@ -53,7 +52,7 @@
 	
 	<fieldset style="padding: 5px;">
 	<legend><b style="font-size: 110%">Student Assignment</b></legend>
-	<form method="POST" enctype="multipart/form-data">
+	<form method="POST" enctype="multipart/form-data" id="assignment_form" onsubmit="return assignment_presubmit();">
 	<input type="hidden" name="event" value="submitAssignment">
 	<table cellpadding="2" cellspacing="1" border="0" width="100%">
 		
@@ -126,6 +125,28 @@
 		<?php
 		}
 		?>
+
+		<?php
+		if ($t['f_showform_audio'])
+		{
+		?>
+		<tr>
+			<td colspan="2">
+				<fieldset><legend>Audio</legend>
+					<APPLET 
+					codebase="<?= BASE_URL;?>commentrec/"
+					archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentRecApplet.class WIDTH=380 HEIGHT=100 id="commentrec">
+					<PARAM name="MAYSCRIPT" value="true"/>
+					</APPLET>
+				</fieldset>
+			<input type="hidden" value="" name="audio_data" id="audio_data">
+			</td>
+		</tr>
+		<?php
+		}
+		?>
+
+
 		<tr>
 			<td colspan="2" align="center">
 			<input type="submit" value="Send Assignment" name="submit">
@@ -150,3 +171,16 @@
 
 ?>
 </TABLE>
+
+<script language="javascript">
+	function assignment_presubmit() {
+		var appletobj = document.getElementById('commentrec');
+		if ( (appletobj && typeof appletobj == 'object') || typeof appletobj == 'function' ) { 
+			var inputElement = document.getElementById('audio_data');
+			var blob = appletobj.attachSound();
+			inputElement.value =  blob;
+			return true;
+		}
+		return false;
+	}
+</script>
