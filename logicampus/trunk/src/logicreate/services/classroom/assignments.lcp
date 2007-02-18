@@ -188,7 +188,7 @@ class assignments extends StudentService {
 				// 5 none
 				switch ($db->Record['responseType'])
 				{
-					case 3: $t['f_showform_file'] = true; $t['f_showform_text'] = true;
+					case 3: $t['f_showform_file'] = true; $t['f_showform_text'] = true; break;
 					case 1:	$t['f_showform_file'] = true; if ($db->Record['responseType'] != 3) break;
 					case 2:	
 						$db2 = DB::getHandle();
@@ -209,9 +209,12 @@ class assignments extends StudentService {
 					
 						break;
 					
-					//case 3: $t['f_showform_file'] = true; $t['f_showform_text'] = true; break;
 					// case 4:
+						//forum post
 					// case 5:
+						//none
+					case 6:
+						$t['f_showform_audio'] = true;break;
 					default: 
 					// none
 					$t['f_showform'] = false;
@@ -253,18 +256,11 @@ class assignments extends StudentService {
 			
 		}
 
-/*
- *
- * Show a form to upload the assignment.
- * 
- * Input data: 
- * Output data: 
- *
- */
+
  		/**
- 		 *	Assignment Type (below in datastructure) means 0= text 1=file to determine the individual records
- 		 *		as assignemtns will only have 1 textual input (if selected in assignemnt itself)
- 		 *		however, will/can have multiple files, no limit?
+ 		 * Assignment Type (below in datastructure) means 0= text 1=file to determine the individual records
+ 		 * as assignemtns will only have 1 textual input (if selected in assignemnt itself)
+ 		 * however, will/can have multiple files, no limit?
  		 */
 		function submitAssignmentRun(&$db,&$u,&$lc,&$t) {
 			$todays_epoch_date = mktime(23,59,59,date('m'),date('d'),date('y'));
@@ -273,7 +269,7 @@ class assignments extends StudentService {
 
 			$lc->templateName='assignments_submitAssignment';
 			//
-			// load up assignment, determine what type of submission i'm getting and deal with it accordingly
+			//load up assignment, determine what type of submission i'm getting and deal with it accordingly
 			
 			// @@@@ i have to make sure i'm a student! faculty can not upload
 			
@@ -405,9 +401,33 @@ $sql.='
 						
 						break;
 					
-						// case 4:
-						// case 5:
-					
+					// case 4:
+					// case 5:
+					case 6:
+					//audio files
+						$audioData = base64_decode($lc->postvars['audio_data']);
+						$newfilename = $u->username."_".time();
+						$fileh = fopen(CONTENT_PATH."/uploads/$newfilename","wb");
+						if ( !$fileh ) {
+							trigger_error('couldnt copy file');
+							return;
+						}
+						fwrite($fileh, $audioData);
+						fclose($fileh);
+
+						$sql = '
+						INSERT INTO class_assignments_turnin
+						SET 
+						dateTurnin='.DB::getFuncName('NOW()').',
+						id_class_assignments='. (int)$lc->getvars['id'].', 
+						id_student=\''. $u->username.'\',
+						assign_type=6,
+						assign_file_size='. strlen($audioData) . ',
+						assign_file_name=\''. $newfilename .'\',
+						assign_file_mime=\'audio/x-speex\',
+						assign_file_blob=\''.$newfilename.'\'';
+						$db->query($sql);
+						break;
 				}
 
 // mgk 9/2/03 - make a private message to the instructor that 
