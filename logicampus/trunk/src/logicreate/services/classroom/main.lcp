@@ -18,11 +18,10 @@ class classroom extends StudentService {
  * Input data: 
  * Output data: 
  */
-function Run(&$db,&$u,&$lc,&$t) {
+function run(&$db,&$u,&$lc,&$t) {
 	$ut = time();
 	$lc->templateName='main_main';
-//auto-comment	$lc->templateStyle='private';
-				
+
 	/*****
 	* CLASS SPECIFIC INFORMATION
 	****/
