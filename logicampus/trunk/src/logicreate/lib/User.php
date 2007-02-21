@@ -172,7 +172,7 @@
 		{
 			$this->classesTaken = classObj::getClassesTaken($userid);
 			//Geleli added for gradebookall
-			$this->overAllClassesTaken = classObj::getOverAllClassesTaken($userid);
+//			$this->overAllClassesTaken = classObj::getOverAllClassesTaken($userid);
 			//end of gelali add
 			
 		}
