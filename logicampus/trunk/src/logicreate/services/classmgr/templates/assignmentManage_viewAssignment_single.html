@@ -172,11 +172,11 @@ if ($obj->user->isFaculty())
 				var soundObj = document.getElementById('audioData');
 //				alert(soundObj.value);
 				appletObj.insertSound(soundObj.value);
-				alert("done");
 //				alert("sound set bytes: "+ );
 				}
-				window.setTimeout('insertDataIntoApplet()',5000);
+//				window.setTimeout('insertDataIntoApplet()',5000);
 			</script>
+			<input type="button" value="put sound" onclick="insertDataIntoApplet();"/>
 		</td>
 		</tr>
 	<?php
