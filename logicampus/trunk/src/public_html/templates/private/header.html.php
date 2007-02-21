@@ -104,9 +104,7 @@
 			<?
 			if ($obj->user->username != 'anonymous') {
 			?>
-			<p>
-			<div style="color:#036;font-weight:bold;"><?=lct('welcome',array('name'=>$obj->user->profile->get('firstname'))) ?></div>
-			</p>
+			<div style="color:#036;font-weight:bold;"><p><?=lct('welcome',array('name'=>$obj->user->profile->get('firstname'))) ?></p></div>
 
 			<p>
 			<a href="<?=appurl('login/out/');?>"><?=lct('Logout')?></a>
