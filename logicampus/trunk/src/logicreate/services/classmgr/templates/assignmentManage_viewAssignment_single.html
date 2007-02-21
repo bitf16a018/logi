@@ -105,8 +105,7 @@ if ($obj->user->isFaculty())
 	
 }
 ?>
-
-	<fieldset style="padding: 5px;">
+<fieldset style="padding: 5px;">
 	<legend><b style="font-size: 110%">Teacher Comments<b></legend>
 <br>
 	<table cellpadding="2" cellspacing="1" border="0" width="100%">
@@ -151,6 +150,39 @@ if ($obj->user->isFaculty())
 	<?php
 		}
 	?>
+
+
+	<?php
+		if (count($t['hasAudio'])) {
+	?>
+		<tr>
+	<td valign="top"><b> Attachment(s): </b>
+		</td>
+		<td style="color: blue">
+			<APPLET 
+			codebase="<?= BASE_URL;?>commentrec/"
+			archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentPlayApplet.class WIDTH=380 HEIGHT=100 id="commentrec">
+			<PARAM name="MAYSCRIPT" value="true"/>
+			</APPLET>
+			<input type="hidden" name="audioData" id="audioData" value="<?=$t['audioData'];?>"/>
+			<script language="javascript">
+				function insertDataIntoApplet() {
+				var appletObj = document.getElementById('commentrec');
+//				alert(appletObj);
+				var soundObj = document.getElementById('audioData');
+//				alert(soundObj.value);
+				appletObj.insertSound(soundObj.value);
+				alert("done");
+//				alert("sound set bytes: "+ );
+				}
+				window.setTimeout('insertDataIntoApplet()',5000);
+			</script>
+		</td>
+		</tr>
+	<?php
+		}
+	?>
+
 		<tr>
 		<td colspan="2">
 			
