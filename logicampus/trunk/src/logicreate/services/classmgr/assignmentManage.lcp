@@ -770,35 +770,23 @@ class assignmentManage extends FacultyService {
 
 
 			// get current attachments for this assignment for this student (FILES ONLY)
-			$sql = '
-			SELECT class_assignments_turnin.id_class_assignments_turnin,
-			class_assignments_turnin.assign_file_name,
-			class_assignments_turnin.assign_file_size,
-			class_assignments_turnin.assign_file_mime,
-			class_assignments_turnin.dateTurnin
+		
 
-			FROM class_assignments_turnin
+			$t['attachments'] = $this->getAssignmentsByType(1,
+					$lc->getvars['student'],
+					$u->activeClassTaught->id_classes,
+					$lc->getvars['id_class_assignments']
+					);
 
-			INNER JOIN class_assignments
-				ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
-
-			WHERE id_student=\''. $lc->getvars['student'].'\'
-			AND assign_type=1
-			AND class_assignments.id_classes='. $u->activeClassTaught->id_classes. '
-			AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id_class_assignments'].'
-			';
-			
-			$db->RESULT_TYPE = MYSQL_ASSOC;
-			$db->query($sql);
-			//echo mysql_error();
-			while ($db->next_record())
-			{
-				//debug($db3->Record);
-				$t['attachments'][] = $db->Record;
+			$audioFiles = $this->getAssignmentsByType(6,
+					$lc->getvars['student'],
+					$u->activeClassTaught->id_classes,
+					$lc->getvars['id_class_assignments']
+					);
+			if (count($audioFiles) > 0 ) {
+				$t['hasAudio'] = true;
+				$t['audioData'] = base64_encode(file_get_contents(CONTENT_PATH.'uploads/'.$audioFiles[0]['assign_file_name']));
 			}
-
-
-			#return;
 		} else {
 			// give me a class list
 			$sql = '
@@ -1159,6 +1147,36 @@ class assignmentManage extends FacultyService {
 		);
 	}
  
+
+	function getAssignmentsByType($typeId,$username,$classId,$assignmentId) {
+
+		$db = DB::getHandle();
+		$sql = '
+		SELECT class_assignments_turnin.id_class_assignments_turnin,
+		class_assignments_turnin.assign_file_name,
+		class_assignments_turnin.assign_file_size,
+		class_assignments_turnin.assign_file_mime,
+		class_assignments_turnin.dateTurnin
+
+		FROM class_assignments_turnin
+
+		INNER JOIN class_assignments
+			ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
+
+		WHERE id_student=\''. $username.'\'
+		AND assign_type='.$typeId.'
+		AND class_assignments.id_classes='. $classId. '
+		AND class_assignments_turnin.id_class_assignments='. $assignmentId.'
+		';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+		$ret = array();
+		while ($db->next_record())
+		{
+			$ret[] = $db->Record;
+		}
+		return $ret;
+	}
 }
 
 
