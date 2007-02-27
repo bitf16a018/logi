@@ -2,21 +2,26 @@
 <hr noshade color="#98AA99" id="line">
 <table width="100%" border="0" cellspacing="1" cellpadding="1">
   <tr> 
-    <td width="38%" valign="top" class="coursemaintitle"> <h4>Manage Courses</h4></td>
+    <td width="38%" valign="top" class="coursemaintitle"> <h4>Manage Courses &amp; Classes</h4></td>
     <td width="6%">&nbsp;</td>
     
-    <td width="36%" valign="top" class="coursemaintitle"> <h4>Manage
-	Semesters<br>
+    <td width="36%" valign="top" class="coursemaintitle"> <h4>Manage Semesters<br>
       </h4></td>
       
   </tr>
   <tr> 
     <td valign="top" class="coursemainbody">
 		<a href="<?=APP_URL?>administration/courses/event=addCourse">Add a Course</a> | 
-		 
-
 		<a href="<?=APP_URL?>administration/courses/main">List Courses</a>
 
+		<br/>
+		<a href="<?=APP_URL?>administration/classes/event=add">Add a Class</a> | 
+		<a href="<?=APP_URL?>administration/classes/main">List Classes</a> | 
+		<a href="<?=APP_URL?>administration/classrestore">Restore Class</a> | 
+
+		<a href="<?=APP_URL?>administration/classes_extra">Manage Extra Faculty</a> 
+
+	
 	</td>
 	
     <td>&nbsp;</td>
@@ -32,20 +37,19 @@
   <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
     
    <tr> 
-    <td valign="top" class="coursemaintitle"><h4>Manage Classes</h4></td>
+    <td valign="top" class="coursemaintitle"><h4>Site Content and Tools</h4></td>
     <td>&nbsp;</td>
     <td valign="top" class="coursemaintitle"><h4>Manage Accounts</h4></td>
   </tr>
   <tr> 
     <td valign="top" class="coursemainbody">
-		<a href="<?=APP_URL?>administration/classes/event=add">Add a Class</a> | 
-		<a href="<?=APP_URL?>administration/classes/main">List Classes</a> | 
-		<a href="<?=APP_URL?>administration/classrestore">Restore Class</a> | 
-
-		<a href="<?=APP_URL?>administration/classes_extra">Manage Extra Faculty</a> 
-
-		
-	</td>
+	<a href="<?=MOD_URL?>mod/">Message of the day</a> | 
+	<a href="<?=MOD_URL?>cal/">Calendar</a> |
+	<a href="<?=APP_URL?>docs/">Documents</a> | 
+	<a href="<?=APP_URL?>forum/admin/">Forums</a> |
+	<a href="<?=MOD_URL?>formmgr">Form Manager</a> |
+	<a href="<?=MOD_URL?>menu">Menus</a>
+    </td>
     <td>&nbsp;</td>
     <td valign="top" class="coursemainbody">
 	<a href="<?=APP_URL?>administration/users">List Users</a> | 
@@ -62,7 +66,7 @@
   <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
  
    <tr> 
-    <td valign="top" class="coursemaintitle"><h4>Site Content and Tools</h4></td>
+    <td valign="top" class="coursemaintitle"><h4><?=$t['rssChannelTitle'];?></h4></td>
     <td>&nbsp;</td>
     <td valign="top" class="coursemaintitle">
     <h4>Distance Learning Applications</h4>
@@ -70,13 +74,19 @@
   </tr>
   <tr> 
     <td valign="top" class="coursemainbody">
-	<a href="<?=MOD_URL?>mod/">Message of the day</a> | 
-	<a href="<?=MOD_URL?>cal/">Calendar</a> |
-	<a href="<?=APP_URL?>docs/">Documents</a> | 
-	<a href="<?=APP_URL?>forum/admin/">Forums</a> |
-	<a href="<?=MOD_URL?>formmgr">Form Manager</a> |
-	<a href="<?=MOD_URL?>menu">Menus</a>
-	</td>
+	    <ul>
+	    <?php
+		foreach ($t['rssItems'] as $item ) {
+
+			$title = $item->get_title();
+			$url   = $item->get_permalink();
+			echo "<li><a href=\"$url\">$title</a><br/>";
+			echo substr($item->get_description(),0,100)."..."; 
+			echo "<br/><br/></li>";
+		}
+	    ?>
+	    </ul>
+    </td>
 	<td>&nbsp;</td>
 	<td valign="top" class="coursemainbody">
 	<a href="<?=APP_URL?>examschedule">Exam Scheduling</a> | 
@@ -86,4 +96,8 @@
 	</td>
   </tr>
 
+
 </table>
+
+
+
