@@ -5,14 +5,28 @@
  *
  */
 
-class administration extends AdminService
-{
+//include(LIB_PATH.'magpie/rss_fetch.php');
+include(LIB_PATH.'rss/simplepie.php');
+
+class administration extends AdminService {
 
 	var $presentor = "htmlPresentation";
 
 	
-	function Run($db,&$u,&$lc,&$t)
-	{
+	function Run($db,&$u,&$lc,&$t) {
 		$lc->templateName = 'main_main';
+
+		$url = 'http://sourceforge.net/export/rss2_projnews.php?group_id=95474';
+		$itemCount =0;
+
+		$feed = new SimplePie($url);
+		$feed->init();
+		$feed->handle_content_type();
+		$feed->feed_url($url);
+		foreach ($feed->get_items() as $item) {
+			if (++$itemCount > 4) { break; }
+			$t['rssItems'][] = $item;
+		}
+		$t['rssChannelTitle'] = $feed->get_feed_title();
 	}
 }
