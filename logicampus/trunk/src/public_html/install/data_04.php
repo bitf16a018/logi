@@ -81,7 +81,7 @@ INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, e
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, exp, validationType, message, stripTags, allowedTags, min, max, req, sort, size, maxlength, selectOptions, checked, multiple, useValue, cols, rows, image, parentPkey, rowStyle, groups, notgroups, row, startYear, endYear, dateTimeBit, extra) VALUES (2000597, 200055, 'select', 'responseType', 'Type of response', '', '', 'select', '(if you have other responses, select none and be sure to cover that in your instructions)', 'N', '', 1, 1, 'N', 9, 1, 0, '1=Upload a file,2=Text Response,3=Upload and Text,4=Forum Post,5=None', '', 'N', 'N', 0, 0, '', 0, '', 'a:1:{i:0;s:3:"reg";}', '', 5, '', '', '', '')
+INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, exp, validationType, message, stripTags, allowedTags, min, max, req, sort, size, maxlength, selectOptions, checked, multiple, useValue, cols, rows, image, parentPkey, rowStyle, groups, notgroups, row, startYear, endYear, dateTimeBit, extra) VALUES (2000597, 200055, 'select', 'responseType', 'Type of response', '', '', 'select', '(if you have other responses, select none and be sure to cover that in your instructions)', 'N', '', 1, 1, 'N', 9, 1, 0, '1=Upload a file,2=Text Response,3=Upload and Text,4=Forum Post,6=Audio Response,5=None', '', 'N', 'N', 0, 0, '', 0, '', 'a:1:{i:0;s:3:"reg";}', '', 5, '', '', '', '')
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
