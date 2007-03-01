@@ -154,6 +154,7 @@ if ($obj->user->isFaculty())
 
 	<?php
 		if (count($t['hasAudio'])) {
+		$a = $t['audioFiles'][0];
 	?>
 		<tr>
 	<td valign="top"><b> Attachment(s): </b>
@@ -161,7 +162,7 @@ if ($obj->user->isFaculty())
 		<td style="color: blue">
 			<APPLET 
 			codebase="<?= BASE_URL;?>commentrec/"
-			archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentPlayApplet.class WIDTH=380 HEIGHT=100 id="commentrec">
+			archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentPlayApplet.class WIDTH=380 HEIGHT=112 id="commentrec">
 			<PARAM name="MAYSCRIPT" value="true"/>
 			</APPLET>
 			<input type="hidden" name="audioData" id="audioData" value="<?=$t['audioData'];?>"/>
@@ -171,12 +172,11 @@ if ($obj->user->isFaculty())
 //				alert(appletObj);
 				var soundObj = document.getElementById('audioData');
 //				alert(soundObj.value);
-				appletObj.insertSound(soundObj.value);
-//				alert("sound set bytes: "+ );
+				appletObj.setSoundUrl("<?=modurl('assignmentManage/event=getFile/id_class_assignments='.$obj->getvars['id_class_assignments'].'/student='.$obj->getvars['student'].'/turnin='.$a['id_class_assignments_turnin']."/".$obj->getvars['student']."_".$a['id_class_assignments_turnin']."_".$a['assign_file_name'])?>","");
 				}
 //				window.setTimeout('insertDataIntoApplet()',5000);
 			</script>
-			<input type="button" value="put sound" onclick="insertDataIntoApplet();"/>
+			<input type="button" value="Download Assignment to Applet" onclick="insertDataIntoApplet();"/>
 		</td>
 		</tr>
 	<?php

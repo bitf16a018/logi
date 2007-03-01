@@ -20,6 +20,7 @@ class assignments extends StudentService {
 		2=>"Text response",
 		3=>"Upload and text",
 		4=>"Forum post",
+		6=>"Audio Response",
 		5=>"None",
 		);
 
