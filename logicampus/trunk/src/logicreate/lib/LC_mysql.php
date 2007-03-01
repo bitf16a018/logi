@@ -6,7 +6,17 @@ class mysql extends DB {
 
 
  	var $RESULT_TYPE = MYSQL_ASSOC;
+	var $_types = array();
 
+
+	/**
+ 	 * constructor
+	 */
+	function mysql() { 
+		$this->_types['ASSOC'] = MYSQL_ASSOC;
+		$this->_types['NUM'] = MYSQL_NUM;
+		$this->_types['BOTH'] = MYSQL_BOTH;
+	}
 
 	/**
 	 * Connect to the DB server
@@ -17,7 +27,6 @@ class mysql extends DB {
 	function connect() {
 
 		if ( $this->driverID == 0 ) {
-                #echo "g<Br>";
                 if ($this->persistent=='y') {
 			$this->driverID=mysql_pconnect($this->host, $this->user,$this->password);
                 } else {
@@ -106,7 +115,7 @@ class mysql extends DB {
 
 	function nextRecord($resID=false) {
 		$ret = $this->next_record($resID);
-		$this->record = $this->Record;
+		$this->record =& $this->Record;
 		return $ret;
 	}
 
@@ -189,10 +198,7 @@ class mysql extends DB {
 	 */
 	function setResultType($type="ASSOC") {
 		$type = strtoupper($type);
-		$types['ASSOC'] = MYSQL_ASSOC;
-		$types['NUM'] = MYSQL_NUM;
-		$types['BOTH'] = MYSQL_BOTH;
-		$this->RESULT_TYPE = $types[$type];
+		$this->RESULT_TYPE = $this->_types[$type];
 	}
 
 	/**
@@ -222,9 +228,9 @@ class mysql extends DB {
 	 * @return string Error message
 	 */
 	function getLastError() {
-	    $this->errorNumber = mysql_errno();
-	    $this->errorMessage = mysql_error();
-	return $this->errorMessage;
+		$this->errorNumber = mysql_errno();
+		$this->errorMessage = mysql_error();
+		return $this->errorMessage;
 	}
 
 
@@ -249,10 +255,20 @@ class mysql extends DB {
 	}
 
 
-
+	/**
+	 * disconnect from the database
+ 	 *
+ 	 */
 	function disconnect() {
 		mysql_close();
 	}
+
+
+	/**
+	 * get list of tables for current database
+	 *
+ 	 * @return array Array of database names
+ 	 */
 	function getTables() {
 		$this->query("show tables");
 		$j = $this->RESULT_TYPE;
@@ -262,6 +278,8 @@ class mysql extends DB {
 		$this->RESULT_TYPE = $j;
 		return $x;
 	}
+
+
 	function getTableIndexes($table='') {
 		$this->query("show index from $table");
 		while($this->next_record()) {
@@ -272,40 +290,49 @@ class mysql extends DB {
 		return $_idx;
 	}
 
+
+	/**
+	 * get column data for given table
+	 * 
+	 * @param string Table name
+	 * @return array Array of table information
+	 *
+	 */
+
 	function getTableColumns($table='') {
 		if ($this->driverID == 0 ) {$this->connect();}
 		$dbfields = @mysql_list_fields($this->database,$table,$this->driverID);
 		if (!$dbfields) { return false; }
 		$columns =  mysql_num_fields($dbfields);
 		$this->RESULT_TYPE= MYSQL_ASSOC;
-for ($i = 0; $i < $columns; $i++) {
-	$name = mysql_field_name($dbfields, $i);
-if ( ($this->RESULT_TYPE == MYSQL_ASSOC)  || ($this->RESULT_TYPE == MYSQL_BOTH) ) {
-	$field[name][$name] = $name;
-	 $field[type][$name] =  mysql_field_type($dbfields, $i);
-	 $field[len][$name] =  mysql_field_len($dbfields, $i);
-	 $field[flags][$name] =  mysql_field_flags($dbfields, $i);
-}
-if ( ($this->RESULT_TYPE == MYSQL_NUM)  || ($this->RESULT_TYPE == MYSQL_BOTH) ) {
-	 $field[name][] =  $name;
-	 $field[type][] =  mysql_field_type($dbfields, $i);
-	 $field[len][] =  mysql_field_len($dbfields, $i);
-	 $field[flags][] =  mysql_field_flags($dbfields, $i);
-}
-}
-$this->query("describe $table");
-while($this->next_record()) {
-	$type = $this->Record['Type'];
-	$name = $this->Record['Field'];
-	if (eregi("\(",$type)) {
-		list($type,$junk) = split("\(",$type);
-		if ($type=='enum') { $type.= "(".$junk; }
-	} else {
-		$field['len'][$name] = '';
-	}
-	$field['type'][$name] = $type;
-}
-return $field;
+		for ($i = 0; $i < $columns; $i++) {
+			$name = mysql_field_name($dbfields, $i);
+		if ( ($this->RESULT_TYPE == MYSQL_ASSOC)  || ($this->RESULT_TYPE == MYSQL_BOTH) ) {
+			$field[name][$name] = $name;
+			 $field[type][$name] =  mysql_field_type($dbfields, $i);
+			 $field[len][$name] =  mysql_field_len($dbfields, $i);
+			 $field[flags][$name] =  mysql_field_flags($dbfields, $i);
+		}
+		if ( ($this->RESULT_TYPE == MYSQL_NUM)  || ($this->RESULT_TYPE == MYSQL_BOTH) ) {
+			 $field[name][] =  $name;
+			 $field[type][] =  mysql_field_type($dbfields, $i);
+			 $field[len][] =  mysql_field_len($dbfields, $i);
+			 $field[flags][] =  mysql_field_flags($dbfields, $i);
+		}
+		}
+		$this->query("describe $table");
+		while($this->next_record()) {
+			$type = $this->Record['Type'];
+			$name = $this->Record['Field'];
+			if (eregi("\(",$type)) {
+				list($type,$junk) = split("\(",$type);
+				if ($type=='enum') { $type.= "(".$junk; }
+			} else {
+				$field['len'][$name] = '';
+			}
+			$field['type'][$name] = $type;
+		}
+		return $field;
 	}
 
 }
