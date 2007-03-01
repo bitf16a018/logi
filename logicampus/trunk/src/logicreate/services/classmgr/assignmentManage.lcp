@@ -778,14 +778,15 @@ class assignmentManage extends FacultyService {
 					$lc->getvars['id_class_assignments']
 					);
 
-			$audioFiles = $this->getAssignmentsByType(6,
+			$t['audioFiles'] = $this->getAssignmentsByType(6,
 					$lc->getvars['student'],
 					$u->activeClassTaught->id_classes,
 					$lc->getvars['id_class_assignments']
 					);
-			if (count($audioFiles) > 0 ) {
+			if (count($t['audioFiles']) > 0 ) {
 				$t['hasAudio'] = true;
 				$t['audioData'] = base64_encode(file_get_contents(CONTENT_PATH.'uploads/'.$audioFiles[0]['assign_file_name']));
+			
 			}
 		} else {
 			// give me a class list
@@ -1113,10 +1114,11 @@ class assignmentManage extends FacultyService {
 		INNER JOIN class_assignments
 			ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
 
-		WHERE 
-		class_assignments_turnin.id_class_assignments_turnin='.(int)$lc->getvars['turnin'].'
+		WHERE  1=1
+		
+		AND class_assignments_turnin.id_class_assignments_turnin='.(int)$lc->getvars['turnin'].'
 		AND id_student=\''. $lc->getvars['student'].'\'
-		AND assign_type=1
+		AND (assign_type=1 OR assign_type=6)
 		AND class_assignments.id_classes='. $u->activeClassTaught->id_classes. '
 		AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id_class_assignments'].'
 		';

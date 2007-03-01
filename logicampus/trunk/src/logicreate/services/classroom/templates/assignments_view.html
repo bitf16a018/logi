@@ -135,7 +135,7 @@
 				<fieldset><legend>Audio</legend>
 					<APPLET 
 					codebase="<?= BASE_URL;?>commentrec/"
-					archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentRecApplet.class WIDTH=380 HEIGHT=100 id="commentrec">
+					archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentRecApplet.class WIDTH=380 HEIGHT=112 id="commentrec">
 					<PARAM name="MAYSCRIPT" value="true"/>
 					</APPLET>
 				</fieldset>
@@ -181,6 +181,6 @@
 			inputElement.value =  blob;
 			return true;
 		}
-		return false;
+		return true;
 	}
 </script>
