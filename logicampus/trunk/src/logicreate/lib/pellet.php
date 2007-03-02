@@ -49,7 +49,30 @@ class Service {
 	// CONTENT HANDLERS
 
 
+	/**
+	 * Encode template variables for javascript consumption
+	 */
+	function jsonPresentation (&$obj,&$t) {
 
+		require_once(LIB_PATH.'JSON.php');
+		$json = new Services_JSON();
+		header("Content-type: text/script");
+		$newarray =array();
+		foreach ($t as $key => $val) {
+			if (substr($key,0,1) == '_') continue;
+			//specific to campus
+			if ($key == 'sectionheader') continue;
+			$newarray[$key] = $val;
+		//	echo Service::jsPrintValue2($key,$val);
+		}
+//	echo 'alert(\''.$json->encode($newarray).'\');var t='.$json->encode($newarray).';';
+		echo 't='.$json->encode($newarray).';';
+	}
+
+
+	/**
+	 * Include basic header, footer, and module template ($obj->templateName)
+	 */
 	function htmlPresentation (&$obj,&$t) {
 		//put the template and content together to form a 
 		// basic html page
@@ -59,7 +82,9 @@ class Service {
 	}
 
 
-
+	/**
+	 * Include print header, print footer, and module template ($obj->templateName)
+	 */
 	function printPresentation (&$obj,&$t) {
 		//put the template and content together to form a 
 		// basic html page
@@ -69,6 +94,9 @@ class Service {
 	}
 
 
+	/**
+	 * Include basic header and footer and show an error message
+	 */
 	function errorMessage (&$obj,&$t) {
 			include_once(TEMPLATE_PATH."header.html.php");
 			print "<h3>Error:</h3> \n\n ".$t[message]." <p>\n".$t[details];
@@ -76,6 +104,9 @@ class Service {
 	}
 
 
+	/**
+	 * Include just the module template.
+	 */
 	function emptyPresentation (&$obj,&$t) {
 		include_once($obj->module_root."templates/".$obj->templateName.".html");
 	}
@@ -382,7 +413,9 @@ class AdminService extends Service {
 			}
 
 		}
-		$t['sectionheader'] = substr($t['sectionheader'],0,-8);
+		if ( count($this->navlinks) > 0 ) {
+			$t['sectionheader'] = substr($t['sectionheader'],0,-8);
+		}
 		$t['sectionheader']  .= '</div>';
 		if ( count($this->applinks) > 0 ) {
 			$t['sectionheader'] .= '<div id="applinks"><b class="title">Application Links:</b>&nbsp;&nbsp;';

@@ -66,7 +66,7 @@
   <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
  
    <tr> 
-    <td valign="top" class="coursemaintitle"><h4><?=$t['rssChannelTitle'];?></h4></td>
+    <td id="td_newsTitle" valign="top" class="coursemaintitle"><h4>Loading News...</h4></td>
     <td>&nbsp;</td>
     <td valign="top" class="coursemaintitle">
     <h4>Distance Learning Applications</h4>
@@ -74,7 +74,7 @@
   </tr>
   <tr> 
     <td valign="top" class="coursemainbody">
-	    <ul>
+	    <ul id="ul_newsItems">
 	    <?php
 		foreach ($t['rssItems'] as $item ) {
 
@@ -100,4 +100,37 @@
 </table>
 
 
+<script language="javascript">
+var t;
+function setRssNews(template) {
+	var titleObj = document.getElementById('td_newsTitle');
+	var ulObj = document.getElementById('ul_newsItems');
+	titleObj.innerHTML = template.rssChannelTitle;
+	for (i = 0; i <= template.rssItems.length; i++) {
+		var list = document.createElement('li');
+		var anch = document.createElement('a');
+		var br = document.createElement('br');
+		var txt = document.createTextNode(template.rssItems[i].data.description);
+		anch.innerHTML = template.rssItems[i].data.title;
+		anch.setAttribute('href',template.rssItems[i].data.link.alternate[0]);
+		list.appendChild(anch);
+		list.appendChild(br);
+		list.appendChild(txt);
+		ulObj.appendChild(list);
+	}
+}
 
+function getRssNews() {
+	var script_filename = '<?=appurl('administration/main/event=news');?>';
+	var js = document.createElement('script');
+	js.setAttribute('language', 'javascript');
+	js.setAttribute('type', 'text/javascript');
+	js.setAttribute('src', script_filename);
+	//html_doc.appendChild(js);
+	document.getElementsByTagName('head')[0].appendChild(js);
+	js.onload = function () {setRssNews(t);}
+	js.onreadystatechange = function () {setRssNews(t);}
+//	return false;
+}
+getRssNews();
+</script>
