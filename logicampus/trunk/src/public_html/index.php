@@ -17,7 +17,7 @@
 
 //hack to get some java plugins from requesting classes outside the class path
 //  known bug in jres since 2000
-if (strstr($PATH_INFO,'javax') ) {header("HTTP/1.0 404 File Not Found"); exit();}
+if (strstr($_SERVER['PATH_INFO'],'javax') ) {header("HTTP/1.0 404 File Not Found"); exit();}
 ob_start();
 
 		/*
