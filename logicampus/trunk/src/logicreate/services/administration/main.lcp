@@ -20,7 +20,7 @@ class administration extends AdminService {
 		$itemCount =0;
 
 		$feed = new SimplePie($url);
-		$feed->set_timeout(0.1);
+		$feed->set_timeout(4);
 		$feed->init();
 		$feed->handle_content_type();
 		$feed->feed_url($url);
@@ -31,6 +31,5 @@ class administration extends AdminService {
 		}
 		$t['rssChannelTitle'] = $feed->get_feed_title();
 		$this->presentor = 'jsonPresentation';
-
 	}
 }
