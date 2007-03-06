@@ -102,11 +102,16 @@
 
 <script language="javascript">
 var t;
-function setRssNews(template) {
+var alreadyRun=false
+function setRssNews() {
+	if (alreadyRun) { return true;}
+	alreadyRun=true;
+	var template=t;
+
 	var titleObj = document.getElementById('td_newsTitle');
 	var ulObj = document.getElementById('ul_newsItems');
 	titleObj.innerHTML = template.rssChannelTitle;
-	for (i = 0; i <= template.rssItems.length; i++) {
+	for (i = 0; i <= template.rssItems.length-1; i++) {
 		var list = document.createElement('li');
 		var anch = document.createElement('a');
 		var br = document.createElement('br');
@@ -127,9 +132,11 @@ function getRssNews() {
 	js.setAttribute('type', 'text/javascript');
 	js.setAttribute('src', script_filename);
 	//html_doc.appendChild(js);
-	document.getElementsByTagName('head')[0].appendChild(js);
-	js.onload = function () {setRssNews(t);}
-	js.onreadystatechange = function () {setRssNews(t);}
+	if (!document.getElementsByTagName('head')[0].appendChild(js)) {
+	}
+	js.onload = function () {setRssNews();}
+	js.onreadystatechange = function () {setRssNews();}
+	window.setTimeout(js.onload,5000);
 //	return false;
 }
 getRssNews();
