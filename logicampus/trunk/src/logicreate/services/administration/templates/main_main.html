@@ -4,7 +4,7 @@
 
 
   <tr> 
-    <td colspan="3" valign="top" class="coursemaintitle"> <h4>Dashboard</h4></td>
+    <td colspan="3" valign="top" class="coursemaintitle">Dashboard</td>
       </h4></td>
       
   </tr>
@@ -12,12 +12,17 @@
     <td colspan="3" valign="top" class="coursemainbody">
 		<table border="0" cellspacing="3" cellpadding="4" width="100%">
 		<tr>
-			<th align="right">Site Operating Mode:</th><td><?= $t['currentMode'];?></td>
-			<th align="right">Courses / Classes:</th><td><?=$t['courseCount'];?> / <?=$t['classCount'];?></td>
+			<th width="25%" align="right">Site Operating Mode:</th>
+			<td><?= $t['currentMode'];?></td>
+
+			<th width="25%" align="right">Courses / Classes:</th>
+			<td width="25%"><?=$t['courseCount'];?> / <?=$t['classCount'];?></td>
 		</tr>
 		<tr>
-			<th align="right">Site Template:</th><td><?= $t['currentTemplate'];?></td>
-			<th align="right">Students / Enrollment:</th><td><?= $t['studentCount'];?> / <?= $t['enrollmentCount'];?></td>
+			<th width="25%" align="right">Site Template:</th>
+			<td><?= $t['currentTemplate'];?></td>
+			<th width="25%" align="right">Students / Enrollment:</th>
+			<td width="25%"><?= $t['studentCount'];?> / <?= $t['enrollmentCount'];?></td>
 		</tr>
 		</table>
     </td>
