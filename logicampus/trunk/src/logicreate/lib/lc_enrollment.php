@@ -131,6 +131,36 @@ class lcClassEnrollment {
 	function deActivateStudent($studentId) {
 		$this->activateStudent($studentId,0);
 	}
+
+
+	/**
+	 * get a count of currently enrolled students
+	 * @static
+	 */
+	function getEnrollmentCount() {
+		$db = DB::getHandle();
+		$db->query("SELECT count(*) as total
+			FROM class_enrollment AS A
+			LEFT JOIN semesters AS B ON A.semester_id = B.semesterId
+			WHERE active=1
+			AND B.dateEnd >= NOW()");
+		$db->nextRecord();
+		return $db->record['total'];
+	}
+
+
+	/**
+	 * get a count of students
+	 * @static
+	 */
+	function getStudentCount() {
+		$db = DB::getHandle();
+		$db->query("SELECT count(*) as total
+			FROM lcUsers AS A
+			WHERE userType=".USERTYPE_STUDENT);
+		$db->nextRecord();
+		return $db->record['total'];
+	}
 }
 
 ?>

@@ -131,6 +131,35 @@ class lcClass {
 		}
 		return $ret;
 	}
+
+
+	/**
+	 * get a count of currently running classes
+	 * @static
+	 */
+	function getClassCount() {
+		$db = DB::getHandle();
+		$db->query("SELECT count(*) as total
+			FROM classes AS A
+			LEFT JOIN semesters AS B ON A.id_semesters = B.semesterId
+			WHERE 1=1
+			AND B.dateEnd >= NOW()");
+		$db->nextRecord();
+		return $db->record['total'];
+	}
+
+
+	/**
+	 * get a count of courses 
+	 * @static
+	 */
+	function getCourseCount() {
+		$db = DB::getHandle();
+		$db->query("SELECT count(*) as total
+			FROM courses");
+		$db->nextRecord();
+		return $db->record['total'];
+	}
 }
 
 ?>
