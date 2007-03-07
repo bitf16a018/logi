@@ -1,6 +1,29 @@
 <h1>Administration</h1>
 <hr noshade color="#98AA99" id="line">
 <table width="100%" border="0" cellspacing="1" cellpadding="1">
+
+
+  <tr> 
+    <td colspan="3" valign="top" class="coursemaintitle"> <h4>Dashboard</h4></td>
+      </h4></td>
+      
+  </tr>
+  <tr> 
+    <td colspan="3" valign="top" class="coursemainbody">
+		<table border="0" cellspacing="3" cellpadding="4" width="100%">
+		<tr>
+			<th align="right">Site Operating Mode:</th><td><?= $t['currentMode'];?></td>
+			<th align="right">Courses / Classes:</th><td><?=$t['courseCount'];?> / <?=$t['classCount'];?></td>
+		</tr>
+		<tr>
+			<th align="right">Site Template:</th><td><?= $t['currentTemplate'];?></td>
+			<th align="right">Students / Enrollment:</th><td><?= $t['studentCount'];?> / <?= $t['enrollmentCount'];?></td>
+		</tr>
+		</table>
+    </td>
+  </tr>
+
+
   <tr> 
     <td width="38%" valign="top" class="coursemaintitle"> <h4>Manage Courses &amp; Classes</h4></td>
     <td width="6%">&nbsp;</td>
@@ -110,7 +133,7 @@ function setRssNews() {
 
 	var titleObj = document.getElementById('td_newsTitle');
 	var ulObj = document.getElementById('ul_newsItems');
-	titleObj.innerHTML = template.rssChannelTitle;
+	titleObj.innerHTML = '<h4>'+template.rssChannelTitle+'</h4>';
 	for (i = 0; i <= template.rssItems.length-1; i++) {
 		var list = document.createElement('li');
 		var anch = document.createElement('a');
