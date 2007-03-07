@@ -141,7 +141,7 @@ class lcClass {
 		$db = DB::getHandle();
 		$db->query("SELECT count(*) as total
 			FROM classes AS A
-			LEFT JOIN semesters AS B ON A.id_semesters = B.semesterId
+			LEFT JOIN semesters AS B ON A.id_semesters = B.id_semesters
 			WHERE 1=1
 			AND B.dateEnd >= NOW()");
 		$db->nextRecord();
