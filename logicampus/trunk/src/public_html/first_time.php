@@ -63,6 +63,7 @@ function tryToMakeTables(&$gdb) {
 			if (trim($schema) == '') { continue;}
 			if (!$gdb->query($schema)) {
 				echo "query failed. ($x)\n";
+				echo $gdb->errorMessage."\n";
 				print_r($schema);
 				exit();
 				return false;

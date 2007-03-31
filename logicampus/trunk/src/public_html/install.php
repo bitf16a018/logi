@@ -1,4 +1,8 @@
 <?php
+if (! defined('BASE_URL') ) {
+	die("Do not access this page directly.");
+}
+
 if ($_GET['action']) {
 	header('Content-type: text/plain');
 	header('Content-disposition: attachment;filename="defines.php"');
