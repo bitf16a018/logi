@@ -133,7 +133,7 @@ Build Date: <?php echo LOGICAMPUS_BUILD_DATE;?>
 		$post .="\n";
 		$post .= '&user_agent='.$_SERVER['HTTP_USER_AGENT'];
 		$post .="\n";
-		$post .= '&campus_version=1.1.6a';
+		$post .= '&campus_version='.LOGICAMPUS_VERSION.LOGICAMPUS_VERSION_STATUS;
 		$post .="\n";
 		$post .= '&php_version='.$PHP_VERSION;
 		$post .="\n";
