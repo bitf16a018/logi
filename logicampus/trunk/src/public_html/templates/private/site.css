@@ -164,11 +164,13 @@ button
 	/**
          *      Other
          */
-td.coursemaintitle
+.coursemaintitle
 {
         background-color:#9C0000;
         font-weight:700;
         padding-left:15px;
+	padding-top:3px;
+	padding-bottom:3px;
         margin-bottom:3px;
         color:#FFF;
 }
