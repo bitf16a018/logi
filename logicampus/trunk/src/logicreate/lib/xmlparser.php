@@ -26,7 +26,7 @@ class xmlparser
 	
 	function write_file($fh)
 	{
-		fwrite($fh, "<?xml version='1.0' encoding='UTF-8'?>\n");
+		fwrite($fh, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
 		if (is_object($this->root))
 		{	$this->root->wr_node($fh);
