@@ -66,7 +66,7 @@ $script = substr($SCRIPT_FILENAME,strrpos($SCRIPT_FILENAME,'/')+1);
 $tail = str_replace($script,'',$SCRIPT_NAME);
 $tail = str_replace('herc/','',$tail);
 $doc = str_replace($script,'',$SCRIPT_FILENAME);
-$doc = str_replace('herc/','',$doc);
+//$doc = str_replace('herc/','',$doc);
 
 
 define('DOCUMENT_ROOT',$doc);
@@ -107,7 +107,7 @@ define('LOG_EXECUTION_TIME',true);
 define('LOG_OUTPUT',false );
 
 // Defines for Hercules Admin system
-define('_SERVICE_PATH',DOCUMENT_ROOT.'herc/');
+define('_SERVICE_PATH',DOCUMENT_ROOT.'/');
 define('_BASE_URL','http://'.$base.$tail.'herc/');
 define('_SECURE_BASE_URL','https://'.$base.$tail.'herc/');
 
