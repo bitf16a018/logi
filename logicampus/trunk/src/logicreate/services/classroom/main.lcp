@@ -5,6 +5,7 @@
  * assignments, calendar, dictionary, thesarus, etc.
  */
 include_once(LIB_PATH."eventsObj.php");
+include_once(LIB_PATH."lc_table_calendar.php");
 
 
 class classroom extends StudentService {
@@ -147,24 +148,23 @@ function run(&$db,&$u,&$lc,&$t) {
 
 			# Grab last assignment, lesson and event for class
 
-			# Add a calendar
-
 			/*****
 			 * MOTD
 			 ****/
 			$t['motd'] = LcSettings::getSystemMotd();
 
-			if (strlen($t['motd']) == 0)
-			{
-				$t['motd'] = 'There is currently no message of the
-				day.';
+			if (strlen($t['motd']) > 0) {
+				$x = truncateText($t['motd']);
+				$t['motd'] = "<a href='".appurl("classroom/details/event=viewMOTD")."'>$x</a>";
 			}
 
 			
 			
-			/**
-			 *	Calendar for Portal page (Encompasses all classes that are taken by student)
+			/*
+			 *  Calendar for Portal page.
+			 *   encompasses all classes that are taken by student
 			 */				
+			/*
 			$mut = (is_numeric($lc->getvars['m'])) ? 
 						(int)$lc->getvars['m'] : date('m');
 			$yut = (is_numeric($lc->getvars['y'])) ? 
@@ -175,7 +175,7 @@ function run(&$db,&$u,&$lc,&$t) {
 			
 			$calendar_epoch_time = strtotime("$mut/1/$yut");
 			$calendar_epoch_time = mktime(0,0,0,date('m',$calendar_epoch_time),1,date('Y',$calendar_epoch_time));
-
+			 */
 			if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
 			{	foreach($u->classesTaken as $v)
 				{	$op_taken[] = trim($v->id_classes);
@@ -184,7 +184,21 @@ function run(&$db,&$u,&$lc,&$t) {
 			} else
 			{	$op_taken[] = $u->activeClassTaken->id_classes;
 			}
-			
+
+
+			$classId = (int)$u->activeClassTaken->id_classes;
+			$m = (int) $lc->getvars['m'];
+			$d = (int) $lc->getvars['d'];
+			$y = (int) $lc->getvars['y'];
+
+			$calendar = LC_Table_ClassCalendar::getMonthCalendar($op_taken,$y,$m,$d);
+
+			$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
+			$t['calendarRenderer']->setCompact(true);
+
+
+
+		/*	
 			reset($u->classesTaken);
 			
 			$c = new cali($calendar_epoch_time,(strtotime("+1 months",$calendar_epoch_time)-1), '', $op_taken, $use_groups);
@@ -195,6 +209,7 @@ function run(&$db,&$u,&$lc,&$t) {
 			$c->noNextPrev = true;
 			$c->monthLinkToZero = true;
 			$c->fl_no_link_numerical_day_event = false;
+		 */
 
 			/**
 			 *	This is a marker to say when we were here.. so that if we click
@@ -202,25 +217,32 @@ function run(&$db,&$u,&$lc,&$t) {
 			 *	say within 2-3 mins we can provide a link back here (this calculation
 			 *	takes place within the mastercalendar/day module
 			 */
-			$u->sessionvars['mastercalendar']['comingfromclassroomportal'] = time();
+//			$u->sessionvars['mastercalendar']['comingfromclassroomportal'] = time();
 			
-			$c->calWidth = '100%';	
+//			$c->calWidth = '100%';	
 			
 			/**
 			 *	marking this so the mastercalendar knows to display ALL classes 
 			 *	this student is taken within it's view.
 			 */		
+			/*
 			$u->sessionvars['mastercalendar']['overallviews'] = 'vtaken';
 			
 			$c->monthReviewURL = appurl('mastercalendar/d='.$lc->getvars['d']);
 			$c->eventDayURL = appurl('mastercalendar/day');
 			$c->eventCountURL = appurl('mastercalendar/');
 			$t['calendar'] = $c->renderMonth(date('m',$calendar_epoch_time), date('Y',$calendar_epoch_time));
-
+			 */
 	}
 
 
 
+}
+
+function truncateText($string,$len=240) { 
+if (strlen($string)<=$len) { return $string; }
+$string = substr($string,0,$len)." ... (more) ";
+return $string;
 }
 
 ?>

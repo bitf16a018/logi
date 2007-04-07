@@ -1,42 +1,33 @@
-<?=$t['sectionheader'];?>
+<h2>Classroom Home</h2>
 <? if ( $t['message'] ) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
 <? if ( $t['error'] ) print '<span style="color:red;">'.$t['message'].'</span>'; ?>
 
 <table border=0 cellpadding="2" cellspacing="0" width="100%">
 <tr>
-	<td valign="top" width="30%">
+	<td width="33%" valign="top">
+
 
 		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
-		<tr class="menu">
-			<td class="portalbox">Announcements<br/><small>(<?= ($t['num_announcements'] > 0) ? '1':'0';?> of <?=$t['num_announcements'];?> <a href="<?=APP_URL?>classroom/announcements">view all</a>)</small></td>
+		<tr>
+			<td class="portalbox">Class Calendar</td>
 		</tr>
 		<tr>
-			<td><?=$t['announcements'];?></td>
+			<td>
+			<div class="calendar_controls" id="calendar_controls">
+				<?=$t['calendarRenderer']->controlsToHTML();?>
+
+			</div>
+			<div class="calendar" id="calendar">
+				<?=$t['calendarRenderer']->toHTML();?>
+			</div>
+			</td>
 		</tr>
 		</table>
-<p>
+
+
+		<br/>
+
 		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
-		<tr class="menu">
-			<td class="portalbox">Message from 
-			<BR>Distance Learning</td>
-		</tr>
-		<tr>
-			<td><?=$t['motd'];?></td>
-		</tr>
-		</table>
-	
-	</td><td valign="top">
-		<div class="calendar_controls" id="calendar_controls">
-			<?=$t['calendarRenderer']->controlsToHTML();?>
-
-		</div>
-		<div class="calendar" id="calendar">
-			<?=$t['calendarRenderer']->toHTML();?>
-		</div>
-	</td>
-
-	<td width="30%" valign="top">
-			<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
 		<tr class="menu">
 			<td class="portalbox">Lessons<br/><small>(<?=$t['_PortalNumOfLessons']?> of <?=$t['lessoncount']?> <a href="<?=APP_URL?>classroom/lessons">view all</a>)</small></td>
 		</tr>
@@ -47,7 +38,8 @@
 			<td><?=$t['lessons'];?></td>
 		</tr>
 		</table>
-		<p>
+
+		<br/>
 
 		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
 		<tr class="menu">
@@ -80,10 +72,57 @@
 
 
 
+
+
+	</td>
+
+	<td width="10">&nbsp;</td>
+
+	<td valign="top">
+
+	<!--	<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Announcements<br/><small>(<?= ($t['num_announcements'] > 0) ? '1':'0';?> of <?=$t['num_announcements'];?> <a href="<?=APP_URL?>classroom/announcements">view all</a>)</small></td>
+		</tr>
+		<tr>
+			<td><?=$t['announcements'];?></td>
+		</tr>
+		</table>
+
+		<br/>
+		-->
+
+<div style="margin:auto;text-align:center; padding:7px; border:1px solid blue; background-color:#EEF;">
+	<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
+				<img src="<?=IMAGES_URL;?>msg_info.png"/>
+	</td><td>
+		<?=$t['motd'];?>
+	</td></tr></table>
+</div>
+
+		<br/>
+
+		<ol>
+			<li><a href="<?= modurl('announcements');?>">Announcements</a></li>
+			<li><a href="<?= modurl('announcements');?>">Tests</a></li>
+			<li><a href="<?= modurl('announcements');?>">Assignments</a></li>
+			<li><a href="<?= modurl('announcements');?>">Calendar</a></li>
+			<li><a href="<?= modurl('announcements');?>">Chat</a></li>
+			<li><a href="<?= modurl('announcements');?>">Classmates</a></li>
+			<li><a href="<?= modurl('announcements');?>">Discussion Boards</a></li>
+			<li><a href="<?= modurl('announcements');?>">Class FAQs</a></li>
+			<li><a href="<?= modurl('announcements');?>">Gradebook</a></li>
+			<li><a href="<?= modurl('announcements');?>">Lessons</a></li>
+			<li><a href="<?= modurl('announcements');?>">Presentations</a></li>
+			<li><a href="<?= modurl('announcements');?>">Syllabus</a></li>
+			<li><a href="<?= modurl('announcements');?>">Who's online</a></li>
+			<li><a href="<?= modurl('announcements');?>">Webliography</a></li>
+			<li><a href="<?= modurl('announcements');?>">Dictionary / Thesaurus</a></li>
+		</ol>
 	</td>
 </tr>
 <tr>
-	<td colspan='3'>
+	<td colspan="3">
 <?
 		# We do not show this block until a faculty 
 		# member chooses something
@@ -102,3 +141,5 @@
 </tr>
 
 </table>
+
+
