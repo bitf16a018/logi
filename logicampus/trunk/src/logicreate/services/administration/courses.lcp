@@ -105,11 +105,9 @@ class courses extends AdminService
 		$this->sectionTitle = 'Add Course';
 		$this->inactivelinks = array( 'Add Course' );
 		$lc->templateName = 'courses_addcourse';
-
 	}
 
-	function editCourseRun(&$db,&$u,&$lc,&$t)
-	{
+	function editCourseRun(&$db,&$u,&$lc,&$t) {
 
 		$this->sectionTitle = 'Edit Course';
 
