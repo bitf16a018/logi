@@ -56,7 +56,8 @@ class Service {
 
 		require_once(LIB_PATH.'JSON.php');
 		$json = new Services_JSON();
-		header("Content-type: text/script");
+//		header("Content-type: text/script");
+		header("Content-type: application/x-javascript");
 		$newarray =array();
 		foreach ($t as $key => $val) {
 			if (substr($key,0,1) == '_') continue;
