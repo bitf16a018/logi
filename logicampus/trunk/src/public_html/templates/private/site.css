@@ -175,13 +175,13 @@ button
         color:#FFF;
 }
 
-tr.bartitle
+.bartitle
 {
         background-color:#9C0000;
         color:#FFF;
 }
 
-tr.bartitle td a
+.bartitle td a
 {
         color:#FFF;
         font-weight:700;
@@ -228,12 +228,6 @@ TD.portalbox a:hover
         color:#FFF;
         font-size:120%;
         font-weight:700;
-}
-
-.titlehead
-{
-        background-color:#9C0000;
-        color:#FFF;
 }
 
 TABLE.grayoutline
