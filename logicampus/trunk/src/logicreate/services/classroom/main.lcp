@@ -184,6 +184,7 @@ function run(&$db,&$u,&$lc,&$t) {
 			} else
 			{	$op_taken[] = $u->activeClassTaken->id_classes;
 			}
+			reset($u->classesTaken);
 
 
 			$classId = (int)$u->activeClassTaken->id_classes;
@@ -196,20 +197,6 @@ function run(&$db,&$u,&$lc,&$t) {
 			$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
 			$t['calendarRenderer']->setCompact(true);
 
-
-
-		/*	
-			reset($u->classesTaken);
-			
-			$c = new cali($calendar_epoch_time,(strtotime("+1 months",$calendar_epoch_time)-1), '', $op_taken, $use_groups);
-			$c->showTitle = false;
-			$c->showTimes = false;
-			$c->linkMonthName = false;
-			$c->showEventCount = false;
-			$c->noNextPrev = true;
-			$c->monthLinkToZero = true;
-			$c->fl_no_link_numerical_day_event = false;
-		 */
 
 			/**
 			 *	This is a marker to say when we were here.. so that if we click
