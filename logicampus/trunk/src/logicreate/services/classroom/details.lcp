@@ -229,12 +229,12 @@ class details extends StudentService {
 			$sql = "SELECT id_class_resource FROM classes WHERE 
 					id_classes = '".$u->activeClassTaken->id_classes."'";
 			$db->queryOne($sql);
-			$id_content = $db->Record[0];
+			$id_content = $db->Record['id_class_resource'];
 
 			$sql = "SELECT txText from class_lesson_content WHERE 
 			id_class_lesson_content = '$id_content'";
 			$db->queryOne($sql);
-			$t['classresource'] = $db->Record[0];
+			$t['classresource'] = $db->Record['txText'];
 
 			// stupid hack to get a feedback message
 			if ($u->sessionvars['message']) {
