@@ -1,4 +1,4 @@
-<h2>Classroom Home</h2>
+<h2>Classroom Home &emdash; <?php echo $obj->user->activeClassTaken->courseFamilyNumber .' '. $obj->user->activeClassTaken->courseName;?></h2>
 <? if ( $t['message'] ) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
 <? if ( $t['error'] ) print '<span style="color:red;">'.$t['message'].'</span>'; ?>
 
@@ -77,7 +77,8 @@
 
 	<td valign="top">
 
-	<!--	<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<!--
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
 		<tr class="menu">
 			<td class="portalbox">Announcements<br/><small>(<?= ($t['num_announcements'] > 0) ? '1':'0';?> of <?=$t['num_announcements'];?> <a href="<?=APP_URL?>classroom/announcements">view all</a>)</small></td>
 		</tr>
@@ -89,15 +90,19 @@
 		<br/>
 		-->
 
-<div style="margin:auto;text-align:center; padding:7px; border:1px solid blue; background-color:#EEF;">
-	<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
-				<img src="<?=IMAGES_URL;?>msg_info.png"/>
-	</td><td>
-		<?=$t['motd'];?>
-	</td></tr></table>
-</div>
+		<?php 
+		if (strlen($t['announcements']) ) {
+			echo lcMessageBox($t['announcements'],'i','Announcements'); 
+			echo "<br/>\n";
+		}
 
-		<br/>
+		if (strlen($t['motd']) ) {
+			echo lcMessageBox($t['motd'],'i','Message of the Day'); 
+			echo "<br/>\n";
+		}
+
+		?>
+
 
 		<ol>
 			<li><a href="<?= modurl('announcements');?>">Announcements</a></li>

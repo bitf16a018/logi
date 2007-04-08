@@ -53,16 +53,12 @@
 	</td>
 	<td width="10">&nbsp;</td>
 	<td valign="top">
-		<?php if (strlen($t['motd']) ) {?>
-		<div style="margin:auto;text-align:center; padding:7px; border:1px solid blue; background-color:#EEF;">
-			<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
-						<img src="<?=IMAGES_URL;?>msg_info.png"/>
-			</td><td>
-				<?=$t['motd'];?>
-			</td></tr></table>
-		</div>
-		<br/>
-		<?php } ?>
+		<?php 
+
+		if (strlen($t['motd']) ) {
+			echo lcMessageBox($t['motd'],'i','Message of the Day'); 
+			echo "<br/>\n";
+		} ?>
 
 
 		<?php foreach($obj->user->classesTaken as $k=>$class)  { ?>
