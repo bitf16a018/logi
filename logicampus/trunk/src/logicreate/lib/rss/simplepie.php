@@ -41,7 +41,7 @@ class SimplePie
 	var $xml_dump = false;
 	var $enable_cache = false;
 	var $max_minutes = 60;
-	var $cache_location = './cache';
+	var $cache_location = '../../cache';
 	var $order_by_date = true;
 	var $input_encoding = false;
 	var $cache_class = 'SimplePie_Cache';
@@ -2403,10 +2403,10 @@ class SimplePie_Cache
 	
 	function SimplePie_Cache($location, $filename, $extension)
 	{
-		$this->location = $location;
+		$this->location = dirname(__FILE__).'/'.$location;
 		$this->filename = rawurlencode($filename);
 		$this->extension = rawurlencode($extension);
-		$this->name = "$location/$this->filename.$this->extension";
+		$this->name = $this->location."/$this->filename.$this->extension";
 	}
 	
 	function save($data)
