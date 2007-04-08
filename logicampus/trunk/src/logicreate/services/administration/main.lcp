@@ -40,6 +40,7 @@ class administration extends AdminService {
 		$itemCount =0;
 
 		$feed = new SimplePie($url);
+		$feed->enable_cache = true;
 		$feed->set_timeout(4);
 		$feed->init();
 		$feed->handle_content_type();

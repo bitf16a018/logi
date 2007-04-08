@@ -596,10 +596,12 @@ class LessonNew extends FacultyService {
 			}
 		}
 
+		/*
 		if (!$validEntry) {
 			$t['message'] = "You need to choose at least one objective.";
 			return false;
 		}
+		 */
 
 
 		foreach($itemArray as $k=>$v) {
