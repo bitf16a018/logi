@@ -1162,7 +1162,7 @@ function lcMessageBox($errorList, $type='i', $title='') {
 		foreach ($errorList as $e) {
 			$errors .= "<li>".$e."</li>\n";
 		}
-		$errors = '</ul>';
+		$errors .= '</ul>';
 	} else {
 		$errors = $errorList;
 	}

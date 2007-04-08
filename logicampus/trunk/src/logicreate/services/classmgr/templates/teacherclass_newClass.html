@@ -1,12 +1,9 @@
 <?=$t['sectionheader'];?>
 
-<span style="color:red;">
-<?php if (count($t['error'])>0) 
-{
-foreach ($t['error'] as $num=>$k){
-?><?=$k;?><BR><?php }
-}	?>
-</span>
+<?php if (count($t['error'])>0)  {
+ echo lcMessageBox($t['error'],'w');
+}
+?>
 
 <table width="95%" border="0" cellspacing="3" cellpadding="4">
 	<form method="POST" enctype="application/x-www-form-urlencoded" action="<?=appurl('classmgr/teacherclass/event=saveClass');?>">
