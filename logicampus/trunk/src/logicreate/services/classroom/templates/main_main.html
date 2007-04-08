@@ -65,11 +65,11 @@
 		<?php } ?>
 
 
-<? while (list ($k,$class) = @each($obj->user->classesTaken) ) { ?>
-<h4><a href="<?=modurl('details/id_classes='.$class->id_classes);?>"><?=$class->courseFamilyNumber;?> - <?=$class->courseName?></a></h4>
-<?=$t['classdata'][$class->id_classes]?>
-<br>
-<? } ?>
+		<?php foreach($obj->user->classesTaken as $k=>$class)  { ?>
+		<h4><a href="<?=modurl('details/id_classes='.$class->id_classes);?>"><?=$class->courseFamilyNumber;?> - <?=$class->courseName?></a></h4>
+		<?=$t['classdata'][$class->id_classes]?>
+		<br>
+		<?php } ?>
 
 	</td>
 </tr>

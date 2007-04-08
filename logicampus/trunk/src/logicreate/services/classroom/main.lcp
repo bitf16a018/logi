@@ -184,7 +184,6 @@ function run(&$db,&$u,&$lc,&$t) {
 			} else
 			{	$op_taken[] = $u->activeClassTaken->id_classes;
 			}
-			reset($u->classesTaken);
 
 
 			$classId = (int)$u->activeClassTaken->id_classes;
