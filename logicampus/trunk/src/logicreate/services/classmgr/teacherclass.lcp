@@ -318,7 +318,7 @@ function makeClass($db, &$u, &$lc, &$t){
 		}
 
 		if(!validateLength($lc->postvars['coursename'],1))
-			$t['error'][] = '* Please enter a class name';
+			$t['error'][] = 'Please enter a class name';
 
 		if (count($t['error']) > 0){
 			$t['error'][] = 'Please fix the problems above then resubmit the form';
@@ -332,7 +332,7 @@ function makeClass($db, &$u, &$lc, &$t){
 			$this->presentor = 'redirectPresentation';
 			$u->addSessionMessage("Class was successfully added.");
 			$t['url'] = appurl('classmgr');
-return;
+		return;
 		}
 
 		//if errors, use old template name.
