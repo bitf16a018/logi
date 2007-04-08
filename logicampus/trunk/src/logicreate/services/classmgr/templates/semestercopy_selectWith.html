@@ -11,23 +11,21 @@
 <?=$t['warning_message'] ;?>
 </font>
 
-<fieldset>
-	<legend>Irreversible Operation</legend>
-<blockquote>
+	<?php echo lcMessageBox('
+If you have any data in <strong>'.$update.'</strong> that you need saved do not procede. 
+It will be deleted from the system if you decide to go through with this 
+update.'
+, 'a', 'Irreversible Operation.');
+	?>
+
+	<blockquote>
 	<i>You are about to replace the current material in:</i><br/>
 	<?=$t['update']['semesterId']. ' '.$t['update']['courseFamilyNumber']. ' '.$t['update']['courseName'];?>
 	<br/><br/>
 	<i>With the material from:</i>
 	<br/>
 	<?=$t['with']['semesterId']. ' '.$t['with']['courseFamilyNumber']. ' '.$t['with']['courseName'];?>
-</blockquote>
-</fieldset>
-
-Please be aware that you will essentially remove all data associated 
-[<B><?=$update;?></B>] and insert all data from [<B><?=$with;?></B>]. 
-If you have any data in [<B><?=$update;?></B>] that you need saved, please save it now. 
-It will be deleted from the system if you decide to go through with this 
-update.
+	</blockquote>
 <br>
 <br>
 <form method="post">

@@ -1166,10 +1166,14 @@ function lcMessageBox($errorList, $type='i', $title='') {
 	} else {
 		$errors = $errorList;
 	}
+	if (strlen($title) ) {
+		$title = '<h2>'.$title.'</h2>';
+	}
 $html .= '<div style="margin:auto;text-align:center; padding:7px; border:1px solid '.$border.'; background-color:'.$bg.';">
 	<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
 				<img src="'.IMAGES_URL.$img.'"/>
 	</td><td>
+		'.$title.'
 		'.$errors.'
 	</td></tr></table>
 </div>
