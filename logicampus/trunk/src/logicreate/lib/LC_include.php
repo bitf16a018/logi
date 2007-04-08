@@ -1135,4 +1135,45 @@ function lcUuid() {
 		);
 }
 
+function lcMessageBox($errorList, $type='i', $title='') {
+	$html = '';
+	$errors = '';
+	switch ($type) {
+		case 'e':
+		case 'w':
+			$img = 'msg_warn.png';
+			$border = 'red';
+			$bg = '#FEE';
+			break;
+		case 'a':
+			$img = 'msg_alert.png';
+			$border = 'black';
+			$bg = '#FFB';
+			break;
+		case 'i':
+		default :
+			$img = 'msg_info.png';
+			$border = 'blue';
+			$bg = '#EEF';
+			break;
+	}
+	if (is_array($errorList) ) {
+		$errors = '<ul>';
+		foreach ($errorList as $e) {
+			$errors .= "<li>".$e."</li>\n";
+		}
+		$errors = '</ul>';
+	} else {
+		$errors = $errorList;
+	}
+$html .= '<div style="margin:auto;text-align:center; padding:7px; border:1px solid '.$border.'; background-color:'.$bg.';">
+	<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
+				<img src="'.IMAGES_URL.$img.'"/>
+	</td><td>
+		'.$errors.'
+	</td></tr></table>
+</div>
+';
+return $html;
+}
 ?>
