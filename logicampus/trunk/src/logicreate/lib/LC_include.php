@@ -235,8 +235,8 @@ class lcSystem {
 
 	var $postvars;
 	var $getvars;
-	var $templateStyle = 'private';
-	//var $templateStyle = 'sinorca';
+	//var $templateStyle = 'private';
+	var $templateStyle = 'sinorca';
 	var $TRACK_SESSIONS = true;
 	var $cssFile;
 
@@ -251,9 +251,9 @@ class lcSystem {
                         $stripquotes($_GET,$stripquotes);
                 }
 
-		$this->postvars = 	$_POST;
-		$this->getvars = 	$_GET;
-		$this->uploads  = 	$_FILES;
+		$this->postvars =      $_POST;
+		$this->getvars  =      $_GET;
+		$this->uploads  =      $_FILES;
 
 		//__FIXME__ use a constant to turn on and off
 		$e =& ErrorStack::_singleton();
@@ -1167,9 +1167,9 @@ function lcMessageBox($errorList, $type='i', $title='') {
 		$errors = $errorList;
 	}
 	if (strlen($title) ) {
-		$title = '<h2>'.$title.'</h2>';
+		$title = '<h3>'.$title.'</h3>';
 	}
-$html .= '<div style="margin:auto;text-align:center; padding:7px; border:1px solid '.$border.'; background-color:'.$bg.';">
+$html .= '<div class="messagebox" style="margin:auto;text-align:center; padding:3px 7px 3px 7px; border:1px solid '.$border.'; background-color:'.$bg.';">
 	<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
 				<img src="'.IMAGES_URL.$img.'"/>
 	</td><td>
