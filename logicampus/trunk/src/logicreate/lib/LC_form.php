@@ -1111,7 +1111,7 @@
 			
 			if ($error) {
 				$this->error = TRUE;
-			return "<h4>ERROR</h4><ul>$error</ul>";	
+				return lcMessageBox($error,'e');
 			} else {
 				$this->error = FALSE;
 				return;
