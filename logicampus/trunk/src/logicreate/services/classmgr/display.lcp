@@ -44,12 +44,13 @@ class display extends FacultyService {
 		$t['classObj'] = $u->activeClassTaught;
 		$this->inactivelinks[] = 'Classroom Manager';
 
-		$lc->templateName = 'display_main';	
+		$lc->templateName = 'display_main';
 
 		/*****
 		* MOTD
 		****/
 		$t['motd'] = LcSettings::getSystemMotd();
+
 
 		if (strlen($t['motd']) == 0)
 		{

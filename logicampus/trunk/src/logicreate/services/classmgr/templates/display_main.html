@@ -1,12 +1,8 @@
 <?=$t['sectionheader'];?>
 <?
-/*
-	if ($t['motd']) {
-	?>
-	<div width="100%" style="border:1px solid #999999;background-color:#dddddd;margin:0 100px 15px 100px;padding:5px;"><b><?=lct('Message of the Day')?>:</b><p style="padding-left:20px;"><?=$t['motd'];?></p></div>
-	<?
-	}
-	*/
+if ($t['motd']) {
+	echo lcMessageBox($t['motd'], lct('Message of the Day'));
+}
 ?>
 
 
@@ -16,7 +12,7 @@
 			<div class="coursemaintitle">
 				Setup Your Class
 			</div>
-			<ol style="font-size:150%">
+			<ol style="font-size:130%">
 			<li><a href="<?=modurl('classSetup');?>"><?=lct('Classroom Setup')?></a></li>
 			<li><a href="<?=APP_URL?>classmgr/syllabusManage"><?=lct('Syllabus')?></a></li>
 			<li><a href="<?=APP_URL?>gradebook/main/event=controlPanel"><?=lct('Gradebook Setup')?></a></li>
@@ -37,7 +33,7 @@
 			<div class="coursemaintitle">
 				Create Class Content
 			</div>
-			<ol style="font-size:150%">
+			<ol style="font-size:130%">
 			<li><a href="<?=modurl('lessonManager');?>"><?=lct('Lessons')?></a></li>
 			<li><a href="<?=modurl('lessonContent');?>"><?=lct('Content')?></a></li>
 			<li><a href="<?=modurl('lessonObjectives');?>"><?=lct('Objectives')?></a></li>
@@ -57,7 +53,7 @@
 			<div class="coursemaintitle">
 				Run Your Class
 			</div>
-			<ol style="font-size:150%">
+			<ol style="font-size:130%">
 
 			<li><a href="<?=APP_URL?>gradebook/main/"><?=lct('Gradebook')?></a></li>
 			<li><a href="<?=modurl('cal/');?>"><?=lct('Calendar')?></a></li>
