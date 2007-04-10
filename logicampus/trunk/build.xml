@@ -136,6 +136,8 @@
 		<include name="templates/**"/>
 		<include name="install/**"/>
 		<exclude name="install/*CVS*"/>
+		<include name="commentrec/**"/>
+		<exclude name="commentrec/*CVS*"/>
 		<include name="templates/private/**"/>
 		<include name="templates/default/**"/>
 		<include name="templates/debug/**"/>
