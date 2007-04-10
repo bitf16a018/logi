@@ -68,7 +68,7 @@
       <div class="subHeader">
         <span class="doNotDisplay">Navigation:</span>
 
-	<a alt="Home" href="<?=appurl('');?>"><img src="<?=TEMPLATE_URL;?>images/menu-widget.png" height="16" border="0" alt="" /><?=lct('Home Page')?></a> |
+	<a alt="Home" href="<?=appurl('');?>"><?=lct('Home Page')?></a> |
 	<a href="<?=appurl('faq/')?>"><?=lct('FAQs')?></a> |
 	<a href="<?=appurl('mastercalendar/')?>"><?=lct('Calendar')?></a> |
 	<a href="<?=appurl('helpdesk/')?>"><?=lct('Help Desk')?></a> |

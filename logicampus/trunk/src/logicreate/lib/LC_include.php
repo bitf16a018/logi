@@ -1142,19 +1142,16 @@ function lcMessageBox($errorList, $type='i', $title='') {
 		case 'e':
 		case 'w':
 			$img = 'msg_warn.png';
-			$border = 'red';
-			$bg = '#FEE';
+			$class = 'msg_info';
 			break;
 		case 'a':
 			$img = 'msg_alert.png';
-			$border = 'black';
-			$bg = '#FFB';
+			$class = 'msg_alert';
 			break;
 		case 'i':
 		default :
 			$img = 'msg_info.png';
-			$border = 'blue';
-			$bg = '#EEF';
+			$class = 'msg_info';
 			break;
 	}
 	if (is_array($errorList) ) {
@@ -1169,7 +1166,7 @@ function lcMessageBox($errorList, $type='i', $title='') {
 	if (strlen($title) ) {
 		$title = '<h3>'.$title.'</h3>';
 	}
-$html .= '<div class="messagebox" style="margin:auto;text-align:center; padding:3px 7px 3px 7px; border:1px solid '.$border.'; background-color:'.$bg.';">
+$html .= '<div class="messagebox '.$class.'">
 	<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="60">
 				<img src="'.IMAGES_URL.$img.'"/>
 	</td><td>
