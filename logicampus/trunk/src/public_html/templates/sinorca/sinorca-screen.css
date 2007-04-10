@@ -241,7 +241,6 @@ acronym, .titleTip {
   padding: 0;
 }
 
-
 #main-copy .topOfPage {
   color: white;
   background-color: transparent;
@@ -344,8 +343,9 @@ dd {
   background-color:#f0f0f0;
   border:1px solid silver;
   padding:3px;
-  line-height:1.1em;
-  font-size:smaller;
+  line-height:1.2em;
+  font-size:-1;
+  margin-bottom:.5em;
 }
 
 #sectionheader a {
