@@ -1,4 +1,11 @@
-<h2>Classroom Home &emdash; <?php echo $obj->user->activeClassTaken->courseFamilyNumber .' '. $obj->user->activeClassTaken->courseName;?></h2>
+<h2 style="">Classroom Home &mdash; <?php echo $obj->user->activeClassTaken->courseFamilyNumber .' '. $obj->user->activeClassTaken->courseName;?></h2>
+<table border=0 cellpadding=2 cellspacing=0 width="80%">
+	<tr><td align="center">
+	<img border="0" src="<?=IMAGES_URL;?>icon-flag.png"/>&nbsp;<a href="<?=modurl('syllabus');?>">classroom syllabus</a>
+	</td><td align="center">
+	<img border="0" src="<?=IMAGES_URL;?>icon-users.png"/>&nbsp;<a href="<?=modurl('facultyProfile');?>">contact instructor</a>
+	</td></tr>
+</table>
 <? if ( $t['message'] ) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
 <? if ( $t['error'] ) print '<span style="color:red;">'.$t['message'].'</span>'; ?>
 
