@@ -69,18 +69,21 @@ DO NOT LEAVE THE PERMISSIONS THIS WAY
 THIS IS JUST FOR THE INSTALL
 
 Next, change the permissions on public_html/defines.php so the web
-server can write to this file.  Note:  the defines.php file must be a
-zero byte file for the installer to run.  
+server can write to this file.  
 
 chmod 777 public_html/defines.php
 
 Next, run the web-based installer.  Example: 
 
-http://yourdomain.com/public_html/install.php
+http://yourdomain.com/public_html/index.php
 
 or
 
-http://yourdomain.com/install.php
+http://yourdomain.com/index.php
+
+
+DO NOT RUN THE FILE NAMED "install.php"
+
 
 Adjust the above url based on your document root of your web server
 and where you installed LogiCampus.  After the install runs you will
