@@ -3,23 +3,18 @@
 ?>
 <?=$t['sectionheader'];?>
 
-<? if ( !$t['print'] ) { ?>
-<div style="float:right;margin:10px;width:120px;">
-	<p>Click <a href="<?=modurl('syllabus/print=yes/');?>">here</a> for a printer friendly version.</p>
+<?php if ( !$t['print'] ) { ?>
+<div style="text-align:right;margin:3px;width:auto;">
+	Click <a href="<?=modurl('syllabus/print=yes/');?>">here</a> for a printer friendly version.
 </div>
-<? } ?>
+<?php } ?>
 
-<? if ( $t['profile']['photo'] && is_file(IMAGES_PATH.'photos/'.$t['profile']['photo']) ) { ?>
-<div align="center" style="float:right;margin:10px;"><img src="<?=IMAGES_URL.'photos/'.$t['profile']['photo'];?>" alt="<?=$t['profile']['firstname'].' '.$t['profile']['lastname'];?>" border=1 /><br/><?=$t['profile']['firstname'].' '.$t['profile']['lastname'];?></div>
-<? } ?>
-
-<h1><?=$t['course']['courseFamily'].' '.$t['course']['courseNumber'];?>:<br/>
-<?=$t['course']['courseName'];?></h1>
-
-<h2>Course Information Document<br/>
-<?=$t['semester']['semesterTerm'].' '.$t['semester']['semesterYear'];?></h2>
-
-<hr size=1 />
+<?php if ( $t['profile']['photo'] && is_file(IMAGES_PATH.'photos/'.$t['profile']['photo']) ) { ?>
+<div align="center" style="float:right;margin:10px;">
+	<img src="<?=IMAGES_URL.'photos/'.$t['profile']['photo'];?>" alt="<?=$t['profile']['firstname'].' '.$t['profile']['lastname'];?>" border=1 /></div>
+<?php } ?>
+<h2 border="1px solid black;"><?=$t['course']['courseFamily'].' '.$t['course']['courseNumber'];?>:<br/>
+<?=$t['course']['courseName'];?></h2>
 
 <h3>Faculty Information</h3>
 <div class="contentchunk">
