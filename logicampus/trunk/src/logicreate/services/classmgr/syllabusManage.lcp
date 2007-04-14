@@ -26,7 +26,7 @@
  */
 
 include_once(LIB_PATH.'SiteForms.php');
-include_once(LIB_PATH.'classSyllabusObj.php');
+include_once(LIB_PATH.'PBDO/ClassSyllabus.php');
 
 class syllabusManage extends FacultyService {
 

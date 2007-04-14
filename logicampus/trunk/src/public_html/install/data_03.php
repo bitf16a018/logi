@@ -85,7 +85,7 @@ INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, e
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, exp, validationType, message, stripTags, allowedTags, min, max, req, sort, size, maxlength, selectOptions, checked, multiple, useValue, cols, rows, image, parentPkey, rowStyle, groups, notgroups, row, startYear, endYear, dateTimeBit, extra) VALUES (2000576, 200053, 'text', 'courseNumber', 'Enter the course number', '', '', 'numericChars', '(Example:  1401)', 'Y', '', 4, 4, 'Y', 2, 4, 4, '', '', '', '', 0, 0, '', 0, '', 'a:1:{i:0;s:3:"reg";}', '', 21, '', '', '', '')
+INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, exp, validationType, message, stripTags, allowedTags, min, max, req, sort, size, maxlength, selectOptions, checked, multiple, useValue, cols, rows, image, parentPkey, rowStyle, groups, notgroups, row, startYear, endYear, dateTimeBit, extra) VALUES (2000576, 200053, 'text', 'courseNumber', 'Enter the course number', '', '', 'numericChars', '(Example:  1401)', 'Y', '', 2, 6, 'Y', 2, 4, 4, '', '', '', '', 0, 0, '', 0, '', 'a:1:{i:0;s:3:"reg";}', '', 21, '', '', '', '')
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
@@ -93,7 +93,7 @@ INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, e
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, exp, validationType, message, stripTags, allowedTags, min, max, req, sort, size, maxlength, selectOptions, checked, multiple, useValue, cols, rows, image, parentPkey, rowStyle, groups, notgroups, row, startYear, endYear, dateTimeBit, extra) VALUES (2000538, 200053, 'text', 'courseFamily', 'Enter the course family', '', '', 'alphaChars', '(Example:  ENGL)', 'Y', '', 4, 4, 'Y', 1, 4, 4, '', '', '', '', 0, 0, '', 0, '', 'a:1:{i:0;s:3:"reg";}', '', 3, '', '', '', '')
+INSERT INTO lcForms (pkey, formId, type, fieldName, displayName, defaultValue, exp, validationType, message, stripTags, allowedTags, min, max, req, sort, size, maxlength, selectOptions, checked, multiple, useValue, cols, rows, image, parentPkey, rowStyle, groups, notgroups, row, startYear, endYear, dateTimeBit, extra) VALUES (2000538, 200053, 'text', 'courseFamily', 'Enter the course family', '', '', 'alphaChars', '(Example:  ENGL)', 'Y', '', 2, 6, 'Y', 1, 4, 4, '', '', '', '', 0, 0, '', 0, '', 'a:1:{i:0;s:3:"reg";}', '', 3, '', '', '', '')
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter

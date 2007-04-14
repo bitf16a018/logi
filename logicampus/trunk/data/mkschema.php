@@ -19,6 +19,9 @@ $schemas['users'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/class_enrollment.mysql.sql'));
 $schemas['enrollment'] = explode(";\n",$setupFile);
 
+$setupFile = trim(file_get_contents('../data/class_syllabus.mysql.sql'));
+$schemas['syllabus'] = explode(";\n",$setupFile);
+
 $setupFile = trim(file_get_contents('../data/lcForms.sql'));
 $data['forms'] = explode(";\n",$setupFile);
 
