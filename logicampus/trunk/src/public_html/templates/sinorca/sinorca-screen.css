@@ -304,7 +304,14 @@ dd {
 #footer a:hover {
   text-decoration: none;
 }
+
 /* ##### LC SPECIFIC ###### */
+
+H1,H2,H3,H4,H5
+{
+        margin:2px;
+}
+
 .bartitle {
   color: white;
   background-color: rgb(0,51,153);
