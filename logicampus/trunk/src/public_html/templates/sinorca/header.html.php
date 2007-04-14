@@ -180,3 +180,9 @@
 
     <div id="main-copy">
 
+<?php 
+	$sysMessages = $obj->user->getSessionMessages();
+	if ( count($sysMessages) ) {
+		echo lcMessageBox($sysMessages);
+	}
+?>

@@ -165,13 +165,6 @@
 <?php 
 	$sysMessages = $obj->user->getSessionMessages();
 	if ( count($sysMessages) ) {
-?>
-<div style="background-color:silver;font-weight:bold;border:2px solid blue;">
-
-<?php 
-	echo '<li>'.implode('</li><li>',$sysMessages).'</li>';
-?>
-</div>
-<?php
+		echo lcMessageBox($sysMessages);
 	}
 ?>
