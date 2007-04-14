@@ -3,4 +3,28 @@
 <? if ($t['msg']) { ?><span style="color:blue"><?=$t['msg'];?></span><? } ?>
 
 <p>Please fill out the form below and click the 'Update Syllabus' button to save the information. You may find it useful to first type up the content in a word processor so you can edit more effectively, and then copy/paste the text into the form on this page.</p>
-<?=$t['form'];?>
+
+<ul>
+<?php
+foreach($t['syllabi'] as $id => $title) {
+echo "<li>".$title."</li>\n";
+}
+?>
+<ul>
+
+<form method="POST">
+	<select name="title">
+		<option>Course Objectives</option>
+		<option>Method of Instruction</option>
+		<option>E-mail Policy</option>
+		<option>Course Requirements</option>
+		<option>Point Allocation of Grades</option>
+		<option>Other Information</option>
+	</select>
+	<br/>
+	<textarea cols="80" rows="15" name="content"></textarea>
+	<input type="hidden" name="event" value="update"/>
+	<br/>
+	<input type="submit" value="save"/>
+</form>
+
