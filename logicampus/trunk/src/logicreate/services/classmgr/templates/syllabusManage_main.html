@@ -2,29 +2,52 @@
 <? if ($t['error']) { ?><span style="color:red"><?=$t['error'];?></span><? } ?>
 <? if ($t['msg']) { ?><span style="color:blue"><?=$t['msg'];?></span><? } ?>
 
-<p>Please fill out the form below and click the 'Update Syllabus' button to save the information. You may find it useful to first type up the content in a word processor so you can edit more effectively, and then copy/paste the text into the form on this page.</p>
+<p>Here, you can build your syllabus section by section.  Choose a section and type in your syllabus description then click "save".  As you add sections, you can see a preview of your syllabus and edit each section below the form.</p>
+
 
 <ul>
 <?php
 foreach($t['syllabi'] as $id => $title) {
-echo "<li>".$title."</li>\n";
+echo "<li><a href=\"#sec-".$id."\">".$title."</a></li>\n";
 }
 ?>
 <ul>
+<br/>
+
 
 <form method="POST">
 	<select name="title">
+		<option>Assignments</option>
+		<option>Attendance Policy</option>
 		<option>Course Objectives</option>
-		<option>Method of Instruction</option>
-		<option>E-mail Policy</option>
 		<option>Course Requirements</option>
+		<option>Course Schedule</option>
+		<option>E-mail Policy</option>
+		<option>Grading Policy</option>
+		<option>Grading Scale</option>
+		<option>Method of Instruction</option>
 		<option>Point Allocation of Grades</option>
+		<option>Office Hours</option>
 		<option>Other Information</option>
 	</select>
 	<br/>
+	<?php if ($t['editId']) {  ?>
+	<textarea cols="80" rows="15" name="content"><?= $t['content'][$t['editId']];?></textarea>
+	<input type="hidden" name="editId" value="<?=$t['editId'];?>"/>
+	<?php } else { ?>
 	<textarea cols="80" rows="15" name="content"></textarea>
+	<?php } ?>
 	<input type="hidden" name="event" value="update"/>
 	<br/>
 	<input type="submit" value="save"/>
 </form>
 
+<p>
+<?php
+foreach($t['syllabi'] as $id => $title) {
+echo "<a name=\"sec-".$id."\"/>\n";
+echo "<h3>".$title."&nbsp;<a href=\"".modurl('syllabusManage/event=edit/id='.$id)."\">[edit]</a></h3>\n";
+echo "<p>".$t['content'][$id]."</p>\n";
+}
+?>
+</p>

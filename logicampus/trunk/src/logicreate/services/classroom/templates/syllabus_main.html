@@ -1,6 +1,3 @@
-<?php
-//debug($t);
-?>
 <?=$t['sectionheader'];?>
 
 <?php if ( !$t['print'] ) { ?>
@@ -85,21 +82,14 @@
 <hr size=1 />
 <? } ?>
 
-<? if ($t['syllabus']['instructionMethods']) { ?>
-<h3>Methods of Instruction</h3>
-<div class="contentchunk">
-	<p><?=$t['syllabus']['instructionMethods'];?></p>
-</div>
-
-<hr size=1 />
-<? } ?>
-
-<h3>Course Requirements</h3>
-<div class="contentchunk">
-	<p><?=$t['syllabus']['courseReqs'];?></p>
-</div>
-
-<hr size=1 />
+<?php 
+	foreach ( $t['syllabi'] as $id => $title ) { ?>
+		<h3>Methods of Instruction</h3>
+		<div class="contentchunk">
+			<p><?=$t['conent'][$id];?></p>
+		</div>
+	<?php }
+?>
 
 <? if ($t['classes']['noexam'] == false && count($t['exam_schedule_classes_dates']) ) { ?>
 <h3>Exam Information</h3>
@@ -308,19 +298,9 @@ if ($t['examinfo']->northwestCampus==1) { echo $z['Northwest Campus']."<BR>"; }
 <h3>E-mail</h3>
 <div class="contentchunk">
 	<p><?=$t['semester_course_info']['emailGuidelines'];?></p>
-	<p><?=$t['syllabus']['emailPolicy'];?></p>
 </div>
 
 <hr size=1 />
-
-<? if (trim($t['syllabus']['other'])!='<p />') { ?>
-<h3>Special Information</h3>
-<div class="contentchunk">
-	<p><?=$t['syllabus']['other'];?></p>
-</div>
-
-<hr size=1 />
-<? } ?>
 
 
 <h3>Withdrawals</h3>
