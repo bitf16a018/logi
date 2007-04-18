@@ -46,7 +46,7 @@ echo "<li><a href=\"#sec-".$id."\">".$title."</a></li>\n";
 <?php
 foreach($t['syllabi'] as $id => $title) {
 echo "<a name=\"sec-".$id."\"/>\n";
-echo "<h3>".$title."&nbsp;<a href=\"".modurl('syllabusManage/event=edit/id='.$id)."\">[edit]</a></h3>\n";
+echo "<h3>".$title."&nbsp;<a href=\"".modurl('syllabusManage/event=edit/id='.$id)."\">[edit]</a>&nbsp;&nbsp;<a href=\"".modurl('syllabusManage/event=del/id='.$id)."\">[delete]</a></h3>\n";
 echo "<p>".$t['content'][$id]."</p>\n";
 }
 ?>
