@@ -25,7 +25,7 @@
  *
  */
 
-include_once(LIB_PATH.'SiteForms.php');
+//include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'PBDO/ClassSyllabus.php');
 
 class syllabusManage extends FacultyService {
@@ -51,11 +51,21 @@ class syllabusManage extends FacultyService {
 
 		$syllabus = ClassSyllabusPeer::doSelect(" id_classes = ".$classId);
 		foreach($syllabus as $sylObj) {
-			$id   = $sylObj->get('idClassSyllabus');
-			$title = $sylObj->get('sectionTitle');
+			$id      = $sylObj->get('idClassSyllabus');
+			$title   = $sylObj->get('sectionTitle');
+			$content = $sylObj->get('sectionContent');
 			$t['syllabi'][$id] = $title;
+			$t['content'][$id] = $content;
 		}
 	}
+
+	function editRun(&$db,&$u,&$lc,&$t) {
+		//load up the syllabus
+		$this->run($db,$u,$lc,$t);
+		$sectionId = (int)$lc->getvars['id'];
+		$t['editId'] = $sectionId;
+	}
+
 
 
 	/**
@@ -69,34 +79,34 @@ class syllabusManage extends FacultyService {
 
 		$classId = (int)$u->activeClassTaught->id_classes;
 
-		$syllabus = new ClassSyllabus();
-		$syllabus->set('idClasses',$classId);
-		$syllabus->set('sectionTitle',$lc->postvars['title']);
-		$syllabus->set('sectionContent',$lc->postvars['content']);
-		$syllabus->save();
-		$u->addSessionMessage('Added a new section to your syllabus with the title <i>'.$lc->postvars['title'].'</i>');
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/syllabusManage');
-	}
-
-/*
- *
- * Grab current generic syllabus for this ID, and show it in a
- * form to update the syllabus.  Possibly 'preview' mode.  Do
- * we integrate spelling in here (preview mode would show
- * spelling mistakes?).
- * 
- * Input data: syllabus ID
- * Output data: update form for the syllabus
- *
- */
-		function viewSyllabusManageRun(&$db,&$u,&$lc,&$t) {
-			$lc->templateName='syllabusManage_viewSyllabusManage';
-
+		//if editing
+		$editId = (int)$lc->getvars['editId'];
+		if ($editId > 0 ) {
+			//load up this syllabus with security check 
+			//change it and save it
+			/*
+			$syllabus->set('sectionContent',$lc->postvars['content']);
+			$syllabus->set('sectionTitle',$lc->postvars['title']);
+			if ($syllabus->save() ) {
+				$u->addSessionMessage('Successfully updated syllabus section.');
+			} else {
+				$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
+			}
+			 */
+		} else {
+			$syllabus = new ClassSyllabus();
+			$syllabus->set('idClasses',$classId);
+			$syllabus->set('sectionTitle',$lc->postvars['title']);
+			$syllabus->set('sectionContent',$lc->postvars['content']);
+			if ($syllabus->save() ) {
+				$u->addSessionMessage('Added a new section to your syllabus with the title <i>'.$lc->postvars['title'].'</i>');
+			} else {
+				$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
+			}
 		}
-
-
-
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/syllabusManage/');
+	}
 }
 
 ?>

@@ -14,130 +14,134 @@ include_once(LIB_PATH.'TextbookClasses.php');
 
 include_once(LIB_PATH.'ClassGradebook.php');
 
+include_once(LIB_PATH.'PBDO/ClassSyllabus.php');
+
 class syllabus extends StudentService {
 
 	var $presentor='htmlPresentation';
 
-	var $sectionTitle = 'Syllabus';
+	var $sectionTitle = 'Classroom Syllabus';
 	var $inactivelinks = array(
 		'Syllabus',
 	);
 
-/*
- *
- * Default event
- * 
- * Input data: class id
- * Output data: a big ol' lob of text
- *
- */
-		function Run(&$db,&$u,&$lc,&$t) {
-			$lc->templateName='syllabus_main';
-			$db->RESULT_TYPE = MYSQL_ASSOC;
-			$classid = $u->activeClassTaken->id_classes;
+	/**
+	 * Default event
+	 * 
+	 * Input data: class id
+	 * Output data: a big ol' lob of text
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='syllabus_main';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$classId = (int)$u->activeClassTaken->id_classes;
 
-			if ($lc->getvars['print']) {
-				$this->presentor = 'printPresentation';
-				$t['print'] = true;
-			}
-
-			// get data from the classes table and error out if we get back nothing
-			$db->queryOne("select * from classes where id_classes='$classid'");
-
-			if (!$db->Record['id_classes']) {
-				// They didn't get back a record! Error out.
-				$this->presentor = 'errorMessage';
-				$t['message'] = 'Invalid class id.';
-				return;
-			}
-
-			$t['classes'] = $db->Record;
-
-			// profile_faculty table
-			$db->queryOne("select f.*,p.* from profile_faculty as f
-				left join profile as p on f.username=p.username
-				where p.username='{$t['classes']['facultyId']}'");
-			$t['profile'] = $db->Record;
-			
-
-			// get course description
-			$db->queryOne("select * from courses
-				where id_courses='{$t['classes']['id_courses']}'");
-			$t['course'] = $db->Record;
-
-			// get semester information
-			$db->queryOne("select * from semesters
-				where id_semesters='{$t['classes']['id_semesters']}'");
-			$t['semester'] = $db->Record;
-
-			// get syllabus information
-			$db->queryOne("select * from class_syllabuses
-				where id_classes='$classid'");
-			$t['syllabus'] = $db->Record;
-
-			// get course syllabus information
-			$db->queryOne("select * from semesters_course_info
-				where id_semesters='{$u->activeClassTaken->id_semesters}'");
-			$t['semester_course_info'] = $db->Record;
-
-			// get professor email addy
-			$db->queryOne("select email from lcUsers
-				where username='{$t['classes']['facultyId']}'");
-			$t['email'] = $db->Record['email'];
-
-			// get textbook information
-			$t['textbook'] = Textbook::load(
-				array( 'id_classes' => $classid ) );
-			$t['textbook_classes'] = TextbookClassesPeer::doSelect(
-				"id_classes='$classid' and status=3" );
-
-			// get exam information
-			$t['exam_schedule_classes'] = ExamScheduleClasses::load(
-				array('id_classes' => $classid, 'status' => 3 ) );
-			if ( is_object($t['exam_schedule_classes']) ) {
-				$x = $t['exam_schedule_classes'];
-				$t['examinfo'] = $x;
-#				debug($x);
-				$t['exam_schedule_classes_dates'] = ExamScheduleClassesDates::loadClassDates($classid);
-				foreach ( $t['exam_schedule_classes_dates'] as $index => $obj ) {
-					$date = ExamScheduleDates::load( $obj->idExamScheduleDates );
-					$t['exam_schedule_classes_dates'][$index]->dateStart = $date->dateStart;
-					$t['exam_schedule_classes_dates'][$index]->dateEnd = $date->dateEnd;
-				}
-			}
-
-			// get gradebook information
-			$t['gradebook'] = ClassGradebook::load( array( 'id_classes' => $classid ) );
-
-			/**
-			 *    Operations on the data we've just retrieved
-			 **/
-
-			// translate campusLocation to full word
-			switch ( $t['profile']['campusLocation'] ) {
-				case 'NW': $t['campusLocation'] = 'Northwest'; break;
-				case 'NE': $t['campusLocation'] = 'Northeast'; break;
-				case 'S':  $t['campusLocation'] = 'South';     break;
-				case 'SE': $t['campusLocation'] = 'Southeast'; break;
-			}
-
-			// split syllabus info on newlines and wrap in <li> tags
-			if ( $t['syllabus']['courseObjectives'] ) { 
-				$objs = split("\n", $t['syllabus']['courseObjectives']);
-				$t['courseObjectives'] = '<li>'.implode('</li><li>', $objs).'</li>';
-			}
-
-			// split up gradingScale all nice for the table
-			$rows = split("\n", $t['syllabus']['gradingScale']);
-			while (list(,$v) = @each($rows)) {
-				$row = split('\|', $v);
-				$t['gradingScale'][] = $row;
-			}
-
+		if ($lc->getvars['print']) {
+			$this->presentor = 'printPresentation';
+			$t['print'] = true;
 		}
 
+		// get data from the classes table and error out if we get back nothing
+		$db->queryOne("select * from classes where id_classes='$classId'");
 
+		if (!$db->Record['id_classes']) {
+			// They didn't get back a record! Error out.
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'Invalid class id.';
+			return;
+		}
 
+		$t['classes'] = $db->Record;
+
+		// profile_faculty table
+		$db->queryOne("select f.*,p.* from profile_faculty as f
+			left join profile as p on f.username=p.username
+			where p.username='{$t['classes']['facultyId']}'");
+		$t['profile'] = $db->Record;
+		
+
+		// get course description
+		$db->queryOne("select * from courses
+			where id_courses='{$t['classes']['id_courses']}'");
+		$t['course'] = $db->Record;
+
+		// get semester information
+		$db->queryOne("select * from semesters
+			where id_semesters='{$t['classes']['id_semesters']}'");
+		$t['semester'] = $db->Record;
+
+		// get syllabus information
+		$syllabus = ClassSyllabusPeer::doSelect(" id_classes = ".$classId);
+		foreach($syllabus as $sylObj) {
+			$id      = $sylObj->get('idClassSyllabus');
+			$title   = $sylObj->get('sectionTitle');
+			$content = $sylObj->get('sectionContent');
+			$t['syllabi'][$id] = $title;
+			$t['content'][$id] = $content;
+		}
+
+		// get course syllabus information
+		$db->queryOne("select * from semesters_course_info
+			where id_semesters='{$u->activeClassTaken->id_semesters}'");
+		$t['semester_course_info'] = $db->Record;
+
+		// get professor email addy
+		$db->queryOne("select email from lcUsers
+			where username='{$t['classes']['facultyId']}'");
+		$t['email'] = $db->Record['email'];
+
+		// get textbook information
+		$t['textbook'] = Textbook::load(
+			array( 'id_classes' => $classId ) );
+		$t['textbook_classes'] = TextbookClassesPeer::doSelect(
+			"id_classes='$classId' and status=3" );
+
+		// get exam information
+		$t['exam_schedule_classes'] = ExamScheduleClasses::load(
+			array('id_classes' => $classId, 'status' => 3 ) );
+		if ( is_object($t['exam_schedule_classes']) ) {
+			$x = $t['exam_schedule_classes'];
+			$t['examinfo'] = $x;
+#				debug($x);
+			$t['exam_schedule_classes_dates'] = ExamScheduleClassesDates::loadClassDates($classId);
+			foreach ( $t['exam_schedule_classes_dates'] as $index => $obj ) {
+				$date = ExamScheduleDates::load( $obj->idExamScheduleDates );
+				$t['exam_schedule_classes_dates'][$index]->dateStart = $date->dateStart;
+				$t['exam_schedule_classes_dates'][$index]->dateEnd = $date->dateEnd;
+			}
+		}
+
+		// get gradebook information
+		$t['gradebook'] = ClassGradebook::load( array( 'id_classes' => $classId ) );
+
+		/**
+		 *    Operations on the data we've just retrieved
+		 **/
+
+		// translate campusLocation to full word
+		switch ( $t['profile']['campusLocation'] ) {
+			case 'NW': $t['campusLocation'] = 'Northwest'; break;
+			case 'NE': $t['campusLocation'] = 'Northeast'; break;
+			case 'S':  $t['campusLocation'] = 'South';     break;
+			case 'SE': $t['campusLocation'] = 'Southeast'; break;
+		}
+
+		/*
+		// split syllabus info on newlines and wrap in <li> tags
+		if ( $t['syllabus']['courseObjectives'] ) { 
+			$objs = split("\n", $t['syllabus']['courseObjectives']);
+			$t['courseObjectives'] = '<li>'.implode('</li><li>', $objs).'</li>';
+		}
+
+		// split up gradingScale all nice for the table
+		$rows = split("\n", $t['syllabus']['gradingScale']);
+		while (list(,$v) = @each($rows)) {
+			$row = split('\|', $v);
+			$t['gradingScale'][] = $row;
+		}
+		 */
+	}
 }
 
 ?>

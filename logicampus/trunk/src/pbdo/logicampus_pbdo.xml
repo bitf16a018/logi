@@ -200,4 +200,24 @@
 	      attribute="active"
 	      name="active_idx"/>
 	</entity>
+	<entity  name="class_syllabus">
+		<attribute name="id_class_syllabus"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="id_classes"
+			required="true"
+			default="0"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="section_title"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="section_content"
+			required="true"
+			size=""
+			type="LONGVARCHAR"/>
+	</entity>
 </project>
