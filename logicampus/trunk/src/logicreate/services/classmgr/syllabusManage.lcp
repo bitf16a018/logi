@@ -54,8 +54,8 @@ class syllabusManage extends FacultyService {
 			$id      = $sylObj->get('idClassSyllabus');
 			$title   = $sylObj->get('sectionTitle');
 			$content = $sylObj->get('sectionContent');
-			$t['syllabi'][$id] = $title;
-			$t['content'][$id] = $content;
+			$t['syllabi'][$id] = nl2br(htmlentities($title));
+			$t['content'][$id] = nl2br(htmlentities($content));
 		}
 	}
 
