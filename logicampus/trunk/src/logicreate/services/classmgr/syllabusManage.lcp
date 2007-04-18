@@ -59,6 +59,7 @@ class syllabusManage extends FacultyService {
 		}
 	}
 
+
 	function editRun(&$db,&$u,&$lc,&$t) {
 		//load up the syllabus
 		$this->run($db,$u,$lc,$t);
@@ -66,6 +67,23 @@ class syllabusManage extends FacultyService {
 		$t['editId'] = $sectionId;
 	}
 
+
+	function delRun(&$db,&$u,&$lc,&$t) {
+		//load up the syllabus
+		$classId = (int)$u->activeClassTaught->id_classes;
+		$syllabus = ClassSyllabusPeer::doSelect(" id_classes = ".$classId);
+		$sectionId = (int)$lc->getvars['id'];
+		foreach($syllabus as $sylObj) {
+			$id      = $sylObj->get('idClassSyllabus');
+			//this matches the given section id submitted to the site.
+			if ($id == $sectionId) {
+				$sylObj->delete();
+				$u->addSessionMessage('Successfully deleted syllabus section.');
+			}
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/syllabusManage/');
+	}
 
 
 	/**
@@ -80,7 +98,7 @@ class syllabusManage extends FacultyService {
 		$classId = (int)$u->activeClassTaught->id_classes;
 
 		//if editing
-		$editId = (int)$lc->getvars['editId'];
+		$editId = (int)$lc->postvars['editId'];
 		if ($editId > 0 ) {
 			//load up this syllabus with security check 
 			//change it and save it
@@ -98,11 +116,9 @@ class syllabusManage extends FacultyService {
 			$syllabus->set('idClasses',$classId);
 			$syllabus->set('sectionTitle',$lc->postvars['title']);
 			$syllabus->set('sectionContent',$lc->postvars['content']);
-			if ($syllabus->save() ) {
-				$u->addSessionMessage('Added a new section to your syllabus with the title <i>'.$lc->postvars['title'].'</i>');
-			} else {
-				$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
-			}
+			$syllabus->save();
+			$u->addSessionMessage('Added a new section to your syllabus with the title <i>'.$lc->postvars['title'].'</i>');
+//			$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
 		}
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/syllabusManage/');
