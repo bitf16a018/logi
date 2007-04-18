@@ -1142,7 +1142,7 @@ function lcMessageBox($errorList, $type='i', $title='') {
 		case 'e':
 		case 'w':
 			$img = 'msg_warn.png';
-			$class = 'msg_info';
+			$class = 'msg_warn';
 			break;
 		case 'a':
 			$img = 'msg_alert.png';
