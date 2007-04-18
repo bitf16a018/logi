@@ -84,9 +84,9 @@
 
 <?php 
 	foreach ( $t['syllabi'] as $id => $title ) { ?>
-		<h3>Methods of Instruction</h3>
+		<h3><?= $title;?></h3>
 		<div class="contentchunk">
-			<p><?=$t['conent'][$id];?></p>
+			<p><?=$t['content'][$id];?></p>
 		</div>
 	<?php }
 ?>
@@ -172,6 +172,8 @@ if ($t['examinfo']->northwestCampus==1) { echo $z['Northwest Campus']."<BR>"; }
 <?php
 	}
 ?>
+
+<? if ( $t['gradebook']->calculationType ) { //if the calculation type is not set, none of this info will be available ?>
 <h3>Grade Information</h3>
 <div class="contentchunk">
 	<table style="margin-bottom:10px;" width="100%" border=1 cellpadding=3 cellspacing=0>
@@ -283,11 +285,15 @@ if ($t['examinfo']->northwestCampus==1) { echo $z['Northwest Campus']."<BR>"; }
 	</table>
 <? }  ?>
 
-
 </div>
 
-<hr size=1 />
+<? } ?>
 
+
+<?php
+//in simple mode, we probably won't have all this info
+if (LcSettings::isModuleOn('LC_SIMPLE_MODE') ) {
+?>
 <h3>Accessing the Class Site</h3>
 <div class="contentchunk">
 	<p><?=$t['semester_course_info']['accessClassSite'];?></p>
@@ -348,3 +354,5 @@ if ($t['examinfo']->northwestCampus==1) { echo $z['Northwest Campus']."<BR>"; }
 <hr size=1 />
 
 <p align="center"><?=$t['semester_course_info']['syllabusDisclaimer'];?></p>
+
+<?php } ?>
