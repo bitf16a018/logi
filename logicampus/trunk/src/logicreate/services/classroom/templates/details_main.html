@@ -89,6 +89,8 @@
 		}
 
 		if (strlen($t['motd']) ) {
+
+			$t['motd'] = "<a href='".appurl("classroom/details/event=viewMOTD")."'>".$t['motd']."</a>";
 			echo lcMessageBox($t['motd'],'i','Message of the Day'); 
 			echo "<br/>\n";
 		}

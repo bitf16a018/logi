@@ -165,18 +165,11 @@ class details extends StudentService {
 			/*****
 			* MOTD
 			****/
-			$file = CONTENT_PATH.'__messageoftheday__';
-			$fp = fopen ($file, 'r');
-			$t['motd'] = fread($fp, filesize($file) );
-			fclose($fp);
-			$t['motd'] = trim($t['motd']);
-	
+			$t['motd'] = LcSettings::getSystemMotd();
 			if (strlen($t['motd']) == 0)
 			{
 				unset($t['motd']);
 			}
-			$x = truncateText($t['motd']);
-			$t['motd'] = "<a href='".appurl("classroom/details/event=viewMOTD")."'>$x</a>";
 
 // __FIX_ME - need a 'closing date' on announcements
 // or some other way of limiting what's shown
