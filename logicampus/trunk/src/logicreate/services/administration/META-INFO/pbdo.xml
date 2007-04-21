@@ -3,33 +3,6 @@
 <!-- that this XML file will not reflect foreign key   -->
 <!-- relationships. You will have to do that yourself. -->
 <database name="logicampus">
-  <table  name="class_student_sections">
-    <column name="sectionNumber"
-            required="true"
-            default="0"
-            primaryKey="true"
-            size="11"
-            type="INTEGER"/>
-    <column name="id_student"
-            required="true"
-            primaryKey="true"
-            size="75"
-            type="VARCHAR"/>
-    <column name="semester_id"
-            required="true"
-            default="0"
-            primaryKey="true"
-            size="11"
-            type="INTEGER"/>
-    <column name="active"
-            required="true"
-            default="0"
-            size="1"
-            type="TINYINT"/>
-    <index>
-      <index-column name="active"/>
-    </index>
-  </table>
   <table  name="class_sections">
     <column name="sectionNumber"
             required="true"
