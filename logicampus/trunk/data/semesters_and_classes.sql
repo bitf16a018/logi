@@ -46,12 +46,6 @@ INSERT INTO `class_sections` (`sectionNumber`, `id_classes`) VALUES (2112, 2);
 
 
 
-INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (1111, 'bart.simpson', 1, 1, NULL);
-INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (2111, 'lisa.simpson', 1, 1, NULL);
-INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (1112, 'nelson.muntz', 1, 1, NULL);
-INSERT INTO `class_student_sections` (`sectionNumber`, `id_student`, `semester_id`, `active`, `dateWithdrawn`) VALUES (2112, 'ralph.wiggum', 1, 1, NULL);
-
-
 
 INSERT INTO exam_schedule_dates VALUES (1, 1, CONCAT(YEAR(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',MONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',DAYOFMONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),' 14:00:00'), CONCAT(YEAR(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',MONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),'-',DAYOFMONTH(ADDDATE(NOW(),INTERVAL 1 MONTH)),' 18:00:00'));
 
