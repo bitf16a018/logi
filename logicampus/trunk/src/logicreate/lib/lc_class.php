@@ -132,7 +132,6 @@ class lcClass {
 		return $ret;
 	}
 
-
 	/**
 	 * get a count of currently running classes
 	 * @static
