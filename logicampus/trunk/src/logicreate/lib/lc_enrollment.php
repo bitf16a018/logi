@@ -161,6 +161,16 @@ class lcClassEnrollment {
 		$db->nextRecord();
 		return $db->record['total'];
 	}
+
+
+	function getEnrollmentHistoryForStudent($studentId, $semesterId=-1) {
+		if ($this->semesterId > -1 ){
+			$this->classEnrollmentDos = ClassEnrollmentPeer::doSelect(' student_id = '.$studentId. ' AND semester_id = '.$semesterId);
+		} else {
+			$this->classEnrollmentDos = ClassEnrollmentPeer::doSelect(' student_id = '.$studentId);
+		}
+	}
+
 }
 
 ?>
