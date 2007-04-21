@@ -130,6 +130,7 @@ class enrollment extends AdminService {
 			$record['class_section'] = $do->get('active');
 			$record['class_section'] = sprintf('%d_%d',$do->get('classId'), $do->get('sectionNumber'));
 			$record['faculty_id'] = $record['facultyId'];
+			$record['withdrew_on'] = $do->get('withdrewOn');
 			$classes[] = $record;
 		}
 //		debug($classes);
@@ -165,10 +166,13 @@ class enrollment extends AdminService {
 
 		$col_a = &$columnModel->getColumnAt(0);
 		$col_a->cellRenderer = new LC_Table_EnrollmentRenderer(0,0,$name);
-//		$col_a->maxWidth=64;
 
 		$col_b = &$columnModel->getColumnAt(4);
 		$col_b->cellRenderer = new LC_TableYesNoRenderer();
+
+		$col_c = &$columnModel->getColumnAt(6);
+		$col_c->cellRenderer = new LC_TableDateRenderer();
+
 
 		/*
 		$col_b = &$columnModel->getColumnAt(2);
@@ -187,6 +191,7 @@ class enrollment extends AdminService {
 
 
 		$t['table'] = new LC_TableRenderer($table);
+		$t['table']->style = '';
 
 
 
@@ -232,12 +237,20 @@ class enrollment extends AdminService {
 
 	function activateRun (&$db,&$u,&$lc,&$t) {
 		$name = addslashes(stripslashes($lc->getvars['username']));
-		$sectionNumber = (int)$lc->getvars['id'];
-		$active= (int)$lc->getvars['active'];
 
-		trigger_error('table out of date. contact a project maintainer.');
-		return;
-		$db->query("update class_student_sections set active=$active where id_student='$name' and sectionNumber=$sectionNumber");
+		list($classId, $sectionNumber) = explode('_',$lc->postvars['id']);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
+
+		$db->query("SELECT pkey FROM lcUsers  WHERE username='".$name."'");
+		$db->nextRecord();
+		$studentId = $db->record['pkey'];
+
+		$db->query("UPDATE class_enrollment 
+			SET active=1
+			WHERE student_id='".$studentId."' 
+			AND section_number=".$sectionNumber );
+
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
 	}
@@ -267,7 +280,6 @@ class enrollment extends AdminService {
 
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
-
 	}
 }
 

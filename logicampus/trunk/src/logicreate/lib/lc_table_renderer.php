@@ -8,6 +8,7 @@ class LC_TableRenderer {
 
 	var $html;	//holds the renered html
 	var $table;		//the table to render, must be of type LC_Table
+	var $style = 'clear:both';
 
 	function LC_TableRenderer($t) {
 		$this->table = $t;
@@ -39,7 +40,7 @@ class LC_TableRenderer {
 	 * opens the table
 	 */
 	function startTable() {
-		$this->html .= '<table cellpadding="0" cellspacing="1" class="datatable" width="100%" style="clear:both;">';
+		$this->html .= '<table cellpadding="0" cellspacing="1" class="datatable" width="100%" style="'.$this->style.'">';
 		$this->html .= "\n";
 	}
 
