@@ -73,8 +73,6 @@ class enrollment extends AdminService {
 		# Take active semesterId out of sessionvar
 		$semesterId = $u->sessionvars['enrollmentSemesterId'];
 
-// get classes taken
-		$classes = classObj::getClassesTaken($name, $semesterId);
 		/*
 		$d = new datagrid('administration','enrollment');
 		$d->headers = array(
@@ -114,9 +112,31 @@ class enrollment extends AdminService {
 		$t['classes'] = $d->toHTML();
 		 */
 
-		
-		$dm = new LC_Table_ObjectModel($classes);
-		$dm->prependColumn('Category');
+		$db->query("SELECT pkey from lcUsers where username = '".$name."'");
+		$db->nextRecord();
+		$userId = $db->record['pkey'];
+
+		// get classes taken
+		$enrollment = new lcClassEnrollment();
+		$enrollment->getEnrollmentHistoryForStudent($userId);
+
+		//need to merge enrollment objects with classes array
+		foreach ($enrollment->classEnrollmentDos as $do) {
+			$db->query('SELECT * FROM classes where id_classes = '.$do->get('classId'));
+			$db->nextRecord();
+			$record = $db->record;
+			$record['active'] = $do->get('active');
+			$record['active'] = $do->get('active');
+			$record['class_section'] = $do->get('active');
+			$record['class_section'] = sprintf('%d_%d',$do->get('classId'), $do->get('sectionNumber'));
+			$record['faculty_id'] = $record['facultyId'];
+			$classes[] = $record;
+		}
+//		debug($classes);
+
+		//$dm = new LC_Table_ObjectModel($enrollment->classEnrollmentDos);
+		$dm = new LC_Table_ItemModel($classes);
+//		debug($classes,1);
 
 		$dm->ignoreColumn('__loaded');
 		$dm->ignoreColumn('_dsn');
@@ -133,14 +153,22 @@ class enrollment extends AdminService {
 		$dm->ignoreColumn('semesterID');
 		$dm->ignoreColumn('title');
 
+
+		//move it to the front
+		$dm->ignoreColumn('class_section');
+		$dm->prependColumn('class_section');
+
 		$table = new LC_Table($dm);
 
 		$columnModel = &$table->getColumnModel();
 		$headerModel = &$table->getHeaderModel();
 
 		$col_a = &$columnModel->getColumnAt(0);
-//		$col_a->cellRenderer = new LC_TableDateRenderer('M j, Y - h:i A');
-//		$col->maxWidth=64;
+		$col_a->cellRenderer = new LC_Table_EnrollmentRenderer(0,0,$name);
+//		$col_a->maxWidth=64;
+
+		$col_b = &$columnModel->getColumnAt(4);
+		$col_b->cellRenderer = new LC_TableYesNoRenderer();
 
 		/*
 		$col_b = &$columnModel->getColumnAt(2);
@@ -222,21 +250,42 @@ class enrollment extends AdminService {
 //		$semesterId = (int)$db->Record['id_semesters'];
 
 		$name = addslashes(stripslashes($lc->getvars['username']));
-		$studentId = (int)$lc->getvars['student_id'];
-		$sectionNumber = (int)$lc->getvars['id'];
+
+		list($classId, $sectionNumber) = explode('_',$lc->postvars['id']);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
+
 
 		$db->query("SELECT pkey FROM lcUsers  WHERE username='".$name."'");
 		$db->nextRecord();
 		$studentId = $db->record['pkey'];
 
-		$db->query("DELETE FROM class_enrollment 
+		$db->query("UPDATE class_enrollment 
+			SET active=0, withdrew_on = ".time()."
 			WHERE student_id='".$studentId."' 
-			AND section_number=".$sectionNumber." 
-			AND semester_id=".$semesterId);
+			AND section_number=".$sectionNumber );
 
 		$lc->templateName = 'enrollment_main';
 		$this->run($db,$u,$lc,$t);
 
 	}
 }
+
+
+class LC_Table_EnrollmentRenderer extends LC_TableCellRenderer {
+	
+	function LC_Table_EnrollmentRenderer($classId,$sectionNumber,$username) {
+		$this->classId = $classId;
+		$this->sectionNumber = $sectionNumber;
+		$this->username = $username;
+	}
+
+	function getRenderedValue() {
+		return  '<a href="'.modurl('enrollment/event=activate/').'id='.$this->value.'/username='.$this->username.'">Activate</a>'.
+			'&nbsp;/&nbsp;<a href="'.modurl('enrollment/event=remove/').'id='.$this->value.'/username='.$this->username.'">Withdraw</a>'
+			;
+	}
+}
+
+
 ?>
