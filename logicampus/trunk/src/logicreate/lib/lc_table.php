@@ -211,48 +211,32 @@ class LC_TableModel {
 
 class LC_DefaultTableModel extends LC_TableModel {
 
+	var $colMap = array();
+	var $ignore = array();
+	var $data   = array();
 
 	/**
-	 * Returns the number of columns in the model.
+	 * Returns the number of cols in the model.
 	 */
 	function getColumnCount() {
-		return $this->columnModel->getColumnCount();
+		return count($this->colMap);
 	}
-}
 
-
-
-class LC_TableModelPaged extends LC_DefaultTableModel {
-	var $rowsPerPage = 10;
-	var $currentPage = 1;
-}
-
-
-
-/**
- * Requires getPrevUrl and getNextUrl functions
- * @abstract
- */
-class LC_Table_SqlModel extends LC_TableModelPaged {
-
-	var $query = '';
-	var $rs = array();
-	var $colMap = array();		// 0-based lookup for column names
-	var $titleMap = array();	// 0-based lookup for column headings
-	var $ignore = array();
 
 	/**
-	 * make a 5 x 10 grid of nonsense
+	 * Sets the mapping of column indexes to result set names.
 	 */
-	function LC_Table_SqlModel($query,$db = '') {
-		$this->query = $query;
+	function setRsNames($map) {
+		$this->colMap = $map;
+//		$this->setColumnTitles($map);
+	}
 
-		$db->query($query);
-		while($db->nextRecord()) {
-			$this->rs[] = $db->record;
-		}
 
-		$this->setRsNames( array_keys($this->rs[0]) );
+	/**
+	 * Sets the mapping of column indexes to column titles.
+	 */
+	function setColumnTitles($map) {
+		$this->titleMap = $map;
 	}
 
 
@@ -270,6 +254,88 @@ class LC_Table_SqlModel extends LC_TableModelPaged {
 		$this->colMap = $cleanMap;
 	}
 
+
+	/**
+	 * Add a column to ignore
+	 */
+	function prependColumn($name) {
+		array_unshift($this->colMap,$name);
+	}
+}
+
+
+
+class LC_TableModelPaged extends LC_DefaultTableModel {
+	var $rowsPerPage = 10;
+	var $currentPage = 1;
+}
+
+
+class LC_Table_ObjectModel extends LC_DefaultTableModel {
+	var $objects = array();
+
+	function LC_Table_ObjectModel($objectArray) {
+		$this->objects = $objectArray;
+
+		$this->setRsNames( array_keys(get_object_vars($this->objects[0])) );
+	}
+
+
+	function getValueAt($x,$y) {
+		$colName = $this->colMap[$y];
+		$r = $this->objects[$x];
+		return $r->{$colName};
+	}
+
+
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->objects));
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		if ( strlen($this->titleMap[$columnIndex]) > 0 ) {
+			return $this->titleMap[$columnIndex];
+		} else {
+			//we don't have a map, try to make a nice name
+			$words = str_replace('_', ' ',$this->colMap[$columnIndex]);
+			return ucwords($words);
+		}
+	}
+
+}
+
+/**
+ * Requires getPrevUrl and getNextUrl functions
+ * @abstract
+ */
+class LC_Table_SqlModel extends LC_TableModelPaged {
+
+	var $query = '';
+	var $rs = array();
+	var $colMap = array();		// 0-based lookup for column names
+	var $titleMap = array();	// 0-based lookup for column headings
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function LC_Table_SqlModel($query,$db = '') {
+		$this->query = $query;
+		$db->setResultType('ASSOC');
+
+		$db->query($query);
+		while($db->nextRecord()) {
+			$this->rs[] = $db->record;
+		}
+
+		$this->setRsNames( array_keys($this->rs[0]) );
+	}
 
 	//sub-class
 	/**
@@ -330,13 +396,6 @@ class LC_Table_SqlModel extends LC_TableModelPaged {
 		$this->titleMap = $map;
 	}
 
-
-	/**
-	 * Sets the mapping of column indexes to result set names.
-	 */
-	function setRsNames($map) {
-		$this->colMap = $map;
-	}
 }
 
 
@@ -393,6 +452,12 @@ class LC_TableColumnModel {
 
 
 	/**
+	 * add a column to the end
+	 */
+	function addColumnAt($i,$c) { }
+
+
+	/**
 	 * return the column at index $i
 	 */
 	function getColumnAt($i) { }
@@ -422,6 +487,7 @@ class LC_TableColumnModel {
 class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 
 	var $tableColumns = array();
+	var $prependColumns = array();
 
 	/**
 	 * Returns the number of columns in the model.
@@ -455,6 +521,28 @@ class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 		$c->setIndex($idx);
 		$this->tableColumns[$idx] = $c;
 		return $idx;
+	}
+
+
+	/**
+	 * add a column to the beginning
+	 * @return	int	 new index
+	 */
+	function prependColumn($c) { 
+		$this->prependColumns[] = $c;
+		/*
+		foreach ($this->tableColumns as $idx => $col) {
+			if ($idx==$i) {
+				$c->setIndex($newIndex);
+				$newcols[$newIdx] = $c;
+			}
+			else {
+				$newcols[$newIdx] = $col;
+			}
+			$newIdx++;
+		}
+		$this->tableColumns = $newcols;
+		 */
 	}
 
 
@@ -537,8 +625,8 @@ class LC_DefaultTableHeader  extends LC_TableHeader {
 	var $columnModel;
 	var $row = -1;
 
-	function LC_DefaultTableHeader($columnModel) {
-		$this->columnModel = $columnModel;
+	function LC_DefaultTableHeader(&$columnModel) {
+		$this->columnModel =& $columnModel;
 	}
 
 
