@@ -39,7 +39,6 @@ class classdoclibService extends FacultyService {
 	function classdoclibService () {
 		global $lcObj;
 		parent::FacultyService();
-		$lcObj->templateStyle = 'private';
 	}
 
 
