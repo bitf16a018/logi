@@ -304,6 +304,19 @@ class LC_TableMoneyRenderer extends LC_TableCellRenderer {
 }
 
 
+
+class LC_TableYesNoRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		if ($this->value == 1) {
+			return 'Yes';
+		}
+		return 'No';
+	}
+}
+
+
+
 class LC_TableFormatRenderer extends LC_TableCellRenderer {
 
 	var $format = '%s';

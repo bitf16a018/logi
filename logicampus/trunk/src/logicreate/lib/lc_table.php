@@ -271,6 +271,46 @@ class LC_TableModelPaged extends LC_DefaultTableModel {
 }
 
 
+
+class LC_Table_ItemModel extends LC_DefaultTableModel {
+	var $items = array();
+
+	function LC_Table_ItemModel($itemArray) {
+		$this->items = $itemArray;
+		$this->setRsNames(array_keys($this->items[0]) );
+	}
+
+
+	function getValueAt($x,$y) {
+		$colName = $this->colMap[$y];
+		$r = $this->items[$x];
+		return $r[$colName];
+	}
+
+
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->items));
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		if ( strlen($this->titleMap[$columnIndex]) > 0 ) {
+			return $this->titleMap[$columnIndex];
+		} else {
+			//we don't have a map, try to make a nice name
+			$words = str_replace('_', ' ',$this->colMap[$columnIndex]);
+			return ucwords($words);
+		}
+	}
+}
+
+
 class LC_Table_ObjectModel extends LC_DefaultTableModel {
 	var $objects = array();
 
