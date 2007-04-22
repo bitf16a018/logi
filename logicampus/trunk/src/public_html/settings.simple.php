@@ -10,4 +10,6 @@ define('MODULE_PRIVATE_MESSAGING',1);
 
 define('DEMO_MODE',1);
 
+define('TEMPLATE_STYLE','sinorca');
+
 ?>

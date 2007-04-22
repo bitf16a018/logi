@@ -235,7 +235,6 @@ class lcSystem {
 
 	var $postvars;
 	var $getvars;
-	//var $templateStyle = 'private';
 	var $templateStyle = 'sinorca';
 	var $TRACK_SESSIONS = true;
 	var $cssFile;
@@ -258,6 +257,10 @@ class lcSystem {
 		//__FIXME__ use a constant to turn on and off
 		$e =& ErrorStack::_singleton();
 		set_error_handler( array( &$e,'_errorHandler') );
+		$style = LcSettings::getValue('TEMPLATE_STYLE');
+		if ($style != null) {
+			$this->templateStyle = $style;
+		}
 	}
 
 	/**
