@@ -121,12 +121,73 @@
 <tr>
 <tr>
 <td colspan="2">
-<?PHP if(LcSettings::isModuleOn('MODULE_REGISTRATION')) { ?>
+<strong>IMPORTANT</strong>
+<p>
+The system only allows one login of each username at one time.  Therefore, you may experience disruption in your demo as other people login to the system.  If the system says you don't have permission to do something, this may be because you have been logged out as someone else logs in with the same username.
+</p>
+<?PHP if(MODULE_REGISTRATION) { ?>
 <strong>To create your own student login</strong>, click below<BR>
 <a href="<?= BASE_URL . "index.php/register/users/event=new" ?>">Create Account</a><br><br>
 <?PHP } ?>
+<strong>Login Information</strong><br>
+LogiCampus works differently depending on which user you log in as.  
+Here are three different logins you can use:
 
 
+<div class="l_wrapper">
+<fieldset class="box_standard">
+	<legend>Staff</legend>
+	<strong>Administrator</strong>
+	<a href="#" onclick="loginAs('admin','admin');return false;" >login as...</a>
+	<br>
+	Login: admin<br>
+	Password: admin<br>
+</fieldset>
+
+<br/>
+
+
+<fieldset class="box_standard">
+	<legend>Students</legend>
+	<strong>Student:</strong>
+	<a href="#" onclick="loginAs('student1','student1');return false;" >login as...</a>
+	<br>
+	Login: student1<br>
+	Password: student1<br>
+
+	<strong>Student:</strong>
+	<a href="#" onclick="loginAs('student2','student2');return false;" >login as...</a>
+	<br>
+	Login: student2<br>
+	Password: student2<br>
+
+	<strong>Student:</strong>
+	<a href="#" onclick="loginAs('student3','student3');return false;" >login as...</a>
+	<br>
+	Login: student3<br>
+	Password: student3<br>
+
+</fieldset>
+</div>
+
+<div class="r_wrapper">
+<fieldset class="box_standard">
+	<legend>Faculty</legend>
+	<strong>Teacher:</strong>
+	<a href="#" onclick="loginAs('teacher1','teacher1');return false;" >login as...</a>
+	<br>
+	Login: teacher1<br>
+	Password: teacher1<br>
+
+	<strong>Teacher:</strong>
+	<a href="#" onclick="loginAs('teacher2','teacher2');return false;" >login as...</a>
+	<br>
+	Login: teacher2<br>
+	Password: teacher2<br>
+</fieldset>
+</div>
+
+<p style="clear:both;">&nbsp;</p>
 Choose your language (new, not completed):<br/>
 <a href="?switchlocale=en_US">English (US)</a>
 <a href="?switchlocale=es_MX">Spanish (MX)</a>
@@ -142,6 +203,8 @@ If you are using MAC OS X or Linux, we suggest using Mozilla 1.3 or higher (1.5 
 </table>
 </div>
 <br />
+<a href="<?=APP_URL?>welcome/about">[HOW TO USE THIS DEMO]</a>
+<br />
 <br />
 <br />
 <br />
@@ -155,6 +218,16 @@ If you are using MAC OS X or Linux, we suggest using Mozilla 1.3 or higher (1.5 
 
 
 </center>
+<script language="JavaScript">
+	document.forms[0].elements[0].focus();
+
+	function loginAs(user,pass) {
+		document.getElementById('login_name').value = user;
+		document.getElementById('login_passwd').value = pass;
+		document.getElementById('login').submit();
+	}
+</script>
+
 
 </BODY>
 </HTML> 

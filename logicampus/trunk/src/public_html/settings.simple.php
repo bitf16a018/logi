@@ -8,4 +8,6 @@ define('MODULE_SELF_ENROLLMENT',1);
 define('MODULE_PRIVATE_MESSAGING',1);
 
 
+define('DEMO_MODE',1);
+
 ?>
