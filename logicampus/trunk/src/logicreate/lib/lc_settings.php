@@ -33,6 +33,14 @@ class LcSettings {
 		}
 		return false;
 	}
+
+
+	function getValue($name) {
+		if (defined($name)) {
+			return constant($name);
+		}
+		return null;
+	}
 }
 
 
