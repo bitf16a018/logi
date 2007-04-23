@@ -8,7 +8,7 @@ class LC_TableRenderer {
 
 	var $html;	//holds the renered html
 	var $table;		//the table to render, must be of type LC_Table
-	var $style = 'clear:both';
+	var $style = 'clear:right;';
 
 	function LC_TableRenderer($t) {
 		$this->table = $t;
