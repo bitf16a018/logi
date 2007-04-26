@@ -20,7 +20,7 @@
 	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/popupwin.js"></script>
 	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/custom.js"></script>
 </HEAD> 
-<BODY bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" link="#0066FF">
+<BODY style="background-color:silver;" bgcolor="silver" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" link="#0066FF">
 
 <center>
 
