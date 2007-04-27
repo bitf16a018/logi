@@ -687,6 +687,7 @@ class LessonManager extends FacultyService {
 			id_class_lessons='{$lessonId}'
 			where id_class_lesson_content=".$content_id );
 
+		$u->addSessionMessage('Lesson changes saved.');
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonId);
 
