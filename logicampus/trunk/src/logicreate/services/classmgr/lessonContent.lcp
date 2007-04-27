@@ -291,6 +291,7 @@ Class LessonContent extends FacultyService
 		}
 
 		// HTML Tidy
+define('HAS_TIDY',false);
 		if (HAS_TIDY) { 
 			$tidied = shell_exec( "cat {$lc->uploads['thefile']['tmp_name']} | "
 			.DOCUMENT_ROOT."/../logicreate/bin/tidy" );
