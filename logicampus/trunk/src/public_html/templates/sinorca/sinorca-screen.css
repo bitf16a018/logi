@@ -110,6 +110,15 @@ acronym, .titleTip {
   text-decoration: underline;
 }
 
+.subHeader a:link {
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 0.75ex 0 0.5ex;
+}
+
 .superHeader .highlight, .subHeader .highlight {
   color: rgb(253,160,91);
   background-color: transparent;
