@@ -668,7 +668,7 @@ class LessonManager extends FacultyService {
 		$content_id = intval($lc->postvars['content']);
 
                 //load PBDO Object
-                $lesson = ClassLessons::load($lessonid);
+                $lesson = ClassLessons::load($lessonId);
                 $lesson->set('title',$lc->postvars['title']);
                 $lesson->set('description',$lc->postvars['description']);
                 $lesson->set('activeOn',$activeOn);
