@@ -162,6 +162,8 @@ class PBDO_Compiler {
 		//php stuff
 		unset($this->workingEntity);
 		unset($this->workingForm);
+//		$this->workingEntity = null;
+//		$this->workingForm = null;
 //unset($this->workingTable);
 
 		//php stuff
@@ -238,7 +240,7 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 	function visitForeignKeyNode(&$fkey) {
 		unset($this->workingRelationship);
 		$this->workingRelationship = new PBDO_ParsedRelationship(
-						$this->workingEntity->name,
+						@$this->workingEntity->name,
 						$fkey->xmlnode->getAttribute('foreignTable')
 					);
 		PBDO_Compiler::$model->addRelationship($this->workingRelationship);
@@ -259,7 +261,7 @@ if ( strstr($table->xmlnode->getAttribute('generate'), 'sql') ||
 		//*
 		unset($this->workingIndex);
 		$this->workingIndex = new PBDO_ParsedKey(
-					$this->workingEntity->name.':'.
+					@$this->workingEntity->name.':'.
 					$key->xmlnode->getAttribute('attribute'),
 					$key->xmlnode->getAttribute('name')
 				);
@@ -363,7 +365,7 @@ class PBDO_EntityNode extends PBDO_NodeBase {
 		$this->PBDO_NodeBase($n);
 		//set the default generate tag to 'all'
 		$attrs =& $this->xmlnode->attributes->getNamedItem('generate');
-		if ( ! strlen($attrs->nodeValue) ) { 
+		if ( !@strlen($attrs->nodeValue) ) { 
 			//$owner = $this->xmlnode->ownerDocument;
 			$this->xmlnode->setAttribute('generate', 'all' );
 		}
