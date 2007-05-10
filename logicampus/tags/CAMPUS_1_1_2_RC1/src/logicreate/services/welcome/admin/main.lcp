@@ -1,0 +1,16 @@
+<?php
+
+class welcome extends HercAuth {
+	var $presentor = "adminPresentation";
+
+	function run (&$db,&$u,&$arg,&$t ) {
+	}
+
+	function updateRun(&$db,&$u,&$arg,&$t) {
+
+		$format = $arg->postvars[time_format];
+		print "format updated to : ". $format;
+		print ". \n <br>";
+	}
+}
+?>

@@ -1,0 +1,69 @@
+<?php
+
+/******* FORM TO EMAIL
+* This class takes input from a form which is setup 
+* to have 2 form arrays:  req and opt.
+* req = required fields for the form
+* opt = optional fields for the form
+*
+* Required fields in the form:
+* 	1.  req[email] = email address of the person filling out the form
+*	2.  req[thankyou_page] = thank you page to send them to if everything is completed
+*	3.  req[return_page]  = page to return if there is an error
+* 	4.  Echo $t[error] in the form.
+* 
+* Addition features to add:
+* 1.  If a user is logged in, grab their profile info and make their email
+*     the From: header.
+*******/
+
+class formToEmail extends BasicAuth {
+
+        function run (&$db, &$u, &$arg, &$t) {
+                while (list ($k,$v) = @each($arg->postvars[req])) {
+                        if ($v == "") {
+                               $t[error] .= "<div style=\"color: red\">".ucfirst($k)." is a required field.</div>";
+			}
+		}
+		//Check to see if email is actually valid
+		if( !eregi( "^" .
+            		"[a-z0-9]+([_\\.-][a-z0-9]+)*" .    //user
+   		         "@" .
+			"([a-z0-9]+([\.-][a-z0-9]+)*)+" .   //domain
+			"\\.[a-z]{2,}" .                    //sld, tld 
+			"$", $arg->postvars[req][email], $regs)
+		   ) {
+
+		$t[error] .= "<div style=\"color: red\">Check your email address and make sure it is valid.  Please enter your information again.</div>";
+		}
+		@reset($arg->postvars[req]);
+		if ($t[error]) {
+			$t[req] = $arg->postvars[req];
+			$t[opt] = $arg->postvars[opt];
+
+			$t[originalPage] = $arg->postvars[req][return_page];
+			$arg->templateName = "formError";
+			$this->presentor = 'htmlPresentation';
+		} else {
+			while (list ($k, $v) = @each($arg->postvars[req])) { 
+			$req .= "$k = $v\n";
+			}
+
+			while (list ($k, $v) = @each($arg->postvars[opt])) { 
+			$opt .= "$k = $v\n";
+			}
+			$body = "Required Fields:\n$req\n\nOptional Fields:\n$opt";
+			$email = $arg->postvars[req][email];
+			$headers = "From: $email\nReply-To: $email\n";
+
+				if ($this->_ToEmail != '') 
+	               		mail($this->_ToEmail, "New Input from ".BASE_URL, "$body", "$headers");
+			$arg->templateName = "thanks";
+			$this->presentor = 'htmlPresentation';
+		}
+  	}
+
+
+}
+
+?>

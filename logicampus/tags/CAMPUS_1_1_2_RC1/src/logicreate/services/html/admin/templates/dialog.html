@@ -1,0 +1,39 @@
+<html>
+	<body bgcolor="#e0e0ff">
+		<table>
+
+			<tr><td valign="top">
+<table width="175" border="0" cellspacing="10" cellpadding="2">
+			<!-- one table per 6 files -->
+			<? while ( list($k,$v) = @each($t['files']) ) {?>
+			<? ++$c; ?>
+	<tr>
+		<td NOWRAP>
+			<? if ( $t['icon'] == 'image.png') { ?>
+			<img height="24" width="24" src="<?=_PICS_URL?><?=$t['icon']?>">&nbsp;<a target="parent" href="<?=IMAGES_URL.$v['name']?>"><?=$v['filename'];?></a>
+			<? } else if ($t['showDelete'] ==1 ) { ?>
+			<img height="24" width="24" src="<?=_PICS_URL?><?=$t['icon']?>">&nbsp;<a target="parent" href="#" onclick="parent.requestDelete(<?=$v[pkey];?>,'<?=$v['filename']?>');return false;"><?=$v['filename'];?></a>
+			<? } else { ?>
+			<img height="24" width="24" src="<?=_PICS_URL?><?=$t['icon']?>">&nbsp;<a target="parent" href="#" onclick="parent.location='<?= MOD_URL ?>edit/event=addPage/pkey=<?=$v[pkey];?>';return false;"><?=$v['filename'];?></a>
+			<? } ?>
+		</td>
+	</tr>
+
+	<? if ($c %6 ==0 ) { ?>
+
+</table>
+			</td><td valign="top">
+<table width="175" border="0" cellspacing="10" cellpadding="2">
+	<? } ?>
+
+
+	<? } ?>
+	<? if ($c %6 != 0) { ?>
+		</td>
+	</tr>
+</table>
+	<? } ?>
+			</td></tr>
+		</table>
+</body>
+</html>

@@ -1,0 +1,27 @@
+
+<h3>Mail List Susbcriptions</h3>
+<? if (is_array($t['maillist'])) { ?>
+<p>Below are the various email list we offer.  By joining or email list you will receive special offers, news and discounts.  Select the list you would like to join by placing a check in the box next to the topic and press the "Update" button.
+</p>
+
+<form action="<?=APP_URL?>users/maillist/event=post" method="POST">
+
+<?  
+ # $t['maillist'] -> gid, groupName array
+
+while (list ($k, $v) = @each($t['maillist']))
+{ 
+	if ($v['checked'] == 'yes') { $checked = 'checked';} 
+	?>
+	<input type="checkbox" name="maillist[<?=$v['gid']?>]" <?=$checked?>> <?=$v['groupName']?><br>
+	
+<? unset($checked); } ?>
+
+<input type="submit" value="Update">
+
+</form>
+<? } else  { ?>
+
+There are no mailling list to subscribe to at this time.
+
+<? } ?>

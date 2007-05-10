@@ -1,0 +1,260 @@
+<?
+/*
+ * Module pm (Private Messaging)
+ * created 06/22/2002 by Michael Kimsal
+ * Updated by Keith Elder 9/2/02
+ */
+
+include_once(LIB_PATH."LC_html.php");
+include_once(SERVICE_PATH."pm/privmess.php");
+
+class pm extends BasicAuth {
+
+var $presentor = "htmlPresentation";
+
+
+	function pm()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+
+	function fixRun($db,&$u,&$arg,&$t) {
+		$db2 = db::GetHandle();
+		$db->query("select pkey,messageTo from privateMessages where sentReceived = 0 and messageTo like '%_%'");
+		while($db->next_record()) {
+			$pkey = $db->Record['pkey'];
+			$messageTo = $db->Record['messageTo'];
+			$messageTo = str_replace("_",".",$messageTo);
+			$db2->query("update privateMessages set messageTo='$messageTo' where pkey=$pkey");
+			echo ++$c."<BR>";
+
+		}
+
+
+	}
+
+
+	## Removed July 3rd 2003 (tarrant doesn't want anyone to turn off email notifications ##
+	function notifyRun($db,&$u,&$arg,&$t) {
+		$notify= $arg->getvars['val'];
+		if ($notify=='yes') {
+			$u->profile->set('emailNotify', 'y');
+			$u->profile['emailNotify']= 'y';
+			$db->query("update profile set emailnotify='y' where username='".$u->username."'");
+		} else { 
+			$u->profile->set('emailNotify', 'n');
+			$db->query("update profile set emailnotify='n' where username='".$u->username."'");
+		}
+		$u->updateProfile();
+		$this->Run($db,$u,$arg,$t);
+
+	}
+
+
+	function Run($db,&$u,&$arg,&$t) {
+		if ($arg->getvars['sentReceived']!='') { 
+			$u->sessionvars['pm']['sentReceived'] = (int)$arg->getvars['sentReceived'];
+		}
+		$viewing = intval($u->sessionvars['pm']['sentReceived']);
+		$t['viewing'] = intval($u->sessionvars['pm']['sentReceived']);
+		$arg->templateName = 'main';
+		$start = intval($arg->getvars['start']);
+		$max = $this->_displayPerPage;
+		$t['start'] = $start;
+		$t['max'] = $max;
+		$t['emailNotify'] = $u->profile->get('emailNotify');
+		$db->queryOne("select count(pkey) from privateMessages where sentReceived='$viewing' and messageTo='".$u->username."'"); 
+		$count = $db->Record[0];
+		if ( ( ($max+$start) < $count)  && ($start<$count)) { 
+
+			$t['next'] =  true;
+		}
+		if ($start>0) { 
+			$t['prev'] = true;
+		}
+		
+		if ($viewing == 0){
+		$db->query("select pkey from privateMessages where sentReceived='$viewing' and messageTo='".$u->username."' order by sentTime DESC limit $start,$max");
+		}
+		else{
+			$db->query("select pkey from privateMessages where sentReceived='$viewing' and messageFrom='".$u->username."' order by sentTime DESC limit $start,$max");
+			}
+		while($db->next_record()) {
+			$x = privMess::load($db->Record[0]);
+			$user = lcUser::getUserByUsername($x->messageFrom);
+			$x->userFrom = $user->username;
+
+			$t['messages'][] = $x;
+		}
+	}
+
+
+	# Reads the message
+	function readRun($db,&$u,&$arg,&$t) {
+		$viewing = intval($u->sessionvars['pm']['sentReceived']);
+		$pkey = $arg->getvars['pkey'];
+		$mess = privMess::load($pkey);
+		if (trim(strtolower($mess->messageTo)) != trim(strtolower($u->username)) and trim(strtolower($mess->messageFrom)) != trim(strtolower($u->username))) { 
+			$arg->templateName = 'invalid';
+		} else {
+			$user = lcUser::getUserByUsername($mess->messageFrom);
+			$mess->userFrom = $user->username;
+			if ($user->profile['username']==' - ') { 
+				$mess->userFrom= $mess->messageFrom;
+				$mess->outside = true;
+			}
+			if($mess->messageFrom == 'SYSTEM ADMIN')
+			{
+				$mess->messageFrom = $this->_SystemAdmin;
+				$mess->noReply = true;
+			}
+
+			// Make them a pretty date
+			$t['date'] = date ("l jS of F Y h:i:s A", $mess->sentTime);
+
+			// format the quoted text to put in the reply body
+			$quote = wordwrap($mess->message, 60, "\n");
+			$arr = split("\n", $quote);
+			for ($i=0; $i<count($arr); $i++) $arr[$i] = '> '.$arr[$i];
+			$t['quote'] = 'On '.date('D M j',$mess->sentTime).', '.$mess->messageFrom." wrote:\n"
+				.implode("\n", $arr);
+
+			// do this nl2br business after we've manipulated the message for the quote
+			$mess->message = nl2br($mess->message);
+			$t['message'] = $mess;
+
+			$arg->templateName = 'read';
+		}
+
+	}
+
+
+	function replyRun($db,&$u,&$arg,&$t) {
+
+		$mess = new privMess();
+		$t = array_merge($t, $arg->postvars);
+		$t['message'] = "";
+		$mess->subject = $arg->postvars['subject'];
+
+		if (!trim($mess->subject)) { $mess->subject = "No subject"; }
+
+		$mess->message = $arg->postvars['message'];
+
+		$mess->sentTime = time();
+
+		$mess->messageFrom = $u->username;
+
+		$mess->messageTo = $arg->postvars['replyto'];
+		if ($mess->messageTo != '') { 
+			$mess->add();
+			$this->run($db,$u,$arg,$t);
+		} else {
+			$t['error'] = "You need to select a user to message.";
+			$this->composeRun($db,$u,$arg,$t);
+		}
+
+	}
+
+
+
+
+	function composeRun($db,&$u,&$arg,&$t) {
+	/*
+		$db2 = DB::getHandle();
+		$db->query("select gid, groupName from lcGroups where gid like 'r_%' order by groupName");
+		while($db->next_record()) { 
+			extract($db->Record);
+			$db2->query("select username from lcUsers where groups like '%$gid%'");
+			while($db2->next_record()) {
+				$username = $db2->Record[0];
+				$x = lcUser::getUserByUsername($username);
+				$list[$username] = $x->username;
+			}
+
+		}
+
+		@asort($list);
+		$t['sendto'] = makeOptions($list,$arg->getvars['sendto']);
+		*/
+		if ($arg->getvars['sendto'])
+		{	$t['sendto'] = $arg->getvars['sendto'];
+		}
+		$arg->templateName = 'compose';
+		$u->sessionvars['pmreturnto'] = $arg->getvars['returnto'];
+	}
+
+
+	function deleteRun($db,&$u,&$arg,&$t) {
+
+		$username = $u->username;
+	
+		if (is_array($arg->postvars['mess']) == false && is_numeric($arg->getvars['mess']))
+		{	$db->query("delete from privateMessages where pkey=".(int)$arg->getvars['mess']." and messageTo='$username'");
+		} else
+		{
+			while(list($k,$v) = @each($arg->postvars['mess'])) { 
+				$db->query("delete from privateMessages where pkey=".(int)$k." and messageTo='$username'");
+			}
+		}
+		$t['message'] = "Message(s) deleted";
+		$this->run($db,$u,$arg,$t);
+	}
+
+
+	function postRun($db,&$u,&$arg,&$t) {
+		
+		/**
+		 * Checking to see if sendto user exists
+		 */
+
+		$sql = '
+		SELECT count(*) user_exists
+		FROM lcUsers
+		WHERE username=\''.$arg->postvars['sendto'].'\'
+		';
+		
+		$db->queryOne($sql);
+		$user_exists = $db->Record['user_exists'];
+
+		$mess = new privMess();
+		$mess->subject = $arg->postvars['subject'];
+		if (!trim($mess->subject)) { $mess->subject = "No subject"; }
+		$mess->message = $arg->postvars['message'];
+		$mess->sentTime = time();
+		$mess->messageFrom = $u->username;
+		$mess->messageTo = $arg->postvars['sendto'];
+		if ($mess->messageTo != '' && $user_exists == true) { 
+			$mess->add();
+			
+			if ($arg->postvars['copytosender'])
+			{	$mess->messageTo = $u->username;
+				$mess->subject = '[C2S] '. $mess->subject;
+				$mess->add();
+			}
+			
+			$t['return'] = base64_decode($u->sessionvars['pmreturnto']);
+			$u->sessionvars['pmreturnto'] = "";
+
+			if ($t['return'] == "") { 
+				$t['message'] = "Message sent";
+				$this->run($db,$u,$arg,$t);
+			} else { 
+				$arg->templateName = 'sent';
+			}
+		} else {
+			$t = array_merge($arg->postvars, $t);
+			$t['message'] = stripslashes($t['message']);
+			$t['subject'] = stripslashes($t['subject']);
+			if ($user_exists)
+			{	$t['error'] = "You need to select a user to message.";
+			} else
+			{	$t['error'] = 'User does not exist.';
+			}
+			$this->composeRun($db,$u,$arg,$t);
+		}
+	}
+
+}
+
+?>

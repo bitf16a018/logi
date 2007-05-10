@@ -1,0 +1,39 @@
+<?php echo $t['sectionheader'];?>
+
+<?php if ( !$t['locked'] ) { ?>
+<div align="center" style="width:100%;">
+	<?php if ( $t['moderator'] ) { ?>
+	<a href="<?=modurl('forumAdmin/event=moveThread/post_id='.$t['postId']);?>"><img src="<?= IMAGES_URL;?>forum_action_move.png" border="0" style="padding-right:3px;" align="middle"/>Move Thread</a>
+	&nbsp;|&nbsp;
+	<a href="<?=modurl('forumAdmin/event=trashThread/post_id='.$t['postId']);?>"><img src="<?= IMAGES_URL;?>forum_action_trash.png" height="22" border="0" style="padding-right:3px;" align="middle"/>Trash Thread</a>
+	<?php } ?>
+</div>
+<?php } ?>
+
+<?php if ( $t['moderator'] ) { ?>
+<!--
+need to make 'unimportant feature'
+<div align="center">
+	<div class="forum_moderator_nav">
+		<a href="<?=modurl('posts/event=/post_id='.$t['postId']);?>"><img src="<?= IMAGES_URL;?>forum_important.png" border="0" align="middle"/> Mark Thread as Important</a>
+		&nbsp;|&nbsp;
+		<a href="<?=modurl('forumAdmin/event=moveThread/post_id='.$t['postId']);?>"><img src="<?= IMAGES_URL;?>forum_action_move.png" border="0" align="middle"/> Move Thread</a>
+	</div>
+</div>
+-->
+<?php } ?>
+
+
+<div style="float:left;">
+	Back to Forum: <a href="<?= modurl('forum/forum_id='.$t['forumId']);?>"><?=$t['forumName'];?></a>
+</div>
+<?php if ( ! $x = $t['threadTable']->toHTML() ) { ?>
+	There are no posts to show.
+<?php } else {
+	echo $x;
+} ?>
+
+<?php if ( !$t['locked'] ) { ?>
+<div align="center" style="width:100%;">
+</div>
+<?php } ?>

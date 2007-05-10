@@ -1,0 +1,209 @@
+<?=$t['sectionheader'];?>
+<div style="float:right;margin:10px;"><img src="<?=$t['photo'];?>" alt="<?=$t['user']['firstname'].' '.$t['user']['lastname'];?>" border=1 /></div>
+
+<table border=0 cellpadding=2 cellspacing=2 width="100%">
+<tr>
+	<td class="profile_title" colspan=2 style="color:white;font-weight:bold;">Personal Information</td>
+</td>
+<tr>
+	<td width="220" class="profile_left" valign="top"><b>Full Name</b></td>
+	<td><?=$t['user']['title'].' '.$t['user']['firstname'].' '.$t['user']['lastname'];?></td>
+</tr>
+<tr>
+	<td class="profile_left" valign="top"><b>Username</b></td>
+	<td><?=$t['username'];?></td>
+</tr>
+<? if ( $t['user']['email'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Work Email</b></td>
+	<td><a href="mailto:<?=$t['user']['email'];?>"><?=$t['user']['email'];?></a></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['showaddinfo'] == 'Y' ) { ?>
+<? if ( $t['user']['address'] && $t['user']['city'] &&
+	$t['user']['state'] && $t['user']['zip'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Home Address</b></td>
+	<td>
+		<?=$t['user']['address'];?><br/>
+		<? if ($t['user']['address2']) print $t['user']['address2']."<br/>"; ?>
+		<?=$t['user']['city'].', '.$t['user']['state'].' '.$t['user']['zip'];?>
+	</td>
+</tr>
+<? } ?>
+<? if ( $t['user']['homePhone'] && $t['user']['homePhone'] != '--' ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Home Phone</b></td>
+	<td><?=$t['user']['homePhone'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['officePhone'] && $t['user']['officePhone'] != '--' ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Office Phone</b></td>
+	<td><?=$t['user']['homePhone'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['workPhone'] && $t['user']['workPhone'] != '--' ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Work Phone</b></td>
+	<td><?=$t['user']['workPhone'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['faxPhone'] && $t['user']['faxPhone'] != '--' ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Fax Phone</b></td>
+	<td><?=$t['user']['faxPhone'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['cellPhone'] && $t['user']['cellPhone'] != '--' ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Cell Phone</b></td>
+	<td><?=$t['user']['cellPhone'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['pagerPhone'] && $t['user']['pagerPhone'] != '--' ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Pager Phone</b></td>
+	<td><?=$t['user']['pagerPhone'];?></td>
+</tr>
+<? } ?>
+<? } // showaddinfo ?>
+<? if ( $t['user']['degree'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Degrees Earned</b></td>
+	<td><?=preg_replace("/\n/", ", ", $t['user']['degree']);?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['jobtitle'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Job Title</b></td>
+	<td><?=$t['user']['jobtitle'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['relevantExp'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Relevant Work Experience</b></td>
+	<td><?=$t['user']['relevantExp'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['workaddy'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Office Address</b></td>
+	<td><?=$t['workaddy'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['officeLocation'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Office Location</b></td>
+	<td><?
+		switch ($t['user']['campusLocation']) {
+			case 'NE': $c = 'Northeast'; break;
+			case 'NW': $c = 'Northwest'; break;
+			case 'S': $c = 'South'; break;
+			case 'SE': $c = 'Southeast'; break;
+		}
+		print $c.' campus<br/>';
+		if ($t['user']['officeLocation']) print '<br/>'.$t['user']['officeLocation'];
+	?></td>
+</tr>
+<? } ?>
+<?
+$ohrs = array();
+if ($t['user']['offHrsMonday']) $ohrs[] = 'Monday: '.$t['user']['offHrsMonday'];
+if ($t['user']['offHrsTuesday']) $ohrs[] = 'Tuesday: '.$t['user']['offHrsTuesday'];
+if ($t['user']['offHrsWednesday']) $ohrs[] = 'Wednesday: '.$t['user']['offHrsWednesday'];
+if ($t['user']['offHrsThursday']) $ohrs[] = 'Thursday: '.$t['user']['offHrsThursday'];
+if ($t['user']['offHrsFriday']) $ohrs[] = 'Friday: '.$t['user']['offHrsFriday'];
+
+if (count($ohrs)) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Office Hours</b></td>
+	<td><?=implode('<br/>', $ohrs);?></td>
+</tr>
+<? } ?>
+<? if ( $t['admin'] ) { ?>
+<? if ( $t['user']['operatingSystem'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Operating System</b></td>
+	<td><?=$t['user']['operatingSytem'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['connectType'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Connection Type</b></td>
+	<td><?=$t['user']['connectType'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['isp'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>ISP</b></td>
+	<td><?=$t['user']['isp'];?></td>
+</tr>
+<? } ?>
+<? } // if $t['admin'] ?>
+<? if ( $t['user']['showonlineinfo'] == 'Y' &&
+	(
+		$t['user']['url'] ||
+		$t['user']['icq'] ||
+		$t['user']['aim'] ||
+		$t['user']['yim'] ||
+		$t['user']['msn']
+	)
+) { ?>
+<tr>
+	<td colspan=2 style="background-color:#31999c;color:white;font-weight:bold;">Online Presence Information</td>
+</td>
+<? if ( $t['user']['url'] ) { ?>
+<tr>
+	<td class="profile_left"><b>URL</b></td>
+	<td><a href="<?=$t['user']['url'];?>"><?=$t['user']['url'];?></a></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['icq'] ) { ?>
+<tr>
+	<td class="profile_left"><b>ICQ UIN</b></td>
+	<td><?=$t['user']['icq'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['aim'] ) { ?>
+<tr>
+	<td class="profile_left"><b>AOL IM</b></td>
+	<td><?=$t['user']['aim'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['yim'] ) { ?>
+<tr>
+	<td class="profile_left"><b>Yahoo</b></td>
+	<td><?=$t['user']['yim'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['msn'] ) { ?>
+<tr>
+	<td class="profile_left"><b>MSN</b></td>
+	<td><?=$t['user']['msn'];?></td>
+</tr>
+<? } ?>
+<? } // showonlineinfo ?>
+<? if ( $t['user']['showbioinfo'] == 'Y' &&
+	(
+		$t['user']['occupation'] ||
+		$t['user']['bio']
+	)
+) { ?>
+<tr>
+	<td colspan=2 style="background-color:#31999c;color:white;font-weight:bold;">Biographical Information</td>
+</td>
+<? if ( $t['user']['occupation'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Occupation</b></td>
+	<td><?=$t['user']['occupation'];?></td>
+</tr>
+<? } ?>
+<? if ( $t['user']['bio'] ) { ?>
+<tr>
+	<td class="profile_left" valign="top"><b>Biography</b></td>
+	<td><?=$t['user']['bio'];?></td>
+</tr>
+<? } ?>
+<? } // showbioinfo ?>
+</table>

@@ -1,0 +1,140 @@
+<?=$t['sectionheader'];?>
+
+<h3><?=$t['semester_label'];?> - Book Estimates</h3>
+
+<form method="POST">
+<?php
+
+	$post_SE = (((int)$obj->postvars['SE'] > 0) ? (int)$obj->postvars['SE'] : 20);
+	$post_SO = (((int)$obj->postvars['SO'] > 0) ? (int)$obj->postvars['SO'] : 33);
+	$post_NE = (((int)$obj->postvars['NE'] > 0) ? (int)$obj->postvars['NE'] : 12);
+	$post_NW = (((int)$obj->postvars['NW'] > 0) ? (int)$obj->postvars['NW'] : 35);
+
+?>
+<table cellpadding="1" cellspacing="1" border="0" width="100%">
+	<tr>
+		<td align="center" bgcolor="silver" width="25%"><B>Southeast Campus</B></td>
+		<td align="center" bgcolor="silver" width="25%"><B>South Campus</B></td>
+		<td align="center" bgcolor="silver" width="25%"><B>Northeast Campus</B></td>
+		<td align="center" bgcolor="silver" width="25%"><B>Northwest Campus</B></td>
+	</tr>
+	<tr>
+		<td align="center"><input type="text" name="SE" value="<?=$post_SE;?>" size="5">%</td>
+		<td align="center"><input type="text" name="SO" value="<?=$post_SO;?>" size="5">%</td>
+		<td align="center"><input type="text" name="NE" value="<?=$post_NE;?>" size="5">%</td>
+		<td align="center"><input type="text" name="NW" value="<?=$post_NW;?>" size="5">%</td>
+	</tr>
+	<tr>
+		<td colspan="4" align="center">
+		Using enrollments from 
+	<select name='semester1'>
+		<?=$t['semester1'];?>
+	</select> &nbsp; 
+	and classes from
+	<select name='semester2'>
+		<?=$t['semester2'];?>
+	</select> &nbsp; 
+		<input type="submit" value="Update Book Percentages"></td>
+	</tr>
+	<tr>
+		<td colspan="4" align="center">
+		</td>
+	</tr>
+</table>
+
+</form>
+Showing estimates based on enrollment for "<?=$t['semester1_label'];?>" semester and classes from <?=$t['semester2_label']?> semester.
+
+<br>
+<?php
+$total_count = $t['total_count'];
+
+if (is_array($t['books']))
+{
+	echo '
+	<table cellpadding="1" cellspacing="1" border="0" width="100%">
+	<tr>
+		<td bgcolor="silver"><B>Bundle</B></td>
+		<td bgcolor="silver"><B>CFAM</B></td>
+		<td bgcolor="silver"><B>CNUM</B></td>
+		<td bgcolor="silver"><B>ISBN</B></td>
+		<td bgcolor="silver"><B>ED.</B></td>
+		<td bgcolor="silver"><B>TITLE</B></td>
+		<td bgcolor="silver"><B>AUTHOR</B></td>
+		<td bgcolor="silver"><B>TYPE</B></td>
+		<td bgcolor="silver"><B>FACULTY</B></td>
+		<td bgcolor="silver"><B>SE</B></td>
+		<td bgcolor="silver"><B>SO</B></td>
+		<td bgcolor="silver"><B>NE</B></td>
+		<td bgcolor="silver"><B>NW</B></td>
+	</tr>';
+	
+	foreach($t['books'] as $null=>$book)
+	{
+		//if (++$iii == 20) debug($book);
+		$se = 0;
+		$so = 0;
+		$ne = 0;
+		$nw = 0;
+		
+		if ($t['a_classroom_count'][$book['id_classes']] > 0)
+		{
+		$percentages = $t['a_campus_pcts'][$book['id_classes']];
+		echo $t['a_classroom_count'][$book['id_classes']]."<BR>";
+			$se = ($percentages['se'] * $t['a_classroom_count'][$book['id_classes']] ) / 100 ;
+			$so = ($percentages['so'] * $t['a_classroom_count'][$book['id_classes']] ) / 100 ;
+			$ne = ($percentages['ne'] * $t['a_classroom_count'][$book['id_classes']] ) / 100 ;
+			$nw = ($percentages['nw'] * $t['a_classroom_count'][$book['id_classes']] ) / 100 ;
+	echo "se=$se nw=$nw ne=$ne so=$so<BR>";	
+		}
+		
+		if ($null == 27)
+		{	//debug($book);
+		}
+		
+		echo '<tr>';
+		echo '<td valign="top" width="12">';
+		if ($book['bundled']) { echo "y"; } else { echo ""; }
+		echo '</td>';
+		echo '<td valign="top">'.$book['courseFamily'].'</td>';
+		echo '<td valign="top">'.$book['courseNumber'].'</td>';
+		echo '<td valign="top">'.$book['isbn'].'</td>';
+		echo '<td valign="top">'.$book['edition'].'</td>';
+		echo '<td valign="top">'.$book['title'].'</td>';
+		echo '<td valign="top">'.$book['author'].'</td>';
+		echo '<td valign="top" width="25">'.$book['type'].'</td>';
+		echo '<td valign="top" width="25">'.ucwords(str_replace("."," ",$book['facultyId'])).'</td>';
+		echo '<td valign="top" width="25">'.$se.'</td>';
+		echo '<td valign="top" width="25">'.$so.'</td>';
+		echo '<td valign="top" width="25">'.$ne.'</td>';
+		echo '<td valign="top" width="25">'.$nw.'</td>';
+		echo '</tr>';
+		// save for storage
+		$b['type'] = $book['type'];
+		$b['author'] = $book['author'];
+		//		$b['required'] = $book['required'];	// of course this isn't in the database?!
+		$b['title'] = $book['title'];
+		$b['edition'] = $book['edition'];
+		$b['isbn'] = $book['isbn'];
+		$b['courseNumber'] = $book['courseNumber'];
+		$b['instructor'] = $book['facultyId'];
+		$b['courseFamily'] = $book['courseFamily'];
+		$b['note'] = $book['note'];
+		$b['se'] = $se;
+		$b['so'] = $so;
+		$b['ne'] = $ne;
+		$b['nw'] = $nw;
+		$b['id_textbook_classes'] = $book['id_textbook_classes'];
+		$books[] = $b;
+
+	}
+	$obj->user->sessionvars['textbooks'] = $books;
+	#debug($obj->user);
+	$obj->user->saveSession();
+	echo '</table>';
+}
+?>
+<form method='post' action='<?=modurl("estimates/event=save");?>'>
+Save these estimates as (use a descriptive name): <input type='text' name='savename' maxlength='30'>
+<input type='submit' value='Save these estimates'>
+</form>

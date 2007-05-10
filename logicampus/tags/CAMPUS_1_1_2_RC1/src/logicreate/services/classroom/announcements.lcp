@@ -1,0 +1,75 @@
+<?
+/*
+ *
+ * Displays announcements to students
+ *
+ */
+
+class announcements extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $inactivelinks = array(
+		'Announcements',
+	);
+	var $sectionTitle = 'Announcements';
+
+/*
+ *
+ * Default event
+ * 
+ * Input data:  $u->activeClassTaken->id_classes
+ * Output data: 5 announcements
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+
+			$lc->templateName = 'announcements_main';
+			$lc->templateStyle = 'private';
+
+			$min = (int)$lc->getvars['limit'];
+			$max = $min + 5;
+			$t['prev'] = $min - 5;
+			$t['next'] = $max;
+
+			$sql = 'select * from class_announcements
+				where id_classes='.$u->activeClassTaken->id_classes.'
+				order by dt_display desc
+				limit '.$min.','.$max;
+			$db->query($sql); 
+
+			while ($db->next_record()) $t['announcements'][] = $db->Record;
+
+			// figure out whether or not we want to display the prev/next links
+			// based on how many rows there are
+			$sql = 'select count(id_class_announcements) as count from class_announcements
+				where id_classes='.$u->activeClassTaken->id_classes;
+			$db->queryOne($sql);
+			$count = $db->Record['count'];
+			$t['showprev'] = $min > 0;
+			$t['shownext'] = $max < $count;
+		}
+
+
+		// print a single announcement
+		function viewRun(&$db,&$u,&$lc,&$t) {
+
+			$lc->templateName='announcements_view';
+			$lc->templateStyle='private';
+
+			$sql = "select tx_title, tx_description from class_announcements
+				where id_classes='{$u->activeClassTaken->id_classes}'
+				and id_class_announcements='".(int)$lc->getvars['id']."'
+				and dt_display < NOW()";
+			$db->queryOne($sql);
+
+			$t['announcement_text'] = $db->Record['tx_description'];
+			$t['announcement_title'] = $db->Record['tx_title'];
+			$t['announcement_posted'] = $db->Record['dt_display'];
+			$this->sectionTitle = 'Announcement';
+
+		}
+
+}
+
+?>

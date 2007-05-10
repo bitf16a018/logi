@@ -1,0 +1,290 @@
+<? 
+
+/******
+* helpdesk module for tccd
+* 8/3/03
+*
+******/
+ 
+include_once (LIB_PATH."LC_html.php"); 
+include_once (LIB_PATH."SiteForms.php"); 
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+ 
+ 
+class helpdeskSubmit extends RegAuth { 
+ 
+	var $presentor = "htmlPresentation"; 
+
+	var $sectionTitle = 'Help Desk';
+	var $navlinks = array(
+		'Helpdesk'=>'main',
+		'FAQs'=>'faq'
+	);
+	var $applinks = array(
+		'List Tickets' => '',
+		'Submit new ticket' => 'helpdeskSubmit'
+		
+	);
+	var $inactivelinks = array(
+		'Submit new ticket'
+	);
+
+
+	/** 
+	 * Show template to add issue
+	 */ 
+
+	function run(&$db,&$u,&$arg,&$t) { 
+		$arg->templateStyle = 'private';
+		
+		$f = new Siteform();
+//_FIX_ME
+// need determination of 'helpdeskadmin' status
+// just a basic group check?
+// or is there a better way?
+		if (in_array("hdadmin",$u->groups) || in_array("hdstaff",$u->groups) || in_array('admin', $u->groups) ) {
+			$f->getForm('helpdeskSubmitAdmin', $arg->postvars);
+		} else {
+			$f->getForm('helpdeskSubmit');
+		}
+		$f->action = appurl("helpdesk/helpdeskSubmit/event=add");
+		$t['form'] = $f->toHTML();
+		$arg->templateName = "helpdeskSubmit_main";
+	}
+
+// add issue submitted from user
+// if user not a helpdeskadmin user, we have the username
+// if not, we'll take it from the form
+// because a helpdeskadmin user will have the 'username' 
+// option in the form
+
+	function addrun(&$db,&$u,&$arg,&$t) { 
+		$arg->templateStyle = 'private';
+		
+		$post = $arg->postvars;
+		//error checking
+		if ( strlen($post['details']) < 10 ) {
+			$t['error'] = "Your incident needs more detail.";
+		}
+
+		if ($t['error']) {
+			$this->run($db,$u,$arg,$t);
+			return;
+		}
+		
+		// no errors, let's commit to helpdeskIncident
+		$h = new HelpdeskIncident();
+		$h->timedateOpen 	= time();
+		$h->timedateUpdate	= time();
+		$h->timedateReply 	= time();
+		$h->status 		= 1; 	// initial status is new
+		$h->_new 		= true;
+		$h->summary = '';	//no summary
+		$h->category = '';	//no category
+		$h->userid = $u->username;
+
+		$h->timedateClose = 0;
+		$h->assignedTo = '';
+		$h->save();
+
+		$t['incident_number'] = $h->helpdeskId;
+
+		$j = new HelpdeskIncidentLog();
+		$j->helpdeskId = $h->helpdeskId;
+		$j->action = 'Initial details';
+		$j->userid = $h->userid;
+		$j->timedate = time();
+		$j->comment = htmlentities($arg->postvars['details']);
+	
+		$j->save();
+	
+		$arg->templateName = "helpdeskSubmit_add";
+	}
+
+
+
+	/**
+	 * Update the category and the summary
+	 */
+	function categorizeRun(&$db,&$u,&$arg,&$t) {
+
+		if ( !in_array("hdadmin",$u->groups) 
+			&& !in_array("hdstaff",$u->groups) 
+			&& !in_array('admin', $u->groups) ) {
+			$t['message'] = "You don't have permission to modify this ticket in this way";
+			$this->presentor = 'errorPresentation';
+			return;
+		}
+
+		$id = $u->sessionvars['helpdesk_id'];
+		$incident = helpdeskIncident::load($id);
+
+		if (! is_object($incident) ) {
+			$t['message'] = "Cannot find the ticket stored in your session.";
+			$this->presentor = 'errorPresentation';
+			return;
+		}
+
+		
+		$incident->set('summary', htmlentities($arg->postvars['summary']));
+		$incident->set('category',htmlentities($arg->postvars['category_id']));
+		$incident->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('helpdesk/helpdeskView/'.$incident->getPrimaryKey().'/saved=1');
+	}
+
+
+	/**
+	 * all updates are done through this add details
+	 * it's really an add comments
+	 * Status 1 = NEW
+	 * Status 2 = IN PROGRESS
+	 * Status 3 = CLOSED
+	 * Stauts 4 = REPLIED
+	 */
+	function addDetailRun(&$db,&$u,&$arg,&$t) 
+	{ 
+		$arg->templateStyle = 'private';
+// get the incident id we were looking at before
+// don't want to submit it in the form becuase 
+// of security - could try to hash it or something
+// instead, but this was simpler to do for now
+
+		$id = $u->sessionvars['helpdesk_id'];
+
+		$incident = helpdeskIncident::load($id);
+		$originalStatus = $incident->status;
+
+		//only the owner or helpdesk admins can add comments
+		// if it's a staff memeber, make it in progress
+		// if it's the owner, make it 'NEW'
+		if ( in_array("hdadmin",$u->groups) || in_array("hdstaff",$u->groups) || in_array('admin', $u->groups) ) {
+			$incident->assignedTo = $u->username;
+			$incident->status=2;			// in progress
+			$incident->set('timedateUpdate',time());
+			$action = 'In Progress';
+		} else {
+			$incident->status=4;			// replied
+			$incident->set('timedateReply',time());
+			$incident->set('timedateUpdate',time());
+			$action = 'Replied';
+		}
+
+
+// initial action label for all added details
+
+		$action = 'Further Details';
+
+		$close = trim($arg->postvars['close']);
+		if ( strtolower($close) == 'on') {
+			$action = 'Closed';
+			$incident->status=3;	//  CLOSED
+			$incident->timedateClose = time();
+		} else {
+			//this is just for an action name for the log
+			if ($incident->status==3) { // if not closed
+				$action = 'Reopened';
+			}
+		}
+
+		// if reassigned to someone else
+		// change that here
+		if ( in_array("hdstaff",$u->groups) || in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) ) {
+			if ($arg->postvars['reassign']) { 
+				$incident->assignedTo = $arg->postvars['reassign'];
+				$action .= '/Reassigned';
+				$reassigned = 'true';
+				$arg->postvars['details'] .= "\n-----\nReassigned to ".$incident->assignedTo."\n";
+
+				// __FIXME__ - mgk - 11/16/04
+				// request to have an email go to the enduser who is the reassignee
+				// should be cleaner code or integrated with something else
+				$db->queryOne("select email from lcUsers where username='".$arg->postvars['reassign']."'");
+				$email = $db->Record[0];
+				if (trim($email)!='') {
+					mail($email, "Helpdesk task #$id",
+"You have been assigned to helpdesk ticket #$id.  Please visit \n ".appurl("helpdesk/helpdeskView/$id")." \n to learn more about the ticket.", "From: ".WEBMASTER_EMAIL);
+				}
+			}
+		}
+
+
+
+// save any changed made to the master incident
+// could be assignment to new person
+// or status change
+		$incident->save();
+
+// check details have something in them
+// perhaps this isn't necessary if we're putting 
+// log info in the 'action', but more specifically
+// a 'system comment' should go in details then?
+
+		$d = htmlentities(trim($arg->postvars['details']));
+		if ($d!='') { 
+			$j = new HelpdeskIncidentLog();
+			$j->helpdeskId = $id;
+			$j->action = $action;
+			$j->userid = $u->username;
+			$j->timedate = time();
+			$j->comment = $d;
+			$j->status = $incident->status; 
+
+			// if reassigned to someone else
+			// change that here
+			if ( in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) ) {
+			}
+
+			$j->save();
+		}
+
+		$db->queryOne('select helpdesk_status_label from helpdesk_status
+			where helpdesk_status_id = '.$incident->status);
+
+		$statusLabel = ($db->Record[0]) ? $db->Record[0]:'N/A';
+
+		$newStatus = $incident->status;
+
+		//here's the notification matrix for mailing the ticket owner
+		// New => In Progress = email owner
+		// In Progress => Closed = email owner
+		// New => Closed = email owner
+		if ( ($originalStatus == 1 and $newStatus == 2) or
+			($originalStatus == 2 and $newStatus == 3) or
+			($originalStatus == 1 and $newStatus == 3) )
+		{
+			$message = "Incident #$id has changed.  The new information is as follows:-----\n\n";
+			$message .= "Status: ".$statusLabel."\nDetails: ".wordwrap($d,65,"\n")."\n-----\n";
+			$message .= "To view the complete history of this incident, visit\n";
+
+			//added by mark because emails don't seem to be working well
+			include_once(SERVICE_PATH."pm/privmess.php");
+			$mess = new privMess();
+			$mess->subject = "Helpdesk Incident Update (#$id)";
+			$mess->message = $message.'<a href="'.appurl("helpdesk/helpdeskView/$id").'">'.appurl("helpdesk/helpdeskView/$id").'</a>';
+			$mess->sentTime = time();
+			$mess->messageFrom = 'SYSTEM ADMIN';
+			$mess->messageTo = $incident->userid;
+			$mess->dontMail = true;
+			$mess->add();
+
+			//get rid of slashes in the email
+			if ( get_magic_quotes_gpc() ) {
+				$message = stripslashes($message);
+			}
+
+			//append this plain text URL for emails only
+			// above is an html address for private messages
+			$message .= appurl("helpdesk/helpdeskView/$id");
+
+			$user = lcUser::getUserByUserName($incident->userid);
+			mail($user->email,"Helpdesk Incident Update (#$id)",$message);
+		}
+
+		$arg->templateName = "helpdeskSubmit_detailAdded";
+	}
+
+}
+?>

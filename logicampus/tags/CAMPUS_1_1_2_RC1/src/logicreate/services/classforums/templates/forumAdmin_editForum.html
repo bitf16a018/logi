@@ -1,0 +1,44 @@
+<?php echo $t['sectionheader'];?>
+
+<h3>Forum Properties</h3>
+
+<form method="POST" action="<?=modurl('forumAdmin/event=saveForum');?>">
+<div style="float:left">
+	Forum name: 
+	<br/>
+	<input size="35" type="text" name="name" value="<?= $t['name'];?>">
+	<br/>
+	Forum description: 
+	<br/>
+	<textarea cols="35" rows="5" name="description"><?= $t['description'];?></textarea>
+	<br/>
+	<input type="submit" id="submit_forum" value="Submit"/>
+	<input type="hidden" name="forum_id" value="<?=$t['forumId'];?>"/>
+</div>
+
+<div style="width:100px;float:left">
+	&nbsp;
+</div>
+
+<div style="float:left">
+	<fieldset>
+		<legend>Choose Category</legend>
+
+		<? if (is_array($t['categories'])) { ?>
+		<? 
+			$count = 2;
+			foreach($t['categories'] as $categoryKey=>$categoryName) { 
+			$checked = ($categoryKey == $t['categoryId']) ? 'CHECKED' : '';
+			?>
+			<div class="hover_button" onclick="document.getElementById('radio_<?=$count;?>').checked=true;">
+				<input type="radio" value="<?=$categoryKey;?>" id="radio_<?=$count;?>" name="category_id" <?=$checked;?>/>
+				<?=$categoryName;?>
+				</div>
+			<?
+			++$count;
+			}
+		?>
+		<? } ?>
+	</fieldset>
+</div>
+</form>

@@ -1,0 +1,1107 @@
+<?php
+
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class users extends AdminService {
+
+	var $presentor = "htmlPresentation";
+	var $authorizer = 'ServiceMapAuth';
+	var $PAGE_SIZE = 30;
+	var $cleanedArray = array();
+
+	// Links
+	var $sectionTitle = 'User Administration';
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Administration Home' => '',
+		'User Manager' => 'users/',
+		'Group Manager' => 'groups/',
+		'Modify Application Permissions' => 'servicePermissions/'
+	);
+	var $applinks = array(
+		'List Users' => 'users',
+		'Create User' => 'users/event=new', 
+		'Sync Students' => 'users/event=syncStudents',
+		'Help Desk' => '%helpdesk'
+	);	
+	var $inactivelinks = array( 'User Manager' );
+
+	/**
+	 * Show the main control panel for users
+	 *
+	 * Retrieve a list of users, groups, collections,
+	 * and profile meta-data to populate all the controls.
+	 */
+	function run (&$db,&$u,&$arg,&$t) {
+		if (in_array("hdadmin",$u->groups)) 
+		{
+			$this->applinks['Help Desk'] = '%helpdesk';
+		}
+		
+		$this->inactivelinks[] = 'List Users';
+		$arg->templateName = 'users_main';
+		$arg->templateStyle = 'private';
+		$this->sectionTitle = 'List Users';
+
+		//fix for a bug in the searching
+		$t['opt1'] = 'opt1=blank';
+
+                $this->where = '1=1';
+                $this->order = " lc.username";
+                $this->table = " lcUsers";
+                $this->anySearchRun($db,$u,$arg,$t);
+                return;
+
+	}
+
+
+	/**
+	 * Search for users based on any criteria
+	 *
+	 */ 
+	function anySearchRun(&$db, &$u, &$arg, &$t) {
+		
+		$arg->templateName = 'users_main';
+		$arg->templateStyle = 'private'; 
+		
+		$arg->getvars[firstletter] != ''? $firstletter = $arg->getvars[firstletter]:$firstletter = $arg->postvars[firstletter];
+		// generic $where and $order set in each 
+		// method, which then call the anysearch method
+		$where = $this->where;
+		$order = $this->order;
+
+		$t[start] = $arg->getvars[start];
+		settype($t[start],"integer");
+
+
+		if ($this->sql)  {
+			$db->query($this->sql. " LIMIT ".$t['start'].",".$this->PAGE_SIZE);
+		}else { 
+			$db->query("select *, lc.username as lc_username from lcUsers as lc LEFT JOIN profile on lc.username = profile.username where $where order by $order LIMIT ".$t[start].",".$this->PAGE_SIZE);
+		}
+		while ($db->next_record() ) {
+			if ( ($db->Record['firstname']== '') and 
+           ($db->Record['lastname'] == '') ) {
+
+				$db->Record['profiledata'] = "<i>Incomplete profile data</i>";
+
+			} else {
+
+				$db->Record['profiledata'] = "<a href=\"".modurl("users/username=".$db->Record['lc_username']."/event=showUser")."\">".$db->Record['lastname'].", ".$db->Record['firstname']."</a>";
+
+			}
+			$t['users'][] = $db->Record;
+		}
+
+		if ($this->sql) { 
+			$db->query($this->count_sql);
+		} else { 
+
+			if ($this->second_where) { $where = $this->second_where; }
+			$db->query("select count(username) from ".$this->table." lc where $where");
+		}
+
+		$db->next_record();
+		$t['result_pages'] = ceil( $db->Record[0] / $this->PAGE_SIZE);
+		$t['current_page'] = ceil( $t[start] / $this->PAGE_SIZE) + 1;
+		$t['max_results'] = $db->Record[0];
+		$t['PAGE_SIZE'] = $this->PAGE_SIZE;
+
+		//groups
+		$db->query("select * from lcGroups");
+		while ($db->next_record() ) {
+			$t["group_opt"] .= "<option value=\"".$db->Record[gid]."\">".$db->Record[groupName]." (".$db->Record[gid].") </option>\n";
+		}
+
+		//profile
+		$db->query("describe profile");	//get profile meta data
+		$db->next_record(); 		//drop off pkey
+		$t['profile_opt'] .= "<option value='_email'>Email</option>\n";
+		$t['profile_opt'] .= "<option value='_username'>Username</option>\n";
+		while ($db->next_record() ) {
+			$t['profile_opt'] .= "<option value=\"".$db->Record[0]."\">".$db->Record[0]."</option>\n";
+		}
+
+		$db->query("select * from courses order by courseFamily, courseNumber, courseName");
+
+		while($db->next_record()) {
+
+			$x[$db->Record['id_courses']] = substr($db->Record['courseFamily']." ".$db->Record['courseNumber']." - ".$db->Record['courseName'], 0, 40);
+
+		}
+
+		$t['courses'] = makeOptions($x, (int)$this->course);
+		$db->query("select * from semesters");
+		while($db->next_record()) {
+			$s[$db->Record['id_semesters']] = $db->Record['semesterId'];
+		}
+		$t['semesters'] = makeOptions($s, (int)$this->semester);
+
+		//fix for search bug
+		$t['opt1'] = 'opt1=blank';
+
+	}
+
+
+
+
+
+	/**
+	 * Search for users based on their username
+	 */
+	function firstLetterRun(&$db, &$u, &$arg, &$t) {
+		
+		$arg->getvars['firstletter'] != ''? $firstletter = $arg->getvars['firstletter']:$firstletter = $arg->postvars['firstletter'];
+
+		$this->where = "lc.username like '".$firstletter."%'";
+		$this->order = "lc.username";
+		$this->table = "lcUsers";
+
+		$t[opt1] = 'event=firstLetter';
+		$t[opt2] = 'firstletter='.$firstletter;
+
+		$this->anySearchRun($db,$u,$arg,$t);
+	}
+
+
+	/**
+	 * Search for a user based on one group
+	 */
+	function groupSearchRun(&$db, &$u, &$arg, &$t) {
+
+		$arg->getvars['gid'] != ''? $gid = $arg->getvars['gid']:$gid = $arg->postvars['gid'];
+
+		//patch for broken groups/suspended accounts
+		if ($gid == '') { $or = " or groups  = '' "; }
+
+		$this->where = " groups like '%|$gid|%' $or ";
+		$this->order = "lc.username";
+		$this->table = "lcUsers";
+
+		$t[opt1] = 'event=groupSearch';
+		$t[opt2] = 'gid='.$gid;
+
+		$this->anysearchRun($db,$u,$arg,$t);
+	}
+
+	/**
+	 * Search for a user based on a course/semester ID combo
+   *
+   * Updated on 2003-11-04 by Joe Stump <jstump@tapinternet.com>
+   *   - Added ability to search by section number (497)
+   *   - Modified templates to work with new section number searching
+	 */
+	function classSearchRun(&$db, &$u, &$arg, &$t) 
+  {
+
+		$arg->getvars['semesterPkey'] != '' ? $semester = $arg->getvars['semesterPkey'] : $semester = $arg->postvars['semesterPkey'];
+
+		$arg->getvars['coursePkey'] != '' ? $course= $arg->getvars['coursePkey'] : $course= $arg->postvars['coursePkey'];
+
+		$arg->getvars['sectionNumber'] != '' ? $section = $arg->getvars['sectionNumber'] : $section = $arg->postvars['sectionNumber'];
+
+		$this->course   = $course;
+		$this->semester = $semester;
+    $this->section  = $t['sectionNumber'] = $section; // Added by Joe Stump (497)
+
+		$this->sql = "SELECT lc.*,lc.username AS lc_username, 
+                         p.*,A.id_student, A.sectionNumber 
+                  FROM profile AS p,lcUsers AS lc, class_student_sections AS A,
+                       classes AS B 
+                  WHERE B.id_courses=$course AND 
+                        B.id_semesters=$semester AND 
+                        POSITION(A.sectionNumber IN B.sectionNumbers) > 0 AND 
+                        lc.username=A.id_student AND 
+                        p.username=lc.username";
+
+    if(strlen($section))
+    {
+      $this->sql .= "\n AND A.sectionNumber='$section'";
+    }
+
+		$this->count_sql = "SELECT COUNT(lc.pkey) 
+                        FROM lcUsers AS lc, 
+                             class_student_sections AS A, 
+                             classes AS B 
+                        LEFT JOIN profile ON lc.username=profile.username 
+                        WHERE B.id_courses=$course AND 
+                              B.id_semesters=$semester AND 
+                              POSITION(A.sectionNumber IN B.sectionNumbers) > 0
+                              AND lc.username=A.id_student";
+
+    if(strlen($section)) 
+    {
+      $this->count_sql .= "\n AND A.sectionNumber='$section'";
+    }
+
+
+		$this->where = " groups like '%|$gid|%' $or ";
+		$this->order = "lc.username";
+		$this->table = "lcUsers";
+
+
+		$t[opt1] = 'event=classSearch';
+		$t[opt2] =  "coursePkey=$course/semesterPkey=$semester/sectionNumber=$section";
+
+
+		$this->anysearchRun($db,$u,$arg,$t);
+
+	}
+
+
+
+	/**
+	 * Search for a user based on one profile field
+	 */
+	function profileSearchRun(&$db, &$u, &$arg, &$t) {
+		
+		if ($arg->getvars['prof'] != '') {
+			$prof = $arg->getvars['prof'];
+		} else {
+			$prof = $arg->postvars['profile_field'].'|'.$arg->postvars['q'];
+		}
+
+		list ($prof_field,$prof_val)  = explode('|',addslashes(stripslashes($prof)));
+
+		$t[start] = $arg->getvars[start];
+		settype($t[start],"integer");
+
+		$this->order = "lc.username";
+
+		if (($prof_field=='_email') || ($prof_field=='_username')) {
+			$prof_field = substr($prof_field,1);
+			$this->where = "lc.".$prof_field." like '%$prof_val%' ";
+			$this->table = "lcUsers";
+		} else  {
+			$this->where = "profile.".$prof_field." like '%$prof_val%' ";
+			$this->second_where = "lc.".$prof_field." like '%$prof_val%' ";
+			$this->table = "profile";
+		}
+		$t[opt1] = 'event=profileSearch';
+		$t[opt2] = 'prof='.$prof;
+
+		$this->anysearchRun($db,$u,$arg,$t);
+	}
+
+
+
+	/**
+	 * Show the form for new user creation
+	 */
+	function newRun (&$db, &$u, &$arg, &$t) {
+		
+		$arg->templateName = "users_new";
+		$arg->templateStyle = 'private';
+		
+		$f = new SiteForm();
+		$f->getForm('createaccount', $this->cleanedArray);
+		$t['form'] = $f->ToHTML();
+		$this->inactivelinks[] = 'Create User';
+	}
+
+
+
+	/**
+	 * Selects the user type and calls the appropiate form via the form manager
+	 */
+	function createAccountRun (&$db, &$u, &$arg, &$t) {
+
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('createaccount', $arg->postvars);
+		$this->cleanedArray = $f->cleanedArray;	// what will this affect? it was in hasErrors() block
+		
+		if ($f->hasErrors() ) {
+			
+			$arg->templateName = "users_new";
+			$this->newRun($db,$u,$arg,$t);
+			return;
+		} 
+		
+		$newuser = new lcUser();
+		$newuser->username = $arg->postvars['username'];
+		$newuser->password = md5($arg->postvars['password']);
+		$newuser->email = $arg->postvars['email'];
+		$newuser->userType = $arg->postvars['userType'];
+		$newuser->groups[] = 'reg';     //add user to register group
+		$newuser->loadProfile();
+		$newuser->profile->set('firstname', $arg->postvars['firstname']);
+		$newuser->profile->set('lastname', $arg->postvars['lastname']);
+		$newuser->updateMailServer(1);
+		
+		# Add users to the appropiate groups
+		# and do other user account specific things
+		if ($arg->postvars['userType'] == USERTYPE_FACULTY)
+		{
+			$newuser->groups[] = 'faculty';
+		}
+
+		if ($arg->postvars['userType'] == USERTYPE_STUDENT)
+		{
+			$newuser->groups[] = 'student';
+		}
+
+		if ($arg->postvars['adminPrivs'] == 'on')
+		{
+			$newuser->groups[] = 'admin';
+		}
+	
+		# Try creating the account
+		$key = $newuser->administrationAddNewUser($db);
+		if ($key < 0)
+			{	// user already exists, append to error message
+				$t['error'] .= '<br><ul><li>User already exists, try another username.</li></ul>';
+				$this->newRun($db, $u, $arg, $t);
+				return;
+			}
+		
+		# Email a notification of their account being created
+		if ($arg->postvars['sendemail']=='on') { 
+			$newuser->sendGreeting();
+		}
+		
+		# Faculty and admin accounts  are special accounts that need to have
+		# some additional information added to it
+		# so let's send them there
+		if ( ($arg->postvars['userType'] == USERTYPE_FACULTY) ||
+		( $arg->postvars['userType'] == USERTYPE_ADMIN) )
+		{
+			$u->sessionvars['useraccount'] = $newuser->username;
+			$this->addCourseFamilyInfoRun($db, $u, $arg, $t);
+			return;
+		}
+		
+		# Send them back to the main list of users
+		# if we are not creating a faculty account
+		$this->Run($db, $u, $arg, $t);
+		return;
+		
+ 		
+	}
+
+	
+	/**
+	 * shows faculty specific form
+	 */
+	function addCourseFamilyInfoRun(&$db, &$u, &$lc, &$t) {
+			$lc->templateName = 'users_addFacultyAccountInfo';
+			$f = new SiteForm();
+			$f->getForm('adminfacultyaccount');
+			$t['form'] = $f->ToHTML();
+			$t['user'] =  $u->sessionvars['useraccount'];
+	}
+
+	/**
+	 * shows faculty specific form
+	 */
+	function editCourseFamilyInfoRun(&$db, &$u, &$lc, &$t) {
+
+		# load up the course family information for the given
+		# user account
+
+		$sql = "select id_profile_faculty_coursefamily from
+		profile_faculty_coursefamily where
+		username='".$lc->getvars['username']."'";
+
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$data['courseFamily'][$db->Record['id_profile_faculty_coursefamily']] =
+			$db->Record['id_profile_faculty_coursefamily'];
+
+		}
+		
+		$u->sessionvars['useraccount'] = $lc->getvars['username'];	
+		$lc->templateName = 'users_addFacultyAccountInfo';
+		$f = new SiteForm();
+		$f->getForm('adminfacultyaccount', $data);
+		$t['form'] = $f->ToHTML();
+		$t['user'] = $lc->getvars['username'];
+	}
+
+
+	/**
+	 * takes the facutly course families and stores them in the faculty profile
+	 */
+	function courseFamilyInfoPostRun(&$db, &$u, &$arg, &$t) {
+		
+			$username = $u->sessionvars['useraccount'];
+			$db->query("delete from profile_faculty_coursefamily where
+			username='".$u->sessionvars['useraccount']."'");
+
+			# Now let's recreate everything
+			while(list ($k, $v) = @each($arg->postvars['courseFamily']))
+			{
+				$db->query("insert into profile_faculty_coursefamily
+				set username='".$username."',
+				id_profile_faculty_coursefamily='".$v."'" );
+			}
+			$this->run($db, $u, $arg, $t);			
+			return;
+	}
+	
+	
+
+	/**
+	 * show a page for editing email, password, groups, and profile.
+	 */
+
+	function showUserRun (&$db, &$u, &$arg, &$t ) {
+		$arg->templateName = "users_showUser";
+
+
+			// USER
+		if ($user->username == "anonymous" ) {
+			$t[message] == "Cannot find user in database";
+			return;
+		}
+
+		# Build up a list of classes the user is enrolled in
+		$user = lcUser::getUserByUsername($arg->getvars['username']);
+
+		$classCount = count($user->classesTaken);
+		for ($i=0; $i<$classCount; $i++)
+		{
+			$t['classlist'][$user->classesTaken[$i]->semesterID][] = 
+			'<li>'.$user->classesTaken[$i]->courseFamilyNumber.' -
+			'.$user->classesTaken[$i]->courseName.'</li>';
+		}
+		$t['user_info']['username'] = $user->username;
+		$t['user_info']['email'] = $user->email;
+
+
+		// Grab the GROUPS
+		$db->query("select * from lcGroups order by groupName");
+		while ($db->next_record() ) {
+			$t[group_opt] .= "<option value=\"".$db->Record[gid]."\"";
+			if ( @ in_array ($db->Record[gid],$user->groups) ) { $t[group_opt] .= " SELECTED "; }
+			$t[group_opt] .= ">".$db->Record[groupName]." (".$db->Record[gid].") </option>\n";
+		}
+
+			# Pass user object to template
+			$t['user'] = $user;
+
+// 10/18/03 - mgk
+// an experiment
+// let's reuse the history code from helpdesk/history to 
+// display the user's helpdeesk history here as well
+// if we change the display there, it'll display here as well (relative not absolute tables)
+// didn't *quite* turn out as good as I'd hoped, but it's a trial
+			include_once(INSTALLED_SERVICE_PATH."helpdesk/history.lcp");
+			$arg->getvars['username'] = $user->username;
+			$h = new history();
+			$x = $arg->templateName;
+			$h->run($db,$u,$arg,$temp);
+			$t['incidents'] = $temp['incidents'];
+			$t['comment'] = $temp['comment'];
+			$t['history'] = $temp['history'];
+			$t['history'] = $temp['history'];
+			$t['username'] = $user->username;
+			$t['includedFromMain'] = true;
+			$arg->templateName = $x;
+		
+	}
+
+
+
+
+
+	/**
+	 * update the db with info about the users email, password, profile, and groups
+	 */
+
+	function updateRun (&$db, &$u, &$arg, &$t ) {
+	//	$this->presentor = "debug"; return;
+		$user = lcUser::getUserByUsername($arg->getvars['username']);
+		$user->groups = $arg->postvars['group_opt'];
+		$user->email = $arg->postvars['email'];
+		if ( $arg->postvars[password] != "") {
+			$user->password = md5($arg->postvars[password]);
+		}
+
+		$user->update();
+		$user->updateMailServer(2);
+
+		header("Location: ".modurl('users'));
+		exit();
+	}
+
+
+	# Displays an R U Sure message
+	function showDeleteRun (&$db, &$u, &$arg, &$t ) {
+			$arg->templateName ="users_showDelete";
+			$db->query("select username from lcUsers where username = '".$arg->getvars['username']."'");
+			$db->next_record();
+			$t['username'] = $db->Record[0];
+	}
+
+	# Deletes the user account
+	function processDeleteRun(&$db, &$u, &$lc, &$t)
+	{
+				
+		$user = lcUser::getUserByUserName($lc->postvars['username']);
+		$user->loggedIn = true;
+		$user->loadProfile();
+		$user->deleteUser();
+		$user->updateMailServer(0);
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('users');
+	}
+
+	/**
+	 * if the submitted username is currently logged in, set a 
+	 * cookie so the admin calling this function can be seen as
+	 * said user.  Else log the admin in as the user.
+	 * 10 min time limit
+	 */
+	function loginAsRun (&$db, &$u, &$arg, &$t ) {
+		global $tail;
+		$this->presentor = 'debug';
+		$username = $arg->getvars[1];
+		$db->query("select sessKey from lcSessions where username = '$username'");
+		if ($db->next_record() ) {
+			//set cookie
+			setcookie("LOGINAS",$db->Record[0],0,$tail,COOKIE_HOST);
+			header("Cache-Control: no-cache");
+			header("Location: ".DEFAULT_URL);
+			exit();
+		} else {
+			//log in as normal user
+			$session = md5( uniqid( rand() ) );
+			$newUser = lcUser::getUserByUsername($username);
+			$newUser->_sessionKey = $session;
+			$bind = $newUser->bindSession();
+			setcookie("LOGINAS",$session,0,$tail,COOKIE_HOST);
+
+			header("Cache-Control: no-cache");
+			/*
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = DEFAULT_URL;
+			return;
+			*/
+			header("Location: ".DEFAULT_URL);
+			exit();
+		}
+	}
+
+	/**
+	 * Show the presentation of all user collection UIs.
+	 *
+	 * A collection of users is stored in the herc user's session.
+	 * A collection of users can have specific operations performed on
+	 * all users at one time.  If a list of users is provided at call time,
+	 * this function will save the users to the session object.
+	 */
+	function showTabRun (&$db, &$u, &$arg, &$t ) {
+		// if we get some users, add them to the list
+		if ($arg->postvars['users']) {
+			$orclause = @join(" or pkey = ",$arg->postvars['users']);
+			$db->query("select pkey,username from lcUsers where pkey = $orclause");
+			while ($db->next_record() ) {
+				$u->sessionvars['user_collection'][$db->Record[0]] = $db->Record[1];
+			}
+			$u->saveSession();
+		}
+
+		$t['groupOpts'] = makeOptions(lcGroup::getList());
+
+		$t['collection'] = $u->sessionvars['user_collection'];
+
+		$this->presentor = 'configurePresentation';
+		$arg->templateName = 'users_'.$arg->getvars['tab'];
+	}
+
+
+	/**
+	 * Add or remove groups to or from all the users in the current collection
+	 *
+	 */
+	function alterGroupsRun (&$db, &$u, &$arg, &$t ) {
+		$this->presentor="debug";
+
+		$userList = lcUser::getListByPkey(array_keys($u->sessionvars['user_collection']));
+
+			while ( list($x, $user) = @each($userList) ) {
+				reset ($arg->postvars[groups]);
+				unset($newGroups);
+
+				if ($arg->postvars['groupAct'] == 'add') {
+					while ( list ($k,$v) = @each($arg->postvars[groups]) ) {
+						$user->groups[] = $v;
+					}
+					$user->update();
+				}
+				if ($arg->postvars['groupAct'] == 'del') {
+					$user->groups = array_diff($user->groups,$arg->postvars[groups]);
+					$user->update();
+				}
+
+			}
+		
+		unset($u->sessionvars['user_collection']);
+		$u->saveSession();
+		header("Location: ".modurl('users'));
+		exit();
+	}
+
+	/**
+	 * Make every user in the current collection have exactly the groups that were submitted
+	 *
+	 */
+	function resetGroupsRun (&$db, &$u, &$arg, &$t ) {
+		$userList = lcUser::getListByPkey(array_keys($u->sessionvars['user_collection']));
+			while ( list($x, $user) = @each($userList) ) {
+				$user->groups = $arg->postvars[groups];
+				$user->update();
+			}
+		unset($u->sessionvars['user_collection']);
+		$u->saveSession();
+		header("Location: ".modurl('users'));
+		exit();
+	}
+
+
+	/**
+	 * Delete all users in the collection 
+	 *
+	 * This function does not take into account any module that stores
+	 * user information internally (i.e. other tables).
+	 * Optionally, a ~lcUser function may be added to the lcUser class
+	 * in the future, this function should call that destructor instead.
+	 */
+	function deleteCollectionRun (&$db, &$u, &$arg, &$t ) {
+
+		$orclause = @join(" or pkey = ",array_keys($u->sessionvars['user_collection']));
+		if ($orclause != '')
+			$db->query("delete from lcUsers where pkey = $orclause"); 
+
+		unset($u->sessionvars['user_collection']);
+		$u->saveSession();
+		header("Location: ".modurl('users'));
+		exit();
+	}
+
+
+	/**
+	 * Erase the user collection from the current session
+	 *
+	 */
+	function clearCollectionRun (&$db, &$u, &$arg, &$t ) {
+		unset($u->sessionvars['user_collection']);
+		$this->run( $db, $u, $arg, $t ); 
+	}
+
+
+	/**
+	 * Replace students in DB with an autogenerated file
+	 *
+	 * use DOCUMENT_ROOT.'logicreate/studentdump.txt';
+	 * @see syncStudentsRemoveRun
+	 */
+	function syncStudentsRun(&$db, &$u, &$lc, &$t ) {
+		$this->inactivelinks[] = 'Sync Students';
+		$this->sectionTitle = 'Sync Students';
+
+		$db->query('select semesterId, semesterTerm, semesterYear, id_semesters from semesters');
+		while ($db->next_record() ) { 
+			$t['sems'][$db->Record['id_semesters']] = $db->Record['semesterTerm']. ' ' .$db->Record['semesterYear'];
+		}
+		$lc->templateName = 'users_syncStudents';
+	}
+
+// add or delete a single student
+	function syncStudentsIndividualRun(&$db, &$u, &$lc, &$t ) {
+		$db->queryOne('select id_semesters from semesters where dateStart <= NOW() AND dateEnd >= NOW()');
+		$semester_id = sprintf('%d',$db->Record[0]);
+		$button = $lc->postvars['button'];
+		$line = str_replace('"','',$lc->postvars['line']);
+		list($usr,$pwd,$ssn,$sec) = split(',', $line);
+		if ($button=='Delete') { 
+			$sql = "update class_student_sections set active=0,dateWithdrawn='".date("Y-m-d")."' where semester_id = $semester_id  and id_student='$usr'";
+$db->query($sql);
+		}
+		if ($button=='Add/Update') { 
+			$sql = "update class_student_sections set active=0 where semester_id = $semester_id  and id_student='$usr'";
+			if ($pwd=='' or $ssn=='' or $sec=='') { 
+				$t['message'] = 'You are missing some fields in the data you passed in.';
+				$lc->templateName = 'users_syncStudentsIndividual';
+				return;
+			}
+			$newuser = new lcUser();
+			$newuser->username = $usr;
+			$newuser->password = md5($pwd);
+			$newuser->email = $usr.'@'.STUDENT_EMAIL_DOMAIN;
+			$newuser->userType = USERTYPE_STUDENT;
+
+			$newuser->profile = new UserProfile($newuser->username,USERTYPE_STUDENT);
+			list ( $fn,$ln ) = explode('.',$newuser->username);
+			if (!$newuser->profile->set('firstname',ucfirst($fn)) ) {
+				echo "cannot set firstname for user $usr";
+				exit();
+			}
+			if (!$newuser->profile->set('lastname',ucfirst($ln)) ) {
+				echo "cannot set lastname for user $usr";
+				exit();
+			}
+
+			$newuser->profile->set('lastname',ucfirst($ln));
+			// save only updates, need to insert
+
+			$newuser->profile->addProfile();
+
+
+			$sql = "insert into lcUsers (groups,username,password,email,createdOn,userType) values ('|reg|student|public|','".$newuser->username."','".$newuser->password."','".$newuser->email."',NOW(), '".$newuser->userType."')";
+			$db->query($sql,false);
+
+			$key = $db->getInsertID();
+#echo "key=$key<BR>"; exit();
+flush();
+			if (!$key  or $key==0) {
+				//$newuser->update();
+				//send an update to the mail server db
+			} else {
+
+				//  If you are using the integrated
+				//	qmail mail server setup
+				//  set this option to true in the defines.php file
+				if (UPDATE_MAILSERVER_DB)
+				{
+					$newuser->updateMailServer(1);
+				}
+				//if they are a new user, save their session
+				$newuser->profile->save();
+				$t['message'] = "One new student account created";
+			}
+			$db->query("replace into class_student_sections set sectionNumber='$sec', id_student='$usr',semester_id='$semester_id',active=1");
+		}
+		if ($button=='Delete') { 
+			$t['message'] = "User account deleted";
+		} else { 
+			$t['message'] .= "User account updated";
+		}
+
+		$lc->templateName = 'users_syncStudentsIndividual';
+	}
+
+	/**
+	 * Show a confirm screen, then jump to syncStudentsWai
+	 *
+	 */
+	function syncStudentsConfirmRun(&$db, &$u, &$lc, &$t ) {
+
+
+		$moved = move_uploaded_file($lc->uploads['student_file']['tmp_name'],'/tmp/lc_active_student_dump');
+
+		if ( ! $moved ) {
+			$t['message'] = 'saving the upload file failed';
+			$t['details'] = 'could not save the upload file to /tmp/lc_active_student_dump.  check permissions on drive.';
+			$this->presentor = 'errorMessage';
+			return;
+		}
+
+		$dump = fopen('/tmp/lc_active_student_dump','r');
+		$t['filename'] = '/tmp/lc_active_student_dump';
+		fseek($dump,0);
+
+		while ($line = fgets($dump,4096) ) {
+			$line = str_replace('"','',$line);
+			list($usr,$pwd,$ssn,$sec) = split(',', $line);
+			$t['users'][$usr][$sec][] = $sec;
+			$t['users'][$usr][$pwd] = $pwd;
+			$t['users'][$usr][$ssn] = $ssn;
+			$sections[$sec]++;
+		}
+		fclose($dump);
+		$t['sections'] = count($sections);
+		$t['count'] = count(array_keys($t['users']));
+
+		//pass along semester_id to template
+		$t['semester_id'] = $lc->postvars['semester_id'];
+
+		$lc->templateName = 'users_syncStudentsConfirm';
+	}
+
+
+
+	/**
+	 * Show a wait screen and jump to doSyncStudents
+	 *
+	 * This process takes a while.
+	 */
+	function syncStudentsWaitRun(&$db, &$u, &$lc, &$t ) {
+
+		$lc->templateName = 'users_syncStudentsWait';
+
+		//pass along semester_id to template
+		$t['semester_id'] = $lc->postvars['semester_id'];
+	}
+
+	/**
+	 * Replace students in DB with an autogenerated file
+	 *
+	 * use $DOCROOT.'logicreate/studentdump.txt';
+	 */
+	function doSyncStudentsRun(&$db, &$u, &$lc, &$t ) {
+		//find active semester if none submitted
+		if ( ! $lc->postvars['semester_id'] ) {
+			$db->query('select id_semesters from semesters where dateStart <= NOW() AND dateEnd >= NOW()');
+			$db->next_record();
+			$semester_id = sprintf('%d',$db->Record[0]);
+		} else {
+			$semester_id = sprintf('%d',$lc->postvars['semester_id']);
+		}
+
+
+		$dump = fopen('/tmp/lc_active_student_dump','r');
+		fseek($dump,0);
+		//first, set everyone to inactive, then cycle through the file and 
+		// set each user back to active
+		if ($dump) {
+			$db->query('update class_student_sections set active=0,dateWithdrawn="'.date("Y-m-d").'" where semester_id = '.$semester_id ,false);
+		}
+
+ob_end_clean();
+		while ($line = fgets($dump,4096) ) {
+			$line = str_replace('"','',$line);
+			$line = trim($line);
+			list($usr,$pwd,$ssn,$sec) = split(',', $line);
+			$userArray[$usr] = $pwd;
+			$sectionArray[$usr][] = $sec;
+		}
+		fclose($dump);
+
+
+		while ( list ($usr,$pwd) = @each($userArray) ) {
+			$newuser = new lcUser();
+			$newuser->username = $usr;
+			$newuser->password = md5($pwd);
+			$newuser->email = $usr.'@'.STUDENT_EMAIL_DOMAIN;
+			$newuser->userType = USERTYPE_STUDENT;
+
+			$newuser->profile = new UserProfile($newuser->username,USERTYPE_STUDENT);
+			list ( $fn,$ln ) = explode('.',$newuser->username);
+			if (!$newuser->profile->set('firstname',ucfirst($fn)) ) {
+				echo "cannot set firstname for user $usr";
+				exit();
+			}
+			if (!$newuser->profile->set('lastname',ucfirst($ln)) ) {
+				echo "cannot set lastname for user $usr";
+				exit();
+			}
+
+			$newuser->profile->set('lastname',ucfirst($ln));
+			// save only updates, need to insert
+
+			$newuser->profile->addProfile();
+
+
+			$sql = "insert into lcUsers (groups,username,password,email,createdOn,userType) values ('|reg|student|public|','".$newuser->username."','".$newuser->password."','".$newuser->email."',NOW(), '".$newuser->userType."')";
+			$db->query($sql,false);
+
+			$key = $db->getInsertID();
+print "one new student, $usr ". ++$foobar." key = $key\n<br/>\n";
+flush();
+			if (!$key) {
+				//$newuser->update();
+				//send an update to the mail server db
+			} else {
+
+				//send an add to the mail server DB
+				if (UPDATE_MAILSERVER_DB)
+				{
+					$newuser->updateMailServer(1);
+				}
+				//if they are a new user, save their session
+				$newuser->profile->save();
+			}
+
+			$keys[$key]++;
+		}
+
+		while ( list ($usr,$sections) = @each($sectionArray) ) {
+		foreach($sections as $k=>$sec) {
+			$db->query('replace into class_student_sections
+				(sectionNumber,id_student,active,semester_id,dateWithdrawn)
+				VALUES
+				('.$sec.',\''.$usr.'\',1,'.$semester_id.',NULL)',false);
+
+print "one new section, $usr - $sec ". ++$barbaz."\n<br/>\n";
+flush();
+			$affected = mysql_affected_rows();
+			if ($affected == 2) {
+				$t['updated_sections']++;
+			} else if ($affected ==1) {
+				$t['new_sections']++;
+			}
+
+
+		}
+		}
+		unlink('/tmp/lc_active_student_dump');
+
+
+		if (UPDATE_MAILSERVER_DB)
+		{
+				//find all student sections where action = 0, update mail server with 0
+				$mailSQL = "insert into mail_accounts_temp
+					(username,password,action)
+					VALUES
+					('%s','%s',%d)";
+				$dbmail = DB::getHandle('mail');
+				$db->query('select * from class_student_sections where active = 0 and semester_id='.$semester_id);
+				while ( $db->next_record() ) {
+					$dbmail->query(
+					sprintf( $mailSQL,
+						$db->Record['id_student'],
+						rand(10000),
+						0),false
+					);
+		/*
+					$dbmail->query("insert into mail_accounts_temp
+					(username,password,action)
+					VALUES
+					('".','".$db->Record['username']."','".rand(10000)."',0)";
+		*/
+				}
+		}
+
+		//show some stats
+		$t['sections'] = count($sections);
+		$t['count'] = count(array_keys($t['users']));
+		//get a count of new users added, remove -1 keys (bad inserts)
+		$t['newcount'] = count(array_keys($keys));
+		if (in_array('-1',array_keys($keys)) ) {
+			$t['newcount'] -=1;
+		}
+		$t['badcount'] = $keys[-1];
+	}
+
+
+	/**
+	 * Handle dropping/removing classes taken by a student
+	 *
+	 * If a student has been completely removed from all classes
+	 * change the student type to Standard.  Save the profile for
+	 * later.
+	 * @see syncStudentsAddRun
+	 * @deprecated
+	 */
+	function syncStudentsRemoveRun(&$db, &$u, &$lc, &$t ) {
+		//save file (move it), open it and count the lines
+		if (! move_uploaded_file($lc->uploads['userdump']['tmp_name'],$lc->uploads['userdump']['tmp_name'].'_userdump') ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'Upload file could not be saved';
+			$t['details'] = $php_errmsg;
+			return;
+		}
+
+		$lc->templateName = 'users_syncStudentsPost';
+		$t['upload'] = $lc->uploads['userdump'];
+		$t['userdump'] = $lc->uploads['userdump']['tmp_name'].'_userdump';
+	}
+
+	/*
+	 * Allows an admin to edit a user's profile
+	 * It loads up a user's profile via the user object
+	 * and passes the groups to the form so it only
+	 * displays the needed fields for that user.
+	 */
+	
+	function editProfileRun($db, &$u, &$arg, &$t)
+	{
+		$this->sectionsTitle = 'Edit User Profile';
+		$arg->templateName = 'users_editProfile';
+		$user = lcUser::getUserByUserName($arg->getvars['username']);
+		$user->loadProfile();
+
+		# store the user's groups in the
+		# admin's session so we can use it in the 
+		# update if necassary
+		$u->sessionvars['usergroups'] = $user->groups;
+		$f = new SiteForm($user->groups);
+
+		if ($t['error']) 
+		{
+			# Convert phone numbers to strings
+			$this->cleanedArray['homePhone'] = arrayToPhoneNumber($this->cleanedArray['homePhone']);
+			$this->cleanedArray['workPhone'] = arrayToPhoneNumber($this->cleanedArray['workPhone']);
+			$this->cleanedArray['faxPhone'] = arrayToPhoneNumber($this->cleanedArray['faxPhone']);
+			$this->cleanedArray['cellPhone'] = arrayToPhoneNumber($this->cleanedArray['cellPhone']);
+			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
+			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
+			$this->cleanedArray['officePhone'] = arrayToPhoneNumber($this->cleanedArray['officePhone']);
+
+			$values = $this->cleanedArray;
+		} else {
+			$values = $user->profile->values;
+		}
+		$f->getForm('userprofile', $values);
+
+		# Since we are using the standard profile form
+		# we need to modify the event to our event
+		$f->modFormValue('event', 'updateProfile');
+		$f->fieldPermissions = true;
+		$t['form'] = $f->ToHTML();
+	}
+
+	/* 
+	 * Processes the form from the editProfile().
+	 */
+
+	function updateProfileRun($db, &$u, &$lc, &$t)
+	{
+		$f = new SiteForm($u->sessionvars['usergroups']);
+		$f->fieldPermissions = true;
+		$t['error'] = $f->validateForm('userprofile', $lc->postvars);
+		if ($f->hasErrors() ) 
+
+		{
+			$this->cleanedArray = $f->cleanedArray;
+			$this->editProfileRun($db, $u, $lc, $t);
+			return;
+		} else {
+			$this->cleanedArray = $f->cleanedArray;
+			$this->cleanedArray['homePhone'] = arrayToPhoneNumber($this->cleanedArray['homePhone']);
+			$this->cleanedArray['workPhone'] = arrayToPhoneNumber($this->cleanedArray['workPhone']);
+			$this->cleanedArray['faxPhone'] = arrayToPhoneNumber($this->cleanedArray['faxPhone']);
+			$this->cleanedArray['cellPhone'] = arrayToPhoneNumber($this->cleanedArray['cellPhone']);
+			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
+			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
+			$this->cleanedArray['officePhone'] = arrayToPhoneNumber($this->cleanedArray['officePhone']);
+
+
+			unset($u->sessionvars['usergroups']);
+			
+			$user = lcUser::getUserByUserName($lc->getvars['username']);
+			$profile = $user->profile;
+			while(list ($k, $v) = @each($this->cleanedArray) )
+			{
+				$profile->set($k, $v);
+			}
+			$profile->save();	
+			$this->run($db, $u, $lc, $t);
+			return;
+		}
+	}
+}
+
+
+	function checkRequired($req) {
+		foreach($req as $k=>$v) {
+			if ($v == "") {
+			$bad =1;
+			}
+		}
+			
+		if ($req[password] != $req[password2] ) {
+			$bad = 1;
+		}		return $bad;
+	}
+
+	/* Joins a phone array into a string 123-123-1234 */
+	function arrayToPhoneNumber($ar)
+	{
+		return $ar['area'].'-'.$ar['pre'].'-'.$ar['num'];
+	}
+
+?>

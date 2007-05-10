@@ -1,0 +1,60 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *  Statuses:  new=1,pending=2,approved=3,denied=4,waiting on
+ *  instructor approval=5
+ */
+include_once(LIB_PATH.'SiteForms.php');
+
+class seminarorientation extends BasicAuth {
+
+	var $presentor = 'htmlPresentation';
+	var $sectiontitle = 'Seminar And Orientation';
+	var $navlinks = array(
+	);
+	var $applinks = array(
+	);
+	var $inactivelinks = array(
+	);
+
+	var $authorizer = 'basicAuth';
+
+	# Constructor
+	function seminarorientation()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+
+	function Run($db,&$u,&$lc,&$t) {
+		if (!$u->sessionvars['semester'])
+		{
+			$t['message'] = 'Please Choose A Semester Below';		
+		}
+
+		
+		$lc->templateName = 'main_main';						
+		$f = new SiteForm();
+		$f->getForm('semester');
+		$f->addHidden('event', 'updateSemester');
+		$f->requiredMessage = '';
+		$t['form'] = $f->ToHTML();
+	}
+
+	function updateSemesterRun($db,&$u, &$lc, &$t)
+	{
+		if (is_numeric($lc->postvars['semester']))
+		{
+			$u->sessionvars['semester'] = $lc->postvars['semester'];
+			$t['message'] = 'Semester Updated';
+			$this->run($db, $u, $lc, $t);
+			return;
+		}
+		
+		
+	}
+
+
+}
+?>
