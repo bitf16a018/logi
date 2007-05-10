@@ -13,6 +13,7 @@ class ClassLessonSequenceBase {
 	var $lobMime;
 	var $lobType;
 	var $lobTitle;
+	var $linkText;
 	var $visible;
 	var $notBeforeSeqId;
 	var $allowAfterDays;
@@ -27,6 +28,7 @@ class ClassLessonSequenceBase {
 	'lobMime'=>'varchar',
 	'lobType'=>'varchar',
 	'lobTitle'=>'varchar',
+	'linkText'=>'varchar',
 	'visible'=>'int',
 	'notBeforeSeqId'=>'int',
 	'allowAfterDays'=>'int',
@@ -132,6 +134,7 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_title'] = 'lob_title';
+		$st->fields['link_text'] = 'link_text';
 		$st->fields['visible'] = 'visible';
 		$st->fields['not_before_seq_id'] = 'not_before_seq_id';
 		$st->fields['allow_after_days'] = 'allow_after_days';
@@ -158,6 +161,7 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_title'] = $this->lobTitle;
+		$st->fields['link_text'] = $this->linkText;
 		$st->fields['visible'] = $this->visible;
 		$st->fields['not_before_seq_id'] = $this->notBeforeSeqId;
 		$st->fields['allow_after_days'] = $this->allowAfterDays;
@@ -189,6 +193,7 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_title'] = $obj->lobTitle;
+		$st->fields['link_text'] = $obj->linkText;
 		$st->fields['visible'] = $obj->visible;
 		$st->fields['not_before_seq_id'] = $obj->notBeforeSeqId;
 		$st->fields['allow_after_days'] = $obj->allowAfterDays;
@@ -262,6 +267,7 @@ class ClassLessonSequencePeerBase {
 		$x->lobMime = $row['lob_mime'];
 		$x->lobType = $row['lob_type'];
 		$x->lobTitle = $row['lob_title'];
+		$x->linkText = $row['link_text'];
 		$x->visible = $row['visible'];
 		$x->notBeforeSeqId = $row['not_before_seq_id'];
 		$x->allowAfterDays = $row['allow_after_days'];
