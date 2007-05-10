@@ -1,0 +1,32 @@
+<?
+hercBox("Category Systems");
+?>
+
+<table width="100%"><tr><td width="300">
+	Categories are used to organize data in hierarchies.  This section can be used to 
+	create arbitrary categories for any module in the system that can make use of 
+	categories.  A set of categories for a specific module, or application, is called a 
+	system of categories.  Category systems can only be modified by module programmers.
+</td><td align="center" valign="center">
+<?php
+	if ($t['errormessage'])
+	{	echo '<font color="red">'.$t['errormessage']. '</font><br>';
+	} else
+	{	echo '<br>';
+	}
+?>
+	<br>
+	<form method="POST">
+	<select size="5" name="systemName">
+	<?= makeOptions($t[systems]); ?>
+	</select> <br>
+	<input type="submit" value="Edit Categories -->">
+	<input type="hidden" name="event" value="showCat">
+	</form>
+</td></tr>
+
+
+</table>
+
+<p><br>
+<? endHercBox(); ?>

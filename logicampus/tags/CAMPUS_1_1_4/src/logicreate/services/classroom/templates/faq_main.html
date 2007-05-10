@@ -1,0 +1,35 @@
+<?=$t['sectionheader'];?>
+<? if ($t['search']) { ?>
+<h4>Searching for <i><?=stripslashes($t['search']);?></i></h4>
+<? } ?>
+<?
+$category = '';
+while (list(,$faq) = @each($t['faqs'])) {
+	if ($category != $faq['category']) {
+		if ($category != '') print "</ul>\n";
+		$category = $faq['category'];
+		print "<h3>$category</h3>\n<ul style=\"margin-top:0;\">\n";
+	}
+	print "\t<li> <a href=\"".modurl('faq')."/event=view/id=".$faq['id_class_faqs']."\">".$faq['question']."</a></li>\n";
+}
+
+if ( $category ) {
+	print "</ul>\n";
+} else {
+	if ($t['search']) { 
+		print '<p style="margin-left:20px;"><i>There were no matches for your search.</i></p>';
+	} else {
+		print '<p style="margin-left:20px;"><i>There are no FAQs for this class.</i></p>';
+	}
+}
+
+?>
+<hr>
+<form method="POST" action="<?=appurl("classroom/faq/");?>">
+Search the classroom FAQs:
+<input type="text" name="search" size="20" maxlength="200">
+<input type="submit" value="Search!">
+<input type="hidden" name="event" value="">
+</form>
+
+
