@@ -224,5 +224,9 @@
 			default="0"
 			size="11"
 			type="INTEGER"/>
+
+	   <key
+	      attribute="rank"
+	      name="rank_idx"/>
 	</entity>
 </project>
