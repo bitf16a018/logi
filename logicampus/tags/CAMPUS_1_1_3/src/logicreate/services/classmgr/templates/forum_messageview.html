@@ -1,0 +1,69 @@
+<center><table width="98%">
+<tr><td align="left"> 
+<h3>Forums</h3>
+</td></tr>
+<tr><Td>
+
+
+<!--width="<?=$t["width"];?>" -->
+<table width="100%" border="0" cellpadding="4" cellspacing="0">
+
+<? if ($t["postedMessage"]) { ?>
+	<tr>
+		<td colspan="2">
+		<?=$t["postedMessage"];?>
+		</td>
+	</tr>
+<? } ?>
+
+<tr>
+	<td  class="forum_head" valign="top" width="80%"><a href="<?=modurl("forum");?>">Forum home</a> : <a href="<?=modurl("forum/event=list/fid=$t[fid]");?>"><?=$t["forumname"];?></a></td>
+		<td class="forum_head" valign="top">
+<? if ($t["canwrite"]) { ?>
+	<a class='forum_head' href="#post">Post a reply</a>
+<? } else { ?>
+	&nbsp;
+<? } ?>
+		</td>
+
+</tr>
+
+</table>
+
+
+<table width="100%" border="0" cellpadding="4" cellspacing="1">
+		<tr>
+<td class="forum_head2" align="left">Author</td>
+<td class="forum_head2" align="left">Message</td>
+<td class="forum_head2" align="right">&nbsp;</td>
+</tr>
+<?=$t["messagethread"];?>
+</table>
+
+<? if ($t["canwrite"]) { ?>
+<a name="post">
+	<form method="post" action="<?=modurl("forum/event=post/return=".$t["return"]);?>">
+	<input type="hidden" name="parent" value="<?=$t["parent"];?>">
+	<input type="hidden" name="fid" value="<?=$t["fid"];?>">
+	<table width="100%"  border="0" cellpadding="4" cellspacing="1">
+	<tr><td colspan="2" class="forum_head">
+		Post a reply
+	</td></tr>
+	<tr>
+		<td class="forum_row1">Title:</td>
+		<td class="forum_row2" align="left"><input type="text" name="message" maxlength="50" size="40" value="<?=$t[reTitle]?>"></td>
+	</tr>
+	<tr>
+		<td class="forum_row1">Comment:</td>
+		<td class="forum_row2" align="left"><textarea name="body" rows="15" cols="45" wrap="virtual"></textarea></td>
+	</tr>
+	<? if ($t["allowHTML"]) { ?>
+<tr><td colspan="2">
+Allowable HTML tags: <?=$t["allowHTML"];?>
+</td></tr>
+	<? } ?>
+	<tr><td colspan="2"><center><input type="submit" value="Post your comment"></center></td></tr>
+	</table>
+	</form>
+<? } ?>
+</td></tr></table></center>

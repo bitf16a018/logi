@@ -1,0 +1,417 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'ExamScheduleDates.php');
+include_once(LIB_PATH.'ExamScheduleClasses.php');
+include_once(LIB_PATH.'ExamScheduleClassesDates.php');
+
+class examschedule extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Exam Scheduler';
+
+	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	
+	
+	/**
+	 *	Updating syllabus's noexam information
+	 *
+	 *	This can be updated whenever, but we only offer the ability
+	 *	if the class has set noexam to true. This information is 
+	 *	shown in the syllabus in classroom if noexam is set to true
+	 */
+	function updateSyllabusRun(&$db,&$u,&$lc,&$t)
+	{
+		$tx_noexam = $lc->postvars['noexam'];
+		
+		// parse and splice up postvars noexam data to play nicely with the database
+		$tx_noexam = stripslashes($tx_noexam);
+		$tx_noexam = stripslashes($tx_noexam);
+		$tx_noexam = str_replace('\'', '\'\'', $tx_noexam);
+		
+		$sql = '
+		UPDATE class_syllabuses
+		SET noExam=\''.$tx_noexam.'\'
+		WHERE id_classes='.$u->activeClassTaught->id_classes;
+		
+		// I could use real *checking* here
+		$db->query($sql);
+		
+		$t['msg'] = 'Syllabus updated';
+		
+		$this->Run($db, $u, $lc, $t); // go back home to our main view
+	}
+	
+
+	/**
+	 *	@modification	11.05.03 :: RS
+	 *		Changed this function, originally it allowed you to 
+	 *		set ANY class you wanted to NO-EXAM just by changing
+	 *		the id_classes in the GETvars. BADDDDD!!!
+	 *	
+	 */
+	function noexamRun(&$db,&$u,&$lc,&$t) 
+	{
+		//$lc->templateName = "examschedule_noexam"; // we aren't going to use this anymore, it was a MAJOR inconvenience
+		
+//		$t['msg'] = 'You have indicated that this class is to have 
+//					no on-campus exams.  If you request exam dates 
+//					after this, this indication will be removed.';
+		
+		$sql = '
+		UPDATE classes
+		SET noexam=1
+		WHERE id_classes='.$u->activeClassTaught->id_classes;
+		
+		$db->query($sql);
+		
+		/**
+		 *	I must update the users object now with the information 
+		 *	because the $u is a cached heap and I need to update it
+		 *	for instant gratification for the teacher
+		 */	
+		$u->activeClassTaught->noexam = 1;
+
+		/**
+		 *	The exam manager whats notification when a class
+		 *	has indicated they do not need an exam.
+		 */
+		$db = DB::getHandle();
+		$sql = '
+		SELECT email 
+		FROM lcUsers 
+		WHERE groups LIKE \'%|exammgr|%\'';
+		
+		$db->query($sql);
+		$emailTo = '';
+		while($db->next_record() )
+		{	$emailTo .= $db->Record['email'].',';	
+		}
+	
+// use this to debug/send email through $emailTo = 'david.wissore@dl.tccd.edu,';
+		
+		if (strlen($emailTo) > 0)
+		{	
+			$emailTo = substr($emailTo, 0, -1);
+			$ml_subject  = 'Exam Manager - Alternative Activites chosen - '.
+					$u->profile->values['firstname'].' '.
+					$u->profile->values['lastname']. ' - '.
+					$u->activeClassTaught->courseFamilyNumber;
+	
+			$msg = "Review Submission: ".appurl('examschedule/main/event=view/id='.$u->activeClassTaught->id_classes);
+			$msg .= "\n\n".'Please do not reply to this message, it has been auto generated.';
+			mail($emailTo, $ml_subject, $msg, "From: ".WEBMASTER_EMAIL."\r\n");
+		}
+	
+		/**
+		 *	I've decided this was the best way, to go back to main 
+		 *	view.
+		 */	
+		$this->Run($db, $u, $lc, $t);
+		
+	}
+
+
+	function Run(&$db,&$u,&$lc,&$t) {
+	
+		$t['hasapproved'] = false;
+		
+		$lc->templateName = 'examschedule_main';
+		$lc->templateStyle = 'private';
+
+		$classid = $t['classid'] = $u->activeClassTaught->id_classes;
+
+		$t['canEdit'] = $this->canEdit($u->activeClassTaught->id_semesters);
+
+		$yes = '<span style="color:green;font-weight:bold;">Yes</span>';
+		$no  = '<span style="color:red;font-weight:bold;">No</span>';
+
+		$esc = ExamScheduleClasses::load( array( 'id_classes' => $classid ) );
+		if ( !is_object($esc) ) $esc = new ExamScheduleClasses();
+		$esc->set( 'oncampusExam', $esc->oncampusExam ? $yes : $no );
+		$esc->set( 'southCampus', $esc->southCampus ? $yes : $no );
+		$esc->set( 'southeastCampus', $esc->southeastCampus ? $yes : $no );
+		$esc->set( 'northeastCampus', $esc->northeastCampus ? $yes : $no );
+		$esc->set( 'northwestCampus', $esc->northwestCampus ? $yes : $no );
+		switch ( $esc->status ) {
+			case 1: $x = "New"; break;
+			case 2: $x = "Pending"; break;
+			case 3: $x = 'Approved'; break;
+			case 4: $x = "Returned to Instructor"; break;
+			default: $x = "N/A";
+		}
+		$esc->set( 'status', $x );
+
+		$escds = ExamScheduleDates::getAllDates(
+			$classid, $u->activeClassTaught->id_semesters,
+			in_array('exammgr', $u->groups) || in_array('admin', $u->groups) );
+		foreach ( $escds as $id => $obj ) {
+			switch ( $obj->status ) {
+				case 1: $x = 'Not Approved'; break;
+				case 2: $x = 'Pending'; break;
+				case 3: $x = '<font color="green">Approved</font>'; $t['hasapproved'] = true; break;
+			}
+			if ( $obj->_new ) $x = '<i>N/A</i>';
+			$escds[$id]->set( 'status', $x );
+			$escds[$id]->set( 'newExam', $obj->newExam ? $yes : $no );
+		}
+		$esc->emClassDates = $escds;
+		$t['esc'] = $esc;
+		
+		if ($u->activeClassTaught->noexam)
+		{	
+			$sql = '
+			SELECT noExam
+			FROM class_syllabuses
+			WHERE id_classes='.$u->activeClassTaught->id_classes;
+			
+			$db->queryOne($sql);
+			if (is_array($db->Record))
+			{	
+				$t['tx_noexam'] = $db->Record['noExam'];
+				
+			} else
+			{	echo 'Error: please report this to an administrator immediately, you have no syllabus installed.';
+			}
+		}
+	}
+
+	function editRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'examschedule_edit';
+		$lc->templateStyle = 'private';
+		$this->sectionTitle = 'Editing Class Exam Dates';
+
+		define( 'ONLYFILLEDOUT', false );
+		define( 'DIMAPPROVED', true );
+
+		$classid = $t['classid'] = $u->activeClassTaught->id_classes;
+
+		$canEdit = $t['canEdit'] = $this->canEdit($u->activeClassTaught->id_semesters);
+		if (!$canEdit) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You are not inside the period allotted for editing exam dates.';
+			return;
+		}
+
+		$esc = ExamScheduleClasses::load( array( 'id_classes' => $classid ) );
+		if ( !$esc ) $esc = new ExamScheduleClasses();
+		if ( $esc->status == 9 ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You cannot edit your class\'s exam dates after they\'ve been approved.';
+			return;
+		}
+
+		// stupid checkboxes won't be unchecked if the val is 0, we gotta unset them.
+		if ( $esc->southCampus == 0 )     unset($esc->southCampus);
+		if ( $esc->southeastCampus == 0 ) unset($esc->southeastCampus);
+		if ( $esc->northeastCampus == 0 ) unset($esc->northeastCampus);
+		if ( $esc->northwestCampus == 0 ) unset($esc->northwestCampus);
+
+		if ( is_array($lc->postvars['emClassDates']) ) {
+
+			$defaults = $lc->postvars;
+
+		} else {
+
+			// Get an array of ExamScheduleClassDates objects w/ ExamScheduleDates date fields (start/end dates)
+			$escds = ExamScheduleDates::getAllDates(
+				$classid, $u->activeClassTaught->id_semesters,
+				in_array('exammgr', $u->groups) || in_array('admin', $u->groups) );
+			$esc->emClassDates = $escds;
+			$defaults = $esc;
+		}
+
+		$f = new Siteform($u->groups);
+		$f->getForm( 'examschedule', $defaults );
+		$f->fieldPermissions = true;
+		$t['form'] = $f->toHTML();
+
+		$t['info'] = '<b>Received Date:</b> '.date('M j @ h:i A', strtotime($esc->receivedDate));
+		switch ($esc->status) {
+			case 1: $s = "New"; break;
+			case 2: $s = "Pending"; break;
+			case 3: $s = 'Approved'; break;
+			case 4: $s = "Returned to Instructor"; break;
+			default: $s = '<i>N/A</i>';
+		}
+		$t['info'] .= "<br/><b>Status:</b> $s";
+	}
+
+	function updateRun(&$db,&$u,&$lc,&$t) {
+
+		$EM = in_array('exammgr', $u->groups) || in_array('admin', $u->groups);
+
+		// make sure they own the class if they're not an exam manager (who can edit any class)
+		if ( !$EM ) {
+			$db->queryOne('select id_classes from classes
+				where facultyId="'.$u->username.'"
+				and id_classes="'.(int)$lc->getvars['id'].'"');
+			if ( !$db->Record['id_classes'] ) {
+				$this->presentation = 'errorMessage';
+				$t['message'] = 'We\'re sorry, but access was denied to that class. '
+					.'If you feel you have reached this message in error, please contact the help desk.';
+				return;
+			}
+		}
+
+		$canEdit = $this->canEdit($u->activeClassTaught->id_semesters);
+		if (!$canEdit) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You are not inside the period allotted for editing exam dates.';
+			return;
+		}
+
+		$f = new Siteform();
+		$t['error'] = $f->validateForm('examschedule', $lc->postvars);
+		if ($t['error']) {
+			$this->editRun($db,$u,$lc,$t);
+			return;
+		}
+
+		$esc = ExamScheduleClasses::load( array( 'id_classes' => (int)$lc->getvars['id'] ) );
+		if ( !is_object($esc) ) {
+			$esc = new ExamScheduleClasses();
+			$esc->setArray( $lc->postvars );
+			$esc->set( 'idClasses', $u->activeClassTaught->id_classes );
+			$esc->set( 'idSemester', $u->activeClassTaught->id_semesters );
+		} else {
+			$esc->setArray( $lc->postvars );
+		}
+		
+		$esc->set( 'receivedDate', date('Y-m-d H:i:s') ); // do this always
+		$esc->set( 'oncampusExam', $esc->oncampusExam == 'on' ? 1 : 0 );
+		$esc->set( 'southCampus', $esc->southCampus == 'on' ? 1 : 0 );
+		$esc->set( 'southeastCampus', $esc->southeastCampus == 'on' ? 1 : 0 );
+		$esc->set( 'northeastCampus', $esc->northeastCampus == 'on' ? 1 : 0 );
+		$esc->set( 'northwestCampus', $esc->northwestCampus == 'on' ? 1 : 0 );
+		$esc->set( 'status', '1' ); // flag as new
+		$esc->save();
+
+		while ( list($esdID,$arr) = @each($lc->postvars['emClassDates']) ) {
+
+			$escd = ExamScheduleClassesDates::load( array(
+				'id_exam_schedule_dates' => $esdID,
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if ( !is_object($escd) ) {
+				$escd = new ExamScheduleClassesDates();
+				$escd->set( 'idClasses', $u->activeClassTaught->id_classes );
+				$escd->set( 'idExamScheduleDates', $esdID );
+				$escd->set( 'status', '1'); // flag as new
+				
+				// Because of the wonder NULL change to the objects, I must seed the following.
+				$escd->set('southCopies', 0);
+				$escd->set('southeastCopies', 0);
+				$escd->set('northeastCopies', 0);
+				$escd->set('northwestCopies', 0);
+				$escd->set('numOfCopies', 0);
+				$escd->set('note', 0);
+				$escd->set('southCopies', 0);
+				$escd->set('southCopies', 0);
+				
+			} else if ( is_object($escd) && ( !$arr['title'] && !$arr['instructions'] ) ) {
+				// it was in the database, but they removed the title and instructions,
+				// so now we get to zap it.
+				ExamScheduleClassesDatesPeer::doDelete( $escd, true );
+				continue;
+			}
+
+			// skip it if they didn't fill in a title or instructions
+			if ( !($arr['title'] || $arr['instructions']) ) continue;
+
+			$escd->set( 'title', $arr['title'] );
+			$escd->set( 'instructions', $arr['instructions'] );
+			
+			//$escd->set( 'newExam', $arr['newExam'] == 'yes' ? '1' : '0' );
+			
+			/**
+			 *	I'm checking to see if this was already set.. If it has been
+			 *	we won't touch it (this is an admin thing only now) otherwise
+			 *	we default it to 0
+			 */
+			if ((string)$escd->newExam != '1')
+			{	$escd->set( 'newExam', '0'); // defaults to NO or 0 now.. we dont' want to show this to a user
+			}
+			$escd->save();
+		}
+
+		// send the admin an email
+		ExamScheduleDates::mailAdmin(
+			$u->profile->values['firstname'].' '.$u->profile->values['lastname']
+			." has just updated his/her exam dates for ".$u->activeClassTaught->courseFamilyNumber.".\n\n"
+			."Class Name: ".$u->activeClassTaught->courseName." (".$u->activeClassTaught->courseFamilyNumber.")\n"
+			."Section Numbers: ".$u->activeClassTaught->sectionNumbers."\n\n"
+			."Review Submission: ".appurl('examschedule/main/event=view/id='.$u->activeClassTaught->id_classes),
+				' - '.$u->profile->values['firstname'].' '.$u->profile->values['lastname']. ' - '.
+				$u->activeClassTaught->courseFamilyNumber
+		);
+
+
+// mgk 10/30/03
+// added noexam flag and need to clear it from classes table if
+// we've set any exam schedules
+$db->query("update classes set noexam=0 where id_classes=".$esc->idClasses);
+
+		/**
+		 *	Updating the $u object cached heap to reflect the above sql statement
+		 */
+		$u->activeClassTaught->noexam = 0;
+
+		$t['message'] = 'Exam dates saved successfully.';
+		$this->Run($db,$u,$lc,$t);
+	}
+
+	// takes a semester id and returns true or false reflecting whether or not they
+	// are inside dateStartExam and dateEndExam in the semesters table
+	function canEdit($semesterid) {
+
+		$sql = 'select dateStartExam, dateEndExam from semesters
+			where id_semesters="'.$semesterid.'"';
+
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+
+		$time = time();
+
+		if ( $time > strtotime($db->Record['dateStartExam'])
+		  && $time < strtotime($db->Record['dateEndExam']) )
+				return true;
+				
+		return false;
+	}
+
+}
+?>

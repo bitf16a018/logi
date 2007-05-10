@@ -1,0 +1,90 @@
+<table width="98%">
+		<tr>
+			<td align="left" width='30%' valign='top'>
+<h3>Forums</h3>
+ <a href="<?= modurl();?>">[home]</a>
+ </td>
+ 
+
+			<td align="left" width='70%' valign='top'>
+<form method='post' action='<?=appurl("forum/search/".$t['forum']->lcForumId);?>'>
+Search for: <input type='text' name='search' maxlength='20'><input type='submit'></form>
+			</td>
+ 
+ </tr>
+ <tr><td colspan='2'>
+	<?
+	if ($t['forumChildren']) { 
+	?>
+		<div class='colorbar'>Sub forums</div>
+		<?
+		while(list($k,$val) = each($t['forumChildren'])) {
+		?>
+			<table width='100%'>
+				<tr>
+					<td valign='top' width='70%'>
+					<a href="<?=appurl("forum/view/".$val->lcForumId);?>"><?=stripslashes($val->lcForumName);?></a>
+					</td>	
+					<td valign='top' width='6%'>
+						<?=stripslashes($val->lcRecentPoster);?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=stripslashes($val->lcForumThreadCount);?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=stripslashes($val->lcForumPostCount);?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=stripslashes($val->lcForumPostCount);?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=stripslashes($val->lcForumPostCount);?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan='4'>
+						<?=stripslashes($val->lcForumDescription);?>
+					</td>
+				</tr>
+				<?  if ($t['forumChildren2'][$val->lcForumId]) { ?>
+				<tr>
+					<td colspan='4'>
+						Sub-forums: 
+						<?while(list($a,$b) = each($t['forumChildren2'][$val->lcForumId])) { ?>
+						<a href="<?=appurl("forum/view/".$b->lcForumId);?>"><?=stripslashes($b->lcForumName);?></a>
+						<? } ?>
+					</td>
+				</tr>
+				<? } ?>
+			</table>
+
+
+
+			<? } ?>
+
+		<?
+
+		} ?>
+
+		<div class='colorbar'><?=$t['forum']->lcForumName;?></div>
+			<table width='100%'>
+				<tr>
+					<td>
+						<?=$t['forum']->lcForumDescription;?>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+
+
+		<br/>
+
+		<a href="<?=appurl("forum/post/".$t['forum']->lcForumId);?>">Post a new thread</a>
+
+		<?=stripslashes($t['table']);?>	
+
+		<a href="<?=appurl("forum/post/".$t['forum']->lcForumId);?>">Post a new thread</a>
+
+
+</td></tr></table>

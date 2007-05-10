@@ -1,0 +1,48 @@
+<h3>Cancel</h3>
+Press the button below if you'd like to cancel your account.  
+<form method="post" action="<?=appurl("prof//event=confirmcancel");?>">
+<input type="submit" value="Cancel">
+</form>
+
+
+<h3>Email</h3>
+Update your current email address below.
+
+<form method="post" action="<?=appurl("prof//event=emailpost");?>">
+<table>
+<tr>
+<td width="200" valign="top">Email</td>
+<td width="200"  valign="top"><input type="text" name="values[email]" value="<?=$t["email"];?>" maxlength="50" size="25"></td>
+</tr>
+
+</table>
+
+<input type="submit" value="update">
+</form>
+
+
+
+<h3>Password</h3>
+To change your password, enter your old password, then a new password, 
+then confirm the new password by entering it again.
+
+<form method="post" action="<?=appurl("prof//event=pwpost");?>">
+<table>
+<tr>
+<td width="200" valign="top">Old password</td>
+<td width="200"  valign="top"><input type="password" name="values[old]" maxlength="15" size="25"></td>
+</tr>
+<tr>
+<td width="200" valign="top">New password</td>
+<td width="200"  valign="top"><input type="password" name="values[new]"  maxlength="15" size="25"></td>
+</tr>
+<tr>
+<td width="200" valign="top">Confirm password</td>
+<td width="200"  valign="top"><input type="password" name="values[confirm]" maxlength="15" size="25"></td>
+</tr>
+
+</table>
+
+<input type="submit" value="update">
+</form>
+

@@ -1,0 +1,63 @@
+<?=$t['sectionheader'];?>
+
+<TABLE>
+<tr>
+	<td class="title">Title:</td>
+	<td><?=$t['assignment']['title'];?></td>
+</tr>
+<tr>
+	<td class="title">Belongs to Lesson:</td>
+	<td><?=$t['assignment']['lessonTitle'] ? $t['assignment']['lessonTitle'] : '<i>None assigned</i>';?></td>
+</tr>
+<tr>
+	<td class="title">Became active on:</td><td><?=date('l jS of F Y', $t['assignment']['activeDate']);?></td>
+<tr>
+	<td class="title">Due on:</td><td><?=date('l jS of F Y', $t['assignment']['dueDate']);?></td>
+</tr>
+<tr>
+	<td class="title" colspan="2">Instructions:</td>
+</tr>
+<tr>
+	<td colspan="2"><?=$t['assignment']['instructions'];?></td>
+</tr>
+
+<tr>
+
+	<td colspan="2">
+&nbsp; <!-- spacer-->
+	</td>
+</tr>
+
+<tr>
+
+	<td colspan="2">
+	
+	<fieldset style="padding: 5px;">
+	<legend><b style="font-size: 110%">Student Assignment</b></legend>
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+		
+		<tr>
+			<td valign="top"><b>Enter Text:</b></td>
+			<td><textarea cols="40" rows="4"></textarea></td>
+		</tr>
+		
+		<tr>
+			<td><b>Upload Assignment</b></td>
+			<td><input size="39" type="file" name="Upload Assignment" value="assignment_file"><td>
+		</tr>
+
+	</table>
+	</fieldset>
+<br>
+
+</td>
+
+<tr>
+
+	<td colspan="2">
+&nbsp; <!-- spacer-->
+	</td>
+</tr>
+
+
+</TABLE>

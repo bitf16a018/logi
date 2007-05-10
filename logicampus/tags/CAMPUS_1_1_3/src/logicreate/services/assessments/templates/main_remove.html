@@ -1,0 +1,22 @@
+<?=$t['sectionheader'];?>
+
+<h3>Removing Assessment <?=$t['assessment']->displayName?></h3>
+You have chosen to delete the assessment <b><?=$t['assessment']->displayName?></b>. This action is non-reversible and will delete all entries in your gradebook of this assessment as well as remove all student grades for this assessment.  Please confirm you wish us to remove this assessment and all questions from the system:
+<p>
+<form action="<?=modurl('main/event=removeConfirm');?>" method="post">
+<input type="hidden" name="id" value="<?=$t['assessment']->assessmentId;?>">
+<FIELDSET>
+<LEGEND>Confirm Delete</LEGEND>
+<table width="100%">
+	<tr>
+		<td align="center" width="50%">
+			<input type="submit" value="Remove Assessment" name="remove">
+		</td>
+		<td align="center" width="50%">
+			<input type="submit" value="Cancel Remove" name="cancel">
+		</td>
+	</tr>
+</table>
+</FIELDSET>
+</form>
+</p>

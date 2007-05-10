@@ -1,0 +1,119 @@
+<h2>Private Messaging<h2>
+
+<table border="0" cellpadding="4" cellspacing="1" width="100%">
+<tr><td valign='top'><a href="<?=APP_URL?>pm/main/event=compose">Compose New Message</a> 
+</td>
+<td valign='top'>
+	<? if ($t['emailNotify']=='y') { ?>
+	Email notification is on.  <a href="<?=modurl("main/event=notify/val=no");?>">Turn notification off</a>
+	<? } else { ?>
+	Email notification is off.  <a href="<?=modurl("main/event=notify/val=yes");?>">Turn notification on</a>
+
+	<? } ?>
+</td>
+</tr>
+<tr>
+
+<td colspan='2' valign='top'>
+	<? if ($t['viewing']==0) { ?>
+	Viewing RECEIVED messages.  <a href="<?=modurl("main/sentReceived=1");?>">View sent messages</a>
+	<? } else { ?>
+	Viewing SENT messages.  <a href="<?=modurl("main/sentReceived=0");?>">View received messages</a>
+
+	<? } ?>
+</td>
+</tr>
+</table>
+
+<hr>
+
+<div align='center'><h4><?=$t['message'];?></h4></div>
+
+<? if (is_array($t['messages'])) {?> 
+<form method='post' action='<?=appurl('pm/main/event=delete/');?>'>
+<input type='submit' value='Delete Checked Messages'>
+<?php
+	echo '<input type="button" value="Select All" onclick="selectAll();">';
+?>
+<? } ?>
+
+<?
+if (is_array($t['messages'])) { ?>
+<br><br>
+<table width='100%' border='0' cellpadding='4' cellspacing='1'>
+<tr class="pmmessage_header"><td colspan="3" align="center"><b>Messages</b></td></tr>
+<?
+	while(list($k,$mess) = @each($t['messages'])) { 
+	if ($row=='row1') { $row='row2'; } else { $row='row1'; }
+		$i++;
+		if (trim($mess->subject)=='') { $mess->subject='NO SUBJECT'; }
+	?>
+	<tr class='<?=$row;?>'>
+	<td rowspan='2' class="header2">
+	<input type='checkbox' id="<?=$i;?>" name='mess[<?=$mess->pkey;?>]'>
+	</td>
+		<td colspan='1'>Subject: <a href="<?=appurl("pm/main/event=read/pkey=".$mess->pkey);?>"><?=$mess->subject;?></a></td>
+	<? if ($t['viewing']==0) { ?>
+		<td colspan='1'>From: <?=$mess->userFrom?></td>
+	<? } else { ?>
+		<td colspan='1'>Sent to: <?=$mess->messageTo;?></td>
+	<? } ?>
+	</tr>
+	<tr class='<?=$row;?>'>
+	<td>Sent: <?=date("m/d/Y h:i A",$mess->sentTime);?></td>
+	<? if ($mess->receivedTime>0) { ?>
+		<td>Read: <?=date("m/d/Y h:i A",$mess->receivedTime);?></td>
+	<? } else { ?>
+		<td>&nbsp;</td>
+	<? } ?>
+	</tr>
+	<? } 
+} else { ?>
+There are no new messages for you at this time.
+<? } ?>
+<? if (is_array($t['messages'])) {?> 
+</table>
+</form>
+<? } ?>
+<br><br>
+<table width='100%'>
+
+<tr>
+
+	<td width='50%'>
+
+		<? if ($t['prev']) { ?>
+
+		<a href="<?=appurl("pm/main/start=".($t['start']-$t['max']));?>">Prev</a> |
+
+		<? } ?>
+
+
+		<? if ($t['next']) { ?>
+
+		<a href="<?=appurl("pm/main/start=".($t['start']+$t['max']));?>">Next</a>
+
+		<? } ?>
+
+	</td>
+
+	<td align='right'>
+&nbsp;
+
+	</td>
+
+</tr>
+
+</table>
+
+<script>
+	var itemcount = <?=$i;?>;
+
+	function selectAll()
+	{
+		for (i=1; i<= itemcount; i++)
+		{	document.getElementById(i).checked = true;	
+		}
+	}
+	
+</script>

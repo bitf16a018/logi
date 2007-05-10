@@ -1,0 +1,41 @@
+			<style type="text/css">
+				.classdoclibrary_even {
+						font-size:12pt;
+						background: #C0C0C0;
+				}
+				.classdoclibrary_odd {
+						font-size:12pt;
+						background: #E0E0E0;
+				}
+
+				.classdoclibrary_open {
+						font-size:12pt;
+						background: #AAF;
+				}
+
+			</style>
+
+
+
+<div id="sectionheader">
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+	<tr>
+		<TH>File Resources Manager - <?=$obj->user->activeClassTaught->courseName.' ('.$obj->user->activeClassTaught->courseFamilyNumber.')';?></TH>
+	</tr>
+	<tr>
+	<td align="left">
+		<a href="<?=APP_URL?>classdoclib/addFolder/main"><img src="<?=IMAGES_URL?>folder-new.png" border="0" height="24" width="24" alt="new folder" title="new folder">New Folder</a> &bull;
+		<a href="<?=APP_URL?>classdoclib/addFile/event=SelectFolder"><img src="<?=IMAGES_URL?>file-new.png" border="0" width="24" height="24" alt="new file" title="new file">New Document</a> &bull;
+		<a href="<?=APP_URL?>classdoclib/trash/"><img src="<?=IMAGES_URL?>file-trash.png" border="0" width="24" height="24" alt="new file" title="Trash">Trash (<?=$t['trashcount']?>)</a> &bull;
+		<a href="<?=APP_URL?>classdoclib/main"><img src="<?=IMAGES_URL?>back.png" border="0" width="24" height="24" alt="back" title="back">Beginning</a> &bull;
+		<a href="<?=appurl('classmgr');?>"><img src="<?=IMAGES_URL?>exit.png" border="0" width="24" height="24" alt="exit" title="exit">Exit</a>
+	</td>
+	</tr>
+</table>
+</div>
+
+
+	<span style="color:red;"><?=$t["error"];?></span>
+
+
+

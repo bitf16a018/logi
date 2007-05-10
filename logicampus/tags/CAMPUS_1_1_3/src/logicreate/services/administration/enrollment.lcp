@@ -1,0 +1,163 @@
+<?php
+
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+class enrollment extends AdminService {
+
+	var $presentor = "htmlPresentation";
+	var $authorizer = 'adminAuth';
+	var $PAGE_SIZE = 30;
+	var $cleanedArray = array();
+
+	// Links
+	var $sectionTitle = 'User Administration - Class Enrollment';
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Administration Home' => '',
+		'User Manager' => 'users/'
+	);
+
+	var $applinks = array(
+		'List Users' => 'users',
+		'Create User' => 'users/event=new', 
+	);	
+
+
+	/**
+	 * Show list of classes (sections) a student is in
+	 * and give option to add to new classes
+	 *
+	 */
+
+	function run (&$db,&$u,&$lc,&$t) {
+
+		# Update active semester and store in user session
+		if ($lc->postvars['semester'])
+		{
+			$u->sessionvars['enrollmentSemesterId'] = $lc->postvars['semester'];
+		} elseif ($u->sessionvars['enrollmentSemesterId'] == '')
+			{
+				$u->sessionvars['enrollmentSemesterId']  = semesterObj::getCurrentID();
+			}
+		
+
+		$name = $lc->postvars['username'];
+		if ($name=='') 
+		{ 
+			$name = $lc->getvars['username'];
+		}
+
+		if ($name == '')
+		{
+			$lc->templateName = 'enrollment_error';
+			$t['error'] = '<h3>Fatal error:  No student selected.</h3>';
+			return;
+		}
+
+		$this->sectionTitle .= ' for <u><a style="font-size: 100%;" href="'.modurl("users/event=showUser/username=$name").'">'.$name.'</a></u>';
+		$t['username'] = $name;
+
+      	$f = new SiteForm();
+        $f->getForm('semester', array('semester'=>$u->sessionvars['enrollmentSemesterId']));
+        $f->action = modurl("enrollment/main/username=$name");
+        $t['form'] = $f->ToHTML();
+
+		# Take active semesterId out of sessionvar
+		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+
+// get classes taken
+		$classes = classObj::getAllClassesTaken($name, $semesterId);
+		$d = new datagrid('administration','enrollment');
+		$d->sortColumns = array("courseNumber",'facultyId');
+		$d->headers = array(
+			"del"=>" ", 
+			"activate"=>" ",
+			"sectionNumber"=>"Section",
+			"facultyName"=>"Faculty", 
+			"courseName"=>"Course name",
+			"courseFamilyNumber"=>"Course",
+			"courseFamily"=>"Family",
+			"classType"=>"Type",
+			"id_classes"=>"Class ID",
+			"id_semesters"=>"Semester ID",
+			"facultyId"=>'Facutly ID',
+			"id_student"=>"Student ID",
+			'semesterID'=>'Semester',
+			'courseNumber'=>'Course Number'
+			);
+		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>">remove</a>',"del");
+		$d->prependColumn('<?$name="'.$name.'"; if ($active==1) { $activate="suspend"; $act=0; } else { $activate="activate"; $act=1; } ?><a href="<?=modurl("enrollment/event=activate/active=$act/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>"><?=$activate;?></a>',"activate");
+		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
+		$d->setRows($classes);
+		$d->ignore = array (
+				'id_class_resource', 
+				'stylesheet', 
+				'_dsn',
+				'_pkey', 
+				'sectionNumbers', 
+				'id_courses',
+				'active',
+				'dateWithdrawn',
+				'noexam',
+				'facultyId',
+				'__loaded',
+				'semester_id'
+		);
+		$t['classes'] = $d->toHTML();
+		$lc->templateName = 'enrollment_main';
+		
+		$db->query("select classes.*, courses.* from classes, courses 
+				where classes.id_semesters=$semesterId 
+				and classes.id_courses = courses.id_courses order by courses.courseFamily, courses.courseNumber, courseName");
+		while($db->next_record()) {
+			$x = explode("\n",$db->Record['sectionNumbers']);
+			foreach($x as $k=>$v) { 
+				$c[$v] = $db->Record['courseFamily']." ".
+				$db->Record['courseNumber']." - ".$db->Record['courseName']." - ".
+				" ($v) - ".$db->Record['facultyId'];
+			}
+		}
+		$t['courses'] = makeOptions($c);
+	}
+
+
+	function addrun(&$db,&$u,&$lc,&$t) {
+		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+
+		$name = addslashes(stripslashes($lc->postvars['username']));
+		$sectionNumber = (int)$lc->postvars['id'];
+		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
+		$lc->templateName = 'enrollment_main';
+		$this->run($db,$u,$lc,$t);
+	}
+
+	function activaterun (&$db,&$u,&$lc,&$t) {
+		$name = addslashes(stripslashes($lc->getvars['username']));
+		$sectionNumber = (int)$lc->getvars['id'];
+		$active= (int)$lc->getvars['active'];
+
+		$db->query("update class_student_sections set active=$active where id_student='$name' and sectionNumber=$sectionNumber");
+		$lc->templateName = 'enrollment_main';
+		$this->run($db,$u,$lc,$t);
+	}
+
+
+	function removerun (&$db,&$u,&$lc,&$t) {
+// only dealing with current semester right now
+// 
+		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
+		$semesterId = $db->Record[0];
+
+		$name = addslashes(stripslashes($lc->getvars['username']));
+		$sectionNumber = (int)$lc->getvars['id'];
+		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+		$lc->templateName = 'enrollment_main';
+		$this->run($db,$u,$lc,$t);
+
+	}
+}
+?>

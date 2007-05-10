@@ -1,0 +1,271 @@
+<?php 
+
+  $BP = 3; // break point 
+  $classBG = 'lightbackground';
+
+?>
+<script type="text/javascript" language="JavaScript">
+function do_delete(url,msg)
+{
+  var agree=confirm(msg);
+  if (agree)
+  {
+    // document.write("");
+    location = url;
+  }
+}
+</script>
+<?php
+
+  $dir = $t['dir'];
+  if(is_object($dir) && is_a($dir,'Docs_Directory'))
+  {
+
+    if(count($t['errors']))
+    {
+      echo '<table width="100%" cellspacing="0" border="0" cellpadding="5" bgcolor="red">'."\n";
+      for($i = 0 ; $i < count($t['errors']) ; ++$i)
+      {
+        echo '<tr>
+                <td><font color="white" size="+1"><b>'.$t['errors'][$i]->getMessage().'</b></font></td> 
+              </tr>'."\n";
+      }
+      echo '</table>';
+    }
+
+    if($dir->directoryID > 1)
+    {
+      $parent = & new Docs_Directory();
+      if($parent->getDirectoryById($dir->parentID))
+      {
+?>
+<table width="100%" class="<?=$classBG?>" border="0" cellspacing="0">      
+<tr>
+  <td>
+<b><a href="<?=APP_URL?>docs/main/event=dir/dirID=<?=$dir->parentID?>"><?=$parent->name?></a></b> &raquo; <b><?=$dir->name?></b>
+  </td>
+  <td align="right">
+
+<table cellspacing="4">
+<tr>
+  <td width="16">
+<a href="<?=APP_URL?>docs/main/event=dir/dirID=<?=$dir->parentID?>"><img src="<?=IMAGES_URL?>/docs/back.gif" border="0" width="16" height="16" /></a>
+  </td>
+  <td>
+<a href="<?=APP_URL?>docs/main/event=dir/dirID=<?=$dir->parentID?>">Back</a> 
+  </td>
+  <td width="16">
+<a href="<?=APP_URL?>docs/main/event=dir/dirID=<?=$dir->directoryID?>"><img src="<?=IMAGES_URL?>/docs/home.gif" border="0" width="16" height="16" /></a>
+  </td>
+  <td>
+<a href="<?=APP_URL?>docs/main/event=dir/dirID=1">Home</a> 
+  </td>
+
+  <td width="16">
+<a href="<?=APP_URL?>docs/main/event=dir/dirID=<?=$dir->directoryID?>"><img src="<?=IMAGES_URL?>/docs/refresh.gif" border="0" width="16" height="16" /></a>
+  </td>
+  <td>
+<a href="<?=APP_URL?>docs/main/event=dir/dirID=<?=$dir->directoryID?>">Refresh</a> 
+  </td>
+
+<?php
+
+        if($dir->_w())
+        { 
+
+?>
+  <td width="16">
+<a href="<?=APP_URL?>docs/main/event=perms/dirID=<?=$dir->directoryID?>"><img src="<?=IMAGES_URL?>/docs/perms.gif" border="0" width="16" height="16" /></a>
+  </td>
+  <td>
+<a href="<?=APP_URL?>docs/main/event=perms/dirID=<?=$dir->directoryID?>">Permissions</a> 
+  </td>
+
+
+<?php
+        }
+?>
+</tr>  
+</table>
+
+  </td>
+</tr>
+</table>
+<?
+      }
+    }
+
+    if($dir->_w())
+    {
+?>
+<form method="post" action="<?=$_SERVER['SCRIPT_NAME']?>/docs/main/event=dir/dirID=<?=$t['dirID']?>" enctype="multipart/form-data">
+
+<table class="<?=$classBG?> grayoutline" width="100%" cellspacing="5">
+<tr>
+  <td>
+
+<table>
+<tr>
+  <td>Upload File:</td>
+  <td><input type="file" name="newFile"/ size="15"></td>
+  <td><input type="submit" value="Upload"></td>
+</tr>
+</table>
+
+  </td>
+</tr>
+</table>
+</form>
+<?
+    }   
+
+    $dirs    = $dir->getDirectories();
+ 
+    if(count($dirs))
+    {
+
+?>
+<table width="100%" cellpadding="5" border="0">
+<tr class="<?=$classBG?>">
+  <td>
+    <font size="+1">Folders</font>
+  </td>
+</tr>
+</table>
+
+<?
+      echo '<table width="100%" cellspacing="4" border="0" cellpadding="5">'."\n";
+      echo '<tr>'."\n";
+
+      while(list(,$var) = each($dirs))
+      {
+        if($var->_r())
+        {
+
+          echo '<td align="center" width="25%">'."\n";
+          echo '<a href="'.APP_URL.'docs/main/event=dir/dirID='.
+               $var->directoryID.'">';
+          echo '<img src="'.IMAGES_URL.'/docs/folder.gif" border="0" /></a>'."\n";
+          echo '<br />'."\n";
+          echo '<a href="'.APP_URL.'docs/main/event=dir/dirID='.
+               $var->directoryID.'">'.$var->name.'</a>'."\n";
+
+          if($var->_w())
+          {
+            echo '<br />'."\n";
+            echo '<table border="0" cellpadding="2" class="'.$classBG.'"><tr><td>'."\n";
+            echo '[ <a href="javascript: do_delete(\''.APP_URL.'docs/main/event=deltree/dirID='.$var->directoryID.'\',\'Are you sure you want to delete this directory\n and its contents?\');"><font color="red">Delete</font></a> | <a href="'.APP_URL.'docs/main/event=perms/dirID='.$var->directoryID.'">Perms</a> ]';
+            echo '</td></tr></table>'."\n";
+          }
+
+          echo '</td>'."\n";
+          
+//          echo '<li> '.$var->name.' </li>'."\n";
+          
+          if(++$n % $BP == 0)
+          {
+            echo '</tr><tr>'."\n";
+          }
+        }
+      } 
+
+      echo '</tr>'."\n";
+      echo '</table>'."\n";
+    }
+
+    $files   = $dir->getFiles();
+
+    if(count($files))
+    {
+      $filetype = & new Docs_Filetype();
+
+?>
+
+<table width="100%" cellpadding="5" border="0">
+<tr class="<?=$classBG?>">
+  <td>
+    <font size="+1">Files</font>
+  </td>
+</tr>
+</table>
+    
+
+<?
+
+      echo '<table width="100%" cellspacing="4" border="0" cellpadding="5">'."\n";
+      echo '<tr>'."\n";
+
+      $n = 0;
+      while(list(,$file) = each($files))
+      {
+        if($file->_r())
+        {
+          $icon = $filetype->getIcon($file->getFiletype());
+
+          echo '<td align="center" width="25%">'."\n";
+          echo '<img src="'.IMAGES_URL.'/docs/'.$icon.'" border="0" />'."\n";
+          echo '<br />'."\n";
+
+	  echo '<a href="'.APP_URL.'docs/main/event=dl/fileID='.$file->fileID.'/'.$file->name.'">'.$file->name.'</a>'."\n"; //.'('.$file->fileID.')'."\n";
+
+          if($file->_w())
+          {
+            echo '<br />'."\n";
+            echo '<table border="0" cellpadding="2" class="'.$classBG.'"><tr><td>'."\n";
+            echo '[ <a href="javascript: do_delete(\''.APP_URL.'docs/main/event=rm/fileID='.$file->fileID.'\',\'Are you sure you want to delete this file?\');"><font color="red">Delete</font></a> | <a href="'.APP_URL.'docs/main/event=perms/fileID='.$file->fileID.'">Perms</a> ]'."\n";
+            echo '</td></tr></table>'."\n";
+          }
+/*
+          echo '<a href="'.APP_URL.'docs/main/event=dir/dirID='.
+               $var->directoryID.'">'.$var->name.'</a>'."\n";
+*/
+          echo '</td>'."\n";
+          
+//          echo '<li> '.$var->name.' </li>'."\n";
+          
+          if(++$n % $BP == 0)
+          {
+            echo '</tr><tr>'."\n";
+          }
+        }
+      } 
+    }
+
+    if($dir->_w())
+    {
+?>
+<form method="post" action="<?=$_SERVER['SCRIPT_NAME']?>/docs/main/event=dir/dirID=<?=$t['dirID']?>">
+<table class="<?=$classBG?> grayoutline" width="100%" cellspacing="5">
+<tr>
+  <td>
+
+<table>
+<tr>
+  <td>Directory Name:</td>
+  <td><input type="text" name="newDir" size="15"/></td>
+  <td><input type="submit" value="Create"></td>
+</tr>
+</table>
+
+  </td>
+</tr>
+</table>
+
+</form>
+<?php 
+    }
+ 
+  }
+  else
+  {
+    echo 'NO PERMS';
+  }
+
+
+?>
+
+<!--
+<p>
+  dirRun.html
+</p>
+-->

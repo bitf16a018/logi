@@ -1,0 +1,48 @@
+<?
+
+class virtualclassrooms extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+	
+
+	/*
+	 * Figures our which type of user it is and redirects them to that opening module.
+	 */
+	 
+	function run($db,&$u,&$lc,&$t) 
+	{
+		/*
+		 * STUDENT
+		 */
+		 
+		 switch($u->userType)
+		 {
+		 	
+		 	case 2;
+		 	$t['url'] = APP_URL.'classroom/';
+		 	$this->presentor = 'redirectPresentation';
+		 	break;
+		 	
+		 	case 3;
+		 	$t['url'] = APP_URL.'classmgr/';
+		 	$this->presentor = 'redirectPresentation';
+		 	break;
+		 	
+		 	default:
+		 	if ($u->username == 'anonymous')
+		 	{
+		 		$t['url'] = APP_URL.'login/';
+		 		$this->presentor = 'redirectPresentation';
+		 	} else {
+		 		$lc->templateName = 'virtualclassrooms_error';
+		 		return;
+		 	}
+		 	break;
+
+		 	
+		 }
+	}
+	
+	
+}
+?>
