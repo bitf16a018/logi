@@ -557,10 +557,11 @@ class lcUser {
 
 	/**
 	 * Save a message in the session so it can be displayed on the
-	 * next page
+	 * next page.
+	 * Store all messages based by their type.
 	 */
-	function addSessionMessage($msg) {
-		$this->sysMessages[] = $msg;
+	function addSessionMessage($msg,$type='i') {
+		$this->sysMessages[$type][] = $msg;
 	}
 
 	/**
