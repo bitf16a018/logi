@@ -1,0 +1,42 @@
+<!DOCTYPE database SYSTEM
+ "http://jakarta.apache.org/turbine/dtd/database_3_1.dtd">
+<database
+  name="lcx"
+  defaultIdMethod="idbroker">
+
+  <table name="tbl_blog" description="Weblog info">
+	  <column name="blog_id" required="true" primaryKey="true" type="integer" description="ID key"/>
+	  <column name="blog_name" required="true" type="varchar" size="30" description="blog name"/>
+	  <column name="blog_description" required="true" type="varchar" size="255" description="Blog description"/>
+	  <column name="blog_owner" required="true" type="varchar" size="32" description="Blog userid"/>
+	  <column name="blog_email_notify" required="true" type="varchar" size="100" description="Blog Email Notification Address"/>
+	  <column name="blog_allow_viewing" required="true" size="1" default="a" type="char" description="Viewing policay All/Registered/None (a/r/n)"/>
+	  <column name="blog_allow_posting" required="true" size="1" default="a" type="char" description="Posting policy All/Registered/None (a/r/n)"/>
+	  <!--
+	  <foreign-key foreignTable="tbl_blog_entry">
+	  	<reference local="blog_id" foreign="blog_id"/>
+	  </foreign-key>
+	  -->
+  </table>
+
+  <table name="tbl_blog_entry" description="Weblog entries">
+	  <column name="blog_entry_id" required="true" primaryKey="true" type="integer" description="ID key"/>
+	  <column name="blog_id" required="true" type="integer" description="Blog ID key"/>
+	  <column name="blog_parent_id" required="true" type="integer" description="Blog parent ID key"/>
+	  <column name="blog_entry_title" required="true" type="varchar" size="255" description="Entry title"/>
+	  <column name="blog_entry_description" required="true" type="varchar" size="255" description="Entry description"/>
+	  <column name="blog_entry_text" required="false" type="text" description="Entry full text"/>
+	  <column name="blog_entry_timedate" required="true" type="int" description="Entry timestamp"/>
+	  <column name="blog_entry_poster_id" required="true" type="varchar" size="25" description="Poster username"/>
+	  <column name="blog_entry_poster_email" required="true" type="varchar" size="25" description="Poster email"/>
+	  <column name="blog_entry_poster_notify" required="true" type="char" size="1" default='n' description="Poster notify"/>
+	  <column name="blog_entry_poster_url" required="true" type="varchar" size="25" description="Poster URL"/>
+	  <foreign-key foreignTable="tbl_blog">
+	  	<reference local="blog_id" foreign="blog_id"/>
+	  </foreign-key>
+	  <foreign-key foreignTable="tbl_blog_entry">
+		  <reference local="blog_parent_id" foreign="blog_id"/>
+	  </foreign-key>
+  </table>
+
+</database>

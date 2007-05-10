@@ -1,0 +1,84 @@
+<?
+/*****
+ * Author:	Keith Elder
+ * Purpose: 	To control mailling list subsriptions for registered users.
+ * Notes:   	This system keys off of groups which start with "ml_".  
+ *         	Groups which start with this are shown in the template 
+ *		for users to subscribe.
+ * LM:	    	11/19/02
+ * Requires: 	groups to be named "ml_??????"
+ *****/
+
+class maillist extends RegAuth {
+
+	var $presentor = 'htmlPresentation';
+	
+
+	function maillist()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+
+	/*  display all maillist to users */
+	function Run (&$db, &$u, &$arg, &$t) {
+		$db->query("select gid, groupName from lcGroups where gid like 'ml_%'");
+		while($db->next_record())
+		  {
+			$t['maillist'][$db->Record['gid']] = $db->Record;
+			if (in_array($db->Record['gid'], $u->groups))
+			{
+				$t['maillist'][$db->Record['gid']][checked] = 'yes';
+			}
+					
+		  }
+	
+	}
+	
+	/* update users groups to the appropiate maillist */
+	function PostRun (&$db, &$u, &$arg, &$t) {
+
+		# Add list to an array
+		while(list($k, $v) = @each($arg->postvars[maillist]))
+		{
+			if ($v == 'on') { $list[] = $k; }
+		}
+		
+		# remove all maillist groups a user current is a member of
+		# so we can merge the new list
+		
+		 while(list ($k, $v) = @each($u->groups))
+		 {
+		  	if (eregi('ml_', $v)) { continue; }
+		 	$tmp_array[] = $v;
+		 }
+		 $u->groups = array_merge($tmp_array, $list);
+		 $u->update();
+		 
+		 if (is_array($list)) {
+		 # Grab the names of the list they subscribed to
+		 while(list($k, $v) = each($list))
+		 {
+		   	$sql .= "gid='$v' or ";
+		 }
+
+		# remove the "or" from the end
+		 $sql = substr($sql, 0, -4);
+
+		 # Pull out the group names to display them on the next page
+		 $sql = "select gid, groupName from lcGroups where $sql";
+		 
+		 $db->query($sql);
+		 while($db->next_record())
+		 {
+		 	if (in_array($db->Record['gid'], $list)) {
+		 		$t['list'][] = $db->Record['groupName'];
+		 	}
+		 }
+		 } # close is_array($list)
+		 
+		 $arg->templateName = 'maillist_done';	
+	}
+
+}
+?>

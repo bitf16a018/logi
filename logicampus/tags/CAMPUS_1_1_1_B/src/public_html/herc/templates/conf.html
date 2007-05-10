@@ -1,0 +1,102 @@
+<?=hercbox("Configs for ".$t["modulename"]);?>
+						<table border="1" width="100%">
+			<tr><td wdith="100%" class="grey" align="center">
+
+			<? if ( ! is_array($t[configs]) ) { ?>
+				<h3>There is no configuration for this module</h3>
+			<? } ?>
+
+			<form method="POST">
+			<table width="100%" border=0 cellspacing=2>
+			<? 
+			while ( list($k,$v) = @each($t[configs]) ) { 
+				$extra = $t['extra'][$k];
+				if ($t['type'][$k] == 'options' ) {
+					$extraArray = explode("\n",$extra);
+					while ( list($i,$j) = @each ($extraArray) )
+						$extraArray[$i] = trim($j);
+				}
+
+				if ($t['type'][$k]=="") { $t['type'][$k]="text"; } 
+			?>
+				<tr><td><a href="<?=modurl("/".$t['mid']."/event=del/key=$k");?>">del</a> - <?=$k;?> (<?=$t['type'][$k];?>)</td>
+			<?	if ($t['type'][$k] == "options") { ?>
+
+				<td>
+				<select name='configs[<?=$k;?>]'>
+				<?=makeOptions($extraArray,$v,true);?>
+				</select>
+			
+				</td>
+				<? } ?>
+
+				<? if ($t['type'][$k] == "textarea") { ?>
+				<td><textarea  rows='6' cols='40' name="configs[<?= $k;?>]"><?= $v;?></textarea></td>
+				<? } ?>
+
+				<? if ( ($t['type'][$k] == "text") || ($t['type'][$k]=="")) { ?>
+				<td><input type="text" name="configs[<?= $k;?>]" value="<?= $v;?>"></td>
+				<? } ?>
+			</tr>
+			<? } ?>
+
+			</td></tr>
+			</table>
+
+			<? 	//print update buttons//
+			 if (  is_array($t[configs]) ) { ?>
+				<input type="submit" value="update">
+			<? } ?>
+			<input type="hidden" name="event" value="update">
+			</form>
+
+			</td></tr>
+
+<? // if ($t['user']->_is_herc_admin) { ?>
+
+			<form method="POST">
+<tr>
+<td>
+<table>
+
+<tr>
+<td>Key</td>
+<td><input type='text' name='key'></td>
+</tr>
+
+
+<tr>
+<td>Type</td>
+<td>
+<select name='type'>
+<option value='text'>Text
+<option value='textarea'>Textarea
+<option value='options'>Options
+</select>
+</td>
+</tr>
+<tr>
+<td>Options (one per line)</td>
+<td>
+<textarea  rows='6' cols='30' name="extra"></textarea>
+</td>
+</tr>
+
+
+</table>
+				<input type="submit" value="Add new config">
+			<input type="hidden" name="event" value="addnew">
+			</form>
+
+</td>
+
+</tr>
+<? // } ?>
+
+
+			<tr><td>
+						<center><div class="message"><?= $t["message"]; ?></div></center>
+						</td></tr>
+                        </table>
+			<p>
+<?=endhercbox();?>

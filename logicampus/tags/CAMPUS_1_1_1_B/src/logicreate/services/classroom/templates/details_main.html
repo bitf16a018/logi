@@ -1,0 +1,100 @@
+<?=$t['sectionheader'];?>
+<? if ( $t['message'] ) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
+<? if ( $t['error'] ) print '<span style="color:red;">'.$t['message'].'</span>'; ?>
+
+<table border=0 cellpadding="2" cellspacing="0" width="100%">
+<tr>
+	<td valign="top" width="30%">
+
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Announcements<br/><small>(1 of <?=$t['num_announcements'];?> <a href="<?=APP_URL?>classroom/announcements">view all</a>)</small></td>
+		</tr>
+		<tr>
+			<td><?=$t['announcements'];?></td>
+		</tr>
+		</table>
+<p>
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Message from 
+			<BR>Distance Learning</td>
+		</tr>
+		<tr>
+			<td><?=$t['motd'];?></td>
+		</tr>
+		</table>
+	
+	</td><td valign="top">
+		<div id="calendar">
+				<?=$t['tinyCal'];?>
+		</div>
+	</td>
+
+	<td width="30%" valign="top">
+			<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Lessons<br/><small>(<?=$t['_PortalNumOfLessons']?> of <?=$t['lessoncount']?> <a href="<?=APP_URL?>classroom/lessons">view all</a>)</small></td>
+		</tr>
+		<tr>
+			<td>(newest lesson is first)</td>
+		</tr>
+		<tr>
+			<td><?=$t['lessons'];?></td>
+		</tr>
+		</table>
+		<p>
+
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Assignments<br/><small>(<?=$t['_PortalNumOfAssignments'];?> of <?=$t['assignmentcount'];?> <a href="<?=APP_URL?>classroom/assignments">view all</a>)</small></td>
+		</tr>
+		<? if ($t['assignments'] || $t['noduedateassignments']) { ?>
+		<? if ($t['assignments']) { ?>
+		<tr>
+			<td>(closest due date is first)</td>
+		</tr>
+		<tr>
+			<td><?=$t['assignments'];?></td>
+		</tr>
+		<? } ?>
+		<? if ($t['noduedateassignments']) { ?>
+		<tr>
+			<td><b>No Due Date</b></td>
+		</tr>
+		<tr>
+			<td><ul><?=$t['noduedateassignments'];?></ul></td>
+		</tr>
+		<? } ?>
+		<? } else { ?>
+		<tr>
+			<td><i>no assignments found</i></td>
+		</tr>
+		<? } ?>
+
+		</table>
+
+
+
+	</td>
+</tr>
+<tr>
+	<td colspan='3'>
+<?
+		# We do not show this block until a faculty 
+		# member chooses something
+		if ($t['classresource'])
+		{ ?>
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Class Resources</td>
+		</tr>
+		<tr>
+			<td><?=$t['classresource'];?></td>
+		</tr>
+		</table>
+		<? } ?>
+	</td>
+</tr>
+
+</table>

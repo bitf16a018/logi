@@ -1,0 +1,43 @@
+<?
+/*
+ *
+ * take external grade format and insert into the
+ * database
+ *
+ */
+
+class import extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Form and info for processing an import
+ * 
+ * Input data: none
+ * Output data: display
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='import_main';
+
+		}
+
+/*
+ *
+ * process import file, show import status
+ * 
+ * Input data: import file
+ * Output data: status
+ *
+ */
+		function processRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='import_process';
+
+		}
+
+
+
+}
+
+?>

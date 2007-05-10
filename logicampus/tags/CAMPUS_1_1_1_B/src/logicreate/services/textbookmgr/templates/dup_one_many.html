@@ -1,0 +1,24 @@
+<?=$t['sectionheader'];?>
+<?=$t['semform'];?>
+
+<form method='post' action='<?=modurl("dup/event=dup");?>'>
+<table>
+<tr><td valign='top'>
+<h3>Semester 1 - <?=$t['fromsemester'];?></h3>
+<select name='from' size='20'>
+<?=$t['from'];?>
+</select>
+
+</td><td valign='top'>
+<h3>Semester 2 - <?=$t['tosemester'];?></h3>
+<select name='to[]' size='20' multiple>
+<?=$t['to'];?>
+</select>
+
+
+
+</td></tr>
+</table>
+<input type='submit' value='Copy from semester 1 to semester 2'>
+
+</form>
