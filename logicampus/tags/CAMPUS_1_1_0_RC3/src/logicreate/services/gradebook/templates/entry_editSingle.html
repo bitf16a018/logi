@@ -1,0 +1,63 @@
+<html>
+<head>
+<? if ($t['done']) { ?>
+<script language="javascript">
+window.opener.location.reload();
+self.close();
+</script>
+</head>
+<body bgcolor="#fff6e6">
+<p>Redirecting...</p>
+</body>
+</html>
+<? exit; } ?>
+</head>
+<body bgcolor="#fff6e6">
+
+<? if ( $t['error'] ) { ?>
+<span style="color:red;"><?=$t['error'];?></span>
+<? } else { ?>
+
+<p align="center">
+	<b><?=$t['user']['firstname'].' '.$t['user']['lastname'];?>'s Score For <?=$t['entry']->title;?></b>
+</p>
+<? /*
+<table style="padding-left:20px;" border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td align="right"><b>Student:</b></td>
+	<td><?=$t['user']['lastname'].', '.$t['user']['firstname'];?></td>
+</tr>
+<tr>
+	<td align="right"><b>Entry:</b></td>
+	<td><?=$t['entry']->title;?></td>
+</tr>
+</table>
+*/ ?>
+
+<form action="" method="post">
+<table align="center" border=0 cellpadding=3 cellspacing=0>
+<tr>
+	<td><b>Score:</b></td>
+	<td><b>Comments:</b></td>
+</tr>
+<tr>
+	<td valign="top"><input type="text" name="score" value="<?=$t['val']->score;?>" size=5 maxlength=5 /></td>
+	<td><textarea name="comments" cols=30 rows=4><?=$t['val']->comments;?></textarea></td>
+</tr>
+<tr>
+	<td colspan=2 align="center"><!--<input type="submit" value="Update score" />--></td>
+</tr>
+</table>
+For now, the ability to update grades directly from the gradebook is turned off.  Please use the
+interfaces from your assignments area or your assessments area.
+<!--
+<input type="hidden" name="event" value="updateSingle" />
+<input type="hidden" name="entid" value="<?=$t['entry']->idClassGradebookEntries;?>" />
+<input type="hidden" name="user" value="<?=$t['user']['username'];?>" />
+</form>
+-->
+
+<? } ?>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<?=$t['sectionheader'];?>
+<br>
+
+	
+<form method="POST">
+
+<table border="0" width="100%">
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Link Text:
+</td></tr>
+<tr><td colspan="2">
+<input type="text" name="linkText" value="<?= $t[menuItem]->linkText;?>">
+<p>
+<input type="checkbox" name="useImage" <? $t[menuItem]->imgOff != "" ? print "CHECKED": print "";?>> Use image instead of text.
+<br>
+<input type="text" name="imgOff" value="<?= $t[menuItem]->imgOff;?>"> (http link to image).
+<p>
+<br>
+Ranking <input size="4" type="text" name="rank" value="<?= $t[menuItem]->rank;?>"> 
+
+</td></tr>
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Linked Application:
+</td>
+</tr>
+<tr><td colspan="1">
+<select name="location" size="5">
+	<?= $t[apps]; ?>
+</select>
+<p>
+</td>
+<td valign="top">Option: <input type="text" name="appOption" value="<?=$t[menuItem]->appOption?>"><br><i>Example: view/userType=member.</i></td>
+</tr>
+
+<tr><td colspan="2">
+<input type="hidden" name="menuID" value="<?= $t[mid];?>">
+
+<input type="hidden" name="pkey" value="<?= $t[menuItem]->pkey;?>">
+<input type="hidden" name="linkType" value="app">
+<input type="hidden" value="<?= $t['event'];?>" name="event">
+<input type="submit" value="save">
+</td></tr>
+</table>
+
+</form>

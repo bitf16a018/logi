@@ -1,0 +1,325 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+/**
+ * 
+ * file management 
+ * Folder managers can share files in nested folders.
+ * Only certain groups can download
+ */
+// IMAGES ONLY //
+class wysiwygimages extends classdoclibService {
+
+
+	var $presentor = 'emptyPresentation';
+	
+
+	function viewimageRun(&$db,&$u,&$lcObj,&$t) {
+		$pkey = $lcObj->getvars["pkey"];
+		$x = LC_file::getSingle($pkey, $u->activeClassTaught->id_classes);
+
+		ob_end_clean();
+		
+		header("Cache-control: public");
+		header("Content-type: ".$x->mime);
+		
+		//permission to view folder?
+		if ( $x == null ) {
+			$fd = fopen(IMAGES_PATH.'img_accessdenied.gif',"r");
+			fpassthru($fd);
+			exit;
+		}		
+
+		$fullpath = LC_DiskRepository::getFullPath($x->diskName);
+
+		if (! file_exists($fullpath) || $x->diskName == '' ) {
+			$this->presentor = 'errorMessage';
+			$t['details'] = 'There is a problem with the server\'s file repository.  The file '.$x->filename.' cannot be found.';
+			$t['message'] = 'This file does not exist';
+			return;
+		}
+		
+		$fd = fopen($fullpath,"r");
+		fpassthru($fd);
+		exit;
+		
+	}
+	
+	
+	function framerun(&$db,&$u,&$lcObj,&$t)
+	{	
+		//echo $this->get_webimages_folder_id($u->activeClassTaught->id_classes);
+		$lcObj->templateName = 'wysiwyg_frame';
+	}
+	
+	
+	function get_webimages_folder_id($facultyId) {
+		$db = DB::getHandle();
+		$db->queryOne("select pkey from classdoclib_Folders where (owner='$facultyId' and name like 'Web Images%') order by pkey ASC");
+		return $db->Record['pkey'];
+		
+	}
+	
+	/**
+	 * show a folder's contents.
+	 * Use the getvars to find out which folder is open.
+	 */
+	function run(&$db,&$u,&$lcObj,&$t) {
+		
+		$lcObj->templateName = 'wysiwyg';
+		
+		//find the currently open folder
+		$openFolder =  $lcObj->getvars[1];
+		
+		if (($openFolder=='') && ($openFolder != 0)) {  
+			$openFolder=$u->sessionvars["openFolder"]; 
+			if ($openFolder=='') {
+				$db->queryOne("select pkey from classdoclib_Folders  order by pkey ASC");
+				$openFolder = $db->Record[0]; 
+			}
+		}
+		
+		if ($openFolder == '') {
+			$openFolder = $this->get_webimages_folder_id($u->activeClassTaught->facultyId);//$lcObj->getvars[2];
+		}
+		$openFolder = addSlashes($openFolder);
+		
+		if ($lcObj->getvars["order"]) { $u->sessionvars["filesorder"] = $lcObj->getvars["order"]; }
+
+
+		// get file categories (folders)
+		//$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes, 1, $lcObj->getvars[2]);
+		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes);
+		
+		while ($cat->traverse() ) {
+			if ($cat->p_CurrentNode->contents['pkey'] == $openFolder) {
+
+				$t["catName"] = $cat->p_CurrentNode->contents['name'];
+				
+				$cat->p_CurrentNode->setOpen();
+				$cat->setStackExpanded(true);
+				$categoryKey = $cat->p_CurrentNode->contents['pkey'];
+				$cat->reset(); break;
+			}
+		}
+
+		//render as HTML
+		$view = new FileWYSView($cat);
+		$view->id_of_folder = $lcObj->getvars[2];
+		$t['id_folder'] = intval($categoryKey);
+		
+		//grab files in this folder
+		$filearray = LC_file::getFromFolder($t['id_folder'],$lcObj->getvars["order"]);
+		
+		//data formatting
+		while(list($k,$v) = @each($filearray)) {
+			if (substr($v->mime, 0, 5) != 'image') {
+				unset($filearray[$k]);
+			}
+			$v->filedate = date("m/d/Y",strtotime($v->filedate));
+			if ($v->size > 999999) { $v->size = sprintf("%.1f",$v->size/1000000). '&nbsp;Mb'; }
+				else { $v->size  = sprintf("%.1f",$v->size/1024) . '&nbsp;kb'; }
+			$t['files'][] = $v;
+		}
+
+		//manager permissions on this folder?
+		if ( @in_array('manager',$u->perms) ) {
+			$t['manager'] = true;
+		}
+
+		$t["ExplorerView"] = $view->renderAsExplorer($openFolder, 0, $filearray);
+		if ($cat->count < 1) {
+			$lc->templateName = 'main_nofolders';
+		}
+
+	}
+
+
+}
+
+
+class FileWYSView extends ListView{
+
+	var $a_filearray;
+	var $id_of_folder=0;
+
+	
+	/**
+	 * render a TreeList as an Explorer Tree
+	 *
+	 * @return	String	HTML output
+	 */
+	function renderAsExplorer($open='',$withControls=0, $a_files= '') {
+
+		if (is_array($a_files)) {
+			$this->a_filearray = $a_files;
+		}
+	
+		$ret = "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+		$this->tree->reset();
+
+		while ($this->tree->traverse()) {
+			/* shows specific and children folder*/
+			if ( !eregi("Images",$this->tree->p_CurrentNode->contents['name']) && 
+				$this->tree->p_CurrentNode->contents['parentKey'] == 0) {
+				$this->tree->p_CurrentNode->expanded = false;
+				continue;
+			}
+				
+			//keep folders closed by default
+			if ($this->tree->p_CurrentNode->expanded != true) 
+				{ $this->tree->p_CurrentNode->expanded = false; }
+
+			//colors
+			++$c %2 ==0 ? $color="even": $color="odd";
+
+			$ret .= "\n\t\t<tr><td>\n\n\t\t<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td NOWRAP>";
+/* */
+
+
+			//wrap link around folder icons
+			
+
+			//find out which image to print (connecting lines)
+			/*  */
+			if ($this->tree->p_CurrentNode->hasChild() && $this->tree->p_CurrentNode->hasSibling())
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"0\">";
+			}
+			else 
+				if ($this->tree->p_CurrentNode->hasChild())
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+				if ($this->tree->p_CurrentNode->hasSibling()) 
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+		
+		
+			// print all types of pipes as you cycle through each level of indent
+			for ($q=0; $q < $this->tree->p_CurrentNode->indent; ++$q) {
+				if ($this->tree->stack[$q]->hasSibling()) {
+					$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"20\" border=\"0\">";
+				} else {
+					$w = count($this->tree->p_CurrentNode->indent) * 18;
+					$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"$w\" border=\"0\">";
+				}
+			}
+			
+				$ret .= "</td>";
+
+	
+				$ret .= "<td  height=\"15\" width=\"98%\">";
+				$ret .= "<a href=\"".MOD_URL."wysiwygimages/".$this->tree->p_CurrentNode->contents['pkey'].'/'.$this->id_of_folder."\">";
+				//open folder
+					
+				if ($open == $this->tree->p_CurrentNode->contents['pkey'] ) {
+					$ret .= "<img src=\"".IMAGES_URL."folder-open.gif\" border=\"0\" align=\"center\" height=\"15\" width=\"17\">";
+				} else {
+					$ret .= "<img src=\"".IMAGES_URL."folder.gif\" border=\"0\" align=\"center\" height=\"15\" width=\"17\">";
+				}
+				$ret .= "</a> ";
+				$ret .= "<a href=\"".MOD_URL."wysiwygimages/".$this->tree->p_CurrentNode->contents['pkey'].'/'.$this->id_of_folder."\">";
+				$ret .= $this->tree->p_CurrentNode->contents['name'];
+				$ret .= "</a>";
+				$ret .= "</td>";
+				
+				if ($open == $this->tree->p_CurrentNode->contents['pkey'] && is_array($this->a_filearray)) 
+				{	
+					foreach($this->a_filearray as $k=>$v)
+					{
+						$ret .= '
+						</tr>
+						<tr>
+						<td>';
+						
+						//find out which image to print (connecting lines)
+			if ($this->tree->p_CurrentNode->hasChild() && $this->tree->p_CurrentNode->hasSibling())
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+			else 
+				if ($this->tree->p_CurrentNode->hasChild())
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+				if ($this->tree->p_CurrentNode->hasSibling()) 
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+			/*
+							if ($this->tree->p_CurrentNode->hasSibling() || ((count($this->a_filearray)-1) == $k )) 
+							{	$ret .= "<img src=\"".IMAGES_URL."path-pipe.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+								
+							}else 
+							{	
+								$ret .= "<img src=\"".IMAGES_URL."child-pipe.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+							}
+						
+*/
+						$ret .= '</td>	
+						<td  height="15" width="98%">
+						';
+
+						// this needs to change if no underfolders exist
+						if ($k == (count($this->a_filearray)-1) && $this->tree->p_CurrentNode->hasSibling() == false)
+						{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"20\" border=0>";
+						} else
+						{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"20\" border=0>";
+						}
+						
+
+						$ret .= '<img src="'.IMAGES_URL.'document.gif" border="0" height="15" width="18">';
+						$ret .= '<a onclick="parent.document.getElementById(\'previewfile\').title = \''.addslashes(stripslashes($v->description)).'\'; parent.document.getElementById(\'previewfile\').alt = \''.addslashes(stripslashes($v->description)).'\'; parent.document.getElementById(\'previewfile\').src = \''. appurl('classroom/viewContent/fhash='.$v->daHasha).'\'; return false;" href="'.APP_URL.'classdoclib/download/pkey='.$v->pkey.'/'.$v->file.'">';
+						$ret .= $v->file. '</a>';
+						
+						/*
+						$v->size
+						$v->filedate
+						$v->description
+						*/
+						
+						$ret .= '</td>
+						';	
+
+					}
+				
+				}
+				
+		$ret .= "</tr></table>\n\n\t";
+
+		$ret .= "\n\t\t</td></tr>\n\n\t\t";
+		}
+		
+		$ret .= "\n\t\t</table>\n";
+		
+	return $ret;
+	}
+
+
+	
+}
+
+?>

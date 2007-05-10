@@ -1,0 +1,17 @@
+<?
+print $t['sectionheader'];
+
+if ( $t['numcontent'] == 0 )
+	print '<p style="color:red">You need at least one <a href="'.MOD_URL.'lessonContent/">content item</a> that is unused by another lesson before you can edit this lesson.<p>';
+
+if ( $t['numobjectives'] == 0 )
+	print '<p style="color:red">You must create at least one <a href="'.MOD_URL.'lessonObjectives/event=edit">lesson objective</a> before the lesson.<p>';
+
+
+if ( $t['numcontent'] && $t['numobjectives'] ) { ?>
+<p>This page allows you to take your content, objectives, assignments, and weblinks and assemble them into a lesson. For the multi-select list boxes, simply hold down your ctrl key as you click on the items to select them. If you assign an objective or assignment to this lesson that already belongs to another lesson, it will be reassigned. In other words, each objective and assignment can only belong to one lesson.</p>
+<? } ?>
+
+<?if($t['error']){?><span style="color:red"><?=$t['error']?></span><?}?>
+<?if($t['msg']){?><span style="color:blue"><?=$t['msg']?></span><?}?>
+<?=$t['content'];?>

@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+		Modifying User: <?= $t[user_info][username];?>
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+	<form method="POST">
+	<input type="hidden" name="event" value="update">
+
+	<table border="1" width="100%" cellpadding="2"><tr>
+	<td class="white" valign="top" width="50%">
+
+		<select size="14" name="group_opt[]" MULTIPLE>
+	<?= $t["group_opt"]; ?>
+		</select>
+		<br>
+
+		<p>
+
+
+		Username: <br>
+		<i><?= $t[user_info][username];?></i>
+		<p>
+
+		Email: <br>
+		<input type="text" name="email" value="<?= $t[user_info][email];?>">
+		<p>
+
+		New-Password: <br>
+		<input type="password" name="password" value="">
+		<br>
+		(replaces old one if filled in)
+
+		<p>
+
+		<input type="submit" value="update user">
+		<p>
+		<div align="right">
+		<a href="<?= _APP_URL .'users/'.$obj->getvars[1];?>/event=ShowDelete"><img src="<?= _PICS_URL;?>edittrash.gif" alt="delete user" border="0"></a><br>[Del]
+		</div>
+		<a href="<?= _APP_URL .'users/'.$t[user_info][username];?>/event=loginAs">Login as <i><?= $t[user_info][username];?></i></a>
+		<br>
+
+	</td><td class="white" align="center" valign="top" width="50%">
+		<center><h3>User Profile Data</h3></center>
+
+	<? while ( list ($k,$v) = each($t[profile_meta]) ) { ?>
+		<?= $v;?>:<br> <input type="text" value="<?= $t[user_profile][$v];?>" name="profile[<?= $v?>]"> <br>
+		<p>
+	<? } ?>
+
+	</form>
+
+	</td></tr>
+	</table>
+
+</td></tr></table>
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
+</body>
+</html>

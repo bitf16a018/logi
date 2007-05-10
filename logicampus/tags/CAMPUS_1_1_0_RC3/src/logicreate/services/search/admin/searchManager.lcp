@@ -1,0 +1,105 @@
+<?
+
+/**
+ * class to handle indexing of site parts
+ * Calls different plugins to handle updating the db
+ * pulgins subclass searchTool
+ */
+require (LIB_PATH.'LC_sql.php');
+
+class searchManager {
+
+	/**
+	 * loads and runs a specific search tool.
+	 */
+	function reindex () {
+		while ($entry = $this->tool->nextItem() ) {
+			$entry->searchdata = addslashes($entry->searchdata);
+			$entry->title = addslashes($entry->title);
+			$entry->_save('lcSearch');
+			++$totalcount;
+			}
+	return "Indexed ".intval($totalcount)." records in the ".$this->tool->moduleName. " module";
+	}
+
+	function setTool($t) {
+		$this->tool = $t;
+	}
+
+	/**
+	 * eliminate old records in the search table for this module alone
+	 * use the current tool.
+	 */
+	function dropRecords () {
+		if ($this->tool == '') {
+			return false;
+		}
+		$db = DB::getHandle();
+		$db->query("delete from lcSearch where modID = '".$this->tool->mid."'");
+	return true;
+	}
+}
+
+
+/**
+ * encapsulates an entry into the main search table
+ * this should be the communication too between the
+ * searchtool and the searchmanager.
+ */
+class searchEntry extends PersistantObject {
+	var $searchdata;	//data to be full-text indexed
+	var $title;		//name for search results
+	var $type;		//type of data, article, web page, FAQ
+	var $link;		//link to access the data ( /html/main/aboutus.html )
+	var $modID;		//module ID from whence the data comes
+	var $mkey;		//pkey for this piece of data
+	var $groups;		// groups to include in search
+	var $notgroups;		// groups to exclude from search
+}
+
+
+/**
+ * abstract superclass of all search tool plugins
+ */
+class searchTool {
+
+	var $moduleName;
+	var $tableName;
+	var $keyName;
+
+	function searchTool() {
+		print "<b>Waring:</b> abstract class <i>searchTool</i> instantiated.<p>";
+	}
+
+
+	/**
+	 * signals the search manager to clear all previous
+	 * records pertaining to this tool's module.
+	 */
+	function clearOldResults () {
+		return false;
+	}
+
+
+	/**
+	 * returns the next item to be indexed by the search manager
+	 */
+	function nextItem() {
+
+	}
+
+
+	/**
+	 * utility function to rid data of noise words
+	 */
+	function stripNoiseWords($data) {
+		$string=" ".$data;
+		$string = str_replace("","\n",$string);
+		while (preg_match("/\W\w{1,3}\W/i",$string))
+		$string = preg_replace("/\W\w{1,3}\W/i", " ", $string); 
+		$string=substr($string,1);
+		return $string;
+	}
+}
+
+?>

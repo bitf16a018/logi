@@ -1,0 +1,53 @@
+<?
+
+/* 
+ * Create by Keith Elder
+ * Last Modified 9/12/02
+ *
+ * The service is called as follows:
+ * APP_URL."users/view/$username
+ * 
+ * This service pulls in information from
+ * several other modules to give a fair picture
+ * of the user including news they user wrote,
+ * their personal photo gallery, comments, etc.
+ */
+
+class view extends RegAuth {
+
+	var $presentor = "htmlPresentation";
+
+
+	function view()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+	function run($db,&$u,$arg,&$t) {
+
+		$name = $t['username'] = $arg->getvars[1];	
+
+		# Update the users number of views in their profile
+		$db->query("update profile set counter=counter+1 where username='$name'");
+
+		# Grab *ALL* of the user's profile information.
+		$sql = "select u.*,p.*,f.*,s.* from lcUsers as u
+		left join profile as p on u.username=p.username
+		left join profile_faculty as f on u.username=f.username
+		left join profile_student as s on u.username=s.username
+		where u.username='$name'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+	    $t['user'] = $db->Record;
+
+		$t['photo'] = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
+			? IMAGES_URL.'photos/'.$db->Record['photo']
+			: IMAGES_URL.'noimage.png';
+
+		$t['admin'] = @in_array('admin', $u->groups);
+
+		$t['workaddy'] = addressByLocation( $t['user']['campusLocation'] );
+
+	}
+}
+?>

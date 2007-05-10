@@ -1,0 +1,36 @@
+<table style="font-size: 11px; font-family: verdana;" cellpadding="2" cellspacing="0" border="0" width="90%" height="90%" valign="middle" align="center">
+<tr>
+<td>File Name: <B><?=$t['filename'];?></B></td>
+<td>File Size: <B><?=$t['filesize'];?></B><font color="silver" size="1">bytes</font></td>
+</tr>
+<tr>
+<td>Width: <B><?=$t['filewidth'];?></B></td>
+<td>Height: <B><?=$t['fileheight'];?></B></td>
+</tr>
+
+<tr><td colspan="2">&nbsp;</td></tr>
+<tr>
+</tr>
+<tr><td colspan="2">&nbsp;</td></tr>
+<tr>
+<td colspan="2" align="center" valign="middle">
+	<?=$t['imgtag'];?>
+	<hr>
+	<?=$t['imgtagthumb'];?>
+</td>
+</tr>
+</table>
+<br><br>
+<center><a onclick="window.close()" href="#">CLOSE WINDOW</a>
+<br><br>
+<form action="<?=$t['thumbnailformaction'];?>" method="POST">
+
+<input type="submit" value="Thumbnail this image">
+<BR>
+Enter a width and/or height<BR>to manually resize the thumbnail.<BR>
+Width: <input size='5' type='text' name='thumb[x]' value=''>
+ Height: <input size='5' type='text' name='thumb[y]' value=''>
+</form>
+</center>
+<hr>
+<?=$t['status'];?>
