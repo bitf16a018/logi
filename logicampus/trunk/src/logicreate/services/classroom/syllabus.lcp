@@ -72,13 +72,13 @@ class syllabus extends StudentService {
 		$t['semester'] = $db->Record;
 
 		// get syllabus information
-		$syllabus = ClassSyllabusPeer::doSelect(" id_classes = ".$classId);
+		$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId);
 		foreach($syllabus as $sylObj) {
-			$id      = $sylObj->get('idClassSyllabus');
+			$id      = $sylObj->get('classSyllabusId');
 			$title   = $sylObj->get('sectionTitle');
 			$content = $sylObj->get('sectionContent');
-			$t['syllabi'][$id] = nl2br(htmlentities($title));
-			$t['content'][$id] = nl2br(htmlentities($content));
+			$t['syllabi'][$id] = nl2br($title);
+			$t['content'][$id] = nl2br($content);
 		}
 
 		// get course syllabus information
