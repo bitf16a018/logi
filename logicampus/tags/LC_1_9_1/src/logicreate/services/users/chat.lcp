@@ -1,0 +1,423 @@
+<?
+/*
+ * chat
+ * Last updated 7/15/2003
+ * 
+ * Purpose:
+ * Chat system designed to allow any and all registered users to talk together,
+ * based on classroom version, but without classroom restriction
+ */
+include_once(LIB_PATH."LC_html.php");
+
+class chat extends StudentService {
+	var $authorizer = 'RegAuth';
+	var $presentor = "htmlPresentation";
+	var $_isChatAvailable = 'Y';			// always available
+	var $_lines = 20;
+	var $_refresh = 5;
+	var $sectionTitle = 'Online Chat';
+	    var $inactivelinks = array(
+			'Chat'
+		);
+
+	function chat(&$arg) {
+		parent::StudentService();
+		global $lcObj;
+		$this->module_name = $lcObj->moduleName;
+		while(list($k,$v) = each($arg->postvars)) {
+			$arg->postvars[$k] = str_replace("\r","",$v);
+			$arg->postvars[$k] = str_replace("\n","",$arg->postvars[$k]);
+			$arg->postvars[$k] = trim($arg->postvars[$k]);
+		}
+		reset($arg->postvars);
+		$u = lcUser::GetCurrentUser();
+		$class = $u->activeClassTaken;
+		$this->_title =  "General school chat";
+		$this->date_format = "h:i:s A";
+		$this->chat_id = 0;  // 0 is the chat_id for 'everyone'
+	}
+
+	function showSidebarRun($db,&$u,&$lcObj,&$t) {	
+		$t['html'] = $this->_sidebarHTML;
+		$lcObj->templateName = 'chat_blank';
+		$this->presentor = "emptypresentation";
+	}
+
+	function showSponsorRun($db,&$u,&$lcObj,&$t) {	
+		$t['html'] = $this->_sponsorHTML;
+		$lcObj->templateName = 'chat_blank';
+		$this->presentor = "emptypresentation";
+	}
+
+	function Run($db,&$u,&$lcObj,&$t) {	
+//auto-comment		$lcObj->templateStyle = 'private';
+		$t['pageDisplay'] = $this->_defaultPageText;
+		$lcObj->templateName = "chat_main";
+#		$db->query("select pkey,chatName,chatDesc from chatArchives ORDER BY pkey DESC");
+#		while($db->next_record()) {
+#			$x[] = $db->Record;
+#		}
+		$t['archiveList'] = $x;
+
+	}
+
+	function initializeRun($db,&$u,&$lcObj,&$t) {
+		if (trim($this->_isChatAvailable)=="Y") { 
+			if ( in_array('chatAdm',$u->groups) || in_array('admin', $u->groups) ) { 
+				$lcObj->templateName = "chat_smalladmin";
+				$lcObj->templateName = "chat_small";
+			} else {
+				$lcObj->templateName = "chat_small";
+			}
+		} else {
+			$lcObj->templateName = "chat_nochat";
+			$t["message"] = $this->_nextChat;
+		}
+		$this->presentor = "emptyPresentation";
+		if (trim($this->_sidebarHTML) != '') { $t['hasSidebar'] = true; }
+		$t['hasSidebar'] = true;
+	}
+
+	function start1Run($db,&$u,&$lcObj,&$t) {
+		if ($u->username!="" && strtolower(trim($u->username))!='anonymous')
+		{
+			$u->sessionvars['chatname'] = $u->username; // always assigning the username to chatname
+			
+			$u->saveSession();
+//			$db->query("delete from chatUsers where chatName='".$u->sessionvars['chatname']."'");
+//			$db->query("insert into chatUsers (chatName,registered) values ('" . $u->sessionvars["chatname"] . "','y') ");
+//			$db->query("insert into chatUsersArchive (chatName) values ('" . $u->sessionvars["chatname"] . "') ");
+
+			$this->inputRun($db,$u,$lcObj,$t);
+			return;
+		}
+		if ($lcObj->getvars["chatThread"] != "" ) { 
+			$this->inputRun($db,$u,$lcObj,$t);
+			return;
+		}
+		$lcObj->templateName = "chat_start";
+		$this->presentor = "emptyPresentation";
+	}
+
+
+	function adminRun($db,&$u,&$lcObj,&$t) {	
+		$lcObj->templateName = "chat_small";
+		$t["chatThread"] = $lcObj->getvars["chatThread"];
+		$this->presentor = "emptyPresentation";
+	}
+
+
+
+	function showRun($db,&$u,&$lcObj,&$t) {	
+		$lcObj->templateName = "chat_show";
+		$db->query("select * from chatThreads");
+		while($db->next_record()) { 
+			extract($db->Record);
+			$x = "<a href=\"#\" onClick=\"window.open('";
+			$x .= appurl("{$this->module_name}/chat/event=admin/chatThread=$chatThread");
+			$x .= "','$username','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=300,height=300');\">$username $chatThread</a>";
+
+			$tr .= "<tr><td>$x</td><td>$started</td></tr>\n";
+		}
+		$t["table"] = $tr;
+	}
+
+	function startRun($db,&$u,&$lcObj,&$t) {
+		$username = trim($lcObj->postvars["username"]);
+		if (!eregi("[[:alnum:]]",$username)) { $this->start1Run($db,$u,$lcObj,$t); return; }
+		if ( ($username =="") || (strtolower(trim($username))=='anonymous'))  { $this->start1Run($db,$u,$lcObj,$t); } else {
+			#$u->sessionvars["chatname"] = $username." (unreg)";
+			$u->sessionvars["chatname"] = $username." ";
+			$u->sessionvars["chatemail"] = $lcObj->postvars["email"];
+			$u->update();
+			$u->saveSession();
+			// check to see if we're dealing with a registered user or not
+			$registered = 'n';
+			if ( in_array('reg', $u->groups))
+			{	$registered = 'y';
+			}
+//			$db->query("delete from chatUsers where chatName='".trim($u->sessionvars['chatname'])."' AND registered='". $registered."'");
+//			$db->query("insert into chatUsers (chatName, registered) values ('" . trim($u->sessionvars["chatname"]) . "', '".$registered."') ");
+//			$db->query("insert into chatUsersArchive (chatName) values ('" . $u->sessionvars["chatname"] . "') ");
+			redirect($db,appurl("{$this->module_name}/chat/event=input"));
+		}
+	}
+
+	function usershowRun($db,&$u,&$arg,&$t) {
+		$arg->templateName='chat_usershow';
+		$db->queryOne("select * from lcUsers where username='".$arg->getvars['username']."'"); 
+		$t['usershow'] = $db->Record;
+		$this->presentor = "emptypresentation";
+	}
+
+	function userlistRun($db,&$u,&$arg,&$t) {
+		$arg->templateName='chat_userlist';
+		$db->query("select distinct(username) from chat where chat_id='{$this->chat_id}' and  timeint>=".(time()-900)." order by username");
+		while($db->next_record()) {
+			$t['users'][] = $db->Record;
+		}
+		$this->presentor = "emptypresentation";
+	}
+
+	function logoutRun($db,&$u,&$lcObj,&$t) {
+			// removing users name from that users cuase they are leaving...
+			$registered = 'n';
+			if (in_array('reg', $u->groups))
+			{	$registered = 'y';
+			}
+//			$db->query("delete from chatUsers where chatName='".trim($u->sessionvars['chatname'])."' and registered='".$registered."'");
+			$u->sessionvars["chatname"] = "";
+			$u->sessionvars["chatemail"] = "";
+			$u->saveSession();
+			redirect($db,appurl("{$this->module_name}/chat/event=start1"));
+	}
+
+	function transRun($db,&$u,&$lcObj,&$t) {
+		$email = $lcObj->postvars["email"];
+		$db->query("insert into chatEmail (email) values ('$email')");
+		$db->query("insert into chatEmailArchive (email) values ('$email')");
+		$t["message"] = "A transcript will be mailed to $email at the end of the chat.";
+		$this->inputRun($db,$u,$lcObj,$t);
+	}
+
+
+	function chatRun($db,&$u,&$lcObj,&$t) {	
+		// Ryan.. adding headers
+		header("Expires: Tues, 27 Apr 1976 18:45:00 GMT");
+        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        header("Cache-Control: no-cache, must-revalidate");
+        header("Pragma: no-cache");
+        
+		$t["refresh"] = $u->sessionvars["refresh"];
+		if (intval($t["refresh"])==0) { $t["refresh"]=$this->_refresh; }
+		$this->presentor = "emptyPresentation";
+		$lcObj->templateName = "chat_chat";
+		$t["time"] = time();
+		$t['format'] = $this->date_format;
+		if ($lcObj->getvars['showtimes']=='y') { $u->sessionvars['showtimes']='y'; }
+		if ($lcObj->getvars['showtimes']=='n') { $u->sessionvars['showtimes']=''; }
+		if ($u->sessionvars['showtimes'] =='y') { 
+			$showtimes = true; $t['showtimes'] = true;
+		} else { $showtimes = false; } 
+		if ($lcObj->getvars['chat_limit'] !='') { 
+			$u->sessionvars['chat_limit'] = $lcObj->getvars['chat_limit'];
+		}
+		if ($u->sessionvars['chat_limit']=='') {
+			$u->sessionvars['chat_limit']='last20';
+		}
+		$limit = $u->sessionvars['chat_limit'];
+		$t['chat_limit']=$limit;
+
+
+		if  (  ( ($u->username=="") || (strtolower(trim($u->username))=="anonymous"))  && ($this->_anonymousView=='N') )  { 
+			$t["table"] = "<tr><td colspan=\"2\">".$this->_noName."</td></tr>\n";
+		} else {
+
+			if ($limit=='last20') { 
+				$sql = "select * from chat where chat_id='{$this->chat_id}' order by timeint DESC limit 0,".$this->_lines;
+			}
+			if ($limit=='last20min') { 
+				$sql = "select * from chat where chat_id='{$this->chat_id}' and timeint>=".(time()-(60*20))." order by timeint DESC ";
+			}
+			if ($limit=='last5min') { 
+				$sql = "select * from chat where chat_id='{$this->chat_id}' and timeint>=".(time()-(60*5))." order by timeint DESC ";
+			}
+			$db->query($sql);
+
+			while($db->next_record()) {
+				extract($db->Record);
+				$message = stripslashes($message);
+				$nameclass = "regname$style";
+				$messclass = "regmess$style";
+				if ($showtimes) { $thistime = "<BR>".date("m/d h:i A",$timeint - (3 * 3600)).""; }	 	
+				if ($entry_type==1) { 
+					$url = $message;
+					if ($timeint>(time()-$this->_refresh)) {
+						$t['popup'] = popupLink($url,300,400);
+					}
+					$message = "<i>".popup($message,300,400)." pushed to everyone</i>";
+				}
+
+				$bgcolor = (++$foobar % 2) ? '#F0F0F0':'#E0F0E0';
+				$tr .= "<tr><td class=\"$nameclass\" bgcolor=\"$bgcolor\" valign=\"top\">$username$thistime</td><td class=\"$messclass\" bgcolor=\"$bgcolor\" valign=\"top\">$message</td></tr>\n";
+			}
+
+			$t["table"] = $tr;
+		}
+
+		$t["time"] = time();
+		$t["title"] = $this->_title;
+		if (trim($this->_isChatAvailable)!="Y") { 
+			$lcObj->templateName = "nochat";
+		}
+
+	}
+	
+	function inputRun($db,&$u,&$lcObj,&$t) {
+		if (trim($this->_isChatAvailable)=="Y") { 
+			$t["username"] = trim($u->username);
+			if ( ($t["username"]=="") || (strtolower(trim($t['username']))=='anonymous')) { 
+				$t["username"] = $u->sessionvars["chatname"];
+			}
+
+			$lcObj->templateName = "chat_input";
+			if ( in_array('chatAdm',$u->groups) || in_array('admin', $u->groups) ) { 
+				$lcObj->templateName = "admininput";
+				$lcObj->templateName = "chat_input";
+			}
+		} else {
+			$lcObj->templateName = "chat_empty";
+		}
+		$this->presentor = "emptyPresentation";
+	}
+
+	function postRun($db,&$u,&$lcObj,&$t) {	
+		$lcObj->postvars['url'] = strip_tags($lcObj->postvars['url']);
+		$lcObj->postvars['text'] = strip_tags($lcObj->postvars['text']);
+
+		$this->presentor = "emptyPresentation";
+		if (trim($lcObj->postvars['text'])=='' and trim($lcObj->postvars['url']=='') ) { $this->inputRun($db,$u,$lcObj,$t); return; }
+
+		$text = $lcObj->postvars['text'];
+		$url = $lcObj->postvars['url'];
+
+		if (trim($this->_isChatAvailable)=="Y") { 
+
+			$u->sessionvars["lastPost"] = time();
+			$username = $u->username;
+			$email = $u->email;
+			if  ( ($username=="")|| (strtolower(trim($username))=='anonymous'))  { 
+				$username = $u->sessionvars["chatname"];
+				$email = $u->sessionvars["chatemail"];
+			}
+			$message = $lcObj->postvars["text"];
+
+		// URL->link
+			$message = url2links($message);
+
+			$message = addslashes($message);
+			$username = addslashes($username);
+
+			$chatcolor = $u->profile->values["chatcolor"];
+			//if ($chatcolor=="") { $chatcolor="#000000"; }
+			if ($chatcolor=="") { $chatcolor="1"; }
+
+
+			if ($this->_queueFirst=="Y") { 
+				if ($message) { 
+				$db->query("insert into chat_queue (entry_type,chat_id,username,timedate,timeint,message) values (0,'{$this->chat_id}','$username','".date("Y-m-d H:i:s")."',".time().",'$message')");
+				}
+				if ($url) {
+				$db->query("insert into chat_queue (entry_type,chat_id,username,timedate,timeint,message) values (1,'{$this->chat_id}','$username','".date("Y-m-d H:i:s")."',".time().",'$url')");
+
+				}
+			} else {
+				if ($message) { 
+				$db->query("insert into chat (entry_type,chat_id,username,timedate,timeint,message) values (0,'{$this->chat_id}','$username','".date("Y-m-d H:i:s")."',".time().",'$message')");
+				} 
+				if ($url) { 
+				$db->query("insert into chat (entry_type,chat_id,username,timedate,timeint,message) values (1,'{$this->chat_id}','$username','".date("Y-m-d H:i:s")."',".time().",'$url')");
+
+				}
+
+			if ($url) { 
+				$t['url'] = $url;
+			}
+
+			}
+		}
+
+		$this->inputRun($db,$u,$lcObj,$t);
+	}
+
+	function adminpostRun($db,&$u,&$lcObj,&$t) {	
+		$u->sessionvars["lastPost"] = time();
+
+		$username = $u->username;
+		$message = $lcObj->postvars["text"];
+				$message = stripslashes($message);
+				$message = addslashes($message);
+				$username = addslashes($username);
+//print_r($u->profile);
+$chatstyle = $u->profile->values["chatstyle"];
+if ($chatstyle=="") { $chatstyle="2"; }
+		$db->query("insert into chat (style,color,username,timedate,timeint,message) values ('$chatstyle','$chatstyle','$username','".date("Y-m-d H:i:s")."',".time().",'$message')");
+
+		$this->inputRun($db,$u,$lcObj,$t);
+		$this->presentor = "emptyPresentation";
+	}
+
+	function viewQRun($db,&$u,&$lcObj,&$t) {
+
+			if ( in_array('chatAdm',$u->groups) || in_array('admin', $u->groups) ) { 
+
+	
+		$t["refresh"] = $u->sessionvars["refresh"];
+		if (intval($t["refresh"])==0) { $t["refresh"]=8; }
+		$this->presentor = "emptyPresentation";
+		$lcObj->templateName = "chat";
+		$t["time"] = time();
+
+
+		$sql = "select * from chatQ order by timeint ASC ";
+		$db->query($sql);
+
+		while($db->next_record()) {
+			extract($db->Record);
+			$message = stripslashes($message);
+			$post = "<a href=\"".appurl("chat/main/event=moveQ/move=1/pkey=$pkey")."\">approve</a>\n";
+			$del = "<a href=\"".appurl("chat/main/event=moveQ/pkey=$pkey")."\">del</a>\n";
+			$tr .= "<tr><td valign=\"top\">$post | $del</td><td valign=\"top\">$username</td><td valign=\"top\">$message</td></tr>\n";
+		}
+
+		$t["table"] = $tr;
+		$t["time"] = time();
+		$lcObj->templateName = "viewq";
+
+		}
+	}
+
+
+	function moveQRun($db,&$u,&$lcObj,&$t) {
+
+			if ( in_array('chatAdm',$u->groups) || in_array('admin', $u->groups) ) { 
+
+			$pkey = $lcObj->getvars["pkey"];
+			if ($lcObj->getvars["move"]==1) { 
+				$db->queryOne("select * from chatQ where pkey=$pkey");
+				extract($db->Record);
+				$message = addslashes($message);
+				$username = addslashes($username);
+				$sql ="insert into chat (style,color,username,message,timeint,timedate) values ('$style','$color','$username','$message',".time().",'".date("Y-m-d H:i:s")."')";
+				$db->query($sql);
+			}
+			$db->query("delete from chatQ where pkey=$pkey");
+
+		}
+
+		$this->viewQRun($db,$u,$lcObj,$t);
+		
+	}
+}
+function url2links($text) { 
+	$vdom = "[:alnum:]";                // Valid domain chars
+	$vurl = $vdom."_~-";                // Valid subdomain and path chars
+	$vura = $vurl."A-?a-y!#$%&*+,;=@."; // Valid additional parameters (after '?') chars;
+					// insert other local characters if needed
+	$protocol = "[[:alpha:]]{3,10}://"; // Protocol exp
+	$server = "([$vurl]+[.])+[$vdom]+"; // Server name exp
+	$path = "(([$vurl]+([.][$vurl]+)*/)|([.]{1,2}/))*"; // Document path exp (/.../)
+	$name = "[$vurl]+([.][$vurl]+)*";   // Document name exp
+	$params = "[?][$vura]*";            // Additional parameters (for GET)
+
+	return ereg_replace("($protocol)?($server(/$path($name)?)?)", "<a target=\"_NEW\" href=\"http://\\2\">\\0</a>", $text); // URL into links
+}
+function popupLink($url,$height,$width,$text='',$extras='toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizeable=1') { 
+if ($extras) { $extras.=","; }
+if (!$text) { $text = $url; }
+$j = "window.open('$url','popup','".$extras."width=$width,height=$height');";
+return $j;
+}
+
+
+?>

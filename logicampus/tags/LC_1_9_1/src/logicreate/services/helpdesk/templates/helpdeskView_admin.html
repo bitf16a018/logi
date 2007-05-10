@@ -1,0 +1,115 @@
+<?=$t['sectionheader'];?>
+
+<h3 style="margin:1px;">Ticket Information</h3>
+
+<?php
+if ($t['saveMessage'] == true ) {?>
+<div style="border:1px solid blue;float:center;text-align:center;font-size:110%;color:blue;">Your changes were saved.</div>
+<?php } ?>
+
+<form method='post' action='<?=appurl("helpdesk/helpdeskSubmit/event=categorize");?>'>
+<table cellspacing="0" cellpadding="2" width="100%" border="0">
+	<tr>
+		<td width="18%" class="row2"><B>Summary:</B></td>
+		<td><input type="text" name="summary" value="<?=stripslashes($t['hd']['summary']);?>" size="35"/>&nbsp;</td>
+		<? if ( $t['canSeeComments'] ) { ?>
+		<td rowspan="6" valign="top" width="50%">
+			<fieldset>
+			<legend>staff comments (only HD staff and admins)</legend>
+			<pre>
+<?= $t['comment']->comment;?>
+			</pre>
+			</fieldset>
+			<a href="<?=appurl('helpdesk/history/username='.$t['hd']['userid']);?>">Edit comments</a> about <?=$t['hd']['userid'];?>
+		</td>
+		<? } ?>
+
+	</tr>
+	<tr>
+		<td width="18%"><nobr><B>Categorized As:</B></nobr></td>
+		<td>
+			<select name="category_id">
+				<?= makeOptions($t['categories'],$t['hd']['category']);?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td width="18%"><nobr><B>Current Status:</B></nobr></td>
+		<td><i><?=$t['hd']['helpdesk_status_label'];?></i></td>
+	</tr>
+	<tr>
+		<td width="18%"><nobr><B>Ticket No.:</B></nobr></td>
+		<td><?=$t['hd']['helpdesk_id'];?></td>
+	</tr>
+
+	<tr>
+		<td width="18%"><nobr><B>Submitted On:</B></nobr></td>
+		<td><?=date("F jS, Y g:i A",$t['hd']['timedate_open']);?></td>
+	</tr>
+	<tr>
+		<td width="18%"><B>By:</B></td>
+		<td><?=$t['hd']['userid'];?>
+			<br/>
+			<a href="<?=appurl('helpdesk/history/username='.$t['hd']['userid']);?>">View History</a> 
+			&nbsp;&nbsp;
+			<a href="<?=appurl('administration/users/'.$t['hd']['userid'].'/event=loginAs');?>">Login As...</a>
+
+		<? if ($t['hd']['helpdesk_status_label'] == 'Closed' ) { ?>
+		<? if (in_array("hdadmin",$obj->user->groups) || in_array('admin', $obj->user->groups) || in_array('hdstaff', $obj->user->groups) ) { ?>
+		&nbsp;&nbsp;-&nbsp;&nbsp;<a href="<?=appurl('pm/main/event=compose/sendto='.$t['hd']['userid']);?>">Private Message</a>
+		<? } ?>
+		<? } ?>
+		</td>
+	</tr>	
+</table>
+
+<br/>
+
+<input type='submit' name='category_submit' value='Save Category and Summary'>
+</form>
+
+<br/>
+
+
+<h4 style="margin:1px;">Communication Log</h4>
+<table cellpadding="2" cellspacing="0" width="100%" style="border: 1px solid silver;">
+	<tr class="titlehead">
+		<td><B>Date Logged</B></td>
+		<td><B>By</B></td>
+		<td><B>Action</B></td>
+		<td><B>Details</B></td>
+	</tr>
+	<? while(list($k,$v) = each($t['log'])) { $i++; ?>
+	<tr>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" width="150" valign='top'><?=date("M j, Y g:i A",$v['timedate']);?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" width="65" valign='top'><?=$v['userid'];?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" width="100" valign='top'><?=$v['action'];?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" valign='top'><?=stripslashes(nl2br($v['comment']));?></td>
+	</tr>
+	<? } ?>
+
+</table>
+
+<h5>Submit more detailed information</h5>
+
+	<form method='post' action='<?=appurl("helpdesk/helpdeskSubmit/event=addDetail");?>'>
+	
+	<textarea name='details' rows='7' cols='60'></textarea><br><br>
+	
+	<? if ($t['techs']) { // do we have a list of techs to reassign to? ?>
+		Reassign to: <select name='reassign'><option value=''>Do not reassign</option>
+		<?=$t['techs'];?>
+		</select>
+		<br/>
+	<? } ?>
+
+	<? if ($t['hd']['status']==3) { // closed ?>
+		<input type='submit' name='button' value='Send details and reopen incident'>
+	<? } else { ?>
+		Close this incident when sending details? <input type="checkbox" name="close"/>
+		<br/>
+		<input type='submit' name='button' value='Send details'>
+	<? } ?>
+</form>
+<br>
+

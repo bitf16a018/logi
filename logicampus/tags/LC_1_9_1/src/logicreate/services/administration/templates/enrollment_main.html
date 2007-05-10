@@ -1,0 +1,18 @@
+<?=$t['sectionheader'];?>
+
+<fieldset>
+<legend>Change to different Semester</legend>
+<?=$t['form'];?>
+</fieldset>
+</br></br>
+Use the form below to add the student <i><?=$t['username'];?></i> to the 
+selected class/section. 
+<form method='post' action='<?=modurl("enrollment/event=add");?>'>
+	<input type='hidden' name='username' value='<?=$t['username'];?>'>
+	<select name="id"><?=$t['courses'];?></select>
+	<input id="submit_enrollment" type="submit" value='Add'>
+</form>
+<hr>
+Click the links below to either remove or activate/suspend <i><u><?=$t['username'];?></u></i>
+ from the particular classes.
+<?=$t['classes'];?>

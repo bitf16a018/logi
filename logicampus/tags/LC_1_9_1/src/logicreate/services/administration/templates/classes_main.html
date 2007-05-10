@@ -1,0 +1,29 @@
+<?=$t['sectionheader'];?>
+<?
+if ($t['error'])
+{ ?>
+<div style="color: red;">
+<?=$t['error'];?>
+</div>
+<? } 
+
+	if ($t['nosemester'])
+	{ ?>
+	<h2>Error</h2>
+	No semesters defined or found.  All classes are tied to a
+	semester so you must first define a semester before managing
+	classes.
+<?	} else {
+			if ($t['goodtimes'])
+			{
+				echo '<b><blockquote><font color="blue">'. $t['goodtimes']. '</font></blockquote></b>';
+			}
+?>
+
+<center>
+<?=$t['form'];?>
+</center>
+
+<?=$t['table'];?>
+
+<? } ?>

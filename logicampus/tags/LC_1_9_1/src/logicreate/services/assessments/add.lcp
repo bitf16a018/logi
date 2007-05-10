@@ -1,0 +1,164 @@
+<?
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class add extends FacultyService {
+
+
+	var $presentor = 'HTMLPresentation';
+	var $data = array();  # cleaned form data
+	var $sectionTitle = 'Class Assessments';
+	var $applinks = array (
+		'Add Assessment' => 'add'
+		);
+	var $navlinks = array(
+		'Calendar' => 'cal',
+		'Grade book' => '%gradebook'
+	);
+
+	var $inactivelinks = array (
+		'Add Assessment' => 'add'
+	);
+
+	/**
+	 * show form to insert a new assessment
+	 * take down name, description, instructions,
+	 */
+	function run($db,&$u,&$lc,&$t) {
+	
+		$lc->templateName = 'add_main';
+//auto-comment		$lc->templateStyle = 'private';
+		$f = new SiteForm();
+		$f->getform('addassessment', $this->data);
+		$t['form'] = $f->ToHTML();
+	}
+
+
+	/**
+	 * insert new assessment into the DB
+	 */
+	function insertRun($db,&$u,&$lc,&$t) {
+
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('addassessment', $lc->postvars);
+		if ($t['error'])
+		{
+			$this->data = $f->cleanedArray;
+			$this->run($db, $u, $lc, $t);
+			return;
+		}
+		$a = new Assessment();
+		$a->classId = $u->activeClassTaught->id_classes;
+		$a->displayName = $lc->postvars['displayName'];
+		$a->description = $lc->postvars['description'];
+		$a->instructions = $lc->postvars['instructions'];
+
+		$a->mailResponses = (int)($lc->postvars['mailResponses'] == 'on');
+		$a->autoPublish = (int)($lc->postvars['autoPublish'] == 'on');
+
+		if ( intval($a->classId) == 0 ) {
+			print "active class id of 0, dying...";
+			exit();
+			trigger_error('empty class id');
+			return false;
+		}
+
+		$a->save();
+
+
+		print "Adding... Essay <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionEssay();
+		$qs->questionText =  'I wrote this, it is not automated, write an essay';
+		$qs->_new = true;
+		$qs->classId = $a->classId;
+		$qs->assessmentId = $a->getPrimaryKey();
+		$qs->save();
+
+		print "\n<hr>\n";
+
+
+		print "Adding... Fill in <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionFill();
+		$qs->questionText =  'I wrote this, it is not automated, fill in all the blanks';
+		$qs->_new = true;
+		$qs->classId = $a->classId;
+		$qs->assessmentId = $a->getPrimaryKey();
+		$qs->save();
+
+		print "\n<hr>\n";
+
+
+		print "Adding... True False  <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionTrueFalse();
+		$qs->questionText =  'I wrote this, it is not automated, pick true of false';
+		$qs->_new = true;
+		$qs->classId = $a->classId;
+		$qs->assessmentId = $a->getPrimaryKey();
+		$qs->save();
+
+		print "\n<hr>\n";
+
+		print "Adding... Multiple Choice <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionChoice();
+		$qs->questionText =  'I wrote this, it is not automated, pick one from the list';
+		$qs->_new = true;
+		$qs->classId = $a->classId;
+		$qs->assessmentId = $a->getPrimaryKey();
+		$qs->save();
+
+		print "\n<hr>\n";
+
+		print "Adding... Multiple Choice (multiple answer)<br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionMChoice();
+		$qs->questionText =  'I wrote this, it is not automated, pick any from the list';
+		$qs->_new = true;
+		$qs->classId = $a->classId;
+		$qs->assessmentId = $a->getPrimaryKey();
+		$qs->save();
+
+		print "\n<hr>\n";
+
+		print "Adding... Matching <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionMatching();
+		$qs->questionText =  'I wrote this, it is not automated, match the choices with the answers';
+		$qs->_new = true;
+		$qs->classId = $a->classId;
+		$qs->assessmentId = $a->getPrimaryKey();
+		$qs->save();
+
+		print "\n<hr>\n";
+
+
+
+
+		$lc->templateName = 'add_insert';
+//auto-comment		$lc->templateStyle = 'private';
+	}
+
+
+	/**
+	 * show form for question
+	 */
+	function questionRun($db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'add_question';
+	
+	}
+
+
+
+}
+?>

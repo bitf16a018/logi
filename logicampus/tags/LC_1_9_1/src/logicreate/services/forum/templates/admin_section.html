@@ -1,0 +1,21 @@
+<h2>Forum administration</h2>
+<h3>Section management</h3>
+Section are top-level areas to help organize your forums.  You can create as many sections 
+as you need.  If no forums are available to a user in a section, the section will not display 
+to the user.
+<BR><BR>
+<a href="<?=appurl("forum/admin/event=sectionEdit/");?>">Add a new section</a>
+<BR>
+<? if (is_array($t['sections'])) { ?>
+<h3>Currently defined sections</h3>
+<? } ?>
+<?
+while(list($k,$v) = each($t['sections'])) {
+?>
+<a href="<?=appurl("forum/admin/event=sectionDelete/key=".$v->lcForumSectionId);?>">delete</a> | 
+<a href="<?=appurl("forum/admin/event=sectionEdit/key=".$v->lcForumSectionId);?>">edit</a> |  
+<?=$v->lcForumSectionName;?>
+<BR>
+<?
+}
+?>

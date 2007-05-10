@@ -1,0 +1,64 @@
+<?=$t['sectionheader'];?>
+
+<? if ( $t['q']->fileHash ) { ?>
+<div style="float:right;margin:20px;">
+<img alt="" src="<?= $t['q']->fileHash ? appurl('classroom/viewContent/fhash=').$t['q']->fileHash : IMAGES_URL.'spacer.gif'; ?>" id="previewfile">
+</div>
+<? } ?>
+		
+
+<p>Below is the matching question you just created, displayed exactly how it will be shown to your students.</p>
+
+<p><b>Instructions</b><br /><?=$t['q']->questionText;?></p>
+
+<?
+
+$count = count($t['randomAnswers']);
+$left = $right = array();
+
+for ($i=0; $i<$count; $i++)
+{
+		$array[$i] = chr($i+65) ;
+	
+}
+reset($t['randomAnswers']);
+
+while(list ($key, $question) = @each($t['questions']))
+{
+	++$n;
+	$left[] = '
+		<select name="foo">'.makeOptions($array).'
+		</select>&nbsp;&nbsp;
+		
+		'.$n.'. '.$question;
+}
+
+while(list($void, $answerArray) = @each($t['randomAnswers']))
+{ 
+	++$x;
+	while(list($answerKey, $answer) = @each($answerArray) )
+	{
+		$right[] = chr($x+64).'. '.$answer;
+	}
+}
+
+?>
+
+<form action="" method="post">
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td><b>Questions</b></td>
+	<td width=30>&nbsp;</td>
+	<td><b>Answers</b></td>
+</tr>
+<?
+$cnt = count($right);
+for ( $f=0; $f<$cnt; $f++ ) {
+	print '<tr><td>'.$left[$f].'</td><td>&nbsp;</td><td>'.$right[$f].'</td></tr>';
+}
+?>
+<tr>
+	<td colspan=3><a href="<?=modurl('main/event=view/id='.$t['id']);?>">&lt;-- Back to questions</a></td>
+</tr>
+</table>
+</form>

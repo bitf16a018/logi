@@ -1,0 +1,46 @@
+<?=$t['sectionheader'];?>
+
+<span style="color:red;">
+<?php if (count($t['error'])>0) 
+{
+foreach ($t['error'] as $num=>$k){
+?><?=$k;?><BR><?php }
+}	?>
+</span>
+
+<table width="95%" border="0" cellspacing="3" cellpadding="4">
+	<form method="POST" enctype="application/x-www-form-urlencoded" action="<?=appurl('classmgr/teacherclass/event=saveClass');?>">
+	<tr><th colspan="2" valign="top" class="">Complete the following fields to add a course to the site.</th></tr>
+	<tr><td valign="top" width="33%" class="">*Course Name<br/><i>Example:  Introduction to American Literature</i></td>
+		<td valign="top" class="">
+			<input type"text" name="coursename" size="65">
+		</td></tr>
+		<tr><td valign="top" class="">*Course Family Abbreviation<br/><i>Example:  ENGL</i></td>
+		<td valign="top" class=""><input type"text" name="coursefamily" size="12"></td></tr>
+	<tr><td valign="top" class="">*Course Number<br/><i>Example:  101</i></td>
+                <td valign="top" class=""><input type"text" name="coursenumber" size="12"></td></tr>
+
+	<tr><td valign="top" class="" valign="top">*Class Description</td>
+		<td valign="top" class="">
+			<table cellpadding="0" cellspacing="0" border="0">
+				<tr><td><textarea name="discription" cols="60" rows="5" id="discription"></textarea></td></tr>
+			</table>
+	</td></tr>
+
+	<tr><td valign="top" class="">Section Numbers<br/><i>place one section per line</i></td>
+		<td valign="top" class=""><textarea name="sectionnumbers" cols="15" rows="5" id="discription"></textarea></td></tr>
+	<tr><td valign="top" class="">*Set Start and End Date</td>
+		<td valign="top" class=""><strong>Start:</strong><br/>
+			<?php
+			echo dateDropDown($t['startDateValue'],$t['startDateName']);
+			?>
+			<br/>
+			<strong>End:</strong><br/>
+			<?php
+			echo dateDropDown($t['endDateValue'],$t['endDateName']);
+			?>
+			</td></tr>
+		<tr><td valign="top" class=""></td>
+		<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Add Class"></td></tr>
+</form></table><div style="font-size: 85%">*denotes a required field</div>
+
