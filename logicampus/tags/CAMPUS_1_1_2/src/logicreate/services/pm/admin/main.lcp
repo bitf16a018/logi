@@ -1,0 +1,39 @@
+<?
+include_once(LIB_PATH."LC_sql.php");
+include_once(INSTALLED_SERVICE_PATH."pm/privmess.php");
+
+class pm extends HercAuth {
+
+	var $presentor = "adminPresentation";
+
+	function run( &$db, &$u, &$arg, &$t) {
+			$arg->templateName = "main";
+			$g = new lcGroup;
+                	 $g->getList();
+                	 $t["groups"] = $g->optionList;
+                	 $t["notgroups"] = $g->optionList;
+	}
+
+	function submitRun( &$db, &$u, &$arg, &$t) {
+		$with = createGroupCheck($arg->postvars['groups']);
+		$without = createGroupCheck($arg->postvars['notgroups']);
+		$db->query("select username from lcUsers where  ( ($with) and not ($without) )");
+		while($db->next_record()) {
+	                $mess = new privMess();
+	                $mess->subject = $arg->postvars['subject'];
+	               if (!trim($mess->subject)) { $mess->subject = "No subject"; }
+	              $mess->message = $arg->postvars['message'];
+		          $mess->sentTime = time();
+	                 $mess->messageFrom =  "SYSTEM ADMIN";
+	               $mess->messageTo = $db->Record[0];
+                      $mess->add();
+		}
+             $t['message'] = "Message sent";
+                            $this->run($db,$u,$arg,$t);
+           } 
+
+
+
+}
+
+?>

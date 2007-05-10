@@ -1,0 +1,326 @@
+<?php
+
+include_once(LIB_PATH."datagrid.php");
+include_once(LIB_PATH.'eventsObj.php');
+
+class cal extends RegAuth 
+{
+
+	var $presentor = "htmlPresentation";
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+	var $applinks = array(
+		'Week view' => 'week',
+		'Month view' => '',
+		'Year view' => 'year',
+		'View schedule' => 'cal/event=schedule',
+		'Schedule event' => 'cal/event=editschedule'
+	);
+	
+	var $sectionTitle = 'Master Calendar';
+	var $navlinks = array(
+		'Master Calendar' => ''
+	);
+
+	var $inactivelinks = array( 'View schedule' ); // not needed
+
+	var $fl_has_access = false;
+	
+	
+	function cal()
+	{	
+		global $lcUser;
+	
+		if (in_array('dlstaff', $lcUser->groups))
+		{	$this->fl_has_access = true;
+		} else
+		{	$this->fl_has_access = false;
+		}
+
+	}
+	
+
+	function insertRun($db,&$u,&$lc,&$t) {
+		if ($this->fl_has_access == false)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to add to the schedule.";
+			return;
+		}
+		$j = new edit();
+		$lc->getvars['key'] = $lc->getvars['pkey'];
+		$lc->postvars['key'] = $lc->postvars['pkey'];
+		
+		$j->insertrun($db,$u,$lc, $t);
+		$this->schedulerun($db,$u,$lc,$t);
+	}
+	
+	
+	function delScheduleRun($db,&$u,&$lc,&$t) {
+		
+		if ($this->fl_has_access == false)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to delete the schedule.";
+			return;
+		}
+		persistantObject::_delete("lcEvents", $lc->getvars['pkey']);
+		$this->scheduleRun($db,$u,$lc,$t);
+	}
+	
+	
+	function editScheduleRun($db,&$u,&$lc,&$t) {
+		
+		if ($this->fl_has_access == false)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to edit the schedule.";
+			return;
+		}
+		
+		$lc->templateStyle = 'private';
+		
+		$this->inactivelinks = array( 'Schedule event' );
+		$t['obj'] =&$lc;
+		$t['obj']->user =&$u;
+		$lc->templateName = 'cal_edit';
+		if ($lc->getvars['pkey']=='') { 
+//			return;
+		}
+		$j = new edit();
+		$lc->getvars['key'] = $lc->getvars['pkey'];
+		$j->run($db,$u,$lc, $t);
+	}
+	
+	
+	
+	function delRun($db,&$u,&$lc,&$t) {
+		
+		if ($this->fl_has_access == false)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to delete.";
+			return;
+		}
+		persistantObject::_delete("_activities", $lc->getvars['pkey']);
+		$this->activityRun($db,$u,$lc,$t);
+	}
+
+	
+	function scheduleRun($db,&$u,&$lc,&$t) {
+		
+		if ($this->fl_has_access == false)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to schedule.";
+			return;
+		}
+		
+		$lc->templateStyle = 'private';
+		
+		$this->inactivelinks = array( 'View scheduled events' );
+		$x = new datagrid('classmgr', 'cal');
+		$x->extra_url = '/event=schedule';	
+		$x->table = "lcEvents";
+		$x->showHeader =true;
+		$x->showNavLinks = false;
+		$x->where = 'groups LIKE \'|dlstaff|\' AND username=\''.$u->username.'\'';
+		$x->headers = array("title"=>"Event", "description"=>"Description", "dates"=>"Date", "times"=>"Time","className"=>"Class", "activityName"=>"Class", "edit"=>" ", "delete"=>' ', 'repeats'=>"Repeating");
+		$x->ignore = array('id_item_sub', "startdate","enddate", 'calendarType', "location", "lastmodified", "pkey","id_classes", "id_item", "f_allday", "f_showwhenactive", "activityDescription", "calendarID", "username","class", "repeatType","repeatData", "repeatExclude","repeatUntil", "repeatCount", "groups","notgroups");
+		$x->prependColumn('<a href="<?=modurl("cal/event=editSchedule/pkey=$pkey");?>">edit</a>','edit');
+		$x->prependColumn('<a onclick="if(confirm(\'Are you sure you want to remove this scheduled item?\')) { return true; } else { return false; }" href="<?=modurl("cal/event=delSchedule/pkey=$pkey");?>">del</a>','delete');
+		$x->postpendColumn('<?=date("m/d/Y", $startdate); if ($repeatType>0) { echo " thru<BR>"; if ($repeatUntil==-1) { echo "forever";} if ($repeatUntil>0) { echo date("m/d/Y",$repeatUntil);} } ?>','dates');
+		$x->postpendColumn('<?=date("h:i A", $startdate);?> thru<BR><?=date("h:i A", $enddate);?>','times');
+		$j .= "if (\$repeatType=='1') { echo 'Repeat every '. \$repeatCount.' day(s)'; }\n";
+		$j .= "if (\$repeatType=='2') { echo 'Repeat on ';\n";
+		$j .= "if (\$repeatData & 1) { echo 'Su '; } \n";
+		$j .= "if (\$repeatData & 2) { echo 'Mo '; } \n";
+		$j .= "if (\$repeatData & 4) { echo 'Tu '; } \n";
+		$j .= "if (\$repeatData & 8) { echo 'We '; } \n";
+		$j .= "if (\$repeatData &  16) { echo 'Th '; } \n";
+		$j .= "if (\$repeatData & 32) { echo 'Fr '; } \n";
+		$j .= "if (\$repeatData & 64) { echo 'Sa '; } \n";
+		$j .= "}   ";
+
+		$x->postpendColumn("<?$j;?>",'repeats');
+		
+		$t['activitylist'] = $x->toHTML();
+		
+		$lc->templateName = "cal_scheduling";
+	}
+
+
+}
+
+
+// I think i'll port this into the eventsObj
+
+class edit {
+
+	var $presentor = "htmlPresentation";
+
+	function Run($db,&$u,&$arg,&$t) {
+//echo date("m/d/Y",strtotime("last thursday", strtotime("6/1/2003")));
+//echo date("m/d/Y",strtotime("this month", strtotime("6/4/2003")));
+		$key = intval($arg->getvars['key']);
+		$event = edate::_load($key);
+		$username = $u->username;
+		$u->sessionvars['editingCalendarKey'] = '';
+		if ($key) {
+			// store the key we're trying to edit
+			// so we can check in the next event that
+			// they match ( no editing of the key at the client side!)
+			$u->sessionvars['editingCalendarKey'] = $key;
+			// NO CHECKING
+			/*
+			if ( ($username!=$event->username) && 
+				!(in_array("adm_evt",$u->groups) || in_array('admin', $->groups) )
+			) {
+				lcSystem::systemPreTemplate($obj,$t);
+				$this->throwError("You do not have permission to edit this event");
+				exit();
+			}
+			*/
+		}
+		$t['event'] = $event;
+		# build month, day, year drop downs
+		$t['startDate'] = dateDropDown((int)$event->startdate,'startDate');
+		$t['endDate'] = dateDropDown((int)$event->enddate, 'endDate');
+		$t['untilDate'] = dateDropDown((int)$event->repeatUntil, 'repeatUntil');
+
+		# Make time options
+		for ($x=0; $x<=23; $x++)
+		 	{
+					$t['hour'][] = date("g a", mktime($x, 0, 0, 1, 1, 0));
+		 	}
+
+	}
+
+	function insertRun($db,&$u,&$arg,&$t) {
+
+	    $t['problemfound'] = false;
+	
+		extract($arg->postvars);
+		// assume the user can access this
+		$canAccess = true;
+		// did we get a pkey?
+		if ($pkey!='') {
+			$event->pkey = $pkey;
+			if ($pkey!=$u->sessionvars['editingCalendarKey']) {
+			// if we had a pkey submitted, we're editing
+			// if we're editing, and the pkey doesn't match
+			// the requested pkey from the previous event,
+			// show a different template
+			// and change our access for the rest of this event
+				$arg->templateName = 'noaccess';
+				$canAccess= false;
+				return;
+			}
+		}
+
+// get repeat data from submitted data
+
+		$postdata = $arg->postvars;
+		$repeatType = $postdata['repeatType'];
+		$repeatCount = $postdata['repeatCount'];
+		
+		if ($repeatType==1) {
+			$repeatCount = $postdata['repeatCount1'];
+			if ($repeatCount <= 0 || trim($repeatCount) == '')
+			{	$repeatCount = 1;
+			}
+		}
+		
+		if ($repeatType == 2) {
+			while(list($k,$v) = @each($postdata['repeatday2'])) {
+				$repeatData += $k;
+			}
+			$repeatCount = $postdata['repeatCount2'];
+//			echo "data = $repeatData<BR>"; exit();
+		}
+		if ($repeatType==4) {
+			$repeatCount = $postdata['repeatCount4'];
+		}
+		if ($repeatType==6) {
+			$repeatCount = $postdata['repeatCount6'];
+		}
+		if ($repeatType==7) {
+			$repeatData = $postdata['repeatWhen'].'|'.$postdata['repeatDay'];
+			$repeatCount = $postdata['repeatCount7'];
+		}
+//		echo "<pre>"; print_r($postdata);
+// echo "d=$repeatData c=$repeatCount<BR>"; exit();
+// get start/end/repeat info
+
+		$repeatUntil = strtotime($postdata['repeatUntil']['month']."/".$postdata['repeatUntil']['day']."/". $postdata['repeatUntil']['year']);
+		$startDate = strtotime($postdata['startDate']['month']."/".$postdata['startDate']['day']."/". $postdata['startDate']['year']." ".$postdata['start']['hour'].":".$postdata['start']['minute']);
+		$endDate = strtotime($postdata['startDate']['month']."/".$postdata['startDate']['day']."/". $postdata['startDate']['year']." ".$postdata['start']['endhour'].":".$postdata['start']['endminute']);
+
+        if ($repeatForever==-1) { $repeatUntil=-1; }
+
+		$t['startDate'] = dateDropDown((int)$event->startdate,'startDate');
+		$t['endDate'] = dateDropDown((int)$event->enddate, 'endDate');
+		$t['untilDate'] = dateDropDown((int)$event->repeatUntil, 'repeatUntil');
+
+		$event = new edate();
+		$event->startdate = $startDate;
+		$event->enddate = $endDate;
+		$event->repeatUntil = $repeatUntil;
+		$event->repeatData = $repeatData;
+		$event->repeatType = $repeatType;
+		$event->repeatCount = $repeatCount;
+		$event->title = $postdata['title'];
+		$event->description  = $postdata['description'];
+		$event->username = $u->username;
+		$event->location = $postdata['location'];
+		//$event->groups = $postdata['groups'];
+		$event->repeatExclude = str_replace("\n","|",$postdata['repeatExclude']);
+		$event->calendarType = 'dlstaffscheduling';
+		
+		$t['event'] = $event;
+//		echo "<pre>"; print_r($event); exit();
+//$this->presentor = 'debug';
+//return;
+
+		$event->username = $u->username;
+		//$event->groups = "|".@implode("|", $groups)."|";
+		$event->groups = "|dlstaff|"; // doesn't really matter becuase we're applying a class id to it.. 
+		
+		$event->id_classes = 0;
+		
+		if (strlen($event->description) > 750)
+		{
+			$t['event'] = $event;
+			$t['problemfound'] = 'Your event description has more than 750 characters, <br>please limit your description to 750 or less characters.';
+			$arg->templateName = 'edit';
+
+			$t['startDate'] = dateDropDown((int)$event->startdate,'startDate');
+			$t['endDate'] = dateDropDown((int)$event->enddate, 'endDate');
+			$t['untilDate'] = dateDropDown((int)$event->repeatUntil, 'repeatUntil');
+
+
+   # Make time options
+			for ($x=0; $x<=23; $x++)
+			{
+				$t['hour'][] = date("g a", mktime($x, 0, 0, 1, 1, 0));
+			}
+
+		} else {
+			if ($button=='Delete') {
+				$event->_delete($pkey);
+			} else {
+				
+				// Seed event with a pkey becuase we're editing
+				if ($pkey)
+				{	$event->pkey = $pkey;
+				}
+				
+				$event->update();
+				
+		}
+
+		$startdate = $event->startdate;
+		
+
+		}
+
+	}
+	
+}
+?>

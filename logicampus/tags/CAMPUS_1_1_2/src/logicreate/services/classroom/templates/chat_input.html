@@ -1,0 +1,93 @@
+<html>
+<head>
+<style>
+
+TD {
+    color: #000000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.admin {
+    color: #FF0000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+
+
+</style>
+<script language="javascript">
+	function doSubmit() {
+
+		curtime = new Date();
+		var timestring = curtime.getHours()+":"+curtime.getMinutes();
+		var hours = curtime.getHours();
+		var minutes = curtime.getMinutes();
+		if (hours>12) { 
+			hours = hours-12;
+			var ampm = " PM";
+			} else {
+			var ampm = " AM";
+		}
+		if (minutes<10) { minutes = "0"+minutes; }
+		var timestring = hours+":"+minutes+ampm;
+
+
+		var y = "<?=$t['postformat'];?>";
+		var reg = /_NAME_/ ;
+		var temp = y.replace(reg, "<?=$obj->user->username;?>");
+		var reg = /_MESSAGE_/ ;
+		var temp2 = temp.replace(reg, document.forms[0].text.value);
+		var reg = /_DATE_/ ;
+		var x= temp2.replace(reg, timestring);
+
+/*
+
+		parent.Controls.document.writeln(document.forms[0].elements[0].value);
+*/
+		if (document.forms[0].text.value!='') {
+			<? if ($t['immediatePost']) { ?>
+			parent.Controls.document.writeln(x);
+			parent.Controls.window.scroll(0,50000000);
+			<? } ?>
+			var postform = 1;
+		}
+
+		if (document.forms[0].url.value!='') {
+			var postform = 1;
+		}
+		if (postform==1) { 
+			document.forms[0].submit();
+		}
+
+	}
+</script>
+</head>
+<body bgcolor="silver" onload="document.forms[0].text.focus();">
+
+<form method="post" action="<?=appurl("{$obj->moduleName}/chat/event=post");?>">
+<table>
+<tr><td colspan="2">
+<?=$t["message"];?>
+</td></tr>
+<tr><td colspan="1">
+Your message? 
+</td><td>
+<input type='text' name='text' size='45'>
+<input type="submit" onClick="doSubmit();" value="Post"> 
+</td></tr>
+
+<? if ($t['allowURL']) { ?>
+	<tr><td colspan="1">
+	URL to post 
+	</td><td>
+	<input type='text' name='url' size='45'>
+	<input type="submit" onClick="doSubmit();" value="Post"> 
+	</td></tr>
+<? } ?>
+
+	</table>
+</form>
+</td></tr></table>
+<a onclick="parent.window.close();" href="javascript:parent.window.close()">Close my chat window</a> | <a href="<?=$_SERVER['HTTP_HOST'];?>/noclick.reg">Turn off IE click</a>
+</body>
+</html>

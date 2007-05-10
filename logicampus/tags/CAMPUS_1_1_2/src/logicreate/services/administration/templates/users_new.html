@@ -1,0 +1,57 @@
+<?=$t['sectionheader'];?>
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+<?
+if ($t['error'] == '') { ?>
+Fill in the following fields below to create a user account in the
+system.  Once the account is created you can assign the different
+permissions (or groups) the user belongs to.  If you wish to create an
+email account for this user (if they are a student, faculty or
+administrator) select the "create email account" option below.
+<? } else { ?> 
+	<span style="color: red;"><?=$t['error'];?></span><? } ?>
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+
+	<form method="POST">
+	
+
+	<table border="0" width="100%"><tr>
+	<td width="50%" class="white" valign="top">
+	<?=$t['form']?>
+<!--		<center><h3>Required Fields:</h3></center> <p>
+
+		Username:<br> <input type="text" name="required[username]">
+		<p>
+		Password:<br> <input type="password" name="required[password]">
+		<p>
+		Re-type:<br> <input type="password" name="required[password2]">
+		<p>
+		Email address:<br> <input type="text" name="required[email]">
+		<p>
+		<input type="checkbox" name="sendemail"> Check to notify this user of their new account by email.
+		<p>
+		<input type="submit" value="Add user">
+-->
+	</td>
+	
+	<!--<td width="50%" class="white" valign="top">
+		<center><h3>Optional Fields:</h3></center> <p>
+
+		<? foreach ($t[profile] as $k=>$v ) { ?>
+		<?= $v;?>:<br> <input type="text" name="profile[<?= $v; ?>]">
+		<p>
+		<? } ?>
+
+	</td>
+	
+	--></tr></table>
+	</td></tr>
+</table>
+
+	</form>
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
