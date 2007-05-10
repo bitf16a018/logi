@@ -1,0 +1,100 @@
+<?=$t['sectionheader'];?>
+	
+<?
+	$choices = $t['q']->questionChoices;
+	$randomAnswers = $choices['randomAnswers'];
+	unset($choices['randomAnswers']);
+
+?>
+<?
+
+# unserialize answers
+$answers = unserialize($t['answer']->assessmentAnswerValues);
+//debug($t['q'],1);
+
+$numAnswers = count($randomAnswers);
+$left = $right = array();
+
+$z = 0;
+for ($i=0; $i<$numAnswers; $i++)
+{
+		$val = array_keys($randomAnswers[$i]);
+		if ($val['randomAnswers']) continue;
+		$key = $val[0];
+		$ans = $randomAnswers[$i][$key];
+		$arrayHash[$ans] = chr($z+65) ;
+		++$z;
+
+}
+$z = 0;
+reset($randomAnswers);
+
+$count = count($choices);
+for ($i=0; $i<$count; $i++)
+{
+	$x = '<select name="answer['.$i.']">';
+	$x .= makeOptions($arrayHash, $answers[$i]);
+	$x .= '</select>&nbsp;&nbsp;';
+	$x .= $i+1;
+	$x .= '. '.$choices[$i]->label;
+	$left[]  = $x;
+}
+
+
+
+while(list($answer, $letter) = @each($arrayHash))
+{ 
+	++$z;
+	$right[] = chr($z+64).'. '.$answer;
+}
+?>
+
+<FIELDSET>
+<LEGEND><b>Remaining Time</b></LEGEND>
+<b>Minutes Remaining</b>: <?=$t['minutes_remaining'];?> &nbsp; <b>Start Time</b>: <?=$t['starttime']?> &nbsp;
+<b>Test Time Limit</b>: <?=$t['minute_limit']?> minutes
+</FIELDSET>
+<br>
+
+<p><b>Instructions</b><br /><?=$t['q']->questionText;?></p>
+
+
+<form action="<?=APP_URL?>classroom/question/qid=<?=$t['q']->assessmentQuestionId?>" method="post">
+<center>
+<? if ( $t['q']->fileHash ) { ?>
+<img alt="" src="<?= $t['q']->fileHash ? appurl('classroom/viewContent/fhash=').$t['q']->fileHash : IMAGES_URL.'spacer.gif'; ?>" id="previewfile" align="center">
+<? } ?>
+	
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td><b>Questions</b></td>
+	<td width=30>&nbsp;</td>
+	<td><b>Answers</b></td>
+</tr>
+<?
+$cnt = count($right);
+for ( $f=0; $f<$cnt; $f++ ) {
+	print '<tr><td>'.$left[$f].'</td><td>&nbsp;</td><td>'.$right[$f].'</td></tr>';
+}
+?>
+
+</table>
+</center>
+
+<br><br>
+	<table border="0" width="100%">
+		<tr>
+			<td valign="top">
+				<input type="submit" name="prev" value="&lt;-Save and Go back">
+			</td>
+			<td valign="top" align="center">
+				<input type="submit" name="start" value="View All Questions">
+			</td>
+			<td valign="top" align="right">
+				<input type="submit" name="next" value="Save and Continue-&gt;">
+				<input type="hidden" name="assessmentAnswerId" value="<?=$t['answer']->assessmentAnswerId?>">
+				</form>
+			</td>
+		</tr>
+	</table>
+

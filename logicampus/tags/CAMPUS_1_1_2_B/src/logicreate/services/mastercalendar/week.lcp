@@ -1,0 +1,113 @@
+<?php
+
+
+include_once(LIB_PATH."eventsObj.php");
+ 
+
+class week extends BasicAuth   
+{
+	
+	var $presentor = 'htmlPresentation';
+		
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+
+	function Run($db,&$u,&$lc,&$t) 
+	{
+		$lc->templateStyle = 'private';
+		
+		$lc->templateName = 'week_main';
+		
+		$mut = (is_numeric($lc->getvars['m'])) ? 
+					$lc->getvars['m'] : date('m');
+		$yut = (is_numeric($lc->getvars['y'])) ? 
+					$lc->getvars['y'] : date('Y');
+		$dut = (is_numeric($lc->getvars['d'])) ? 
+					$lc->getvars['d'] : date('d');
+		
+		$ut = strtotime("$mut/$dut/$yut");	// MAIN DATEKEEPER
+
+		$week_start_position = strtotime("-".(date('w', $ut))." day",$ut); // EPOCH date Sunday
+		
+		// filters apply from month view
+		$op_taken  = array();
+		$op_taught = array();
+		
+		if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
+		{	if ($u->sessionvars['mastercalendar']['overallviews'] == 'vtaken')
+			{
+				foreach($u->classesTaken as $v)
+				{	$op_taken[] = trim($v->id_classes);
+				}
+				$op_taken = array_unique($op_taken);
+			}
+		}
+		
+		if (isset($u->classesTaught) && is_array($u->classesTaught) && count($u->classesTaught) > 0)
+		{	if ($u->sessionvars['mastercalendar']['overallviews'] == 'vteach')
+			{
+				foreach($u->classesTaught as $v)
+				{	$op_taught[] = trim($v->id_classes);
+				}
+				$op_taught = array_unique($op_taught);
+			}
+		}
+		// end filterage
+				
+		// scheduling cali object to load up with begining of weeks events to end of weeks events
+		$c = new cali($week_start_position,
+					  (strtotime("+1 week",$week_start_position)-1), '', 
+					  array_merge($op_taught, $op_taken), 
+					  array_unique($u->groups));
+
+		// setting flags
+		$c->showTitle = false;
+		$c->showTimes = false;
+		$c->showEventCount = true;
+		
+		// setting urls to be rendered
+		$c->monthReviewURL = modurl();
+		$c->eventDayURL = modurl('day');
+		$c->eventCountURL = modurl('day');
+		
+		// oh it's time to render this baby!
+		$t['calendar'] = $c->renderWeekView();
+		
+		// creating template labels
+		$t['TX_year'] = date('Y', $ut);
+		// potential problems. when a year turns
+		$t['TX_weeknumber'] = (date('w', $ut) > 0) ? date('W', $ut) : (date('W', $ut)+1);
+				
+		// checking for the insertion of previous and next year dates
+		if (date('Y', (strtotime("+1 week",$week_start_position)-1)) <> date('Y', $week_start_position))
+		{	$t['TX_day_start_to_end'] = date('F jS Y', $week_start_position). ' - ';
+		} else
+		{	$t['TX_day_start_to_end'] = date('F jS', $week_start_position). ' - ';
+		}
+		
+		// check for month change
+		if (date('j', (strtotime("+1 week",$week_start_position)-1)) < date('j', $week_start_position))
+		{	
+			// check for year change
+			if (date('Y', (strtotime("+1 week",$week_start_position)-1)) <> date('Y', $week_start_position))
+			{	$t['TX_day_start_to_end'] .= date('F jS Y', (strtotime("+1 week",$week_start_position)-1));
+			} else
+			{	$t['TX_day_start_to_end'] .= date('F jS', (strtotime("+1 week",$week_start_position)-1));
+			}
+			
+		} else
+		{	$t['TX_day_start_to_end'] .= date('jS', (strtotime("+1 week",$week_start_position)-1));
+		}
+		
+		// creating next / prev links
+		$t['LINK_next'] = '<a href="'.modurl('week/'.date('\d=d/\m=m/\y=y', strtotime("+1 week", $week_start_position))).'">Next week <img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('week/'.date('\d=d/\m=m/\y=y', strtotime("-1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"> Previous week</a>';
+	
+	
+	}
+	
+
+}
+
+?>

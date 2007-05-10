@@ -1,0 +1,111 @@
+<h2>My addressbook</h2>
+
+<h3>Add or edit an addressbook entry</h3>
+<form method="post" action="<?=appurl("address//event=edit");?>">
+<input type="hidden" name="event" value="update">
+<input type="hidden" name="addressname" value="<?=$t["abook"]["addressname"];?>">
+
+<?=$t["message"];?>
+
+<table width="100%" border="1" cellpadding="0" cellspacing="0">
+<tr><td>
+
+<table width="100%" border="0" cellpadding="4" cellspacing="0">
+<tr>
+	<td width="240" class="row1">
+		Address Name<BR>
+<font size="-2">Give this address entry a unique name <BR> something like "Bill's office" or "Mom's house"</font>
+	</td>
+	<td valign="top" class="row1">
+		<input type="text" name="address[addressname]" value="<?=$t["abook"]["addressname"];?>">
+	</td>
+</tr>
+
+<tr>
+	<td class="row2">
+		Recipient name<BR>"Bill", "Mom", etc.
+	</td>
+	<td valign="top" class="row2">
+		<input type="text" name="address[sendtoname]" value="<?=$t["abook"]["sendtoname"];?>">
+	</td>
+</tr>
+
+<tr>
+	<td class="row1">
+		Address<BR>
+	</td>
+	<td valign="top" class="row1">
+		<textarea name="address[address1]" cols="25" rows="5" wrap="virtual"><?=$t["abook"]["address1"];?></textarea>
+	</td>
+</tr>
+
+<tr>
+	<td class="row2">
+		City
+	</td>
+	<td valign="top" class="row2">
+		<input type="text" name="address[city]" value="<?=$t["abook"]["city"];?>">
+	</td>
+</tr>
+
+<tr>
+	<td class="row1">
+		State/Province
+	</td>
+	<td valign="top" class="row1">
+		<select name="address[state]"><option value="">State/province
+		<?=$t["abook"]["state"];?>
+<option value="">other
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="row2">
+		State/Province
+		<BR>If not US/Canada
+	</td>
+	<td valign="top" class="row2">
+		<input type="text" name="address[stateother]" value="<?=$t["abook"]["stateother"];?>">
+	</td>
+</tr>
+
+<tr>
+	<td class="row1">
+		ZIP/Postal code
+	</td>
+	<td valign="top" class="row1">
+		<input type="text" name="address[zip]" value="<?=$t["abook"]["zip"];?>">
+	</td>
+</tr>
+<tr>
+	<td class="row2">
+		Country
+	</td>
+	<td valign="top" class="row2">
+		<select name="address[country]"><?=$t["abook"]["country"];?></select>
+	</td>
+</tr>
+<tr>
+	<td class="row1">
+		Phone
+	</td>
+	<td valign="top" class="row1">
+		<input type="text" name="address[phone]" value="<?=$t["abook"]["phone"];?>">
+	</td>
+</tr>
+<tr>
+	<td class="row2">
+		Fax
+	</td>
+	<td valign="top" class="row2">
+		<input type="text" name="address[fax]" value="<?=$t["abook"]["fax"];?>">
+	</td>
+</tr>
+
+
+</table>
+</td></tr></table>
+<BR>
+<input type="submit" value="Add/update this address entry">
+</form>
+

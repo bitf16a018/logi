@@ -1,0 +1,47 @@
+<?
+class HTMLSearchTool extends searchTool {
+
+	function HTMLSearchTool() {
+		$this->moduleName =  'HTML';
+		$this->tableName  =  'lcHtml';
+		$this->keyName    =  'pkey';
+		$this->mid        =  'html';
+		$this->filename   =  'HTML';
+		$this->getCountSQL = 'Select count(pkey)  from lcHtml';
+	}
+
+	function initQuery() {
+		$this->db = DB::getHandle();
+		$this->db->query('select * from '.$this->tableName);
+	}
+
+	function nextItem() {
+		$tmp = new SearchEntry();
+		if (!$this->db->next_record() ) {
+			return false;
+		}
+		while ( !$f) {
+			@$f = fopen (CONTENT_PATH.$this->db->Record[filename],'r');
+		if ( ! $f ) { $this->db->next_record(); }
+		}
+
+		$tmp->searchdata = fread($f,filesize(CONTENT_PATH.$this->db->Record['filename']));
+		
+        $tmp->searchdata = eregi_replace("<image([^>]+)>", '', $tmp->searchdata);
+        $tmp->searchdata = strip_tags($tmp->searchdata);
+		fclose($f);
+
+		$tmp->searchdata .= ' ' .$this->db->Record[title];
+		$tmp->searchdata = searchTool::stripNoiseWords($tmp->searchdata);
+
+		$tmp->title = $this->db->Record[title];
+		$tmp->type = 'HTML';
+		$tmp->link = 'html/main/'.$this->db->Record[filename];
+		$tmp->modID = $this->mid;
+		$tmp->mkey = $this->db->Record[pkey];
+		$tmp->groups = $this->db->Record[groups];
+		$tmp->notgroups = $this->db->Record[notgroups];
+		return $tmp;
+	}
+}
+?>

@@ -1,0 +1,50 @@
+<?php
+	// need to show a date drop down
+	// 		FROM A to B date dropdown (w/ time)
+	// use submit
+	
+	// outputs a plain text view (popup screen) of the chat (transcript)
+	echo $t['sectionheader'];
+	for ($i=1;$i<=12;++$i) $harray[$i] = $i;
+	echo $t['error'];
+?>
+Select the date and time you wish to receive a transcript for:<br><br>
+<form method="POST">
+<blockquote>
+<?php
+	echo $t['date'];
+	
+?>
+	<blockquote>FROM: 
+
+					<SELECT name="from[hour]">
+					<?=makeOptions($harray);?>
+					</SELECT>
+					:
+					<SELECT name="from[minute]">
+					<?=$minarray = array("0"=>"00","15"=>"15","30"=>"30","45"=>"45");?>
+					<?=makeOptions($minarray);?>
+					</SELECT>
+					<SELECT name="from[ampm]">
+					<?=$ampmarray = array("AM"=>"AM","PM"=>"PM");?>
+					<?=makeOptions($ampmarray);?>
+					</SELECT>
+	</blockquote>
+	<blockquote>TO: &nbsp;&nbsp;&nbsp;
+					<SELECT name="to[hour]">
+					<?=makeOptions($harray);?>
+					</SELECT>
+					:
+					<SELECT name="to[minute]">
+					<?=$minarray = array("0"=>"00","15"=>"15","30"=>"30","45"=>"45");?>
+					<?=makeOptions($minarray);?>
+					</SELECT>
+					<SELECT name="to[ampm]">
+					<?=$ampmarray = array("AM"=>"AM","PM"=>"PM");?>
+					<?=makeOptions($ampmarray);?>
+					</SELECT>
+	
+	</blockquote>					
+	<input type="submit" value="Get Transcript" name="submit">
+</blockquote>
+</form>

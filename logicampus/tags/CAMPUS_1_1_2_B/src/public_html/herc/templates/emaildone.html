@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+
+
+	<LINK REL="Stylesheet" HREF="<?= BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+
+		Broadcast email
+
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+
+
+Emailing to:
+<BR>
+<?=$t["emails"];?>
+<HR>
+Started <?=$t["start"];?><BR>
+Ended <?=$t["end"];?><BR>
+
+      </td></tr>
+</table>
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
+</body>
+</html>

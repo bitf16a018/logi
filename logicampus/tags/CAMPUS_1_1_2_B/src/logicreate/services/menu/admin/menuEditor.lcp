@@ -1,0 +1,166 @@
+<?
+
+include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
+
+
+class menuEditor extends HercAuth {
+
+	var $presentor = "adminPresentation";
+
+	function run (&$db, &$u, &$arg, &$t) {
+		$t[menu] = MenuObj::get($arg->getvars[3]);
+
+		$db->query("select gid,groupName from lcGroups order by groupName");
+		while($db->next_record()) {
+			$t[groups] .= '<option value="'.$db->Record[0].'" ';
+			$t[notgroups] .= '<option value="'.$db->Record[0].'" ';
+			if ( in_array($db->Record[0],$t[menu]->groups) ) {
+				$t[groups] .= 'SELECTED';
+			}
+			if ( in_array($db->Record[0],$t[menu]->notgroups) ) {
+				$t[notgroups] .= 'SELECTED';
+			}
+			$t[groups] .= '>'.$db->Record[1].'</option>';
+			$t[notgroups] .= '>'.$db->Record[1].'</option>';
+
+		}
+
+		$t[event] = "update";
+	}
+
+
+
+	function updateRun (&$db, &$u, &$arg, &$t) {
+		$menu = MenuObj::get($arg->postvars['pkey']);
+		$menu->title = $arg->postvars['title'];
+		$menu->menuid= $arg->postvars['menuid'];
+		if ($arg->postvars[groups] != '') { 
+			$menu->groups = $arg->postvars[groups];
+		} else {
+			$menu->groups = array();
+		}
+		if ($arg->postvars[notgroups] != '') {
+			$menu->notgroups = $arg->postvars[notgroups];
+		} else {
+			$menu->notgroups = array();
+		}
+		switch ($arg->postvars[layout]) {
+			case 'v':
+				$menu->layout = 'vertical';
+				break;
+			case 'h':
+				$menu->layout = 'horizontal';
+				break;
+			case 'jh':
+				$menu->layout = 'jshorizontal';
+				break;
+
+			default:
+				$menu->layout = 0;
+		}
+		$menu->update();
+		$this->cacheRun($db,$u,$arg,$t);
+	}
+
+
+
+
+	function addRun (&$db, &$u, &$arg, &$t) {
+
+		$db->query("select gid,groupName from lcGroups order by groupName");
+		while($db->next_record()) {
+			$t[groups] .= '<option value="'.$db->Record[0].'" ';
+			$t[notgroups] .= '<option value="'.$db->Record[0].'" ';
+			$t[groups] .= '>'.$db->Record[1].'</option>';
+			$t[notgroups] .= '>'.$db->Record[1].'</option>';
+
+		}
+
+		$t[event] = "insert";
+	}
+
+
+	function insertRun (&$db, &$u, &$arg, &$t) {
+		$menu = new MenuObj();
+
+		$menu->title = $arg->postvars[title];
+
+		if ($arg->postvars[groups] != '') {
+			$menu->groups = $arg->postvars[groups];
+		} else {
+			$menu->groups = array();
+		}
+
+		if ($arg->postvars[notgroups] != '') {
+			$menu->notgroups = $arg->postvars[notgroups];
+		} else {
+			$menu->notgroups = array();
+		}
+		$menu->update();
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = MOD_URL;
+	}
+
+
+	/**
+	 * save the php serialized object into a mysql table for faster access
+	 */
+	function cacheRun (&$db, &$u, &$arg, &$t) {
+		$foo = MenuObj::get($arg->getvars[3]);
+		$sql = "replace into menuCache set menuid = '{$foo->menuid}', pkey = $foo->pkey, menuObj ='".addSlashes(serialize($foo))."', rank = {$foo->rank}, groups = '|".join('|',$foo->groups)."|', notgroups = '|".join('|',$foo->notgroups)."|'";
+		$db->query($sql);
+		header("Location: ".MOD_URL);
+		exit();
+	}
+
+
+	/**
+	 * remove the menu from menu, menuCache,
+	 * and the menu items from menuItems
+	 */
+	function deleteRun (&$db, &$u, &$arg, &$t) {
+		$id = $arg->postvars[pkey];
+		if ( intval( trim ($id) ) > 0 ) {
+			$db->query("delete from menu where pkey = $id");
+			$db->query("delete from menuItems where menuID = $id");
+			$db->query("delete from menuCache where pkey = $id");
+		}
+		header("Location: ".MOD_URL);
+		exit();
+	}
+
+
+	/**
+	 * adjust the rank of this item
+	 */
+	function upRun (&$db, &$u, &$arg, &$t) {
+
+		$sql = 'update menu set rank = rank-1 where pkey='.$arg->getvars['mid'].' and rank > 0';
+		$db->query($sql);
+
+		$sql = 'update menuCache set rank = rank-1 where pkey='.$arg->getvars['mid'].' and rank > 0';
+		$db->query($sql);
+
+		header("Location: ".MOD_URL);
+		exit();
+	}
+
+
+	/**
+	 * adjust the rank of this item
+	 */
+	function downRun (&$db, &$u, &$arg, &$t) {
+
+		$sql = 'update menu set rank = rank+1 where pkey='.$arg->getvars['mid'];
+		$db->query($sql);
+
+		$sql = 'update menuCache set rank = rank+1 where pkey='.$arg->getvars['mid'];
+		$db->query($sql);
+
+		header("Location: ".MOD_URL);
+		exit();
+	}
+
+}
+
+?>

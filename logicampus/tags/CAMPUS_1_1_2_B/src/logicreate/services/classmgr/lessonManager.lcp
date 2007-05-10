@@ -1,0 +1,699 @@
+<?php
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'classLessonObj.php');
+// PBDO is the new standard, above object is DEPRECATED
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+include(SERVICE_PATH.'classmgr/lc_table_lesson.php');
+
+
+
+class LessonManager extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+//	var $authorizer = 'native';
+
+	// links
+	var $inactivelinks = array( 'Lessons' );
+	var $applinks = array (
+		'List Lessons' => 'lessonManager/',
+		'Add a Lesson' => 'lessonNew/event=add'
+	);
+        var $navlinks = array (
+                'Classroom Manager' => 'display/',
+                'Announcements'=>'announcements/',
+                'Assessment Manager' => '%assessments/',
+                'Assignments' => 'assignmentManage/',
+                'Content' => 'lessonContent/',
+                'FAQ' => 'faq/',
+                'File Resource Manager' => '%classdoclib/',
+                'Gradebook' => '%gradebook/',
+                'Lessons' => 'lessonManager/',
+                'Objectives' => 'lessonObjectives/',
+                'Webliography' => 'lessonWebliography/'
+        );
+
+
+
+
+	/**
+	 * Show the main page of the lesson manager: a list of all the lessons
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'lessonManager_main';
+		$this->inactivelinks[] = 'List Lessons';
+		$this->sectionTitle = 'List Lessons';
+
+		$dg = new DataGrid($this->module,$this->serviceName);
+		$dg->table = 'class_lessons';
+		$dg->column = 'createdOn,activeOn,title,description,id_class_lessons';
+		$dg->class = 'datagrid';
+		$dg->ignore = array('id_classes', 'checkList', 'id_class_lessons', 'inactiveOn' );
+		$dg->overrideColumn('<?=date("M j h:i A", $createdOn);?>', 'createdOn');
+		$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
+		$dg->where = "id_classes='{$u->activeClassTaught->id_classes}'";
+		$dg->headers = array(
+			'createdOn' => 'Created',
+			'activeOn' => 'Active On',
+			'title' => 'Title',
+			'description' => 'Description',
+			'links' => ' '
+		);
+		if ($lc->getvars['gdorder']=='') {
+			$lc->getvars['dgorder'] = 'activeOn';
+		}
+		$dg->sortColumns = array( 'createdOn', 'activeOn', 'title' );
+		$dg->postpendColumn('<a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">view</a> | <a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">edit</a> | <a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">delete</a>', 'links'); 
+		$t['content'] = $dg->toHTML();
+	}
+
+
+	/**
+	 * Edit the assignments to this lesson
+	 */
+	function linkAssignmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Assignments';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveAssignments';
+		$t['pageHeading'] = 'Lesson Assignments';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
+		$sql = "SELECT A.id_class_assignments, A.title
+			FROM class_assignments AS A
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.title";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_assignments, A.id_class_lessons, B.title
+			FROM class_assignments_link AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_assignments']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_assignments']][] = $db->Record['id_class_lessons'];
+		}
+
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->idName = 'id_class_assignments';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Assignment');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+		$col_c->cellRenderer->idName = 'id_class_assignments';
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Edit the assignments to this lesson
+	 */
+	function linkWebRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Web Links';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveWeb';
+		$t['pageHeading'] = 'Lesson Web Links';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT A.id_class_links, A.title
+			FROM class_links AS A
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.title";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_links, A.id_class_lessons, B.title
+			FROM class_lesson_links AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_links']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_links']][] = $db->Record['id_class_lessons'];
+		}
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+		$col->cellRenderer->idName = 'id_class_links';
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Web Link');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_links';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Edit the objectives to this lesson
+	 */
+	function linkObjectivesRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Objectives';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveObjectives';
+		$t['pageHeading'] = 'Lesson Objectives';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		if( is_object($lesson))
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT A.id_class_objectives, A.objective
+			FROM class_objectives AS A
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.objective";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_objectives, A.id_class_lesson, B.title
+			FROM class_lesson_objectives AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lesson = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_objectives']][] = $db->Record['id_class_lesson'];
+		}
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->idName = 'id_class_objectives';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Objective');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Save the objectives to this lesson
+	 */
+	function saveObjectivesRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_objectives
+			FROM class_objectives AS A
+			WHERE A.id_classes = ".$class_id;
+		$db->query($sql);
+		while ($db->next_record()) {
+			$allowableItems[] = $db->Record['id_class_objectives'];
+		}
+
+		//clean input array to match allowable items
+		$validEntry = false;
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+				$validEntry = true;
+			}
+		}
+
+		if (!$validEntry) {
+			$this->linkObjectivesRun($db,$u,$lc,$t);
+			$t['message'] = "You need to choose at least one objective.";
+			return false;
+		}
+
+
+		//wipe all previous objective links for this lesson
+		$db->query('DELETE from class_lesson_objectives 
+			WHERE id_class_lesson = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_objectives
+		(id_class_objectives,id_class_lesson)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Save the web links to this lesson
+	 */
+	function saveWebRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_links
+			FROM class_links AS A
+			WHERE A.id_classes = ".$class_id;
+		$db->query($sql);
+		while ($db->next_record()) {
+			$allowableItems[] = $db->Record['id_class_links'];
+		}
+
+		//clean input array to match allowable items
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+			}
+		}
+
+		//wipe all previous web links for this lesson
+		$db->query('DELETE from class_lesson_links 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_links
+		(id_class_links,id_class_lessons)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Save the assignments to this lesson
+	 */
+	function saveAssignmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_assignments
+			FROM class_assignments AS A
+			WHERE A.id_classes = ".$class_id;
+		$db->query($sql);
+		while ($db->next_record()) {
+			$allowableItems[] = $db->Record['id_class_assignments'];
+		}
+
+		//clean input array to match allowable items
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+			}
+		}
+		//wipe all previous assignment links for this lesson
+		$db->query('DELETE from class_assignments_link 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_assignments_link
+		(id_class_assignments,id_class_lessons)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
+	/**
+	 * show the editing page
+	 */
+	function editRun(&$db,&$u,&$lc,&$t) {
+
+		$this->sectionTitle = 'Edit Lesson';
+		$lc->templateName = 'lessonManager_edit';
+		$defaults = array();
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		$t['lessonId'] = $lesson_id;
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		DEFINE(LESSON_ID, $lesson_id); // for the custom fields
+
+
+		// get the content pages
+		$sql = "SELECT A.id_class_lesson_content, A.txTitle
+			FROM class_lesson_content AS A
+			WHERE A.id_classes='{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
+
+		// get the content field
+		$sql = "select id_class_lesson_content from class_lesson_content
+			where id_class_lessons='{$lesson_id}'";
+		$db->queryOne($sql);
+		$t['content'] = $db->Record['id_class_lesson_content'];
+
+		// get the objectives
+		$sql = "SELECT A.objective 
+			FROM class_objectives AS A
+			LEFT JOIN class_lesson_objectives AS B
+			  ON A.id_class_objectives=B.id_class_objectives
+			WHERE B.id_class_lesson='{$lesson_id}'
+			AND A.id_classes = '{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['objectives'][] = $db->Record['objective'];
+
+
+		// Get the basic info about the lesson
+		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
+			from class_lessons
+			where id_class_lessons='{$lesson_id}'";
+		$db->queryOne($sql);
+		$t['title'] = $db->Record['title'];
+		$t['description'] = $db->Record['description'];
+		$t['createdOn'] = $db->Record['createdOn'];
+		$t['activeOn'] = $db->Record['activeOn'];
+		$t['inactiveOn'] = $db->Record['inactiveOn'];
+		if ( strlen( trim( $db->Record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->Record['checkList']) );
+
+		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+		$t['activeOnStruct']['fieldName'] = 'activeOn';
+		$t['activeOnStruct']['displayName'] = 'Active On';
+		$t['activeOnStruct']['dateTimeBit'] = 63;
+
+		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
+		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
+		$t['inactiveOnStruct']['dateTimeBit'] = 7;
+
+		// get the web links
+		$sql = "SELECT A.id_class_links, A.title
+			FROM class_links AS A
+			LEFT JOIN class_lesson_links  AS B
+			  ON A.id_class_links=B.id_class_links
+			WHERE B.id_class_lessons='{$lesson_id}'
+			AND A.id_classes = '{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['web'][] = $db->Record['title'];
+
+
+		// get the assignments
+		$sql = "SELECT A.id_class_assignments, A.title
+			FROM class_assignments AS A
+			LEFT JOIN class_assignments_link  AS B
+			  ON A.id_class_assignments=B.id_class_assignments
+			WHERE B.id_class_lessons='{$lesson_id}'
+			AND A.id_classes = '{$class_id}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['assignments'][] = $db->Record['title'];
+	}
+
+
+	/**
+	 * commit the posted data to the database, if worthy
+	 */
+	function updateRun(&$db,&$u,&$lc,&$t)
+	{
+		$f = new Siteform();
+		$lessonid = $lc->getvars['id'];
+
+		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
+
+		$activeOn = dateArray2TimestampFull($lc->postvars['activeOn']);
+		$inactiveOn = dateArray2Timestamp($lc->postvars['inactiveOn']);
+
+		$title = htmlentities($lc->postvars['title']);
+		$desc = htmlentities($lc->postvars['description']);
+
+		$content_id = intval($lc->postvars['content']);
+
+		// Take care of the lesson table
+		$sql = "UPDATE class_lessons 
+			SET title='%s',
+			description='%s',
+			activeOn=%d,
+			inactiveOn=%d
+			WHERE id_class_lessons='{$lessonid}'";
+
+			$t['msg'] = 'Lesson updated successfully.';
+
+		$db->query( sprintf($sql,
+				$title,
+				$desc,
+				$activeOn,
+				$inactiveOn)
+			);
+
+		// take care of the content table
+		$db->query( "update class_lesson_content set
+			id_class_lessons=NULL
+			where id_class_lessons='{$lessonid}'" );
+		$db->query( "update class_lesson_content set
+			id_class_lessons='{$lessonid}'
+			where id_class_lesson_content=".$content_id );
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonid);
+
+	}
+
+
+	/**
+	 * confirm the lesson deletion and ask if we should remove or just unlink the
+	 * external items.
+	 */
+	function deleteConfRun(&$db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'lessonManager_deleteConf';
+		$lessonid = $lc->getvars['id'];
+
+		$db->queryOne( "select title from class_lessons where id_class_lessons='{$lessonid}'");
+		$t['lessonTitle'] = $db->Record['title'];
+		$t['id_class_lessons'] = $lessonid;
+		$t['id_classes'] = $u->activeClassTaught->id_classes;
+
+	}
+
+
+	/**
+	 * delete the lesson
+	 */
+	function deleteRun(&$db,&$u,&$lc,&$t)
+	{
+		$lessonid = $lc->getvars['id'];
+
+		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
+
+		// just set the lesson id in all the tables to NULL
+		$db->query("update class_lesson_content set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
+	//	$db->query("update class_objectives set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
+
+		// we just want to remove the link associations for weblinks and objectives.
+		$db->query("delete from class_lesson_links where id_class_lessons='{$lessonid}'");
+		$db->query("delete from class_lesson_objectives where id_class_lesson='{$lessonid}'");
+		$db->query("delete from class_assignments_link where id_class_lessons='{$lessonid}'");
+
+		// finally, delete the lesson itself
+		$db->query("delete from class_lessons where id_class_lessons='{$lessonid}'");
+
+		$t['msg'] = 'The lesson has been removed and all its associated content, objectives,
+			and assignments have been unlinked. You may now reuse these items in other lessons';
+
+		$this->Run($db,$u,$lc,$t);
+		
+	}
+
+
+	/**
+	 * Show the Check List for editing
+	 */
+	function checkListRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$sql = "select checkList, title
+			from class_lessons
+			where id_class_lessons='{$lesson_id}'";
+
+		$db->queryOne($sql);
+
+		$t['checkList'] = split("\n", $db->Record['checkList']);
+		$t['title'] = $db->Record['title'];
+		$t['lessonId'] = $lesson_id;
+
+		$lc->templateName = 'lessonManager_checkList';
+	}
+
+
+	/**
+	 * Save the check list to this lesson
+	 */
+	function saveCheckListRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		foreach($lc->getvars['checkList'] as $k=>$v) {
+			if ( strlen(trim($v)) > 0 ) {
+				$checkList .= htmlentities($v)."\n";
+			}
+		}
+
+		$sql = "UPDATE class_lessons 
+			SET checkList='%s'
+			WHERE id_class_lessons='{$lesson_id}'";
+
+		$db->query( sprintf($sql,
+				$checkList)
+			);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Do they have authority for this lesson? Yes, return true. No, give them an error
+	 * and return false. (The caller need only return.)
+	 */
+	function checkAuth($lessonid, &$db, &$u, &$t) {
+		$db->queryOne("select count(id_class_lessons) as cnt from class_lessons as l
+			left join classes as c on l.id_classes=c.id_classes
+			where l.id_classes='{$u->activeClassTaught->id_classes}'
+			and l.id_class_lessons='{$lessonid}'");
+		if (!$db->Record['cnt'] || intval($lessonid) == 0 ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to modify that lesson.";
+			return false;
+		} else return true;
+	}
+
+}
+
+?>

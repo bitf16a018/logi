@@ -1,0 +1,171 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include_once(SERVICE_PATH.'classforums/classforums_lib.php');
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
+
+/**
+ * Class Forums
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class forum extends StudentService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $applinks = array();
+	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildAppLinks() {
+		$this->applinks = array (
+		);
+
+/*
+		global $lcUser;
+		//need to make this search for moderator status
+		if ( $lcUser->isFaculty() ) {
+			$this->applinks[lct('Admin')]  = 'forumAdmin/';
+		}
+*/
+	}
+
+
+	function run (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forum_main';
+		$forumId = (int)$lc->getvars['forum_id'];
+
+		$forum = ClassForum_Forums::load($forumId);
+		$t['locked'] = $forum->isLocked();
+
+		if ( ! $forum->isVisible() ) {
+			$lc->templateName = 'forum_invisible';
+			return;
+		}
+
+		$x = ClassForum_Settings::getLastForumVisit($u,$forum);
+
+
+		//FIXME check for closed, visibility, etc
+		$dm = new MyPostTableModel($lc->getvars['forum_id']);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=64;
+		$col->cellRenderer = new LC_TableNewMessageRenderer($x);
+		$col->cellRenderer->u = $u;
+
+		$col_b = &$columnModel->getColumnAt(3);
+		$col_b->maxWidth=60;
+
+		$col_c = &$columnModel->getColumnAt(4);
+		$col_c->maxWidth=160;
+		$col_c->cellRenderer = new LC_TableRenderer_ForumLastReply();
+		$col_c->cellRenderer->dateFormat = 'M j, Y - h:i A';
+
+		$col_d = &$columnModel->getColumnAt(1);
+		$col_d->cellRenderer = new LC_TableRenderer_ForumTopic();
+		$col_d->justify = 'left';
+
+		$t['table'] = new LC_TableRenderer($table);
+		$t['forumId'] = (int)$lc->getvars['forum_id'];
+	}
+}
+
+
+
+class MyPostTableModel extends LC_TableModel {
+
+	var $posts = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyPostTableModel($fid) {
+		$this->posts = ClassForum_Posts::getTopics($fid);
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->posts));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 5;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return '&nbsp;'; break;
+
+			case '1':
+				return 'Topics'; break;
+
+			case '2':
+				return 'Started By'; break;
+
+			case '3':
+				return 'Replies'; break;
+
+			case '4':
+				return 'Last Reply'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$post = $this->posts[$x];
+		switch ($y) {
+			case 0:
+				return $post;
+			case 1:
+				return $post;
+			case 2:
+				return $post->_dao->userId;
+			case 3:
+				return $post->getReplyCount();
+			case 4:
+				return $post;
+		}
+	}
+}
+
+?>

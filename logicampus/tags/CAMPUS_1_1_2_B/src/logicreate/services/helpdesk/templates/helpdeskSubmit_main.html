@@ -1,0 +1,22 @@
+<?=$t['sectionheader'];?>
+
+<h3 style="margin:1px;">Submit a new issue</h3>
+
+				<div style="font-size=80%;">Give us a detailed description of your problem.</div>
+<?=$t['error'];?>
+
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<form action="<?= appurl('helpdesk/helpdeskSubmit/event=add');?>" method="POST" enctype="application/x-www-form-urlencoded">
+		<tr>
+			<td valign="top" class="">
+			<textarea name="details" cols="65" rows="7" id="details"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Post your issue"></td>
+		</tr>
+	</form>
+</table>
+

@@ -1,0 +1,39 @@
+
+<table width="98%">
+	<tr>
+		<td align="left">
+			<h3>Forums</h3>
+		</td></tr>
+		<tr><td>
+		 	<a href="<?= modurl();?>">[home]</a> | <a href="<?= modurl('view/'.$t['forum']->lcForumId);?>">[view all posts]</a>
+
+		</td>
+	</tr>
+</table>
+
+<center><table width="98%"><tr><td align="left">
+
+<div class="colorbar">Post a message</div>
+</td></tr>
+<tr>
+	<td>
+		<Form method='post' action='<?=appurl("forum/post/event=post");?>'>
+		<table>
+
+			<tr>
+				<td><b>Title</b></td>
+				<td><input type='text' name='forum[title]' size="55" maxlength=255></td>
+			</tr>
+			<tr>
+				<td valign="top"><b>Message</b></td>
+				<td><textarea name='forum[message]' rows='10' cols='55'></textarea></td>
+			</tr>
+		</table>
+
+		<input type='submit' value='Post'>
+	</form>
+	
+	</td>
+</tr>
+
+</table>

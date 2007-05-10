@@ -1,0 +1,121 @@
+<?=$t['sectionheader'];?>
+<h4>Dealing with semester <?=$t['semesterLabel'];?></h4>
+<h2>Editing Exam Dates for <?=$t['facultyName'];?>'s <?=$t['courseName'];?></h2>
+<? if ($t['error']) { ?><span style="color:red;"><?=$t['error'];?></span><? } ?>
+<? if ($t['message']) { ?><span style="color:blue;"><?=$t['message'];?></span><? } ?>
+<?=$t['info'];?>
+<?php 
+	if ($t['noexam'])
+	{	?>
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr><td valign="top" class="tabletitle">This course requires alternative activities</td></tr>
+<tr><td>
+	<b style="color: red;">
+	 This course requires alternative activities and will not have 
+	 exams coordinated through the Center for Distance Learning
+	</b>
+</td></tr>
+</table>
+<Br>
+<?php } ?>
+
+<?=$t['form'];?>
+
+<script>
+
+var south;
+var southeast;
+var northeast;
+var northwest;
+
+function south()
+{
+	var enabling = false;
+	enabling = document.getElementById("southCampus").checked;
+	
+	for (field in cizampus_south) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (enabling)
+		{	tmp_element.disabled = false;
+		} else
+		{	tmp_element.disabled = true;
+		}
+		
+	}
+	
+}
+
+function southeast()
+{	
+	var enabling = false;
+	enabling = document.getElementById("southeastCampus").checked;
+	
+	for (field in cizampus_southeast) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (enabling)
+		{	tmp_element.disabled = false;
+		} else
+		{	tmp_element.disabled = true;
+		}
+		
+	}
+	
+}
+
+function northeast()
+{
+	var enabling = false;
+	enabling = document.getElementById("northeastCampus").checked;
+	
+	for (field in cizampus_northeast) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (enabling)
+		{	tmp_element.disabled = false;
+		} else
+		{	tmp_element.disabled = true;
+		}
+		
+	}
+	
+}
+
+function northwest()
+{
+	var enabling = false;
+	enabling = document.getElementById("northwestCampus").checked;
+	
+	for (field in cizampus_northwest) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (enabling)
+		{	tmp_element.disabled = false;
+		} else
+		{	tmp_element.disabled = true;
+		}
+		
+	}
+	
+}
+
+
+// on load we are going to assign the default stuff
+	south();
+	southeast();
+	northeast();
+	northwest();
+
+
+// binding events to functions
+	document.getElementById("southCampus").onclick=south;
+	document.getElementById("southeastCampus").onclick=southeast;
+	document.getElementById("northeastCampus").onclick=northeast;
+	document.getElementById("northwestCampus").onclick=northwest;
+
+</script>
