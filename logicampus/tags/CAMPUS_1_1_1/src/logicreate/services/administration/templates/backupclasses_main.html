@@ -1,0 +1,31 @@
+<?=$t['sectionheader'];?>
+
+<center>
+<iframe name="progressbar" id="progressbar" src="<?=modurl('backupclasses/event=hello');?>"
+	height="48"
+	width="400"
+	frameborder="0"
+	scrolling="No"
+	></IFRAME>
+</center>
+<?php
+	if ($t['messages'])
+	{	echo '<p>';
+		foreach($t['messages'] as $msg) echo '<li><font color="maroon">'.$msg.'</font></li>';
+		echo '</p>';
+	}
+?>
+<fieldset>
+<legend>Semesters to backup</legend>
+<br>
+<center>
+	<?php
+	
+	foreach($t['a_semester'] as $semid=>$semester)
+	{	echo '<a onclick="getElementById(\'progressbar\').src = \''.modurl('backupclasses/event=go/'.$semid).'\'; return false;" href="#">'.$semester. '</a><br><br>';
+	}
+	
+	?>
+</center>
+<br>
+</fieldset>

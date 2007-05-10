@@ -1,0 +1,15 @@
+<?=$t['sectionheader'];?>
+<br>
+<fieldset>
+	<legend><b><?=lct('Assessment Graded');?></b></legend>
+	<?=$t['testover'];?>
+	You have successfully turned in your assessment. Below you will find the score of your
+	test.  If there were any essay questions on the test these questions are not calculated
+	into your final score.  Your instructor will need to review essay questions and upate
+	your score.  Please do not press the back button on your browser and try to re-submit
+	your test as that will result in an error.
+</fieldset>
+
+
+<h3><?=lct('Your Score: $grade out of $possiblePoints - $percentGrade', array($t) );?></h3>
+<h3><a href="<?=APP_URL?>assessments"><?=lct('Return to Assessments');?></a></h3>

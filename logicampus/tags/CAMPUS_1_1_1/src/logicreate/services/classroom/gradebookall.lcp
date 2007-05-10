@@ -1,0 +1,138 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * Displays current grades for a student in a class.
+ *
+ */
+
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
+
+class gradebookall extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Student Summary';
+	var $inactivelinks = array(
+		'Gradebook',
+	);
+
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName='gradebookall_main';
+
+		if ( $lc->getvars['print'] ) {
+			$this->presentor = 'emptyPresentation';
+		} else {
+			$this->applinks['Printer Friendly'] = 'gradebookall/print=yes';
+		}
+		$t2 = array();
+		foreach($u->classesTaken as $k=>$v) { 
+			$this->getAllGrades($u,$v->id_classes, $t2);
+
+			$t['allOutput'][$v->id_classes] = $t2;
+			$t['allOutput'][$v->id_classes]['instructor'] = $v->facultyName;
+			$t['allOutput'][$v->id_classes]['courseName'] = $v->courseName;
+			unset($t2);
+		}
+	}
+
+	function getAllGrades($u,$classId,&$t) { 
+		// load up the gradebook and tell it to do a bunch of work for me.
+		$gradebook = ClassGradebook::load( 
+			array('id_classes' => $classId) );
+
+		if ( !is_object($gradebook) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'The gradebook for your class could not be found. Please contact
+				the help desk immediately and report this.';
+			return;
+		}
+
+		$gradebook->getEntries(false);
+		$gradebook->getStudent($u->username); // we only need one if we use a clever SQL statement below
+		$gradebook->loadVals();
+		$gradebook->loadCategories();
+		$gradebook->setStudentVals();
+
+
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
+		
+		$db = lcdb::getHandle();
+
+		$db->query("	SELECT sum(score) as score,username from class_gradebook_val 
+				WHERE id_classes = ".$u->activeClassTaken->id_classes."
+				GROUP BY username
+		");
+
+		//assume rank is one, push rank down for each student that has a higher score
+		$t['rank'] = 1;
+		while ($db->next_record() ) {
+			if ($u->username == $db->Record['username']) {
+				$usersScore = $db->Record['score'];
+			}
+			$scores[$db->Record['username']] = $db->Record['score'];
+		}
+
+		foreach ($scores as $username => $score) {
+			if ($u->username == $username) continue;
+			if ($score > $usersScore) $t['rank']++;
+			$t['totalRanks']++;
+		}
+
+
+		//loop through all categories and all vals for this one student,
+		// build up all info to pass to template
+		foreach ( $gradebook->categories as $catid => $cat ) {
+
+			$t['categories'][$catid]['possible'] = 0;
+			$t['categories'][$catid]['earned'] = 0;
+			$t['categories'][$catid]['letter'] = 'N/A';
+			$t['categories'][$catid]['label'] = $cat->label;
+			
+		
+			foreach ( $gradebook->students[$u->username]->vals as $valid => $val ) {
+				if ( $gradebook->entries[$valid]->idClassGradebookCategories != $catid )
+				continue;
+				if ( $val->isDisqualified() )
+				continue;
+
+				$t['categories'][$catid]['possible'] += $gradebook->entries[$valid]->totalPoints;
+				$t['categories'][$catid]['earned'] += $val->score;
+				
+			}
+
+			$t['categories'][$catid]['letter'] = $gradebook->getLetterGrade(
+				$t['categories'][$catid]['earned'],
+				$t['categories'][$catid]['possible']);
+	
+		}
+		$t['gradebook'] = $gradebook;
+		$t['username'] = $u->username;
+		
+		$t['student'] = $u->profile->values['firstname'].' '.$u->profile->values['lastname'];
+		$t['course'] = $u->activeClassTaken->courseName;
+		$t['instructor'] = $u->activeClassTaken->facultyName;
+		
+
+		//$t['totalRanks']++;
+	}
+		
+}
+
+?>

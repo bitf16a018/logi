@@ -1,0 +1,29 @@
+<h2>Private Messaging - Compose Message<h2>
+
+<table border="0" cellpadding="4" cellspacing="1" width="100%">
+<tr><td><a href="<?=APP_URL?>pm">Message Center</a> | <a href="<?=APP_URL?>pm/main/event=compose">Compose New Message</a></td></tr>
+</table>
+
+<b><?=$t['error'];?></b>
+<form method="post" action="<?=appurl("pm/main/event=post");?>">
+<table width="100%" cellpadding="4" cellspacing="1">
+<tr><td class="header2">Send to:</td>
+<td class="grey"><input type="text" name="sendto" size=25 maxlength=255 value="<?=$t['sendto'];?>" />&nbsp;&nbsp;(username)</td>
+</tr>
+<tr><td class="header2">Subject:</td>
+<td class="grey"><input type='text' name='subject' maxlength='50' size='50' value="<?=$t['subject'];?>"></td>
+</tr>
+<tr>
+<td class="header2" valign="top">Message:</td>
+<td class="grey">
+<textarea name='message' rows='15' cols='60' wrap='virtual'><?=$t['message'];?></textarea>
+</td>
+</tr>
+<tr>
+<td class="header2">&nbsp;</td>
+<td class="grey">
+<input type='submit' value='Post'>
+</td>
+</tr>
+</table>
+</form>

@@ -1,0 +1,58 @@
+<br>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+      			Dynamic Menus
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+				<td class="white" align="center">
+
+<form method="POST">
+
+<table border="0" width="100%">
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Link Text:
+</td></tr>
+<tr><td colspan="2">
+<input type="text" name="linkText" value="<?= $t[menuItem]->linkText;?>">
+<p>
+<input type="checkbox" name="useImage" <? $t[menuItem]->imgOff != "" ? print "CHECKED": print "";?>> Use image instead of text.
+<br>
+<input type="text" name="imgOff" value="<?= $t[menuItem]->imgOff;?>"> (http link to image).
+<p>
+<br>
+Ranking <input size="4" type="text" name="rank" value="<?= $t[menuItem]->rank;?>"> 
+
+</td></tr>
+<tr><td bgcolor="#D0D0D0" colspan="2">
+External Page:
+</td></tr>
+<tr><td colspan="2">
+<input type="text" name="location" value="<?= $t[menuItem]->location;?>"> (don't forget the http://)
+<p>
+</td></tr>
+
+
+<tr><td colspan="2">
+<input type="hidden" name="menuID" value="<?= $t[mid];?>">
+
+<input type="hidden" name="pkey" value="<?= $t[menuItem]->pkey;?>">
+<input type="hidden" name="linkType" value="url">
+<input type="hidden" value="<?= $t[event];?>" name="event">
+<input type="submit" value="save">
+</td></tr>
+</table>
+
+
+				</td>
+			</tr>
+		</table></td></tr>
+
+</table>

@@ -1,0 +1,20 @@
+<?=$t['sectionheader'];?>
+
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td><b>Title:</b></td>
+	<td><?=$t['pres']['title'];?></td>
+</tr>
+<tr>
+	<td><b>Created On:</b></td>
+	<td><?=date("M j \a\\t g:i A", strtotime($t['pres']['createdOn']));?></td>
+</tr>
+<tr>
+	<td><b>Approved On:</b></td>
+	<td><?=date("M j \a\\t g:i A", strtotime($t['pres']['approvedOn']));?></td>
+</tr>
+<tr>
+	<td><b>Content:</b></td>
+	<td style="background-color:white;border:1px solid #a0a0a0"><?=$t['pres']['content'];?></td>
+</tr>
+</table>

@@ -1,0 +1,51 @@
+<?
+
+
+class dialog extends HercAuth {
+
+	var $presentor = 'myPlainPresentation';
+
+	function run (&$db,&$u,&$arg,&$t) {
+
+                 $g = new lcGroup($db);
+
+
+		$db->query("select filename,pkey from lcHtml order by filename");
+		while($db->next_record()) {
+
+
+		if ( strlen($db->Record['filename']) > 15) {
+			$db->Record['filename'] = substr($db->Record['filename'],0,14). '...';
+		}
+
+		$t[files][] = $db->Record;
+		}
+		$t['showDelete'] = $arg->getvars['d'];
+		$t['icon'] = 'filenew.gif';
+	}
+
+
+	function imageRun (&$db,&$u,&$arg,&$t) {
+
+		$d = dir(IMAGES_PATH);
+		while (false !== ($entry = $d->read())) {
+			if (!is_dir(IMAGES_PATH."/".$entry) ) { 
+				if ( strlen($entry) > 15) {
+					$t[files][] = array('name'=>$entry,'filename'=> substr($entry,0,15).'...');
+				} else {
+					$t[files][] = array('name'=>$entry,'filename'=> $entry);
+				}
+			}
+		}
+		sort($t["files"]);
+		$d->close();
+
+		$t['icon'] = 'image.png';
+	}
+
+function myPlainPresentation (&$obj, &$t) {
+	include(MOD_PATH."admin/templates/".$obj->templateName.".html");
+}
+
+}
+?>
