@@ -1,0 +1,156 @@
+<style>
+	.blogTitle {
+		font-size: 180%;
+	}
+
+	.blogReplyTitle {
+		font-size: 120%;
+	}
+
+	.blogReplyTimedate {
+		font-size: 90%;
+	}
+
+	.blogReplyBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+	.blogEntryTitle {
+		font-size: 120%;
+	}
+
+	.blogEntryTimedate {
+		font-size: 90%;
+	}
+
+	.blogEntryBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+</style>
+
+<div class='blogTitle'><?=$t['blog']->blogDescription;?></div>
+
+<table width='100%'>
+
+	<tr>
+		<td width='80%' style='vertical-align: top'>
+			<div class='blogEntryTitle'><?=$t['entry']->blogEntryTitle;?></div>
+			<div class='blogEntryTimedate'>Posted: <?=date("m/d/Y h:i A", $t['entry']->blogEntryTimedate);?></div> 
+			<? if ($t['isOwner']) { ?>
+			<a onClick="if(confirm('Delete this entry?')) { location.href='<?=modurl("blog/".$t['username']."/id=".$t['entry']->blogEntryId."/event=deleteEntry");?>';}" href="#">delete</a> | 
+			<a href='<?=modurl("blog/".$t['username']."/id=".$t['entry']->blogEntryId."/event=editEntry");?>'>edit</a>
+			<? } ?>
+
+			<div class='blogEntryBody'>sdfsdf <?=$t['entry']->blogEntryText;?></div>
+
+<? 
+while(list($k, $v) = @each($t['replies'])) { 
+$replyCount++;
+?>
+<table width='100%' style='border-top: 1px solid #000; border-bottom: 1px solid #000; padding-bottom: 10px; padding-top: 10px'>
+	<tr>
+		<td class='blogReplyTitle'><?=$v->blogEntryTitle;?></h3></td>
+	</tr>
+	<tr>
+		<td class='blogReplyBody'><?=$v->blogEntryText;?></td>
+	</tr>
+	<tr>
+		<td class='blogReplyTimedate'>Posted: <?=date("m/d/Y h:i A", $v->blogEntryTimedate);?> by 
+			<?=$v->blogEntryPosterId;?> 
+			<? if ($v->blogEntryPosterEmail) { ?>
+				<a href="mailto:<?=$v->blogEntryPosterEmail;?>">(email)</a> 
+			<? } ?>
+			<? if ($v->blogEntryPosterUrl) { ?>
+				<a href="<?=$v->blogEntryPosterUrl;?>">(url)</a> 
+			<? } ?>
+			<? if ($t['isOwner']) { ?>
+			<a onClick="if(confirm('Delete this entry?')) { location.href='<?=modurl("blog/".$t['username']."/id=".$v->blogEntryId."/event=deletePost");?>';}" href="#">delete</a> | 
+			<a href='<?=modurl("blog/".$t['username']."/id=".$v->blogEntryId."/event=editEntry");?>'>edit</a>
+			<? } ?>
+		</td>
+		</td>
+	</tr>
+</table>
+
+<?
+if ($replyCount==0) { ?>
+	No replies to this entry 
+	<? } ?>
+<? } ?>
+
+		</td>
+		<td width='20%' style='vertical-align: top'>
+			<h3>Archives</h3>
+			<? while(list($k,$v) = @each($t['blogEntryMonths'])) { 
+				++$monthCount;	
+				?>
+				<a href="<?=modurl("blog/".$t['username']."/month=".$k);?>"><?=$v;?></a><BR/>
+			<? } ?>
+			<? if ($monthCount==0) { ?>
+				No previous archives
+			<? } ?>
+
+
+
+			<hr>
+			<? if ($t['isOwner']) { ?>
+			<h3>Administration</h3>
+			<a href="<?=modurl("blog/".$t['username']."/event=setup");?>">Web log setup</a>
+			<br/>
+			<a href="<?=modurl("blog/".$t['username']."/event=mypost");?>">Add an entry</a>
+			<? } ?>
+
+		</td>
+	</tr>
+
+
+<? if ($t['posting']) { ?>	
+	<tr>
+		<td style='vertical-align: top'>
+			<h3>Add a comment</h3>
+			<?=$t['form'];?>
+		</td>
+	</tr>
+<?} ?>
+<!--
+			<form method='post' action='<?=modurl("blog/event=post");?>'>
+				<input type='hidden' name='blogEntryId' value='<?=$t['entry']->blogEntryId;?>'>
+				<table width='100%'>
+					<tr>
+						<td>Name</td>
+						<td><input type='text' name='name'></td>
+					</tr>
+					<tr>
+						<td>Email</td>
+						<td><input type='text' name='email'></td>
+					</tr>
+					<tr>
+						<td>URL</td>
+						<td><input type='text' name='url'></td>
+					</tr>
+					<tr>
+						<td>Comment title</td>
+						<td><input type='text' name='title'></td>
+					</tr>
+					<tr>
+						<td colspan='2'>
+							Comment: 
+							<br/>
+							<textarea name='comment' rows='10' cols='50'></textarea>
+						</td>
+					</tr>
+				</table>
+				<input type='submit' value='Add comment'>
+			</form>
+				
+
+		</td>
+	</tr>
+	-->
+
+</table>

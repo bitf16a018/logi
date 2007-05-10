@@ -1,0 +1,473 @@
+<?
+
+include_once(LIB_PATH.'classLessonContentObj.php');
+include_once(LIB_PATH.'datagrid.php');
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+
+
+/**
+ * handles displaying online lessons
+ *
+ */
+class lessons extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Classroom Lessons';
+	var $inactivelinks = array(
+		'Lessons',
+	);
+
+
+	/**
+	 * Default event
+	 * 
+	 * Input data:  $u->activeClassTaken->id_classes
+	 * Output data: show all lessons for this class
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$ut = time();						
+		$lc->templateName = 'lessons_main';
+
+		//query to get all visible lessons
+		$sql = 'SELECT * FROM class_lessons
+			where id_classes='.$u->activeClassTaken->id_classes.'
+			AND activeOn <= '.$ut.'
+			AND inactiveOn > '.$ut.'
+			ORDER BY createdOn';
+
+		$db->query($sql);
+		while ($db->next_record()) $lessons[] = $db->Record;
+
+
+/*
+// TODO add sorting to LC_Table (LC_TableSortable ??)
+		$dm = new MyLessonModel($lessons);
+		$table = new LC_Table($dm);
+
+		$render = new LC_TableRenderer($table);
+//		echo $render->toHTML();
+//exit();
+		$t['table'] = $render->toHTML();
+*/
+
+
+
+		# Build datagrid of lessons, only show ones that are
+		# active
+		$dg = new datagrid($this->module, $this->serviceName);
+		$dg->table = 'class_lessons';
+		$dg->column = 'createdOn, activeOn, inactiveOn, title, description, id_class_lessons';
+		$dg->ignore = array('id_class_lessons', 'createdOn', 'inactiveOn' );
+		$dg->where = 'id_classes='.$u->activeClassTaken->id_classes.'
+			AND activeOn <= '.$ut.'
+			AND inactiveOn > '.$ut;
+		$dg->orderby = 'createdOn';
+		$dg->sortColumns = array( 'activeOn', 'inactiveOn', 'title' );
+
+		$dg->headers = array(
+			'title' => 'Lesson',
+			'description' => 'Description',
+			'activeOn' => 'Active On',
+			'inactiveOn' => 'Inactive On'
+		);
+		$dg->overrideColumn('<?=date("M j, Y h:i A", $activeOn);?>', 'activeOn');
+		$dg->overrideColumn('<a href="'.modurl('lessons/event=view/id=<?=$id_class_lessons;?>').'"><?=$title;?></a>', 'title');
+		$t['table'] = $dg->toHTML();
+//*/
+
+	}
+
+	/**
+	 * Displays a lesson
+	 * 
+	 * Input data:  lesson id and activeClassTaken->id_classes
+	 * Output data: a lesson and all of its associatd data (links, assignments, etc)
+	 *
+	 */
+	function viewRun(&$db,&$u,&$lc,&$t) {
+		
+		$lc->templateName='lessons_view';
+		$class_id = intval($lc->getvars['id']);
+
+		// Make sure they're allowed to access this lesson AND
+		#function checkContentPermission($activeClassTaken, $table, $tablePkey, $contentLabel, $contentPkey
+
+		$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $class_id);
+		if (!$check)
+		{
+			$lc->templateName = 'main_nocontentaccess';
+			return;
+		}
+		// actually retrieve the data from the db
+		$ut = time();
+		$sql = "select * from class_lessons
+			where id_class_lessons='".$class_id."'
+			and id_classes='{$u->activeClassTaken->id_classes}'";
+		if (!$u->isFaculty())
+			$sql .= " and (activeOn < ".time()."
+				and inactiveOn > ".time().')';
+
+		$db->queryOne($sql);
+		$t['lesson'] = $db->Record;
+
+		if (!$t['lesson']['id_class_lessons']) {
+			$lc->templateName = 'main_nocontentaccess';
+			return;
+		}
+
+		$db->queryOne("select id_class_lesson_content, txTitle,txText from class_lesson_content
+			where id_class_lessons='".$class_id."'");
+		$t['content'] = $db->Record;
+
+		$db->query("SELECT class_objectives.id_class_objectives, objective, f_hide 
+			FROM class_objectives
+			LEFT JOIN class_lesson_objectives on 
+				class_lesson_objectives.id_class_objectives = class_objectives.id_class_objectives
+			WHERE class_lesson_objectives.id_class_lesson='".$class_id."' 
+			AND f_hide=0 ORDER BY i_sort ASC");
+		while ($db->next_record()) $t['objectives'][] = $db->Record;
+
+
+		//ASSIGNMENTS TABLE
+		// modified this sql statemnet to order by dueDate 
+		//  instead of activeDate in desc order
+		$t['assignments'] = array();
+		$sql = "SELECT a.id_class_assignments, a.title, a.dueDate, a.responseType
+			FROM class_assignments as a
+			LEFT JOIN class_assignments_link as k 
+			  ON k.id_class_assignments=a.id_class_assignments
+
+			LEFT JOIN class_lessons as l 
+			  ON l.id_class_lessons=k.id_class_lessons
+
+			WHERE a.id_classes='".$u->activeClassTaken->id_classes."'
+			AND l.id_class_lessons='".$class_id."' 
+			ORDER BY dueDate ASC";
+
+		$db->query($sql);
+		while ($db->next_record()) $t['assignments'][] = $db->Record;
+		//can't figure this out with a join
+		foreach($t['assignments'] as $k =>$v) {
+			$db->query("SELECT dateTurnin 
+				FROM class_assignments_turnin
+				WHERE id_class_assignments = ".$v['id_class_assignments']."
+				AND id_student = '".$u->username."'");
+			if ($db->next_record()) {
+				$t['assignments'][$k]['dateTurnin'] = $db->Record['dateTurnin'];
+			} else {
+				$t['assignments'][$k]['dateTurnin'] = 0;
+			}
+		}
+
+		$dataModel = new MyAssignmentModel($t['assignments']);
+		$table = new LC_Table($dataModel);
+
+		$columnModel = &$table->getColumnModel();
+		$col_a = &$columnModel->getColumnAt(0);
+		$col_a->cellRenderer = new LC_TableAssignmentRenderer();
+		$col_a->maxWidth = 270;
+		$col_a->justify = 'left';
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->cellRenderer = new LC_TableDateRenderer('M j h:i a');
+		$col_b->maxWidth = 120;
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->cellRenderer = new LC_TableAssignmentStatusRenderer();
+
+		$col_d = &$columnModel->getColumnAt(3);
+		$col_d->maxWidth = 60;
+
+		$col_z = &$columnModel->getColumnAt(4);
+		$col_z->maxWidth = 60;
+
+		$render = new LC_TableRenderer($table);
+		$t['assignmentsTable'] = $render->toHTML();
+
+
+		// WEB LINKS
+		$sql = "SELECT l.id_class_links, title, url from class_links as l
+			LEFT JOIN class_lesson_links as ll 
+			  ON l.id_class_links=ll.id_class_links
+			WHERE ll.id_class_lessons='".$class_id."'";
+		$db->query($sql);
+		while ($db->next_record()) $t['weblinks'][] = $db->Record;
+
+
+
+		// CHECKLIST
+		$t['checkListArray'] = explode("\n",trim($t['lesson']['checkList']));
+
+
+		//DEPRECATED, we don't need to store it in the session anymore
+		// because this info is only on one page, not all pages
+		// of the lesson
+
+		// Create the sidebar and stash it in the session
+//			$u->sessionvars['activeLesson'] = $t['lesson'];
+
+		if ($lc->getvars['print']) {
+			$this->presentor = 'printPresentation';
+		}
+
+	}
+
+
+	function viewContentRun(&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName='lessons_content';
+		$content_id = intval($lc->getvars['id']);
+
+		// Make sure they're allowed to access this lesson AND
+
+		// __FIXME__
+		/* should we actually link arbitrary content to lessons ??
+//			$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $content_id);
+//			if (!$check)
+//			{
+//				$lc->templateName = 'main_nocontentaccess';
+//				return;
+//			}
+		*/
+
+		// actually retrieve the data from the db
+		$sql = "select * from class_lesson_content
+			WHERE id_classes='{$u->activeClassTaken->id_classes}'
+			and id_class_lesson_content = $content_id";
+		$db->queryOne($sql);
+		$t['content'] = $db->Record;
+		if ($lc->getvars['print']) {
+			$this->presentor = 'printPresentation';
+		}
+
+		// get the lesson from the session so we can show the title
+		$t['lesson'] = $u->sessionvars['activeLesson'];
+	}
+
+
+	function printLessonRun(&$db, &$u, &$lc, &$t)
+	{
+		# load up a printer presentation handler
+		# so we the student can print a version of the lesson
+	}
+
+
+# current active class
+# table we are checking
+# table pkey name
+# content id
+# active class id
+	function checkContentPermission($activeClassTaken, $table, $tablePkeyLabel,
+		$contentLabel, $contentPkey)
+	{
+		$db = DB::getHandle();
+		$sql = "SELECT $contentLabel FROM $table WHERE 
+				$tablePkeyLabel ='$contentPkey'";
+		$db->queryOne($sql);
+		if ($activeClassTaken == $db->Record[$contentLabel])
+		{
+			return true;
+		}
+		return false;				
+	}
+}
+
+
+
+// TABLE INTERFACE CLASSES
+
+class MyLessonModel extends LC_TableModel {
+
+	var $lessons = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyLessonModel($l) {
+		$this->lessons = $l;
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->lessons));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 3;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return 'Active On'; break;
+
+			case '1':
+				return 'Lesson'; break;
+
+			case '2':
+				return 'Description'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$l = $this->lessons[$x];
+		switch ($y) {
+			case 0:
+				return $l['activeOn'];
+			case 1:
+				return $l['title'];
+			case 2:
+				return $l['description'];
+		}
+	}
+}
+
+
+class MyAssignmentModel extends LC_TableModel {
+
+	var $assignments = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyAssignmentModel($a) {
+		$this->assignments = $a;
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->assignments));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 5;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return 'Assignment Name'; break;
+
+			case '1':
+				return 'Due Date'; break;
+
+			case '2':
+				return 'Status'; break;
+
+			case '3':
+				return 'Turned in'; break;
+
+			case '4':
+				return 'Assignment Type'; break;
+
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$assignment = $this->assignments[$x];
+		switch ($y) {
+			case 0:
+				return $assignment;
+			case 1:
+				return $assignment['dueDate'];
+			case 2:
+				return $assignment;
+			case 3:
+				return $assignment['dateTurnin'] > 0 ? 'Yes':'No';
+		}
+
+		// 1 upload file
+		// 2 text
+		// 3 both 
+		
+		// 4 forum post --- holding on this
+		// 5 none
+		if ($y == 4) {
+			//return words for the response type code
+			switch ($assignment['responseType']) {
+				case 1:
+					return 'Upload File';
+				case 2:
+					return 'Text Response';
+				case 2:
+					return 'Text Response';
+				case 3:
+					return 'Text and Upload';
+				case 4:
+					return 'Forum Post';
+				case 5:
+					return 'None';
+			}
+		}
+	}
+}
+
+
+class LC_TableIconRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		if ($this->row % 2 == 0 ) {
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
+		} else {
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="old posts" alt="old posts">';
+		}
+	}
+}
+
+
+class LC_TableAssignmentRenderer  extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<a href="'.appurl('classroom/assignments/event=view/id='.$this->value['id_class_assignments']).'">'.$this->value['title'].'</a>';
+	}
+}
+
+class LC_TableAssignmentStatusRenderer  extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		if ($this->value['dueDate'] > time() ) {
+			return '<a href="'.appurl('classroom/assignments/event=view/id='.$this->value['id_class_assignments']).'">View / Turn in</a>';
+		} else {
+			return 'closed';
+		}
+	}
+}
+
+?>

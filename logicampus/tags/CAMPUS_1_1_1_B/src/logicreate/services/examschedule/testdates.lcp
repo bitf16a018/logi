@@ -1,0 +1,151 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'ExamScheduleDates.php');
+
+class testdates extends BasicAuth {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Exam Scheduler';
+	var $inactivelinks = array(
+	);
+	var $navlinks = array(
+		'List Schedules' => '',
+	);
+	var $applinks = array(
+		'List Semester Dates' => 'testdates',
+		'Add Semester Date' => 'testdates/event=edit/',
+	);
+
+	function Run($db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'testdates_main';
+		$lc->templateStyle = 'private';
+		$this->sectionTitle = 'Exam Scheduler - List Testing Periods';
+		$this->inactivelinks[] = 'List Semester Dates';
+
+		if ($lc->postvars['semester']) { 
+			$t['semid'] = $lc->postvars['semester'];
+			$u->sessionvars['semesterid'] = $t['semid'];
+		} else {
+			$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+		}
+		$t['semesterLabel'] = getSemesterLabel($t['semid']);
+
+		$f = new Siteform();
+		$arr = array( 'semester' => $t['semid'] );
+		$f->getForm('semester', $arr);
+		$t['semform'] = $f->toHTML();
+
+		$dg = new datagrid($this->module, $this->serviceName);
+		$dg->table = 'exam_schedule_dates';
+		$dg->where = "id_semester='{$u->sessionvars['semesterid']}'";
+		$dg->ignore = array( 'id_exam_schedule_dates', 'id_semester' );
+		$dg->overrideColumn( '<?=date("M j, Y @ g:i A", strtotime($date_start));?>', 'date_start' );
+		$dg->overrideColumn( '<?=date("M j, Y @ g:i A", strtotime($date_end));?>', 'date_end' );
+		$dg->headers = array( 'date_start' => 'Start Date', 'date_end' => 'End Date' );
+		$dg->postpendColumn( '<a href="<?=modurl("testdates/event=edit/id=$id_exam_schedule_dates");?>">edit</a> | <a href="<?=modurl("testdates/event=delete/id=$id_exam_schedule_dates");?>" onclick="if (confirm(\'Are you SURE you want to delete this testing period?\')) { return true; } else { return false; }">delete</a>', ' ' );
+		$t['table'] = $dg->toHTML();
+
+	}
+
+	function editRun($db,&$u,&$lc,&$t) {
+
+		if ($lc->postvars['semester']) { 
+			$t['semid'] = $lc->postvars['semester'];
+			$u->sessionvars['semesterid'] = $t['semid'];
+		} else {
+			$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+		}
+		$t['semesterLabel'] = getSemesterLabel($t['semid']);
+
+
+
+		$lc->templateName = 'testdates_edit';
+		$lc->templateStyle = 'private';
+		$this->sectionTitle = 'Exam Scheduler - Edit Testing Periods';
+
+		$esd = ExamScheduleDates::load( array( 'id_exam_schedule_dates' => (int)$lc->getvars['id'] ) );
+
+		$f = new Siteform();
+		$f->getForm('testdates', $esd);
+
+		if ( is_object($esd) ) {
+			$this->sectionTitle = 'Edit Testing Period';
+			$f->modFormValue('submit', 'Modify Testing Period');
+		} else {
+			$this->sectionTitle = 'Add Testing Period';
+		}
+
+		$t['form'] = $f->toHTML();
+
+	}
+
+	function updateRun(&$db,&$u,&$lc,&$t) {
+
+		$f = new Siteform();
+		$t['error'] = $f->validateForm('testdates', $lc->postvars);
+		if ($t['error']) {
+			$this->editRun($db,$u,$lc,$t);
+			return;
+		}
+
+		if ( (int)$lc->getvars['id'] ) {
+			$esd = ExamScheduleDates::load( array( 'id_exam_schedule_dates' => (int)$lc->getvars['id'] ) );
+		} else {
+			$esd = new ExamScheduleDates();
+			$esd->set( 'idSemester', $u->sessionvars['semesterid'] );
+		}
+
+		$esd->set( 'dateStart', date('Y-m-d H:i:s', dateArray2Timestamp($lc->postvars['dateStart']) ) );
+		$esd->set( 'dateEnd',   date('Y-m-d H:i:s', dateArray2Timestamp($lc->postvars['dateEnd']) ) );
+		$esd->save();
+
+		$t['message'] = 'Testing period saved.';
+		$this->Run($db,$u,$lc,$t);
+		return;
+
+	}
+
+	function deleteRun(&$db,&$u,&$lc,&$t) {
+
+		$esd = ExamScheduleDates::load( array( 'id_exam_schedule_dates' => (int)$lc->getvars['id'] ) );
+		if ( !is_object($esd) ) {
+			$t['error'] = 'Testing period not found.';
+			$this->Run($db,$u,$lc,$t);
+			return;
+		}
+
+		ExamScheduleDatesPeer::doDelete($esd, true);
+		$t['message'] = 'Testing period deleted successfully.';
+		$this->Run($db,$u,$lc,$t);
+
+	}
+
+}
+
+function getSemesterLabel($id) { 
+		$db = db::GetHandle();
+		$sql = '
+		SELECT semesterTerm, semesterYear
+		FROM semesters
+		WHERE id_semesters = '.$id;
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		return $db->Record['semesterTerm'].' '.$db->Record['semesterYear'];
+}
+?>

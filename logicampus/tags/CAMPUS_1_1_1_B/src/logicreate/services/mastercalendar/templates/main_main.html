@@ -1,0 +1,41 @@
+<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0>
+<tr>
+	<td><big>Master Calendar</big></td>
+	<td align="right">&nbsp;</td>
+</tr>
+</table>
+	<div id="sectionheader">
+		<a href="<?=modurl('');?>">Master Calendar</a>
+	</div>
+	<div id="applinks">
+		<b class="title">Application Links:</b>&nbsp;&nbsp;<a href="<?=modurl('week/');?>">Week view</a> &bull; 
+		<b>Month view</b> &bull; 
+		<a href="<?=modurl('year/');?>">Year view</a>
+		<?php
+		if (in_array('dlstaff', $obj->user->groups))
+		{	?> &bull; <a href="<?=modurl('cal/event=editschedule/');?>">Schedule event</a> <?php
+			?> &bull; <a href="<?=modurl('cal/event=schedule/');?>">View schedule</a> <?php
+		}
+		?>
+		<!--&bull; <a href="<?=modurl('search/');?>">Search</a>-->
+	</div>
+	<br>
+<?php
+if ($t['showfilterstuff'])
+{
+?>
+<form method="post">
+	
+	<?=$t['op']['overallviews'];?>
+	<input type="submit" value="submit" name="submit">
+	
+</form>
+<?php
+}
+?>
+<div id="calendar">
+
+	<?=$t['tinyCal'];?>
+	
+</div>
+

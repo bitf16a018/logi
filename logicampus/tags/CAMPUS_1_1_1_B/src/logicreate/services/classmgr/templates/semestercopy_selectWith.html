@@ -1,0 +1,39 @@
+<?=$t['sectionheader'];?>
+
+<?php
+	$update = $t['update']['semesterId']. ' '.$t['update']['courseFamilyNumber']. ' '.$t['update']['courseName'];
+	$with =$t['with']['semesterId']. ' '.$t['with']['courseFamilyNumber']. ' '.$t['with']['courseName'];
+?>
+
+<h1>Warning</h1>
+
+<font color="red">
+<?=$t['warning_message'] ;?>
+</font>
+
+<fieldset>
+	<legend>Irreversible Operation</legend>
+<blockquote>
+	<i>You are about to replace the current material in:</i><br/>
+	<?=$t['update']['semesterId']. ' '.$t['update']['courseFamilyNumber']. ' '.$t['update']['courseName'];?>
+	<br/><br/>
+	<i>With the material from:</i>
+	<br/>
+	<?=$t['with']['semesterId']. ' '.$t['with']['courseFamilyNumber']. ' '.$t['with']['courseName'];?>
+</blockquote>
+</fieldset>
+
+Please be aware that you will essentially remove all data associated 
+[<B><?=$update;?></B>] and insert all data from [<B><?=$with;?></B>]. 
+If you have any data in [<B><?=$update;?></B>] that you need saved, please save it now. 
+It will be deleted from the system if you decide to go through with this 
+update.
+<br>
+<br>
+<form method="post">
+<input type="hidden" name="ic_sure" value="<?=(int)$obj->postvars['ic_sure']+1;?>">
+<input type="hidden" name="id_classes_update" value="<?=$t['update']['id_classes'];?>">
+<input type="hidden" name="id_classes_with" value="<?=$t['with']['id_classes'];?>">
+<input type="hidden" name="event" value="selectYouSure">
+<input type="submit" value="Continue >>">
+</form>

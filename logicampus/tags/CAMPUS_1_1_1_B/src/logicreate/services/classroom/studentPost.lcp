@@ -1,0 +1,83 @@
+<?
+/*
+ *
+ * Allow students to post content for viewing/sharing
+ * with others in the class.
+ *
+ */
+
+class studentPost extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * delete the news id (if it's yours or you're the instructor)
+ * 
+ * Input data: ID
+ * Output data: 
+ *
+ */
+		function delNewsRun(&$db,&$u,&$lc,&$t) {
+			//$t['url']=appurl("classroom/studentPost/event=");
+			//$this->presentor='redirect';
+			//return;
+
+			$lc->templateName='studentPost_delNews';
+
+		}
+
+/*
+ *
+ * If passed an ID, edit the news article ID (if owner is
+ * user).  If not, show a 'new' news article form (empty).
+ * 
+ * Input data: id
+ * Output data: 
+ *
+ */
+		function editNewsRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='studentPost_editNews';
+
+		}
+
+/*
+ *
+ * Show list of recent postings by students.    If the current
+ * user is the owner, then show 'delete' and 'edit' buttons
+ * for current user's posts.  Event will link back to itself
+ * with 'page' info to 'page back' in postings.  If user is
+ * instructor, show delete for all posts.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='studentPost_main';
+
+		}
+
+/*
+ *
+ * Update news article in database (new or update) then
+ * redirect back to list
+ * 
+ * Input data: news article data
+ * Output data: 
+ *
+ */
+		function updateNewsRun(&$db,&$u,&$lc,&$t) {
+			//$t['url']=appurl("classroom/studentPost/event=");
+			//$this->presentor='redirect';
+			//return;
+
+			$lc->templateName='studentPost_updateNews';
+
+		}
+
+
+
+}
+
+?>

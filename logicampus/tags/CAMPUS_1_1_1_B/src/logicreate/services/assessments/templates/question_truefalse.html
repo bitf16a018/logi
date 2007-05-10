@@ -1,0 +1,92 @@
+<?=$t['sectionheader'];?>
+
+<?=$t['error'];?>
+
+<form method="POST">
+	<table border="0" width="600">
+		<tr>
+			<td valign="top">*<b>Question</b></td>
+			<td colspan=2>
+				<textarea rows="5" cols="50" name="questionText" <?= $t['disableFlag'];?>><?=$t['q']->questionText;?></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td colspan=3 height=25>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>*<b>Answer</b></td>
+			<td colspan=2>&nbsp;</td>
+		</tr>
+		<? for ($x=0;$x<2;++$x) { ?>
+		<? $qc = $t['q']->questionChoices[$x]; ?>
+		<?// debug($t['q']);?>
+		<tr>
+			<td width=100 align="right">
+				<? printf('%d',$x+1);?>.
+			</td>
+			<td width=50><?=$qc->label;?></td>
+			<td>
+				<input name="correct" value="<?=$x;?>" type="radio" <?= $qc->correct ? 'CHECKED':'';?>>
+			</td>
+		</tr>
+		<? } ?>
+		<tr>
+			<td>&nbsp;</td>
+			<td colspan=2>
+<style>
+		
+	div.over {
+		overflow: scroll;
+		height: 220px;
+		width: 240px;
+	}
+
+</style>
+	<FIELDSET valign="middle" style="width: 235px; height: 245px; padding: 2px;">
+	
+	<select name="fileHash"
+		style="width: 235px;"
+		onChange="document.getElementById('previewfile').src='<?=appurl('classroom/viewContent/fhash=');?>' + this.value;"
+		>
+	<option value="">Select Image</option>
+<?php
+	foreach($t['images'] as $myIzimage)
+	{
+		echo '
+		<option value="'.$myIzimage['daHasha'].'"'.
+		($t['q']->fileHash == $myIzimage['daHasha'] ? ' SELECTED' : '').'>'.
+			$myIzimage['displayname'].'</option>';
+	}
+
+?>	
+	</select>
+
+		
+	<div class="over" align="center" valign="middle">
+	<table cellpadding="2" cellspacing="0" border="0" width="100%" height="100%">
+	<tr>
+
+		<td valign="middle" align="center" height="100%" width="100%">
+		<img alt="" src="<?= $t['q']->fileHash ? appurl('classroom/viewContent/fhash=').$t['q']->fileHash : IMAGES_URL.'spacer.gif'; ?>" id="previewfile">
+							
+					
+		</td>
+	</tr>
+	</table>
+	</div>
+			
+	</FIELDSET>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td colspan=2>
+				<input type="submit" value="Continue-&gt;">
+				<input type="hidden" name="event" value="save">
+			</td>
+		</tr>
+	</table>
+
+</form>
+
+<p>* denotes a required field.</p>

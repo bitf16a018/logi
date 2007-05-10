@@ -1,0 +1,171 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+
+
+/**
+ * Class Forums
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class forum extends StudentService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $applinks = array();
+	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('Class Forums Home') => '%classforums/',
+		lct('New Topic') => '%classforums/topic/event=post'
+		);
+	}
+
+
+	function run (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forum_main';
+
+		//main code
+		include('main_main.html'); //just for the CSS
+
+		$dm = new MyPostTableModel($lc->getvars['forum_id']);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=64;
+		$col->cellRenderer = new LC_TableIconRenderer();
+
+		$col_b = &$columnModel->getColumnAt(2);
+		$col_b->maxWidth=100;
+
+		$col_c = &$columnModel->getColumnAt(3);
+		$col_c->maxWidth=200;
+		$col_c->cellRenderer = new LC_TableDateRenderer();
+		$col_c->cellRenderer->dateFormat = 'n / j / Y &\n\b\sp;&\n\b\sp; h:i:s';
+
+		$col_d = &$columnModel->getColumnAt(1);
+		$col_d->cellRenderer = new LC_TableTopicRenderer();
+		$col_d->justify = 'left';
+
+		$t['table'] = new LC_TableRenderer($table);
+
+	}
+}
+
+
+
+class MyPostTableModel extends LC_TableModel {
+
+	var $posts = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyPostTableModel($fid) {
+//		$this->posts = ClassForumPostPeer::doSelect('class_forum_id = '.$fid);
+		$this->posts = ClassForum_Posts::getTopics($fid);
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->posts));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 4;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return '&nbsp;'; break;
+
+			case '1':
+				return 'Topics'; break;
+
+			case '2':
+				return 'Replies'; break;
+
+			case '3':
+				return 'Last Reply'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$post = $this->posts[$x];
+		switch ($y) {
+			case 0:
+				return $post->getForumId();
+			case 1:
+				return $post;
+			case 2:
+				return $post->getReplyCount();
+			case 3:
+				return $post->postTimedate;
+		}
+	}
+}
+
+class LC_TableIconRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		if ($this->row % 2 == 0 ) {
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_new.png" title="new posts" alt="new posts">';
+		} else {
+			return '<img height="32" width="32" src="http://dev.logicampus.com/images/messages_read.png" title="new posts" alt="new posts">';
+			return 'no new posts.&nbsp;';
+		}
+	}
+}
+
+
+
+class LC_TableTopicRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<a href="'.appurl('classforums/posts/').'post_id='.$this->value->getPostId().'">'.$this->value->getSubject().'</a> <br/>'.substr($this->value->getMessage(),0,45);
+	}
+}
+
+?>

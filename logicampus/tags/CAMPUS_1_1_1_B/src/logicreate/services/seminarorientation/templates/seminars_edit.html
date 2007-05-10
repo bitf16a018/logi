@@ -1,0 +1,15 @@
+<?=$t['sectionheader'];?>
+
+<?
+if ($t['entry']->numSeminar)
+{
+	echo '<h3>Seminar '.$t['entry']->numSeminar.'</h3>'; ?>
+
+	<div style="font-size: 120%;">
+	<b>Instructor:</b>  <a href="<?=APP_URL?>users/view/<?=$t['facultyId']?>"><?=$t['facultyId'];?></a> <b>Class:</b> <?=$t['courseName']?> (<?=$t['courseFamNum'];?>)
+	</div>
+<? } ?>
+
+
+<?=$t['form'];?>
+

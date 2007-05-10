@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<project name="logicampus">
+  <entity  name="class_forum">
+    <attribute name="class_forum_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="name"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <attribute name="class_id"
+            required="true"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="description"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <attribute name="class_forum_recent_post_timedate"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_recent_poster"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <attribute name="class_forum_thread_count"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_post_count"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_unanswered_count"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_category_id"
+            required="false"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <foreign-key foreignTable="class_forum_category">
+	    <reference
+		local="class_forum_category_id"
+		foreign="class_forum_category_id"/>
+    </foreign-key>
+    <key 
+	    attribute="class_forum_category_id"
+	    name="class_forum_category_idx"/>
+    <key 
+	    attribute="class_id"
+	    name="class_idx"/>
+  </entity>
+  <entity  name="class_forum_post">
+    <attribute name="class_forum_post_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_id"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="is_sticky"
+            required="false"
+            size="1"
+            type="TINYINT"/>
+    <attribute name="reply_id"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="thread_id"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="subject"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <attribute name="message"
+            required="true"
+            size=""
+            type="TEXT"/>
+    <attribute name="user_id"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <attribute name="post_timedate"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="class_forum_post_status"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <foreign-key foreignTable="class_forum">
+	    <reference
+		local="class_forum_id"
+		foreign="class_forum_id"/>
+    </foreign-key>
+    <key 
+	    attribute="is_sticky"
+	    name="is_sticky_idx"/>
+    <key 
+	    attribute="user_id"
+	    name="user_idx"/>
+    <key 
+	    attribute="thread_id"
+	    name="thread_id"/>
+  </entity>
+  <entity  name="class_forum_category">
+    <attribute name="class_forum_category_id"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <attribute name="name"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <attribute name="class_id"
+            required="true"
+            size="11"
+            type="INTEGER"/>
+    <key 
+	    attribute="class_id"
+	    name="class_idx"/>
+    <index>
+      <index-column name="class_id"/>
+    </index>
+
+  </entity>
+
+</project>

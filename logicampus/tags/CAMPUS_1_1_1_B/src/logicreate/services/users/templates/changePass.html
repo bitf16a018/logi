@@ -1,0 +1,29 @@
+<?=$t[error]?>
+
+
+	<table width="100%" cellspacing="4" cellpading="1" border="0">
+		<tr>
+			<td valign="top" class="header2">
+				New Password:
+			</td>
+			<td valign="top" class="grey">
+				<form method="post">
+				 <input type="password" name="password" maxlength="15">
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class="header2">
+				Retype Password:
+			</td>
+			<td valign="top" class="grey">
+				 <input type="password" name="password2" maxlength="15">
+				 <br>
+				 <input type="hidden" name="event" value="<?=$t[event]?>">
+				 <input type="submit" value="Change Password">
+				 <br>
+				 </form>
+				 Press the button above to reset or change your password.
+			</td>
+		</tr>
+	</table>
+
