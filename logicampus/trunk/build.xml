@@ -99,7 +99,8 @@
 		<fileset dir="./">
 			<include name="README" />
 			<include name="LICENSE" />
-			<include name="CHANGELOG" />
+			<include name="changelog.txt" />
+			<include name="changelog.html" />
 			<include name="UPGRADE" />
 	  </fileset>
 	</copy>
@@ -357,6 +358,11 @@
 			start="10 March 2006"
 			end="08 February 2007"/>
 		-->
+		<cvschangelog dir="."
+			destfile="changelog.xml"
+			start="10 March 2006"
+			end="12 April 2007"/>
+
 
 		<xslt in="changelog.xml" 
 			out="changelog.html" 
