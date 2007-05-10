@@ -1,0 +1,65 @@
+<?
+hercBox("Category Systems");
+?>
+
+<table width="100%"><tr><td>
+	<h3>Category Edit: <i><?=$t[systemName];?> -> <?=$t[catName];?></i></h3>
+</td></tr>
+<tr><td valign="top">
+	New category attributes: <br>
+	<form method ="POST">
+	Name:<br>
+	<input type="text" name="new[name]" value="<?=$t[cat]->name;?>">
+	<p>
+	Sort order:<br>
+	<input type="text" name="new[sortorder]" size="2"  value="<?=$t[cat]->sortorder;?>">
+	<p>
+	Notes/Description/Examples:<br>
+	<textarea cols="25" rows="4" name="new[notes]"><?=$t[cat]->notes;?></textarea>
+</td><td valign="top">
+	Choose a parent category if this will be a sub-category.
+	If not, choose "Top Level Category".
+	<br>
+	<center>
+	<select name="new[parentKey]" size="10">
+		<option value="0" SELECTED>&nbsp;&nbsp;&nbsp;[Top Level Category] (no parent)
+		<?= $t[treeOpts] ?>
+	</select>
+	</center>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input type="hidden" value="<?=$t[cat]->pkey?>" name="new[pkey]">
+	<input type="hidden" value="update" name="event">
+	<input type="hidden" value="<?= $t[systemName];?>" name="new[system]">
+	<input type="submit" value="Save">
+	</form>
+	<p>
+	<br>
+</td></tr>
+<tr><td colspan="2"  bgcolor="#D09090" align="center">
+	Remove the Category
+</td></tr>
+<tr><td>
+	<form method="POST">
+	<input type="radio" name="del" value="keep" CHECKED>Delete the category <i><?=$t[cat]->name;?></i> and move its
+	sub categories up, replacing its position.
+	<br>
+	- or -
+	<br>
+	<input type="radio" name="del" value="destroy">Delete the category and destroy all sub-categories
+	underneath.
+	<p>
+	<input type="submit" value="Del">
+	<input type="hidden" name="event" value="delete">
+	<input type="hidden" name="pkey" value="<?=$t[cat]->pkey;?>">
+	<input type="hidden" name="sysName" value="<?=$t[systemName];?>">
+	</form>
+</td><td>
+	&nbsp;
+</td></tr>
+
+</table>
+
+<? endHercBox(); ?>
+
+

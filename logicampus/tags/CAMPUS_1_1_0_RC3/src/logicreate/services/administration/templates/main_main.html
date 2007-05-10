@@ -1,0 +1,91 @@
+<h3>Administration</h3>
+<table width="95%" border="0" cellspacing="1" cellpadding="1">
+	<tr> 
+    <td colspan="3" valign="top"><hr noshade color="#98AA99" id="line"></td>
+  </tr>
+  <tr> 
+    <td width="38%" valign="top" class="coursemaintitle"> <h4>Manage Courses</h4></td>
+    <td width="6%">&nbsp;</td>
+    
+    <td width="36%" valign="top" class="coursemaintitle"> <h4>Manage
+	Semesters<br>
+      </h4></td>
+      
+  </tr>
+  <tr> 
+    <td valign="top" class="coursemainbody">
+		<a href="<?=APP_URL?>administration/courses/event=addCourse">Add a Course</a> | 
+		 
+
+		<a href="<?=APP_URL?>administration/courses/main">List Courses</a>
+
+	</td>
+	
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemainbody">
+		<a href="<?=APP_URL?>administration/semesters/event=add">Add Semester</a> 
+		| <a href="<?=APP_URL?>administration/semesters/main">List Semesters</a>  | 
+		<a href="<?=APP_URL?>administration/courses/event=semesterInfo">Course Semester Information</a>
+	</td>
+	
+    
+  </tr>
+  
+  <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
+    
+   <tr> 
+    <td valign="top" class="coursemaintitle"><h4>Manage Classes</h4></td>
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemaintitle"><h4>Manage Accounts</h4></td>
+  </tr>
+  <tr> 
+    <td valign="top" class="coursemainbody">
+		<a href="<?=APP_URL?>administration/classes/event=add">Add a Class</a> | 
+		<a href="<?=APP_URL?>administration/classes/main">List Classes</a> | 
+		<a href="<?=APP_URL?>administration/classrestore">Restore Class</a> | 
+
+		<a href="<?=APP_URL?>administration/classes_extra">Manage Extra Faculty</a> 
+
+		
+	</td>
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemainbody">
+	<a href="<?=APP_URL?>administration/users">List Users</a> | 
+	<a href="<?=APP_URL?>administration/users/event=new">Create User</a> | 
+	<a href="<?=APP_URL?>administration/groups">List Groups</a> | 
+	<a href="<?=APP_URL?>administration/users/event=syncStudents">Sync Students</a> |
+	<a href="<?=APP_URL?>administration/servicePermissions">Modify Application Permissions</a>   |
+	<a href="<?=APP_URL?>administration/facultylist/">Faculty List</a> 
+
+	</td>
+  </tr>
+
+
+  <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
+ 
+   <tr> 
+    <td valign="top" class="coursemaintitle"><h4>Site Content and Tools</h4></td>
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemaintitle">
+    <h4>Distance Learning Applications</h4>
+    </td>
+  </tr>
+  <tr> 
+    <td valign="top" class="coursemainbody">
+	<a href="<?=MOD_URL?>mod/">Message of the day</a> | 
+	<a href="<?=MOD_URL?>cal/">Calendar</a> |
+	<a href="<?=APP_URL?>docs/">Documents</a> | 
+	<a href="<?=APP_URL?>forum/admin/">Forums</a> |
+	<a href="<?=MOD_URL?>formmgr">Form Manager</a> |
+	<a href="<?=MOD_URL?>menu">Menus</a>
+	</td>
+	<td>&nbsp;</td>
+	<td valign="top" class="coursemainbody">
+	<a href="<?=APP_URL?>examschedule">Exam Scheduling</a> | 
+	<a href="<?=APP_URL?>seminarorientation/">Seminar and Orientation Scheduling</a>  |
+	<a href="<?=APP_URL?>textbookmgr">Textbook Manager</a> | 
+	<a href="<?=APP_URL?>remotetest">Remote Test Administration</a>
+	</td>
+  </tr>
+
+</table>

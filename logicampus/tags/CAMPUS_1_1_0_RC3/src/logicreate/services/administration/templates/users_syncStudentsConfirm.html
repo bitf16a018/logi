@@ -1,0 +1,21 @@
+<?=$t['sectionheader'];?>
+
+
+<form method="POST">
+
+
+	<h3>Using:</h3>
+	/tmp/lc_active_student_dump
+	<br/>
+	semester id = <?= $t['semester_id'];?>
+
+	<h3>Found:</h3>
+	(<?= sprintf("%d",$t['count']);?>) unique users and
+	<br>
+	(<?= sprintf("%d",$t['sections']);?>) unique sections.
+
+	<br/>
+	<input type="hidden" name="event" value="syncStudentsWait">
+	<input type="hidden" name="semester_id" value="<?=$t['semester_id'];?>">
+	<input type="submit" value="Commit Student File">
+</form>

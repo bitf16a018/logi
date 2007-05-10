@@ -1,0 +1,41 @@
+<?
+include_once(LIB_PATH."LC_sql.php");
+include_once (SERVICE_PATH."news/newsObj.php");
+class news extends BasicAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,$arg,&$t) {
+//	$this->presentor = "";
+
+
+		$db->queryOne("select * from lcHtml where filename='welcome.html'  $where");
+		$t["title"] = $db->Record["title"];
+		$t["file"] = $db->Record[filename];
+/********
+* The following two SQL queries only pull articles
+* that are within the appropiate date range as specified on the article.
+* Also, the queries only show the article to the appropiate group of users.
+*
+* This file keys off of two categories in News categories:  News,
+* Articles. 
+* Also, if an article is placed under a sub-category of News or Articles, it will 
+* not be shown.
+********/
+
+		$groups = createGroupCheck($u->groups);
+		$notgroups = createGroupCheck($u->groups,"notgroups");
+		$db->query("select introtext, title, articles.pkey from articles left join lcCategories on lcCategories.pkey = articles.catid where lcCategories.name = 'Articles' and (articles.startdate <= NOW() and articles.enddate >= NOW()) and ( ($groups) and not ($notgroups)) and status='Active' order by pkey DESC limit 2");
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		while ($db->next_record() ) {
+			$t[articles][] = PersistantObject::createFromArray("NewsArticle",$db->Record);
+		}
+		$db->query("select introtext,title,articles.pkey from articles left join lcCategories on lcCategories.pkey = articles.catid where lcCategories.name = 'News' and (articles.startdate <= NOW() and articles.enddate >= NOW()) and ( ($groups) and not ($notgroups)) and status='Active' order by pkey DESC limit 2");
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		while ($db->next_record() ) {
+			$t[news][] = PersistantObject::createFromArray("NewsArticle",$db->Record);
+		}
+
+	}
+}
+?>

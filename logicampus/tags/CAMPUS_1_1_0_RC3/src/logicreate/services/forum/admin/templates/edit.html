@@ -1,0 +1,53 @@
+
+<? if ($t["forumname"]!="") { 
+	hercBox('Editing forum '.$t["forumname"]);
+ } else { 
+	hercBox('Adding a new forum');
+ } ?>
+
+<form method="post">
+<input type="hidden" name="event" value="update">
+<input type="hidden" name="in[fid]" value="<?=$t["fid"];?>">
+<table width="100%">
+
+	<tr>
+		<td>Forum ID<BR>(short code like 'testing')</td>
+<? if ($t["fid"]=="") { ?>
+		<td><input type="text" name="in[fid]" value="<?=$t["fid"];?>"></td>
+<? } else { ?>
+		<td><input type="hidden" name="in[fid]" value="<?=$t["fid"];?>">
+		<?=$t["fid"];?></td>
+<? } ?>
+	</tr>
+
+	<tr>
+		<td>Forum name</td>
+		<td><input type="text" name="in[forumname]" value="<?=$t["forumname"];?>"></td>
+	</tr>
+	<tr>
+		<td>Forum description</td>
+		<td><input type="text" name="in[forumdesc]" value="<?=$t["forumdesc"];?>"></td>
+	</tr>
+	<tr>
+		<td>Email notification (separate with commas)</td>
+		<td><input type="text" size="50" maxlength="255" name="in[email]" value="<?=$t["email"];?>"></td>
+	</tr>
+	<tr>
+		<td>Require moderator approval of posts?</td>
+		<td><select name="in[defaultstatus]">
+			<option value="y" <? if($t["defaultstatus"]=='y') print 'SELECTED';?>>No moderation, posts automatically appear</option>
+			<option value=""  <? if(! $t["defaultstatus"]) print 'SELECTED';?>>Posts must be approved first</option>
+			</select>
+		</td>
+	</tr>
+
+</table>
+
+<table width="100%">
+<?=$t["perms"];?>
+</table>
+
+
+<input type="submit">
+</form>
+<? endHercBox();?>

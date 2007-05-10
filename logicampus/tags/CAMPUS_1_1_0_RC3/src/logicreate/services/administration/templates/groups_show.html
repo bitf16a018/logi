@@ -1,0 +1,72 @@
+
+
+
+			<center><div class="message"><?= $t["message"]; ?></div></center>
+
+<table border="0" cellpadding="0" cellspacing="0" style="font-size: 11px; font-family: verdana;">
+
+                <tr><td width="500">
+
+                        <table border="0" width="100%">
+							<tr><td wdith="100%" class="selectedTab" align="center">
+			All Permissions for Group <i><?= $t["gName"];?></i>
+			</td></tr>
+
+			<tr><td width="100%" class="white" align="center">
+			<br>
+			<? while ( list($k,$v) = @each($t["modNames"]) ) { 
+			 $allowed = $t[perms][$k]; $size=count($v[perms])+1; ?>
+
+				<form method="POST">
+				<table width="90%" border=0 cellpadding="0" cellspacing="0" align="center">
+				<tr><td width="40%">
+				
+					<table  width="100%" align="left" border=0 cellspacing=0 style="font-size: 13px; font-family: verdana;">
+						<tr><td align="left" width="100%" colspan="<?=$size?>">
+								<b><?=$k?></b>
+						</td></tr>
+					</table>
+					
+				</td><td width="60%" style="font-size: 80%;">
+				for <?= $t['gName'];?>
+				</td></tr>
+				<tr><td colspan="2">
+				
+				<table bgcolor="#9CCECD" width="100%" align="center" cellspacing="4" style="border-width:1px;border-style:solid; border-color:black;">
+				<tr><td>
+
+			</td></tr>
+			<tr><td>
+					<table bgcolor="#FFCE7B" border="1" cellpadding="2" cellspacing="1" style="color: #310062; border-color:#9CCECD;border-style:solid;border-width:2px;">
+
+					<tr><td align="center">
+							Access <br>
+						<input type="checkbox" name="perms[access][Access]" <?  if ( in_array('access',$allowed) ) { print "CHECKED";} ?>>
+					</td>
+
+					<? while ( list($kk,$vv) = @each($v[perms]) ) { ?>
+					<td align="center">
+						<?=$vv?> <br>
+						<input type="checkbox" name="perms[<?= $kk; ?>][<?=$vv?>]" <?  if ( in_array($kk,$allowed) ) { print "CHECKED";} ?>>
+						</td>
+					<? } ?>
+					</tr></table>
+			</td></tr>
+			<tr><td>
+				<input type="submit" value="update">
+
+			<input type="hidden" name="mid" value="<?=$v[id]?>">
+			<input type="hidden" name="gid" value="<?=$t[gid]?>">
+			<input type="hidden" name="event" value="update">
+			</form>
+	</td></tr>
+</table>
+</td></tr>
+</table>
+			<p>&nbsp;</p>
+			<? } ?>
+
+
+                </td></tr>
+</table>
+

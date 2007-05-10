@@ -1,0 +1,240 @@
+LOGICAMPUS CHANGE LOG
+Last Updated:  $Date: 2005-06-16 02:38:36 $
+
+SYNTAX:  
+<Date: m/d/y h:i> - <username>
+<Module / Library> - <Description>
+
+ALTERNATE SYNTAX:
+<Date: Y-M-D h:i> username
+================================================================================
+Comments
+     *file (rev)
+     *file (rev)
+
+
+
+2005-06-09 16:16 hardcorelamer
+================================================================================
+Adding last update and last reply times
+     *patches/107_to_110/06_add_helpdesk_time.sql (1.1)
+
+
+2005-06-09 16:16 hardcorelamer
+================================================================================
+Adding last update and last reply times
+     *src/logicreate/services/helpdesk/META-INFO/pbdo.xml (1.2)
+
+     *src/logicreate/services/helpdesk/META-INFO/setup.sql (1.2)
+
+
+2005-06-06 15:26 hardcorelamer
+================================================================================
+Fixes to classroom posts and generic forums.
+Removed extra columns.
+Stopped errors from queries that weren't expecting nulls.
+     *src/logicreate/services/forum/LcForum.php (1.4)
+     *src/logicreate/services/forum/LcForumPost.php (1.3)
+     *src/logicreate/services/forum/post.lcp (1.2)
+     *src/logicreate/services/forum/view.lcp (1.2)
+
+
+2005-06-06 15:26 hardcorelamer
+================================================================================
+Fixes to classroom posts and generic forums.
+Removed extra columns.
+Stopped errors from queries that weren't expecting nulls.
+     *src/logicreate/services/classroom/discussion.lcp (1.4)
+
+
+2005-06-02 17:11 hardcorelamer
+================================================================================
+Fix to allow photos to be re-uploaded.
+Fix to delete image from harddrive when remove photo is checked.
+Feature: file count next to folders in File Manager.
+     *src/logicreate/lib/documentLibraryLib.php (1.5)
+     *src/logicreate/services/users/editProfile.lcp (1.2)
+
+
+2005-06-02 13:11 hardcorelamer
+================================================================================
+Applying correct fix for due dates to the assignments query.
+     *src/logicreate/services/classroom/main.lcp (1.5)
+
+
+2005-06-02 12:49 hardcorelamer
+================================================================================
+Fixing alert language.
+     *src/logicreate/services/administration/templates/courses_semesterInfo.html (1.2)
+
+
+5/29/2005 - mak
+lib - Added facutly only authorizers to stop observers from viewing grades
+assessments - Added facutly only authorizers to stop observers from viewing 
+grades.  Fixed a problem with letter grades on assessments.
+
+#########################
+5/1/05 - mgk
+Removed debugging information from index.php controller, and changed cookie handling so that it should work with localhost.  Many smaller changes have happened over the past few months - small cleanups and UI changes, for example.
+
+
+12/19/04 7:20 - mgk
+Added registration info to installer - trying to determine usage/installation numbers.  :)  Also, mark didn't mention it, but some more translation work has been done (primarily in chinese) and we've also put in some new sample user data.
+
+12/17/04 - 12:00 - gelali
+Fixed PM system, it is finally working fine.
+
+11/27/04 - 5:40 - mgk
+Fixed PM system - it 'worked', but wasn't working as it should have.  :( 
+
+10/9/04 - 7:40pm - mgk
+Modified PM system to have a notion of 'sent' and 'received' so that 
+a user can view the messages they've sent.
+
+9/20/04 - 1:30am - mark
+Fixed a major bug that would allow students to check their grades of 
+assessments as they worked if the result type was set to show grades and
+answers.
+
+
+9/12/04 - 7:15pm - gelali
+Changes to classroom gradebook template because it was not showing everything properly.
+
+
+8/29/04 - 7:00pm - gelali
+Added files for the gradebook overview service. gradebookall.lcp will show only grades for active classes, gradebookallsem.lcp will show all grades regardless of the active status. New files are 'classroom/gradebookall.lcp, classroom/gradebookallsem.lcp, classroom/templates/gradebookall_main.html, classroom/templates/gradebookallsem_main.html.' Changed files 'lib/User.php, lib/classObj.php.' Make sure you make a link for the one you want to use in the member's menu on the left.
+
+
+8/21/03 - 5:30pm - michael
+Changes to how images/files are stored and reused.  Well, reused.  Previously, references to images and files inside of the content pages had hashlinks in them, which were used to verify the class you were taking.  For example, an image file foo.jpg tied to class 5 would only be viewable by people in class 5.  This is problematic when you want to copy content to new semesters, because the hash still points to class 5, but the new class in the new semester may be class 24.  A change was made to check the teacher of the class instead of the class #.  So now teacher3 can have content copied between semesters and classes which references hash XPJ59.  Hash XPJ59 will verify that the teacher of the class you're in is the same as the teacher who owns the file you're trying to look at.  This may cause some problems in that you *might* be able to see something you shouldn't, but it's still locked down to students of a teacher.  This also exists in the analogue world to the extent that I can get a copy of Mr. H's ECON301 lessons even though I only take Mr. H's ECON102 class.  This was a tradeoff made to make copy/backups much simpler. 
+
+
+8/16/04 - 10:00 - michael
+Changes to how test taking works some more.  Backed out storage change and modified 'matching' creation and storage code to use htmlentities(stripslashes())'d version of questions and answers for matching.  Changing it to anything else was too complex for right now.
+
+
+8/15/05 - 4:00 - michael
+Test patch to make content editing usable without TIDY.  Reportedly didn't work too well, but can't be sure.
+
+
+07/29/04 - 10:40 - michael
+Lots of small updates to the test taking procedure.  It's broken up into a separate service (test) and some of the supporting libraries have been modified to get rid of some apparently premature optimizations.  Also, the system should be storing the test option values, not the answer values specifically (storing "2" instead of "The red rabbit fell down")
+
+
+06/29/04 - 10:40 - michael
+Updated classroom chat system.  Smoother refreshing.  Not 100% sure how well it works with IE yet, but it's running on tccd right now.  If all goes well, it'll be rolled out to general school chat too.
+
+
+06/28/04 - 10:22 PM - michael
+Added option for md5() passwords in mysql database.  This shouldn't be used long-term, but rather the md5 or other hashing mechanism should be done in the app itself and send to the db for comparison so that the original isn't xmitted across the network, and to make the system more portable (mssql doesn't have md5).  I wasn't sure if md5() in PHP is the same as MySQL.  Shouldn't be a hard change to make, except for the mysql-specific INSERTS in the SQL statement files (should be redone in PBDO anyway!)
+------
+
+06/20/2004 10:30 PM - michael
+Changed contact info
+
+
+06/06/2004 11:55 PM - mark
+Fixed bug #960571
+
+06/06/2004 6:15 PM - michael
+Added area in 'student management' for teachers to create subgroups of students.  
+Upon creation of each subgroup, a forum in that classroom is created, and only members of that group have the ability to view that forum.  Forum navigation still needs to be cleaned up some, but it's functional.  
+setup.sql changes in forum, classmgr
+/lib now has ClassGroup.php and ClassGroupMember.php
+/classmgr has new administrative files for studentgroups
+/classroom has updated discussion* files
+
+-------------------------
+06/04/2004 10:15 PM - michael
+Added TCCD changes to the standard logicampus tree.  This set of changes is an upgrade to the forum system to allow for 2 file attachments per post.  I need to find where the PBDO is defined, as the table definitions need to change.  Changed files in /forum (pbdo objects) and classroom (discussion*.lcp files and templates)
+-------------------------
+
+04/18/2004 11:45 PM - mark
+Lots of bug fixes and small layout changes.
+Fixed bug where students were invisible to classes with enrollment as a
+multiple of 13.
+Fixed bug in answer multiple choice questions.
+Started on assessment backup feature for easier testing of problem tests.
+
+
+01/11/03 8:27 PM - zorka
+administration/formmgr -
+Export sql didn't have template.  Added template, fixed.
+
+
+01/11/03 8:22 PM - zorka
+classmgr/users -
+FACULTY STUDENT MANAGEMENT
+
+This update adds the ability for faculty to manage student accounts for their class.  The features include:
+
+* ability to search existing accounts and colllect users to add them to the class
+* drop active students
+* re-activate dropped students
+* view profile and other information on one screen
+
+The following is the built-in help information:
+
+ About Student Management
+Student Management allows you to locate prospective students and add them to your class. You are only allowed to search for users that have existing accounts in the system. If you need a student added to the system so you can make them a member of your class, please consult your LogiCampus administrator.
+
+How-to add a student(s)
+Use the built-in search tools to locate a student(s) in the system to add to your class. You can search for students that are enrolled in other classes, by the first letter of their username, or search by email address, username and other profile information using the 'show users where'.
+
+Collecting Users
+After you search for a student(s), you select the appropiate checkbox next to the desired accounts you wish to add to your class and press the 'Collect Users' button. Collecting users allows you to search for students using the various search tools and then add students all at once to your class. This feature is handy when you first populate students into your class.
+
+Class Roster
+The class roster displays all students that are enrolled in your class or that were dropped from your class. Students that are active students in the class are shown in green as 'Active'. Students that have dropped or that have been dropped are shown in red as 'Dropped'.
+
+The action column provides the ability to drop students or re-activate students. Simply click the link in the action column to perform that action on that student.
+
+
+01/09/03 2:28 PM - zorka
+data/sql - 
+The ability to give certain groups permission to be able to update
+enrollments.  Note:  If someone is given access to the enrollment,
+they have to have access to users.
+
+01/09/03 12:11 PM - zorka
+adminstration - 
+This adds the ability for an admin to manage student enrollment.  The
+main account interface was modified to display all semesters and
+classes and a user is enrolled in.  This should help helpdesk staff to
+know which classes a user is or is not enrolled in.  When you select
+the 'manage class enrollment' it shows the classes a student is
+enrolled in for the current semester.  There is a drop down to select
+another semester to view.
+
+Other features include the ability to remove a student from a class,
+suspend and active a student for a given class.
+
+01/06/03 8:45 PM - zorka
+install - fixed installer so it doesn't add all of the fake user
+accounts
+install - added LANG_PATH to the defines so the translation things
+mark added work
+
+12/20/03 1:00 PM - mark
+core system - added translation system, spanish and chinese has been
+started
+
+12/17/03 7:00 PM - mgkimsal
+users/blog - Added the ability for users to have their own blog (not
+stable, still needs testing)
+
+12/09/03 2:00 PM - mark
+gradebook - Added a feature to the gradebook where you can drop
+a number of low grades from any gradebook category.  Patched some
+security holes.
+
+12/07/03 3:05 - mgkimsal
+unknown/install	- Change to add define for MAX_COURSES
+unknown/install - Change to put in 'include sample data' in installer
+administration/courses - Change to check for MAX_COURSES
+
+12/01/03 12:00 PM - zorka
+adminstration/classes - Removed text on the 'assignments folder' that says this
+is where to find assignments that have been uploaded by students.
+This was the original way it was planned to work, but the workflow was
+changed to make it easier to teachers to grade assignments.
