@@ -1,0 +1,89 @@
+<?php
+
+
+include_once(LIB_PATH."eventsObj.php");
+ 
+
+class day extends BasicAuth 
+{
+	
+	var $presentor = 'htmlPresentation';
+		
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+	
+	function Run($db,&$u,&$lc,&$t) 
+	{
+		$lc->templateStyle = 'private';
+		
+		$lc->templateName = "day_main";
+		
+		$mut = $lc->getvars['m'];
+		$yut = $lc->getvars['y'];
+		$dut = $lc->getvars['d'];
+		$month = $lc->getvars['m'];
+		$day = $lc->getvars['d'];
+		$year = $lc->getvars['y'];
+
+		$ut = strtotime("$mut/$dut/$yut");
+		$start = strtotime("$mut/1/$yut");
+		
+		// filters apply from month view
+		$op_taken  = array();
+		$op_taught = array();
+		
+		if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
+		{	if ($u->sessionvars['mastercalendar']['overallviews'] == 'vtaken')
+			{
+				foreach($u->classesTaken as $v)
+				{	$op_taken[] = trim($v->id_classes);
+				}
+				$op_taken = array_unique($op_taken);
+			}
+		}
+		
+		if (isset($u->classesTaught) && is_array($u->classesTaught) && count($u->classesTaught) > 0)
+		{	if ($u->sessionvars['mastercalendar']['overallviews'] == 'vteach')
+			{
+				foreach($u->classesTaught as $v)
+				{	$op_taught[] = trim($v->id_classes);
+				}
+				$op_taught = array_unique($op_taught);
+			}
+		}
+		// end filterage
+		
+		$c = new cali($start,(strtotime("+1 months",$ut)-1), '', array_merge($op_taught, $op_taken), array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->linkMonthName = true;
+		$c->calWidth = '190';
+		$c->monthReviewURL = modurl('main/d='.$lc->getvars['d']);
+		
+		$c->eventDayURL = modurl('day');
+		$c->eventCountURL = modurl('day');
+		
+		$t['tinyCal'] = $c->renderMonth($lc->getvars['m'], $lc->getvars['y']);
+
+		# Returns all of the events schedule for the day passed to it.
+		$dayView = new cali($ut, ($ut+86399), '', array_merge($op_taught, $op_taken), array_unique($u->groups));
+
+		$dayView->starttime = $this->_START_TIME;
+		$dayView->endtime = $this->_END_TIME;
+		
+		$dayView->monthReviewURL = modurl('day/d='.$lc->getvars['d']);
+		$dayView->eventDayURL = modurl('day');
+		$dayView->eventCountURL = modurl('day');
+		
+		$t['eventHtml'] = $dayView->renderDayFull();
+		
+		$t['title'] = "Events for $month/$day/$year";
+		$dayView->width = "100%";
+		$dayView->showEventsInDay = "N";	
+	}
+	
+
+}
+
+?>

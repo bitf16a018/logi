@@ -1,0 +1,343 @@
+<?
+/*
+ *
+ * show various reports to the instructor of grades
+ *
+ */
+
+include_once(LIB_PATH."gradeBookObj.php");
+include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH.'ClassGradebook.php');
+
+class report extends FacultyService {
+
+	var $presentor='htmlPresentation';
+
+	// links
+	var $sectionTitle = 'Gradebook Report Generator';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => '%assessments/',
+	);
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
+		'Control Panel' => 'main/event=controlPanel/'
+	);
+
+/*
+ *
+ * Show form for searching/types of reports
+ * 
+ * Input data: none
+ * Output data: display
+ *
+ */
+	function Run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='report_main';
+
+		$t['cats'] = ClassGradebookCategoriesPeer::doSelect(
+			'id_classes="'.$u->activeClassTaught->id_classes.'"'
+		);
+
+		// get sections
+		$c = $u->activeClassTaught->id_classes;
+		$sql = "select sectionNumbers from classes where id_classes=$c";
+		$db->queryOne($sql);
+		$s = explode("\n",$db->Record[0]);
+		$t['sections'] = $s;
+	}
+
+	// Page that Run posts to. calls the chosen report function
+	function showReportRun(&$db,&$u,&$lc,&$t) {
+
+		switch ( $lc->postvars['rtype'] ) {
+			case 'fullgrid':
+				$this->fullGridRun($db,$u,$lc,$t);
+				return;
+			case 'classStandards':
+				$this->classStandardsRun($db,$u,$lc,$t);
+				return;
+			default:
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'Unknown report type.';
+				return;
+		}
+	}
+
+	// displays them a nice, printable chart of all the students'
+	// grades for all entries
+	// Adam 2003-08-13
+	function fullGridRun(&$db, &$u, &$lc, &$t) {
+
+		// How many entries are displayed per page? (including student name)
+		$columnsPerPage = 10;
+
+		$this->presentor = 'emptyPresentation';
+		$lc->templateName = 'report_classGradesTable';
+		$cats = array_keys($lc->postvars['cats']);
+
+		// pull in gradebook preferences
+		$gradebook = ClassGradebook::load( array(
+			'id_classes' => $u->activeClassTaught->id_classes,
+		) );
+
+		//pull in all students no matter what
+		// put a W next to non-active students
+		
+		// filterActive needs to be null to get aeverything, not 0
+		#$gradebook->filterActive = 0;
+		$gradebook->filterBySection = $lc->postvars['section'];
+
+		// need to pass this to report page for printing.
+		
+		$t['section'] = $lc->postvars['section'];
+
+		// tell the gradebook object to do a bunch of work
+
+		$gradebook->loadCategories();
+		$gradebook->getEntries();
+		$gradebook->getStudents();
+		$gradebook->loadVals();
+
+
+		if ( count($gradebook->students) == 0 )
+		{
+			$t['table'] = 'There are no students in your class. You must have students to view the gradebook.';
+			return;
+		}
+
+		//associate vals and students based on a number of criteria
+		// (dropped, due date ...)
+		$gradebook->setStudentVals();
+
+
+		$gradebook->calculateEntryWeights();
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
+
+		// filter out categories that were not requested
+		reset($gradebook->entries);
+		foreach ($gradebook->entries as $entid => $entry) {
+			if ( in_array($entry->idClassGradebookCategories, $cats) ) continue;
+			unset($gradebook->entries[$entid]);
+		}
+
+/*
+		foreach ( $gradebook->students as $user => $student ) {
+			foreach ( $student->vals as $entid => $val ) {
+				if ( in_array($gradebook->entries[$val->idClassGradebookEntries]->idClassGradebookCategories,
+					$cats) ) continue;
+				unset($gradebook->students[$user]->vals[$entid]);
+			}
+		}
+*/
+
+
+		// set some stuff up
+		// (the +1 is for the totals column at the end)
+		$tableCount = ceil( (count($gradebook->entries)+1) / ($columnsPerPage - 1) );
+		$tables = array();  // array of tables, rows, then cells
+
+		// create the header of each table
+		$counter = $columnsPerPage;
+		reset($gradebook->entries);
+		for ( $x=0; $x<$tableCount; $x++ ) {
+			$tables[$x][0][] = '&nbsp;';
+			$counter--;
+			while ( $counter != 0 && list($entid,$entry) = each($gradebook->entries) ) {
+			  	$tables[$x][0][] = $entry->gradebookCode.
+					' ('.$entry->totalPoints.')';
+				$counter--;
+			}
+			$counter = $columnsPerPage;
+		}
+		$tot = '<b>TOTAL ('.$gradebook->possiblePoints.')</b>';
+		if ( $counter == 0 ) {       $tables[$x][0][] = $tot; }
+		else                 { $x--; $tables[$x][0][] = $tot; }
+
+		
+		// get all students' grades and populate the tables
+		$counter = $columnsPerPage;
+		$curRow = 1; // start on the second row
+		reset($gradebook->students);
+		while ( list($username,$stud) = @each($gradebook->students) ) {
+
+			reset($gradebook->entries);
+			for ( $x=0; $x<$tableCount; $x++ ) {
+				if ($stud->isWithdrawn() ) {
+					$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname . ' W';
+				} else { 
+					$tables[$x][$curRow][] = $stud->lastname.', '.$stud->firstname;
+				}
+
+				$counter--;
+				while ( $counter != 0 && list($entid,$entry) = @each($gradebook->entries) ) {
+					unset($text);
+					if ( strtolower(get_class($stud->vals[$entid])) != 'classgradebookval') {
+						$tables[$x][$curRow][] = '?';
+						$counter--;
+						continue;
+					}
+
+					$text = !isset($stud->vals[$entid]->score) ? '?' : sprintf("%0.2f",$stud->vals[$entid]->score);
+					if ( $stud->vals[$entid]->isDisqualified() ) {
+						$text = 'd '.$text;
+					}
+
+					$tables[$x][$curRow][] = $text;
+					$counter--;
+				}
+				$counter = $columnsPerPage;
+			}
+
+
+
+
+			if ( $stud->isWithdrawn() ) {
+				$tot = 'Withdrawn';
+			} else {
+
+				// push on the total in the total column
+				if ( $gradebook->calculationType == 1 ) {
+					$tot = $stud->weightedAverage.'% / '
+						.$gradebook->getLetterGrade($stud->weightedAverage, $stud->possiblePoints);
+				} else {
+					$tot = $stud->totalPointsEarned.' / '
+						.sprintf( "%0.2f", $stud->totalPointsEarned / $stud->possiblePoints * 100).'% / '
+						.$gradebook->getLetterGrade($stud->totalPointsEarned, $stud->possiblePoints);
+				}
+			}
+
+			if ( $counter == 0 ) {       $tables[$x][$curRow][] = $tot; }
+			else                 { $x--; $tables[$x][$curRow][] = $tot; }
+
+			$curRow++;
+		}
+
+
+		// create the header of each table
+		$counter = $columnsPerPage;
+		reset($gradebook->entries);
+		for ( $x=0; $x<$tableCount; $x++ ) {
+
+			if ( $gradebook->calculationType == 1 ) $tables[$x][$curRow][] = 'Weighted %';
+			else                                    $tables[$x][$curRow][] = 'Total Points';
+			$counter--;
+
+			while ( $counter != 0 && list($entid,$entry) = each($gradebook->entries) ) {
+				if ( $gradebook->calculationType == 1 ) $tables[$x][$curRow][] = $entry->weightedPercent;
+				else                                    $tables[$x][$curRow][] = $entry->totalPoints;
+				$counter--;
+			}
+			$counter = $columnsPerPage;
+		}
+		$tot = '<b>'.$gradebook->possiblePoints.'</b>';
+		if ( $counter == 0 ) {       $tables[$x][$curRow][] = $tot; }
+		else                 { $x--; $tables[$x][$curRow][] = $tot; }
+
+
+		// render the table
+		if ($t['section']) { $section = " - ".$t['section']; }
+		foreach ( $tables as $pagenum => $table )
+		{
+			$t['table'] .= "<div style=\"page-break-after:always;margin-top:20px;\">\n";
+			$t['table'] .= "<table width=\"100%\" border=0><tr><td>Gradebook for "
+				.$u->activeClassTaught->courseName."<br />".$u->activeClassTaught->facultyName
+				." $section</td><td valign=\"bottom\" align=\"right\">Page ".($pagenum+1)." of ".$tableCount
+				."</td></tr></table>\n";
+			$t['table'] .= "<table width=\"100%\" cellpadding=2 cellspacing=0 border=0 style=\"font-size:8pt;border:1px solid black;\">\n";
+
+			foreach ( $table as $rownum => $row )
+			{
+				$tdstyle = array();
+				if ($rownum % 3 == 0) $tdstyle[0] = 'border-bottom:1px solid black;';
+				if ($rownum == count($gradebook->students)+1) $tdstyle = array();
+
+				if ($rownum == 0) $trstyle = ' style="background-color:black;color:white;font-weight:bold;"';
+					else $trstyle = '';
+
+				$t['table'] .= "<tr$trstyle>\n";
+
+				foreach ( $row as $colnum => $cell )
+				{
+					if ( $colnum != 0 ) $tdstyle[] = 'border-left:1px solid black;';
+					$t['table'] .= "<td"
+						.(count($tdstyle) ? ' style="'.implode('',$tdstyle).'"' : '')
+						.">$cell</td>\n";
+				}
+				$t['table'] .= "</tr>\n";
+			}
+			$t['table'] .= "</table>\n";
+if (!is_array($tables[($pagenum+1)])) {  // done
+$t['table'] .= "<br/>";
+$t['table'] .= "<p style='font-size:8pt;'>Signature:<u>";for ($x=0;$x<100;++$x) { $t['table'] .="&nbsp;";}
+$t['table'] .= "<br/>";
+$t['table'] .= "<br/>";
+$t['table'] .= "<p style='font-size:8pt;'>Date:   <u>";for ($x=0;$x<100;++$x) { $t['table'] .="&nbsp;";}
+$t['table'] .="</u></p>";
+$t['table'] .= "<p style='font-size:8pt;'><i>This document was generated on ".date('M j, Y \a\t g:i A', time())."</i></p>";
+
+}
+			$t['table'] .= "</div>\n";
+		}
+
+	}
+
+
+	// Prints out a summary of all entries and what they're worth
+	function classStandardsRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'report_classStandards';
+		$this->presentor = 'emptyPresentation';
+		$cats = array_keys($lc->postvars['cats']);
+		
+		$gradebook = ClassGradebook::load( array(
+			'id_classes' => $u->activeClassTaught->id_classes,
+		) );
+
+		$gradebook->filterBySection = $lc->postvars['section'];
+
+		// tell the gradebook object to do a bunch of work
+		$gradebook->loadCategories();
+		$gradebook->getEntries();
+
+		// filter out categories that were not requested
+		reset($gradebook->entries);
+		foreach ($gradebook->entries as $entid => $entry) {
+			if ( in_array($entry->idClassGradebookCategories, $cats) ) continue;
+			unset($gradebook->entries[$entid]);
+		}
+
+		$gradebook->calculateWeightedAverages();
+
+		$t['gradebook'] = $gradebook;
+
+		// get the categories and remove ones that weren't requested
+		$t['cats'] = ClassGradebookCategoriesPeer::doSelect(
+			'id_classes="'.$u->activeClassTaught->id_classes.'"'
+		);
+		foreach ($t['cats'] as $index => $cat) {
+			if ( in_array($cat->idClassGradebookCategories, $cats) ) continue;
+			unset($t['cats'][$index]);
+		}
+
+		// make a nice grading scale array to make it easier in the template
+		$t['gradeScale'] = array(
+			'A = '.$gradebook->aLower.'-100',
+			'B = '.($gradebook->aLower - .01).'-'.$gradebook->bLower,
+			'C = '.($gradebook->bLower - .01).'-'.$gradebook->cLower,
+			'D = '.($gradebook->cLower - .01).'-'.$gradebook->dLower,
+			'F = 0-'.($gradebook->dLower - .01)
+		);
+	}
+
+}
+
+?>

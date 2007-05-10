@@ -1,0 +1,101 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+//
+// ettendance - electronic attendance.
+// 12/10/03 - mgk
+// things to do
+// link to detailed logs of each user (both as a whole and for the particular class viewed)
+// count failed and valid login attempts
+//
+// possibly convert to using datagrid - can someone figure out a single SQL clause to do this?
+// 
+
+include(LIB_PATH. 'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'classFaqs.php');
+
+
+class ettendance extends FacultyService 
+{
+
+	var $presentor = "htmlPresentation";
+
+	var $cleanedArray = array();
+	
+	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $applinks = array(
+	);
+
+#	var $inactivelinks = array( 'FAQ' );
+	var $sectionTitle = 'Ettendance';
+	
+	
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$id_class = (int)$lc->getvars['id_classes'];
+		$db->queryOne("select sectionNumbers from classes where id_classes = '$id_class' and facultyId='".$u->username."'");
+
+		if ($db->Record[0]=='') { // we have nothing
+						// might not be our class, or bad data
+			$this->presentor='errorMessage';
+			$t['message'] = 'Failed attempt - you have no access to retrieve this data';
+			return;
+		}
+
+		$numbers = explode("\n",$db->Record[0]);
+		$id_semester = $u->activeClassTaught->id_semesters;
+
+		$sql = 'select * from class_student_sections where semester_id= '.$id_semester.' and sectionNumber='.implode(" or sectionNumber=",$numbers);
+
+		$db->query($sql);
+		while($db->next_record()) { 
+			$student[$db->Record['id_student']] = $db->Record['dateWithdrawn'];
+		}	
+
+		$db->queryOne("Select * from semesters where id_semesters='$id_semester'");
+		$start = strtotime($db->Record['dateStart']);
+		$end = strtotime($db->Record['dateEnd']);
+
+// we'll only show logins this semester, not how
+// many times someone has come into a particular class area
+ 
+		while(list($k,$v) = each($student)) {
+// select count of good logins this semester
+			$db->queryOne("select count(*) from lc_users_login_attempt where login_attempt>=$start and login_attempt<=$end and username='$k' and login_status=1");
+			$studentCount[$k] = $db->Record[0];
+		}
+
+// sort the student list
+		@ksort($student);
+
+		$t['students'] = $student;
+		$t['studentCount'] = $studentCount;	
+	
+		$lc->templateStyle='private';
+		$lc->templateName="ettendance_main";
+		
+	}
+}
+?>

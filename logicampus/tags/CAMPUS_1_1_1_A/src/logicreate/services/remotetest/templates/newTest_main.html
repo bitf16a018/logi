@@ -1,0 +1,24 @@
+<?=$t['sectionheader'];?>
+<h2>Add a new test</h2>
+<span style="color: red;"><?=$t['message'];?></span>
+<br>
+<form method="POST" action='<?=modurl("newTest/event=add");?>' enctype='multipart/form-data'>
+
+<br>
+<table>
+<tr>
+	<td>Email address of test administrator</td>
+	<td><input type='text' name='email' maxlength='60' size='20' value='<?=$t['email'];?>'></td>
+</tr>
+<tr>
+	<td>Test file to send</td>
+	<td><input type='file' name='testfile'></td>
+</tr>
+<tr>
+	<td>Description/notes</td>
+	<td><textarea name='description' rows='6' cols='30'><?=$t['description'];?></textarea></td>
+</tr>
+</table>
+<input type='submit' value='Add test'>
+</form>
+

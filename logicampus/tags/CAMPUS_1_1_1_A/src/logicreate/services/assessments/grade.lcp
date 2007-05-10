@@ -1,0 +1,513 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'AssessmentLog.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+
+class grade extends FacultyService {
+
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Grade Class Assessments';
+
+	var $data = array();  # cleaned form data
+	var $applinks = array (
+		'List Assessments' => 'main',
+		'Add Assessment' => 'main/event=add'
+		);
+	var $navlinks = array(
+		'Calendar' => 'cal',
+		'Gradebook' => '%gradebook'
+	);
+
+	var $inactivelinks = array (
+		'Add Assessment' => 'main/event=add'
+	);
+
+	var $authorizer = 'facultyOnlyAuth';
+
+
+	/*
+	 * Shows all students in the class and links to their test
+	 */
+	function run($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'grade_main';	
+		$id = (int)$lc->getvars['id']; # assessemnt ID
+
+
+		$this->applinks['Re-Grade Assessment'] = 'grade/event=regrade/id='.$id;
+		$t['assessment'] = Assessment::load($id, $u->activeClassTaught->id_classes);
+		if(! is_object($t['assessment']) ) {
+			$lc->templateName = 'grade_error';
+			$t['message'] = '<h3>Error</h3>
+							 We were unable to load the assessment you are trying to grade.
+							 Please go back to the previous page and try again.  If this
+							 error persists then please contact the help desk.';
+			return;
+		}
+		$t['possiblePoints'] = $t['assessment']->possiblePoints;
+
+
+		$gb = ClassGradebook::load(array('id_classes' =>
+		$u->activeClassTaught->id_classes));
+
+		$gb->getStudents();
+		$t['students'] = $gb->students;
+
+		# get other meta information
+		while(list($studentId, $stuObj) = @each($t['students']))	{
+			/**
+			 *	Since gradebook class returns all students in a class
+			 *	without respecting the constraint of *active* or *inactive*
+			 *	status, we have to make that choice here and remove inactive students
+			 */
+			if ($stuObj->active == false)	{
+				unset($t['students'][$studentId]);
+				continue; // restart the while loop, waste to continue on
+			}
+			
+			$log = 	$t['assessment']->getLastLogEntry($studentId);
+			if (is_object($log) )	{
+				$log->updateTotalCount();
+				$t['students'][$studentId]->log = $log;
+			}
+		}
+		reset($t['students']);
+
+
+		// get the scores to show as well
+		$db->query("SELECT SUM(points_given - points_earned) as difference, SUM(points_earned) as earned, student_id  
+			FROM `assessment_answer`
+			WHERE assessment_id = ".$t['assessment']->getPrimaryKey()."
+			GROUP BY student_id");
+
+		while( $db->next_record() ) {
+			$t['scores'][$db->Record['student_id']] = sprintf('%.2f',$db->Record['earned'] + $db->Record['difference']);
+		}
+
+	}
+
+
+	function viewRun($db, &$u, &$lc, &$t)	{
+		$id = (int)$lc->getvars['id'];
+		$studentId = $lc->getvars['studentid'];
+		if (!$studentId || !$id)	{
+			$t['message'] = '<h3>Error</h3>No student id and assessment id was given.
+			Please go back and try again.  If you continue to get this error, please contact
+			the help desk.';
+			$lc->templateName = 'grade_error';
+			return;
+		}
+		$t['studentid'] = $lc->getvars['studentid'];
+		# load assessment
+		$t['assessment'] = Assessment::load($id, $u->activeClassTaught->id_classes);
+		if ($t['assessment'])	{
+			$log = $t['assessment']->getLastLogEntry($studentId);
+			if (is_object($log) )	{
+				$log->updateTotalCount();
+			}
+	
+			if (!$log->endDate)	{
+				$t['message'] = 'This assessment was never finished by the student.';
+			}
+	
+			include_once(LIB_PATH.'LC_html.php');
+			include_once(LIB_PATH.'ClassGradebook.php');
+			$gb = ClassGradebook::load(array('id_classes'=>$u->activeClassTaught->id_classes));
+			$lc->templateName = 'grade_view';
+		
+			$t['questions'] = $t['assessment']->getQuestionsAndAnswers($studentId, $u->activeClassTaught->id_classes);
+			
+			$this->sectionTitle .= ' - '.$t['assessment']->displayName.' for
+			'.$studentId;
+			$t['questions_total'] = 0;
+			$t['questions_total_points'] = 0;
+				
+			foreach($t['questions'] as $k=>$v) 	{
+				$t['questions_total_points'] += $v->questionPoints;
+				if ($v->answer->pointsGiven == "0" || $v->answer->pointsGiven > 0)	{
+					$t['total_points_earned'] += $v->answer->pointsGiven;
+				} else {
+					$t['total_points_earned'] += $v->answer->pointsEarned;
+				}
+				$t['questions_total']++;
+			}
+		
+			$t['percentage'] = number_format($t['total_points_earned'] / $t['questions_total_points'], 4) * 100;
+			#$t['letter_grade'] = $gb->getLetterGrade($t['percentage'],$t['questions_total_points']);
+			$t['letter_grade'] = $gb->getLetterGrade($t['total_points_earned'],$t['questions_total_points']);
+	
+			reset ($t['questions']);
+			$t['assessmentId'] = $t['assessment']->assessmentId;
+		} else {
+			$t['message'] = '<h3>Error</h3> The assessment for this student does not exist.
+			If you receive this error, please contact the help desk immediately.';
+			$lc->templateName = 'grade_error';
+			return;
+		}
+	}
+	
+	function updatePointsRun($db, &$u, &$lc, &$t)	{
+		$asmt = Assessment::load($lc->getvars['id'], $u->activeClassTaught->id_classes);
+		$entry = $asmt->loadGradebookEntry();
+		$entryId = $entry->getPrimaryKey();
+
+		$qst = $asmt->getQuestionsAndAnswers($lc->getvars['studentid'], $u->activeClassTaught->id_classes);
+		$questionCount = count($qst);
+		
+		for($i=0; $i< $questionCount; $i++)	{
+			list($answerId, $points) = @each($lc->postvars['pointsGiven']);
+			
+			$answer = $qst[$i]->answer;
+			if (is_object($answer) ) {
+				if ($answer->assessmentAnswerId == $answerId) {
+					if ($points == '') {
+						$points = NULL;
+					}
+					$answer->pointsGiven = $points;
+					$answer->save();
+				}
+			} else {
+			# what if there was never an answer entered?
+				# we create a blank answer, this is needed so the 
+				# instructor can give points if they want
+				$answer = new AssessmentAnswer();
+				$answer->assessmentQuestionId = $qst[$i]->assessmentQuestionId;
+				$answer->studentId = $lc->getvars['studentid'];
+				$answer->idClasses = $u->activeClassTaught->id_classes;
+				$answer->assessmentId = $lc->getvars['id'];
+				if ($points == '') {
+					$points = NULL;
+				}
+				# assign points now
+				$answer->pointsGiven = $points;
+				$answer->save();
+			}
+
+		}
+		
+		$update = $asmt->updateGradebookScore($lc->getvars['studentid'], $u->activeClassTaught->id_classes,$entryId);
+##		if ($update)
+##		{
+			$u->sessionvars['message'] = 'Your gradebook was updated with the new score.';
+			$t['url'] =
+			#APP_URL.'gradebook/assessment/event=editAsmt/id='.$asmt->idClassGradebookEntries;
+			APP_URL.'assessments/grade/id='.$asmt->assessmentId;
+			$this->presentor = 'redirectPresentation';
+			return;
+##		} else {
+##			$t['message'] = 'There was a problem saving this student\'s updated
+##			grade into the gradebook.';
+##			$lc->templateName = 'grade_error';
+##			return;
+##		}
+	}
+
+	function markCompletedRun($db, &$u, &$lc, &$t)
+	{
+		$id = $lc->getvars['id'];
+		$asmt = Assessment::load($id, $u->activeClassTaught->id_classes);
+		$log = $asmt->getLastLogEntry($lc->getvars['studentid']);
+		if (is_object($log) ) 
+		{
+			$log->endDate = time();	
+			$log->save();
+		} else {
+			#  we need to create a log entry for this student
+			$time = time();
+			$log = new AssessmentLog();
+			$log->assessmentId = $id;
+			$log->idStudent = $lc->getvars['studentid'];
+			$log->startDate =  $time;
+			$log->endDate = $time;
+			$log->idClasses = $u->activeClassTaught->id_classes;
+			$log->save();
+		}
+		
+		$t['message'] = 'Assessment was marked completed for Student ID:
+		'.$lc->getvars['studentid'];
+		$this->run($db, $u, $lc, $t);
+		return;
+	}
+
+	# Allows the teacher to reset the retry for the student (in case the student screws up)
+	# Essentially what we do is remove their last log entry
+	function resetRetryRun($db, &$u, &$lc, &$t)
+	{
+		$id = $lc->getvars['id'];
+		$asmt = Assessment::load($id, $u->activeClassTaught->id_classes);
+		$log = $asmt->getLastLogEntry($lc->getvars['studentid']);
+		if (is_object($log) ) 
+		{
+			AssessmentLogPeer::doDelete($log);
+		} else {
+			$t['message'] = 'There was a problem resetting the log entry for this student.
+			Please contact the help desk if this problem persists.';
+		}
+
+		$t['message'] = 'The retry was reset so the student can take this exam again if
+		needed.  Please be sure the availability dates are within the current range so the
+		student can access the assessment.';
+		$this->run($db, $u, $lc, $t);
+		return;
+
+	}
+
+	function regradeRun($db, &$u, &$lc, &$t) {
+		$id = (int)$lc->getvars['id'];
+
+		$asmt = Assessment::load($id, $u->activeClassTaught->id_classes);
+		$entry = $asmt->loadGradebookEntry();
+		$entryId = $entry->getPrimaryKey();
+		print "<!-- entry id = $entryId -->\n\n";
+
+
+		if (!is_object($asmt) )
+		{
+			$t['message'] = '<h3>Error</h3> There was a problem loading the assessment.  Either this
+			assessment doesn\'t exist or you do not have privledge to modify it.';
+			$lc->templateName = 'grade_error';
+			return;
+		}
+
+		# Load gradebook to get the students
+		$gb = ClassGradebook::load(array("id_classes"=>$u->activeClassTaught->id_classes) );
+		if (!is_object($gb) )
+		{
+			$t['message'] = '<h3>Gradebook Error</h3> There was a problem loading your gradebook.  If
+			you continu to get this error, please contact the help desk.';
+			$lc->templateName = 'grade_error';
+			return;
+		}
+
+
+		//find all students who took this exam, if it's after exam close date,
+		// pull all students in the class
+		if ( $asmt->dateUnavailable < time() ) {
+			//pull all students from class, exam is over
+			$sectionClause = str_replace("\n"," or sectionNumber = ",$u->activeClassTaught->sectionNumbers);
+			$currentSemester = $u->activeClassTaught->id_semesters;
+			$db->query("select DISTINCT id_student from class_student_sections where (sectionNumber = $sectionClause) and active = 1 and semester_id = $currentSemester");
+			while ( $db->next_record() ){
+				$studentIds[] = $db->Record['id_student'];
+			}
+			$progress = 'Finished';
+			$numStudentIds = count($studentIds);
+
+		} else  {
+			//still in progress, find students who submitted answers
+			$db->query("select DISTINCT student_id from assessment_answer  where assessment_id = ".$asmt->assessmentId);
+			while ( $db->next_record() ){
+				$studentIds[] = $db->Record['student_id'];
+			}
+			$progress = 'In progress';
+			$numStudentIds = count($studentIds);
+		}
+
+		//__FIXME__ load all the values from assessment_answer for this assessment
+		// loop through one by one and regrade questions that might be wrong
+
+		ob_end_flush();
+
+		$questions = $asmt->getAssessmentQuestions();
+		//must reorder to get qids as keys,
+		// didn't know this function was PBDO
+		while ( list($blank,$q) = @each($questions) ) {
+			$newQuestions[$q->assessmentQuestionId] = $q;
+		}
+		$questions = $newQuestions;
+
+
+
+		while ( list($blank,$studentId) = @each($studentIds) ) {
+
+
+		//grab the answers for this student for the current assessment
+		$answer = AssessmentAnswerPeer::doSelect("assessment_id ='".$asmt->assessmentId."' AND
+		student_id='".$studentId."' AND id_classes='".$u->activeClassTaught->id_classes."'" );
+
+		foreach ($answer as $blank=>$answerObj) {
+			$answerList[$answerObj->assessmentQuestionId] = $answerObj;
+		}
+
+		foreach ($questions as $qid=>$qst) {
+			$answer = $answerList[$qid];
+			//we know all the students in this loop must need a grade for this exam
+			// whether they've turned in a test or the test date is over with
+			// so if this answer is not an object, create a blank one
+			if (! is_object($answer) ) {
+					$answer = new AssessmentAnswer();
+					$answer->assessmentQuestionId = $qst->assessmentQuestionId;
+					$answer->studentId = $studentId;
+					$answer->idClasses = $u->activeClassTaught->id_classes;
+					$answer->assessmentId = $asmt->assessmentId;
+					$answer->pointsEarned = 0;
+			}
+/*
+			if ($qst->questionType == QUESTION_MATCHING || $qst->questionType == QUESTION_MANSWER)
+			{
+				$answer->assessmentAnswerValues = serialize($lc->postvars['answer']);
+			} else {
+				$answer->assessmentAnswerValues = $lc->postvars['answer'];	
+			}
+*/
+			# Grade the answer
+			$qst->grade($answer);
+
+			unset($answer);
+		}
+		unset($answerList);
+		}
+
+
+
+
+		$db->query("SELECT SUM(points_given - points_earned) as difference, SUM(points_earned) as earned, student_id  
+			FROM `assessment_answer`
+			WHERE assessment_id = ".$asmt->getPrimaryKey()."
+			GROUP BY student_id");
+
+		while( $db->next_record() ) {
+			$scores[$db->Record['student_id']] = (float)$db->Record['earned'] + $db->Record['difference'];
+		}
+		$numStudents = count($scores);
+
+		// place what's in the scores array into GBV's
+		$keys = array();
+		$keys['id_classes'] = $u->activeClassTaught->id_classes;
+		$keys['id_class_gradebook_entries'] = $entryId;
+		foreach($scores as $student=>$score) {
+			print "<!-- $student $score -->\n";
+			$keys['username']  = $student;
+			$gbvObj = ClassGradebookVal::load ($keys);
+			if (is_object($gbvObj) ) {
+			print "<!-- $student has gbv of ".$gbvObj->idClassGradebookVal. "  -->\n";
+				$gbvObj->set('score', $score);
+				$gbvObj->_modified == true;
+				$gbvObj->save();
+			} else {
+				$gbvObj = new ClassGradebookVal();
+				$gbvObj->idClassGradebookEntries = $entryId;
+				$gbvObj->idClasses = $u->activeClassTaught->id_classes;
+				$gbvObj->username = $student;
+				$gbvObj->set('score', $score);
+				$gbvObj->save();
+			}
+		}
+
+
+//__FIXME__ update total possible points for both assessment and GBE
+// no, don't do this.  This should be done in assessments, update points
+
+
+		// student's don't regrade their own tests...
+		//MAK 10-14-2003
+		# Send the student back to the run
+		$t['message'] = "Assessment Re-graded, $numStudents scores were published to the gradebook.\n";
+		$t['message'] .= "<br/>Initially collected $numStudentIds student assessments.\n";
+		$t['message'] .= "<br/>This test is: ". $progress;
+		$this->run($db, $u, $lc, $t);
+	}
+
+
+
+	/**
+	 * only need this for messed up re-grade feature
+	 * should be take-out-able in a few days.
+	 * __FIXME__ take this out
+	 */
+	function fixAssessmentAnswersRun(&$db,&$u,&$lc,&$t) {
+
+		$db->query('select assessment.assessment_id,count(assessment_question.assessment_question_id) as countq 
+			FROM assessment
+			LEFT JOIN assessment_question ON assessment_question.assessment_id = assessment.assessment_id
+			GROUP BY assessment_question.assessment_id');
+		while ($db->next_record() ){
+			$qtotals[$db->Record['assessment_id']] = $db->Record['countq'];
+			print "Assessment #".$db->Record['assessment_id'] ." has ".$db->Record['countq']. " questions <br/>\n";
+		}
+
+		$sql = "SELECT count(assessment_answer_id) as acount,student_id FROM `assessment_answer` WHERE assessment_id = %d group by student_id";
+		$deleteSQL =  "DELETE FROM assessment_answer WHERE assessment_id = %d
+		AND student_id ='%s'
+		AND assessment_answer_values IS NULL";
+
+		while ( list($aid,$qcount) = each($qtotals) ) {
+			$db->query(sprintf($sql,$aid) );
+			while ($db->next_record() ) {
+				if ($db->Record['acount'] > $qcount ) {
+					print "STUDENT ".$db->Record['student_id']." has mismatched answers <br/>\nShould have $qcount, but does have ".$db->Record['acount']." ($aid)<hr/>\n";
+					$deletes[$db->Record['student_id']] = $aid;
+				++$ccx;
+				}
+			}
+
+			while (list ($kk,$vv) = @each($deletes) ) {
+	//			$db->query(sprintf($deleteSQL,$vv,$kk) );
+			}
+		unset($deletes);
+		}
+
+		print "Total mismatches $ccx";
+//		exit();
+	}
+
+}
+
+/*
+	this is good code for publishing to the GB in one step, but not
+	for recalculating what's wrong with answers
+
+		$db->query("SELECT SUM(points_given - points_earned) as difference, SUM(points_earned) as earned, student_id  
+			FROM `assessment_answer`
+			WHERE assessment_id = ".$asmt->getPrimaryKey()."
+			GROUP BY student_id");
+
+		while( $db->next_record() ) {
+			$scores[$db->Record['student_id']] = $db->Record['earned'] + $db->Record['difference'];
+		}
+
+		// place what's in the scores array into GBV's
+		$keys = array();
+		$keys['id_classes'] = $u->activeClassTaught->id_classes;
+		$keys['id_class_gradebook_entries'] = $entryId;
+		foreach($scores as $student=>$score) {
+			$keys['username']  = $student;
+			$gbvObj = ClassGradebookVal::load ($keys);
+			if (is_object($gbvObj) ) {
+				$gbvObj->score = $score;
+				$gbvObj->save();
+			} else {
+				$gbvObj = new ClassGradebookVal();
+				$gbvObj->idClassGradebookEntries = $entryId;
+				$gbvObj->idClasses = $u->activeClassTaught->id_classes;
+				$gbvObj->username = $student;
+				$gbvObj->score = $score;
+				$gbvObj->save();
+			}
+		}
+
+*/
+
+?>

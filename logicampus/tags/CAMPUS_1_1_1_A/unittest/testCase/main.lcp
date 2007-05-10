@@ -1,0 +1,99 @@
+<?
+
+class TestCase extends NoAuth {
+
+	var $presentor = 'emptyPresentation';
+
+	function run(&$db, &$u, &$lc, &$t) {
+
+		$d = dir(SERVICE_PATH.'testCase');
+		while (false !== ($entry = $d->read())) {
+			if ($entry == 'main.lcp' || strpos($entry,'~') || (substr($entry,0,1) == '.') || $entry == 'unitTest.php' ) continue;
+
+			if ( strpos($entry,'.php') ) {
+				include(SERVICE_PATH.'testCase/'.$entry);
+				$count++;
+				$tests[$count]['name'] = substr($entry,0,-4);
+				$tests[$count]['file'] = $entry;
+
+
+				$className = $tests[$count]['name'];
+				$tests[$count]['obj'] = new $className();
+			}
+		}
+		$t['tests'] = $tests;
+		$lc->templateName = 'main';
+	}
+
+
+	/**
+	 * foobar
+	 */
+	function performTestRun(&$db, &$u, &$lc, &$t) {
+
+		include(SERVICE_PATH.'testCase/'.$lc->getvars['test'].'.php');
+
+		$className = $lc->getvars['test'];
+		$testObj = new $className();
+
+		$testObj->run($db,$u,$lc,$t);
+		$tests[$k]['tests'] = $testObj->tests;
+
+		while ( list($k,$v ) = @each($testObj->tests) ) {
+			$test = '$testObj->results[\''.$k.'\'] = $testObj->'.$v['name'].'Test();';
+			eval($test);
+			//print "testing $k "; print_r($v); print " <br>";
+		}
+
+
+		while ( list($k,$v ) = @each($testObj->results) ) {
+			$t['results'][$k] = $v == $testObj->tests[$k]['expected']? 'PASS':'FAIL';
+		}
+
+		$t['s'] = $lc->getvars['test'];
+		$t['m'] = 'testCase';
+
+		foreach($testObj->results as $rslt=>$expect) {
+			if ($expect == $testObj->tests[$rslt]['expected']) {
+				$good++;
+			} else {
+				$bad++;
+			}
+		}
+		//$t['results'] = $testObj->results;
+		$t['css'] = ($bad == 0) ? 'PASS':'FAIL';
+	}
+
+
+	/**
+	 * show details about one particular test case
+	 */
+	function inspectRun(&$db, &$u, &$lc, &$t) {
+
+		$testName = $lc->getvars['t'];
+		$moduleName = $lc->getvars['m'];
+		$serviceName = $lc->getvars['s'];
+		include(SERVICE_PATH.'testCase/'.$serviceName.'.php');
+		$test = new $serviceName();
+
+		$file = fopen(SERVICE_PATH.'testCase/'.$serviceName.'.php','r');
+		if (!$file) exit();
+		flush();
+
+		print "<pre>\n";
+		while (!feof($file) ) {
+			$line = fgets($file);
+			while(list($k,$v) = each($test->tests) ) {
+				if ( strpos($line,'function '.$v['name']) ) {
+					$link = '<a name="'.$k.'"/>';
+				}
+			}
+			echo $link; unset($link);
+			reset ($test->tests);
+			echo htmlspecialchars($line);
+		}
+		fclose($file);
+		print "</pre>\n";
+	}
+}
+?>

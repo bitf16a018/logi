@@ -1,0 +1,5 @@
+<?=$t['sectionheader'];?>
+<? if ( $t['message'] ) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
+<? if ( $t['error'] ) print '<span style="color:red;">'.$t['message'].'</span>'; ?>
+<p>You currently have <?=$t['inactivePresCount'];?> presentation<?= $t['inactivePresCount'] == 1 ? '' : 's'; ?> pending approval for this class.</p>
+<?=$t['table'];?>

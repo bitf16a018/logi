@@ -1,0 +1,20 @@
+<?= $t['sectionheader']; ?>
+
+<div style="float:right">
+	<form style="margin:0px;" action="<?= appurl('classmgr/lessonManager/event=edit/id='.$t['lessonId']);?>">
+		<input type="submit" value="Cancel"/>
+	</form>
+</div>
+
+<form action="<?= appurl('classmgr/lessonManager/event='.$t['saveEvent'].'/id='.$t['lessonId']);?>" style="margin:0px;">
+
+<input type="submit" value="Save"/>
+<br/>
+<br/>
+
+<?php echo $t['table']->toHTML(); ?>
+
+<br/>
+<input type="submit" value="Save"/>
+</form>
+

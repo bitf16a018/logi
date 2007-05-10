@@ -1,0 +1,42 @@
+<h2>Helpdesk</h2>
+(faculty view)<BR>
+<a href="<?=appurl("helpdesk/helpdeskSubmit");?>">Submit a new request</a>
+<?=$t['table'];?>
+<h3>Open issues</h3>
+<table>
+	<? if (is_array($t['open'])) { ?>
+	<tr>
+		<td>Summary</td>
+		<td>Date</td>
+	</tr>
+	<? while(list($k,$v) = @each($t['open'])) { ?>
+	<tr>
+		<td><a href="<?=appurl("helpdesk/helpdeskView/".$v['helpdesk_id']);?>"><?=substr($v['summary'],0,30)."...";?></a></td>
+		<td><?=date("m/d/Y h:i A",$v['timedate_open']);?></td>
+	</tr>
+	<? } ?>
+	<? } else { ?>
+	<tr><td colspan='2'>No open items</td></tr>
+	<? } ?>
+</table>
+<hr>
+<h3>Closed issues</h3>
+<table>
+	<? if (is_array($t['closed'])) { ?>
+	<tr>
+		<td>Summary</td>
+		<td>Date opened</td>
+		<td>Date closed</td>
+	</tr>
+	<? while(list($k,$v) = @each($t['open'])) { ?>
+	<tr>
+		<td><?=substr($v['summary'],0,30)."...";?></td>
+		<td><?=date("m/d/Y h:i A",$v['timedate_open']);?></td>
+		<td><?=date("m/d/Y h:i A",$v['timedate_closed']);?></td>
+	</tr>
+	<? } ?>
+	<? } else { ?>
+	<tr><td colspan='2'>No closed items</td></tr>
+	<? } ?>
+</table>
+

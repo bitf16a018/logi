@@ -1,0 +1,49 @@
+<?
+
+class contentSearch extends HercAuth {
+
+	var $presentor = "AdminPresentation";
+
+	/**
+	 * signal the iframe to show html files by passing it 
+	 * parameters
+	 */
+	function listPagesRun (&$db, &$u, &$arg, &$t) {
+		$t['showDelete'] = $arg->getvars['d'];
+		if ($t['showDelete'] == 1 ) {
+			$t['contentArea'] = 'deletes';
+		} else {
+			$t['contentArea'] = 'files';
+		}
+		$arg->templateName = 'main';
+	}
+
+
+
+	/**
+	 * signal the iframe to call dialog.lcp and pass it image parameters
+	 */
+	function listImagesRun (&$db, &$u, &$arg, &$t) {
+
+		$arg->templateName = 'main';
+		$t['contentArea'] = 'images';
+
+	}
+
+
+
+	/**
+	 * show a list of templates for starting a new page
+	 */
+	function addPageRun (&$db, &$u, &$arg, &$t) {
+		$t['contentArea'] = 'templates';
+		$t['templateInclude'] = 'templates.html';
+		$arg->templateName = 'main';
+	}
+
+}
+
+function myPlainPresentation (&$obj, &$t) {
+	include_once(MOD_PATH."admin/templates/".$obj->templateName.".html");
+}
+?>

@@ -1,0 +1,11 @@
+<?php echo $t['sectionheader'];?>
+<?php
+		echo $t['table']->toHTML();
+?>
+
+
+<p>&nbsp;</p>
+<?php // TODO: only do this based on permissions ?>
+<form method="GET" action="<?php echo appurl('classforums/posts/event=newTopic'); ?>">
+	<input type="submit" value="Start New Topic"/>
+</form>
