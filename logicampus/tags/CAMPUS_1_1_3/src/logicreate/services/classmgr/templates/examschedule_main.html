@@ -1,0 +1,160 @@
+<?=$t['sectionheader'];?>
+
+<? if($t['msg']){ ?><span style="color:blue"><?=$t['msg'];?></span><? } ?>
+<? if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><? } ?>
+
+<? if ( $t['canEdit'] ) { ?>
+<!--<p>Click <a href="<?=modurl('examschedule/event=edit/id='.$t['classid']);?>">here</a> to edit your class's exam dates.<p> -->
+<?php
+	if ($obj->user->activeClassTaught->noexam == false)
+	{	
+		if ($t['hasapproved'] == false)
+		{
+		?>	<p>Click <a href="<?=modurl('examschedule/event=noexam/');?>">here</a> 
+			to indicate that this course requires alternative activites and will not have exams 
+			coordinated through the Center for Distance Learning.</p><?php
+		}
+	} else
+	{	?>	<p style="color: blue; font-weight: bold;">You have indicated that this course requires alternative activities and will not
+			have exams coordinated through the Center for Distance Learning. If you request exam
+			dates after this, this indication will be removed.</p><?php
+	}
+?>
+<p>Click <a href="<?=modurl('examschedule/event=edit/id='.$t['classid']);?>">here</a> to edit your class's exam dates.<p>
+
+<p>
+<? } ?>
+<!--
+<fieldset>
+<legend><b>General Testing Information</b></legend>
+
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td valign="top">
+
+<? if ( $t['esc']->_new ) { ?>
+<i>No data entered yet.</i>
+<? } else { ?>
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td align="right"><b>Overall Status:</b></td>
+	<td><?=$t['esc']->status;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Received Date:</b></td>
+	<td><?=date('M j @ h:i A', strtotime($t['esc']->receivedDate));?></td>
+</tr>
+<tr>
+	<td align="right"><b>On Campus Exam?</b></td>
+	<td><?=$t['esc']->oncampusExam;?></td>
+</tr>
+</table>
+<? } ?>
+
+	</td>
+
+<? if ( preg_match( '/Yes/', $t['esc']->oncampusExam ) ) { ?>
+	<td width=30>&nbsp;</td>
+	<td valign="top">
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td align="right"><b>South Campus:</b></td>
+	<td><?=$t['esc']->southCampus;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Southeast Campus:</b></td>
+	<td><?=$t['esc']->southeastCampus;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Northeast Campus:</b></td>
+	<td><?=$t['esc']->northeastCampus;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Northwest Campus:</b></td>
+	<td><?=$t['esc']->northwestCampus;?></td>
+</tr>
+</table>
+	</td>
+<? } ?>
+</tr>
+</table>
+</fieldset>
+-->
+<?
+if ($obj->user->activeClassTaught->noexam)
+{
+	
+	?>
+	<h4>You may use the area below to describe your alternate activies to
+	your students.</h4>
+	<form method="POST">
+	<textarea name="noexam" cols="65" rows="10"><?=$t['tx_noexam'];?></textarea>
+	<br>
+	<input type="submit" name="submit" value="Update Syllabus">
+	<input type="hidden" name="event" value="updateSyllabus">
+	</form>
+	<?php
+	$t['esc']->emClassDates = array();
+	return;
+}
+echo '<h3>Entered Testing Dates</h3>';
+
+$flag = false;
+foreach ( $t['esc']->emClassDates as $idExamScheduleDates => $obj ) {
+	if ( $obj->_new ) continue; 
+	$flag = true;
+	?>
+<fieldset>
+	<legend>
+	<b><?=date('M j', strtotime($obj->dateStart));?> - 
+		<?=date('M j', strtotime($obj->dateEnd));?> ( <?=$obj->status;?> )</b>
+	</legend>
+	
+	<table width="100%" border=0 cellpadding=5 cellspacing=0>
+	<tr>
+		<td valign="top" width="40%">
+			<table border=0 cellpadding=2 cellspacing=0 style="padding:5px 5px 5px 20px;">
+			<? if ( !$obj->_new ) { ?>
+			<tr>
+				<td align="right"><b>Title:</b></td>
+				<td><?=$obj->title ? $obj->title : '<i>Untitled</i>';?></td>
+			</tr>
+			<? } ?>
+			<tr>
+				<td align="right"><b>Status:</b></td>
+				<td><?=$obj->status;?></td>
+			</tr>
+			<? /** disabling this view 
+				if ( !$obj->_new ) { ?>
+			<tr>
+				<td align="right"><b>New Exam?</b></td>
+				<td><?=$obj->newExam;?></td>
+			</tr>
+			<? } 
+			**/ ?>
+			</table>
+		</td>
+		<? if ( $obj->instructions ) { ?>
+		<td valign="top">
+			<p>
+				<b>Instructions:</b><br />
+				<?=$obj->instructions;?>
+			</p>
+		</td>
+		<? } ?>
+		<? if ( $obj->note ) { ?>
+		<td valign="top">
+			<p>
+				<b>Note from Exam Manager:</b><br />
+				<?=$obj->note;?>
+			</p>
+		</td>
+		<? } ?>
+	</tr>
+	</table>
+</fieldset>
+<? }
+
+if ( !$flag ) print '<i>No dates have been entered.</i>';
+?>
+

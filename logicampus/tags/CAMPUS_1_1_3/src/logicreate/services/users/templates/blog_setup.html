@@ -1,0 +1,124 @@
+<h2>Web blog setup</h2>
+<a href="<?=modurl("blog/".$t['blog']->blogOwner);?>">back to the weblog main page</a>
+<hr>
+<style>
+	.blogTitle {
+		font-size: 180%;
+	}
+
+	.blogReplyTitle {
+		font-size: 120%;
+	}
+
+	.blogReplyTimedate {
+		font-size: 90%;
+	}
+
+	.blogReplyBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+	.blogEntryTitle {
+		font-size: 120%;
+	}
+
+	.blogEntryTimedate {
+		font-size: 90%;
+	}
+
+	.blogEntryBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+	.blogMessage{
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		color: #f00;
+		text-align: center;
+		font-size: 120%;
+	}
+
+</style>
+
+<? if ($t['message']) { ?>
+<div class='blogMessage'><?=$t['message'];?></div>
+<? } ?>
+
+<form method='post' action='<?=modurl("blog/".$t['blog']->blogOwner."/event=setupPost");?>'>
+<table width='100%'>
+	<tr>
+		<td style='vertical-align: top'>
+			Weblog name
+		</td>
+		<td style='vertical-align: top'>
+			<input type='text' name='blog[blogName]' value="<?=htmlspecialchars(stripslashes($t['blog']->blogName), ENT_QUOTES);?>">
+		</td>
+	</tr>
+	<tr>
+		<td style='vertical-align: top'>
+			Weblog description 
+		</td>
+		<td style='vertical-align: top'>
+			<input type='text' name='blog[blogDescription]' value="<?=htmlspecialchars(stripslashes($t['blog']->blogDescription), ENT_QUOTES);?>">
+		</td>
+	</tr>
+	<tr>
+		<td style='vertical-align: top'>
+			Notify this email address when comments are added:	
+		</td>
+		<td style='vertical-align: top'>
+			<input type='text' name='blog[blogEmailNotify]' value="<?=htmlspecialchars(stripslashes($t['blog']->blogEmailNotify), ENT_QUOTES);?>">
+		</td>
+	</tr>
+	<tr>
+		<td style='vertical-align: top'>
+			Who can view this weblog?	
+		</td>
+		<td style='vertical-align: top'>
+			<? 
+			$all = " selected";
+			if ($t['blog']->blogAllowViewing=='r') { 
+				$all = ""; 
+				$registered =' selected';
+			} 
+			?>
+			<select name='blog[blogAllowViewing]'>
+				<option value='a'<?=$all;?>>Everyone</option>
+				<option value='r'<?=$registered;?>>Only registered users (other students and faculty)</option>
+			</select>
+
+		</td>
+	</tr>
+	<tr>
+		<td style='vertical-align: top'>
+			Who can post to this weblog?	
+		</td>
+		<td style='vertical-align: top'>
+			<? 
+			$all = " selected";
+			if ($t['blog']->blogAllowPosting=='n') { 
+				$all = ""; 
+				$nobody=' selected';
+			} 
+			if ($t['blog']->blogAllowPosting=='r') { 
+				$all = ""; 
+				$registered=' selected';
+			} 
+			?>
+			<select name='blog[blogAllowPosting]'>
+				<option value='a'<?=$all;?>>Everyone</option>
+				<option value='r'<?=$registered;?>>Only registered users (other students and faculty)</option>
+				<option value='n'<?=$nobody;?>>Nobody - it's a read-only weblog</option>
+			</select>
+		</td>
+	</tr>
+</table>
+<input type='hidden' name='blog[blogId]' value='<?=$t['blog']->blogId;?>'/>
+<input type='submit' value='Update weblog preferences'/>
+</form>
+
+

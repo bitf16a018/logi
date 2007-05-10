@@ -1,0 +1,52 @@
+<br>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+      			Dynamic Menus
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+				<td class="white" align="center">
+
+<form method="POST">
+
+<table border="0" width="100%">
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Break Type:
+</td></tr>
+<tr><td colspan="2">
+		<input type="radio" name="custom" value="hr" <? if ($t['menuItem']->linkText == '')  echo 'CHECKED';?>> Use a line  (<i>&lt;hr&gt;</i>)<br><hr width="100px" align="left">
+<input type="hidden" name="location" value="none">
+<p>
+<input type="radio" name="custom" value="custom" <? if ($t['menuItem']->linkText != '')  echo 'CHECKED';?>> Use custom HTML...
+<br>
+<input type="text" name="linkText" value="<?= htmlspecialchars($t['menuItem']->linkText);?>">
+
+<p>
+<br>
+Ranking <input size="4" type="text" name="rank" value="<?= $t[menuItem]->rank;?>"> 
+</td></tr>
+
+
+<tr><td colspan="2">
+<input type="hidden" name="menuID" value="<?= $t[mid];?>">
+
+<input type="hidden" name="pkey" value="<?= $t[menuItem]->pkey;?>">
+<input type="hidden" name="linkType" value="hr">
+<input type="hidden" value="<?= $t[event];?>" name="event">
+<input type="submit" value="save">
+</td></tr>
+</table>
+
+
+				</td>
+			</tr>
+		</table></td></tr>
+
+</table>

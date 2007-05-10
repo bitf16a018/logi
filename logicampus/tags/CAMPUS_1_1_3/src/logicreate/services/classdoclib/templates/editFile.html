@@ -1,0 +1,63 @@
+<?=$t['sectionheader'];?>
+
+<h2>Edit File: <?=$t['file']->displayname?></h2>
+
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+	<td width="50%" valign="top">
+
+	<h3>Set File Attributes</h3>
+
+	<form method="post" action="<?=APP_URL?>classdoclib/editFile/event=updateFile">
+	<img src="<?=IMAGES_URL?>document.gif">
+	<?=$t['file']->displayname;?><br>
+	<table border=0 cellpadding=3 cellspacing=0>
+	<tr>
+		<th>Name:</th>
+		<td><input type="text" size="35" name="displayname" value="<?=$t['file']->displayname?>"></td>
+	</tr>
+	<tr>
+		<th valign="top">Description:</th>
+		<td><textarea cols="35" rows="4" name="description" ><?=$t['file']->description?></textarea></td>
+	</tr>
+	<tr>
+		<td colspan=2 align="center"><input type="submit" value="Update File"/></td>
+	</tr>
+	</table>
+	<input type="hidden" name="file" value="<?=$t['file']->pkey;?>"/>
+	<input type="hidden" name="fid" value="<?=$t['folder']->pkey;?>"/>
+	</form>
+
+	<!--	<p><a href="<?=modurl('editFile/event=trash/file='.$t['file']->pkey);?>">Move to Trash</a></p>-->
+
+	</td>
+	<td style="padding: 15px;" valign="top">
+		<p align="center" style="font-weight:bold">OR...</p>
+	</td>
+	<td valign="top" align="center">
+
+	<h3>Copy/Move the file</h3>
+
+	<form method="post" action="<?=APP_URL?>classdoclib/editFile/event=copyMoveFile">
+	<table align="center" border=0 cellpadding=3 cellspacing=0>
+	<tr>
+		<td><input type="radio" name="op" value="copy" checked/> Copy</td>
+	</tr><tr>
+		<td><input type="radio" name="op" value="move"/> Move</td>
+	</tr><tr>
+		<td><?=$t['file']->displayname;?> to ...</td>
+	</tr><tr>
+		<td><select name="destfid">
+		<?=$t['dropdown'];?>
+		</select></td>
+	</tr><tr>
+		<td><input type="submit" value="Move/Copy File"/></td>
+	</tr>
+	</table>
+	<input type="hidden" name="file" value="<?=$t['file']->pkey;?>"/>
+	<input type="hidden" name="fid" value="<?=$t['folder']->pkey;?>"/>
+	</form>
+
+	</td>
+</tr>
+</table>

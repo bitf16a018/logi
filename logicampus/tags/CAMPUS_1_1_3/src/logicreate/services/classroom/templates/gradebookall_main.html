@@ -1,0 +1,177 @@
+<?=$t['sectionheader'];?>
+<?
+foreach($t['allOutput'] as $id_classes=>$temp) { 
+$gradebook = $temp['gradebook'];
+
+
+$student = $gradebook->students[$temp['username']];
+if ( $tgradebook->calculationType == 1 ) {
+	$finalGrade = $gradebook->getLetterGrade($student->weightedAverage,$student->possiblePoints);
+} else {
+	$finalGrade = $gradebook->getLetterGrade($student->totalPointsEarned,$student->possiblePoints);
+}
+?>
+<table width=650 border=0 cellpadding=0 cellspacing=0><tr>
+	<td valign="top">
+
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td><b>Student:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['student'];?></td>
+</tr>
+<tr>
+	<td><b>Course:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['courseName'];?></td>
+</tr>
+<tr>
+	<td><b>Instructor:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['instructor'];?></td>
+</tr>
+</table>
+
+	</td>
+	<td width=50>&nbsp;</td>
+	<td valign="top">
+		<? if ($gradebook->calculationType==2) {  // only points based works right now - stifle this display ?>
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td><b>Overall Grade:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><b><?=$finalGrade;?></b> ( <?=$student->percentAverage;?>% )</td>
+</tr>
+<tr>
+	<td><b>Total Points Earned:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?= sprintf('%.1f',$student->totalPointsEarned);?> / <?= sprintf('%.1f',$student->possiblePoints);?></td>
+</tr>
+<tr>
+	<td><b>Class Rank:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$t['rank'];?> / <?=$t['totalRanks'];?></td>
+</tr>
+</table>
+
+		<? } ?>
+		<? if ($gradebook->calculationType==1) {  // percentage based works now?>
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td><b>Overall Grade:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><b><?=$finalGrade;?></b> ( <?=$student->weightedAverage;?>% )</td>
+</tr>
+<tr>
+	<td><b><!--Total Points Earned:--></b></td>
+	<td width=20>&nbsp;</td>
+	<td><!--<?= sprintf('%.1f',$student->totalPointsEarned);?> / <?= sprintf('%.1f',$student->totalPossiblePoints);?>--></td>
+</tr>
+<tr>
+	<td><b>Class Rank:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$t['rank'];?> / <?=$t['totalRanks'];?></td>
+</tr>
+</table>
+
+		<? } ?>
+
+	</td>
+</tr></table>
+
+<span id="datagrid">
+<table width=650 border=0 cellpadding=3 cellspacing=0>
+<tr>
+	<th>Title</th>
+	<th width=20 class="menu_head">&nbsp;</th>
+	<th>Score</th>
+	<th width=20>&nbsp;</th>
+	<th>Grade</th>
+	<th width=20>&nbsp;</th>
+	<th NOWRAP>Teacher Comments</th>
+</tr>
+<pre>
+<?
+$NA = '<span style="color:#666666;">?</span>';
+$alternate = $alt1;
+foreach ( $temp['categories'] as $catid => $cat )
+{
+	$alternate = $alt1;
+	$catRows = '';
+	$totalPointsPossible = 0;
+	$totalPointsReceived = 0;
+	$totalPercentage = 0;
+	$valsInCat = 0;
+
+	foreach ( $gradebook->students[$temp['username']]->vals as $valid => $val )
+	{
+
+		if ( $gradebook->entries[$valid]->idClassGradebookCategories != $catid )
+			continue;
+			unset($x);
+			$x = sprintf("%0.2f", $val->score / $gradebook->entries[$val->idClassGradebookEntries]->totalPoints)*100;
+
+		if ( !$val->_new ) { 
+			$totalPointsPossible += $gradebook->entries[$val->idClassGradebookEntries]->totalPoints;
+			$totalPointsReceived += $val->score;
+		} 
+		else {
+			 // they don't have a val for this entry
+			 $x = 'N/A';
+			$totalPercentage += $val->percentScore;
+		}
+
+		$catRows .= '
+			<tr>
+			<td valign="top" NOWRAP>'.$gradebook->entries[$valid]->title.'</td>
+			<td width=20>&nbsp;</td>
+			<td valign="top" NOWRAP>'.($val->_new ? $NA : $val->score).' / '
+				.$gradebook->entries[$val->idClassGradebookEntries]->totalPoints.'</td>
+			<td width=20>&nbsp;</td>
+
+			<td valign="top" NOWRAP>';
+				if (  $gradebook->entries[$val->idClassGradebookEntries]->totalPoints == 0 ) { 
+				$catRows .= 'EC';
+				} else { 
+				$catRows .=  $x.'% / '.$gradebook->getLetterGrade($val->score,$gradebook->entries[$val->idClassGradebookEntries]->totalPoints);
+			}
+		$catRows .= '</td>
+			<td width=20>&nbsp;</td>
+			<td valign="top">'.($val->comments ? $val->comments : '<i>None</i>').'</td>
+			</tr>';
+
+		$valsInCat++;
+	}
+
+	if ( !$catRows ) continue;
+	if ($totalPointsPossible==0) { 
+	print '<tr style="font-weight:bold;">
+		<td valign="top" class="portalbox" style="text-align:left;" NOWRAP>'.$cat.'</td>
+		<td width=20 class="portalbox">&nbsp;</td>
+		<td valign="top" class="portalbox" style="text-align:left;" NOWRAP>'.$totalPointsReceived.' / '.$totalPointsPossible.'</td>
+		<td width=20 class="portalbox">&nbsp;</td>
+		<td valign="top" colspan=3 class="portalbox" style="text-align:left;" NOWRAP>? / ?</td>
+		</tr>';
+	print $catRows;
+
+	} else {
+	$pct = ($totalPointsReceived/$totalPointsPossible)*100;
+	print '<tr style="font-weight:bold;">
+		<td valign="top" class="portalbox" style="text-align:left;" NOWRAP>'.$cat.'</td>
+		<td width=20 class="portalbox">&nbsp;</td>
+		<td valign="top" class="portalbox" style="text-align:left;" NOWRAP>'.$totalPointsReceived.' / '.$totalPointsPossible.'</td>
+		<td width=20 class="portalbox">&nbsp;</td>
+		<td valign="top" colspan=3 class="portalbox" style="text-align:left;" NOWRAP>'
+			.sprintf("%0.2f", $pct).'% / '
+			.$gradebook->getLetterGrade( $pct).'</td>
+		</tr>';
+	print $catRows;
+	} 
+} ?>
+</table>
+</span>
+
+
+
+<? } ?>
+<p><i>This document was generated on <?=date('M j, Y \a\t g:i A', time());?>.</i></p>

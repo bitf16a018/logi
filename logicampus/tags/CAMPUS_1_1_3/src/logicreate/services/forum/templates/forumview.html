@@ -1,0 +1,97 @@
+<? global $lcUser; ?>
+<center><table width="98%"><tr><td align="left">
+
+
+<h3>Forums</h3>
+<form method="post" action="<?=appurl("forum/main/event=list/fid=$t[fid]");?>">
+<table width="100%" border="0" cellpadding="4" cellspacing="0">
+
+
+<? if ($t["postedMessage"]) { ?>
+	<tr>
+		<td colspan="2">
+		<?=$t["postedMessage"];?>
+		</td>
+	</tr>
+<? } ?>
+
+
+<tr class="forum_head">
+	<td valign="top" width="50%" class="forum_head"><a href="<?=appurl("forum");?>">Forum home</a> : <?=$t["forumname"];?></td>
+	<td valign="top" class="forum_head">
+		<? if ($t["pages"]) { ?>
+			Page: <select name="start"><?=$t["pages"];?></select><input type="submit" value="Go!">
+			<?=$t["nav"];?>
+		<? } ?>
+	</td>
+		<td valign="top" width="25%" class="forum_head">
+<? if ($t["canwrite"]) { ?>
+	<a class='forum_head' href="#post">Start a thread</a>
+<? } else { ?>
+	&nbsp;
+<? } ?>
+		</td>
+
+</tr>
+
+</table>
+</form>
+
+
+	<?php if($t["messageslist"]) { ?>
+
+<table width="100%" border="0" cellpadding="4" cellspacing="1">
+		<tr ><td  class="forum_head2" width="85" nowrap>Posted by</td><td class="forum_head2" width="415">Thread</td><td class="forum_head2" width="50">Replies</td><td  class="forum_head2" width="50">Views</td><td class="forum_head2" width="100" nowrap>Recent post</td></tr>
+<?=$t["messageslist"]?>
+</table>
+<? } else { ?>
+<b><center>Currently, there are no posts in this forum.</center></b>
+<? } ?>
+
+
+<p>
+<? if ($lcUser->username != "anonymous") { ?>
+	<!-- user pref form -->
+	<form method="POST">
+	<table width="100%" border="0" cellpadding="4" cellspacing="0">
+		<tr><td colspan="2" class="forum_head" valign="center">
+			 <input type="image" src="<?=IMAGES_URL?>submit-button.gif" align="right" valign="bottom">
+			<img src="<?=IMAGES_URL?>envelope-icon.gif" border="0">
+			 Email posts to this forum to me. 
+			<input type="checkbox" align="right" name="emailPref" <? if ($t[emailPref]) echo 'CHECKED'; ?>>
+	</td></tr></table>
+	<input type="hidden" name="event" value="emailPref">
+	<input type="hidden" name="fid" value="<?=$t['fid']?>">
+	</form>
+	<p>
+	<? } ?>	
+<!-- post permissions -->
+<? if ($t["canwrite"]) { ?>
+
+<a name="post">
+	<form method="post" action="<?=appurl("forum/main/event=post/return=".$t["return"]);?>">
+	<input type="hidden" name="fid" value="<?=$t['fid'];?>">
+	<table width="100%" border="0" cellpadding="4" cellspacing="0">
+		<tr><td colspan="2" class="forum_head">
+		Start a new thread
+	</td></tr>
+
+	<tr>
+		<td class="forum_row1">Title</td>
+		<td class="forum_row2"><input type="text" name="message" maxlength="50" size="40"></td>
+	</tr>
+	<tr>
+		<td class="forum_row1" valign="top">Comment</td>
+		<td class="forum_row2"><textarea name="body" rows="15" cols="45" wrap="virtual"></textarea></td>
+	</tr>
+		<? if ($t["allowHTML"]) { ?>
+<tr><td colspan="2">
+Allowable HTML tags: <?=$t["allowHTML"];?>
+</td></tr>
+	<? } ?>
+
+	<tr><td colspan="2"><center><input type="submit" value="Post your comment"></center></td></tr>
+	</table>
+	</form>
+<? } ?>
+</td></tr></table></center>
