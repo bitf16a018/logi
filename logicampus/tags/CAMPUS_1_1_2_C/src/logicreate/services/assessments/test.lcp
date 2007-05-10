@@ -1,0 +1,115 @@
+<?
+/*
+ * test in assessments
+ *
+ */
+
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+
+class test extends NoAuth {
+
+	var $presentor = 'emptyPresentation';
+
+	/**
+	 * load an assessment from the DB and show it
+	 */
+	function run($db,&$u,&$lc,&$t) {
+
+		$ass = Assessment::load('14','1');
+		if ( $e = ErrorStack::pullError('error')) {
+			$t['message'] =  $e->message;	
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$qs = $ass->getAssessmentQuestions();
+
+		while ( list($k,$v) = @each($qs) ) {
+			print $v->questionInput->render();
+			print "\n<hr>\n";
+		}
+	}
+
+
+
+	function addRun($db,&$u,&$lc,&$t) {
+
+		$ass = Assessment::load('14','1');
+		if ( $e = ErrorStack::pullError('error')) {
+			$t['message'] =  $e->message;	
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$qs = AssessmentQuestion::getTest();
+		$qs->_new = true;
+		$qs->assessmentId = $ass->getPrimaryKey();
+//		$qs->save();
+
+
+		print $qs->toHTML();
+		print "\n<hr>\n";
+		debug($ass);
+	}
+
+
+	function typesRun($db,&$u,&$lc,&$t) {
+
+		print "Essay <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionEssay();
+		$qs->questionText =  'I wrote this, it is not automated, write an essay';
+		$qs->_new = true;
+		print $qs->toHTML();
+		print "\n<hr>\n";
+
+
+		print "Fill in <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionFill();
+		$qs->questionText =  'I wrote this, it is not automated, fill in all the blanks';
+		$qs->_new = true;
+		print $qs->toHTML();
+		print "\n<hr>\n";
+
+
+		print "True False  <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionTrueFalse();
+		$qs->questionText =  'I wrote this, it is not automated, pick true of false';
+		$qs->_new = true;
+		print $qs->toHTML();
+		print "\n<hr>\n";
+
+		print "Multiple Choice <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionChoice();
+		$qs->questionText =  'I wrote this, it is not automated, pick one from the list';
+		$qs->_new = true;
+		print $qs->toHTML();
+		print "\n<hr>\n";
+
+		print "Multiple Choice (multiple answer)<br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionMChoice();
+		$qs->questionText =  'I wrote this, it is not automated, pick any from the list';
+		$qs->_new = true;
+		print $qs->toHTML();
+		print "\n<hr>\n";
+
+		print "Matching <br/><br/>\n\n";
+
+		$qs = new AssessmentQuestionMatching();
+		$qs->questionText =  'I wrote this, it is not automated, match the choices with the answers';
+		$qs->_new = true;
+		print $qs->toHTML();
+		print "\n<hr>\n";
+
+
+	}
+
+}
+?>

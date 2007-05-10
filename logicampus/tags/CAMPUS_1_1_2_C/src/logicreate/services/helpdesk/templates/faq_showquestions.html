@@ -1,0 +1,30 @@
+<?=$t['sectionheader'];?>
+<?php
+ 
+$a_display_question = array();
+$tx_category = '';
+
+foreach($t['a_question'] as $question)
+{	
+	$tx_category = $question['tx_category'];
+	$a_display_question[] = '<a href="'.
+		modurl('faq/event=showanswer/'.$question['id_faq']).'">'.
+		$question['tx_question'].'</a>';
+}
+
+// I may not want to show category all the time (uncategorized stuff)
+if (strlen(trim($tx_category)) > 0)
+{	echo '<h4>'. $tx_category. '</h4>';
+}
+
+echo count($t['a_question']). ' FAQs listed below.<br>';
+
+echo '<ul type="square">';
+
+foreach($a_display_question as $q)
+{	echo '<li>'.$q.'</li>';
+}
+
+echo '</ul>';
+echo '<br>';
+?>

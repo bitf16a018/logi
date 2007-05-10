@@ -1,0 +1,45 @@
+<h3>File management - edit a file</h3>
+
+
+<form method="post" action="<?=appurl("classdoclib/main/event=update");?>">
+<input type="hidden" name="pkey" value="<?=$t[file]->pkey;?>">
+<input type="hidden" name="checksum" value="<?=$t[checksum];?>">
+
+<table width="500">
+<tr>
+	<td width="200">
+		File name
+	</td>
+	<td width="300">
+		<input type="text" size="50" maxlength="75" name="newfilename" value="<?=$t[file]->filename;?>">
+	</td>
+</tr>
+
+<tr>
+	<td width="200">
+		File notes
+	</td>
+	<td width="300">
+		<input type="text" size="50" maxlength="150" name="newdescription" value="<?=$t[file]->description;?>">
+	</td>
+</tr>
+
+<tr>
+	<td width="200">
+		Share with these groups:
+	</td>
+	<td width="300">
+		<select name="newgroups[]" size="5" MULTIPLE>
+		<?= makeOptions($t[grouplist],$t['selectedGroups']);?>
+		</select>
+	</td>
+</tr>
+
+</table>
+<input type="submit" value="Modify the file info">
+</form>
+
+<form method="post" action="<?=appurl("classdoclib");?>">
+<input type="submit" value="Cancel">
+</form>
+

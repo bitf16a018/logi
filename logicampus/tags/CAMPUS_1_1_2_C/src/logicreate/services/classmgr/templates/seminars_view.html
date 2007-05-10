@@ -1,0 +1,113 @@
+<?=$t['sectionheader'];?>
+
+
+<?
+	$count = count($t['data']);
+	if (!$count)
+	{ ?>
+	<FIELDSET>
+		<LEGEND>
+			Results	
+		</LEGEND>
+		No scheduled entries found for this class.
+	</FIELDSET>
+<?	}
+	for ($i=0; $i<$count; $i++)
+	{ ?>
+		<FIELDSET>
+		<LEGEND>
+			<b>Seminar <?=$t['data'][$i]->numSeminar;?>	
+			- 
+			Status <?=getStatus($t['data'][$i]->entryStatus);?></b>
+
+			<?
+				# If the item is approved or, if the deadline to do
+				# this has expired then they cannot modify
+				if ($t['data'][$i]->entryStatus != 3)
+					{ ?>
+					-	<a href="<?=APP_URL?>classmgr/seminars/event=edit/id=<?=$t['data'][$i]->idSeminarClassesDates?>">Modify</a>
+				<? } ?>
+		</LEGEND>
+
+		<table width="100%">
+			<tr class="tabletitle">
+				<td>
+					Campus
+				</td>
+				<td>
+					Date
+				</td>
+				<td>
+					Alternate Time Range	
+				</td>
+				<td>
+				</td>
+
+			</tr>
+			<tr>
+				<td>
+					South Campus Date
+				</td>
+				<td>
+					<?=convertDateTime($t['data'][$i]->southDate);?>
+				</td>
+				<td>
+					<?=convertTime($t['data'][$i]->southTimeStart);?> -
+					<?=convertTime($t['data'][$i]->southTimeEnd);?>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					North East Campus Date
+				</td>
+				<td>
+					<?=convertDateTime($t['data'][$i]->northeastDate);?>
+				</td>
+				<td>
+					<?=convertTime($t['data'][$i]->northeastTimeStart);?> -
+					<?=convertTime($t['data'][$i]->northeastTimeEnd);?>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					North West Campus Date
+				</td>
+				<td>
+					<?=convertDateTime($t['data'][$i]->northwestDate);?>
+				</td>
+				<td>
+					<?=convertTime($t['data'][$i]->northwestTimeStart);?> -
+					<?=convertTime($t['data'][$i]->northwestTimeEnd);?>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					South East Campus Date
+				</td>
+				<td>
+					<?=convertDateTime($t['data'][$i]->southeastDate);?>
+				</td>
+				<td>
+					<?=convertTime($t['data'][$i]->southeastTimeStart);?> -
+					<?=convertTime($t['data'][$i]->southeastTimeEnd);?>
+				</td>
+
+			</tr>
+			<? 
+			if ($t['data'][$i]->note) { ?>
+			<tr>
+				<td colspan="3">
+					<FIELDSET>
+					<LEGEND><b>Note</b></LEGEND>
+					<?=$t['data'][$i]->note?>
+					</FIELDSET>
+				</td>
+
+			</tr>
+			<? } ?>
+		</table>
+		</FIELDSET>
+		<br><br>
+		
+<?	} ?>
+

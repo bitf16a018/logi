@@ -1,0 +1,548 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH."SiteForms.php"); 	//form library
+include_once(LIB_PATH."LC_html.php"); 	//for hercBox()
+
+/**
+ * send mass emails to groups of users.
+ */
+
+class formMgr extends HercAuth {
+
+	var $presentor = "plainPresentation";
+	var $cleanedInput;  #use for resubmitting input back to another run method
+	var $APP;   # path to application
+	var $PIC = _PICS_URL;  # path to images
+
+	# sets $APP since you can't concat strings in a property
+	function formMgr () {
+		$this->APP = _APP_URL.'formMgr/';
+	}
+	
+	/**
+	 * Grab all of the forms that are in the system
+	 */
+	function run (&$db,&$u,&$arg,&$t) {
+		$where = "where type ='site'";
+		
+		$type = $arg->getvars['type'];
+		if ($type != '')
+		{
+			$where = "where type !='site'";
+		}
+     	 $sql = "select pkey, name, description from lcFormInfo $where order by pkey asc";
+     	 $db->query($sql);
+     	 while($db->next_record())
+     	 {
+     	 	$t['lcFormInfo'][$db->Record['pkey']] = $db->Record;
+     	 }
+	}
+
+	
+	/**
+	 * review all entries for one form
+	 */
+	function viewFormRun(&$db, &$u, &$arg, &$t) {
+		$arg->templateName = "viewform";
+		$arg->getvars['pkey'];
+		$pkey = $arg->getvars['pkey'];
+		
+		# Grab all of the ADMIN forms and show 
+		$sql = "select * from lcFormInfo where type !='site' and type !='add' order by name asc";
+		$db->query($sql);
+		while ($db->next_record())
+		{
+			$tmp[] = "<a href=\"".$this->APP."event=addModifyFormField/type=".$db->Record['type']."/action=replace/formId=".$arg->getvars['pkey']."\">\n
+					<img src=\"".$this->PIC."filenew.gif\" border=\"0\"></a>\n
+			<br>
+			<a href=\"".$this->APP."event=addModifyFormField/type=".$db->Record['type']."/action=replace/formId=".$arg->getvars['pkey']."\">".$db->Record['name']."</a>\n";
+		}
+		#htmlTable($array,$cols,$w="",$colorArray="",$cp="",$cs="",$brd="", $cellAlignment="left")
+		$t['fieldTypes'] = htmlTable($tmp, 4, "100%", array(), 1, 4, 0, "center");
+		$t['pkey'] = $arg->getvars['pkey'];
+		
+		$f = new SiteForm();
+		$f->adminGetForm($pkey);
+		$f->border = 0;
+		
+		$t['lcForm'] = $f->adminToHTML();
+		$t['formCode'] = $f->formCode;
+		
+		$t['sourceurl'] = popup($this->APP.'event=viewSourceForm/pkey='.$pkey.'/formCode='.$f->formCode, 500, 400, "View HTML Source");
+		$t['previewurl'] = popup($this->APP.'event=previewForm/pkey='.$pkey.'/formCode='.$f->formCode, 500, 400, "Preview Form");
+		$t['name'] = $f->name;
+
+		
+	}	
+
+	
+	/**
+	 * create a new form
+	 */
+	function addModifyFormRun(&$db, &$u, &$arg, &$t) {
+		$f = new SiteForm();
+		$formPkey = $arg->getvars['formPkey'];
+		if ($formPkey != '')
+		{
+			# load form data
+			$sql = "select * from lcFormInfo where pkey='$formPkey'";
+			$arg->postvars = $f->getFormData($sql);
+		}
+		#debug($arg->postvars);	
+		$f->getForm('addform', $arg->postvars);
+		$f->cssLeft = "white";
+		$f->cssRight = "white";
+		$f->addHidden("pkey", $formPkey);
+		$t['form'] = $f->ToHTML();
+		$arg->templateName = 'form';
+		
+	}	
+	
+	/**
+	 * create a new form
+	 */
+	function addModifyFormPostRun(&$db, &$u, &$arg, &$t) {
+		#debug($arg->postvars);
+						
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm($arg->postvars['formId'], $arg->postvars);
+		#echo $t['error'];
+		#exit();
+		if ($t['error'] == '')
+		{
+			$sql = $this->buildSQL($arg->postvars, "lcFormInfo", "replace");
+			#echo $sql;
+			#exit();
+			$db->query($sql);
+			$t['message'] = "Form ".$arg->postvars['req']['name']." Updated";
+			$this->Run($db, $u, $arg, $t);
+			return;
+		} else 
+		{
+			$this->addModifyFormRun(&$db, &$u, &$arg, &$t);
+		}		
+				
+	}	
+	
+	/**
+	 * This is used to build the SQL for req and opt arrays
+	 * to update information in the DB. 
+	 * In the future the persistent object could do this.
+	 * Type is for either update or replace
+	 * I started using replace but  not all fields are being
+	 * passed so i had to use update
+	 **/
+	function buildSQL($postvars, $table, $type="replace", $pkey='')
+	{
+		# We need to make sure we are not putting something into
+		# the SQL query that isn't in the DB so we need
+		# to grab the fields for the db and skip any other
+		# fields being passed in such as hidden or submits
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$fields = $db->getTableColumns($table);
+		$fields = $fields['name'];
+		
+		
+		while (list ($k, $v) = @each($postvars) )
+			{
+				if ($k == $fields[$k])
+				{
+					if ($k == 'message') {
+						$v = htmlspecialchars($v);
+					}
+					// AI - Update
+					// If any $v is an Array, we serialize it to make sure we don't loose the information
+					// in it. (This is assuming you don't acutally want to store 'Array' in your DB table).
+					if ( is_array($v) ) {
+
+							$v = serialize( $v );
+
+						}
+
+				
+					# for the date drop down to work
+					# we need to add up the total number of 
+					# bits	
+					
+					if ($k == 'dateTimeBit') {
+						
+						$v = array_sum($v);
+						
+					}
+					$x .= "$k='$v', ";
+				}
+			}
+		
+		
+		
+		$x = substr($x, 0, -2);
+		
+		if ($pkey != '')
+		{
+			$pkey = "pkey='$pkey' ";
+		}
+		
+		if (strtolower($type) == 'update')
+		{
+			
+			$type = 'update';
+			$pkey = "where $pkey";
+		} else {
+			$type = "$type into";
+			if ($pkey != '') $pkey = ", $pkey";
+		}
+			
+		$sql = "$type $table set $x $pkey";
+		return $sql;
+	}
+	
+	/**
+	 * search for a particule form
+	 */
+	function searchFormRun(&$db, &$u, &$arg, &$t) {
+		
+	}	
+	
+	/**
+	 * add for modify a form Field
+	 */
+	function addModifyFormFieldRun(&$db, &$u, &$arg, &$t) {
+		$type = $arg->getvars['type'];
+		$formId = $arg->getvars['formId'];
+		$pkey = $arg->getvars['pkey'];  #pkey of the form when doing an update
+		$formCode = $arg->getvars['formCode'];
+		#$formPkey = $arg->getvars['type'];
+		
+		# Grab the pkey of this type of form
+		$db->queryOne("select formCode from lcFormInfo where type='$type' limit 1");
+		$lcFormPkey = $db->Record['formCode'];
+				
+		# action should be either replace or update
+		# this is used to switch out the buildSQL statement
+		$action = $arg->getvars['action'];
+		
+		# If we are doing a replace (probably should have called this insert)
+		# then we select the form for this type of field
+		if ($action == 'replace')
+		{
+			$sql = "select * from lcForms where formId='$pkey'";
+			
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			$values = $db->Record;
+		}
+		
+		# If action = update we are doing a modification
+		# so we need to pull in the values for for form so we can edit it
+		if ($action == 'update')
+		{
+			# First, grab the information for this field
+			$sql = "select * from lcForms where pkey='$pkey'";
+			
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			$values = $db->Record;
+	
+		}
+		#echo $action;	
+		#debug($values);
+		$values['groups']= unserialize($values['groups']);
+		# End building up form values
+		
+		$f = new SiteForm();
+		$f->getForm($lcFormPkey, $values);
+		$f->addHidden("pkey", $pkey);
+		$f->addHidden("formId", $formId);
+		$f->addHidden("action", $action);
+		$f->addHidden("formPkey", $formPkey);
+		$f->addSubmit("submit", "Enter");
+		#debug($f,1);
+		$t['form'] = $f->ToHTML();
+		$arg->templateName = 'addmodifyfield';
+		
+		# template info
+		$t['fieldPkey'] = $pkey;
+		$t['formId'] = $formId;
+			
+	}
+
+	/**
+	 * post the added or modified form to the database
+	 */
+	function addModifyFormFieldPostRun(&$db, &$u, &$arg, &$t) {
+		
+		$type = $arg->postvars['type'];
+		# Grab the formCode of this type of form
+		$db->queryOne("select formCode from lcFormInfo where type='$type' limit 1");
+		$formCode = $db->Record['formCode'];
+		
+		#validate form input
+		$f = new SiteForm();
+		#echo $arg->postvars['formId'];
+		$t['message'] = $f->validateForm($formCode, $arg->postvars);
+		$this->cleanedInput = $f->cleanedArray;
+		#debug($this->cleanedInput, 1);
+		if ($t['message'] != '')
+		{
+			#echo "i'm here and stoppping";
+			#exit();
+			$this->addModifyFormFieldRun($db, $u, $arg, &$t);
+			return;
+		}
+		
+		#echo "im here and not stopping";
+		#exit();
+		$action = 'update';
+		if (strtolower($arg->postvars['action']) == 'replace')
+		{
+			$action = 'replace';
+		}
+		
+		$sql = $this->buildSQL($arg->postvars, 'lcForms', $action, $arg->postvars['pkey']);
+		#echo $sql;
+		#exit();
+		if ($action == 'replace')
+		{
+			# we need to add the hidden fields and extra information
+			$getlastsortnum = "select sort from lcForms where formId='".$arg->postvars['formId']."' order by sort desc limit 1";
+			$db->queryOne($getlastsortnum);
+			
+			$sortnum = $db->Record['sort'] + 1;
+			$sql = "$sql, sort='$sortnum', row='$sortnum'";
+		}
+		#echo $sql;
+		#debug($sql, 1);
+		$db->query($sql);
+		$t['message'] = "Field Updated";
+		#pass the formId as pkey 
+		$arg->getvars['pkey'] = $arg->postvars['formId'];
+		$this->viewFormRun(&$db, &$u, &$arg, &$t);
+		
+	}	
+
+	/**
+	 * view the source code in HTML of the form
+	 * this needs some formatting
+	 * maybe mike can run it through his HTML parser ?
+	 */
+	function viewSourceFormRun(&$db, &$u, &$arg, &$t) {
+		$formCode = $arg->getvars['formCode'];
+		
+		$f = new SiteForm();
+		$f->getForm($formCode);
+		$t['form'] = $f->PrintForm();
+		$arg->templateName = 'viewformsource';
+	}	
+
+	/**
+	 * delete a from
+	 */
+	function deleteFormRun(&$db, &$u, &$arg, &$t) {
+		$pkey = $arg->getvars['pkey'];
+		$sql = "delete from lcFormInfo where pkey='$pkey'";
+		$db->query($sql);
+		
+		$sql = "delete from lcForms where formId='$pkey'";
+		$db->query($sql);
+		$t['message'] = "Form Deleted";
+		$this->Run($db, $u, $arg, $t);
+		return;
+	}		
+
+	/**
+	 * delete a from
+	 */
+	function deleteFieldRun(&$db, &$u, &$arg, &$t) {
+		#debug($arg->getvars, 1);
+		$pkey = $arg->getvars['pkey'];
+		$arg->getvars['pkey'] = $arg->getvars['formId'];
+		$sql = "delete from lcForms where pkey='$pkey'";
+		#echo $sql;
+		$db->query($sql);
+
+		$t['message'] = "Field Deleted";
+		$this->viewFormRun($db, $u, $arg, $t);
+		return;
+	}	
+	
+	/**
+	 * preview the form
+	 * it doens't take into account style sheets
+	 */
+	function previewFormRun(&$db, &$u, &$arg, &$t) {
+		$formCode = $arg->getvars['formCode'];
+		$f = new SiteForm();
+		$f->getForm($formCode);
+		$t['form'] = $f->ToHTML();
+		$arg->templateName = 'viewformsource';
+	}	
+	
+	/**
+	 * moves a field up or down
+	 *
+	 */
+	function sortRun (&$db,&$u,&$arg,&$t) {
+		$pkey = $arg->getvars['pkey'];
+		$method = $arg->getvars['method'];
+
+		 # Figure out the formId of the pkey being passed
+		 # grab the current postion of key being passed
+		 $sql = "select sort from lcForms where pkey='$pkey'";
+		 
+		 $db->queryOne($sql);
+		 $oldKey = $db->Record['sort'];
+		
+		 if ($method == 'up')
+		 {
+		 	$newKey = $oldKey - 1;
+		 } else {
+		 	$newKey = $oldKey + 1;
+		 }
+		 
+		 $sql = "select formId from lcForms where pkey='$pkey'";
+     	 $db->queryOne($sql);
+     	 $formId = $db->Record['formId'];
+
+     	 $sql = "select pkey, sort from lcForms where formId=$formId";
+     	 $db->query($sql);
+     	 
+     	 while($db->next_record())
+     	 {
+     	  	$tmp[$db->Record['pkey']] = $db->Record['sort'];
+     	 }
+     	 
+     	 # sort the array and grab the last value so we can see what is last
+     	 # create a copy of it so we can pop off the end
+     	 asort($tmp);
+     	 $tmparray = $tmp;
+     	 $x = array_pop($tmparray);
+     	 unset($tmparray);
+     	      	 
+     	 if ( ( ($method == 'up') and ($oldKey == 1) ) or ( ($method == 'down') and ($oldKey == $x) ) )
+		 {
+		 	$t['message'] = "This row is already at the end and cannot be moved any higher or lower.";
+		 	# set the pkey from the formId so viewFormRun will work
+		 	$arg->getvars['pkey'] = $formId;
+		 	$this->viewFormRun($db, $u, &$arg, &$t);
+		 	return;
+		 }     	 
+     	 # update the key to the new value
+     	 $tmp[$pkey] = $newKey;
+     	 ($tmp);  
+     	
+     	 while (list ($k, $v) = @each($tmp))
+     	 {
+     	 		#echo "$k = $v<br>";
+     		 	if ($k == $pkey)
+     		 	{
+     		 		continue; # we don't want to modify this key again
+     		 	} 
+     		 	
+     		 	if ($tmp[$k] == $newKey)
+     		 	{
+     		 		# same row so give it our old key
+     		 		$tmp[$k] = $oldKey;
+     		 		$changedKey = $k;
+     		 	}
+     	 }
+     	 #echo "newkey = $newKey<br>";
+     	 #echo "pkey = $pkey<br>";
+     	 #echo "oldKey = $oldKey<br>";
+     	 #echo "changedKey = $changedKey<br>";
+     	 
+     	 $sql = "update lcForms set sort=$newKey where pkey='$pkey'";
+     	 $db->query($sql);
+     	 $sql = "update lcForms set sort=$oldKey where pkey='$changedKey'";
+     	 $db->query($sql);
+     	 
+     	 # set the pkey to the formId so viewFormRun will work
+		 $arg->getvars['pkey'] = $formId;
+       	 $this->viewFormRun($db, $u, &$arg, &$t);		
+	}	
+	
+	function resetOrderRun (&$db, &$u, &$arg, &$t)
+	{
+		$formPkey = $arg->getvars['formPkey'];
+		$sql = "select pkey, sort from lcForms where formId='$formPkey'";
+		$db->query($sql);
+		while($db->next_record())
+		{	$n++;
+			$db2 = DB::getHandle();
+			$sql = "update lcForms set sort='$n', row='$n' where pkey='".$db->Record['pkey']."'";
+			$db2->query($sql);
+		}
+		$arg->getvars['pkey'] = $formPkey;
+		$t['message'] = "Form sort order set to default";
+		$this->viewFormRun($db, $u, $arg, $t);
+	}
+	
+	function exportSqlRun(&$db, &$u, &$arg, &$t)
+	{
+		$pkey = $arg->getvars['formId'];
+		$sql = "select * from lcFormInfo where pkey='$pkey'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$info = $db->Record;
+	
+	
+		$formInfoKey = time();
+
+		$formKey = time()+10;
+		while (list ($k, $v) = @each($info))
+		{
+			if ($k == 'pkey')
+			{
+				$v = $formInfoKey;
+			}
+			$tmpsql  .= "$k='".addslashes($v)."', ";
+		}
+	
+		$tmpsql = substr($tmpsql, 0, -2);
+		$tmpsql = "insert into lcFormInfo set $tmpsql;<br>\n";
+		$t['sql'] = $tmpsql;
+		$sql = "select * from lcForms where formId='$pkey'";
+		$db->query($sql);
+	
+		while ($db->next_record() )
+		{
+			#debug($db->Record);
+			while (list ($k, $v) = @each($db->Record))
+			{
+				if ($k == 'pkey')
+				{
+					# add a 1000 to the key
+					$v = $formKey;
+				}
+				if ($k == 'formId')
+				{
+					$v = $formInfoKey;
+				}
+				
+				$line .= "$k='".addslashes($v)."', ";
+			}
+			++$formKey;
+			$line = substr($line, 0, -2);
+			$tmp .= "insert into lcForms set $line;<br><br>\n\n";
+			unset($line);	
+		}
+		$t['sql'] .= $tmp;
+		$arg->templateName = "exportsql";
+	}	
+}
+
+
+?>

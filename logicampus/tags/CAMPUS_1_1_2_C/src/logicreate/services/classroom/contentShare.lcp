@@ -1,0 +1,30 @@
+<?
+/*
+ *
+ * Allow students to post content for viewing/sharing
+ * with others in the class. 
+ *
+ */
+
+class contentShare extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Default event
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='contentShare_main';
+
+		}
+
+
+
+}
+
+?>
