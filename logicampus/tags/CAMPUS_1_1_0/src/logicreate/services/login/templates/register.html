@@ -1,0 +1,59 @@
+<? if ($t["error"]) { ?>The following errors were encounterd:<font color="red"> <ul><?=$t["error"];?></ul></font> <? } ?>
+<? if(!$t["error"]){?>
+
+<h3>Site Registration</h3>
+In order to provide you the utmost service, we recommend you register with us.  By registering this allows you to:
+<ul>
+<li>Update your private information securely
+<li>Access member only portions of this site
+<li>and more
+</ul>
+We hope that you'll take a few moments to register with our website if you haven't done so already.  Already an existing member?  Then <a href="<?=APP_URL?>login">Login!</a>.<br><br>
+<? } ?>
+<table cellspacing="1" cellpadding="2" border="0">
+	<tr>
+		<td valign="top" align="center">
+	<table cellspacing="1" cellpadding="2" border="0">
+		<tr>
+			<td class="regloginhead">Username</td>
+			<td class="reglogin">
+				<form method="post" action="<?=APP_URL;?>login/register">
+					<input type="text" name="username" size="20" maxlength="15" value="<?=$t["vars"]["username"]?>">
+			</td>
+		</tr>
+		<tr>
+			<td class="regloginhead">Password</td>
+			<td class="reglogin"><input type="password" name="password" size="20" maxlength="15"></td>
+		</tr>
+		<tr>
+			<td class="regloginhead" nowrap>Confirm your password</td>
+			<td class="reglogin"><input type="password" name="password2" size="20" maxlength="15"></td>
+		</tr>
+		<tr>
+			<td class="regloginhead">Email</td>
+			<td class="reglogin"><input type="text" name="email" size="20" maxlength="50" value="<?=stripslashes($t["vars"]["email"])?>"></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+			<input type="submit" value="Sign-up!">
+			<input type="hidden" name="event" value="post">
+			</form>
+			</td>
+		</tr>
+	</table>
+		</td>
+	</tr>
+	<tr>
+		<td class="reglogin" valign="top">
+			<img src="<?=IMAGES_URL?>register.jpg" align="right" width="100">
+			<b>Username</b> - Choose a username which you will use each time you visit our site.  Please do not include spaces, or any other characters such as <i>&^%$#@!~`=\|}{[]";:&lt;&gt;,.?/()* or spaces</i>.  Maximum length is 15 characters.<br><br>
+			<b>Password</b> - Passwords are limited to 15 characters.<br><br>
+			<b>Email</b> - Enter an email address.  Your email address will not sent to third parties.
+		</td>
+	</tr>
+</table>
+<script>
+document.forms[0].elements[0].focus();
+</script >
+

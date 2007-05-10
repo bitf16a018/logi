@@ -1,0 +1,35 @@
+<h2>Frequently Asked Questions</h2>
+Searching for <i><?=stripslashes($t['search']);?></i>
+<BR><BR>
+
+<? while ( list($cat,$number) = @each($t['categories']) ) { ?>
+	<h3><?= $cat?></h3>
+	<? while (list($k,$v) = @each($t['list']) ) { ?>
+		<? if($v->category == $cat) { ?>
+		 <a href="<?=MOD_URL;?>main/<?=$v->pkey;?>/event=read"><?=$v->question;?></a><br>
+		<? } ?>
+	<? } 
+	 reset($t['list']); ?>
+<? } ?>
+<? if ( count($t['list']) < 1 ) { ?>
+Sorry, there  were no matches for your search request.
+<? } ?>
+<p><br>
+<hr>
+<form method="POST">
+Search the FAQ area:
+<input type="text" name="search" size="20" maxlength="200">
+<input type="submit" value="Search!">
+<input type="hidden" name="event" value="">
+</form>
+
+
+<? if ($t['canAsk'] ==1 ) { ?>
+<form method="POST">
+Is your question not answered here?<br>
+<input type="text" name="question" size="40" maxlength="200">
+<input type="submit" value="Ask!">
+<input type="hidden" name="event" value="ask">
+</form>
+Submit a new question to the site maintainers.
+<? } ?>

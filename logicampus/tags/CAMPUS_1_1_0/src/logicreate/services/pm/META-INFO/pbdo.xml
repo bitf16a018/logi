@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!-- MySQL does not support foreign keys. This means   -->
+<!-- that this XML file will not reflect foreign key   -->
+<!-- relationships. You will have to do that yourself. -->
+<database name="logicampus">
+  <table  name="privateMessages">
+    <column name="pkey"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="messageFrom"
+            required="true"
+            size="25"
+            type="VARCHAR"/>
+    <column name="messageTo"
+            required="true"
+            size="25"
+            type="VARCHAR"/>
+    <column name="message"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+    <column name="sentTime"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="receivedTime"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="subject"
+            required="true"
+            size="75"
+            type="VARCHAR"/>
+    <column name="repliedTime"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+  </table>
+</database>
+<!-- END OF MYSQL2TURBINE DUMP -->

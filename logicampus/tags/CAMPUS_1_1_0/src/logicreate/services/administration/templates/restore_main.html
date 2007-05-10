@@ -1,0 +1,53 @@
+<?=$t['sectionheader'];?>
+
+<br>
+<fieldset>
+<legend>Restore Classroom Backup</legend>
+<br>
+<center>
+	<form method="POST" enctype="multipart/form-data">
+	
+	<fieldset>
+		<legend>Select semester to restore this classroom to</legend>
+		
+		<select name="id_semesters">
+		<?php
+			foreach($t['optionSemester'] as $k=>$v)
+			{
+				echo '
+			<option value="'.$k.'">'.$v.'</option>
+			';
+
+			}
+		?>
+		</select>
+	
+	</fieldset>
+	
+	<br>
+	
+	<fieldset>
+		<legend>Select action</legend>
+	
+		<select name="event">
+			<option value="copy">Duplicate classroom</option>
+			<option value="restore">Restore classroom (overwrite existing classroom)</option>
+		</select>
+		
+	</fieldset>
+	
+	<br>
+	
+	<fieldset>
+		<legend>Select classroom .xml file to restore</legend>
+	
+	<input type="file" name="classroom">
+	
+	</fieldset>
+	<br><br>
+	<input type="submit" value="Restore classroom">
+	
+	</form>
+</center>
+<br>
+</fieldset>

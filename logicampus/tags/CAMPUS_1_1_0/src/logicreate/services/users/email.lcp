@@ -1,0 +1,64 @@
+<?
+/*
+ * profile
+ * Last updated 3/29/2001
+ * 
+ * Purpose:
+ * add/update user profile 
+ */
+
+include_once(LIB_PATH.'SiteForm.php');
+
+class email extends RegAuth {
+
+var $presentor = "htmlPresentation";
+
+	function email()
+	{
+
+// mgk
+// not using this?  they should not be here
+// kill the session
+// better error handling later
+
+if (!UPDATE_MAILSERVER_DB) { 
+	die("Your system isn't set up to allow access to this feature");	
+}
+
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+
+	function run($db,&$lcUser,&$lcObj,&$lcTemplate) {	
+
+
+		$lcTemplate["email"] = $lcUser->email;
+		$lcObj->templateName = "email_main";
+	}
+
+
+
+	function processRun($db,&$u,&$lc,&$t) {	
+		if ( $lc->getvars['forward'] == $u->email ) {
+			$lc->templateName = 'email_same';
+		}
+
+		$mailSQL = "insert into mail_accounts_temp
+			(username,email_forward,action)
+			VALUES
+			('%s','%s',%d)";
+
+		$db = DB::getHandle('mail');
+		$db->query(
+		sprintf( $mailSQL,
+			$u->username,
+			$lc->getvars['forward'],
+			3)
+		);
+
+
+		$lc->templateName = 'email_done';
+		$t['forward'] = $lc->getvars['forward'];
+	}
+}
+?>

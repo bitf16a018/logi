@@ -1,0 +1,330 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+ 
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class semesters extends AdminService 
+{
+	var $presentor = "htmlPresentation";
+	var $authorizer = 'ServiceMapAuth';
+	var $a_semester_code = array();
+	var $a_semester = array();
+
+	// Links
+	var $sectionTitle = 'Semster Manager';
+	var $navlinks = array(
+		'Administration Home' => '',
+	);
+	var $applinks = array(
+		'List Semesters' => 'semesters/',
+		'Add Semester' => 'semesters/event=add',
+		'Course Semester Information' => 'courses/event=semesterInfo'
+	);
+
+	/* 
+	 * Semester terms is used to get the literal meaning of each code.  
+	 * If you wish to add additional semester terms to the system, you
+	 * MUST add them to this array.  For example, if you wanted to add 
+	 * Summer1 and Summer2, add them here first
+	 */
+
+	var $semesterTerms = array("SU"=>"Summer", "SP"=>"Spring", "FA"=>"Fall", "WI"=>"Winter"
+	,'S1'=> 'Summer I', 'S2'=>'Summer II', 'WM'=>'Winter Mini', 'FM'=>'Fall Mini', 'PM'=>'Spring Mini', 'SM'=>'Summer Mini'
+	);
+	
+
+	function Run($db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'semesters_listing';
+		$lc->templateStyle = 'private';
+		unset($this->inactivelinks);
+		$this->inactivelinks[] = 'List Semesters';
+		
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		$datagrid->table = 'semesters';
+		$datagrid->column = 'semesterTerm,semesterYear,dateStart,dateEnd,semesterTerm,dateRegistrationStart,dateRegistrationEnd,dateDeactivation, dateCensus,dateAccountActivation,dateFinalDrop,id_semesters';
+		
+		$datagrid->headerClass = 'classheader';
+		
+		$datagrid->ignore = array('semesterId', 'id_semesters', 'dateFinalDrop', 'dateEnd', 'dateRegistrationStart');
+		$datagrid->setCellWidth('semesterTerm', '75');
+		$datagrid->sortColumns = array('dateAccountActivation', 'semesterTerm', 'dateFinalDrop', "dateStart", 'dateEnd', 'dateRegistrationStart', 'dateRegistrationEnd', 'dateDeactivation', 'dateCensus', 'semesterYear');
+		$datagrid->headers = array('dateStart'=>'Start / Activation Date','dateEnd'=>'End Date',
+		"dateRegistrationStart"=>"Registration Start", 'dateRegistrationEnd'=>'Registration End',
+		'dateDeactivation'=>'Account Deactivation Date', 'dateCensus'=>'Census', 
+		'semesterTerm'=>'Term', 'semesterYear'=>'Year', 'dateFinalDrop'=>'Final Drop', 'dateAccountActivation'=>'Teacher Activated');
+		
+		$datagrid->overrideColumn('<?=date("Y-m-d",strtotime($dateFinalDrop));?>','dateFinalDrop');
+		$datagrid->overrideColumn('<nobr><?=date("Y-m-d h:i A",strtotime($dateAccountActivation));?></nobr>','dateAccountActivation');
+		
+		$datagrid->postpendColumn('<a href="<?=modurl("semesters/event=add/id=$id_semesters");?>">Edit</a>','Actions');
+		$datagrid->class = 'datagrid';
+		$t['table'] = $datagrid->toHTML();
+		
+
+	}
+
+
+	/**
+	 *	This function name is a bit misleading as it is mainly a "PROCESSOR"
+	 *	it will add and edit a record 
+	 *
+	 *	If you need to change the name to suit your mental needs, do so but make sure you
+	 *	make link changes throughout the site
+	 */
+	function addRun($db,&$u,&$lc,&$t)
+	{
+		$lc->templateStyle = 'private';
+		$lc->templateName = 'semesters_add';
+		$this->inactivelinks[] = 'Add Semester';
+		
+		$f = new SiteForm();
+		$id = $lc->getvars['id'];	// setting a tester 
+		
+		if ((int)$id != 0)
+		{	// setting a tital (display only) no real value
+			$t['action'] = 'Editing Semester';
+		}
+		
+		if ($lc->postvars['submit'])
+		{
+			// modifying semesterYear for the sake of LC_forms (semesterYear is only a YEAR field type in DB)
+			$lc->postvars['semesterYear']['month'] = 1; 
+			$lc->postvars['semesterYear']['day'] = 1; 
+			
+			$t['error'] .= $f->validateForm('adminsemesters', $lc->postvars);
+			
+			
+			$this->cleanedArray = $f->cleanedArray;
+			if ($f->hasErrors() == false)
+			{	
+				
+				// ### Start of business logic (it's gonna get ugly!) ### \\
+				//debug($f->cleanedArray);
+				
+				$hasErrors = false;
+				// $bl_?? = business logic variables.. only used in comparisons, nothing else do not use for seeding anything
+				$bl_date_start 		= strtotime($lc->postvars['dateStart']['month']. '/'. $lc->postvars['dateStart']['day']. '/'.$lc->postvars['dateStart']['year']);
+				$bl_date_end 		= strtotime($lc->postvars['dateEnd']['month']. '/'. $lc->postvars['dateEnd']['day']. '/'.$lc->postvars['dateEnd']['year']);
+	
+				// checking semester start and end date
+				if ($bl_date_start >= $bl_date_end)
+				{	$t['error'] .= '<li>Semester date must come before the semester date end.</li>';
+					$hasErrors = true;
+				}
+				//echo 'sem: '.date('Y-m-d h:i:s', $bl_date_start). '<br>';
+				//echo 'sem: '.date('Y-m-d h:i:s', $bl_date_end). '<br>';
+				
+				$bl_reg_date_start	= strtotime($lc->postvars['dateRegistrationStart']['month']. '/'. $lc->postvars['dateRegistrationStart']['day']. '/'.$lc->postvars['dateRegistrationStart']['year']);
+				$bl_reg_date_end	= strtotime($lc->postvars['dateRegistrationEnd']['month']. '/'. $lc->postvars['dateRegistrationEnd']['day']. '/'.$lc->postvars['dateRegistrationEnd']['year']);
+
+				//echo 'reg: '.date('Y-m-d h:i:s', $bl_reg_date_start). '<br>';
+				//echo 'reg: '.date('Y-m-d h:i:s', $bl_reg_date_end). '<br>';
+				
+				// basic bounds checking start coming before end
+				if ($bl_reg_date_start >= $bl_reg_date_end)
+				{	$t['error'] .= '<li>Registration start date must come before registration end date.</li>';
+					$hasErrors = true;
+				}
+				
+				// making sure registration start is before semester start
+				if ($bl_reg_date_start >= $bl_date_start)
+				{	$t['error'] .= '<li>Student registration date must come before the begining of your semester.</li>';
+					$hasErrors = true;
+				}
+				
+				// making sure registration end date is before the end of the semester
+				if ($bl_reg_date_end >= $bl_date_end)
+				{	$t['error'] .= '<li>Student registration end date must end before semesters end.</li>';
+					$hasErrors = true;
+				}
+				
+				
+				$bl_final_drop_date	= strtotime($lc->postvars['dateFinalDrop']['month']. '/'. $lc->postvars['dateFinalDrop']['day']. '/'.$lc->postvars['dateFinalDrop']['year']);
+				
+				// making sure your drop date comes before the end of the semester and starts on or after semester start
+				if ($bl_final_drop_date >= $bl_date_end || $bl_final_drop_date < $bl_date_start)
+				{	$t['error'] .= '<li>Final drop date must between semester start date and before end date.</li>';
+					$hasErrors = true;
+				}
+				
+				
+				$bl_faculty_activation_start	= strtotime($lc->postvars['dateAccountActivation']['month']. '/'. $lc->postvars['dateAccountActivation']['day']. '/'.$lc->postvars['dateAccountActivation']['year']);
+				
+				if ($bl_faculty_activation_start >= $bl_date_start)
+				{	$t['error'] .= '<li>Faculty activation must come before this semesters start date.</li>';
+					$hasErrors = true;
+				}
+				
+
+				$bl_student_activation_start	= strtotime($lc->postvars['dateStudentActivation']['month']. '/'. $lc->postvars['dateStudentActivation']['day']. '/'.$lc->postvars['dateStudentActivation']['year']);
+				
+				// making sure student activation start date comes before semesters end
+				if ($bl_student_activation_start >= $bl_date_end)
+				{	$t['error'] .= '<li>Students must be activated before semesters end.</li>';
+					$hasErrors = true;
+				}
+				
+				// making sure students are not activated before faculty accounts
+				if ($bl_student_activation_start <= $bl_faculty_activation_start)
+				{	$t['error'] .= '<li>Faculty must be activated before students on this semester.</li>';
+					$hasErrors = true;
+				}
+				
+				
+				// which accounts does this mean? faculty or students? maybe both? eventually we'll need to know :)
+				$bl_account_deactivation	= strtotime($lc->postvars['dateDeactivation']['month']. '/'. $lc->postvars['dateDeactivation']['day']. '/'.$lc->postvars['dateDeactivation']['year']);
+				
+				// making sure account_deactivation comes after or ON semester start
+				if ($bl_account_deactivation < $bl_date_start)
+				{	$t['error'] .= '<li>Account deactivation must be on or after semester start.</li>';
+					$hasErrors = true;
+				}
+				
+				
+				
+				// crazy census date, who knows what the heck it's for?!
+				$bl_census_date	= strtotime($lc->postvars['dateCensus']['month']. '/'. $lc->postvars['dateCensus']['day']. '/'.$lc->postvars['dateCensus']['year']);
+				
+				if ($bl_census_date < $bl_date_start || $bl_census_date > $bl_date_end)
+				{	$t['error'] .= '<li>Census date must fall within the semester start and end dates.</li>';
+					$hasErrors = true;
+				}
+				
+				
+				// we are only dupchecking here on NEW semesters not editted ones, (see below bout 20-25 lines below)
+				if ($id == false)
+				{
+					// i need to do a duplication check for summer/spring/fall/winter (and year)
+					$sql = '
+					SELECT COUNT(*) as semester_exists 
+					FROM semesters
+					WHERE semesterId=\''.$this->cleanedArray['semesterTerm'].$this->cleanedArray['semesterYear']['year'].'\'
+					';
+					$db->queryOne($sql);
+					if ($db->Record['semester_exists'])
+					{	$t['error'] .= '<li>The semester term and year already exist, please choose another.</li>';
+						$hasErrors = true;
+					}
+					
+				}
+				
+				if ($hasErrors == false)
+				{
+					if ((int)$id != 0)
+					{	$semesterObj = semesterObj::_getFromDB($id, 'id_semesters');	// prepopulate object
+					
+						// dup check
+						if ($semesterObj->semesterId != ($this->cleanedArray['semesterTerm'].$this->cleanedArray['semesterYear']['year']))
+						{
+							// ok, we are editing a semester and we are requesting to change
+							// a term or the year.. lets dupcheck it
+							$sql = '
+							SELECT COUNT(*) as semester_exists 
+							FROM semesters
+							WHERE semesterId=\''.$this->cleanedArray['semesterTerm'].$this->cleanedArray['semesterYear']['year'].'\'
+							';
+							$db->queryOne($sql);
+							if ($db->Record['semester_exists'])
+							{	$t['error'] .= '<li>The semester term and year already exist, please choose another</li>';
+								$hasErrors = true;
+							}
+						}
+					
+					} else
+					{	$semesterObj = new semesterObj(); // blank object (it's new!)
+					}
+					
+					
+					// i have to add this if block becuase of editing abilities above
+					if ($hasErrors == false)
+					{
+						$semesterObj->dateStart 			= $lc->postvars['dateStart']['year']. '-'.$lc->postvars['dateStart']['month']. '-'. $lc->postvars['dateStart']['day'];
+						$semesterObj->dateEnd 				= $lc->postvars['dateEnd']['year']. '-'.$lc->postvars['dateEnd']['month']. '-'. $lc->postvars['dateEnd']['day'];
+						$semesterObj->dateRegistrationStart = $lc->postvars['dateRegistrationStart']['year']. '-'.$lc->postvars['dateRegistrationStart']['month']. '-'. $lc->postvars['dateRegistrationStart']['day'];
+						$semesterObj->dateRegistrationEnd 	= $lc->postvars['dateRegistrationEnd']['year']. '-'.$lc->postvars['dateRegistrationEnd']['month']. '-'. $lc->postvars['dateRegistrationEnd']['day'];
+						
+						if ($lc->postvars['dateAccountActivation']['ampm'] == 'PM')
+						{	$lc->postvars['dateAccountActivation']['hours'] +=12;
+						} 
+					
+						$semesterObj->dateAccountActivation = $lc->postvars['dateAccountActivation']['year']. '-'.$lc->postvars['dateAccountActivation']['month']. '-'. $lc->postvars['dateAccountActivation']['day'].' '.$lc->postvars['dateAccountActivation']['hours']. ':'. $lc->postvars['dateAccountActivation']['minutes']. ':00';
+						$semesterObj->dateDeactivation 		= $lc->postvars['dateDeactivation']['year']. '-'.$lc->postvars['dateDeactivation']['month']. '-'. $lc->postvars['dateDeactivation']['day'];
+						$semesterObj->dateCensus 			= $lc->postvars['dateCensus']['year']. '-'.$lc->postvars['dateCensus']['month']. '-'. $lc->postvars['dateCensus']['day'];
+						$semesterObj->dateFinalDrop			= $lc->postvars['dateFinalDrop']['year']. '-'.$lc->postvars['dateFinalDrop']['month']. '-'. $lc->postvars['dateFinalDrop']['day']. ' 00:00:00';//.$lc->postvars['dateFinalDrop']['hours']. ':'. $lc->postvars['dateFinalDrop']['day']. ':'.$lc->postvars['dateFinalDrop']['day'];
+						
+						if ($lc->postvars['dateStudentActivation']['ampm'] == 'PM')
+						{	$lc->postvars['dateStudentActivation']['hours'] +=12;
+						} 
+						$semesterObj->dateStudentActivation = $lc->postvars['dateStudentActivation']['year']. '-'.$lc->postvars['dateStudentActivation']['month']. '-'. $lc->postvars['dateStudentActivation']['day'].' '.$lc->postvars['dateStudentActivation']['hours']. ':'. $lc->postvars['dateStudentActivation']['minutes']. ':00';
+					
+						$semesterObj->semesterId			= $lc->postvars['semesterTerm']. $lc->postvars['semesterYear']['year'];
+						$semesterObj->semesterYear			= $lc->postvars['semesterYear']['year'];
+						$semesterObj->semesterTerm			= $this->semesterTerms[$lc->postvars['semesterTerm']];
+						
+						// make sure to use BIG H for hours
+						$semesterObj->dateEndITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndITVseminar']));
+						$semesterObj->dateStartITVseminar = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartITVseminar']));
+						
+						$semesterObj->dateEndOrientation= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndOrientation']));
+						$semesterObj->dateStartOrientation = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartOrientation']));
+						
+						$semesterObj->dateEndTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndTextbook']));
+						$semesterObj->dateStartTextbook = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartTextbook']));
+						
+						$semesterObj->dateEndExam= date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateEndExam']));
+						$semesterObj->dateStartExam = date('Y-m-d H:i:s', dateArray2TimestampFull($lc->postvars['dateStartExam']));
+						
+						
+						$semesterObj->_saveToDB();
+						
+						if (mysql_insert_id() >= 1)
+						{	$sql = 'insert into semesters_course_info set id_semesters='.mysql_insert_id();
+							$db->query($sql);
+							/// i need to know if this worked..add error checking later
+						}
+						
+						$this->run($db, $u, $lc, $t);
+						return;
+					}
+					
+				}				
+				
+			} else
+			{
+				$t['error'] .= '<br>Failed, please check your information and try again';
+			}
+
+		} else
+		{
+			// Has a request come in to edit a semester? 
+			if ($id != 0)
+			{
+				// loadup record for editing // populate form with record
+				$semesterObj = semesterObj::_getFromDB($id, 'id_semesters');
+				$semesterObj->semesterYear .= '-01-01'; // converting to a usable date for lc_forms
+				$semesterObj->semesterTerm = substr($semesterObj->semesterId, 0, 2);
+				
+				$t['error'] .= $f->validateForm('adminsemesters', $semesterObj);
+				$this->cleanedArray = $f->cleanedArray;
+			
+			}
+							
+		}
+		
+		$f->getForm('adminsemesters', $this->cleanedArray);
+		$f->modFormValue('event', 'add');
+		
+		$t['form'] = $f->ToHTML();
+	}
+
+	
+}
+?>

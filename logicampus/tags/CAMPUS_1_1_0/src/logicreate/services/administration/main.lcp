@@ -1,0 +1,19 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+
+class administration extends AdminService
+{
+
+	var $presentor = "htmlPresentation";
+
+	
+	function Run($db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'main_main';
+		$lc->templateStyle = 'private';
+	}
+}
