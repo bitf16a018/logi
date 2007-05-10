@@ -1,0 +1,150 @@
+<?php
+	$fl_using_taken = false;
+	$fl_using_taught = false;
+	
+	$ic_found = count($t['output']);
+	
+?>
+<?=$t['sectionheader'];?>	<br>
+	<?php
+	if ($obj->postvars['submit'] == 'Search')
+	{
+		echo '<B>Results: '. $ic_found. '</B> item(s) found<hr size="1" noshade><br>';
+		
+		foreach($t['output'] as $k=>$item)
+		{	echo $item. '<br><br>';
+		}
+	}
+	?>
+	<!--
+Oh great search of the master calendar.
+
+<br><br>
+
+What if user is a student.. what do i show?<br><br>
+what if user is a teacher.. what do i show?<br><br>
+
+What kind of options do i allow the search to go on?<br><br>
+
+I know if we're a student, we should allow a search to be applied to any one class or all or multiple<br><br>
+
+And if a teacher, we should allow the same, searching one, multiple, all of their classes.<br><br>
+
+-->
+<a name="search"></a>
+<fieldset>
+
+	<legend>Search our calendars</legend>
+
+	<form method="POST">
+
+	<?php
+	
+	if (is_array($t['op_taught']) && count($t['op_taught']) > 0)
+	{	$fl_using_taught = true;
+		?>
+		<fieldset>
+
+			<legend>Filter by classes:</legend>
+			<?php
+			//	debug($obj->postvars);
+			?>
+			<select name="taught[]" multiple size="10">
+			<?php
+			
+			foreach($t['op_taught'] as $id_classes => $taught_label)
+			{	
+				echo '<option value="'.$id_classes.'"'.((isset($obj->postvars['taught']) && in_array($id_classes, $obj->postvars['taught'])) ? ' selected' : '').'>'.$taught_label.'</option>
+				';
+				//echo '<input type="checkbox" name="taught[]" value="'.$id_classes.'"'.((isset($obj->postvars['taught']) && in_array($id_classes, $obj->postvars['taught'])) ? ' checked' : '').'> '.$taught_label. '<br>';
+			}
+			
+			?>
+			</select>
+		</fieldset>
+		<br>
+		<?php
+	}
+	
+	if (is_array($t['op_taken']) && count($t['op_taken']) > 0)
+	{	$fl_using_taken = true;
+		?>
+		<fieldset>
+
+			<legend>Filter by classes I'm taking:</legend>
+			<?php
+			foreach($t['op_taken'] as $id_classes => $taken_label)
+			{	
+				echo '<input type="checkbox" name="taken[]" value="'.$id_classes.'"'.((isset($obj->postvars['taken']) && in_array($id_classes, $obj->postvars['taken'])) ? ' checked' : '').'> '.$taken_label. '<br>';
+			}
+			
+			?>
+
+		</fieldset>
+		<br>
+		<?php
+	}
+	?>
+	<fieldset>
+
+		<legend>Filter By:</legend>
+
+		
+		<input type="checkbox" name="filter[]" value="2"<?=((isset($obj->postvars['filter']) && in_array('2', $obj->postvars['filter'])) ? ' checked' : '');?>> Seminar dates &nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="checkbox" name="filter[]" value="3"<?=((isset($obj->postvars['filter']) && in_array('3', $obj->postvars['filter'])) ? ' checked' : '');?>> Orientation dates &nbsp;&nbsp;&nbsp;&nbsp;
+
+		<?php 
+		if ($fl_using_taught || $fl_using_taken)
+		{	?><br><input type="checkbox" name="filter[]" value="4"<?=((isset($obj->postvars['filter']) && in_array('4', $obj->postvars['filter'])) ? ' checked' : '');?>> Classroom Assignments &nbsp;&nbsp;&nbsp;&nbsp;<?php
+		}
+		?>
+		<?php 
+		if ($fl_using_taught || $fl_using_taken)
+		{	?><input type="checkbox" name="filter[]" value="1"<?=((isset($obj->postvars['filter']) && in_array('1', $obj->postvars['filter'])) ? ' checked' : '');?>> Exam dates &nbsp;&nbsp;&nbsp;&nbsp;<?php
+		}
+		?>
+
+		<?php 
+		if ($fl_using_taught || $fl_using_taken)
+		{	?><input type="checkbox" name="filter[]" value="5"<?=((isset($obj->postvars['filter']) && in_array('5', $obj->postvars['filter'])) ? ' checked' : '');?>> Assessments <?php
+		}
+		?>
+		
+	</fieldset>
+	<br>
+	
+	<fieldset>
+		<legend>Show events between:</legend>
+		<?php
+			$dt_ep_current = time();
+			$dt_ep_to = strtotime('+3 years');
+			
+			if (dateArray2TimestampFull($obj->postvars['datefrom']) > 0)
+			{	$dt_ep_current = dateArray2TimestampFull($obj->postvars['datefrom']);
+			}
+			
+			if (dateArray2TimestampFull($obj->postvars['dateto']) > 0)
+			{	$dt_ep_to = dateArray2TimestampFull($obj->postvars['dateto']);
+			}
+		?>
+		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+		<tr>
+			<td width="50%"><?php echo dateDropDown($dt_ep_current, 'datefrom', date('Y')-1, date('Y')+3);?></td>
+			<td width="50%" align="right"><?php echo dateDropDown($dt_ep_to, 'dateto', date('Y')-1, date('Y')+3);?></td>
+		</tr>
+		</table>
+	
+	</fieldset>
+	<br>
+	
+	<center>
+		
+		Search for: 
+		<input type="text" size="45" name="searchables" maxlength="50" value="<?=trim(htmlentities(stripslashes($obj->postvars['searchables']), ENT_QUOTES));?>"><br><br>
+		<input type="submit" value="Search" name="submit">
+
+	</center>
+
+	</form>
+
+</fieldset>

@@ -1,0 +1,62 @@
+<h2>Forum administration</h2>
+<h3>Forum management</h3>
+<form method='post'>
+	<input type='hidden' name='event' value='forumUpdate'>
+<input type='hidden' name='forum[lc_forum_id]' value='<?=$t['forum']->lcForumId;?>'>
+	<table>
+		<tr>
+			<td>Forum name</td>
+			<td><input type='text' name='forum[lc_forum_name]' value='<?=$t['forum']->lcForumName;?>'></td>
+		</tr>
+		<tr>
+			<td>Forum description</td>
+			<td><input type='text' name='forum[lc_forum_description]' value='<?=$t['forum']->lcForumDescription;?>'></td>
+		</tr>
+		<tr>
+			<td valign="top">Placement (select a parent)</td>
+			<td>
+				<select name='forum[lc_forum_parent_id]' size='10'>
+					<option value='0'>No parent
+					<?=$t['options'];?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
+		<tr>
+			<td valign="top"><B>Reading</B></td>
+			<td>
+				<select name="read_perms[]" multiple size="10">
+					<?=$t['read_perms'];?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
+		<tr>
+			<td valign="top"><B>Post</B><br> who has access to post on this forum</td>
+			<td>
+				<select name="post_perms[]" multiple size="10">
+					<?=$t['post_perms'];?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
+		<tr>
+			<td valign="top"><B>Delete</B><br>Deleting a post</td>
+			<td>
+				<select name="dele_perms[]" multiple size="10">
+					<?=$t['dele_perms'];?>
+				</select>
+			</td>
+		</tr>
+	</table>
+	
+	<br>
+	<input type='submit' value='Submit'>
+</form>
+

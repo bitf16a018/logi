@@ -1,0 +1,173 @@
+<?=$t['sectionheader'];?>
+
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><br/><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><br/><?}?>
+
+<? if ($t['entry']->publishFlag) { ?>
+<span style="float:right">This entry is currently <b>visible</b>.
+	<br/>
+	<form method="POST">
+		<input type="hidden" name="event" value="visibility">
+		<input type="hidden" name="change" value="hidden">
+		Click to make it <input type="submit" value="Hidden from students">
+	</form>
+</span>
+<? } else { ?>
+<span style="float:right">This entry is currently <b>hidden</b>.
+	<br/>
+	<form method="POST">
+		<input type="hidden" name="event" value="visibility">
+		<input type="hidden" name="change" value="visible">
+		Click to make it <input type="submit" value="Shown to students">
+	</form>
+</span>
+<? } ?>
+
+<big><b>Student Grades For `<?=$t['entry']->title;?>' (<?=$t['entry']->gradebookCode;?>)</b></big>
+<br/>
+<? if ($t['entry']->assignmentId || $t['entry']->assessmentId) { ?>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+	<? if ($t['entry']->assignmentId) { ?>
+	<tr><td colspan="2"><a href="<?=appurl('classmgr/assignmentManage/event=viewAssignment/id_class_assignments='.$t['entry']->assignmentId);?>">Click to view this assignment</a> </td></tr>
+	<? } else { ?>
+
+	<tr><td colspan="2"><a href="<?=appurl('assessments/grade/id='.$t['entry']->assessmentId);?>">Click to view this test</a> </td></tr>
+	<? } ?>
+	<tr><td>Due Date</td><td><?=date('m/d/Y',$t['entry']->dateDue);?></td></tr>
+</table>
+<? } else { ?>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+	<tr><td colspan="2">This entry is <b>not</b> linked to any assignment nor assessment.</td></tr>
+	<? if ($t['entry']->dateDue) { ?>
+	<tr><td>Due Date</td><td><?=date('m/d/Y',$t['entry']->dateDue);?></td></tr>
+	<? } else { ?>
+	<tr><td>Due Date</td><td><b>No date specified</b></td></tr>
+	<? } ?>
+</table>
+<? } ?>
+
+<form action="<?=modurl('assessment/event=updateAsmt/');?>" method="post">
+<table cellpadding="2" cellspacing="2" border="0" width="100%">
+
+<tr>
+	<td bgcolor="#FFCE7B"><b>Student</b></td>
+	<td bgcolor="#FFCE7B"><b>Score</b></td>
+	<td bgcolor="#FFCE7B"><b>Comments</b></td>
+</tr>
+<? while ( list(,$val) = @each($t['vals']) ) {
+	//$user = lcUser::getUserByUsername($val->username);
+	$now = time();
+	list ($firstname,$lastname) = explode('.',$val->username);
+	?>
+<tr>
+	<td valign="top" width="30%"><?=ucfirst($lastname).', '.ucfirst($firstname);?></td>
+	<td valign="top">
+	<?
+		# if this is an assessment make a link instead of input field
+		if ($t['entry']->assessmentId) { ?>
+		<? if (!$val->score) $val->score = '?'; ?>
+	
+		<b><?=$val->score?></b>
+			<a href="<?=APP_URL?>assessments/grade/event=view/studentid=<?=$val->username?>/id=<?=$t['entry']->assessmentId?>">(edit grade)</a>
+		<? } else { ?>
+		<? if ($t['entry']->dateDue < $now && $val->score == 0 && $t['entry']->dateDue > 0) { $val->score = 0; } ?>
+			<input type="text" name="score[<?=$val->username;?>]" value="<?=$val->score;?>" size=5 maxlength=5 />
+		<? } ?>		
+	</td>
+	<td valign="top"><textarea name="comments[<?=$val->username;?>]" rows=4 cols=30><?=stripslashes($val->comments);?></textarea></td>
+</tr>
+<tr>
+	<td colspan="3"><hr/></td>
+</tr>
+<? } ?>
+
+<tr>
+<td colspan="2">&nbsp;</td>
+</tr>
+
+<? if ( !$t['entry']->assessmentId ) { ?>
+<tr>
+	<td colspan="3" bgcolor="#FFCE7B"><b>Adjustments</b></td>
+</tr>
+<tr>
+	<td>Curve</td>
+	<td>
+		<select name="curve">
+			<option>-25</option>
+			<option>-24</option>
+			<option>-23</option>
+			<option>-22</option>
+			<option>-21</option>
+			<option>-20</option>
+			<option>-19</option>
+			<option>-18</option>
+			<option>-17</option>
+			<option>-16</option>
+			<option>-15</option>
+			<option>-14</option>
+			<option>-13</option>
+			<option>-12</option>
+			<option>-11</option>
+			<option>-10</option>
+			<option>-9</option>
+			<option>-8</option>
+			<option>-7</option>
+			<option>-6</option>
+			<option>-5</option>
+			<option>-4</option>
+			<option>-3</option>
+			<option>-2</option>
+			<option>-1</option>
+			<option selected>0</option>
+			<option>+1</option>
+			<option>+2</option>
+			<option>+3</option>
+			<option>+4</option>
+			<option>+5</option>
+			<option>+6</option>
+			<option>+7</option>
+			<option>+8</option>
+			<option>+9</option>
+			<option>+10</option>
+			<option>+11</option>
+			<option>+12</option>
+			<option>+13</option>
+			<option>+14</option>
+			<option>+15</option>
+			<option>+16</option>
+			<option>+17</option>
+			<option>+18</option>
+			<option>+19</option>
+			<option>+20</option>
+			<option>+21</option>
+			<option>+22</option>
+			<option>+23</option>
+			<option>+24</option>
+			<option>+25</option>
+		</select>
+	<td>
+</tr>
+<? } ?>
+
+<tr>
+	<td colspan="2">&nbsp;</td>
+</tr>
+<tr>
+	<td colspan="3" bgcolor="#FFCE7B"><b>Gradebook Entry Notes</b></td>
+</tr>
+<tr>
+	<td valign="top">Notes</td>
+	<td valign="top" colspan=2>
+		<textarea name="notes" cols=40 rows=5><?=$t['entry']->notes;?></textarea>
+		<p>You can use this space for some brief (or not so brief) notes about
+		this entry in your gradebook such as when you curved the grades how much
+		and why.</p>
+	</td>
+</tr>
+<tr>
+	<td colspan="2"><input type="submit" name="submit" value="Update Assessment"></td>
+</tr>
+
+</table>
+<input type="hidden" name="entryid" value="<?=$t['entry']->idClassGradebookEntries;?>" />
+</form>

@@ -1,0 +1,61 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+ 
+ 
+class facultylist extends AdminService 
+{
+
+	var $sectionTitle = 'Faculty List';
+	var $presentor = "htmlPresentation";
+	var $navlinks = array( 'Administration Home' => '' );
+	// FIXME 
+	// shouldn't be noauth, but can't figure out any way else to do it for now
+	// is it that big a deal?  it's all stuff people can see anyway
+	var $authorizer = 'NoAuth';	
+	
+	function Run($db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'facultylist_main';
+		$lc->templateStyle = 'private';
+		
+		$where_extra = '';
+		if ($lc->getvars[1])
+		{	$where_extra .= 'AND A.username=\''.$lc->getvars[1].'\'';
+		}
+		
+		// dim
+		$a_faculty_list = array();	// in the future i want to manipulate this more than I am now.
+		
+		// grabbing there user information, linking it to there profile to gather
+		// their name and personal information
+		// then linking against profile_faculty to get hours information
+		$sql = '
+		SELECT A.email, A.createdOn, B.firstname, B.lastname, B.emailAlternate, B.homePhone, B.workPhone, B.faxPhone, B.cellPhone, B.pagerPhone,
+			   B.city, B.state, B.zip, B.address, B.address2, C.*
+		FROM lcUsers as A
+		INNER JOIN profile as B
+			ON A.username=B.username
+		INNER JOIN profile_faculty as C
+			ON B.username=C.username
+		WHERE A.groups like \'%|faculty|%\'
+		'.$where_extra.'
+		ORDER BY B.lastname
+		';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+		
+		while ($db->next_record())
+		{	$a_faculty_list[] = $db->Record;
+		}	
+		
+		$t['a_faculty_list'] = $a_faculty_list;
+	}
+
+
+}
+?>

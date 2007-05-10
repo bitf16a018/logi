@@ -1,0 +1,34 @@
+
+<br>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+      			FAQ Management
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="500">
+		<table border="1" width="100%">
+			<tr>
+				<td class="white">
+
+
+<a href="<?= MOD_URL?>main/event=add">&lt;Add a new FAQ&gt;</a>
+<BR><BR>
+<table width="510" border="0">
+<? while( list($k,$v) = @each($t['displist']) ) { ?>
+	<tr><td><?= $v->question; ?> </td> </td><td><?= $v->category?></td>
+	<td align="left"> <a href="<?= MOD_URL;?>main/pkey=<?=$v->pkey?>/event=edit">(edit)</a>
+	  <a onclick="if (!confirm('Are You Sure?')) {return false;}" href="<?= MOD_URL;?>main/pkey=<?=$v->pkey?>/event=delete">[del]</a></td>
+	<td ><?=$v->clicks?> clicks</td></tr>
+<? } ?>
+</table>
+
+
+
+		</td></tr>
+		</table>
+	</td></tr></table>

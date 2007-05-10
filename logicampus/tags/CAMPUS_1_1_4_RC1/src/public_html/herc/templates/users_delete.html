@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+<script language="JavaScript"> <!--
+
+	function doCancel() {
+		parent.View.location='<?= __APP_URL;?>users/<?= $t[uid];?>/event=show';
+	}
+</script>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+
+		User Admin
+
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+
+	<table border="1" width="100%"><tr>
+	<td width="50%" class="white" align="center" rowspan="2">
+	<form method="POST">
+	<input type="hidden" value="yes" name="confirm">
+	<input type="hidden" value="<?= $t[uid];?>" name="uid">
+
+		Deleting user &lt; <i><?= $t[username]; ?></i> &gt; ...
+		<br>
+
+		Are you sure? <br>
+		<p>
+	<input type="button" value="no" onClick="doCancel();"> - <input type="submit" value="yes">
+	</form>
+	</td></tr>
+	</table>
+
+	</td></tr>
+</table>
+
+
+</body>
+</HTML>

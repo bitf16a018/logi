@@ -1,0 +1,27 @@
+<?=$t['sectionheader'];?>
+
+<form method="GET" action="<?=modurl('main/event=doSearch');?>">
+<fieldset>
+	<LEGEND>Search by username:</LEGEND>
+	Enter a username below to see all posts by that user.
+	<br/>
+	<input type="text" value="<?=$t['search'];?>" name="username" size="35"/>
+
+	<br/>
+	<br/>
+	<input type="submit" value="Search"/>
+<form>
+</fieldset>
+
+<?php 
+if (strlen($t['message']) ) {
+	echo $t['message'];
+}
+?>
+
+	<?php
+	if (is_object($t['renderer']) ) {
+		echo $t['renderer']->toHTML();
+	}
+
+	?>

@@ -1,0 +1,116 @@
+<?
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+/**
+ * file management 
+ * Folder managers can share files in nested folders.
+ * Only certain groups can download
+ */
+
+class addFile extends classdoclibService {
+
+
+
+
+
+	/** 
+	 * show a multifile upload form, if no folder is 
+	 * selected, redirect to a folder select event
+	 */
+	function run($db,&$u,&$lcObj,&$t) {
+
+		$lcObj->getvars['fid'] = addslashes(trim($lcObj->getvars['fid']));
+		if ($lcObj->getvars['fid'] == '' ) {
+			header("Location: ".APP_URL."classdoclib/addFile/event=selectFolder");
+			exit();
+		}
+		$db->query('select name from classdoclib_Folders where pkey = '.$lcObj->getvars['fid']);
+		$db->next_record();
+
+		$t['max_file_size'] = sprintf("%.2f",ini_get('upload_max_filesize'));
+		$t['folderName' ] = $db->Record['name'];
+		$t['folderID' ] = $lcObj->getvars['fid'];
+
+
+	}
+
+
+
+
+	/**
+	 * show a list of folders to the user for selecting
+	 */
+	function selectFolderRun($db,&$u,&$arg,&$t) {
+		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes,FOLDER_EDIT);
+
+		$view = new FileMGTView($cat);
+		$t['folderHTML'] = $view->renderWithRadio();
+
+		$arg->templateName = 'addFile_selectFolder';
+	}
+
+
+
+	/**
+	 * save the files to the HDD and the DB
+	 * filename on hdd is md5 of "filename-username-microtime"
+	 */
+	function handleUploadRun($db,&$u,&$arg,&$t) {
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = APP_URL.'classdoclib/main/'.$arg->postvars['folderID'];
+		$folder = LC_folder::load($arg->postvars['folderID'],$u->activeClassTaught->id_classes);
+		if ($folder == '' ) {
+			$u->sessionvars['doc_message'] = 'You do not have permission to write to this folder';
+			return;
+		}
+
+		static $dahasha_cizounta = 2;
+		for ($x=0; $x< count($arg->uploads['files']['name']); ++$x) {
+			if ($arg->uploads['files']['name'][$x] != '' ) {
+				$tmp = new LC_file();
+				$tmp->size = $arg->uploads['files']['size'][$x];
+				$tmp->file = $arg->uploads['files']['name'][$x];
+				$tmp->tmpfile = $arg->uploads['files']['tmp_name'][$x];
+				$tmp->mime = $arg->uploads['files']['type'][$x];
+
+				$tmp->daHasha = md5($tmp->size.microtime().$dahasha_cizounta++.$tmp->file);
+
+				$tmp->displayname = $tmp->file;
+				$tmp->description = $arg->postvars['descriptions'][$x];
+
+				$tmp->owner = $u->username;
+				$tmp->filedate = date("Y-m-d h:i:s");
+
+				$tmp->folder = $arg->postvars['folderID'];
+
+				//$newUploads[] = $tmp;
+				if(! $tmp->save() ) {
+					$t['baduploads'] .= $tmp->file .'  was not handled properly<p>';
+				} else {
+					$t['gooduploads'] .= '<li>'.$tmp->file ;
+				}
+			}
+		}
+
+		if ($t['baduploads']) {
+			$u->sessionvars['doc_message'] .= 'There was a problem with the file uploads.  Not all of the uploads were successfully processed.<BR>';
+			$u->sessionvars['doc_message'] .= $t['baduploads'];
+		}
+		if ($t['gooduploads'] ) {
+			$u->sessionvars['doc_message'] .= '<p>The following files were successfully uploaded and saved: <p><ul>';
+			$u->sessionvars['doc_message'] .= $t['gooduploads'];
+			$u->sessionvars['doc_details'] .= '</ul>';
+		}
+
+	}
+}
+
+
+function mymicrotime(){ 
+    list($usec, $sec) = explode(" ",microtime()); 
+    return (float)$usec ; 
+} 
+
+?>

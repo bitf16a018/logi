@@ -1,0 +1,69 @@
+<?
+/*
+ *
+ * To administrate submissions of forms by
+ * instructors. 2 diff authority levels
+ * 1. david, the preprocessor, after reviewing can
+ * set forms to finalize, which brings us to 2.
+ * 2. bookmanagers, which can review the
+ * information, once it's been finalized. they can
+ * print pdfs by building, classroom.
+ * 
+ * the information is based off of existing class
+ * schedules
+ *
+ */
+
+class adminSubmissions extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Allows david to edit a form and only david. 
+ * 
+ * 
+ * Input data: id_form
+ * Output data: form
+ *
+ */
+		function editRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='adminSubmissions_edit';
+
+		}
+
+/*
+ *
+ * A list of submitted forms to be processed (not yet
+ * processed) available to david and the bookmanagers. Will
+ * also display a search form at the top to find individual
+ * books.. a fairly extensive search
+ * 
+ * Input data: 
+ * Output data: listing
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='adminSubmissions_main';
+
+		}
+
+/*
+ *
+ * Will search the list of submissions, depending on who you
+ * are. you will be able to print pdfs, edit submissions. 
+ * 
+ * Input data: From Form
+ * Output data: 
+ *
+ */
+		function searchRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='adminSubmissions_search';
+
+		}
+
+
+
+}
+
+?>
