@@ -1,0 +1,405 @@
+<?
+/*
+ *
+ * Upload assignments and review instructor comments
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(SERVICE_PATH.'pm/privmess.php');
+
+class assignments extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Assignments';
+
+	var $inactivelinks = array(
+		'Assignments'
+		);
+	
+/*
+ *
+ * View submitted assignments and any instructor comments with
+ * each.  Also show a form for uploading a new assignment.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='assignments_main';
+			$this->sectionTitle = 'Assignments';
+			
+			$dg = new datagrid($this->module, $this->serviceName);
+			$dg->column = 'id_class_assignments,title,dueDate,noDueDate,dateNoAccept';
+			$dg->table = 'class_assignments';
+			$dg->where = 'activeDate <= '.time().' and id_classes='.$u->activeClassTaken->id_classes;
+			$dg->ignore = array( 'id_class_assignments', 'dateNoAccept', 'noDueDate' );
+
+			$dg->headers = array(
+				'title' => 'Title',
+				'dueDate' => 'Due Date',
+				'status' => 'Status'
+			);
+			$dg->prependColumn('<?=strtotime($dateNoAccept) >= time() ? $title : \'<a href="\'.modurl("assignments/event=view/id=$id_class_assignments").\'">\'.$title.\'</a>\';?>', 'title');
+			$dg->postpendColumn('<?=(strtotime($dateNoAccept) >= time() ? \'<a href="\'.modurl("assignments/event=view/id=$id_class_assignments").\'">Turn in</a>\' : "closed");?>', 'status');
+			$dg->overrideColumn('<?=$noDueDate ? "<i>No due date</i>" : date("F jS, Y h:i A", $dueDate);?>', 'dueDate');
+			$dg->sortColumns = array( 'title', 'dueDate' );
+
+			$t['table'] = $dg->toHTML();
+
+		}
+
+		function viewRun(&$db,&$u,&$lc,&$t) {
+
+			$lc->templateName = 'assignments_view';
+			$this->sectionTitle = 'View Assignment';
+			# Set up thee active date for students
+			# if it is a teacher viewing the class
+			# we'll overide it below so they can view
+			# the assignment
+			$todays_epoch_date = mktime(23,59,59,date('m'),date('d'),date('y'));
+			$activeDate = "and activeDate <= $todays_epoch_date";
+
+			while(list ($k, $v) = @each($u->classesTaught) )
+			{
+			 	if ($v->id_classes ==
+				$u->activeClassTaken->id_classes)
+				{
+					# Person viewing the class is teaching the
+					# class
+					$activeDate = '';
+					$t['msg'] = '<div style="color: blue;"><h3>Faculty</h3>Remember that you are allowed to see all assignments no matter what the active date is.  Students, however, will not be able to access an assignment
+					until it is active.</div>';
+				}
+			}
+			$sql = "select * from class_assignments
+				where id_classes='{$u->activeClassTaken->id_classes}'
+				$activeDate
+				and id_class_assignments='{$lc->getvars['id']}'";
+			$db->queryOne($sql);
+
+			if (!$db->Record['id_class_assignments']) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = '<div style="color: red;">An error has occured. Either you are trying to access an assignment which has not been activated by your teacher, or you are trying to access an assignment for which you do not have permission to access.</div>';
+				return;
+			}
+
+			$t['assignment'] = $db->Record;
+
+			if ($lc->getvars['print'])
+				$this->presentor = 'printPresentation';
+			
+			// PROTOTYPES				
+			if ($lc->getvars['new'])
+			{	
+				$lc->templateName = 'assignments_viewnew';
+			}
+
+			if ($lc->getvars['text'])
+			{	$lc->templateName = 'assignments_view_done_text';
+			}
+	
+			if ($lc->getvars['upload'])
+			{	$lc->templateName = 'assignments_view_done_upload';
+			}
+			
+			$t['f_showform'] = false;
+			$t['f_showform_file'] = false;
+			$t['f_showform_text'] = false;
+			
+			if ((strtotime($db->Record['dateNoAccept'])+86399) > time())
+			{
+				$t['f_showform'] = true;
+				// we can show the forms for uploading
+				
+				// check response type
+				// this will determine the view of what is to be uploaded
+				
+				// 1 upload file
+				// 2 text
+				// 3 both 
+				
+				// 4 forum post --- holding on this
+				// 5 none
+				switch ($db->Record['responseType'])
+				{
+					case 3: $t['f_showform_file'] = true; $t['f_showform_text'] = true;
+					case 1:	$t['f_showform_file'] = true; if ($db->Record['responseType'] != 3) break;
+					case 2:	
+						$db2 = DB::getHandle();
+						$sql = 'SELECT a.assign_text
+						FROM  class_assignments_turnin as a
+						
+						INNER JOIN class_assignments AS b
+							ON a.id_class_assignments = b.id_class_assignments
+						
+						WHERE assign_type=0
+						AND b.id_classes='. $u->activeClassTaken->id_classes. '
+						AND a.id_class_assignments='. $lc->getvars['id'].'
+						AND a.id_student=\''. $u->username.'\'';
+						
+						$db2->queryOne($sql);
+						$t['assigntext'] = $db2->Record['assign_text'];
+						$t['f_showform_text'] = true; 
+					
+						break;
+					
+					//case 3: $t['f_showform_file'] = true; $t['f_showform_text'] = true; break;
+					// case 4:
+					// case 5:
+					default: 
+					// none
+					$t['f_showform'] = false;
+					break;
+				}
+				
+			} else
+			{
+				// if we're pass the due date.. maybe we want to say something?
+			}
+			
+			
+			// get current attachments for this assignment for this student (FILES ONLY)
+			$sql = '
+			SELECT class_assignments_turnin.id_class_assignments_turnin,
+			class_assignments_turnin.assign_file_name,
+			class_assignments_turnin.assign_file_size,
+			class_assignments_turnin.assign_file_mime,
+			class_assignments_turnin.dateTurnin
+			
+			FROM class_assignments_turnin
+			
+			INNER JOIN class_assignments 
+				ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
+			
+			WHERE id_student=\''. $u->username.'\'
+			AND assign_type=1
+			AND class_assignments.id_classes='. $u->activeClassTaken->id_classes. '
+			AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id'].'
+			AND id_student=\''. $u->username.'\'
+			';
+			$db3 = DB::getHandle();
+			$db3->query($sql);
+			
+			while ($db3->next_record()) 
+			{
+				$t['attachments'][] = $db3->Record;	
+			}
+			
+		}
+
+/*
+ *
+ * Show a form to upload the assignment.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+ 		/**
+ 		 *	Assignment Type (below in datastructure) means 0= text 1=file to determine the individual records
+ 		 *		as assignemtns will only have 1 textual input (if selected in assignemnt itself)
+ 		 *		however, will/can have multiple files, no limit?
+ 		 */
+		function submitAssignmentRun(&$db,&$u,&$lc,&$t) {
+			$todays_epoch_date = mktime(23,59,59,date('m'),date('d'),date('y'));
+		//	$activeDate = "and activeDate <= $todays_epoch_date";
+
+
+			$lc->templateName='assignments_submitAssignment';
+			//
+			// load up assignment, determine what type of submission i'm getting and deal with it accordingly
+			
+			// @@@@ i have to make sure i'm a student! faculty can not upload
+			
+			// @@@ this below ( 2 blocks ) are redundant to viewRun().. gotta be a better way
+			// i'm making sure i can do this stuff!
+			
+		//	$todays_epoch_date = mktime(0,0,0,date('m'),date('d'),date('y'));
+			
+			$db->queryOne("select * from class_assignments
+				where id_classes='{$u->activeClassTaken->id_classes}'
+				and activeDate <= $todays_epoch_date
+				and id_class_assignments='{$lc->getvars['id']}'");
+
+			if (!$db->Record['id_class_assignments']) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You don't have permission to view this assignment.";
+				return;
+			}
+			$tx_assignment_information = $db->Record;
+			// is this assignment still accepting data?
+			if ((strtotime($db->Record['dateNoAccept'])+86399) > time())
+			{
+				switch ($db->Record['responseType'])
+				{
+					case 3:
+					case 1:		// file
+						// multiple files
+						// upload files?
+						
+						//this is fatal, die here, don't send confirmations
+						if ((int)@$lc->uploads['uploadassignment']['size'] < 1)	{
+							switch($lc->uploads['uploadassignment']['error']) {
+								case UPLOAD_ERR_INI_SIZE:
+								case UPLOAD_ERR_FORM_SIZE:
+								$t['details'] = 'File is too big.';
+								break;
+								case UPLOAD_ERR_PARTIAL:
+								case UPLOAD_ERR_NO_FILE:
+								$t['details'] = 'Incomplete or no file uploaded.';
+								break;
+								default:
+								$t['details'] = 'Unspecified error.';
+							}
+							$t['message'] = "There was an error uploading your assignment, try again.";
+							$t['message'] .="<br/>No assignment information was saved.";
+							$this->presentor = 'errorMessage';
+							return;
+						}
+
+						$file = $lc->uploads['uploadassignment'];
+						$newfilename = $u->username."_".time();
+						$copy = copy($file['tmp_name'],CONTENT_PATH."/uploads/$newfilename");
+						if ( !$copy ) {
+							trigger_error('couldnt copy file');
+							return;
+						}
+
+						$sql = '
+						INSERT INTO class_assignments_turnin
+						SET 
+						dateTurnin=NOW(),
+						id_class_assignments='. (int)$lc->getvars['id'].', 
+						id_student=\''. $u->username.'\',
+						assign_type=1,
+						assign_file_size='. $file['size']. ',
+						assign_file_name=\''. str_replace("'", '\'\'', stripslashes($file['name'])). '\',
+						assign_file_mime=\''. $file['type']. '\',
+						assign_file_blob=\''.$newfilename.'\'
+						';
+						$db->query($sql);
+
+						if ($tx_assignment_information['responseType'] != 3) {
+							break;
+						}
+					
+					case 2:		// text
+						
+						$sql = 'SELECT a.id_class_assignments_turnin, b.id_classes
+						FROM  class_assignments_turnin as a
+						
+						INNER JOIN class_assignments AS b
+							ON a.id_class_assignments = b.id_class_assignments
+						
+						WHERE assign_type=0
+						AND b.id_classes='. $u->activeClassTaken->id_classes. '
+						AND a.id_class_assignments='. $lc->getvars['id'].'
+						AND a.id_student=\''. $u->username.'\'';
+						
+						$db->queryOne($sql);
+						
+						// the only problem i seem to have with below is 
+						// an update could potentially change things
+						if ((int)$db->Record['id_class_assignments_turnin'] > 0)
+						{
+							// we have an assignment, lets update
+							$sql_head = 'UPDATE';
+							$sql_footer = 'WHERE id_class_assignments='.$lc->getvars['id']. '
+							AND id_Class_assignments_turnin='. $db->Record['id_class_assignments_turnin'];
+							
+						} else
+						{
+							$sql_head = 'INSERT INTO';
+							$sql_footer = false;
+						}
+
+						$sql = $sql_head.'
+						class_assignments_turnin
+						SET
+						'.(($sql_footer == false) ? 'dateTurnin=NOW(),' : '').'
+						assign_type=0,
+						id_class_assignments='. (int)$lc->getvars['id'].', 
+						id_student=\''. $u->username.'\',
+						assign_text=\''. str_replace("'", '\'\'', stripslashes($lc->postvars['assigntext'])).'\'
+						'. $sql_footer;
+#			echo $sql;exit();			
+						$db->query($sql);
+						if (mysql_errno())
+						{	//echo mysql_error();
+						} else
+						{	//echo 'THank you for travelling with us!';
+						}
+						// only 1 text page per assignmnet
+						
+						break;
+					
+						// case 4:
+						// case 5:
+					
+				}
+
+// mgk 9/2/03 - make a private message to the instructor that 
+// a student turned in an assignment
+	$p = new privmess();
+	$p->messageFrom = "systemAdmin"; 	// __FIX_ME
+	$p->sentTime = time();
+	$p->subject = "Assignment: ".$tx_assignment_information['title']." - from ".$u->username." turned in\n";
+	$p->message = "Assignment: ".$tx_assignment_information['title']."\n";
+	$p->message .= "Student ".$u->username." turned in their assignment at ".date("m/d/Y h:i A");
+	$p->messageTo = $u->activeClassTaken->facultyId;
+	$p->add();
+	$p = new privmess();
+	$p->messageFrom = "systemAdmin"; 	// __FIX_ME // <-- DUMB COMMENT, WHATS TO FIX???
+	$p->sentTime = time();
+	$p->subject = "Assignment: ".$tx_assignment_information['title']." - Confirmation ".$u->username." ";
+	$p->message = "Assignment: ".$tx_assignment_information['title']."\n";
+	$p->message .= "You turned in your assignment at ".date("m/d/Y h:i A");
+	$p->message = "\n*** Please print this message out for your records.\nIf you delete this private message, it can not be retrieved.\n";
+	//$p->message .= "You turned in your assignment at ".date("m/d/Y h:i A")." for assignment #".$lc->getvars['id'];
+	//$p->message.= "\n(This is a system generated assignment # and does not correspond to the number of assignments in your particular class)";
+	$p->messageTo = $u->username;
+	$p->add();
+		
+			}
+			
+			
+			
+			// go to jail, do not pass go, do not collect $200
+			$this->viewRun($db, $u, $lc, $t);
+			
+			
+		}
+		
+	
+
+/*
+ *
+ * Take the uploaded file and store in a secure area of the
+ * webserver. Store the path, mime info, file size, original
+ * file name to a database with a unique ID so that
+ * instructors can later download them from the classmgr app.
+ * Also store timestamp. Students could reupload another file
+ * with the same name, but won't be able to delete the
+ * original file (only overwrite it).
+ * 
+ * Input data: file mime info
+ * Output data: 
+ *
+ */
+		function uploadAssignmentRun(&$db,&$u,&$lc,&$t) {
+			//$t['url']=appurl("classroom/assignments/event=");
+			//$this->presentor='redirect';
+			//return;
+
+			$lc->templateName='assignments_uploadAssignment';
+
+		}
+
+
+
+}
+
+?>

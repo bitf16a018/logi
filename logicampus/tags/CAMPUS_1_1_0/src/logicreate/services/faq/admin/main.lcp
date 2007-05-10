@@ -1,0 +1,104 @@
+<?
+/*
+ * adminfaq
+ * Last updated 9/25/2001
+ * 
+ * Purpose:
+ * Admin FAQs
+ */
+
+include_once(INSTALLED_SERVICE_PATH."faq/faqObj.php");
+
+class faq extends HercAuth {
+
+
+	var $presentor = "adminPresentation";
+
+	function editRun(&$db,&$lcUser,&$arg,&$t) {
+		if ($arg->getvars["pkey"]) {
+			$faq = faqs::_load($arg->getvars[pkey]);
+			$t[faq] = $faq;	
+		}
+
+			$sql = "select gid,groupname from lcGroups";
+			$db->query($sql);
+			while($db->next_record()) {
+			extract($db->Record);
+			if (in_array($gid,$faq->groups)) {
+				$c = " selected";
+			} else { $c=""; }
+				$list .= "<option value=\"$gid\"$c>$groupname\n";
+			}
+
+		$db->query("select distinct category from lcFaqs order by category");
+		while($db->next_record()) {
+			extract($db->Record);
+			if ( $category == $faq->category) { $c = " selected"; } else { $c =""; }
+
+			$opt .= "<option value=\"$category\"$c>$category\n";
+		}
+
+		$t["catopt"] = $opt;
+		$t["groups"] = $list;
+		
+		$arg->templateName="adminfaqedit";
+	}
+
+
+
+	function addRun(&$db,&$lcUser,&$arg,&$t) {
+
+		$sql = "select gid,groupname from lcGroups";
+		$db->query($sql);
+		while($db->next_record()) {
+			extract($db->Record);
+			$list .= "<option value=\"$gid\"$c>$groupname\n";
+		}
+
+		$db->query("select distinct category from lcFaqs order by category");
+		while($db->next_record()) {
+			extract($db->Record);
+			$opt .= "<option value=\"$category\"$c>$category\n";
+		}
+
+		$t["catopt"] = $opt;
+		$t["groups"] = $list;
+		
+		$arg->templateName="adminfaqedit";
+	}
+
+
+	function updateRun(&$db,&$lcUser,&$arg,&$t) {
+
+		extract($arg->postvars[faq]);
+//		print_r($arg->postvars); exit();
+		$faq = faqs::_load($pkey);
+		$faq->category = $arg->postvars["faq"]["category"];
+		if (trim($arg->postvars[textcategory]) != "") {
+			$faq->category = $arg->postvars[textcategory];
+		}
+		$faq->question = $question;
+		$faq->answer = $answer;
+		$faq->groups = '|'.@join('|',$groups).'|';
+		$faq->update();
+
+		$this->Run(&$db,&$lcUser,&$arg,&$t);
+
+	}
+
+	function deleteRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
+
+		faqs::_delete($lcObj->getvars[pkey]);
+		$this->Run(&$db,&$lcUser,&$lcObj,&$lcTemplate);
+	}
+
+
+
+	function Run($db,&$lcUser,&$lcObj,&$t) {
+
+		$t['displist'] = faqs::getList();
+
+	}
+
+}
+?>

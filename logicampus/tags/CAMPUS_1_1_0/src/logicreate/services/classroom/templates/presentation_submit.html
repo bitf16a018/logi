@@ -1,0 +1,10 @@
+<?=$t['sectionheader'];?>
+<p>Fill out the form below to submit your presentation to the instructor.</p>
+
+<?if($t['error']){?><span style="color:red;"><?=$t['error'];?></span><?}?>
+<?if($t['msg']){?><span style="color:blue;"><?=$t['msg'];?></span><?}?>
+<?if($t['preview']){?>
+	<p><b>Previewing presentation.</b> Please make any changes you deem necessary and preview again or submit your work by clicking the Submit Presentation button.</p>
+	<?=$t['preview'];?>
+<?}?>
+<?=$t['form'];?>

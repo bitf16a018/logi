@@ -1,0 +1,30 @@
+  
+	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/popups/popup.js"></script>
+	
+	<style type="text/css">
+		html, body {
+		  background: ButtonFace;
+		  color: ButtonText;
+		  font: 11px Tahoma,Verdana,sans-serif;
+		  margin: 0px;
+		  padding: 0px;
+		}
+		body { padding: 5px; margin-right: 10px;}
+		table {
+		  font: 11px Tahoma,Verdana,sans-serif;
+		}
+		.title { background: #ddf; color: #000; font-weight: bold; font-size: 120%; padding: 3px 10px; margin-bottom: 10px;
+		border-bottom: 1px solid black; letter-spacing: 2px;
+		}
+	</style>
+
+
+<?php
+if ($t["catName"] == "")
+{	$t['catName'] = '';	
+}
+?>
+<div class="title"><?=$t["catName"];?></div>
+<?=$t["ExplorerView"];?>
+
+

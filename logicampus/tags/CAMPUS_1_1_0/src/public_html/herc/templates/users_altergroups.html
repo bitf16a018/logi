@@ -1,0 +1,50 @@
+<body bgcolor="#a69171">
+<table width="650" border="0" cellpadding="3" cellspacing="0">
+  <tr>
+    <td align="center" width="119"> &nbsp; </td>
+    <td align="center" class="selectedTab" width="132" background="<?=_PICS_URL;?>tabshell.gif"> Alter Groups </td>
+    <td align="center" class="tab" width="132" background="<?=_PICS_URL;?>tabshell.gif"> <a href="<?=_APP_URL?>users/event=showTab/tab=resetgroups">Reset Groups</a> </td>
+    <td align="center" class="tab" width="132" background="<?=_PICS_URL;?>tabshell.gif"> <a href="<?=_APP_URL?>users/event=showTab/tab=deletegroups">Delete Users</a> </td>
+    <td align="center" width="119"> &nbsp; </td>
+  </tr>
+</table>
+<table width="650" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td colspan="5" align="center" class="selectedTab"> User Admin </td>
+  </tr>
+  <tr>
+    <td colspan="5"><table width="100%" border="1"><tr><td bgcolor="white">
+    <form method="POST" action="<?=_APP_URL?>users/event=alterGroups">
+    <table cellspacing="4" border="0" width="100%">
+        <tr>
+        <td colspan="5" bgcolor="white" align="center">
+                <p>
+                <h2>Change users' groups... </h2>
+		<select size="7" name="groups[]" multiple style="width:65%;">
+		<?= $t['groupOpts']?>
+               </select>
+        </td></tr>
+        <tr><td align="center" width="100%" colspan="5">
+                <table border="0"><tr><td>
+                This
+                       <select onchange="this.options[0].selected=true;">
+                <option SELECTED> <i>entire</i> list of users
+		<?= makeOptions($t['collection']); ?>
+                </select>
+                  will be </td>
+                <td>
+                <input type="radio" name="groupAct" value="add" CHECKED>Added to
+                <br>
+                <input type="radio" name="groupAct" value="del">Deleted from
+                </td><td>
+                the above groups.
+                </td></tr></table>
+                <p>
+                <input type="submit" value="Okay" style="width:30%">  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="button" value="Cancel" style="width:30%" onclick="document.location='<?=_APP_URL?>users';">
+          </td></tr></table>
+	</form>
+        </td></tr></table>
+
+</td></tr>
+</table>
+</body>
