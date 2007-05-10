@@ -1,0 +1,321 @@
+/* Default LogiCreate Color Setup:
+	LC Blue/Grey = #BFC6D8  (used in top nav bar, and other apps)
+	LC Dark Blue = #125CA5  (primary color)
+	LC Orange    = #F3A42B  (primary color) 
+	LC Green     = #058845  (used in comments, and top menu)
+	LC Light Grey= #E0E3EC  (used in menu, forums, etc)
+	LC Left Menu = #EFEBAE  (used in the left menu)
+*/
+
+	.maintable { 
+		background-color: #FFFFFF;
+		border: thin solid black;
+	}
+	.sidebar { 
+		background-color: #DDDDDD;
+		border: thin solid black;
+	}
+
+	.toptable { 
+		background-color: #339955;
+		border: thin solid black;
+		color: #FFFFFF;
+		text-align: right;
+	}
+	.toptable a:link { color: #FFFFFF;  } 
+	.toptable a:visited { color: #E0E0E0; }
+	.toptable a:hover { color: #DDEE44;  }
+	.bottomtable { 
+		background-color: #339955;
+		border: thin solid black;
+		color: #FFFFFF;
+		text-align: center;
+	}
+	.bottomtable a:link { color: #FFFFFF;  } 
+	.bottomtable a:visited { color: #E0E0E0; }
+	.bottomtable a:hover { color: #DDEE44;  }
+
+	.menu_head {	 color: #ffffff;
+		 font-size: 13px; 
+		 background-color: #339966; 
+		 font-weight: bold;
+		 font-family: verdana,  arial, helvetica, san-serif;
+		 text-align: center;
+		 line-height: 18px;
+		}
+	.menu_head a:link {color: #FFFFFF; font-weight: bold;}
+
+	.menu_item { color: #000000;
+		 text-indent: 10px;
+		 background-color: #aaddaa;
+		 font-size: 11px; 
+		 font-family: verdana, arial, helvetica, san-serif;
+		 line-height: 18px;
+		 }
+        .menu_item a:link {color: #000000;}
+        .menu_item a:visited {color: #000000;}
+        .menu_item a:active {color: #f3a42b;}
+        .menu_item a:hover {color: #6699FF; }
+	.menu2 { color: #000000;
+		 font-size: 10px; 
+		text-indent: 25px; 
+		 font-family: verdana, arial, helvetica, san-serif;
+		 }
+
+
+
+	BODY { 
+		background-color: #CCDDCC; 
+	}
+
+	H1 {
+		font-family : Verdana, Arial, Helvetica, sans-serif; 
+		color : #125ca5; 
+		font-weight : bold; 
+		line-height : normal; 
+		margin-top : 0px; 
+		margin-bottom : 8px; 
+	} 
+
+	H2 {
+		font-family : Verdana, Arial, Helvetica, sans-serif; 
+		font-weight : bold; 
+		text-transform : none; 
+		margin-top : 0px; 
+		color : #125ca5; 
+		line-height : 90%; 
+		margin-bottom : 8px; 
+	} 
+
+	H3 {
+		font-family : Verdana, Arial, Helvetica, sans-serif; 
+		font-weight : bold; 
+		margin-top : 12px;
+		margin-bottom : 4px;
+		color : #125ca5; 
+		line-height : 100%; 
+	} 
+
+	H4 {
+		font-family : Verdana, Arial, Helvetica, sans-serif; 
+		font-weight : bold; 
+		margin-top : 12px;
+		margin-bottom : 4px;
+		color : #125ca5; 
+		line-height : 100%; 
+	} 
+
+	TABLE { 
+		font-family: Verdana, Arial, Helvetica, sans-serif; 
+		font-size: 12px;
+		font-style: normal;
+		line-height: 16px; 
+		font-weight: normal;
+		font-variant: normal; 
+		text-transform: none;
+		color: #000000
+	}
+
+	.bodycopy {
+		font-family: Verdana, Arial, Helvetica, sans-serif; 
+		font-size: 11px;
+		font-style: normal;
+		line-height: 16px; 
+		font-weight: normal;
+		font-variant: normal; 
+		text-transform: none;
+		color: #000000
+		}
+
+	.bodycopy a:link { color: #125CA5; } 
+	.bodycopy a:visited { color: #125CA5; } 
+	.bodycopy a:hover { color: #F3A42B; }
+
+	.topnav {	 color: #606060;
+		 background-color: #E0E3EC;
+		 font-size: 9px; 
+		 font-weight: bold;
+		 font-family: arial, helvetica, san-serif;
+		 text-align: right;
+		 text-decoration: none;
+		}
+	.topnav a:link { color: #606060; text-decoration: none; } 
+	.topnav a:visited { color: #606060; text-decoration: none;}
+	.topnav a:hover { color: #f3a42b; text-decoration: none; }
+
+	.rowheader { color: #FFFFFF;
+		 font-size: 10px; 
+		 background-color: #125CA5;
+		 font-weight: bold;
+		 font-family: arial, helvetica, san-serif;
+		}
+	.rowheader a { color: #FFFFFF; text-decoration: none;}
+        .rowheader a:link { color: #FFFFFF; text-decoration: none;}
+        .rowheader a:hover { color: #F3A42B; text-decoration: none;}
+
+	.leftnav { color: #000000;
+		   background-color: #FFFFFF;
+		     font-size: 12px;
+		     font-color: #000000;
+		     font-family: arial, helvetica, san-serif;
+		    }
+
+	.rightnav { color: #000000;
+		   background-color: #efebae;
+		     font-size: 12px;
+		     font-color: #000000;
+		     font-family: arial, helvetica, san-serif;
+		    }
+	.rightnav a:hover {color: #000000;}
+	.rightnav a:link {color: #000000;}
+	.rightnav a:visited {color: #000000;}
+	.rightnav a:active {color: #f3a42b;}
+	/* used in the login and register pages */
+	.reglogin{ color: #000000;
+		 background-color: #e0e3ec;
+		 font-size: 11px; 
+		 font-family: verdana, arial, helvetica, san-serif;
+		 line-height: 18px;
+		 }
+
+	/* used in the login and register pages */
+	.regloginhead{	 color: #000000;
+		 font-size: 12px; 
+		 background-color: #e0e3ec; 
+		 font-family: arial, helvetica, san-serif;
+		 text-align: left;
+		 line-height: 18px;
+		}
+
+	.line { color: #F3A42B;
+		 font-size: 12px; 
+		 background-color: #F3A42B;
+		 font-weight: bold;
+		 font-family: arial, helvetica, san-serif;
+		}
+
+	.greenline { color: #000000;
+		 font-size: 12px; 
+		 background-color: #058845;
+		 font-weight: bold;
+		 font-family: arial, helvetica, san-serif;
+		}
+
+	.row1 { color: #000000;
+		 font-size: 10px; 
+		 background-color: #CCCCCC;
+		 font-family: arial, helvetica, san-serif;
+		}
+
+	.row2 { color: #000000;
+		 font-size: 10px; 
+		 background-color: #C0C0C0;
+		 font-family: arial, helvetica, san-serif;
+		}
+
+	.footer { background-color: #125CA5; }
+
+	.bottomnav {	 color: #000000;
+		background-color: #ffffff;
+		 font-size: 9px; 
+		 font-weight: bold;
+		 font-family: arial, helvetica, san-serif;
+		 text-align: center;
+		 line-height: 10px;
+		 text-decoration: none;
+		}
+
+	.bottomnav a:link { color: #125ca5; text-decoration: none; } 
+	.bottomnav a:visited { color: #125ca5; text-decoration: none;}
+	.bottomnav a:hover { color: #f3a42b; text-decoration: none; }
+
+	/* Used in the welcome/news/templates/news.html for news */
+	td.header {
+		background-color : #125ca5; 
+		font-family : Verdana, Arial, Helvetica, sans-serif; 
+		font-size : 10pt; 
+		font-weight: bold;
+		color : #FFFFFF; 
+		line-height : 120%; 
+		font-style : normal; 
+	} 
+
+	/* Used in the welcome/news/templates/news.html for articles  */
+	td.header2 {
+		background-color : #f3a42b; 
+		font-family : Verdana, Arial, Helvetica, sans-serif; 
+		font-size : 10pt; 
+		font-weight: bold;
+		color : #FFFFFF; 
+		line-height : 120%; 
+		font-style : normal; 
+	} 
+
+
+.forum_head {
+background-color: #393990;
+font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+color: white;
+}font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+.forum_head a:link {color: white;}
+.forum_head a:visited {color: white;}
+.forum_head a:hover {color: #DADAB9;}
+.forum_head a:active {color: white;}
+
+.forum_row1{
+background-color: #CCCCCC;
+font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+color: black;
+}
+.forum_row1 a:link {color: black;}
+.forum_row1 a:visited {color: black;}
+.forum_row1 a:hover {color: #393990;}
+.forum_row1 a:active {color: black;}
+
+.forum_row2{
+background-color: #EFEFEF;
+font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+color: black;
+}
+.forum_row2 a:link {color: black;}
+.forum_row2 a:visited {color: black;}
+.forum_row2 a:hover {color: #393990;}
+.forum_row2 a:active {color: black;}
+
+.forum_moderated{
+background-color: red;
+font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+color: white;
+text-align: left;
+}font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+.forum_moderated a:link {color: white;}
+.forum_moderated a:visited {color: white;}
+.forum_moderated a:hover {color: #DADAB9;}
+.forum_moderated a:active {color: white;}
+
+
+.forum_head2 {
+background-color: #000000;
+font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+color: white;
+}font-weight: bold;
+font-size: 8pt;
+font-family: Arial;
+.forum_head2 a:link {color: white;}
+.forum_head2 a:visited {color: white;}
+.forum_head2 a:hover {color: #DADAB9;}
+.forum_head2 a:active {color: white;}

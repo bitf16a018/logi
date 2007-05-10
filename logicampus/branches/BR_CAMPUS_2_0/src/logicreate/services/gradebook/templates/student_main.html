@@ -1,0 +1,66 @@
+<?=$t['sectionheader'];?>
+
+<b>Total Points:</b> <?=$t['totalpoints'];?><br>
+<b>Current Average:</b> {AVERAGE}<br>
+<b>What else (within reason):</b> {?}<br><br>
+
+Grades that are shown in a form below can be changed by entering a
+value and updating the grades.  Grades which are links are assessments
+and can only be changed by altering the score for that test.
+
+<table width="100%" border=0 cellpadding=2 cellspacing=2>
+<tr bgcolor="#FFCE7B">
+	<td><b>Description</b></td>
+	<td><b>Score</b></td>
+	<td><b>Comments</b></td>
+</tr>
+<? debug($t['gbval']); ?>
+<? while ( list(,$val) = each($t['gbval']) ) { ?>
+<tr>
+	<td valign="top"><?=$val->entry->title;?></td>
+	<td valign="top"><input type="text" name="score[<?=$val->id;?>]" value="<?=$val->score;?>" size=4 maxlength=5 /></td>
+	<td valign="top"><?=$val->comments;?></td>
+</tr>
+<? } ?>
+</table>
+
+<hr/>
+
+<table width="95%"  border="0" cellspacing="1" cellpadding="1">
+  <tr>
+  <td bgcolor="#FFCE7B">Description</td><td
+  bgcolor="#FFCE7B">Score</td>
+  </tr>
+  <tr> 
+    <td width="42%">Homework 1</td>
+    <td width="58%"><form name="form1" method="post" action="">
+        <input type="text" name="textfield" value="76">
+    </td>
+  </tr>
+  <tr> 
+    <td>Lab Asssignemtn 2</td>
+    <td>
+        <input type="text" name="textfield" value="98">
+    </td>
+  </tr>
+  <tr> 
+    <td>Mid Term</td>
+    <td>
+        &nbsp;<b>87</b> <a href="<?=APP_URL?>gradebook/assessment/event=editAsmt/assId=2">(edit grade)</a>
+      </td>
+  </tr>
+  <tr> 
+    <td>Final Exam</td>
+    <td>
+	  &nbsp;<b>84</b> <a href="<?=APP_URL?>gradebook/assessment/event=editAsmt/assId=2">(edit grade)</a>
+	</td>
+  </tr>
+  <tr> 
+    <td>&nbsp;</td>
+    <td>
+        <input type="submit" value="Update">
+	</td>
+  </tr>
+</table>
+	</form>
+

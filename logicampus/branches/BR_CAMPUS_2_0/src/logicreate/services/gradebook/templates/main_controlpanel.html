@@ -1,0 +1,31 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+
+<table width="95%" border="0" cellspacing="1" cellpadding="1">
+  <tr> 
+    <td width="9%" valign="top"><img src="<?=IMAGES_URL?>icon-general.gif" width="32" height="32" alt="Preferences icon"></td>
+    <td width="36%" valign="top" class="coursemainbody">
+	<h4>Preferences</h4></td>
+    <td width="6%">&nbsp;</td>
+    <td width="9%" valign="top"><img src="<?=IMAGES_URL?>icon-assmt.gif" width="32" height="34" alt="data-exchange icon"></td>
+    <td width="38%" valign="top" class="coursemainbody"> <h4>Data Exchange</h4></td>
+  </tr>
+  <tr> 
+    <td valign="top">&nbsp;</td>
+    <td valign="top" class="coursemainbody">
+	<ol>
+		<li><a href="<?=APP_URL?>gradebook/prefs/event=chooseGradeOption">Grading  Options</a></li>
+		<li><a href="<?=APP_URL?>gradebook/prefs/event=chooseColorOption">Setup Colors</a></li>
+		<li><a href="<?=APP_URL?>gradebook/category">Setup Categories</a></li>
+	</ol>
+
+	</td>
+    <td>&nbsp;</td>
+    <td align="center" valign="top">&nbsp;</td>
+    <td valign="top" class="coursemainbody">
+		<a href="<?=APP_URL?>gradebook/dataexchange/event=export">Export Grades</a> 
+	</td>
+  </tr>
+  
+</table>

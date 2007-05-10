@@ -1,0 +1,52 @@
+
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td valign="top">
+
+<table border=0 cellpadding=2 cellspacing=0 style="border:1px solid black;">
+<tr style="background-color:black;color:white;font-weight:bold;">
+	<td><b>Assignment</b></td>
+	<td width=20>&nbsp;</td>
+	<td><b>Max Points</b></td>
+	<? if ( $t['gradebook']->calculationType == 1 ) { ?>
+	<td width=20>&nbsp;</td>
+	<td><b>% of Grade</b></td>
+	<? } ?>
+</tr>
+<? foreach ( $t['cats'] as $cat ) { ?>
+<tr>
+	<td colspan=3><b><?=$cat->label;?></b></td>
+</tr>
+<? foreach ( $t['gradebook']->entries as $entid => $entry ) {
+	if ( $entry->idClassGradebookCategories != $cat->idClassGradebookCategories )
+		continue;
+	?>
+<tr>
+	<td style="padding-left:10px;"><?=$entry->title;?></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$entry->totalPoints;?></td>
+	<? if ( $t['gradebook']->calculationType == 1 ) { ?>
+	<td width=20>&nbsp;</td>
+	<td><?=$entry->weightedPercent;?></td>
+	<? } ?>
+</tr>
+<? } ?>
+<? } ?>
+</table>
+
+	</td>
+	<td valign="top">
+
+<table border=0 cellpadding=2 cellspacing=0 style="border:1px solid black;">
+<tr>
+	<td style="background-color:black;color:white;font-weight:bold;">Grading Scale</td>
+</tr>
+<? foreach ( $t['gradeScale'] as $gs ) { ?>
+<tr><td><?=$gs;?></td></tr>
+<? } ?>
+</table>
+
+	</td>
+</tr>
+</table>
+<p style=\"font-size:8pt;\"><i>This document was generated on <?=date('M j, Y \a\t g:i A', time());?>.</i></p>

@@ -1,0 +1,86 @@
+<h2><?=lct( 'Classroom Portal Page' )?></h2>
+
+<table border=0 cellpadding="2" cellspacing="0" width="100%">
+<tr>
+	<td width="33%" valign="top">
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">Student Calendar</td>
+		</tr>
+		<tr>
+			<td>
+				<div class="calendar_controls" id="calendar_controls">
+					<?=$t['calendarRenderer']->controlsToHTML();?>
+
+				</div>
+				<div class="calendar" id="calendar">
+					<?=$t['calendarRenderer']->toHTML();?>
+				</div>
+			</td>
+		</tr>
+		</table>
+		
+		<br/>
+		
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Lessons</td>
+		</tr>
+		<tr>
+			<td>(newest lesson is first)</td>
+		</tr>
+		<tr>
+			<td>
+					<?=$t['lessons']?>
+			</td>
+		</tr>
+		</table>
+		<br/>
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">Assignments</td>
+		</tr>
+		<tr>
+			<td>(closest due date is first)</td>
+		</tr>
+		<tr>
+			<td>
+				<?=$t['assignments']?>
+			</td>
+		</tr>
+		</table>
+
+	</td>
+	<td width="10">&nbsp;</td>
+	<td valign="top">
+		<?php 
+
+		if (strlen($t['motd']) ) {
+			echo lcMessageBox($t['motd'],'i','Message of the Day'); 
+			echo "<br/>\n";
+		} ?>
+
+
+		<?php foreach($obj->user->classesTaken as $k=>$class)  { ?>
+		<h4><a href="<?=modurl('details/id_classes='.$class->id_classes);?>"><?=$class->courseFamilyNumber;?> - <?=$class->courseName?></a></h4>
+		<?=$t['classdata'][$class->id_classes]?>
+		<br>
+		<?php } ?>
+
+	</td>
+</tr>
+</table>
+
+<? if(MODULE_SELF_ENROLLMENT){ ?>
+<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+<tr>
+		<td class="portalbox"><b>Class Management</b></td>
+	</tr>
+<tr>
+	<td style="font-size: 9px;">
+		<tr><td><a href="<?= BASE_URL.'index.php/users/enrollment/' ?>">add/drop classes</a>	
+</tr>
+</table>
+<? } ?>
+														
+

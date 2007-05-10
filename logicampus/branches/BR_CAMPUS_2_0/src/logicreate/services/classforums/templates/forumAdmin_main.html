@@ -1,0 +1,19 @@
+<?php echo $t['sectionheader'];?>
+
+<form method="POST" action="<?=modurl('forumAdmin/event=saveChanges');?>">
+<?php
+		echo $t['table']->toHTML();
+?>
+
+	<p style="margin:1px;">&nbsp;</p>
+	Move Checked Forums to Category :
+	<select name="cat_move_to">
+		<option value="-1">Don't Move</option>
+		<?=$t['categoryPulldown'];?>
+	</select>
+
+	<input type="submit" id="submit_forum" value="Save Changes"/>
+</form>
+
+<p style="margin:1px;">&nbsp;</p>
+

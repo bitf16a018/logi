@@ -1,0 +1,90 @@
+<?=$t['sectionheader'];?>
+<? if ($t['print']) { ?>
+<a href="#" onclick='window.close();'>Close this window</a>
+<? } else { ?>
+<a href="<?=modurl("main/event=report/print=yes/week=".$t['week']);?>" target='_NEW'>Printer friendly version</a>
+<? } ?>
+<? while(list($k,$v) = each($t['info'])) {
+ob_start(); 
+
+if ($count<0) { debug($v); } ++$count; 
+?>
+<tr>
+	<td valign='top'><?=$v['courseFamilyNumber'];?></tD>
+	<td valign='top' width='100'><?=$v['courseName'];?></tD>
+	<td valign='top'><?=$v['facultyId'];?></tD>
+	<td valign='top'><? if ($v['south_campus']) { ?>SO<? } ?></tD>
+	<td valign='top'><? if ($v['southeast_campus']) { ?>SE<? } ?></tD>
+	<td valign='top'><? if ($v['northeast_campus']) { ?>NE<? } ?></tD>
+	<td valign='top'><? if ($v['northwest_campus']) { ?>NW<? } ?></tD>
+</tr>
+<? 
+$x = ob_get_contents();
+$temp = strtotime($v['date_start']);
+$week = date("W",$temp);
+$month = date("m",$temp);
+if (strtolower($v['classType'])=='itv') { 
+$weeks[$temp]['itv'] .= $x;
+} else { 
+$weeks[$temp]['internet'] .= $x;
+}
+$months[$month] .= $x;
+$weekdates[$temp] = $temp;
+$weeksdate[$temp] = $temp;
+$monthsdate[$month] = $temp;
+ob_end_clean();
+} 
+
+if ($t['week'] >0) { 
+$finalweek[$t['week']] = $weeks[$t['week']];
+}
+?>
+
+<BR>Select a week: 
+<? while(list($k,$v) = each($weekdates)) { ?>
+<? if ($t['print']) { $print='yes'; }
+$d[] = '<a href="'.modurl("main/event=report/week=$v/print=$print").'">'.date("m/d/Y",$k).'</a>';
+} 
+echo implode(" | ",$d);
+?>
+
+<? if (is_array($finalweek)) { ?>
+<? if (!$t['print']) { ?>
+<BR>
+NOTES: <form method='post' action='<?=modurl("main/event=report/week=".$t['week']);?>'><textarea name='notes'><?=$t['notes'];?></textarea><input type='submit' value='Update notes'></form>
+<? }  else { 
+// We're printing, not viewing, so let's see if we have notes
+if ($t['notes']) { 
+?>
+<h4>NOTES</h4><?=$t['notes'];?>
+<BR><BR>
+<? } 
+ } ?>
+<table width='100%' border='0'>
+<?
+while(list($k,$v) = each($finalweek)) { 
+?>
+<tr><td colspan='7'><h3>Week of <?=date("m/d/Y",$weeksdate[$k]);?></h3></td></tr>
+<tr><td colspan='7'><h4>Internet</h4></td></tr>
+	<tr style='background-color: red; color: white;'>
+		<td width='20%'>Course #</td>
+		<td width='40%'>Course</td>
+		<td width='20%'>Faculty</td>
+		<td colspan='4'>Location of testing</td>
+	</tr>
+
+<?=$v['internet'];?>
+<tr><td colspan='7'><h4>ITV</h4></td></tr>
+	<tr style='background-color: red; color: white;'>
+		<td>Course #</td>
+		<td>Course</td>
+		<td>Faculty</td>
+		<td colspan='4'>Location of testing</td>
+	</tr>
+
+<?=$v['itv'];?>
+
+<? } ?>
+</table>
+<? } ?>
+

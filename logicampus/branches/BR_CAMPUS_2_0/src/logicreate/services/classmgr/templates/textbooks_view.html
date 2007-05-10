@@ -1,0 +1,161 @@
+<?=$t['sectionheader'];?>
+
+<? # prints message
+if ($t['message'])
+{ ?>
+<div style="color: blue; font-size: 120%;"><?=$t['message'];?></div>
+<? } ?>
+
+<?
+$count = count($t['data']);
+
+if ( $t['checkAccess'] ) {
+	if ( $t['noTextbooks'] ) {
+		print "<p>You have indicated that your class doesn't have any course materials that are requested of the students. If this is not the case, simply add a material.</p>";
+	} else {
+		if ( !$count ) {
+		print "<p>You have no course materials, but you have not indicated that this is your intention. If you intend <u>not</u> <u>to</u> <u>require</u> any course materials click <a href=\"".modurl('textbooks/event=view/noTextbooks=1')."\">here</a>.</p>";
+		}
+	}
+}
+?>
+
+<?
+		$t['noTextbooks'] = $db->Record['noTextbooks'];
+		$t['checkAccess'] = $this->checkAccess($u);
+
+	if (!$count)
+	{ ?>
+
+	<FIELDSET>
+		<LEGEND>
+			Results	
+		</LEGEND>
+		No materials found for this class.
+	</FIELDSET>
+<?	} else {
+	for ($i=0; $i<$count; $i++)
+	{ ?>
+		<FIELDSET>
+		<LEGEND>
+			<a href="<?=MOD_URL?>textbooks/event=edit/id=<?=$t['data'][$i]->idTextbookClasses?>">Modify</a>
+			&bull;
+			<a href="<?=MOD_URL?>textbooks/event=delete/id=<?=$t['data'][$i]->idTextbookClasses?>" onclick="if (confirm('Are you SURE you want to delete this material?')) { return true; } else { return false; }">Delete</a> 
+			 - 
+			<b>Title: <?=$t['data'][$i]->title;?>	
+			- 
+			Status <?=getStatus($t['data'][$i]->status);?></b>
+
+		</LEGEND>
+
+		<table width="100%" cellspacing="1">
+			<tr class="tabletitle">
+				<td colspan="4">
+					Material Information
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Status
+				</td>
+				<td colspan=3>
+					<?=getStatus($t['data'][$i]->status);?>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Title
+				</td>
+				<td>
+					<?=$t['data'][$i]->title;?>
+				</td>
+				<td>
+					Edition	
+				</td>
+				<td>
+					<?=$t['data'][$i]->edition;?>
+				</td>
+			</tr>			
+			<tr>
+				<td>
+					Author
+				</td>
+				<td>
+					<?=$t['data'][$i]->author;?>
+				</td>
+				<td>
+					Copyright	
+				</td>
+				<td>
+					<?=$t['data'][$i]->copyright;?>
+				</td>
+
+			</tr>
+			<tr>
+				<td>
+					Publisher
+				</td>
+				<td>
+					<?=$t['data'][$i]->publisher;?>
+				</td>
+				<td>
+					ISBN	
+				</td>
+				<td>
+					<?=$t['data'][$i]->isbn;?>
+				</td>
+
+			</tr>			
+			<tr>
+				<td colspan="4">
+					<b>Other Information</b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Bundled
+				</td>
+				<td>
+					<?=printyesno($t['data'][$i]->bundled);?>
+				</td>
+				<td>
+					Bundled Items
+				</td>
+				<td>
+					<?=$t['data'][$i]->bundledItems;?>
+				</td>
+					
+			</tr>			
+			<tr>
+				<td>
+					Last Item
+				</td>
+				<td>
+					<?=printyesno($t['data'][$i]->lastItem);?>
+				</td>
+				<td>
+					Required Material
+				</td>
+				<td>
+					<?=printyesno($t['data'][$i]->required);?>
+				</td>
+			</tr>		
+			<? if ($t['data'][$i]->note) { ?>
+			<tr>
+				<td colspan="4">
+				<FIELDSET>
+					<LEGEND>
+					Note
+					</LEGEND>
+					<?=$t['data'][$i]->note;?>
+				</FIELDSET>
+				
+				</td>
+			</tr>
+			<? } ?>
+		</table>
+		</FIELDSET>
+		<br><br>
+		
+<?	} } ?>
+
