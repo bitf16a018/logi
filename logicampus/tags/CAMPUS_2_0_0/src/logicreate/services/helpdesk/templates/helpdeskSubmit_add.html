@@ -1,0 +1,20 @@
+<?=$t['sectionheader'];?>
+
+Your incident was accepted and is being routed to the appropriate person.  You may 
+check back at the <a href="<?=appurl("helpdesk");?>">help desk</a> area to monitor 
+the progress of your incident.  You will also receive email notices when your 
+incident has been updated.
+<?php
+	if ($t['incident_number'])
+	{
+?>
+	<br>
+	<br>
+	<center>
+	<h3>
+		Please use this as a reference: Incident #<?=$t['incident_number'];?>
+	</h3>
+	</center>
+<?php
+	}
+?>

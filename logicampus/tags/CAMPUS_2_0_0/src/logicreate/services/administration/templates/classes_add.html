@@ -1,0 +1,18 @@
+<?=$t['sectionheader'];?>
+
+<?php if ($t['error']) { ?><span style="color:red;"><?=$t['error'];?></span><?php } ?>
+
+<?=$t['form']?>
+
+<script>
+
+	function updateFaculty()
+	{	
+		/** facultyId */
+		location.href = '<?=modurl('classes/event='.$t['myEvizent'].'/cf=');?>'+document.getElementById('id_courses').value;
+		
+	}
+	
+	document.getElementById("id_courses").onchange=updateFaculty;
+	
+</script>

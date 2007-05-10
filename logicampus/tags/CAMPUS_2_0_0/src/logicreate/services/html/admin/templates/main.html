@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+<script language="JavaScript">
+	function openwysiwyg() {
+		window.open('<?= BASE_URL?>herc/wysiwyg/_editor.php?formname=Editor','wysiwyg','navigation=0,resizable=yes,width=820,height=700,scrollbars=yes');
+		//window.open('<?=_APP_URL;?>content/event=wysiwyg','wysiwyg','navigation=0,resizable=yes,width=750,height=480,scrollbars=yes');
+	}
+	function sendNewFile(v) {
+		Editor.elements[1].value = v;
+	}
+	function getContent() {
+		return Editor.elements[1].value;
+	}
+</script>
+<? global $HTTP_USER_AGENT?>
+</HEAD>
+
+<BODY bgcolor="#ada592">
+
+
+
+<script language="javascript">
+	function requestDelete($fid,$name) {
+		if (confirm ('Are you sure you want to delete file: "'+$name+'"?') ) {
+			document.location='<?= MOD_URL ?>main/event=delete/pkey='+$fid;
+		}
+	}
+</script>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+
+      			HTML Pages
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+
+				<td class="white">
+					<table width="100%"  border="0" cellspacing="2" cellpadding="4">
+						<tr>
+						<td nowrap align="center" valign="top">
+							<a href="<?=MOD_URL?>contentSearch/event=AddPage">
+								<img src="<?=_PICS_URL?>filenew.gif" border="0"></a>
+							<br>
+
+							<a href="<?=MOD_URL?>contentSearch/event=AddPage">
+							Add a New Page</a>
+						</td>
+						<td width="100%" rowspan="4" valign="top">
+							<? switch ($t['contentArea']) {
+								case 'images': ?>
+								<iframe width="100%" height="300" src="<?=MOD_URL;?>dialog/event=image"></iframe>
+								<? break;
+								case 'deletes': ?>
+								<iframe width="100%" height="300" src="<?=MOD_URL;?>dialog/d=1"></iframe>
+								<? break;
+								case 'files': ?>
+								<iframe width="100%" height="300" src="<?=MOD_URL;?>dialog"></iframe>
+								<? break;
+								case 'templates':
+								include(SERVICE_PATH.'html/admin/templates/'.$t['templateInclude']);
+								break;
+
+								default: ?>
+								Choose a feature
+								<br> &lt;----
+							<? } ?>
+						</td>
+						</tr><tr>
+						<td nowrap align="center" valign="top" <? $t['contentArea'] == 'deletes' ? print 'bgcolor="#D0D0D0"': print '';?>>
+							<a href="<?=MOD_URL?>contentSearch/event=listPages/d=1">
+								<img src="<?=_PICS_URL?>edittrash.gif" border="0"></a>
+							<br>
+
+							<a href="<?=MOD_URL?>contentSearch/event=listPages/d=1">
+							Delete Pages</a>
+						</td>
+						</tr><tr>
+						<td nowrap align="center" valign="top" <? $t['contentArea'] == 'files' ? print 'bgcolor="#D0D0D0"': print '';?>>
+
+							<a href="<?=MOD_URL?>contentSearch/event=listPages">
+								<img src="<?=_PICS_URL?>fileopen.gif" border="0"></a>
+							<br>
+							<a href="<?=MOD_URL?>contentSearch/event=listPages">
+							Edit a Page</a>
+						</td>
+						</tr><tr>
+						<td nowrap align="center" valign="top" <? $t['contentArea'] == 'images' ? print 'bgcolor="#D0D0D0"': print '';?>>
+
+							<a href="<?=MOD_URL?>contentSearch/event=listImages">
+								<img src="<?=_PICS_URL?>image.png" border="0"></a>
+							<br>
+
+							<a href="<?=MOD_URL?>contentSearch/event=listImages">
+							Manage Images</a>
+						</td>
+						</tr>	
+					</table>
+
+					</td>
+			</tr>
+		</table>
+
+	</td></tr>
+</table>
+<br>&nbsp;<br>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+      			Upload Images
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="350">
+
+		<table border="1" width="100%">
+			<tr>
+				<td class="white">
+					<table width="100%">
+						<tr>
+						<td nowrap valign="top">
+
+
+
+							<form method="post" action="<?=modurl("main/event=uploadImage");?>" enctype="multipart/form-data">
+							<table>
+							<tr>
+								<td>Filename</td>
+								<td><input type="file" name="in[file]"></td>
+								</tr><tr>
+								<td colspan="2">
+									<input type="submit" value="Put Image">
+								</td>
+							</tr>
+							</table>
+							</form>
+
+
+						</td>
+						</tr>
+					</table>
+					</td>
+			</tr>
+
+		</table>
+		<br><br>
+
+</td></tr>
+</table>

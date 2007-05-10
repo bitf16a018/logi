@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+
+
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<? hercBox("Broadcast email"); ?>
+
+<form method="post">
+<input type="hidden" name="event" value="send">
+
+	<table width="100%"><tr><td width="50%" class="grey">
+		Include Groups
+	</td><td class="grey" width="50%">
+		Exclude Groups
+	</td></tr>
+	<tr><td width="50%">
+		Send email to everyone in these groups:<br>
+		<select name="groups[]" multiple size="5">
+		<?=$t["groups"];?>
+		</select>
+	</td><td width="50%">
+		But to no one in any of these groups: <br>
+		<select name="notgroups[]" multiple size="5">
+		<?=$t["notgroups"];?>
+		</select>
+	</td></tr>
+	<tr><td class="grey" colspan="2">
+		Headers
+	</td></tr>
+	<tr><td width="50%">
+		Subject: <input type="text" name="subject" size="25">
+	</td><td width="50%">
+		From: <input type="text" name="from" size="25">
+	</td></tr>
+	<tr><td colspan="2" class="grey">
+		Message Body:
+	</td></tr>
+	<tr><td colspan="2">
+		<textarea name="message" rows="8" cols="60" wrap="physical"></textarea>
+	</td></tr>
+	<tr><td colspan="2">
+		<input type="submit" value="Send Mail!">
+	</td></tr>
+</table>
+<table width='100%'><tr><td>
+<?=hercbox('Available values');?>
+Add the values below to the email message above to personalize the content going to each recipient.
+<?=htmltable($t['optionlist'],4,'100%');?>
+
+<? endHercBox(); ?>
+</td></tr></table>
+</form>
+
+
+
+<? endHercBox(); ?>
+
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
+</body>
+</html>

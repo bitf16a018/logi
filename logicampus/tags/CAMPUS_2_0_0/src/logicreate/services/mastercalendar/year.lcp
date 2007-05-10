@@ -1,0 +1,90 @@
+<?php
+
+
+include_once(LIB_PATH."eventsObj.php");
+ 
+
+class year extends BasicAuth   
+{
+	
+	var $presentor = 'htmlPresentation';
+		
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+	
+	function Run($db,&$u,&$lc,&$t) 
+	{
+//auto-comment		$lc->templateStyle = 'private';
+		
+		$lc->templateName = 'year_main';
+
+		// use passed in ?
+		if ($lc->getvars['y']) 
+		{
+			$mut = 1;
+			$dut = 1;
+			$year = $lc->getvars['y'];
+			
+			$ut = strtotime("$mut/1/$year");	// MAIN DATEKEEPER
+			
+		} else /** Default time (year) is current **/
+		{	$ut = mktime(0, 0, 0, 1, 1, date('Y')); // MAIN DATEKEEPER
+			$year = date('Y');
+		}
+
+		$t['year'] = $year;
+		
+		// filters apply from month view
+		$op_taken  = array();
+		$op_taught = array();
+		
+		if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
+		{	if ($u->sessionvars['mastercalendar']['overallviews'] == 'vtaken')
+			{
+				foreach($u->classesTaken as $v)
+				{	$op_taken[] = trim($v->id_classes);
+				}
+				$op_taken = array_unique($op_taken);
+			}
+		}
+		
+		if (isset($u->classesTaught) && is_array($u->classesTaught) && count($u->classesTaught) > 0)
+		{	if ($u->sessionvars['mastercalendar']['overallviews'] == 'vteach')
+			{
+				foreach($u->classesTaught as $v)
+				{	$op_taught[] = trim($v->id_classes);
+				}
+				$op_taught = array_unique($op_taught);
+			}
+		}
+		// end filterage
+
+		$c = new cali($ut,(strtotime("+1 years",$ut)-1), '', array_merge($op_taught, $op_taken), array_unique($u->groups));
+			$c->linkMonthName = true;
+			$c->noNextPrev = true;
+			$c->showTitle = false;
+			$c->showTimes = false;
+			$c->calWidth = '200';
+			$c->monthReviewURL = modurl('main/d=1');
+			
+			$c->eventDayURL = modurl('day');
+			
+		/**	I have to do this becuase something seems strange when I view year
+		 */	
+		for($i=1; $i <= 12; ++$i)
+		{	$t['calendar'][$i] = $c->renderMonth($i, $year);
+		}
+		
+		$t['title'] = "Events for Year: ".date("Y");
+
+		# Make Month and Year Options (Dropdown Creation)		
+		$t['LINK_next'] = '<a href="'.modurl('year/'.date('\y=Y/', strtotime("+1 year", $ut))).'">Next Year <img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('year/'.date('\y=Y/', strtotime("-1 year", $ut))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"> Previous Year</a>';
+		
+	}
+	
+
+}
+
+?>
