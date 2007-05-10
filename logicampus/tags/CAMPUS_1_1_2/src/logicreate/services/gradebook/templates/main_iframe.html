@@ -1,0 +1,77 @@
+<HTML>
+	<HEAD>
+		<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL.'/'.$t['cssFile'];?>">
+	</HEAD>
+	<body topmargin="0" leftmargin="0" rightmargin="0" bgcolor="white">
+
+	<? if ($t['message']) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
+
+
+	<table cellpadding=5 cellspacing=1 border=0 bgcolor="silver">
+	<?php
+		// Render the table
+		$commoncolor = '#FFFBE4';  // to alternate between white and #FFFBE4 per row
+		$table = $t['table'];
+		$columnHeaders = $t['columnHeaders'];
+		$columnFooter = $t['columnFooter'];
+		$printHeadersEvery = $t['printHeadersEvery'];
+
+		$currentRow = 1;
+		while ( list($rownum,$row) = @each($table) )
+		{
+			echo "<tr>\n";
+			while ( list($cellnum,$cell) = @each($row) )
+			{
+				if ( $cellnum === 'inactive' ) continue;
+
+				// determine the cell's background color
+				if ( $cell == '&nbsp;' 
+					|| $cell == 'Total Points'
+					|| $cell == 'Weighted %' ) {
+						$bgcol = 'white';
+				} else if ( $table[$rownum][0] == '&nbsp;'
+					|| $table[$rownum][0] == 'Total Points'
+					|| $table[$rownum][0] == 'Weighted %' ) {
+						$bgcol = '#E7E8E7';
+				} else if ( strstr($cell,'*') ) {
+					$bgcol = '#A2CFEF'; 
+				} else if ( $table[$rownum]['inactive'] ) {
+					$bgcol = $droppedStudentRowColor;
+				} else {
+					$bgcol = $commoncolor;
+				}
+
+				if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
+					echo "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnHeaders[$cellnum-1]."</th>\n";
+				} else {
+					//disqualified grades
+					// if i do this color swap outside of here, it affects
+					// some of the header cells
+					if ( strstr($cell,'d ') ) {
+						$bgcol = 'E0E0E0'; 
+					}
+
+					echo "\t<td bgcolor=\"$bgcol\" NOWRAP>$cell</td>\n";
+				}
+			}
+			echo "</tr>\n";
+			$commoncolor = $commoncolor == 'white' ? '#FFFBE4' : 'white';
+			//rewind the table when we hit a 'header' row
+			// __FIXME__ don't do this
+			if ( ( $currentRow == 1 ) || ( $currentRow % ($printHeadersEvery+1) == 0) ) {
+				prev($table);
+			}
+			flush();
+			flush();
+		$currentRow++;
+		}
+		//ADD FOOTER TO TEMPLATE VARIABLE
+		while ( list($cellnum,$cell) = @each($columnFooter) ) {
+			echo "\t<th bgcolor=\"$bgcol\" NOWRAP>".$columnFooter[$cellnum]."</th>\n";
+		}
+
+
+	?>
+	</table>
+	</body>
+<html>

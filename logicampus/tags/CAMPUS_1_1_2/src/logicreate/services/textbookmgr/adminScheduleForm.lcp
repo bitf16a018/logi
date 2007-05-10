@@ -1,0 +1,132 @@
+<?
+/*
+ *
+ * Schedule a the annual "send the form" out days
+ * informing when the forms are needed.
+ *
+ */
+include_once(LIB_PATH."TC_semester.php");
+include_once(LIB_PATH."LC_html.php");
+
+class adminScheduleForm extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Default event
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='adminScheduleForm_main';
+
+		}
+
+/*
+ *
+ * Will be a simple "if ($_POST)" switch statement to determine
+ * if we're showing a date or entering a date.
+ * 
+ * Input data: a date
+ * Output data: form
+ *
+ */
+		function selectReturnByDateRun(&$db,&$u,&$lc,&$t) 
+		{	
+			$lc->templateName='adminScheduleForm_selectReturnByDate';
+			
+			$t = @array_merge($lc->postvars, $t);
+			$semesterId = $lc->postvars['semesterId'];
+			
+			$objSemester = new Semester($db);
+			$a_semester = $objSemester->getSemester($semesterId);
+			if (is_array($a_semester))
+			{
+				$t['semester_description'] = $objSemester->getSemesterDescription($semesterId);
+				
+				$t['semester_description'].= ' ('. date('F d, Y', strtotime($a_semester['dateStart'])). ' - '.date('F d, Y', strtotime($a_semester['dateEnd'])). ')';
+				//echo '<pre>'; print_r($a_semester);
+				// if a date wasn't submitted, it's the first time we see this, lets just show the form.
+				if (isset($lc->postvars['date_deadline']['month']) == false)
+				{	
+					$t['date_deadline']['month'] = date('m', strtotime($a_semester['dateStart']));
+					$t['date_deadline']['day'] = date('d', strtotime($a_semester['dateStart']));
+					$t['date_deadline']['year'] = date('Y', strtotime($a_semester['dateStart']));
+					
+					return;
+				}
+				
+				$dt_deadline = strtotime($lc->postvars['date_deadline']['month']. '/'. $lc->postvars['date_deadline']['day']. '/'.$lc->postvars['date_deadline']['year']);
+				
+				if ($dt_deadline > strtotime($a_semester['dateStart']))
+				{ // error.. report it and move on'
+					$t['errors'][] = ' * Your date must be before the startdate of this semester';
+					
+					return;
+					
+					
+				}
+				
+				
+				/**
+				 *	If we get here, we have passed the tests and we can 
+				 *	enter this information into the database
+				 *	then enter information into the mailqueue to send it out
+				 */
+				
+				// @@@@ I must make sure someone didnt hit submit twice, thats alot of emails!
+				// so i'll run a check on the date being submitted, if it already exists in db
+				// then i will report the error and move on.
+				$lc->templateName='adminScheduleForm_thankyou';
+				
+				
+				
+			} else 
+			{
+				$t['errors'][] =  'we have a BAD semester';
+			}
+
+		}
+
+/*
+ *
+ * To select a semester to tie *form* to.
+ * 
+ * Input data: semesterDate
+ * Output data: 
+ *
+ */
+		function selectSemesterRun(&$db,&$u,&$lc,&$t) 
+		{
+			$lc->templateName='adminScheduleForm_selectSemester';
+			$t = array_merge($t, $lc->postvars);
+			
+			$objSemester = new Semester($db);
+			
+			$semesterId=$t['semesterId'];
+			$a_semester = $objSemester->getSemester($semesterId);
+			
+			if (is_array($a_semester))
+			{	// we have submitted, and we have a semester
+				$this->selectReturnByDateRun($db, $u, $lc, $t);
+			} else 
+			{
+				$a_list = $objSemester->getCurrentList(date('Y-m-d'), true);
+				
+				foreach($a_list as $code=>$semester)
+				{
+					$t['op_semesters'][$code]= $objSemester->getSemesterDescription($code);
+				}
+				
+			}
+			
+		}
+
+
+
+}
+
+?>

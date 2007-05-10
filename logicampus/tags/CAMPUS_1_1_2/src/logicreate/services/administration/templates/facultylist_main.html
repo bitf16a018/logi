@@ -1,0 +1,73 @@
+<?=$t['sectionheader'];?>
+
+<hr size="1">
+
+<?php
+$a_campus = array('SE'=>'Southeast Campus', 'NE'=>'Northeast Campus', 'NW'=>'Northwest Campus', 'S'=>'South Campus', ''=>'Not Available');
+
+echo '<B>Total Faculty: </B>'. count($t['a_faculty_list']);
+
+echo '<hr size="1">';
+
+foreach($t['a_faculty_list'] as $faculty)
+{
+	?>
+	<table cellpadding="2" cellspacing="0" border="0" width="100%">
+	<tr>
+		<td colspan="4"><B><a target="_blank" href="<?=appurl('users/view/'.$faculty['username']);?>"><?=trim($faculty['title']. ' '. $faculty['lastname']. ', '. $faculty['firstname']);?></a></B></td>
+	</tr>
+	<tr>
+		<td width="25%">E-mail:</td>
+		<td width="25%"><?=$faculty['email'];?></td>
+		<td width="25%">Alternate E-mail:</td>
+		<td width="25%"><?=$faculty['emailAlternate'];?></td>
+	</tr>
+	<tr>
+		<td>Office Location:</td>
+		<td><?=$a_campus[trim($faculty['campusLocation'])]?></td>
+		<td colspan="2">Office Hours</td>
+	</tr>
+	<tr>
+		<td width="25%" valign="top">Office Address:</td>
+		<td width="25%" valign="top"><?=$faculty['officeLocation'];?></td>
+		<td colspan="2" valign="top"><B>M</B>: <?=$faculty['offHrsMonday'];?> <br><B>Tu</B>: <?=$faculty['offHrsTuesday'];?> <br><B>W</B>: <?=$faculty['offHrsWednesday'];?> <br><B>Th</B>: <?=$faculty['offHrsThursday'];?> <br><B>F</B>: <?=$faculty['offHrsFriday'];?></td>
+	</tr>
+	<tr>
+		<td width="25%" valign="top">Office Phone:</td>
+		<td width="25%" valign="top"><?=$faculty['officePhone'];?></td>
+		<td colspan="2" valign="top">&nbsp;</td>
+	</tr>
+	
+	<tr>
+		<td width="25%">Home Phone:</td>
+		<td width="25%"><?=$faculty['homePhone'];?></td>
+		<td width="25%">Cell Phone:</td>
+		<td width="25%"><?=$faculty['cellPhone'];?></td>
+	</tr>
+	<tr>
+		<td width="25%">Fax Phone:</td>
+		<td width="25%"><?=$faculty['faxPhone'];?></td>
+		<td width="25%">Pager Phone:</td>
+		<td width="25%"><?=$faculty['pagePhone'];?></td>
+	</tr>
+	<tr>
+		<td width="25%">Emergency Contact:</td>
+		<td width="25%"><?=$faculty['emergencyContact'];?></td>
+		<td width="25%">Emergency Phone:</td>
+		<td width="25%"><?=$faculty['emergencyPhone'];?></td>
+	</tr>
+	<tr>
+		<td width="25%"></td>
+		<td width="25%"></td>
+		<td width="25%"></td>
+		<td width="25%"></td>
+	</tr>
+	</table>
+	<br>
+	<hr size="1">
+	<br>
+	<?php
+	
+}
+
+?>
