@@ -4,7 +4,7 @@ print $t['sectionheader'];
 
 <?php
 if ( strlen($t['message']) > 0 ) { ?>
-	<h3 style="margin:0px;color:red;"><?= $t['message'];?></h3>
+	<?= lcMessageBox($t['message'],'e');?>
 <?php } ?>
 
 <?php
