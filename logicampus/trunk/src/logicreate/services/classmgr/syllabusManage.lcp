@@ -49,9 +49,9 @@ class syllabusManage extends FacultyService {
 		$lc->templateName='syllabusManage_main';
 		$classId = (int)$u->activeClassTaught->id_classes;
 
-		$syllabus = ClassSyllabusPeer::doSelect(" id_classes = ".$classId);
+		$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId);
 		foreach($syllabus as $sylObj) {
-			$id      = $sylObj->get('idClassSyllabus');
+			$id      = $sylObj->get('classSyllabusId');
 			$title   = $sylObj->get('sectionTitle');
 			$content = $sylObj->get('sectionContent');
 			$t['syllabi'][$id] = nl2br(htmlentities($title));
@@ -71,10 +71,10 @@ class syllabusManage extends FacultyService {
 	function delRun(&$db,&$u,&$lc,&$t) {
 		//load up the syllabus
 		$classId = (int)$u->activeClassTaught->id_classes;
-		$syllabus = ClassSyllabusPeer::doSelect(" id_classes = ".$classId);
+		$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId);
 		$sectionId = (int)$lc->getvars['id'];
 		foreach($syllabus as $sylObj) {
-			$id      = $sylObj->get('idClassSyllabus');
+			$id      = $sylObj->get('classSyllabusId');
 			//this matches the given section id submitted to the site.
 			if ($id == $sectionId) {
 				$sylObj->delete();
@@ -96,26 +96,43 @@ class syllabusManage extends FacultyService {
 	function updateRun(&$db,&$u,&$lc,&$t) {
 
 		$classId = (int)$u->activeClassTaught->id_classes;
+		$title = trim(htmlentities($lc->postvars['title']));
+		$section = htmlentities($lc->postvars['content']);
 
 		//if editing
 		$editId = (int)$lc->postvars['editId'];
 		if ($editId > 0 ) {
 			//load up this syllabus with security check 
+			$classId = (int)$u->activeClassTaught->id_classes;
+			$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId." and class_syllabus_id = ".$editId);
+			$syllabusObj = $syllabus[0];
+
+			if (! is_object($syllabusObj) ) {
+				$u->addSessionMessage('The system could not find the requested syllabus section for editing.','e');
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = appurl('classmgr/syllabusManage/');
+			}
 			//change it and save it
-			/*
-			$syllabus->set('sectionContent',$lc->postvars['content']);
-			$syllabus->set('sectionTitle',$lc->postvars['title']);
-			if ($syllabus->save() ) {
+			
+			$syllabusObj->set('sectionContent',$section);
+			$syllabusObj->set('sectionTitle',$title);
+
+			$syllabusObj->save();
+			$u->addSessionMessage('Successfully updated syllabus section.');
+			//can't do return value checking with PBDOs, use fake try/catch
+/*
+			if ($syllabusObj->save() ) {
 				$u->addSessionMessage('Successfully updated syllabus section.');
 			} else {
 				$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
 			}
-			 */
+*/
+			 
 		} else {
 			$syllabus = new ClassSyllabus();
-			$syllabus->set('idClasses',$classId);
-			$syllabus->set('sectionTitle',$lc->postvars['title']);
-			$syllabus->set('sectionContent',$lc->postvars['content']);
+			$syllabus->set('classId',$classId);
+			$syllabus->set('sectionTitle',$title);
+			$syllabus->set('sectionContent',$section);
 			$syllabus->save();
 			$u->addSessionMessage('Added a new section to your syllabus with the title <i>'.$lc->postvars['title'].'</i>');
 //			$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');

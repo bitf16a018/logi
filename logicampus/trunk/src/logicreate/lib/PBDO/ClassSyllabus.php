@@ -6,28 +6,30 @@ class ClassSyllabusBase {
 	var $_modified;		//set() called
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
-	var $idClassSyllabus;
-	var $idClasses;
+	var $classSyllabusId;
+	var $classId;
 	var $sectionTitle;
 	var $sectionContent;
+	var $rank;
 
 	var $__attributes = array( 
-	'idClassSyllabus'=>'integer',
-	'idClasses'=>'integer',
+	'classSyllabusId'=>'integer',
+	'classId'=>'integer',
 	'sectionTitle'=>'varchar',
-	'sectionContent'=>'longvarchar');
+	'sectionContent'=>'longvarchar',
+	'rank'=>'integer');
 
 	var $__nulls = array();
 
 
 
 	function getPrimaryKey() {
-		return $this->idClassSyllabus;
+		return $this->classSyllabusId;
 	}
 
 
 	function setPrimaryKey($val) {
-		$this->idClassSyllabus = $val;
+		$this->classSyllabusId = $val;
 	}
 
 
@@ -47,7 +49,7 @@ class ClassSyllabusBase {
 			}
 			$where = substr($where,0,-5);
 		} else {
-			$where = "id_class_syllabus='".$key."'";
+			$where = "class_syllabus_id='".$key."'";
 		}
 		$array = ClassSyllabusPeer::doSelect($where,$dsn);
 		return $array[0];
@@ -106,10 +108,11 @@ class ClassSyllabusPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_SelectStatement("class_syllabus",$where);
-		$st->fields['id_class_syllabus'] = 'id_class_syllabus';
-		$st->fields['id_classes'] = 'id_classes';
+		$st->fields['class_syllabus_id'] = 'class_syllabus_id';
+		$st->fields['class_id'] = 'class_id';
 		$st->fields['section_title'] = 'section_title';
 		$st->fields['section_content'] = 'section_content';
+		$st->fields['rank'] = 'rank';
 
 
 		$array = array();
@@ -124,13 +127,14 @@ class ClassSyllabusPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("class_syllabus");
-		$st->fields['id_class_syllabus'] = $this->idClassSyllabus;
-		$st->fields['id_classes'] = $this->idClasses;
+		$st->fields['class_syllabus_id'] = $this->classSyllabusId;
+		$st->fields['class_id'] = $this->classId;
 		$st->fields['section_title'] = $this->sectionTitle;
 		$st->fields['section_content'] = $this->sectionContent;
+		$st->fields['rank'] = $this->rank;
 
 
-		$st->key = 'id_class_syllabus';
+		$st->key = 'class_syllabus_id';
 		$db->executeQuery($st);
 
 		$obj->_new = false;
@@ -144,13 +148,14 @@ class ClassSyllabusPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_UpdateStatement("class_syllabus");
-		$st->fields['id_class_syllabus'] = $obj->idClassSyllabus;
-		$st->fields['id_classes'] = $obj->idClasses;
+		$st->fields['class_syllabus_id'] = $obj->classSyllabusId;
+		$st->fields['class_id'] = $obj->classId;
 		$st->fields['section_title'] = $obj->sectionTitle;
 		$st->fields['section_content'] = $obj->sectionContent;
+		$st->fields['rank'] = $obj->rank;
 
 
-		$st->key = 'id_class_syllabus';
+		$st->key = 'class_syllabus_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
@@ -173,7 +178,7 @@ class ClassSyllabusPeerBase {
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_DeleteStatement("class_syllabus","id_class_syllabus = '".$obj->getPrimaryKey()."'");
+		$st = new PBDO_DeleteStatement("class_syllabus","class_syllabus_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -206,10 +211,11 @@ class ClassSyllabusPeerBase {
 
 	function row2Obj($row) {
 		$x = new ClassSyllabus();
-		$x->idClassSyllabus = $row['id_class_syllabus'];
-		$x->idClasses = $row['id_classes'];
+		$x->classSyllabusId = $row['class_syllabus_id'];
+		$x->classId = $row['class_id'];
 		$x->sectionTitle = $row['section_title'];
 		$x->sectionContent = $row['section_content'];
+		$x->rank = $row['rank'];
 
 		$x->_new = false;
 		return $x;
