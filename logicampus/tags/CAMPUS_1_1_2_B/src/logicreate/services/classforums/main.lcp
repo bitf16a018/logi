@@ -1,0 +1,241 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include_once(SERVICE_PATH.'classforums/classforums_lib.php');
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
+
+
+/**
+ * Class Forums
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class classforums extends StudentService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $applinks = array();
+	var $navlinks = array();
+
+	function run (&$db, &$u, &$lc, &$t) {
+
+
+		$lc->templateName = 'main_main';
+
+		$dm = new MyTableModel($u);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=64;
+		$col->cellRenderer = new LC_TableNewMessageRenderer();
+		$col->cellRenderer->u = $u;
+
+		$col_b = &$columnModel->getColumnAt(2);
+		$col_b->maxWidth=100;
+
+		$col_b = &$columnModel->getColumnAt(3);
+		$col_b->maxWidth=100;
+
+		$col_c = &$columnModel->getColumnAt(4);
+		$col_c->cellRenderer = new LC_TableDateRenderer('M j, Y - h:i A');
+
+		$col_d = &$columnModel->getColumnAt(1);
+		$col_d->cellRenderer = new LC_TableForumRenderer();
+		$col_d->justify = 'left';
+
+		//make sub headers for forum categories
+
+		//TODO use real class id
+		$categories = ClassForum_Categories::getAll($u->activeClassTaken->id_classes);
+
+		foreach($categories as $k=>$v) {
+			$thisCount = $dm->getForumsInCategory($v->getCategoryId());
+			if ($thisCount < 1) { continue; }
+
+			$subHeaderModel = new LC_TableDefaultColumnModel();
+			$sub_col_a = new LC_TableColumn();
+			$sub_col_a->name = lct('Category').': '. $v->getName();
+			$subHeaderModel->addColumn($sub_col_a);
+			$subHeader = new LC_DefaultTableHeader($subHeaderModel);
+			$subHeader->row = $forumCount;
+
+			$forumCount += $thisCount;
+
+			$table->addSubHeader($subHeader);
+		}
+
+		$t['table'] = new LC_TableRenderer($table);
+
+	}
+
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildAppLinks() {
+		$this->applinks = array (
+		);
+
+		global $lcUser;
+		//need to make this search for moderator status
+		if ( $lcUser->isFaculty() ) {
+			$this->applinks[lct('Admin')]  = 'forumAdmin/';
+		}
+	}
+}
+
+
+
+class MyTableModel extends LC_DefaultTableModel {
+
+	var $forums = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function MyTableModel($u) {
+		$this->forums = ClassForum_Forums::getAll($u->activeClassTaken->id_classes);
+		$newList = array();
+		//throw out "invisible" ones
+		foreach ($this->forums as $k=>$v) {
+			if ( !$v->isVisible() ) {
+				continue;
+			}
+			$newList[] = $v;
+		}
+		$this->forums = $newList;
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->forums));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 5;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return '&nbsp;'; break;
+
+			case '1':
+				return 'Forum'; break;
+
+			case '2':
+				return 'Topics'; break;
+
+			case '3':
+				return 'Replies'; break;
+
+			case '4':
+				return 'Last Post'; break;
+
+			case '5':
+				return 'Admin'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$forum = $this->forums[$x];
+		switch ($y) {
+			case 0:
+				return $forum;
+			case 1:
+				return $forum->_dao;
+			case 2:
+				return $forum->getTopicCount();
+			case 3:
+				return $forum->getPostCount();
+			case 4:
+				return $forum->getLastPostTime();
+			case 5:
+				return $forum->_dao;
+		}
+	}
+
+
+
+	/**
+	 * Custom function to get number of forums
+	 * in a certain category
+	 * saves from hitting the DB, since all the forums are loaded already
+	 */
+	function getForumsInCategory($catId) {
+		$ret = 0;
+		foreach($this->forums as $k => $v ) {
+			if ($v->getCategoryId() == $catId) {
+				$ret++;
+			}
+		}
+		return $ret;
+	}
+}
+
+
+class LC_TableIconRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		if ($this->value->isLocked() ) {
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_locked.png" title="new posts" alt="new posts"><br/>LOCKED';
+		}
+		return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="old posts" alt="old posts">';
+
+		if ($this->row % 2 == 0 ) {
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_new.png" title="new posts" alt="new posts"><br/>NEW&nbsp;POSTS';
+		} else {
+			return '<img height="32" width="32" src="'.IMAGES_URL.'messages_read.png" title="old posts" alt="old posts">';
+		}
+	}
+}
+
+
+
+/*
+class LC_TableControlRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<a href="'.appurl('classforums/forumAdmin/').'forum_id='.$this->value->classForumId.'">EDIT</a>';
+	}
+}
+*/
+
+
+class LC_TableForumRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<a href="'.appurl('classforums/forum/').'forum_id='.$this->value->classForumId.'">'.$this->value->name.'</a> <br/>'.$this->value->description;
+	}
+}
+
+
+?>

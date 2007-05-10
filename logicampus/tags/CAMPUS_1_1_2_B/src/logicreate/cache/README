@@ -1,0 +1,4 @@
+This directory is a standard LogiCreate directory that can be used in conjunction with
+the cache library located in LC_include.php.
+
+HTML you wish to cache should be cached here.

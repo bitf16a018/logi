@@ -1,0 +1,225 @@
+<?php
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+/**
+ * file management 
+ * Folder managers can share files in nested folders.
+ * Only certain groups can download
+ */
+
+class classdoclib extends classdoclibService {
+
+
+//var $presentor='';
+
+	/**
+	 * show a folder's contents.
+	 * Use the getvars to find out which folder is open.
+	 */
+	function run(&$db,&$u,&$lcObj,&$t) {
+
+		// pull messages from session regarding previous operations before a redirect
+		$t['message'] = $u->sessionvars['doc_message'];
+		$u->sessionvars['doc_message'] = '';
+
+
+// NOTE
+// this is only here to help ease the transition in the 'live' demo environment 
+// because they have a number of folders for classes already created
+// the classes.lcp file will create Trash for new classes, but there's no easy 
+// way to add Trash folders to everything that's already come before.
+// this shouldn't have to be done in production, and can be taken out after all
+// classes have been visited
+		$thisclass = $u->activeClassTaught->id_classes;
+		$db->queryOne("select * from classdoclib_Folders where class_id=$thisclass and owner='".$u->username."' and folderType=0");
+		if ($db->Record['pkey']==0) { 
+			$db->query("insert into classdoclib_Folders (name,parentKey,owner,class_id,folderType) values ('Trash',0,'{$u->username}','{$thisclass}',0)");
+		}
+// end of this temporary code
+// 
+//
+		if ($u->activeClassTaught->id_classes < 1) {die('no active class taught');}		
+
+
+		//find the currently open folder
+		$openFolder = (int) $lcObj->getvars[count($lcObj->getvars)-1];
+
+		$t['openFolder'] = $openFolder;
+		$openFolder = addSlashes($openFolder);
+
+		if ($openFolder) { 
+			$db->queryOne("select trashed,folderType from classdoclib_Folders where pkey=".(int)$openFolder);
+			$folderType = $db->Record['folderType'];
+			if ($folderType==0) { $t['isTrash'] = 'y'; $isTrash = 'y';}
+			if ($db->Record['trashed']=='') { $db->Record['trashed']='n'; }
+			$t['isTrashed'] = $db->Record['trashed'];
+			$t['folderType'] = $db->Record['folderType'];
+			$isTrashed = $db->Record['trashed'];
+		}
+		if ($lcObj->getvars["order"]) { $u->sessionvars["filesorder"] = $lcObj->getvars["order"]; }
+
+
+		// get file categories (folders)
+		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes);
+
+		while ($cat->traverse() ) {
+			if ($cat->p_CurrentNode->contents['pkey'] == $openFolder) {
+
+				$t["catName"] = $cat->p_CurrentNode->contents['name'];
+				//only show the edit link if the user can edit.
+				if ( ($cat->p_CurrentNode->contents['action'] == FOLDER_EDIT) || ($cat->p_CurrentNode->contents['owner'] == $u->username))
+					$t['canEdit'] = true;
+
+				$t['notes'] = $cat->p_CurrentNode->contents['notes'];
+				
+				$cat->p_CurrentNode->setOpen();
+				$cat->setStackExpanded(true);
+				$categoryKey = $cat->p_CurrentNode->contents['pkey'];
+				$cat->reset(); break;
+			}
+		}
+
+		
+
+		//render as HTML
+		$view = new FileMGTView($cat);
+
+		$t["pkey"] = intval($categoryKey);
+
+		//grab files in this folder
+		$filearray = LC_file::getFromFolder($categoryKey,$lcObj->getvars["order"]);
+
+
+		//data formatting
+		while(list($k,$v) = @each($filearray)) {
+//			if ($v->trashed=='y') { continue; }
+			$v->filedate = date("m/d/Y",strtotime($v->filedate));
+			if ($v->size > 999999) { $v->size = sprintf("%.1f",$v->size/1000000). '&nbsp;Mb'; }
+				else { $v->size  = sprintf("%.1f",$v->size/1024) . '&nbsp;kb'; }
+			$t['files'][] = $v;
+
+
+		}
+		//manager permissions on this folder?
+		if ( @in_array('manager',$u->perms) ) {
+			$t['manager'] = true;
+		}
+
+
+		$t["ExplorerView"] = $view->renderAsExplorer($openFolder);
+		if ($cat->count < 1) {
+			$lcObj->templateName = 'main_nofolders';
+		}
+		if ($t['isTrash']=='y') {
+			$lcObj->templateName = 'main_trash';
+		}
+
+// folderType=0 is trash
+// folderType=1 is default nonchangeable
+// folderType=2 is userdefined
+		$t['canEdit'] = false;
+		if ((int)$folderType>1) {
+			$t['canEdit'] =true;
+		}
+
+	}
+
+
+
+
+
+
+
+
+
+	/**
+	 * small set of routines to act on an 'act' variable (action)
+	 * move, delete or copy files
+	 */
+	function actRun($db,&$u,&$lcObj,&$t) {
+
+		//new permission
+		if ( ! @in_array('manager',$u->perms)) {
+			$t['message' ] = "Permission Denied";
+			$t['details'] = "You do not have permission to move files in this module.";
+			$this->presentor = "errorMessage";
+			return;
+		}
+
+		$button = $lcObj->postvars["button"];
+		if (eregi("delete",$button)) { 
+			$x = new files($u->username,$u->groups);
+			$pkeys = $lcObj->postvars["pkeys"];
+			while(list($k,$v) = each($pkeys)) { 
+				$x->_delete($v);
+			}
+		}
+		
+		if (eregi("move",$button)) { 
+			$cat = $lcObj->postvars["actionCategory"];
+			$pkeys = $lcObj->postvars["pkeys"];
+			while(list($k,$v) = @each($pkeys)) { 
+				$x = files::getSingle($v,$u);
+				$x->folder = $cat;
+				$x->_update();
+			}
+			$u->sessionvars["categoryLevel"] = $cat;
+		}
+
+		if (eregi("copy",$button)) { 
+			$x = new files($u->username,$u->groups);
+			$cat = $lcObj->postvars["actionCategory"];
+			$pkeys = $lcObj->postvars["pkeys"];
+			while(list($k,$v) = @each($pkeys)) { 
+				$x = files::getSingle($v,$u);
+				$x->folder = $cat;
+				$x->username = $u->username;
+				$x->save();
+			}
+			$u->sessionvars["categoryLevel"] = $cat;
+
+
+		}
+
+		$this->Run($db,$u,$lcObj,$t);
+	}
+
+
+
+	/**
+	 * Take info passed from the form in the 'edit' run
+	 * and update the db with it.
+	 */
+	function updateRun($db,&$u,&$lcObj,&$t) {
+		//new permission
+		if ( ! @in_array('manager',$u->perms)) {
+			$t['message' ] = "Permission Denied";
+			$t['details'] = "You do not have permission to edit files in this module.";
+			$this->presentor = "errorMessage";
+			return;
+		}
+
+		$pkey = $lcObj->postvars["pkey"];
+		$checksum = $lcObj->postvars["checksum"];
+
+
+
+		if (md5($u->username.$pkey) == $checksum) { 
+			$x = LC_file::getSingle($pkey);
+			$x->description = trim($lcObj->postvars["newdescription"]);
+			$x->file = trim($lcObj->postvars["newfile"]);
+			$x->groups = '|'.@join('|',$lcObj->postvars['newgroups']).'|';
+			$x->_save('lcFiles');
+		}
+		$t['url'] = MOD_URL;
+		$this->presentor = 'RedirectPresentation';
+	}
+
+
+
+}
+
+
+?>

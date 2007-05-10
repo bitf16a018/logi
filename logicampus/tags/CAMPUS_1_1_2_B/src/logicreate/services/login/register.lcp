@@ -1,0 +1,111 @@
+<?
+/*
+ * register
+ * Last updated 3/21/2001
+ * 
+ * Purpose:
+ * User registration
+ */
+
+//include_once(MODULE_PATH."/profile.php");
+
+class register extends BasicAuth {
+
+var $presentor = "htmlPresentation";
+
+	function Run($db,&$lcUser,&$lcObj,&$lcTemplate) {
+		
+		$lcObj->templateStyle = 'private';
+		
+	if ($this->_allowRegister == "y") {
+		$g = $lcObj->getvars[0];
+		$lcTemplate["mchecked"] = " checked"; 
+		if ($g=="f") { 	
+			$lcTemplate["fchecked"] = " checked"; 
+			$lcTemplate["mchecked"] = ""; 
+		}
+		$lcTemplate["title"] = "Register";
+		$lcObj->templateName = "register";
+	}
+	}
+
+	function postRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
+
+
+		$gender = $lcObj->postvars["gender"];
+		$username = $lcObj->postvars["username"];
+		$password = $lcObj->postvars["password"];
+		$password2 = $lcObj->postvars["password2"];
+		$email = $lcObj->postvars["email"];
+
+		if ($password != $password2) {
+			$error .= "<li>Your passwords didn't match.  Please enter your information again.<BR>";
+		}
+		if ($password=="") {
+			$error .= "<li>You need to enter a password.  Please enter your information again.<BR>";
+		}
+		if ($username=="") {
+			$error .= "<li>You need to enter a username.  Please enter your information again.<BR>";
+		}
+
+		# Updated 9/17/02 by KE
+		# User accounts shouldn't be allowed to have a space in them now
+		if (!eregi("^[a-z0-9]+[a-z0-9\_\-\.]$", $username)) { $error .= "<li>You have invalid characters in your username.<BR>"; }
+		
+		if( !eregi( "^" .
+            "[_a-z0-9-]+([_\\.-][_a-z0-9-]+)*" .    //user
+            "@" .
+            "([_a-z0-9-]+([\.-][_a-z0-9-]+)*)+" .   //domain
+            "\\.[a-z]{2,}" .                    //sld, tld 
+            "$", $email, $regs)
+   ) {
+
+		$error .= "<li>Check your email address and make sure it is valid.  Please enter your information again.<BR>";
+		}
+
+if ($this->_allowRegister!="y") { 
+$error .= "<li>This site does not allow users to register at this time.<br>";
+}
+
+		if ($error =="" ) {
+			$u =& $lcUser;
+			$u->username = $username;
+			$u->password = $password;
+			$u->email = $email;
+			$u->groups = array("reg","public","new");
+
+			# Added by KE on 9/17/02
+			# Updates profile so username gets inserted into profile
+			# Certain APPS rely on username being in the profile table
+
+			$key = $u->addUser($db);
+			if ( intval($key) < 1 ) {
+				$error .= "That username is not available.  Please choose a different username.<BR>";
+				$u->username = "anonymous";
+				$u->password = "";
+				$u->email = "";
+				$u->groups = array("pub");
+			} else {
+				$db->query("insert into profile set username='".$u->username."'");
+			}
+		}
+
+		$lcTemplate["error"] = $error;
+
+		if ($error) {
+			$lcObj->templateName = "register";
+			$lcTemplate["title"] = "Register";
+			$lcTemplate["vars"] = $lcObj->postvars;
+		} else {
+			//$lcObj->templateName = "regthanks";
+			//$lcTemplate["title"] = "Thanks";
+			redirect($db,APP_URL.$this->_registerThanksURL);
+		}
+
+	}
+
+
+
+
+}
+?>

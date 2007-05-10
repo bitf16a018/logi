@@ -1,0 +1,7 @@
+Working draft of new forum system.
+
+Permissions not implemented yet, but posting is 
+working and rendering in both threaded and flat mode (no toggling 
+yet, but it works).  
+
+More functional work progressing ASAP.

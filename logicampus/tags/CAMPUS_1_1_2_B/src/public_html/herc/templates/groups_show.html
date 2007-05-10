@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript"><!--
+function mouseOn(img, name)
+{
+if (br == "n3")
+    arguments[0].src = name + "_active.png"
+}
+
+function mouseOff(img, name)
+{
+if (br == "n3")
+    arguments[0].src = name + ".png"
+}
+
+function cancel(loc) {
+parent.View.location = loc;
+}
+
+// -->
+</SCRIPT>
+
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+			<center><div class="message"><?= $t["message"]; ?></div></center>
+
+<table border="0" cellpadding="0" cellspacing="0">
+
+                <tr><td width="500">
+
+                        <table border="1" width="100%">
+			<tr><td wdith="100%" class="selectedTab" align="center">
+			All Permissions for Group <i><?= $t["gName"];?></i>
+			</td></tr>
+
+			<tr><td width="100%" class="white" align="center">
+
+			<? while ( list($k,$v) = @each($t["modNames"]) ) { 
+			 $allowed = $t[perms][$k]; $size=count($v[perms])+1; ?>
+
+		<form method="POST">
+		<table width="90%" border=0 align="center"><tr><td width="40%">
+				<table  width="100%" align="left" border=1 cellspacing=0 style="border-width:2px;border-color:blue;">
+					<tr><td align="center" width="100%" class="selectedTab" colspan="<?=$size?>">
+							<b><?=$k?></b>
+					</th></tr>
+				</table>
+				</td><td width="60%" style="font-size: 80%;">
+			for <?= $t['gName'];?>
+		</td></tr>
+		<tr><td colspan="2">
+				<table width="100%" align="center" cellspacing="4" style="border-width:1px;border-style:solid; border-color:black;">
+				<tr><td>
+<!--				<table border=1 cellspacing=0 style="border-width:2px;border-color:blue;">
+					<tr><td align="center" width="100%" colspan="<?=$size?>">
+							<b><?=$k?></b>
+					</th></tr>
+				</table>
+				-->
+			</td></tr>
+			<tr><td>
+					<table border="1" style="border-color:black;border-style:solid;border-width:2px;">
+
+					<tr><td align="center">
+							Access <br>
+						<input type="checkbox" name="perms[access][Access]" <?  if ( in_array('access',$allowed) ) { print "CHECKED";} ?>>
+					</td>
+
+					<? while ( list($kk,$vv) = @each($v[perms]) ) { ?>
+					<td align="center">
+						<?=$vv?> <br>
+						<input type="checkbox" name="perms[<?= $kk; ?>][<?=$vv?>]" <?  if ( in_array($kk,$allowed) ) { print "CHECKED";} ?>>
+						</td>
+					<? } ?>
+					</tr></table>
+			</td></tr>
+			<tr><td>
+				<input type="submit" value="update">
+
+			<input type="hidden" name="mid" value="<?=$v[id]?>">
+			<input type="hidden" name="gid" value="<?=$t[gid]?>">
+			<input type="hidden" name="event" value="update">
+			</form>
+	</td></tr>
+</table>
+</td></tr>
+</table>
+			<p>&nbsp;</p>
+			<? } ?>
+
+
+                </td></tr>
+</table>
+
+</body>
+</html>

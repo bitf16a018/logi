@@ -1,0 +1,38 @@
+<html>
+<head>
+<style>
+
+TD {
+    color: #000000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+.admin {
+    color: #FF0000;
+    font-family: arial, helvetica, san-serif;
+    font-size: 12px; 
+}
+
+
+</style>
+</head>
+<body bgcolor="silver" onload="document.forms[0].elements[0].focus(); parent.Controls.location.reload();">
+
+<form method="post" action="<?=appurl("{$obj->moduleName}/chat/event=post");?>">
+<table>
+<tr><td colspan="2">
+<?=$t["message"];?>
+</td></tr>
+<tr><td colspan="1">
+Your message? 
+</td><td>
+<input type='text' name='text' size='45'>
+<input type="submit" value="Post"> 
+</td></tr>
+	</table>
+</form>
+</td></tr></table>
+<br/>
+<a onclick="parent.window.close();" href="javascript:parent.window.close()">Close my chat window</a>
+</body>
+</html>

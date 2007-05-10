@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript"><!--
+function mouseOn(img, name)
+{
+if (br == "n3")
+    arguments[0].src = name + "_active.png"
+}
+
+function mouseOff(img, name)
+{
+if (br == "n3")
+    arguments[0].src = name + ".png"
+}
+
+function showUserProfile (sel) {
+	if (sel.isSelected == false) {
+		return;
+	}
+	mid = sel.options[sel.selectedIndex].value;
+	if (mid != '__0' )
+		if ( mid != '')
+			parent.View.location = '<?= _APP_URL;?>users/' + mid +'/event=show';
+
+}
+
+// -->
+</SCRIPT>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+
+		User Admin
+
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+
+	<form method="POST">
+	<input type="hidden" name="event" value="addnew">
+
+	<table border="1" width="100%"><tr>
+	<td width="50%" class="white" valign="top">
+		<center><h3>Required Fields:</h3></center> <p>
+
+		Username:<br> <input type="text" name="required[username]">
+		<p>
+		Password:<br> <input type="password" name="required[password]">
+		<p>
+		Re-type:<br> <input type="password" name="required[password2]">
+		<p>
+		Email address:<br> <input type="text" name="required[email]">
+		<p>
+		<input type="checkbox" name="sendemail"> Check to notify this user of their new account by email.
+		<p>
+		<input type="submit" value="Add user">
+
+	</td><td width="50%" class="white" valign="top">
+		<center><h3>Optional Fields:</h3></center> <p>
+
+		<? foreach ($t[profile] as $k=>$v ) { ?>
+		<?= $v;?>:<br> <input type="text" name="profile[<?= $v; ?>]">
+		<p>
+		<? } ?>
+
+	</td></tr></table>
+	</td></tr>
+</table>
+
+	</form>
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
+</body>
+</html>

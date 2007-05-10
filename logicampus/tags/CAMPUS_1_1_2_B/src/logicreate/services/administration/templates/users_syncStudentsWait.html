@@ -1,0 +1,11 @@
+
+Synching students...
+This may take a while.
+<form method="POST" name="waitform">
+	<input type="hidden" name="event" value="doSyncStudents">
+	<input type="hidden" name="semester_id" value="<?=$t['semester_id'];?>">
+</form>
+
+<script>
+	document.forms['waitform'].submit();
+</script>
