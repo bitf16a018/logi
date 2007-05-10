@@ -1,0 +1,165 @@
+<?
+
+//include_once(LIB_PATH."eventsObj.php");
+include_once(LIB_PATH."lc_table_calendar.php");
+
+/**
+ * Provides calendar view for students.
+ * Mixes class events with generic events
+ */
+class ClassCalendar extends StudentService {
+
+	var $presentor='htmlPresentation';
+	
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	var $applinks = array(
+		'Week view' => 'classCalendar/event=viewWeek',
+		'Month view' => 'classCalendar/',
+	);
+		//'Year view' => 'classCalendar/event=viewYear'
+	var $sectionTitle = 'Calendar';
+	var $inactivelinks = array(
+		'Calendar'
+	);
+
+
+	/**
+	 * Default event
+	 * 
+	 * Input data: 
+	 * Output data: calendar objec5
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='classCalendar_main';
+		$this->inactivelinks[] = 'Month view';
+
+		$classId = (int)$u->activeClassTaken->id_classes;
+		$m = (int) $lc->getvars['m'];
+		$d = (int) $lc->getvars['d'];
+		$y = (int) $lc->getvars['y'];
+
+		$calendar = LC_Table_ClassCalendar::getMonthCalendar($classId,$y,$m,$d);
+
+		$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
+	}
+
+
+	function viewWeekRun($db,&$u,&$lc,&$t) {
+		$this->inactivelinks[] = 'Week view';
+		$lc->templateName = 'classCalendar_week';
+
+		$classId = (int)$u->activeClassTaken->id_classes;
+		$m = (int) $lc->getvars['m'];
+		$d = (int) $lc->getvars['d'];
+		$y = (int) $lc->getvars['y'];
+
+		$calendar = LC_Table_ClassCalendar::getWeekCalendar($classId,$y,$m,$d);
+
+		$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
+
+/*
+		// creating next / prev links
+		$t['LINK_next'] = '<a href="'.modurl('classCalendar/event=viewWeek/'.date('\d=d/\m=m/\y=y', strtotime("+1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('classCalendar/event=viewWeek/'.date('\d=d/\m=m/\y=y', strtotime("-1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"></a>';
+
+*/
+	}
+	
+	
+	function viewDayRun(&$db,&$u,&$lc,&$t) 
+	{
+		$classId = (int)$u->activeClassTaken->id_classes;
+		$m = (int) $lc->getvars['m'];
+		$d = (int) $lc->getvars['d'];
+		$y = (int) $lc->getvars['y'];
+
+		$dayCalendar = LC_Table_ClassCalendar::getDayCalendar($classId,$y,$m,$d);
+		$monthCalendar = LC_Table_ClassCalendar::getMonthCalendar($classId,$y,$m,$d);
+
+		$t['dayCalendarRenderer'] = new LC_TableRenderer_DayCalendar($dayCalendar);
+
+		$t['calendarRenderer'] = new LC_TableRenderer_Calendar($monthCalendar);
+		$t['calendarRenderer']->setCompact(true);
+
+
+/*
+		$c = new cali($start,(strtotime("+1 months",$start)-1), '', $u->activeClassTaken->id_classes, array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->calWidth = '190';
+		$c->monthReviewURL = modurl('classCalendar/event=viewDay/d='.$lc->getvars['d']);
+		
+		$c->eventDayURL = modurl('classCalendar/event=viewDay');
+		$c->eventCountURL = modurl('classCalendar/event=viewDay');
+		
+		$t['tinyCal'] = $c->renderMonth($lc->getvars['m'], $lc->getvars['y']);
+
+		# Returns all of the events schedule for the day passed to it.
+		$dayView = new cali($ut, ($ut+86399), '', $u->activeClassTaken->id_classes, array_unique($u->groups));
+
+		# Generates an HTML table for all events on given day.
+		
+		$dayView->starttime = $this->_START_TIME;
+		$dayView->endtime = $this->_END_TIME;
+		if ($dayView->starttime == '' ) {
+			print "::UNKNOWN ERROR::";exit();
+		}
+		
+		$dayView->monthReviewURL = modurl('classCalendar/event=viewDay/d='.$lc->getvars['d']);
+		$dayView->eventDayURL = modurl('classCalendar/event=viewDay');
+		$dayView->eventCountURL = modurl('classCalendar/event=viewDay');
+
+		$t['eventHtml'] = $dayView->renderDayFull();
+*/
+		
+		$lc->templateName = "classCalendar_day";
+		$dayView->width = "100%";
+	}
+	
+	
+	function viewYearRun($db,&$u,&$arg,&$t) 
+	{
+		$this->inactivelinks[] = 'Year view';
+		$arg->templateName = 'classCalendar_year';
+
+		// use passed in ?
+		if ($arg->getvars['y']) 
+		{
+			$mut = 1;
+			$dut = 1;
+			$year = $arg->getvars['y'];
+			
+			$ut = strtotime("$mut/1/$year");	// MAIN DATEKEEPER
+			
+		} else /** Default time (year) is current **/
+		{	$ut = mktime(0, 0, 0, 1, 1, date('Y')); // MAIN DATEKEEPER
+			$year = date('Y');
+		}
+
+		$t['year'] = $year;
+		$c = new cali($ut,(strtotime("+1 years",$ut)-1), '', $u->activeClassTaken->id_classes, array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->calWidth = '200';
+		$c->monthReviewURL = modurl('classCalendar/event=viewDay/d=1');
+		
+		$c->eventDayURL = modurl('classCalendar/event=viewDay');
+				
+		for($i=1; $i <= 12; ++$i)
+		{
+			$t['calendar'][$i] = $c->renderMonth($i, $year);
+		}
+		
+		$t['title'] = "Events for Year: ".date("Y");
+
+		# Make Month and Year Options (Dropdown Creation)
+		
+		$t['LINK_next'] = '<a href="'.modurl('classCalendar/event=viewYear/'.date('\y=Y/', strtotime("+1 year", $ut))).'"><img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('classCalendar/event=viewYear/'.date('\y=Y/', strtotime("-1 year", $ut))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"></a>';
+		
+	}
+
+	
+}
+?>

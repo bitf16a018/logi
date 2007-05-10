@@ -1,0 +1,602 @@
+<?php
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'eventsObj.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'ExamScheduleDates.php');
+include_once(LIB_PATH.'ExamScheduleClasses.php');
+include_once(LIB_PATH.'ExamScheduleClassesDates.php');
+
+/*
+STATUS 1 = NEW
+STATUS 2 = PENDING
+STATUS 3 = APPROVED
+STATUS 4 = RETURNED TO INSTRUCTOR
+*/
+
+class examschedule extends BasicAuth {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Exam Scheduler';
+	var $navlinks = array(
+		'List Schedules' => '',
+	);
+	var $applinks = array(
+		'List Semester Dates' => 'testdates',
+		'Add Semester Date' => 'testdates/event=edit/',
+		'Test check chart' => 'main/event=report/testcheck=y/',
+		'Test list' => 'main/event=report/',
+		'Alternative Activity Chosen' => 'main/event=alt'
+	);
+	var $inactivelinks = array(
+	);
+
+	var $statuses = array(1=>'NEW', 2=>'PENDING', 3=>'APPROVED', 4=>'RETURNED TO INSTRUCTOR');
+
+	function noexamRun(&$db,&$u,&$lc,&$t) {
+		$id = (int)$lc->getvars['id'];
+		$db->query("update classes set noexam=1 where id_classes=".$id);
+		$lc->templateName = "main_noexam";
+	}
+
+	function reportRun($db,&$u,&$lc,&$t) {
+		if ($lc->getvars['testcheck']=='y' or $lc->getvars['testcheck']=='yes') { 
+			$this->sectionTitle = 'Test check chart';
+			$lc->templateName = 'examschedule_report_testcheck';
+			$this->inactivelinks[] = 'Test check chart';
+		} else { 
+			$this->sectionTitle = 'Test list';
+			$lc->templateName = 'examschedule_report_testlist';
+			$this->inactivelinks[] = 'Test list';
+		}
+
+//auto-comment		$lc->templateStyle = 'private';
+
+		if ($lc->getvars['print']=='yes') { 
+			$this->presentor= 'emptyPresentation';
+			$this->navlinks = array();
+			$this->applinks = array();
+			$t['print'] = true;
+		}
+		
+// mgk 10/17/03
+// we needed to keep the notes 'permanent' so if we needed to reprint 
+// the notes wouldn't need to be retyped.  However, I didn't 
+// want to make a database table over this and couldn't 
+// determine where best to put it in the existing tables
+// so it's just a text blob in a file right now
+		$file = CACHE_PATH."/examschedule_notes";
+		$f = fopen($file,"r");
+		$notes = fread($f,filesize($file));
+		fclose($f);
+		$u->sessionvars['examscheduling']['notes'] = unserialize($notes);
+
+		if ($lc->postvars['notes']) { 
+			// NOTES will be just temporary in session for now -mgk 10/17/03
+			// don't know if we should store them long term or not.
+			$u->sessionvars['examscheduling']['notes'][$lc->getvars['week']] = $lc->postvars['notes'];
+		}
+
+		$f = fopen($file,"w");
+		fputs($f,serialize($u->sessionvars['examscheduling']['notes']));
+		fclose($f);
+
+		$semid = $u->sessionvars['semesterid'];
+
+
+		$sql = '
+		SELECT A.*, B.*, C.*, X.*, Z.* 
+		FROM exam_schedule_classes as A
+		INNER JOIN classes as X ON A.id_classes=X.id_classes
+		INNER JOIN courses as Z ON X.id_courses=Z.id_courses
+		INNER JOIN exam_schedule_classes_dates as B ON A.id_classes=B.id_classes
+		INNER JOIN exam_schedule_dates as C ON B.id_exam_schedule_dates=C.id_exam_schedule_dates
+		WHERE A.status=3 AND A.id_semester='.$semid.'
+		ORDER BY X.courseFamilyNumber
+		';
+		$db->query($sql);
+		while($db->next_record()) 
+		{	$info[] = $db->Record;
+		}
+/*
+
+	To whom it may concern:
+	This query (2 queries) obviously baffled the writer of this for
+	more time than it should of. These queries are by far NOT optimal
+	Please, (the writer of these queries) If you are having a hard time
+	let your ego go and talk to someone about it for help.
+
+	-RS
+
+		$db->query("select A.*,B.*,C.* from exam_schedule_classes A, exam_schedule_classes_dates B, exam_schedule_dates C where A.status=3 and A.id_semester=$semid and A.id_classes = B.id_classes and B.id_exam_schedule_dates = C.id_exam_schedule_dates");
+		while($db->next_record()) {
+			$info[] = $db->Record;
+		}
+
+		while(list($k,$v) = each($info)) {
+			$db->queryOne("select A.*,B.* from classes A,courses B where A.id_classes=".$v['id_classes']." and A.id_courses = B.id_courses");
+			$info[$k] = array_merge($v,$db->Record);
+		}
+#print_r($info);
+		reset($info);
+		*/
+		$t['info'] = $info;
+		$t['week'] = $lc->getvars['week'];
+		$t['notes'] = $u->sessionvars['examscheduling']['notes'][$lc->getvars['week']];
+	}
+
+
+	function Run($db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'main_main';
+//auto-comment		$lc->templateStyle = 'private';
+		$this->inactivelinks[] = 'List Schedules';
+
+		if ( $lc->postvars['semester'] )
+			$u->sessionvars['semesterid'] = (int)$lc->postvars['semester'];
+
+		$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+
+		$t['semesterLabel'] = getSemesterLabel($t['semid']);
+
+
+		$f = new Siteform();
+		$arr = array( 'semester' => $t['semid'] );
+		$f->getForm('semester', $arr);
+		$f->requiredMessage = '';
+		$t['semform'] = $f->toHTML();
+
+		$dg = new searchGrid($this->module, $this->serviceName);
+		$dg->table = 'classes as l';
+		$dg->column = 'l.id_classes, l.noexam, f.title, l.courseFamilyNumber, o.courseName, e.status,
+			e.received_date, p.firstname, p.lastname';
+		$dg->joins = 'left join courses as o on o.id_courses=l.id_courses
+			left join exam_schedule_classes as e on e.id_classes=l.id_classes
+			left join profile as p on p.username=l.facultyId
+			left join profile_faculty as f on f.username=p.username';
+		$dg->where = 'l.id_semesters="'.$t['semid'].'"';
+		$dg->overrideColumn( '<?
+			if ($noexam == 1)
+			{ echo "No Exam";
+			} else
+			{
+				switch ($status) {
+				case 1: echo "New"; break;
+				case 2: echo "Pending"; break;
+				case 3: echo "Approved"; break;
+				case 4: echo "Returned to Instructor"; break;
+				default: if ($noexam==1) { echo "No exams"; } else { echo "<i>N/A</i>"; }
+				} 
+			}
+			?>', 'status' );
+		$dg->overrideColumn( '<a href="'.modurl('main/event=view/id=<?=$id_classes;?>')
+			.'"><?=$courseFamilyNumber.": ".$courseName;?></a>', 'courseName' );
+		$dg->overrideColumn( '<?=$title." ".$firstname." ".$lastname;?>', 'title' );
+		$dg->overrideColumn( '<? if ($received_date) { echo date("m/d/Y h:i a", strtotime($received_date)); } ?>', 'received_date' );
+		$dg->headers = array(
+			'id_classes' => 'Class ID', 
+			'courseName' => 'Course',
+			'title' => 'Instructor',
+			'status' => 'Status',
+			'received_date' => 'Received'
+		);
+		$dg->ignore = array( 'courseFamilyNumber', 'firstname', 'lastname', 'noexam');
+		$dg->postpendColumn( '<a href="'.modurl('main/event=edit/id=<?=$id_classes;?>').'">edit</a>', ' ' );
+		$dg->sortColumns = array( 'received_date', 'status', 'courseName', 'title', 'id_classes');
+
+		$dg->addInstructorSelectFilter('Instructor', 'p.username');
+		$dg->add4StatusSelectFilter('Status', 'e.status');
+		$dg->addInputFilter('Class ID', 'l.id_classes', true);
+		$dg->addInputFilter('Course Name', 'o.courseName');
+		$t['table'] = $dg->toHTML();
+
+	}
+
+	function viewRun(&$db,&$u,&$lc,&$t) {
+	
+		$lc->templateName = 'main_view';
+//auto-comment		$lc->templateStyle = 'private';
+		$this->sectionTitle = 'Exam Scheduler - View';
+
+		$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+		$t['semesterLabel'] = getSemesterLabel($t['semid']);
+
+		$classid = $t['classid'] = (int)$lc->getvars['id'];
+
+		$yes = '<span style="color:green;font-weight:bold;">Yes</span>';
+		$no  = '<span style="color:red;font-weight:bold;">No</span>';
+
+		$esc = ExamScheduleClasses::load( array( 'id_classes' => $classid ) );
+		if ( !is_object($esc) ) $esc = new ExamScheduleClasses();
+		$esc->set( 'oncampusExam', $esc->oncampusExam ? $yes : $no );
+		$esc->set( 'southCampus', $esc->southCampus ? $yes : $no );
+		$esc->set( 'southeastCampus', $esc->southeastCampus ? $yes : $no );
+		$esc->set( 'northeastCampus', $esc->northeastCampus ? $yes : $no );
+		$esc->set( 'northwestCampus', $esc->northwestCampus ? $yes : $no );
+		switch ( $esc->status ) {
+			case 1: $x = "New"; break;
+			case 2: $x = "Pending"; break;
+			case 3: $x = "Approved"; break;
+			case 4: $x = "Returned to Instructor"; break;
+			default: $x = "N/A";
+		}
+		$esc->set( 'status', $x );
+
+		$escds = ExamScheduleDates::getAllDates(
+			$classid, $u->sessionvars['semesterid'],
+			in_array('exammgr', $u->groups) || in_array('admin', $u->groups) );
+		foreach ( $escds as $id => $obj ) {
+			switch ( $obj->status ) {
+				case 1: $x = 'Not Approved'; break;
+				case 2: $x = 'Approved'; break;
+				default: $x = "N/A";
+			}
+			if ( $obj->_new ) $x = '<i>N/A</i>';
+			$escds[$id]->set( 'status', $x );
+			$escds[$id]->set( 'newExam', $obj->newExam ? $yes : $no );
+		}
+		$esc->emClassDates = $escds;
+		$t['esc'] = $esc;
+	}
+
+	function editRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'main_edit';
+//auto-comment		$lc->templateStyle = 'private';
+		$this->sectionTitle = 'Exam Scheduler - Edit Dates';
+
+		$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+		$t['semesterLabel'] = getSemesterLabel($t['semid']);
+
+		// so the emClassDates custom field knows only to display filled out dates
+// mgk 10/29/03
+// Boxes will be 'filled out'  by values submitted by teachers.
+// if they haven't requsted any test dates in a semester, this will be empty
+		define( 'ONLYFILLEDOUT' , true );
+		define( 'DIMAPPROVED', false );
+		
+		$classid = $t['classid'] = (int)$lc->getvars['id'];
+
+		$esc = ExamScheduleClasses::load( array( 'id_classes' => $classid ) );
+
+		// stupid checkboxes won't be unchecked if the val is 0, we gotta unset them.
+		if ( $esc->southCampus == 0 )     unset($esc->southCampus);
+		if ( $esc->southeastCampus == 0 ) unset($esc->southeastCampus);
+		if ( $esc->northeastCampus == 0 ) unset($esc->northeastCampus);
+		if ( $esc->northwestCampus == 0 ) unset($esc->northwestCampus);
+
+		if ( is_array($lc->postvars['emClassDates']) ) {
+
+			$defaults = $lc->postvars;
+
+		} else {
+
+			// Get an array of ExamScheduleClassDates objects w/ ExamScheduleDates date fields (start/end dates)
+			$escds = ExamScheduleDates::getAllDates(
+				$classid, $u->sessionvars['semesterid'],
+				in_array('exammgr', $u->groups) || in_array('admin', $u->groups) );
+			$esc->emClassDates = $escds;
+			$defaults = $esc;
+		}
+
+		$f = new Siteform($u->groups);
+		$f->getForm( 'examschedule', $defaults );
+		$f->fieldPermissions = true;
+		$t['form'] = $f->toHTML();
+
+		switch ($esc->status) {
+			case 1: $s = "New"; break;
+			case 2: $s = "Pending"; break;
+			case 3: $s = "Approved"; break;
+			case 4: $s = "Returned to instructor"; break;
+			default: $s = "N/A";
+		}
+		$t['info'] = '<b>Received Date:</b> '
+			.date('M j @ g:i A', strtotime($esc->receivedDate))
+			."<br/><b>Overall Status:</b> $s";
+
+		// Get the name of the class
+		$sql = 'select o.courseName, p.firstname, p.lastname, f.title, l.noexam
+			from classes as l
+			left join courses as o on o.id_courses=l.id_courses
+			left join profile as p on p.username=l.facultyId
+			left join profile_faculty as f on f.username=l.facultyId
+			where l.id_classes="'.$classid.'"';
+		$db->queryOne($sql);
+		$t['courseName'] = $db->Record['courseName'];
+		$t['facultyName'] = $db->Record['title'].' '.$db->Record['firstname'].' '.$db->Record['lastname'];
+		$t['noexam'] = $db->Record['noexam'];
+		
+	}
+	
+
+	function updateRun(&$db,&$u,&$lc,&$t) {
+
+		$old_status = 0;	// old status is updated in the loop for each exam.
+							// it's to keep track of the status prior to updating
+							// for updating the calendaring system.
+		
+		$EM = in_array('exammgr', $u->groups) || in_array('admin', $u->groups);
+		$statusChanged = false;
+		$overallStatus = 3; // approved. will be changed if not all escd's are approved
+
+		$a_statuschange_description = array();
+		$a_status = array('1'=>'Not Approved', '1'=>'Pending', '3'=>'Approved');		
+		// make sure they own the class if they're not an exam manager (who can edit any class)
+		if ( !$EM ) {
+			$db->queryOne('select id_classes from classes
+				where facultyId="'.$u->username.'"
+				and id_classes="'.(int)$lc->getvars['id'].'"');
+			if ( !$db->Record['id_classes'] ) {
+				$this->presentation = 'errorMessage';
+				$t['message'] = 'We\'re sorry, but access was denied to that class. '
+					.'If you feel you have reached this message in error, please contact the help desk.';
+				return;
+			}
+		}
+
+		$f = new Siteform();
+		$t['error'] = $f->validateForm('examschedule', $lc->postvars);
+		if ($t['error']) {
+			$this->editRun($db,$u,$lc,$t);
+			return;
+		}
+
+		$esc = ExamScheduleClasses::load( array( 'id_classes' => (int)$lc->getvars['id'] ) );
+		if ( !is_object($esc) ) {
+			$esc = new ExamScheduleClasses();
+			$esc->setArray( $lc->postvars );
+			$esc->set( 'idClasses',    $u->activeClassTaught->id_classes );
+			$esc->set( 'idSemester',   $u->activeClassTaught->id_semesters );
+			$esc->set( 'receivedDate', date('Y-m-d H:i:s', time()) );
+		} else {
+			$esc->setArray( $lc->postvars );
+		}
+		$esc->set( 'oncampusExam',    $esc->oncampusExam    == 'on' ? 1 : 0 );
+		$esc->set( 'southCampus',     $esc->southCampus     == 'on' ? 1 : 0 );
+		$esc->set( 'southeastCampus', $esc->southeastCampus == 'on' ? 1 : 0 );
+		$esc->set( 'northeastCampus', $esc->northeastCampus == 'on' ? 1 : 0 );
+		$esc->set( 'northwestCampus', $esc->northwestCampus == 'on' ? 1 : 0 );
+		// wait to save. still need to set status below
+
+		while ( list($esdID,$arr) = @each($lc->postvars['emClassDates']) ) {
+
+			$escd = ExamScheduleClassesDates::load( array(
+				'id_exam_schedule_dates' => $esdID,
+				'id_classes' => (int)$lc->getvars['id']
+			) );
+
+			if ( !is_object($escd) ) {
+				$escd = new ExamScheduleClassesDates();
+				$escd->set( 'idClasses', (int)$lc->getvars['id'] );
+				$escd->set( 'idExamScheduleDates', $esdID );
+			} else if ( is_object($escd) && ( !$arr['title'] || !$arr['instructions'] ) ) {
+				// it was in the database, but they remoevd the title or instructions,
+				// so now we get to zap it.
+				ExamScheduleClassesDatesPeer::doDelete( $escd, true );
+				continue;
+			}
+
+
+
+			// skip it if they didn't fill in a title or instructions
+			if ( !($arr['title'] || $arr['instructions']) ) continue;
+			
+			$old_status = $escd->status;
+			
+			if ( $escd->status != $arr['dateStatus'] ) 
+			{	$statusChanged = true;
+				$a_statuschange_description[] = '
+				
+	Exam: '. $escd->title. '
+		Status: '. $a_status[$escd->status]. ' [changed to] '. $a_status[$arr['dateStatus']];
+				
+			}
+
+			$escd->set( 'title', $arr['title'] );
+			$escd->set( 'instructions', $arr['instructions'] );
+			$escd->set( 'southCopies', $arr['southCopies'] );
+			$escd->set( 'southeastCopies', $arr['southeastCopies'] );
+			$escd->set( 'northeastCopies', $arr['northeastCopies'] );
+			$escd->set( 'northwestCopies', $arr['northwestCopies'] );
+			$escd->set( 'newExam', $arr['newExam'] == 'yes' ? '1' : '0' );
+			$escd->set( 'note', $arr['note'] );
+			$escd->set( 'status', $arr['dateStatus'] );
+			
+			$tmp_examdates = ExamScheduleDates::load($escd->idExamScheduleDates); // it's an object not just dates..
+
+			// if this date's status isn't approved, set the overall status to pending
+			if ($escd->status != 3) $overallStatus = 2;
+
+			// we want to know when this bizzo was being CHANGED to approved.. 
+			if ($arr['dateStatus'] == 3 && $old_status != 3)
+			{
+				$campus_array = array(1=>'Northwest', 2=>'Northeast', 3=>'South', 4=>'Southeast');				
+				
+				// this can go outside the loop but i like it here!
+				$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				
+					FROM classes AS a 
+					INNER JOIN courses as b ON a.id_courses=b.id_courses 
+					WHERE a.id_classes='".$escd->idClasses."'";
+				
+				unset($dbb);
+				$dbb = DB::getHandle();
+				$dbb->RESULT_TYPE = MYSQL_ASSOC;
+				$dbb->queryOne($sql);
+				
+					$addevent = new examscheduling();
+
+					$addevent->set_id_class($escd->idClasses);
+					$addevent->set_id_item($escd->idExamScheduleClassesDates);
+					//$addevent->set_id_item_sub();
+					$addevent->dbLoad(); // if it exists, it'll be loaded up.
+
+					$addevent->set_owner($dbb->Record['facultyId']);
+					$addevent->set_title('['.$dbb->Record['courseFamily'].$dbb->Record['courseNumber'].'] '.addslashes(stripslashes($escd->title)));
+					$addevent->set_description(addslashes(stripslashes($escd->instructions)));
+					
+					$addevent->set_date_start($tmp_examdates->dateStart);
+					$addevent->set_date_end($tmp_examdates->dateEnd);
+					
+					$addevent->save(); // this updates/adds all by it's lonesome.. no need to wrroy about it here
+
+					unset($addevent); // cleanup!
+			} else
+			{		
+					// now we are going to try and delete the calendar item
+					// becuase it's no longer approved!
+									
+					$addevent = new examscheduling();
+
+					$addevent->set_id_class($escd->idClasses);
+					$addevent->set_id_item($escd->idExamScheduleClassesDates);
+					//$addevent->set_id_item_sub();
+					$addevent->dbLoad();
+					
+					// only trying to remove it if it was loaded!
+					if ((int)$addevent->pkey > 0)
+					{	$addevent->delete();
+					}										
+					
+			}
+			
+			$escd->save();
+			
+		}
+
+		$esc->set( 'status', $overallStatus );
+		$esc->save();
+
+		// Send a private message to the faculty if the status changed
+		if ( $statusChanged ) {
+
+			include_once(SERVICE_PATH."pm/privmess.php");
+
+			$sql = "
+				SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 
+				FROM classes AS a 
+				INNER JOIN courses as b ON a.id_courses=b.id_courses 
+				WHERE a.id_classes='".$esc->idClasses."'";
+
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+
+
+			$mess = new privMess();
+			$mess->subject = '['.$db->Record['courseFamily'].$db->Record['courseNumber']
+				.'] Your exam schedule has been updated.';
+			$mess->message = 'There was a change to your exam schedule *status* on: '.$db->Record['courseName']
+				.' - '.$db->Record['courseFamily'].$db->Record['courseNumber'].' class.';
+
+			foreach($a_statuschange_description as $null=>$prvmsg)
+			{	$mess->message .= $prvmsg;
+			}
+			
+			$mess->sentTime = time();
+			$mess->messageFrom = $u->username;
+
+			$mess->messageTo = $db->Record['facultyId'];
+			$mess->add();
+		}
+
+		$t['message'] = 'Exam dates saved successfully.';
+		$this->Run($db,$u,$lc,$t);
+	}
+
+	function altRun($db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'main_main';
+//auto-comment		$lc->templateStyle = 'private';
+		$this->inactivelinks[] = 'Alternate Activity Chosen';
+
+		if ( $lc->postvars['semester'] )
+			$u->sessionvars['semesterid'] = (int)$lc->postvars['semester'];
+
+		$t['semid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+
+		$t['semesterLabel'] = getSemesterLabel($t['semid']);
+
+
+		$f = new Siteform();
+		$arr = array( 'semester' => $t['semid'] );
+		$f->getForm('semester', $arr);
+		$f->requiredMessage = '';
+		$t['semform'] = $f->toHTML();
+
+		$dg = new DataGrid($this->module, $this->serviceName);
+		$dg->table = 'classes as l';
+		$dg->column = 'l.id_classes, l.noexam, f.title, l.courseFamilyNumber, o.courseName, e.status,
+			e.received_date, p.firstname, p.lastname';
+		$dg->joins = 'left join courses as o on o.id_courses=l.id_courses
+			left join exam_schedule_classes as e on e.id_classes=l.id_classes
+			left join profile as p on p.username=l.facultyId
+			left join profile_faculty as f on f.username=p.username';
+		$dg->where = 'l.id_semesters="'.$t['semid'].'" AND l.noexam=1';
+		$dg->overrideColumn( '<?
+			if ($noexam == 1)
+			{ echo "No Exam";
+			} else
+			{
+				switch ($status) {
+				case 1: echo "New"; break;
+				case 2: echo "Pending"; break;
+				case 3: echo "Approved"; break;
+				case 4: echo "Returned to Instructor"; break;
+				default: if ($noexam==1) { echo "No exams"; } else { echo "<i>N/A</i>"; }
+				} 
+			}
+			?>', 'status' );
+/*		$dg->overrideColumn( '<a href="'.modurl('main/event=view/id=<?=$id_classes;?>')
+			.'"><?=$courseFamilyNumber.": ".$courseName;?></a>', 'courseName' );
+			*/
+		$dg->overrideColumn( '<?=$courseFamilyNumber.": ".$courseName;?>', 'courseName' );
+			
+		$dg->overrideColumn( '<?=$title." ".$firstname." ".$lastname;?>', 'title' );
+		$dg->overrideColumn( '<? if ($received_date) { echo date("m/d/Y h:i a", strtotime($received_date)); } ?>', 'received_date' );
+		$dg->headers = array(
+			'id_classes' => 'Class ID', 
+			'courseName' => 'Course',
+			'title' => 'Instructor',
+			'status' => 'Status',
+			'received_date' => 'Received'
+		);
+		$dg->ignore = array( 'courseFamilyNumber', 'firstname', 'lastname', 'noexam');
+		$dg->sortColumns = array( 'received_date', 'status' );
+
+		$t['table'] = $dg->toHTML();
+
+	}
+
+
+}
+function getSemesterLabel($id) { 
+		$db = db::GetHandle();
+		$sql = '
+		SELECT semesterTerm, semesterYear
+		FROM semesters
+		WHERE id_semesters = '.$id;
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		return $db->Record['semesterTerm'].' '.$db->Record['semesterYear'];
+}
+?>

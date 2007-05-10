@@ -1,0 +1,54 @@
+<?xml encoding="UTF-8" version="1.0"?>
+<language locale="en_US">
+	<message id="username" domain="system">
+		username
+	</message>
+	<!--username-->
+	<usage id="username" file="foobar/info.php" line="630"/>
+	<usage id="username" file="foobar/tomato.php" line="44"/>
+
+
+	<message id="password" domain="system">
+		password
+	</message>
+	<!--password-->
+	<usage id="password" file="foobar/info.php" line="630"/>
+	<usage id="password" file="foobar/tomato.php" line="44"/>
+
+
+	<message id="welcome" domain="system">
+		<param name="user" type="string"/>
+		Welcome, $user
+	</message>
+	<!--Welcome, $user-->
+	<usage id="welcome" file="foobar/info.php" line="630"/>
+	<usage id="welcome" file="foobar/tomato.php" line="44"/>
+
+
+	<message id="E_NO_PERM_ACCESS" domain="error">
+		You do not have permission to access the current data.
+	</message>
+	<!--You do not have permission to access the current data.-->
+
+	<message id="E_NO_PERM_UPDATE" domain="error">
+		You do not have permission to update the current data.
+	</message>
+	<!--You do not have permission to update the current data.-->
+
+	<message id="E_NO_PERM_DELETE" domain="error">
+		You do not have permission to delete the current data.
+	</message>
+	<!--You do not have permission to update the current data.-->
+
+	<message id="E_NO_PERM_ACCESS_OBJECT" domain="error">
+		You do not have permission to access this object (oid=%s).
+	</message>
+	<!--You do not have permission to update the current data.-->
+
+	<message id="E_NO_PERM_ACCESS_OBJECT" domain="error">
+		<param name="oid" type="string"/>
+		You do not have permission to access this object (oid=$oid).
+	</message>
+	<!--You do not have permission to update the current data.-->
+
+</language>

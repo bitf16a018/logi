@@ -1,0 +1,99 @@
+<?=$t['sectionheader'];?>
+<?
+foreach($t['allOutput'] as $id_classes=>$temp) { 
+$gradebook = $temp['gradebook'];
+
+
+$student = $gradebook->students[$temp['username']];
+if ( $tgradebook->calculationType == 1 ) {
+	$finalGrade = $gradebook->getLetterGrade($student->weightedAverage,$student->possiblePoints);
+} else {
+	$finalGrade = $gradebook->getLetterGrade($student->totalPointsEarned,$student->possiblePoints);
+}
+?>
+<table width=650 border=0 cellpadding=0 cellspacing=0>
+  <tr>
+	<td valign="top">
+
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td><b>Student:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['student'];?></td>
+</tr>
+<tr>
+	<td><b>Course:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['courseName'];?></td>
+</tr>
+<tr>
+	<td><b>Instructor:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['instructor'];?></td>
+</tr>
+<tr>
+	<td><b>Semester:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$temp['semesterID'];?></td>
+</tr>
+</table>
+
+	</td>
+	<td width=50>&nbsp;</td>
+	<td valign="top">
+		<? if ($gradebook->calculationType==2) {  // only points based works right now - stifle this display ?>
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td><b>Overall Grade:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><b><?=$finalGrade;?></b> ( <?=$student->percentAverage;?>% )</td>
+</tr>
+<tr>
+	<td><b>Total Points Earned:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?= sprintf('%.1f',$student->totalPointsEarned);?> / <?= sprintf('%.1f',$student->possiblePoints);?></td>
+</tr>
+<tr>
+	<td><b>Class Rank:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$t['rank'];?> / <?=$t['totalRanks'];?></td>
+</tr>
+</table>
+
+		<? } ?>
+		<? if ($gradebook->calculationType==1) {  // percentage based works now?>
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td><b>Overall Grade:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><b><?=$finalGrade;?></b> ( <?=$student->weightedAverage;?>% )</td>
+</tr>
+<tr>
+	<td><b><!--Total Points Earned:--></b></td>
+	<td width=20>&nbsp;</td>
+	<td><!--<?= sprintf('%.1f',$student->totalPointsEarned);?> / <?= sprintf('%.1f',$student->totalPossiblePoints);?>--></td>
+</tr>
+<tr>
+	<td><b>Class Rank:</b></td>
+	<td width=20>&nbsp;</td>
+	<td><?=$t['rank'];?> / <?=$t['totalRanks'];?></td>
+</tr>
+</table>
+
+		<? } ?>
+
+	</td>
+</tr></table>
+
+
+
+<br>
+<table width="650"  border="1" cellpadding="0" cellspacing="0" bordercolor="#000000" bgcolor="#CC3300">
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+
+<? } ?>
+
+<p><i>This document was generated on <?=date('M j, Y \a\t g:i A', time());?>.</i></p>

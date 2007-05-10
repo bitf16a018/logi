@@ -1,0 +1,23 @@
+<?=$t['sectionheader'];?>
+<? if($t['msg']){ ?><span style="color:blue"><?=$t['msg'];?></span><? } ?>
+<? if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><? } ?>
+
+<h3>Publish assignment to gradebook</h3>
+<? if ( ! $t['table'] ) { ?>
+	In order to publish a grade to the gradebook you need to have
+	"<i>gradebook categories</i>" & "<i>gradebook entries</i>" setup.  You do not have any categories currently.
+	<br/>
+	<br/>
+	<a href="<?=appurl('gradebook/category/');?>">Click here</a> to setup <i>gradebook categories</i>.
+	<br/>
+	<a href="<?=appurl('gradebook/entry/event=add');?>">Click here</a> to add a <i>gradebook entry</i> into a category.
+	
+<? } else {
+?>
+Select a gradebook entry from below to accept the students' grades on this assignment. <br/>
+You will only see entries that have not been attached to another assessment or assignment.
+	<hr/>
+	<?
+	echo $t['table'];
+   }
+?>

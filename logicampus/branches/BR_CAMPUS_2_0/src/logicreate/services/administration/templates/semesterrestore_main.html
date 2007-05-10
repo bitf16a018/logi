@@ -1,0 +1,95 @@
+<?=$t['sectionheader'];?>
+
+<center>
+<iframe name="progressbar" id="progressbar" src="<?=modurl('semesterrestore/event=hello');?>"
+	height="48"
+	width="400"
+	frameborder="0"
+	scrolling="No"
+	></IFRAME>
+</center>
+
+<?php
+	if (count($t['a_import_enabled_semester']) == 0)
+	{	
+		?>
+		<fieldset>
+		<legend>Error</legend>
+		
+		The problem is that you have no semesters available to import information into, you must
+		have a semester that has 0 (zero) classes attached to it before attempting to import.
+		</field>
+		<?php
+	
+	} else
+	{
+?>
+<fieldset>
+<legend>Select semester to import data into</legend>
+<br>
+<form method="POST" action="" id="semimport" name="semimport" 
+	onsubmit="getElementById('progressbar').src = '<?=APP_URL;?>administration/semesterrestore/event=go/' + getElementById('import_into').value + '/' + getElementById('semid').value;
+	return false;">
+<center><br>
+<input type="hidden" value="0" name="semid" id="semid">
+<select id="import_into" name="import_into" size="1"> 
+<?php
+	foreach ($t['a_import_enabled_semester'] as $semimport)
+	{	echo '<option value="'.$semimport['id_semesters'].'">'.$semimport['semesterYear'].' '.$semimport['semesterTerm'].'</option>';
+	}
+?>
+</select><br>&nbsp;
+</center>
+<input type="submit" id="submitit" name="submitit" value="Submit" style="visible: hidden; display:none;">
+</form> 
+</fieldset>
+<br><br>
+<fieldset>
+<legend>Click to restore semesters data into the above selected semester</legend>
+<br>
+<center>
+<?php
+	if ($t['a_import_enabled_semester'] > 0)
+	{
+	
+?>
+	<table cellpadding="2" cellspacing="0" border="0" width="90%" align="center">
+	
+	<?php
+	
+	//debug($t['a_semester']);
+	foreach($t['a_semester'] as $semid=>$semester)
+	{	
+		echo '<tr>';
+	
+		if (is_array($semester['stat']) )
+		{
+			echo '<td><a onclick=" getElementById(\'semid\').value = \''.$semid.'\'; ';
+			?>
+			getElementById('progressbar').src = '<?=APP_URL;?>administration/semesterrestore/event=go/' + getElementById('import_into').value + '/' + getElementById('semid').value;
+			<?php
+			echo ' return false;" href="#">'.$semester['semesterTerm']. ' '.$semester['semesterYear']. '</a></td>';
+		
+		} else
+		{	
+			echo '<td>'.$semester['semesterTerm']. ' '.$semester['semesterYear']. '</td>';
+		}
+	
+		echo '<td> [ last backed up: '.((is_array($semester['stat'])) ? date('F jS Y g:i A', $semester['stat']['mtime']) : 'Never').'] </td>';
+		echo '</tr>';
+	}
+	
+	?>
+	</table>
+<?php
+	} else
+	{
+		echo 'There are no semesters available to import information into';
+	}
+?>
+</center>
+<br>
+</fieldset>
+<?php
+	}
+?>

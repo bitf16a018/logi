@@ -1,0 +1,28 @@
+<?=$t['sectionheader']?>
+<h2>Upcoming Events</h2>
+
+<font class="textone">
+	<b>Click on a date to view more information about an event.</b>
+</font>
+
+<p align="center" id="calendar">
+
+<?=$t['calendar'];?>
+
+</p>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<td>
+		
+		<form method="get" action="<?=modurl('cal/');?>">
+		<select name="m">
+		<?=$t['monthOptions'];?>
+		</select>
+
+		<select name="y"><?=$t['yearOptions'];?></select>
+		<input type="submit" value="View">
+		</form>
+		</td>
+	</tr>
+</table>

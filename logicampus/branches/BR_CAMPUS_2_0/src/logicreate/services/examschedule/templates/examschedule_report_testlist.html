@@ -1,0 +1,99 @@
+<?=$t['sectionheader'];?>
+<? if ($t['print']) { ?>
+<? } else { ?>
+<a href="<?=modurl("main/event=report/print=yes/week=".$t['week']);?>" target='_NEW'>Printer friendly version</a>
+<? } ?>
+<br>
+<? 
+$ic_counter = 0;
+while(list($k,$v) = each($t['info'])) {
+ob_start(); 
+
+if ($count<0) { debug($v); } ++$count; 
+?>
+<tr class="<?=((++$ic_counter%2) ? 'odd' : 'even')?>">
+	<td valign='top'><?=$v['courseFamilyNumber'];?></tD>
+	<td valign='top' NOWRAP><?=$v['courseName'];?></tD>
+	<td valign='top'><?=$v['facultyId'];?></tD>
+	<td valign='top'><? if ($v['south_campus']) { ?>SO <? } ?></tD>
+	<td valign='top'><? if ($v['southeast_campus']) { ?>SE <? } ?></tD>
+	<td valign='top'><? if ($v['northeast_campus']) { ?>NE <? } ?></tD>
+	<td valign='top'><? if ($v['northwest_campus']) { ?>NW <? } ?></tD>
+</tr>
+<? 
+$x = ob_get_contents();
+$temp = strtotime($v['date_start']);
+$week = date("W",$temp);
+$month = date("m",$temp);
+if (strtolower($v['classType'])=='itv') { 
+$weeks[$temp]['itv'] .= $x;
+} else { 
+$weeks[$temp]['internet'] .= $x;
+}
+$months[$month] .= $x;
+$weekdates[$temp] = $temp;
+$weeksdate[$temp] = $temp;
+$monthsdate[$month] = $temp;
+ob_end_clean();
+} 
+
+if ($t['week'] >0) { 
+$finalweek[$t['week']] = $weeks[$t['week']];
+}
+?>
+
+<? if (!$t['print'])  { ?>
+<BR>
+<div id="applinks">
+<b>Select a week:</b><br>
+<? while(list($k,$v) = each($weekdates)) { ?>
+<? if ($t['print']) { $print='yes'; }
+$d[] = '<a href="'.modurl("main/event=report/week=$v/print=$print").'">'.date("m/d/Y",$k).'</a>';
+} 
+echo implode(" | ",$d);
+?>
+</div>
+<? } ?>
+
+<? if (is_array($finalweek)) { ?>
+<? if (!$t['print']) { ?>
+<BR>
+NOTES: <form method='post' action='<?=modurl("main/event=report/week=".$t['week']);?>'><textarea rows='5' cols='40' name='notes'><?=$t['notes'];?></textarea><input type='submit' value='Update notes'></form>
+<? }  else { 
+// We're printing, not viewing, so let's see if we have notes
+if ($t['notes']) { 
+?>
+<h4>NOTES</h4><?=$t['notes'];?>
+<BR><BR>
+<? } 
+ } ?>
+ <span id="datagrid">
+<table width='100%' border='0' class="datagrid">
+<?
+while(list($k,$v) = each($finalweek)) { 
+?>
+<tr><td colspan='7'><h3>Week of <?=date("m/d/Y",$weeksdate[$k]);?></h3></td></tr>
+<tr><td colspan='7'><h4>Internet</h4></td></tr>
+	<tr>
+		<th width='20%'>Course #</th>
+		<th width='40%'>Course</th>
+		<th width='20%'>Faculty</th>
+		<th colspan='4'>Location of testing</th>
+	</tr>
+
+<?=$v['internet'];?>
+<tr><td colspan='7'><br><h4>ITV</h4></td></tr>
+	<tr>
+		<th>Course #</th>
+		<th>Course</th>
+		<th>Faculty</th>
+		<th colspan='4'>Location of testing</th>
+	</tr>
+
+<?=$v['itv'];?>
+
+<? } ?>
+</table>
+</span>
+<? } ?>
+

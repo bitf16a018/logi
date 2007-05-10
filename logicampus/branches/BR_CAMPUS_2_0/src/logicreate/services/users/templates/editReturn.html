@@ -1,0 +1,29 @@
+
+<table border="0" cellspacing="1" cellpadding="4" width="100%">
+	<tr>
+		<td class="header2">Title</td>
+		<td class="row1">
+			<form method="post" action="<?=APP_URL?>users/articles">
+			<input type="text" name="title" value="<?=$t[article][title]?>">
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" class="header2">Intro to Article</td>
+		<td class="row1"><textarea cols="30" rows="10" name="introtext"><?=$t[article][introtext]?></textarea></td>
+	</tr>
+	<tr>
+		<td valign="top" class="header2">Main Body of Article</td>
+		<td class="row1">
+			<textarea cols="30" rows="10" name="maintext"><?=$t[article][maintext]?></textarea>
+			<input type="hidden" name="event" value="editReturnPost">
+			<input type="hidden" name="pkey" value="<?=$t[article][pkey]?>">	
+		</td>
+	</tr>
+	<tr>
+		<td class="header2">&nbsp;</td>
+		<td class="row1">
+			<input type="submit" value="Enter">
+			</form>
+		</td>
+	</tr>
+</table>

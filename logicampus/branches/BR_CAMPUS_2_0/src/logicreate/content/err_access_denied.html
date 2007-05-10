@@ -1,0 +1,61 @@
+<h3><?=lct('Access Denied!')?></h3>
+
+<?=lct('You have reached a page that either you do not have permission to view based on the current system settings.  If you feel you have reached this page in error, contact the <a href="'.APP_URL.'helpdesk">Help Desk</a>.')?>
+
+<h2><?=$lcTemplate['reason'];?></h2>
+<? if ($lcTemplate['reason']) {
+				echo '<div name="DEBUG" id="DEBUG" style="padding:5px;margin-left:5%;border-color:black;border-style:dashed;border-width:5px;align:center;width:90%;background-color:white;float;position:absolute;visibility:hidden;">';
+				echo '<span style="float:right;"><a href="#" onclick="javascript:document.getElementById(\'DEBUG\').style.visibility=\'hidden\';return false;">[X] close window</a></span>';
+				echo nl2br(str_replace(' ','&nbsp;',$lcTemplate['debug']));
+				echo '</div>';
+				echo '<a href="#" onclick="document.getElementById(\'DEBUG\').style.visibility=\'visible\';return false;">Show details of this error.</a> <br/>';
+} ?>
+
+<br><br>
+<b>Why you may be seeing this page</b><br>
+<ol>
+<li>Our system does not know which class you are trying to access.</li>
+<li>You are trying to access portions of the site which you do not have access.</li>
+<li>There is a broken link that took you here.</li>
+</ol>
+
+If none of the above reasons match then you may want to contact the Help Desk.
+
+
+<br><br>
+
+<? if ( $lcUser->isAnonymous() ) {?>
+<form method="POST" action="<?= appurl('login/main/event=login?loginredir=http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']);?>">
+<table style="border-color:black;border-style:solid;border-width:2px;" cellspacing="3" cellpadding="3">
+	<tr class="menu_head">
+		<td colspan="2">
+			Login to gain access 
+		</td>
+	</tr>
+	<tr class="menu_item">
+		<td>
+			<?=lct('username')?>:
+		</td>
+		<td>
+			<input name="username">
+		</td>
+	</tr>
+	<tr class="menu_item">
+		<td>
+			<?=lct('password')?>:
+		</td>
+		<td>
+			<input name="password" type="password">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="submit" value="<?=lct('Login')?>">
+		</td>
+	</tr>
+
+</table>
+</form>
+<br />
+
+<? } ?>

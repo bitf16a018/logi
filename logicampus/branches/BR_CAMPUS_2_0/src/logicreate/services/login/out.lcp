@@ -1,0 +1,31 @@
+<?
+/*
+ * logout
+ * Last updated 6/13/2001
+ * 
+ * Purpose:
+ * Process logout attempts
+ */
+
+class out extends NoAuth {
+
+	var $presentor = "redirectPresentation";
+
+
+	function Run($db,&$lcUser,&$lcObj,&$t) {
+		
+		global $tail;
+		setcookie("LC_LOGIN",'',0,$tail,COOKIE_HOST);
+		setcookie("PHPSESSID",'',0,$tail,COOKIE_HOST);
+		if ( $_COOKIE['LOGINAS'] != '' ) {
+			setcookie('LOGINAS','',0,$tail,COOKIE_HOST);
+		} else {
+			$lcUser->destroySession($db);
+		}
+			$t['url'] = DEFAULT_URL;
+	}
+
+
+//
+}
+?>
