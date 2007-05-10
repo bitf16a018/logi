@@ -229,4 +229,72 @@
 	      attribute="rank"
 	      name="rank_idx"/>
 	</entity>
+	<entity  name="class_lesson_sequence">
+		<attribute name="class_lesson_sequence_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lesson_id"
+			required="true"
+			default="0"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="class_id"
+			required="true"
+			default="0"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_id"
+			required="true"
+			default="0"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_mime"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_type"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_title"
+			required="true"
+			size="11"
+			type="VARCHAR"/>
+		<attribute name="visible"
+			required="true"
+			size="4"
+			type="int"/>
+		<attribute name="not_before_seq_id"
+			required="false"
+			size="11"
+			type="int"/>
+		<attribute name="allow_after_days"
+			required="false"
+			size="11"
+			type="int"/>
+		<attribute name="allow_on"
+			required="false"
+			size="11"
+			type="int"/>
+		<attribute name="rank"
+			required="true"
+			default="0"
+			size="11"
+			type="INTEGER"/>
+
+	   <key
+	      attribute="class_id"
+	      name="class_idx"/>
+	   <key
+	      attribute="lesson_id"
+	      name="lesson_idx"/>
+	   <key
+	      attribute="lob_id"
+	      name="lob_idx"/>
+	   <key
+	      attribute="rank"
+	      name="rank_idx"/>
+	</entity>
 </project>
