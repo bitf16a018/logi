@@ -1,0 +1,324 @@
+<?php
+
+define('EVENT_SHOWEXTRACLASSINFO', true);
+
+/**
+ *	The unfortunate fact, I never really know if i'm teaching something or taking it
+ *	when i'm a teacher. unless i check the facultyID
+ */
+include_once(LIB_PATH."eventsObj.php");
+ 
+
+class search extends BasicAuth 
+{
+	
+	var $presentor = 'htmlPresentation';
+		
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+	
+	function Run($db,&$u,&$lc,&$t) 
+	{
+		$lc->templateName = "search_main";
+		$lc->templateStyle = 'private';
+		
+	
+		// filters apply from month view
+		$op_taken  = array();
+		$op_taught = array();
+		
+		$fl_student = false;
+		$fl_teacher = false;
+		$a_full_class_id_list = array();
+		//debug($u);
+		if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
+		{
+			foreach($u->classesTaken as $v)
+			{	$a_full_class_id_list[] = $v->id_classes;
+				// only way to tell if i'm taking this class or teaching it
+				if ($v->facultyId != $u->username)
+				{	$op_taken[$v->id_classes] = $v->semesterID. ' '. $v->courseFamilyNumber.' '.$v->courseName; 
+					$fl_student = true;
+				}
+				
+			}
+		}
+		
+		if (isset($u->classesTaught) && is_array($u->classesTaught) && count($u->classesTaught) > 0)
+		{	
+			foreach($u->classesTaught as $v)
+			{	$a_full_class_id_list[] = $v->id_classes;
+				if ($v->facultyId == $u->username)
+				{	$op_taught[$v->id_classes] = $v->semesterID. ' '. $v->courseFamilyNumber.' '.$v->courseName; 
+					$fl_teacher = true;
+				}
+			}
+
+		}
+		// end filterage
+		$t['op_taken'] = $op_taken;
+		$t['op_taught'] = $op_taught;
+		
+		// what if we're searching? hmmmmmmm
+		if ($lc->postvars['submit'] == 'Search')
+		{
+			$sql_textual = '';
+			$sql_taught = '';
+			$sql_taken = '';
+			$sql_filter = '';
+			$sql_date = '';
+			
+			$a_filter = array();
+			
+			// flags to let me know how to react when these filters are hit
+			$fl_orientationsscheduling = false;
+			$fl_classroomassignments = false;
+			$fl_seminarscheduling = false;
+			$fl_examscheduling = false;
+			$fl_assessmentscheduling = false;
+			
+			$fl_using_taught = false;
+			$fl_using_taken = false;
+			
+			// i'm worried about outside injection here. But it's so easy to use implode()
+			if (is_array($lc->postvars['taught']) && count($lc->postvars['taught']) >= 1)
+			{	$sql_taught = '(id_classes=\''.implode($lc->postvars['taught'], '\' OR id_classes=\'').'\')';
+				$fl_using_taught = true;
+			} else
+			{	
+				// I need this to determine if we're not filtering by classes, we must include
+				// only public information, or should i combine ALL classes we're invovled with too?
+				if (is_array($lc->postvars['taken']) && count($lc->postvars['taken']) >= 1)
+				{	// this is not being used, i just need the ELSE here, it's the easiest to think of.
+				} else
+				{	$a_full_class_id_list = array_unique($a_full_class_id_list);
+					if ($fl_teacher == false && $fl_student == false && count($a_full_class_id_list) == 0)
+					{
+						$sql_taught = 'id_classes=0';
+					} else
+					{	// we need all the classes
+						$sql_taught = '(id_classes=0 OR id_classes=\''.implode($a_full_class_id_list, '\' OR id_classes=\'').'\')';
+						$fl_using_taught = true;
+					}
+					
+					if (is_array($lc->postvars['filter']) && count($lc->postvars['filter']) >= 1)
+					{	
+						if (in_array('2', $lc->postvars['filter'])	|| in_array('3', $lc->postvars['filter']))
+						{	
+							if ($fl_teacher == false && $fl_student == false)
+							{	$sql_taught = ''; // stripping classes=0 because we now have no boundries
+							}
+							
+						}
+						
+					}
+								
+						
+				/*
+				 *	If i'm here and orientation or seminar's are selected
+				 *	I must do a MASS search on this information. across all classes
+				 *	this search can go.. has no boundries.
+				 */	
+				
+				
+					/**
+					 *	The unfortunate fact: I have to clean groups!!!
+					 */
+					$u->groups = array_unique($u->groups);
+					
+					foreach($u->groups as $k=>$v)
+					{	if (trim($v) == '')
+						{	unset($u->groups[$k]);
+						}
+					}
+					
+					if ($sql_taught != '')
+					{	$sql_taught .= ' AND ';
+					}
+					
+					$sql_taught .=  '(groups LIKE \'%|'.implode($u->groups, '|%\' OR groups LIKE \'%|'). '|%\')';
+					
+				}
+
+			}
+			
+			if (is_array($lc->postvars['taken']) && count($lc->postvars['taken']) >= 1)
+			{	$sql_taken = '(id_classes=\''.implode($lc->postvars['taken'], '\' OR id_classes=\'').'\')';
+				$fl_using_taken = true;
+			}
+			
+			if (is_array($lc->postvars['filter']) && count($lc->postvars['filter']) >= 1)
+			{
+				/**
+				 *	Filter key: 
+				 *		1) Exam date				#class
+				 *		2) Seminar dates			#general
+				 *		3) Orientation dates		#general
+				 *		4) Classroom Assignments	#class
+				 *		5) Classroom Assessments	#class
+				 *
+				 *	ok, the $fl variables i can use to determine if seminar scheduling
+				 *	or orientation have been set, if they have, we don't give a crap about
+				 *	id_classes unless a class was specifically selected
+				 */
+				foreach($lc->postvars['filter'] as $filter)
+				{
+					switch($filter)
+					{
+						case 1:	
+							if ($fl_using_taken || $fl_using_taught)
+							{	$a_filter[] = 'examscheduling';			$fl_examscheduling = true;		
+							}
+						break;
+						case 2:	$a_filter[] = 'seminarscheduling';		$fl_seminarscheduling = true; 	break;
+						case 3:	$a_filter[] = 'orientationsscheduling';	$fl_classroomassignments = true;break;
+						case 4:	
+							if ($fl_using_taken || $fl_using_taught)
+							{	$a_filter[] = 'classroomAssignments';	$fl_classroomassignments = true;
+							}
+						break;
+						case 5: 
+							if ($fl_using_taken || $fl_using_taught)
+							{	$a_filter[] = 'assessmentscheduling';	$fl_assessmentscheduling = true;break;
+							}
+						break;
+					}
+				}
+
+				$sql_filter = '(calendarType=\''.implode($a_filter, '\' OR calendarType=\'').'\')';
+
+			}
+
+			if (strlen(trim($lc->postvars['searchables'])) > 2)
+			{
+				// strip unnecessary characters
+				$searchable = str_replace('\'', '\'\'', ereg_replace('[^a-zA-Z0-9._ \']', '', $lc->postvars['searchables']));
+				$sql_textual = '(title LIKE \'%'.$searchable.'%\' OR description LIKE \'%'.$searchable.'%\' OR location LIKE \'%'.$searchable.'%\')';
+				$t['searchables'] = $searchable;
+			}
+
+			// dates
+			$datefrom = dateArray2TimestampFull($lc->postvars['datefrom']);
+			$dateto = dateArray2TimestampFull($lc->postvars['dateto']);
+
+			if ($datefrom > 0 && $dateto > 0)
+			{	$sql_date = '
+							(
+							 (startdate > '.$datefrom.' AND startdate < '.$dateto.')
+							 OR 
+							 (startdate < '.$datefrom.' AND enddate > '.$dateto.')
+							 OR
+							 (enddate > '.$datefrom.' AND enddate < '.$dateto.')
+							 OR
+							 (startdate > '.$datefrom.' AND enddate < '.$dateto.')
+							)
+							';
+			}
+
+			$fl_sql_where = false;
+
+			$sql = '
+			SELECT * 
+			FROM lcEvents
+			';
+			$sql .= $this->spreadthewordbaby($sql_date, $fl_sql_where);
+			$sql .= $this->spreadthewordbaby($sql_filter, $fl_sql_where);
+			$sql .= $this->spreadthewordbaby($sql_taught, $fl_sql_where);
+			$sql .= $this->spreadthewordbaby($sql_taken, $fl_sql_where);
+			$sql .= $this->spreadthewordbaby($sql_textual, $fl_sql_where);
+
+			$sql .= ' ORDER BY startdate ASC, title ASC';
+
+			//echo '<hr>'.$sql.'<hr size=1>';
+						
+			$db->query($sql);
+			
+			$t['output'] == array();
+			while ($db->next_record())
+			{
+				if ($db->Record['calendarType'])
+				{	
+					$tmp = new $db->Record['calendarType'];
+					$val = $this->array2object($db->Record);
+					//debug($val);
+					if ($tmp->autoLoad($val) && $tmp->cansee(time(), false, true))
+					{	
+						$output = '<b>'.date('F jS Y h:i A', $tmp->startdate).' - '.date('F jS Y h:i A', $tmp->enddate). '</b><br>'.
+										$tmp->get_brief_display(time());
+						
+						if ($tmp->description)
+						{	$output .= '<br><i>Description</i>: '.$tmp->description;
+						}
+						
+						if ($tmp->location)
+						{	$output .= '<br><i>Location</i>: '.$tmp->location;
+						}
+						
+						$t['output'][] = $output;
+					}
+				
+				} else
+				{	
+					$output = '<b>'.date('F jS Y', $db->Record['startdate']).'</b><br>'.
+								$db->Record['title'];
+					
+					if ($db->Record['description'])
+					{	$output .= '<br><i>Description</i>: '. $db->Record['description'];
+					}
+					if ($db->Record['location'])
+					{	$output .= '<br><i>Location</i>: '. $db->Record['location'];
+					}
+						
+					$t['output'][] = $output;
+						
+				}
+				unset($tmp);
+			}
+
+		}
+		
+	}
+	
+	
+	function array2object($array)
+	{
+		settype($object, 'object');
+		
+		if (is_array($array))
+		{
+			foreach($array as $k=>$v)
+			{	$object->{$k} = $v;
+			}
+			
+		return $object;
+		}
+		
+	}
+	
+	
+	/**
+	 *	Just builds up an sql statement onto the endof an existing one.. blah blah
+	 *	You wanna know what this does, read the 10 lines of code
+	 */
+	function spreadthewordbaby($sql_sliver, &$fl_sql_where)
+	{
+		$sql = '';
+		
+		if ($sql_sliver)
+		{	if ($fl_sql_where == false)
+			{	$fl_sql_where = true;
+				$sql .= 'WHERE '. $sql_sliver;
+			} else
+			{	$sql .= ' AND '.$sql_sliver;
+			}
+
+		}
+
+	return $sql;
+	}
+	
+
+}
+
+?>

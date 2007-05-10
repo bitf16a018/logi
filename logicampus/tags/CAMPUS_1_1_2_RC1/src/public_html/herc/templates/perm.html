@@ -1,0 +1,50 @@
+
+                        <table border="1" width="100%">
+			<tr><td wdith="100%" class="selectedTab" align="center">
+			Permissions for Module <i><?=$t[modName];?></i>
+			</td></tr>
+
+			<tr><td width="100%" class="white" align="center">
+
+			<form method="POST" action="<?= _APP_URL?>perm/event=permChange/modID=<?=$t[modID]?>">
+			<table width="650" border="1" cellspacing="0">
+			<tr><th>Group Names</th>
+			<th>Access</th>
+			<? while ( list ($k,$v) = @each($t[modPerms]) ) { ?>
+				<th><?= $v?></th>
+			<? } @reset($t[modPerms]); ?>
+			</tr>
+
+			<? while ( list($k,$v) = @each($t["groups"]) ) {
+			$current = $t[perms][$v[1]];
+			if ( ! is_array($current) ) { $current = array(); }?>
+
+			<tr><td><?= $v[0]; ?></td>
+			<td align="center"><input type="checkbox" name="perms[<?= $v[1]; ?>][access]" <?  if ( in_array('access',$current) ) { print "CHECKED";} ?>></td>
+				<? while ( list ($pk,$pv) = @each($t[modPerms]) ) { ?>
+						<td align="center"><input type="checkbox" name="perms[<?= $v[1]; ?>][<?=$pk?>]" <?  if ( in_array($pk,$current) ) { print "CHECKED";} ?>></td>
+				<? } @reset($t[modPerms]); ?>
+			</tr>				
+			<? } ?>
+
+			</table>
+			<br>
+			<input type="submit" value="update"> &nbsp;
+			<input type="button" value="cancel" onclick="window.location = '<?= _APP_URL;?>view/<?= $t[mid];?>';">
+			<input type="hidden" name="event" value="update">
+			</form>
+
+			</td></tr>
+                        </table>
+			<p>
+
+			<center><div class="message"><?= $t["message"]; ?></div></center>
+
+			<p>
+			<form method="GET" action="<?= _APP_URL?>perm/event=permChange/modID=<?=$t[modID]?>">
+			<input type="submit" value="Alter Permissions">
+			</form>
+                </td></tr>
+</table>
+
+

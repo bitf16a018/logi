@@ -1,0 +1,42 @@
+<?php include_once("$templatepath/header.php"); ?>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="100%">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr><td>
+<?=areaTitle($TEMPLATE["tabletitle"]);?>
+<?=$TEMPLATE["table"];?>
+		</td>
+		</tr>
+
+		<tr><td>
+<?=areaTitle($TEMPLATE["messagetype"]);?>
+
+<? if ($TEMPLATE["showform"]!="n") { // not on the category page, so show submit form ?>
+<form method="post">
+<input type="hidden" name="event" value="post">
+<? if ($TEMPLATE["t_user"]->is_public) { ?>
+Name <input type="text" name="name" maxlength="35" value=""><br>
+<? } ?>
+Title <input type="text" name="title" maxlength="35" value="<?=$TEMPLATE["revalue"];?>">
+<br>
+<textarea name="body" rows="10" cols="40" wrap="virtual"></textarea>
+<br><br>
+<input type="submit" value="Post">
+</form>
+<? } ?>
+		</td>
+		</tr>
+
+
+
+	</table>
+</td>
+
+</tr>
+</table>
+
+<? include_once("$templatepath/footer.html"); ?>
+
+

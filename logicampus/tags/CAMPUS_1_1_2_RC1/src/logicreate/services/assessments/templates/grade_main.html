@@ -1,0 +1,116 @@
+<?=$t['sectionheader'];?>
+
+<?
+if ($t['message']) { ?>
+<div style="color: blue;"><?=$t['message'];?></div>
+<? } ?>
+<br>
+<fieldset>
+<legend><b>Instructions</b></legend>
+<br><b>Turning In Tests</b><br>
+Once assessments have been turned in you can grade them.  If a student for some reason did not
+take the test, or did not complete the test you can mark it completed by clicking on the
+"Turn In" link for that student.  Use this in cases where the student did not take the test
+for example.  Once an assessment is turned in, you can grade the assessment.
+<br><br>
+<b>Resetting Attempts</b><br>
+If for some reason you need to reset the attempt of the student taking the test, select the
+"Reset Attempt" link for that student.  This will remove their previous attempt but will save
+the information they previously entered on their test.  Once the test has published,
+students can see the correct answers to the assessment, so be careful when using this
+feature.
+<br><br>
+<b>Re-Grading Assessments</b><br>
+If you have modified points on your exam after students have taken it, or if you have deleted
+questions on the exam, you need to re-grade your assessment.  You can re-grade your assessment by
+selecting the 'Re-Grade Assessemnt" link above in the Application Links section.
+
+</fieldset>
+
+<br>
+<fieldset>
+<legend><?=$t['assessment']->displayName;?></legend>
+<span id="datagrid">
+<table width="100%">
+	<tr>
+		<th>Student Name</th>
+		<th>Date</th>
+		<th>Score</th>
+		<th>Attempts/Status</th>
+		<th>Actions</th>
+	</tr>
+
+<?
+
+	while(list($studentId, $stuObj) = @each($t['students']))
+	{ ++$n;
+		$class = 'even';
+		if ($n % 2 == 0) $class ='odd';	
+	?>
+		<tr class="<?=$class?>">
+			<td><?=$stuObj->lastname?>, <?=$stuObj->firstname?></td>
+			<td>
+		
+		<?
+			# Print meta info
+			if ($stuObj->log->startDate)
+			{
+				echo date('D, M jS h:i A', $stuObj->log->startDate);		
+			} 
+		?>
+			</td>
+			<td>
+		<?
+			echo $t['scores'][$stuObj->username] .' / '.$t['possiblePoints'];
+		?>
+			</td>
+			<td align="center">
+		<?
+			# Print meta info
+			if ($stuObj->log->logCount)
+			{
+				echo $stuObj->log->logCount .'/'.$t['assessment']->numRetries;
+			} else {
+				echo 0 .'/'.$t['assessment']->numRetries;
+;
+			}
+		?>
+		<br/>
+		<?
+			# Print status info
+
+			if ($stuObj->log->endDate < time() && $stuObj->log->endDate > 0)
+			{
+				echo '<span style="color: #FFFFFF; background: green">Completed</span>';
+			} else if($stuObj->log->startDate && $stuObj->log->endDate) {
+				echo '<span style="color: #FFFFFF; background: blue">Started</span>';
+			} else {
+				echo '<span style="color: #FFFFFF; background: red">Not Taken</span>';
+			}
+
+		?>
+
+			</td>
+			<td nowrap>
+		<?
+			# Print links 
+			if (!$stuObj->log->endDate)
+			{
+				echo '<a href="'.MOD_URL.'grade/event=markCompleted/id='.$t['assessment']->assessmentId.'/studentid='.$studentId.'">Turn In</a>';
+			} else { ?>
+				<a href="<?=MOD_URL?>grade/event=view/studentid=<?=$studentId?>/id=<?=$t['assessment']->assessmentId?>">Grade</a>
+		<?
+				if ($t['assessment']->numRetries <= $stuObj->log->logCount)
+				{
+					echo ' &bull; <a href="'.MOD_URL.'grade/event=resetRetry/id='.$t['assessment']->assessmentId.'/studentid='.$studentId.'">Reset Attempt</a>';
+
+				}
+			}
+		?>
+
+			</td>
+		</tr>
+<?	}
+?>
+</table>
+</fieldset>
