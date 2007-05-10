@@ -1,0 +1,56 @@
+<?
+/**
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+include_once(LIB_PATH.'rss/simplepie.php');
+include_once(LIB_PATH.'lc_enrollment.php');
+include_once(LIB_PATH.'lc_class.php');
+
+class administration extends AdminService {
+
+	var $presentor = "htmlPresentation";
+
+	
+	function run($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'main_main';
+		if (LcSettings::isModuleOn('LOGICAMPUS_SIMPLE_MODE') ) {
+			$t['currentMode'] = 'Simple Mode';
+		} else {
+			$t['currentMode'] = 'Campus Mode';
+		}
+
+		if($lc->templateStyle == 'private') {
+			$t['currentTemplate'] = 'Campus Default (private)';
+		} else {
+			$t['currentTemplate'] = ucfirst($lc->templateStyle);
+		}
+
+		$t['enrollmentCount'] = lcClassEnrollment::getEnrollmentCount();
+		$t['studentCount'] = lcClassEnrollment::getStudentCount();
+
+		$t['courseCount'] = lcClass::getCourseCount();
+		$t['classCount'] = lcClass::getClassCount();
+	}
+
+
+	function newsRun($db,&$u,&$lc,&$t) {
+		$url = 'http://sourceforge.net/export/rss2_projnews.php?group_id=95474';
+		$itemCount =0;
+
+		$feed = new SimplePie($url);
+		$feed->enable_cache = true;
+		$feed->set_timeout(4);
+		$feed->init();
+		$feed->handle_content_type();
+		$feed->feed_url($url);
+		foreach ($feed->get_items() as $item) {
+			if (++$itemCount > 4) { break; }
+			$item->data['description'] = strip_tags($item->get_description());
+			$t['rssItems'][] = $item;
+		}
+		$t['rssChannelTitle'] = $feed->get_feed_title();
+		$this->presentor = 'jsonPresentation';
+	}
+}

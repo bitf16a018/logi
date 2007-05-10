@@ -1,0 +1,47 @@
+<?
+/* 
+ * Create by Keith Elder
+ * Description:  Tells how many users are currently logged into the site and who they are.
+ * Last Modified 9/12/02
+ */
+	
+class online extends  RegAuth {
+		
+		var $presentor = "htmlPresentation";
+		
+#		var $authorizer = 'ServiceMapAuth';
+		var $authorizer = 'NoAuth';
+
+		function online()
+		{
+			global $lcObj;
+//auto-comment			$lcObj->templateStyle = 'private';
+		}
+		
+		function Run(&$db, &$u, &$arg, &$t) {
+			$db->queryOne("select count(*) as count from lcSessions where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 120 ORDER BY username");
+			$x = $db->Record[count]; 
+			
+			if ($arg->getvars['showme'] == 'somepictures')
+			{	$db->query("select a.username, b.photo from lcSessions as a LEFT JOIN profile as b ON  a.username=b.username where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(a.gc) < 120 and a.username!='' ORDER BY a.username" );
+			} else
+			{	$db->query("select username from lcSessions where unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 120 and username!='' ORDER BY username" );
+			}
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			
+			$i=1;
+			while($db->next_record()) {
+				$t[users][$i++]= $db->Record;
+			}
+			$t[anonymous] = $x - count($t[users]);
+			$t[total] = $x;
+			$t[loggedin] = count($t[users]);
+
+			# Check to see if the PM module is installed
+			$pm = lcRegistry::load("pm");
+			if ($pm->mid == 'pm') {
+				$t[pm] = true;
+			}
+		}
+	}
+?>

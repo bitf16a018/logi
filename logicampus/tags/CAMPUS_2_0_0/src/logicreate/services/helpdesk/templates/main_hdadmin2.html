@@ -1,0 +1,82 @@
+<?=$t['sectionheader'];?>
+<HR>
+<h5>Status</h5>
+<?php
+	if ($obj->getvars['msg'])
+	{	
+		echo '<font color="maroon">You may not delete the *base* status\'s of the helpdesk</font><br><Br>';
+	}
+?>
+
+
+<fieldset>
+<legend><B>Add a new status</B></legend>
+<center>
+
+<form method='post' action='<?=appurl("helpdesk/hdStatus/event=add");?>'>
+<input type='text' name='label' size='15' maxlength='15'>
+	<input type='submit' name='button' value='Add'>
+</form>
+</center>
+</fieldset>
+<br>
+
+
+<fieldset>
+<legend><B>Remove Status</B></legend>
+<center>
+<? if (is_array($t['status'])) { ?>
+<form method='post' action='<?=appurl("helpdesk/hdStatus/event=edit");?>'>
+<select name='helpdesk_status_id'>
+	<?=makeoptions($t['status']);?>
+</select>
+
+<input type='submit' name='button' value='Delete'>
+</form>
+<? } else { ?>
+No statuses defined
+<? } ?>
+</center>
+</fieldset>
+<br>
+
+<h5>Categories</h5>
+
+
+<?php
+	if ($obj->getvars['catmsg'])
+	{	
+		echo '<font color="maroon">You may not add a duplicate category name, please try again.</font><br><Br>';
+	}
+?>
+
+<fieldset>
+<legend><B>Add a new category</B></legend>
+<Center>
+<form method='post' action='<?=appurl("helpdesk/hdCategory/event=add");?>'>
+<input type='text' name='label' size='15' maxlength='30'>
+	<input type='submit' name='button' value='Add'>
+</form>
+</center>
+</fieldset>
+
+<br>
+
+<fieldset>
+<legend><B>Remove category</B></legend>
+<Center>
+<? if (is_array($t['categories'])) { ?>
+
+<form method='post' action='<?=appurl("helpdesk/hdCategory/event=edit");?>'>
+<select name='helpdesk_category_id'>
+	<?=makeoptions($t['categories']);?>
+</select> &nbsp;&nbsp;&nbsp;&nbsp;
+<input type='submit' name='button' value='Delete'>
+</form>
+<? } else { ?>
+No categories defined
+<? } ?>
+</center>
+</fieldset>
+
+

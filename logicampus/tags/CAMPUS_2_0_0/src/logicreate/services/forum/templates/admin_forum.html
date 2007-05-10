@@ -1,0 +1,45 @@
+<h2>Forum administration</h2>
+<h3>Forum management</h3>
+
+<?php
+	echo '<font color="maroon" size="3">'.$t['message']. '</font><br>';
+?>
+<a href="<?=appurl("forum/admin/event=forumEdit/");?>">Add a new forum</a>
+<BR>
+<BR>
+<?=//$t['table'];?>
+<?
+while(list($k,$v) = each($t['forums'])) {
+?>
+<a href="<?=appurl("forum/admin/event=sectionDelete/key=".$v->lcForumSectionId);?>">delete</a> | 
+<a href="<?=appurl("forum/admin/event=sectionEdit/key=".$v->lcForumSectionId);?>">edit</a> |  
+<?=$v->lcForumSectionName;?>
+<BR>
+<?
+}
+
+?>
+<table cellpadding="2" cellspacing="1" border="0" width="100%" style="border: 1px solid silver;">
+<tr>
+	<td><B>Forum Titles</B></td>
+	<td><B>Options</B></td>
+</tr>
+
+<?php
+
+foreach($t['forumss'] as $forum)
+{
+	echo '
+	<tr style="background-color: '.((++$i%2) ? '#e7e7e7' : ''). ';">
+		<td>'.$forum->lcForumName.'</td>
+		<td>
+		<a href="'.appurl("forum/admin/event=forumDelete/key=".$forum->lcForumId).'">delete</a> | 
+		<a href="'.appurl("forum/admin/event=forumEdit/key=".$forum->lcForumId).'">edit</a>  
+		</td>
+	</tr>
+	';
+}
+
+?>
+</table>
+

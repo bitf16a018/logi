@@ -1,0 +1,125 @@
+<?
+/*
+ * faq
+ * Last updated 3/12/2001
+ * 
+ * Purpose:
+ * Show list of FAQs
+ */
+
+define(FAQ_TABLE, "lcFaqs");
+
+include_once(SERVICE_PATH."faq/faqObj.php");
+
+class faq extends BasicAuth {
+
+	var $presentor = "htmlPresentation";
+
+
+	/**
+	 * show a question, figure out if they can ask a return question
+	 */
+      function Run($db,&$lcUser,&$lcObj,&$t) {
+      		$search = addslashes(stripslashes($lcObj->postvars['search']));
+		if (!$search) { 
+      			$search = addslashes(stripslashes($lcObj->getvars['search']));
+		}
+
+                if ($lcObj->getvars['cat']){
+                $lcUser->sessionvars['faqcat'] = $lcObj->getvars['cat'];
+                }
+// pass in "." for the cat in the URL to clear things out
+                if ($lcObj->getvars['cat']=='.'){
+                $lcUser->sessionvars['faqcat'] = '';
+                }
+                $faqcat =$lcUser->sessionvars['faqcat'];
+                if ( in_array('ask',$lcUser->perms) ) {
+                        $t['canAsk'] = 1;
+                }
+
+		if ($search) { 
+			$t['search'] = $search;
+                	$t['list'] = faqs::getVisibleListSearch($lcUser->groups,$search,$faqcat);
+			$lcObj->templateName = 'main_search';
+		} else {
+                	$t['list'] = faqs::getVisibleList($lcUser->groups,$faqcat);
+		}
+		if (! is_array($t['list']) ) { return; }
+
+		while ( list($k,$v) = @each($t['list']) ) {
+			$t['categories'][$v->category] ++;
+		}
+		reset($t['list']);
+	}
+
+
+
+
+
+	/**
+	 * Show the answer to one FAQ
+	 * update the DB
+	 */
+	function readRun(&$db,&$lcUser,&$lcObj,&$lcTemplate) {	
+		$f = faqs::_load($lcObj->getvars[1]);
+		$f->clicks++;
+		settype($f->pkey,"integer");
+		$f->question = addslashes($f->question);
+		$f->answer = addslashes($f->answer);
+		$f->update("lcFaqs");
+
+		$f->question = stripslashes($f->question);
+		$f->answer = stripslashes($f->answer);
+
+		$lcTemplate["html"] = "<h3>$f->question</h3>$f->answer<br>\n";
+		$lcTemplate["title"] = $f->question;
+		$lcObj->templateName="faqread";
+	}
+
+
+
+	/**
+	 * submit a new question to the DB
+	 * put it in the unanswered category
+	 */
+	function askRun(&$db, &$u, &$arg, &$t) {
+		
+//		$faq = new faqs();
+//		$faq->question = strip_tags($arg->postvars[question]);
+//		$faq->groups = array();
+//		$faq->category = "Unanswered";
+//		$faq->update();
+
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+
+		$h = HelpdeskIncidentPeer::row2Obj($arg->postvars);
+		$h->timedateOpen = time();
+		$h->summary = strip_tags($arg->postvars['question']);
+		#$h->category = 11;	// hardcoded as 'FAQ ENTRY' in the helpdesk_categories table on local server
+		$h->category = 15;	// hardcoded as 'FAQ ENTRY' in the helpdesk_categories table on live server
+		$h->status = 1; 	// initial status - pending?
+		$h->_new = true;
+		$h->timedateClose= 0;
+		$h->timedateOpen= time();
+		$h->assignedTo= '';
+		$h->userid = $u->username;
+		
+		$h->save();
+
+		$t['incident_number'] = $h->helpdeskId;
+		
+		$j = new HelpdeskIncidentLog();
+		$j->helpdeskId = $h->helpdeskId;
+		$j->action = 'Initial details';
+		$j->userid = $h->userid;
+		$j->timedate = time();
+		$j->comment = $arg->postvars['question'];
+	
+		$j->save();
+	
+		$arg->templateName = "thanks";
+	}
+}
+
+?>

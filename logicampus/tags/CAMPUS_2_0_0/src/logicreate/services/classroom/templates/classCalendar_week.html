@@ -1,0 +1,29 @@
+<?=$t['sectionheader']?>
+
+<!--
+<h3 align="center">Week: #<?=$t['TX_weeknumber'];?> of <?=$t['TX_year'];?><br><?=$t['TX_day_start_to_end'];?></h3>
+
+<p align="center" id="calendar">
+
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+	<tr>
+		<td width="50%"><?=$t['LINK_prev'];?></td>
+		<td width="50%" align="right"><?=$t['LINK_next'];?></td>
+	</tr>
+	</table>
+	<table cellpadding="5" cellspacing="1" border="0" width="100%" height="200">
+	<?=$t['calendar'];?>
+	</table>
+
+</p>
+
+-->
+
+<div id="calendar_controls">
+	<?=$t['calendarRenderer']->controlsToHTML();?>
+</div>
+
+<div id="calendar">
+	<?=$t['calendarRenderer']->toHTML();?>
+</div>
+

@@ -1,0 +1,253 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+define('FORUM_FILES_PATH',CONTENT_PATH."/forums");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(LIB_PATH."datagrid.php");
+include_once(LIB_PATH."visual_editor.php");
+
+class discussion_post extends StudentService {
+
+	var $presentor = "htmlPresentation";
+	var $sectionTitle = 'Post Message';
+
+	var $applinks = array(
+		'List Threads' => 'discussion/',
+		#'Start new Thread' => 'discussion_post/',
+	);
+
+	var $inactivelinks = array(
+		'Start new Thread',
+		'Discussion Board'
+	);
+	
+
+	function run(&$db,&$u,&$lc,&$t) {	
+
+		$e = new visual_editor();
+		$e->popup = false;
+		
+		$e->name = 'forum[message]';
+		$e->id= 'frm';
+		$t['editor'] = $e->render();
+		$t['_body'] = " onload='editor_init();' ";
+
+		$forum_id = (int)$lc->getvars[1];
+		$parent_id= (int)$lc->getvars[2];
+		$thread_id= (int)$lc->getvars[3];
+
+		$forum = lcforum::load($forum_id);
+		$t['forum'] = $forum;
+		$lc->templateName = 'discussion_post';
+		$u->sessionvars['forum']['post'] = $forum_id;
+		$u->sessionvars['forum']['parent_post'] = $parent_id;
+		$u->sessionvars['forum']['thread_post'] = $thread_id;
+	}
+
+
+	function replyRun(&$db,&$u,&$lc,&$t) {	
+		$e = new visual_editor();
+		$e->popup = false;
+		$e->name = 'forum[message]';
+		$e->id= 'frm';
+		$t['editor'] = $e->render();
+		$t['_body'] = " onload='editor_init();' ";
+
+		$forum_id = (int)$lc->getvars[1];
+		$parent_id= (int)$lc->getvars[2];
+		$thread_id= (int)$lc->getvars[3];
+
+		$forum = lcforum::load($forum_id);
+		$t['forum'] = $forum;
+		$lc->templateName = 'discussion_post';
+		$u->sessionvars['forum']['post'] = $forum_id;
+		$u->sessionvars['forum']['parent_post'] = $parent_id;
+		$u->sessionvars['forum']['thread_post'] = $thread_id;
+
+		$t['post'] = LcForumPost::load($parent_id);
+		$lc->templateName = 'discussion_post_reply';
+	}
+
+	function deleteRun($db,&$u,&$lc,&$t) {	
+		$key= $lc->getvars[1];
+		$f = lcForum::load($key);
+		$classid = $u->activeClassTaken->id_classes;
+		if ($f->lcForumNumericLink != $classid ) { 
+			echo "You can not delete this post";	
+			exit();
+		} else { 
+			$t['perms']['dele'] = true;
+		}
+
+
+		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
+		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
+		while($db->next_record()) {
+			$t['perms'][$db->Record[0]] = true;
+		}
+		if (!$t['perms']['dele']) { 
+			echo "You can't delete this post"; exit();
+		}
+		$post = $lc->getvars[2];
+		$p = LcForumPost::load($post);
+		$p->lcForumPostStatus = 1;
+		$p->save();
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classroom/discussion_view/".$lc->getvars[3]);
+	}
+
+
+	function undeleteRun($db,&$u,&$lc,&$t) {	
+		$key= $lc->getvars[1];
+		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
+		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
+		while($db->next_record()) {
+			$t['perms'][$db->Record[0]] = true;
+		}
+		if (!$t['perms']['dele']) { 
+			echo "You can't undelete this post"; exit();
+		}
+		$post = $lc->getvars[2];
+		$p = LcForumPost::load($post);
+		$p->lcForumPostStatus = 0;
+		$p->save();
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classroom/discussion_view/".$lc->getvars[2]);
+	}
+
+
+	
+	function filedlRun($db,&$u,&$lc,&$t) {	
+// have to put security in if it's not there
+#		$post = 
+	}
+
+	function postRun($db,&$u,&$lc,&$t) {	
+
+// handle file upload stuff
+// need to handle uploading errors
+		$file1 = $lc->uploads['file1'];
+		$file2 = $lc->uploads['file2'];
+		if ($file1['error']!=0) { 
+			// file 1 error
+		}
+		if ($file2['error']!=0) { 
+			// file 2 error
+		}
+		
+	
+		$forum_post_to = (int)$u->sessionvars['forum']['post'];
+		$parent_post_to= (int)$u->sessionvars['forum']['parent_post'];
+		$thread_post_to = (int)$u->sessionvars['forum']['thread_post'];
+
+		$forumPost = new LcForumPost();
+		$forumPost->lcForumPostTitle = stripslashes($lc->postvars['forum']['title']);
+		#$forumPost->lcForumPostMessage = htmlspecialchars(stripslashes($lc->postvars['forum']['message']));
+		$forumPost->lcForumPostMessage = removeEvilTags(stripslashes($lc->postvars['forum']['message']));
+		$forumPost->lcForumPostUsername= $u->username;
+		$forumPost->lcForumId = $forum_post_to;
+		$forumPost->lcForumPostParentId = $parent_post_to;
+		$forumPost->lcForumPostThreadId = $thread_post_to;
+		$forumPost->lcForumPostTimedate= time();
+		$forumPost->lcForumPostStatus = 0;
+		$forumPost->lcForumRecentPostTimedate = 0;
+		$forumPost->lcForumRecentPostId = 0;
+		$forumPost->lcForumReplyCount = 0;
+		$forumPost->lcForumRecentPoster = '';
+
+
+// handle file uploads
+// get the primary key
+// this will be part of the unique name
+
+		$forumPost->lcForumFile1Name = '';
+		$forumPost->lcForumFile1SysName= '';
+		$forumPost->lcForumFile1Size= '';
+		$forumPost->lcForumFile1MIME= '';
+
+		$forumPost->lcForumFile2Name = '';
+		$forumPost->lcForumFile2SysName= '';
+		$forumPost->lcForumFile2Size= '';
+		$forumPost->lcForumFile2MIME= '';
+
+		$forumPost->save();
+		if (is_array($file1)) { 
+			$file1name = $forumPost->getPrimaryKey()."_1_".md5($file1['name']);
+			copy($file1['tmp_name'],FORUM_FILES_PATH."/$file1name");
+			unlink($file1['tmp_name']);
+			$forumPost->lcForumFile1Name = $file1['name'];
+			$forumPost->lcForumFile1SysName= $file1name;
+			$forumPost->lcForumFile1Size= $file1['size'];
+			$forumPost->lcForumFile1MIME= $file1['type'];
+			$hasFiles = true;
+		}
+		if (is_array($file2)) { 
+			$file2name = $forumPost->getPrimaryKey()."_2_".md5($file2['name']);
+			copy($file2['tmp_name'],FORUM_FILES_PATH."/$file2name");
+			unlink($file2['tmp_name']);
+			$forumPost->lcForumFile2Name = $file2['name'];
+			$forumPost->lcForumFile2SysName= $file2name;
+			$forumPost->lcForumFile2Size= $file2['size'];
+			$forumPost->lcForumFile2MIME= $file2['type'];
+			$hasFiles = true;
+		}
+		if ($hasFiles) { 	
+			$forumPost->save();
+		}	
+
+
+		$t['forum_id'] = $u->sessionvars['forum']['post'];
+		$t['forum_thread_id'] = $thread_post_to;
+		if ($t['forum_thread_id']==0) { 
+			$t['forum_thread_id'] = $forumPost->getPrimaryKey();
+			$t['newpost'] = true;
+		}
+#		$t['forum_id'] = $u->sessionvars['forum']['parent_post'];
+		$u->sessionvars['forum']['post']='';
+		$u->sessionvars['forum']['parent_post']='';
+
+// update stats on parent forum
+		// adding 10/16
+		if ($forum_post_to > 0)
+		{
+			$forum = lcForum::load($forum_post_to);
+			$forum->updateStats(); 
+		}
+		if ($t['forum_thread_id'] > 0)
+		{
+			$forumPost = lcForumPost::load($t['forum_thread_id']);
+			if (is_object($forumPost)) $forumPost->updateStats(); 
+		}
+		$lc->templateName = 'discussion_posted';
+
+	}
+
+}
+/* from php.net */
+function removeEvilAttributes($tagSource)
+{
+       $stripAttrib = "' (class)=\"(.*?)\"'i";
+       $tagSource = stripslashes($tagSource);
+       $tagSource = preg_replace($stripAttrib, '', $tagSource);
+       return $tagSource;
+}
+
+function removeEvilTags($source)
+{
+   $allowedTags='<a><br><b><h1><h2><h3><h4><i>' .
+             '<img><li><ol><p><strong><table>' .
+             '<tr><td><th><u><ul>';
+   $source = strip_tags($source, $allowedTags);
+   return preg_replace('/<(.*?)>/ie', "'<'.removeEvilAttributes('\\1').'>'", $source);
+}
+?>

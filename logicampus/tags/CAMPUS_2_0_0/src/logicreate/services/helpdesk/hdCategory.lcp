@@ -1,0 +1,73 @@
+<? 
+
+/******
+* helpdesk module for tccd
+* 8/3/03
+*
+******/
+ 
+include_once (LIB_PATH."LC_html.php"); 
+include_once (LIB_PATH."SiteForms.php"); 
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskStatus.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskCategory.php");
+ 
+ 
+class hdCategory extends RegAuth { 
+ 
+	var $presentor = "htmlPresentation"; 
+
+	var $sectionTitle = 'Help Desk';
+	var $navlinks = array(
+		
+	);
+	var $applinks = array(
+		'List Tickets' => '',
+		'Submit new ticket' => 'helpdeskSubmit'
+		
+	);
+	var $inactivelinks = array(
+	);
+	  
+	 
+	/** 
+	 * Show template to add status 
+	 */ 
+
+	function run(&$db,&$u,&$arg,&$t) { 
+		
+	}
+
+// add category 
+
+	function addrun(&$db,&$u,&$arg,&$t) { 
+		$sql = 'SELECT COUNT(*) category_exists FROM helpdesk_categories WHERE helpdesk_category_label=\''.$arg->postvars['label'].'\'';
+		$db->queryOne($sql);
+		if ($db->Record['category_exists'])
+		{
+			$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2/catmsg=dupcat");
+			
+		} else {
+			$h = new HelpdeskCategory();
+			$h->helpdeskCategoryLabel = $arg->postvars['label'];
+			$h->save();
+			$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2");
+		}
+	}
+
+// edit status (only delete right now)
+
+	function editRun(&$db,&$u,&$arg,&$t) { 
+		$id = $arg->postvars['helpdesk_category_id'];
+		if ($arg->postvars['button']=="Delete") { 
+			$db->query("delete from helpdesk_categories where helpdesk_category_id='$id'");
+			$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2");
+		}
+	}
+
+}
+?>

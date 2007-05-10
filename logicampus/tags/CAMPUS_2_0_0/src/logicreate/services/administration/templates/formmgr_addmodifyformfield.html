@@ -1,0 +1,87 @@
+<?=$t['sectionheader'];?>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+
+      			Form Management
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+
+				<td class="white">
+					<table width="100%"  border="0" cellspacing="2" cellpadding="4">
+						<tr>
+						<td nowrap align="center" valign="top">
+							<a href="<?=APP_URL?>administration/formmgr">
+								<img src="<?=IMAGES_URL?>filenew.gif" border="0"></a>
+							<br>
+
+							<a href="<?=APP_URL?>administration/formmgr">
+							Site Forms</a>
+						</td>
+
+						<td nowrap align="center" valign="top">
+							
+							<a href="#" onclick="requestDelete(<?=$t['fieldPkey']?>,'<?=$t['formId']?>');return false;"><img src="<?=IMAGES_URL?>edittrash.gif" border="0"></a>
+							<br>
+							<a href="#" onclick="requestDelete(<?=$t['fieldPkey']?>,'<?=$t['formId']?>');return false;">Delete Field</a>
+							
+						</td>
+						<td nowrap align="center" valign="top">
+							
+							<a href="#" onclick="history.back(-1);return false;"><img src="<?=IMAGES_URL?>filenew.gif" border="0"></a>
+							<br>
+							<a href="#" onclick="history.back(-1);return false;">&lt;-Back</a>
+							
+						</td>						
+						</tr>
+						
+						
+					</table>
+
+					</td>
+			</tr>
+		</table>
+
+	</td></tr>
+</table>
+<br>&nbsp;<br>
+<div style="color: red;"> <?=$t['message']?> </div>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+
+      			Add / Modify Field<b> <?=$t['name']?> </b>
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+
+				<td class="white">
+					<table width="100%"  border="0" cellspacing="2" cellpadding="4">
+						<tr>
+						<td nowrap align="center" valign="top">
+							<?=$t['form']?>
+						</td>
+						</tr>
+						
+						
+					</table>
+
+					</td>
+			</tr>
+		</table>
+
+	</td></tr>
+</table>

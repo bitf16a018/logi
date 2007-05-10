@@ -1,0 +1,33 @@
+<?=$t['sectionheader'];?>
+<?
+if ($t['list'])
+{ ?> 
+
+<FIELDSET>
+<LEGEND><b>Moving Question</b></LEGEND>
+ <?=$t['question'];?>
+ 
+</FIELDSET>
+
+<br><br>
+	
+<b>Select the assessment below you wish to move this assessment to.</b><br><br>
+<ul>
+<?
+	$count = count($t['list']);
+	for ($i=0; $i<$count; $i++)
+	{ ?>
+		
+		<li><a href="<?=APP_URL?>assessments/question/event=processMove/qid=<?=$t['qid']?>/id=<?=$t['list'][$i]->assessmentId?>"><?=$t['list'][$i]->displayName;?></a><br><br></li>
+<?	} ?>
+</ul>
+
+
+<? } else { ?>
+
+<FIELDSET>
+<LEGEND><b>Error</b></LEGEND>
+ No available tests found.
+ 
+</FIELDSET>
+<? } ?>
