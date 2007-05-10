@@ -1,0 +1,105 @@
+<?
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'presentationObj.php');
+include_once(LIB_PATH.'datagrid.php');
+
+/*****
+ * Created by Adam Bellinson (adam@tapinternet.com)
+ * Last Modified:  June 4, 2003
+ *
+ *****/
+class presentations extends StudentService {
+
+	var $presentor = "htmlPresentation";
+	var $sectionTitle = 'Submit Presentation';
+
+	var $inactivelinks = array(
+		'Presentations',
+	);
+
+	var $applinks = array(
+		'List Presentations' => 'presentations',
+		'Submit Presentation' => 'presentations/event=submit/'
+	);
+
+	# Default run method.
+	function run(&$db,&$u,&$arg,&$t) {
+
+		$arg->templateName = 'presentation_main';
+		$this->inactivelinks[] = 'List Presentations';
+
+		// count pending presentations
+		$sql = 'select count(id_presentations) as inactivePresCount from class_presentations
+			where id_classes="'.$u->activeClassTaken->id_classes.'"
+			and author="'.$u->username.'"
+			and status=1';
+		$db->queryOne($sql);
+		$t['inactivePresCount'] = $db->Record['inactivePresCount'];
+
+		$dg = new datagrid( $this->modules, $this->serviceName );
+		$dg->table = 'class_presentations as p';
+		$dg->column = 'p.id_presentations, p.title, p.content, p.createdOn, p.approvedOn, r.firstname, r.lastname';
+		$dg->joins = 'left join profile as r on r.username=p.author';
+		$dg->where = 'author="'.$u->username.'" and status=2';
+		$dg->ignore = array( 'id_presentations', 'firstname', 'lastname' );
+		$dg->overrideColumn( '<?=date("M j \a\\\t g:i A", strtotime($createdOn));?>', 'createdOn' );
+		$dg->overrideColumn( '<?=date("M j \a\\\t g:i A", strtotime($approvedOn));?>', 'approvedOn' );
+		$dg->overrideColumn( '<?= $status == 2 ? "Approved" : "Pending"; ?>', 'status' );
+		$dg->postpendColumn( '<a href="<?=modurl("presentations/event=view/id=".$id_presentations);?>">view</a>', ' ' );
+		$dg->prependColumn( '<?=$firstname;?> <?=$lastname;?>', 'Author' );
+		$dg->overrideColumn( '<?=substr($content, 0, 200).(strlen($content) > 200 ? "..." : "");?>', 'content' );
+		$dg->headers = array( 'createdOn' => 'Created', 'title' => 'Title',
+			'status' => 'Status', 'content' => 'Presentation', 'approvedOn' => 'Approved' );
+		$t['table'] = $dg->toHTML();
+	}
+
+	function viewRun(&$db,&$u,&$arg,&$t) {
+
+		$arg->templateName = 'presentation_view';
+
+		$sql = 'select * from class_presentations
+			where id_classes="'.$u->activeClassTaken->id_classes.'"
+			and author="'.$u->username.'"
+			and id_presentations="'.(int)$arg->getvars['id'].'"';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$t['pres'] = $db->Record;
+	}
+
+	function submitRun(&$db,&$u,&$arg,&$t) {
+
+		$arg->templateName = 'presentation_submit';
+		$this->inactivelinks[] = 'Submit Presentation';
+		$f = new Siteform();
+
+		if ($arg->postvars['preview'] || $arg->postvars['submit']) {
+			$t['error'] = $f->validateForm('studentpresentation', $arg->postvars);
+			if ( !$f->hasErrors ) {
+				if ( $f->cleanedArray['htmltype'] == '1' )
+					$f->cleanedArray['content'] = preg_replace("/\n/", '<br>', $f->cleanedArray['content']);
+				if ($arg->postvars['preview']) {
+					$t['preview'] = "<p><b>Title:</b> {$f->cleanedArray['title']}</p>\n"
+								   ."<p style=\"background-color:white;padding:5px;border:1px solid #a0a0a0\">{$f->cleanedArray['content']}</p>\n";
+				} else if ($arg->postvars['submit']) {
+					$pres = new presentationObj();
+					$f->cleanedArray['status'] = '1';
+					$f->cleanedArray['author'] = $u->username;
+					$f->cleanedArray['createdOn'] = date("Y-m-d h:i:s");
+					$f->cleanedArray['id_classes'] = $u->activeClassTaken->id_classes;
+					$pres->_loadArray($f->cleanedArray);
+					$pres->_saveToDB();
+					
+					$arg->templateName = 'presentation_thanks';
+					return;
+				}
+			}
+		}
+
+		$f->getForm('studentpresentation', $f->cleanedArray);
+		if ( !$arg->postvars['preview'] ) $f->removeFormField('submit');
+		$t['form'] = $f->ToHTML();
+	}
+
+}
+?>

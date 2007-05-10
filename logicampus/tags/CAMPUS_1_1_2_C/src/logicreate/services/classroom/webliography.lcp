@@ -1,0 +1,93 @@
+<?
+/*
+ *
+ * Views links related to the classroom.
+ *
+ */
+
+include_once(LIB_PATH.'LC_html.php');
+
+class webliography extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Webliography';
+
+	var $inactivelinks = array(
+		'Webliography'
+	);
+
+/*
+ *
+ * Default event
+ * 
+ * Input data:  $u->activeClassTaken
+ * Output data: displays a list of all the top level links and subcategories
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='webliography_main';
+			$this->inactivelinks[] = 'Webliography';
+			$category = $lc->getvars['category'] ? $lc->getvars['category'] : '0';
+
+			$t['cats'] = array();
+
+			// get the name of the current category
+			if ( $category == '0' ) {
+				$t['catname'] = 'Top Level';
+			} else {
+				$db->queryOne('select txTitle from class_links_categories
+					where id_classes="'.$u->activeClassTaken->id_classes.'"
+					and id_class_links_categories="'.$category.'"');
+				$t['catname'] = $db->Record['txTitle'];
+			}
+
+			// select all of the top level categories
+			$sql = 'select id_class_links_categories,txTitle from class_links_categories
+				where id_class_links_categories_parent='.$category.'
+				and id_classes="'.$u->activeClassTaken->id_classes.'"';
+			$db->query($sql);
+			while ( $db->next_record() ) {
+
+				$db2 = DB::GetHandle();
+				// count the links under this category
+				$db2->queryOne('SELECT count(id_class_links) AS count 
+					FROM class_links
+					WHERE id_class_links_categories="'.$db->Record['id_class_links_categories'].'"');
+
+				$t['cats'][$db->Record['id_class_links_categories']] = array(
+					'title' => $db->Record['txTitle'],
+					'count' => $db2->Record['count']
+				);
+			}
+
+			// loop through the top-level categories and get all their subcategories
+			while ( list($id,$link) = @each($t['cats']) ) {
+				$sql = "select id_class_links_categories,txTitle from class_links_categories
+					where id_class_links_categories_parent='$id'
+					and id_classes='".$u->activeClassTaken->id_classes."'";
+				$db->query($sql);
+				while ( $db->next_record() ) {
+					$t['cats'][$id]['subs'][$db->Record['id_class_links_categories']]
+						= $db->Record['txTitle'];
+				}
+			}
+			
+			reset($t['cats']); // stupid php
+
+			// get all top level links
+			$sql = 'SELECT id_class_links,title,description,dateCreated,hits 
+				FROM class_links
+				WHERE id_class_links_categories='.$category.'
+				AND id_classes="'.$u->activeClassTaken->id_classes.'"
+				ORDER BY hits';
+			$db->query($sql);
+			while ( $db->next_record() ) {
+				$t['links'][] = $db->Record;
+			}
+
+		}
+
+}
+
+?>

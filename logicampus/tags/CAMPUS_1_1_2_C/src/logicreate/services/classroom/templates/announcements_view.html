@@ -1,0 +1,11 @@
+<?=$t['sectionheader'];?>
+
+<div style="background-color:#31999c;font-weight:bold;color:white;padding:3px;">
+	<?=$t['announcement_title'];?>
+</div>
+<div style="padding:3px 0 0 10px;font-size:x-small;">
+	<b><?=lct('Posted On')?>:</b> <i><?=date("l jS of F Y", strtotime($t['announcement_posted']));?></i>
+</div>
+<div style="padding:5px 20px 20px 20px;">
+	<?=$t['announcement_text'];?>
+</div>

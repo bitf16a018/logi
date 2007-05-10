@@ -1,0 +1,36 @@
+<?=$t['sectionheader'];?>
+This page is used to allow Phil to import student accounts into the
+system.  Account should be created and the import routine should
+figure out if the user has dropped and take the appropiate actions.
+
+<table width="100%" border="0" cellpadding="4" cellspacing="10">
+	<tr>
+		<td style="border-color:black;border-style:solid;border-width:2px;">
+			<h3>Add/Update students</h3>
+			<form method="POST" enctype="multipart-form">
+				<input type="file" name="userdump">
+				<input type="hidden" name="event" value="syncStudentsAdd">
+				<br>
+				Browse your system to find a comma seperated dump of the students.
+				<input type="submit" value="Proceed to Step 2">
+			</form>
+		</td>
+		<td style="border-color:black;border-style:solid;border-width:2px;">
+			<h3>Remove/Drop students</h3>
+			<form method="POST" enctype="multipart-form">
+				<input type="file" name="userdump">
+				<input type="hidden" name="event" value="syncStudentsRemove">
+				<br>
+				Browse your system to find a comma seperated dump of the students.
+				<input type="submit" value="Proceed to Step 2">
+			</form>
+		</td>
+	</tr>
+</table>
+<center><h4>You can zip the student files before you send them to the server.</h4></center>
+
+<br><br>
+From the spec:  <b>This application will also provide the opportunity
+to compare the file received weekly from Information Systems to the
+current file of users and to automatically make changes where
+applicable (add, remove, change address, and so forth).  </b>

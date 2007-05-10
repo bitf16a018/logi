@@ -1,0 +1,53 @@
+<center>
+	<h2><?=$t['action']?></h2>
+</center>
+
+
+<table width="80%" align="center" border="1">
+	<tr>
+		<td valign="top">
+			Source: <img src="<?=IMAGES_URL?>folder.gif"> <?=$t['originFolder']->name?>
+		</td>
+		<td rowspan="2" align="center" valign="center">
+			=>
+		</td>
+		<td valign="top">
+			Destination: <img src="<?=IMAGES_URL?>folder.gif"> <?=$t['destinationFolder']->name?>
+		</td>
+	</tr>
+
+	<tr>
+		<td valign="top">
+			<? while ( list($k,$v) =  @each($t['folders']) ) {?>
+			<img src="<?=IMAGES_URL?>folder.gif"> <?=$v->name?>
+			<br>
+			<?  } ?>
+
+			<? while ( list($k,$v) =  each($t['files']) ) {?>
+
+			<img src="<?=IMAGES_URL?>document.gif"> <?=$v->displayname?>
+			<br>
+			<?  } ?>
+		</td>
+		<td valign="top">
+			<? while ( list($k,$v) =  @each($t['destPerms']) ) {?>
+
+			<?=$v['gid']?> /
+			<? $v['action'] ==1 ? print 'Access': print 'Edit'; ?>
+			<br>
+			<?  } ?>
+			&nbsp;
+		</td>
+	</tr>
+
+</table>
+
+<p>&nbsp;</p>
+<center>
+<h3>Are you sure?</h3>
+<form>
+	<input type="submit" value="No" name="confirm">
+	 &nbsp; &nbsp;
+	<input type="submit" value="Yes" name="confirm">
+</form>
+</center>

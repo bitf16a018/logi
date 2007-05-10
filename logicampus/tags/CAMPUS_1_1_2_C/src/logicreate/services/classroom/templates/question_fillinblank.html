@@ -1,0 +1,51 @@
+<?=$t['sectionheader'];?>
+
+<?=$t['error'];?>
+<FIELDSET>
+<LEGEND><b>Remaining Time</b></LEGEND>
+<b>Minutes Remaining</b>: <?=$t['minutes_remaining'];?> &nbsp; <b>Start Time</b>: <?=$t['starttime']?> &nbsp;
+<b>Test Time Limit</b>: <?=$t['minute_limit']?> minutes
+</FIELDSET>
+<br>
+
+<form method="POST" ACTION="<?=APP_URL?>classroom/question/qid=<?=$t['q']->assessmentQuestionId?>">
+	<table border="0" width="100%">
+		<tr>
+			<td valign="top"><b>Question</b></td>
+			<td><?=$t['q']->questionText;?></td>
+		</tr>
+		<? if ($t['q']->fileHash) { ?>
+		<tr>
+			<td>&nbsp;</td>
+			<td><img src="<?=APP_URL?>classroom/viewContent/fhash=<?=$t['q']->fileHash?>" border="0"
+			alt="question image"></td>
+		</tr>
+	<? } ?>
+		<tr>
+			<td>
+				<b>*Answer</b>
+			</td>
+			<td>
+				<input name="answer" type="text" value="<?=$t['answer']->assessmentAnswerValues?>" size="50">
+			</td>
+		</tr>
+	</table>
+
+<br><br>
+	<table border="0" width="100%">
+		<tr>
+			<td valign="top">
+				<input type="submit" name="prev" value="&lt;-Save and Go back">
+			</td>
+			<td valign="top" align="center">
+				<input type="submit" name="start" value="View All Questions">
+			</td>
+			<td valign="top" align="right">
+				<input type="submit" name="next" value="Save and Continue-&gt;">
+				<input type="hidden" name="assessmentAnswerId" value="<?=$t['answer']->assessmentAnswerId?>">
+				</form>
+			</td>
+		</tr>
+	</table>
+
+<p>* denotes a required field.</p>

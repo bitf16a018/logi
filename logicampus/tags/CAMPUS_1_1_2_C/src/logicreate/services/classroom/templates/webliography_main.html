@@ -1,0 +1,50 @@
+<?=$t['sectionheader'];?>
+<table width="100%" border=0 cellpadding=5 cellspacing=0><tr><td class="portalbox"><?=$t['catname'];?> Categories</td></tr></table>
+<?
+
+$htmls = array();
+$flag = false;
+
+while ( list($catid,$cat) = @each($t['cats']) ) {
+
+	$html = '<big><b><a href="'.modurl('webliography').'/category='.$catid.'">'.$cat['title'].'</a> ('.$cat['count'].')</b></big><br/>';
+
+	while ( list($subid,$subcat) = @each($cat['subs']) ) {
+		$html .= '<a href="'.modurl('webliography').'/category='.$subid.'">'.$subcat.'</a>, ';
+	}
+
+	$htmls[] = substr($html, 0, -2);
+	$flag = true;
+
+}
+
+if (!$flag) print '<div class="contentchunk"><i>There are no '.
+	($t['catname'] == 'Top Level' ? 'categories' : 'subcategories').'.</div>';
+
+print '<div align="center">';
+print htmlTable($htmls, 3, '100%', array(), 5, 0, 0, 'left');
+print '</div>';
+
+?>
+<table width="100%" border=0 cellpadding=5 cellspacing=0><tr><td class="portalbox"><?=$t['catname'];?> Links</td></tr></table>
+<?
+
+$flag = false;
+
+while ( list(,$val) = @each($t['links']) ) { ?>
+
+<div style="margin-top:20px;">
+	<b><a href="<?=modurl('links').'/id='.$val['id_class_links'];?>" target="_blank"><?=$val['title'];?></a></b> (<?=$val['hits'];?> hits)
+	<div style="margin:0 5px 5px 20px;">
+		<b>Description:</b> <?=$val['description'];?><br/>
+		<b>Date Added:</b> <?=date('l, F jS, Y \a\t g:i:s A', strtotime($val['dateCreated']));?>
+	</div>
+</div>
+
+	<?
+	$flag = true;
+}
+
+if (!$flag) print '<div class="contentchunk"><i>There are no links in this category.</i></div>';
+
+?>

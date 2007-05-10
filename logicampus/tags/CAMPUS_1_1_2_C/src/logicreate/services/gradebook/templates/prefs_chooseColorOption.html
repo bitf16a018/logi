@@ -1,0 +1,36 @@
+<?=$t['sectionheader'];?>
+
+<p>The color that you select below will be used in your gradebook to indicate a missing entry.</p>
+
+<? if ($t['error']) { ?>
+	<span style="color: red"><?=$t['error']?></span>
+<? } ?>
+
+<?
+	$colors = array(
+		'#ffc6c6',
+		'#cec6ff',
+		'#c6d3ff',
+		'#c6fff5',
+		'#c6ffc3',
+		'#ffe4c6',
+		'#ffc6e4'
+	);
+
+	$table = array();
+	foreach ( $colors as $color ) {
+		$table[] = '<input type="radio" name="color" value="'.$color.'"'
+			.($t['color'] == $color ? ' CHECKED' : '').' />';
+		$table[] = '<div style="width:30px;height:15px;background-color:'.$color
+			.';border:1px solid silver;">&nbsp;</div>';
+	}
+?>
+
+<form method="post" action="<?=modurl('prefs/');?>">
+<?
+	include_once(LIB_PATH.'LC_html.php');
+	print htmlTable( $table, 2, '', '', 5, 2, 0, 'left' );
+?>
+<input type="submit" value="Select Color" />
+<input type="hidden" name="event" value="chooseColorOptionUpdate" />
+</form>
