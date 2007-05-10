@@ -201,12 +201,12 @@
 	      name="active_idx"/>
 	</entity>
 	<entity  name="class_syllabus">
-		<attribute name="id_class_syllabus"
+		<attribute name="class_syllabus_id"
 			required="true"
 			primaryKey="true"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="id_classes"
+		<attribute name="class_id"
 			required="true"
 			default="0"
 			size="11"
@@ -219,5 +219,10 @@
 			required="true"
 			size=""
 			type="LONGVARCHAR"/>
+		<attribute name="rank"
+			required="true"
+			default="0"
+			size="11"
+			type="INTEGER"/>
 	</entity>
 </project>
