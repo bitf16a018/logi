@@ -1,0 +1,54 @@
+
+<?=$t['sectionheader'];?>
+
+<h5>Current message of the day</h5>
+<hr>
+<blockquote>
+	<?=$t['mod'];?> 
+</blockquote>
+<hr>
+<br>
+<form method="POST">
+<table cellpadding="2" cellspacing="1" border="0" style="border: 1px solid silver;" width="100%">
+<tr>
+	<td valign="top"><b>Enter a new message of the day (below)</b></td>
+</tr>
+<tr>
+	<td>
+	<input type="button" name="wloader" id="wloader" value="Use WYSIWYG Editor" onclick="loadWys(this);">
+	<br>
+	<textarea name="mod" id="mod" rows="20" style="width: 100%"; cols="75"><?=$t['mod'];?></textarea></td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
+</tr>
+<tr>
+	<td><input type="submit" value="Update message of the day"></td>
+</tr>	
+</table>
+<input type="hidden" name="event" value="update">
+</form>
+<script type="text/javascript">
+
+
+	/**
+	 * Button Code (Click button to engage wysiwyg)
+	 */
+	function loadWys(obj)
+	{	obj.style.display = 'none';
+		initEditor();
+	}
+	
+	
+	/**	Wysiwyg loader
+	 */
+	function initEditor() {
+	  editor = new HTMLArea("mod");
+	  editor.config.editorURL = "<?=BASE_URL;?>htmlarea/";
+	  
+	  editor.generate();
+	  
+	
+	}
+
+</script>

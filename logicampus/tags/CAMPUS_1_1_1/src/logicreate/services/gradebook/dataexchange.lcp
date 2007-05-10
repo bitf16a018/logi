@@ -1,0 +1,63 @@
+<?
+/*
+ *
+ * Allows the gradebook to be exported and imported.
+ *
+ */
+
+include_once(LIB_PATH.'LC_form.php');
+class dataexchange extends NoAuth {
+
+	var $presentor='htmlPresentation';
+	var $cleanedArray = array();
+
+	// link
+	var $sectionTitle = 'Gradebook Assessments';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Gradebook' => '',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => 'jack',
+	);
+	var $inactivelinks = array( 'Assessments' );
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'Control Panel' => 'main/event=controlPanel/'
+	);
+
+/*
+ *
+ * Doesn't do anything
+ * 
+ * Input data: none
+ * Output data: none
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='prefs_main';
+			$lc->templateStyle = 'private';
+		}
+
+		
+
+/*
+ *
+ * Grabs all records in the database and exports the information into a CVS file
+ * the faculty member can download.
+ * 
+ * Input data: classID
+ * Output data: displays a page along with a link to the file
+ *
+ */		
+		function exportRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='dataexchange_export';
+			$lc->templateStyle = 'private';
+		}
+		
+}
+
+?>

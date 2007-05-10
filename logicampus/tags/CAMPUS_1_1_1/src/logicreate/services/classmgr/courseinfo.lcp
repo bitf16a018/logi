@@ -1,0 +1,59 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * Service will act as a gateway into the rest of the
+ * application.
+ *
+ */
+
+include_once(LIB_PATH.'LC_form.php');
+class courseinfo extends FacultyService {
+
+        var $presentor='htmlPresentation';
+		var $cleanedArray = array();
+
+/*
+ *
+ * Displays Course Information form
+ * classmgr app.
+ *
+ * Input data:
+ * Output data:
+ *
+ */
+	function editRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='courseinfo_edit';
+			$lc->templateStyle = 'private';
+			$f = new form();
+			$f->getForm(200049, $this->cleanedArray);
+			$t['form'] = $f->ToHTML();
+	}
+
+/*
+ * Displays the main class page 
+ *
+ * Input data: classID
+ * Output data: template with dynamic links mapping to the specific classID
+ */
+
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateStyle = 'private';
+
+	}
+
+}
+
+?>

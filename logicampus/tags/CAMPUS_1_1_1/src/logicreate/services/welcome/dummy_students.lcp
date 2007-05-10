@@ -1,0 +1,71 @@
+<?
+/*
+
+needed a way to populate test student accounts for a particular semester
+each section will have a student account
+Section 16500 will have student s_16500 with password 16500
+
+*/
+
+class dummy_students extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,&$arg,&$t) 
+	{
+		$semester = 2;
+
+		$db->query("select sectionNumbers from classes where id_semesters = $semester");
+		while($db->next_record()) { 
+			$k = explode("\n",$db->Record[0]);
+			while(list($a,$b) = each($k)) {
+				$ar[$b] = $b;
+			}
+		}
+		while(list($a,$b) = each($ar)) {
+		// each $b is a section number
+		// we're going to create a test user for each section number
+		// user = s_section#, password = section#
+		// need to do this because students are related to sections, not classes
+		$username = "s_$b";
+		$password = $b;
+		$db->query("delete from lcUsers where username='$username'");
+		$db->query("delete from profile where username='$username'");
+		$db->query("delete from class_student_sections where id_student='$username' and semester_id=$semester");
+		$db->query("insert into lcUsers (username,password,groups,usertype,email) values ('$username','$password','|pub|public|reg|',2,'$username@dl.tccd.edu')");
+#		ob_end_flush();
+		$db->query("insert into profile (username,firstname,lastname) values ('$username','Test student','#$b')");
+#		echo ("insert into profile (username,firstname,lastname) values ('$username','Test student','#$b')")."<BR>";
+		$db->query("insert into class_student_sections (id_student,semester_id,sectionNumber,active) values ('$username',$semester,'$b',1)");
+#		echo("insert into class_student_sections (id_student,semester_id,sectionNumber,active) values ('$username',$semester,'$b',1)")."<BR>";
+		++$count;
+		}
+		echo "done inserting $count fake students";
+		exit();
+		$arg->templateStyle = 'home';
+	}
+
+
+	/* remove this function as soon as it is run. Then,
+		1. update the other assignment related files
+		2. remove the id_class_lessons field from the
+		   class_assignments table
+	function rebuildAssignmentLinksRun(&$db,&$u,&$lc,&$t) {
+		if ( $u->username != 'adam' ) return;
+
+		$db2 = DB::getHandle();
+
+		$sql = 'select * from class_assignments';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+
+		while ( $db->next_record() ) {
+			$sql = "insert into class_assignments_link
+				set id_class_assignments='{$db->Record['id_class_assignments']}',
+				id_class_lessons='{$db->Record['id_class_lessons']}'";
+			$db2->query($sql);
+		}
+	}
+	*/
+}
+?>

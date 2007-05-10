@@ -1,0 +1,12 @@
+<?=$t['sectionheader'];?>
+<p>This page lists the available courses. You can click on the column titles to sort by that column, and use the arrows on the right to navigate through the pages of courses. You may also view, edit, or delete a course using the provided links, and adding a course is done by clicking the link above.</p>
+
+<?php if ( $t['msg'] ) { ?>
+	<p style="color:blue;"><?=$t['msg'];?></p>
+<?php } ?>
+<?php if ( $t['error'] ) { ?>
+	<p style="color:red;"><?=$t['error'];?></p>
+<?php } ?>
+<?=$t['table'];?>
+	
+

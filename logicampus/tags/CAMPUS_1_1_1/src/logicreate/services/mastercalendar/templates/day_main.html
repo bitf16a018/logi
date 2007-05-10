@@ -1,0 +1,57 @@
+<?php
+
+$link_backtoclass = '';
+if ($obj->user->sessionvars['mastercalendar']['comingfromclassroomportal'] > (time()-360))
+{	$link_backtoclass = '&bull; <a href="'.APP_URL.'classroom/">Go back to your classroom</a>';
+}
+
+?>
+
+<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0>
+<tr>
+	<td><big>Master Calendar</big></td>
+	<td align="right">&nbsp;</td>
+</tr>
+</table>
+	<div id="sectionheader">
+		<a href="<?=modurl('');?>">Master Calendar</a>
+	</div>
+	<div id="applinks">
+		<b class="title">Application Links:</b>&nbsp;&nbsp;<a href="<?=modurl('week/');?>">Week view</a> &bull; 
+		<a href="<?=modurl('main/');?>">Month view</a> &bull; 
+		<a href="<?=modurl('year/');?>">Year view</a>
+		<?=$link_backtoclass;?>
+	</div>
+	<br>
+
+
+<a href="<?=modurl();?>">MONTH VIEW</a>
+
+<h3><?=$t['title']?></h3>
+
+
+<table width="100%" cellpadding="4" cellspacing="1">
+<tr>
+<td width="70%" valign="top">
+<?=$t['eventHtml']?><br>
+</td>
+<td valign='top'>
+<table>
+<tr><td>
+<div id="calendar">
+<?=$t['tinyCal'];?>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td valign="top" align="center"><?=$t['cal']?>
+</tr>
+</table>
