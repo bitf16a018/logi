@@ -7,9 +7,13 @@
 DROP TABLE IF EXISTS `class_syllabus`;
 CREATE TABLE `class_syllabus` (
 		
-	`id_class_syllabus` integer (11) NOT NULL auto_increment, 
-	`id_classes` integer (11) NOT NULL, 
+	`class_syllabus_id` integer (11) NOT NULL auto_increment, 
+	`class_id` integer (11) NOT NULL, 
 	`section_title` varchar (255) NOT NULL, 
 	`section_content` text NOT NULL,
-	PRIMARY KEY (id_class_syllabus) 
+	`rank` integer (11) NOT NULL,
+	PRIMARY KEY (`class_syllabus_id`) 
 );
+
+ALTER TABLE `class_syllabus` ADD INDEX `class_idx` (`class_id`);
+
