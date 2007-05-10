@@ -260,7 +260,11 @@
 			type="VARCHAR"/>
 		<attribute name="lob_title"
 			required="true"
-			size="11"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="link_text"
+			required="true"
+			size="255"
 			type="VARCHAR"/>
 		<attribute name="visible"
 			required="true"
