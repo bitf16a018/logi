@@ -1,0 +1,25 @@
+<?=$t['sectionheader'];?>
+
+Note that these numbers represent successful logins for all the student's system usage, not just 
+for this particular class.
+<BR/>
+<BR/>
+<table width='100%' cellpadding='3' cellspacing='0'>
+	<tr style='background-color: #999; color: #fff; font-size: 130%;'>
+		<td width='60%'>Student ID</td>
+		<td>Logins</td>
+		<td>Withdrawn?</td>
+	</tr>
+	<? while(list($k,$v) = each($t['students'])) { ?>
+	<? if ($row=='#ccc') { $row='#ddd'; } else { $row='#ccc'; } ?>
+	<tr style='background-color: <?=$row;?>'>
+		<td><?=ucwords(str_replace(".", " ",$k));?></td>
+		<td><?=$t['studentCount'][$k];?></td>
+		<td><?
+		if (!is_null($v)) { 
+		echo date("m/d/Y", strtotime($v));
+		}
+		?></td>
+	</tr>
+	<? } ?>
+</table>	

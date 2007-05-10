@@ -1,0 +1,39 @@
+<?
+
+ /*
+  * Created by Keith Elder
+  * Description:  Displays an image from the user contributed photo gallery
+  * Note:  This displays the image directly in the site template.  Depending
+  * on the type of template you have, this may break your site.
+  * Example:  APP_URL/users/viewPhoto/$pkey
+  */
+
+class viewPhoto extends RegAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function viewPhoto()
+	{
+		global $lcObj;
+		$lcObj->templateStyle = 'private';
+	}
+
+	function run($db,&$u,$arg,&$t) {
+		if ($this->_DisplayPhotoInformation == 'N') {
+			$t[error] = "The site administrator has disabled the user photo gallery.";
+		} else { 
+			$pkey = $arg->getvars[1];	
+			$sql = "select * from userPhotos where pkey='$pkey'";
+			$db->queryOne($sql);
+			$t[image] = $db->Record;
+
+			$db->queryOne("select username, firstname, lastname from profile where username='".$t[image][username]."'");
+			$t[profile] = $db->Record;
+
+			$db->query("update userPhotos set count=count+1 where pkey='$pkey'");
+			$t[_PHOTO_DIR] = $this->_PHOTO_DIR;
+			$t[_THUMB_DIR] = $this->_THUMB_DIR;
+		}
+	}
+}
+?>

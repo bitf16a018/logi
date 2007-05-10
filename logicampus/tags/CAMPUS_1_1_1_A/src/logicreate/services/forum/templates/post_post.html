@@ -1,0 +1,11 @@
+<h3>Forums</h3>
+<h4>Post a message</h4>
+Your message was posted.  
+<? if ($t['newpost']) { ?>
+<a href="<?=appurl("forum/viewPost/".$t['forum_thread_id']);?>">View the new discussion thread</a>
+<? } else { ?>
+<a href="<?=appurl("forum/viewPost/".$t['forum_thread_id']);?>">View the thread with your post</a>
+
+<? } ?>
+<BR><BR>
+<a href="<?=appurl("forum");?>">Return to forum home</a>

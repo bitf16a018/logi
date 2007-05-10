@@ -1,0 +1,57 @@
+<?
+
+	if (!$t[error]) { ?>
+<br> 
+<table border="0" cellpadding="0" cellspacing="0"> 
+	<tr> 
+		<td> 
+
+			<center><b><?=$t[message];?></b></center> 
+      			<h3>Personal Photo Album</h3>
+				The personal photo album on <?=BASE_URL?> allows registered users to share their favorite digital photographs with other registered users on the site.  Share your favorite birthday parties photos, children photos, wedding photos, pet photos or anything you like.  
+		</td> 
+		<td class="selectedTab" align="right">&nbsp;</td> 
+	</tr> 
+</table>
+
+<br><br>
+
+		
+		
+
+<BR><BR> 
+<img align="middle" width="32" height="32" src="<?=IMAGES_URL?>photoUpload.gif"> <a href="<?=MOD_URL?>uploadMyPhotos">Upload Photos</a> 
+ 
+		 
+<hr>
+<? if (!$t[photos]) { ?> No photos have been uploaded yet. <? } else { ?>
+The following pictures have been uploaded to your personal photo gallery.
+
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td class="header2"><b>P H O T O S</b></td><td class="header2"><b>A C T I O N S</b></td></tr>
+<?
+	while(list($k, $v) = @each($t[photos]))
+		{
+			extract($v);
+			?>
+		<tr>
+			<td width="200"><img src="<?=IMAGES_URL?><?=$t[_THUMB_DIR]?><?=$thumbname?>" width="<?=$t_width?>" height="<?=$t_height?>" border="0"></td>
+			<td valign="top"><a href="<?=APP_URL?>users/editMyPhotos/pkey=<?=$pkey?>">Edit</a> | <a onclick="if (!confirm('Are you sure?')) {return false;}" href="<?=APP_URL?>users/editMyPhotos/event=delete/pkey=<?=$pkey?>">Delete</a><br>
+			<b>Caption:</b><br> <?=$caption?><br>
+			<b>Views:</b> <?=$count?>
+			</td>
+			</tr>
+			<tr><td colspan="2"><hr></td></tr>
+		</tr>
+		<? } ?>
+		</table>
+<? } 
+
+} else { 
+	?>
+	<h3><?=$t[error]?></h3>
+
+	<? } ?>
+
+

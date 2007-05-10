@@ -1,0 +1,7 @@
+The shell script `wipe_clean.sh' will remove every table and 
+install dummy data used for testing.  Only use this on demo 
+or test systems.  You should remove this directory from production 
+systems to avoid potential problems.
+
+The shell script `install_metainfo.sh' will drop all tables and 
+re-create them completely blank.

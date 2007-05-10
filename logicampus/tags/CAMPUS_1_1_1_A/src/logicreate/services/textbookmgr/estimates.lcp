@@ -1,0 +1,341 @@
+<?php
+/*
+ *
+ * Estimations on how many books per campus for a particular semester
+ *
+ *	@note	I am waiting on ticket 496
+ *			http://dl.tccd.edu/index.php/hd/helpdeskView/496
+ *			to finish this. 
+ *	
+ */
+
+ 
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+
+class estimates extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+	var $authorizer = 'native';
+	var $sectionTitle = 'Textbook Estimations';
+	
+	var $navlinks = array(
+		'Text Book Manager' => 'main/',
+	);
+	var $applinks = array(
+		'Estimates'=>'estimates/',
+		'View estimates'=>'viewestimates/',
+		'Duplicate Books' => 'dup',
+	);
+	var $inactivelinks = array(
+	);
+
+	/** 
+	 *	Native Authorization, we only want textbook admins
+	 *	and admins to enter. This function is triggered
+	 *	by the framework becuase a classvariable::authorizer
+	 *	has been set to "native"
+	 *
+	 *	@access	public
+	 *	@return					boolean
+	 */	
+	function authorize() {
+
+		// Only tbadmin or tbsadmin users allowed here
+		global $lcUser;
+		return in_array('tbadmin', $lcUser->groups)
+			|| in_array('admin', $lcUser->groups);
+	}
+
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$name = addslashes(stripslashes($lc->postvars['savename']));
+		$books = $u->sessionvars['textbooks'];
+		$db->queryOne("Select * from textbook_estimates where textbook_estimates_name ='$name'");
+		$key = $db->Record['textbook_estimates_key'];
+		if ($key) {
+			$db->query("delete from textbook_estimates_data where textbook_estimates_key=$key");
+		} else {
+			$db->query("insert into textbook_estimates (textbook_estimates_name) values ('$name')");
+			$key = $db->getInsertId();
+		}
+		while(list($k,$v) = each($books)) { 
+			$v['textbook_estimates_key'] = $key;
+			$j = PersistantObject::CreateFromArray("persistantObject",$v);
+			$j->_save("textbook_estimates_data");
+			#debug($j,1);
+		}
+	}
+
+
+	/**
+	 *	Our only objective is to return an estimate for how many books
+	 *	on a per campus basis for the selected semester
+	 *
+	 *	@event
+	 */
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'estimates_main';
+
+		/**
+		 *	Gathering the current or preselected semester id
+		 */
+		$t['semesterid'] = $u->sessionvars['semesterid'] =
+			$u->sessionvars['semesterid']
+			? $u->sessionvars['semesterid']
+			: semesterObj::getCurrentID();
+
+	
+		if ($lc->postvars['semester1']) { 
+			$sem1 = $lc->postvars['semester1'];
+		}
+		if ($lc->postvars['semester2']) { 
+			$sem2 = $lc->postvars['semester2'];
+		}
+		if (!$sem1) { 
+			$sem1 = $t['semesterid'];
+		}
+		if (!$sem2) { 
+			$sem2 = $t['semesterid'];
+		}
+		
+		// get semester list
+		$sql = '
+		SELECT id_semesters,semesterTerm, semesterYear
+		FROM semesters
+		';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+		while($db->next_record()){ 
+			$temp[$db->Record['id_semesters']] = $db->Record['semesterTerm']." ".$db->Record['semesterYear'];
+		}
+		$t['semester1'] = makeOptions($temp);
+		$t['semester2'] = makeOptions($temp);
+	
+
+		$sql = '
+		SELECT semesterTerm, semesterYear
+		FROM semesters
+		WHERE id_semesters = '.$t['semesterid'].'
+		';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$t['semester_label'] = $db->Record['semesterYear'].' '.$db->Record['semesterTerm'];
+	
+		$sql = '
+		SELECT semesterTerm, semesterYear
+		FROM semesters
+		WHERE id_semesters = '.$sem1.'
+		';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$t['semester1_label'] = $db->Record['semesterYear'].' '.$db->Record['semesterTerm'];
+		
+		$sql = '
+		SELECT semesterTerm, semesterYear
+		FROM semesters
+		WHERE id_semesters = '.$sem2.'
+		';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$t['semester2_label'] = $db->Record['semesterYear'].' '.$db->Record['semesterTerm'];
+		
+
+	
+	
+
+		/** 
+		 *	The below sql statement needs to grab all books that have been
+		 *	approved (status = 3) an link them to there classes respectively
+		 *	to locate the correct semester id that we're in and then to see
+		 *	which campus is was to be entered into and how many for that 
+		 *	campus. Also must count nubmer of students per class and calculate
+		 *	that into the equation, remember the students in the classes
+		 *	must be calculated not by class but by section id and that are
+		 *	using an active flag
+		 
+		 
+		 
+		 SELECT  count(B.id_classes) as blah, A .  * , B.id_classes
+FROM textbook_classes AS A
+INNER  JOIN classes AS B ON A.id_classes = B.id_classes
+INNER  JOIN semesters AS C ON B.id_semesters = C.id_semesters
+LEFT JOIN class_sections as D ON B.id_classes=D.id_classes INNER JOIN class_student_sections as E ON D.sectionNumber=E.sectionNumber AND E.active=1 AND semester_id=2
+WHERE C.id_semesters = 2
+GROUP BY B.id_classes
+
+	I just need to get count to count nulls :) ya! for 0's, if there are no students
+	attached, count won't count them for 0's
+
+		I think it can be done to calculate student counts for each class/book but
+		I haven't figured it out yet.. i need to get this done now so i'm going
+		the long way. grabbing the clases, then running calcs on each one.. OI!
+		 */
+		$sql = '
+		SELECT A.*, count(D.id_classes) as studentcount
+		FROM textbook_classes as A
+		INNER JOIN classes as B ON A.id_classes=B.id_classes
+		INNER JOIN semesters as C ON B.id_semesters=C.id_semesters
+		LEFT JOIN class_sections as D ON B.id_classes=D.id_classes
+		WHERE C.id_semesters='.$sem1.'
+		GROUP BY D.id_classes
+		';
+		
+		$sql = '
+		SELECT B.facultyId, B.courseFamily, B.courseNumber, B.sectionNumbers, A.*
+		FROM textbook_classes as A
+		INNER JOIN classes as B ON A.id_classes=B.id_classes
+		INNER JOIN semesters as C ON B.id_semesters=C.id_semesters
+		WHERE A.status = 3 AND C.id_semesters='.$sem2.'
+		ORDER BY B.courseFamily ASC, A.id_classes ASC
+		';
+		
+		$db->query($sql);
+		
+		$a_books = array();
+		// at most, 1000 records, first semester of this program there are only 200+
+		while($db->next_record())
+		{	$a_books[] = $db->Record;
+		}
+		
+		$total_count = 0;
+		
+		foreach($a_books as $k=>$book)
+		{
+			if ($classroom_count[$book['id_classes']])
+			{	$total_count += $classroom_count[$book['id_classes']];
+				continue;
+			}
+
+// convoluted
+// we have the id_classes for the book requested in the chosen semester
+// we need to match that up with the id_classes for the 'enrollment' semester
+// to grab info.
+// example:
+// sp2004 - bmgt1303 is id_classes 399 and taught by kevin E
+// we need to look up the id_classes of bmgt1301/kevin E and 
+// use that to get enrollments for that id_classes or maybe even section numbers
+// ack!
+
+// FIXME - mgk 10/30/03
+// also not sure if we should be using class_student_sections - that gets wiped
+// sometimes.  we need a separate table which holds 'twelfth day' stuff
+// to pull against for historical purposes
+//
+
+// get me the faculty id and course info for the class associated with the current book
+
+#			$db->queryOne("select facultyId, courseFamilyNumber from classes where id_classes='".$book['id_classes']."'");
+#			$temp= $db->Record;
+// now get me the info for that class (matching instructor and class name) for the selected 
+// previous semester
+#			$db->queryOne("select * from classes where facultyId='".$temp['facultyId']."' and courseFamilyNumber='".$temp['courseFamilyNumber']."' and id_semesters='".$sem1."'");
+#			$info = $db->Record;
+
+// now we have a list of section numbers for the same class taught by the same instructor 
+// in the semester chosen by the textbook admin
+
+// so now we have to determine how many students were in one of those section numbers during that semester
+/*
+$sect = explode("\n",$info['sectionNumbers']);
+if (is_array($sect) and count($sect)>1) { 
+$sec = "sectionNumber=".implode(" or sectionNumber=",$sect);
+} else { $sec=0; }
+			$sql = "select count(*) as student_count from class_student_sections where";
+			$sql .= "($sec) and active=1 and semester_id=$sem1";
+*/
+
+// 10/31/03 - CHANGING
+// we won't pull info from historical records anymore.
+// we'll just estimate total number of students as sections x 25
+
+			$student_count= count(explode("\n",$book['sectionNumbers'])) * 25;
+		
+			$classroom_count[$book['id_classes']] = $student_count;
+/*
+CAMPUS BITS
+1 = NE
+2 = NW
+3 = SE
+4 = SO
+*/
+define(NE,1);
+define(NW,2);
+define(SE,4);
+define(SO,8);
+			$sectionlist = explode("\n", $book['sectionNumbers']);
+			$bits=0;
+			while(list($k,$v) = each($sectionlist)) {
+				if (substr($v,0,1)=="1") { 
+					$bits = $bits | NE;
+				}
+				if (substr($v,0,1)=="2") { 
+					$bits = $bits | NW;
+				}
+				if (substr($v,0,1)=="3") { 
+					$bits = $bits | SE;
+				}
+				if (substr($v,0,1)=="4") { 
+					$bits = $bits | SO;
+				}
+				// FIXME - specific to this semester
+			}
+			if ($bits==1) 
+				$x['ne'] = 100; $x['nw'] = 0; $x['se'] = 0; $x['so'] = 0; 
+			if ($bits==2) 
+				$x['ne'] = 0; $x['nw'] = 100; $x['se'] = 0; $x['so'] = 0; 
+			if ($bits==3) 
+				$x['ne'] = 50; $x['nw'] = 50; $x['se'] = 0; $x['so'] = 0; 
+			if ($bits==4) 
+				$x['ne'] = 0; $x['nw'] = 0; $x['se'] = 100; $x['so'] = 0; 
+			if ($bits==5) 
+				$x['ne'] = 50; $x['nw'] = 0; $x['se'] = 50; $x['so'] = 0; 
+			if ($bits==6) 
+				$x['ne'] = 0; $x['nw'] = 50; $x['se'] = 50; $x['so'] = 0; 
+			if ($bits==7) 
+				$x['ne'] = 33; $x['nw'] = 33; $x['se'] =34; $x['so'] = 0; 
+			if ($bits==8) 
+				$x['ne'] = 0; $x['nw'] = 0; $x['se'] = 0; $x['so'] = 100; 
+			if ($bits==9) 
+				$x['ne'] = 50; $x['nw'] = 0; $x['se'] = 0; $x['so'] = 50; 
+			if ($bits==10) 
+				$x['ne'] = 0; $x['nw'] = 50; $x['se'] = 0; $x['so'] = 50; 
+			if ($bits==11) 
+				$x['ne'] = 33; $x['nw'] = 33; $x['se'] = 0; $x['so'] =34; 
+			if ($bits==12) 
+				$x['ne'] = 0; $x['nw'] = 0; $x['se'] = 50; $x['so'] = 50; 
+			if ($bits==13) 
+				$x['ne'] = 33; $x['nw'] = 0; $x['se'] = 33; $x['so'] =34; 
+			if ($bits==14) 
+				$x['ne'] = 0; $x['nw'] = 33; $x['se'] = 33; $x['so'] =34; 
+			if ($bits==15) 
+				$x['ne'] = 25; $x['nw'] = 25; $x['se'] = 25; $x['so']=25; 
+			
+			$campus_bits[$book['id_classes']] = $x;
+			$campus_count[$book['id_classes']] = $student_count;
+			$total_count += $student_count;
+		}
+
+		$t['total_count'] = $total_count;
+		
+		$t['books'] = $a_books;
+		$t['a_classroom_count'] = $classroom_count;
+		$t['a_campus_pcts'] = $campus_bits;
+		$t['a_campus_count'] = $campus_count;
+		
+		
+		
+	}
+	
+
+}
+?>

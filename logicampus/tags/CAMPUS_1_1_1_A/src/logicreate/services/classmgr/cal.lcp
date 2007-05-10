@@ -1,0 +1,592 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH."datagrid.php");
+include_once(LIB_PATH.'eventsObj.php');
+include_once(LIB_PATH.'LC_html.php');
+
+class cal extends FacultyService {
+
+
+	var $presentor = "htmlPresentation";
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+	var $applinks = array(
+		'Week view' => 'cal/event=viewWeek',
+		'Month view' => 'cal/',
+		'Year view' => 'cal/event=viewYear',
+		'View scheduled events' => 'cal/event=schedule',
+		'Schedule event' => 'cal/event=editschedule'
+	);
+	
+	var $sectionTitle = 'Class Calendar';
+	var $navlinks = array(
+		'Classroom Manager' => 'display/',
+		'Class Setup' => 'classSetup/',
+		'Syllabus' => 'syllabusManage/'
+	);
+
+	var $inactivelinks = array( 'Class Calendar' );
+
+
+
+	function run($db,&$u,&$arg,&$t) 
+	{
+		$this->inactivelinks[] = 'Month view';
+		$arg->templateName = 'cal_main';
+		/**
+		 *	Was there a passed in (requested) monthly view? 
+		 *	defaults to current date
+		 *
+		 *	$ut is our timestamp (main datekeeper)
+		 */
+		if ($arg->getvars['m'] and $arg->getvars['y']) 
+		{
+			$mut = $arg->getvars['m'];
+			$yut = $arg->getvars['y'];
+			$dut = $arg->getvars['d'];
+			
+			$t['URLmonth'] = $arg->getvars['m'];
+			$t['URLyear'] = $arg->getvars['y'];
+			
+			$ut = strtotime("$mut/1/$yut");	// MAIN DATEKEEPER
+			
+		} else 
+		{
+			# Detecting if an UT was submitted 
+			# @@@ this could result in odd behavior if SDLFJSDFLJ was passed in the url for ut
+			if ($arg->getvars['ut']) 
+			{	$ut = $arg->getvars['ut'];
+			} else 
+			{	// no args were passed, use default time
+			
+				list($mut,$yut) = split(' ', date('m Y'));
+				$ut = mktime(0, 0, 0, 	$mut, 1, $yut); // MAIN DATEKEEPER
+			}
+			
+		}
+
+		// loading up the cache? so we can get our CIZACHE!
+		$cache = new cache();
+		$cache->getFromCache("cal$mut$yut");
+		
+		if ($cache->data) 
+		{	$c = unserialize($cache->data);
+		} else 
+		{	$c = new cali($ut,(strtotime("+1 months",$ut)-1), '', array($u->activeClassTaught->id_classes), array_unique($u->groups));
+			$cache->putInCache("cal$mut$yut",serialize($c),5);
+		}
+
+		# Do we show detailed events in view
+		// @@@ i hope this doesn't get us into trouble .. using === becuase that makes sure we're comparing 
+		//     2 strings (2 of the same TYPE) I think it should be [ if ((boolean)[or (int)]$arg->getvars['showEvents']) ] but i won't change this (it's a boolean check and original code is FORCING a string comparison.. frickin ODDDDDDDD
+		if($arg->getvars['showEvents']==='1') 
+		{	$u->sessionvars['cal_showEvents']=true;
+		}
+		
+		if($arg->getvars['showEvents']==='0') 
+		{	$u->sessionvars['cal_showEvents']=false;
+		}
+
+		// wow.. refer to the above @@@ now we're doing a boolean check? I have to confirm this action so i don't
+		// screw something up! ugh.. strange..
+		if ($u->sessionvars['cal_showEvents'] )
+		{
+			$c->showTitle = true;
+			$c->showEventCount = false;
+			
+		} else 
+		{
+			$c->showTitle = false;
+			$c->showEventCount = true;
+		}
+		
+		$c->calWidth = '100%';
+		$c->showTimes = false;
+		$c->eventDayURL='';
+
+		// Do we show a link to show events within the calendar? 
+		// I will change this to handle multiple types of events (calendarID) like stuff
+		// @@@@ due for removal (4 @'s)
+		if($u->sessionvars['cal_showEvents']) 
+		{
+			$calendar->showEventsInDay = "Y";
+			$showEvent = "showEvents=1";
+			$t['showEvent'] = "<a href=\"".MOD_URL."/cal/m=".$arg->getvars['m']."/y=".$arg->getvars['y']."/showEvents=0\">(hide details)</a>";
+			
+		} else 
+		{
+			$calendar->showEventsInDay = "Y";
+			$showEvent = "showEvents=0";
+			$t['showEvent'] = "<a href=\"".MOD_URL."/cal/m=".$arg->getvars['m']."/y=".$arg->getvars['y']."/showEvents=1\">(show details)</a>";
+		}		
+
+		# Generate a HTML calendar of events.
+		# Generate the next and previous button as well as the
+		# pull down options.
+		$c->monthHeader1 = 'monthlybar';
+		$c->monthTableClass2 = 'monthtable';
+		
+		$c->monthReviewURL = modurl('cal');
+		$c->eventDayURL = modurl('cal/event=viewDay');
+		$c->eventCountURL = modurl('cal/event=viewDay');
+		
+		
+		$t['calendar'] = $c->renderMonth($mut, $yut);
+//		$t['calendar'] = $t['cal'];
+
+		$t['title'] = "Events for ".date("F Y");
+
+		# Make Month and Year Options (Dropdown Creation)
+		$t['monthOptions'] = $c->monthOptions();
+		$t['yearOptions'] = $c->yearOptions();
+		
+	}
+
+
+	function viewDayRun(&$db,&$u,&$arg,&$t) 
+	{
+
+		$mut = $arg->getvars['m'];
+		$yut = $arg->getvars['y'];
+		$dut = $arg->getvars['d'];
+		$month = $arg->getvars['m'];
+		$day = $arg->getvars['d'];
+		$year = $arg->getvars['y'];
+
+		$ut = strtotime("$mut/$dut/$yut");
+		$start = strtotime("$mut/1/$yut");
+
+/*
+		$c = new cali($start,(strtotime("+1 months",$ut)-1), '', $u->activeClassTaught->id_classes, array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->calWidth = '190';
+		$c->monthReviewURL = modurl('cal/event=viewDay/d='.$arg->getvars['d']);
+		
+		$c->eventDayURL = modurl('cal/event=viewDay');
+		$c->eventCountURL = modurl('cal/event=viewDay');
+		
+		$t['tinyCal'] = $c->renderMonth($arg->getvars['m'], $arg->getvars['y']);
+*/
+
+		# Returns all of the events schedule for the day passed to it.
+		$dayView = new cali($ut, ($ut+86399), '', $u->activeClassTaught->id_classes, array_unique($u->groups));
+		# Generates an HTML table for all events on given day.
+		$dayView->starttime = $this->_START_TIME;
+		$dayView->endtime = $this->_END_TIME;
+		
+		if ($dayView->starttime == '' ) 
+		{	print "::UNKNOWN ERROR::";exit();
+		}
+		
+		$k2 = microtime();
+
+		$t['eventHtml'] = $dayView->renderDayFull();
+		$k3 = microtime();
+
+		$arg->templateName = "cal_viewDay";
+		$t['title'] = 'Events for '. date('F jS Y', strtotime("$month/$day/$year"));
+		$dayView->width = "100%";
+		$dayView->showEventsInDay = "N";
+		
+	}
+
+	
+	function viewWeekRun($db,&$u,&$arg,&$t)
+	{
+		$this->inactivelinks[] = 'Week view';
+		$arg->templateName = 'cal_viewWeek';
+		
+		$mut = (is_numeric($arg->getvars['m'])) ? 
+					$arg->getvars['m'] : date('m');
+		$yut = (is_numeric($arg->getvars['y'])) ? 
+					$arg->getvars['y'] : date('Y');
+		$dut = (is_numeric($arg->getvars['d'])) ? 
+					$arg->getvars['d'] : date('d');
+		
+		$ut = strtotime("$mut/$dut/$yut");	// MAIN DATEKEEPER
+
+		$week_start_position = strtotime("-".(date('w', $ut))." day",$ut); // EPOCH date Sunday
+
+				
+		// scheduling cali object to load up with begining of weeks events to end of weeks events
+		$c = new cali($week_start_position,
+					  (strtotime("+1 week",$week_start_position)-1), '', 
+					  $u->activeClassTaught->id_classes, 
+					  array_unique($u->groups));
+
+		// setting flags
+		$c->showTitle = false;
+		$c->showTimes = false;
+		$c->showEventCount = true;
+		
+		// setting urls to be rendered
+		$c->monthReviewURL = modurl('cal');
+		$c->eventDayURL = modurl('cal/event=viewDay');
+		$c->eventCountURL = modurl('cal/event=viewDay');
+		
+		// oh it's time to render this baby!
+		$t['calendar'] = $c->renderWeekView();
+		
+		// creating template labels
+		$t['TX_year'] = date('Y', $ut);
+		// potential problems. when a year turns
+		$t['TX_weeknumber'] = (date('w', $ut) > 0) ? date('W', $ut) : (date('W', $ut)+1);
+				
+		// checking for the insertion of previous and next year dates
+		if (date('Y', (strtotime("+1 week",$week_start_position)-1)) <> date('Y', $week_start_position))
+		{	$t['TX_day_start_to_end'] = date('F jS Y', $week_start_position). ' - ';
+		} else
+		{	$t['TX_day_start_to_end'] = date('F jS', $week_start_position). ' - ';
+		}
+		
+		// check for month change
+		if (date('j', (strtotime("+1 week",$week_start_position)-1)) < date('j', $week_start_position))
+		{	
+			// check for year change
+			if (date('Y', (strtotime("+1 week",$week_start_position)-1)) <> date('Y', $week_start_position))
+			{	$t['TX_day_start_to_end'] .= date('F jS Y', (strtotime("+1 week",$week_start_position)-1));
+			} else
+			{	$t['TX_day_start_to_end'] .= date('F jS', (strtotime("+1 week",$week_start_position)-1));
+			}
+			
+		} else
+		{	$t['TX_day_start_to_end'] .= date('jS', (strtotime("+1 week",$week_start_position)-1));
+		}
+		
+		// creating next / prev links
+		$t['LINK_next'] = '<a href="'.modurl('cal/event=viewWeek/'.date('\d=d/\m=m/\y=y', strtotime("+1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('cal/event=viewWeek/'.date('\d=d/\m=m/\y=y', strtotime("-1 week", $week_start_position))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"></a>';
+
+	}
+	
+	
+	function viewYearRun($db,&$u,&$arg,&$t) 
+	{
+		$this->inactivelinks[] = 'Year view';
+		$arg->templateName = 'cal_viewYear';
+
+		// use passed in ?
+		if ($arg->getvars['y']) 
+		{
+			$mut = 1;
+			$dut = 1;
+			$year = $arg->getvars['y'];
+			
+			$ut = strtotime("$mut/1/$year");	// MAIN DATEKEEPER
+			
+		} else /** Default time (year) is current **/
+		{	$ut = mktime(0, 0, 0, 1, 1, date('Y')); // MAIN DATEKEEPER
+			$year = date('Y');
+		}
+
+		$t['year'] = $year;
+		$c = new cali($ut,(strtotime("+1 years",$ut)-1), '', $u->activeClassTaught->id_classes, array_unique($u->groups));
+		$c->showTitle=false;
+		$c->showTimes = false;
+		$c->calWidth = '200';
+		$c->monthReviewURL = modurl('cal/event=viewDay/d=1');
+		
+		$c->eventDayURL = modurl('cal/event=viewDay');
+				
+		for($i=1; $i <= 12; ++$i)
+		{
+			$t['calendar'][$i] = $c->renderMonth($i, $year);
+		}
+		
+		$t['title'] = "Events for Year: ".date("Y");
+
+		# Make Month and Year Options (Dropdown Creation)
+		
+		$t['LINK_next'] = '<a href="'.modurl('cal/event=viewYear/'.date('\y=Y/', strtotime("+1 year", $ut))).'"><img src="'.IMAGES_URL.'next.gif" border="0" alt="Next Year"></a>';
+		$t['LINK_prev'] = '<a href="'.modurl('cal/event=viewYear/'.date('\y=Y/', strtotime("-1 year", $ut))).'"><img src="'.IMAGES_URL.'prev.gif" border="0" alt="Previous Year"></a>';
+
+	}
+
+	
+	function insertRun($db,&$u,&$lc,&$t) {
+		$j = new edit();
+		$lc->getvars['key'] = $lc->getvars['pkey'];
+		$lc->postvars['key'] = $lc->postvars['pkey'];
+		#print_r($lc->postvars);
+		$j->insertrun($db,$u,$lc, $t);
+		$this->schedulerun($db,$u,$lc,$t);
+	}
+	
+	
+	function delScheduleRun($db,&$u,&$lc,&$t) {
+		persistantObject::_delete("lcEvents", $lc->getvars['pkey']);
+		$this->scheduleRun($db,$u,$lc,$t);
+	}
+	
+	
+	function editScheduleRun($db,&$u,&$lc,&$t) {
+		$this->inactivelinks = array( 'Schedule event' );
+		$t['obj'] =&$lc;
+		$t['obj']->user =&$u;
+		$lc->templateName = 'cal_edit';
+		if ($lc->getvars['pkey']=='') { 
+//			return;
+		}
+		$j = new edit();
+		$lc->getvars['key'] = $lc->getvars['pkey'];
+		$j->run($db,$u,$lc, $t);
+	}
+	
+	
+	function viewRun($db,&$u,&$lc,&$t) {
+		$db->queryOne("select * from _activities where pkey='".addslashes($lc->getvars['pkey'])."'");
+		$t = array_merge($t,$db->Record);
+		$this->activityRun($db,$u,$lc,$t);
+	}
+	
+	
+	function delRun($db,&$u,&$lc,&$t) {
+		persistantObject::_delete("_activities", $lc->getvars['pkey']);
+		$this->activityRun($db,$u,$lc,$t);
+	}
+
+	
+	function scheduleRun($db,&$u,&$lc,&$t) {
+		$this->inactivelinks = array( 'View scheduled events' );
+		$x = new datagrid('classmgr', 'cal');
+	$x->extra_url = '/event=schedule';	
+		$x->table = "lcEvents";
+		$x->showHeader =true;
+		$x->showNavLinks = false;
+		$x->where = 'id_classes='.$u->activeClassTaught->id_classes. ' AND calendarType=\'\'';
+		$x->headers = array("title"=>"Event", "location"=>"Location", "dates"=>"Date", "times"=>"Time","className"=>"Class", "activityName"=>"Class", "edit"=>" ", "delete"=>' ', 'repeats'=>"Repeating");
+		$x->ignore = array('id_item_sub', "startdate","enddate", 'calendarType', "description", "lastmodified", "pkey","id_classes", "id_item", "f_allday", "f_showwhenactive", "activityDescription", "calendarID", "username","class", "repeatType","repeatData", "repeatExclude","repeatUntil", "repeatCount", "groups","notgroups");
+		$x->prependColumn('<a href="<?=modurl("cal/event=editSchedule/pkey=$pkey");?>">edit</a>','edit');
+		$x->prependColumn('<a onclick="if(confirm(\'Are you sure you want to remove this scheduled item?\')) { return true; } else { return false; }" href="<?=modurl("cal/event=delSchedule/pkey=$pkey");?>">del</a>','delete');
+		$x->postpendColumn('<?=date("m/d/Y", $startdate); if ($repeatType>0) { echo " thru<BR>"; if ($repeatUntil==-1) { echo "forever";} if ($repeatUntil>0) { echo date("m/d/Y",$repeatUntil);} } ?>','dates');
+		$x->postpendColumn('<?=date("h:i A", $startdate);?> thru<BR><?=date("h:i A", $enddate);?>','times');
+		$j .= "if (\$repeatType=='1') { echo 'Repeat every '. \$repeatCount.' day(s)'; }\n";
+		$j .= "if (\$repeatType=='2') { echo 'Repeat on ';\n";
+		$j .= "if (\$repeatData & 1) { echo 'Su '; } \n";
+		$j .= "if (\$repeatData & 2) { echo 'Mo '; } \n";
+		$j .= "if (\$repeatData & 4) { echo 'Tu '; } \n";
+		$j .= "if (\$repeatData & 8) { echo 'We '; } \n";
+		$j .= "if (\$repeatData &  16) { echo 'Th '; } \n";
+		$j .= "if (\$repeatData & 32) { echo 'Fr '; } \n";
+		$j .= "if (\$repeatData & 64) { echo 'Sa '; } \n";
+		$j .= "}   ";
+
+		$x->postpendColumn("<?$j;?>",'repeats');
+		
+		$t['activitylist'] = $x->toHTML();
+		
+		$lc->templateName = "cal_scheduling";
+	}
+
+
+}
+
+
+// I think i'll port this into the eventsObj
+
+class edit {
+
+	var $presentor = "htmlPresentation";
+
+	function Run($db,&$u,&$arg,&$t) {
+//echo date("m/d/Y",strtotime("last thursday", strtotime("6/1/2003")));
+//echo date("m/d/Y",strtotime("this month", strtotime("6/4/2003")));
+		$key = intval($arg->getvars['key']);
+		$event = edate::_load($key);
+		$username = $u->username;
+		$u->sessionvars['editingCalendarKey'] = '';
+		if ($key) {
+			// store the key we're trying to edit
+			// so we can check in the next event that
+			// they match ( no editing of the key at the client side!)
+			$u->sessionvars['editingCalendarKey'] = $key;
+			// NO CHECKING
+			/*
+			if ( ($username!=$event->username) && 
+				!(in_array("adm_evt",$u->groups) || in_array('admin', $->groups) )
+			) {
+				lcSystem::systemPreTemplate($obj,$t);
+				$this->throwError("You do not have permission to edit this event");
+				exit();
+			}
+			*/
+		}
+		$t['event'] = $event;
+		# build month, day, year drop downs
+		$t['startDate'] = dateDropDown((int)$event->startdate,'startDate');
+		$t['endDate'] = dateDropDown((int)$event->enddate, 'endDate');
+		$t['untilDate'] = dateDropDown((int)$event->repeatUntil, 'repeatUntil');
+
+		# Build up an array of groups
+		# We used to let anyone share with any group they were in
+		# now it'll be shared with any groups, but only adm_evt members
+		# can edit the sharing aspect
+		/*
+		while(list($k, $v) =@each($u->groups))
+		{
+			if ($v == '') continue;
+			$arr[$v] = $v;
+		}
+		$t[groups] = $arr;
+		*/
+		$db->query("select gid,groupname from lcGroups order by groupname");
+		while($db->next_record()) {
+			$t['groups'][$db->Record[0]] = $db->Record[1];
+		}
+
+
+
+		# Make time options
+		for ($x=0; $x<=23; $x++)
+		 	{
+					$t['hour'][] = date("g a", mktime($x, 0, 0, 1, 1, 0));
+		 	}
+
+	}
+
+	function insertRun($db,&$u,&$arg,&$t) {
+
+	    $t['problemfound'] = false;
+	
+		extract($arg->postvars);
+		// assume the user can access this
+		$canAccess = true;
+		// did we get a pkey?
+		if ($pkey!='') {
+			$event->pkey = $pkey;
+			if ($pkey!=$u->sessionvars['editingCalendarKey']) {
+			// if we had a pkey submitted, we're editing
+			// if we're editing, and the pkey doesn't match
+			// the requested pkey from the previous event,
+			// show a different template
+			// and change our access for the rest of this event
+				$arg->templateName = 'noaccess';
+				$canAccess= false;
+				return;
+			}
+		}
+
+// get repeat data from submitted data
+
+		$postdata = $arg->postvars;
+		$repeatType = $postdata['repeatType'];
+		$repeatCount = $postdata['repeatCount'];
+		
+		if ($repeatType==1) {
+			$repeatCount = $postdata['repeatCount1'];
+			if ($repeatCount <= 0 || trim($repeatCount) == '')
+			{	$repeatCount = 1;
+			}
+		}
+		
+		if ($repeatType == 2) {
+			while(list($k,$v) = @each($postdata['repeatday2'])) {
+				$repeatData += $k;
+			}
+			$repeatCount = $postdata['repeatCount2'];
+//			echo "data = $repeatData<BR>"; exit();
+		}
+		if ($repeatType==4) {
+			$repeatCount = $postdata['repeatCount4'];
+		}
+		if ($repeatType==6) {
+			$repeatCount = $postdata['repeatCount6'];
+		}
+		if ($repeatType==7) {
+			$repeatData = $postdata['repeatWhen'].'|'.$postdata['repeatDay'];
+			$repeatCount = $postdata['repeatCount7'];
+		}
+//		echo "<pre>"; print_r($postdata);
+// echo "d=$repeatData c=$repeatCount<BR>"; exit();
+// get start/end/repeat info
+
+		$repeatUntil = strtotime($postdata['repeatUntil']['month']."/".$postdata['repeatUntil']['day']."/". $postdata['repeatUntil']['year']);
+		$startDate = strtotime($postdata['startDate']['month']."/".$postdata['startDate']['day']."/". $postdata['startDate']['year']." ".$postdata['start']['hour'].":".$postdata['start']['minute']);
+		$endDate = strtotime($postdata['startDate']['month']."/".$postdata['startDate']['day']."/". $postdata['startDate']['year']." ".$postdata['start']['endhour'].":".$postdata['start']['endminute']);
+
+        if ($repeatForever==-1) { $repeatUntil=-1; }
+
+		$t['startDate'] = dateDropDown((int)$event->startdate,'startDate');
+		$t['endDate'] = dateDropDown((int)$event->enddate, 'endDate');
+		$t['untilDate'] = dateDropDown((int)$event->repeatUntil, 'repeatUntil');
+
+		$event = new edate();
+		$event->startdate = $startDate;
+		$event->enddate = $endDate;
+		$event->repeatUntil = $repeatUntil;
+		$event->repeatData = $repeatData;
+		$event->repeatType = $repeatType;
+		$event->repeatCount = $repeatCount;
+		$event->title = $postdata['title'];
+		$event->description  = $postdata['description'];
+		$event->username = $u->username;
+		$event->location = $postdata['location'];
+		$event->groups = $postdata['groups'];
+		$event->repeatExclude = str_replace("\n","|",$postdata['repeatExclude']);
+
+		$t['event'] = $event;
+//		echo "<pre>"; print_r($event); exit();
+//$this->presentor = 'debug';
+//return;
+
+		$event->username = $u->username;
+		//$event->groups = "|".@implode("|", $groups)."|";
+		$event->groups = "|student|faculty|"; // doesn't really matter becuase we're applying a class id to it.. 
+		
+		$event->id_classes = $u->activeClassTaught->id_classes; 
+		
+		if (strlen($event->description) > 750)
+		{
+			$t['event'] = $event;
+			$t['problemfound'] = 'Your event description has more than 750 characters, <br>please limit your description to 750 or less characters.';
+			$arg->templateName = 'edit';
+
+			$t['startDate'] = dateDropDown((int)$event->startdate,'startDate');
+			$t['endDate'] = dateDropDown((int)$event->enddate, 'endDate');
+			$t['untilDate'] = dateDropDown((int)$event->repeatUntil, 'repeatUntil');
+
+
+   # Make time options
+			for ($x=0; $x<=23; $x++)
+			{
+				$t['hour'][] = date("g a", mktime($x, 0, 0, 1, 1, 0));
+			}
+
+		} else {
+			if ($button=='Delete') {
+				$event->_delete($pkey);
+			} else {
+				
+				// Seed event with a pkey becuase we're editing
+				if ($pkey)
+				{	$event->pkey = $pkey;
+				}
+				
+				$event->update();
+				
+		}
+
+		$startdate = $event->startdate;
+		
+
+		}
+
+	}
+	
+}
+?>

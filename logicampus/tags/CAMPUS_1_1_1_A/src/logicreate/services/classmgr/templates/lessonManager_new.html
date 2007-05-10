@@ -1,0 +1,60 @@
+<?php 
+print $t['sectionheader'];
+?>
+
+<form action="" method="POST" enctype="application/x-www-form-urlencoded">
+	<table width="" border="0" cellspacing="3" cellpadding="0">
+		<tr>
+			<td valign="top" class="">*Title</td>
+			<td valign="top" class=""><input type="text" id="title" name="title" value="" size="65" maxlength="255"/></td>
+		</tr>
+		<tr>
+			<td valign="top" class="" valign="top">*Description</td>
+			<td valign="top" class="">
+				<textarea name="description" cols="62" rows="7" id="description"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class="">*Content Page</td>
+			<td valign="top" class="">
+				<select id="content" name="content"  size="1">
+					<?php echo makeOptions($t['contentPages']); ?>
+				</select>
+			</td>
+		</tr>
+	</table>
+
+	<fieldset>
+		<legend>Dates</legend>
+	<table width="" border="0" cellspacing="3" cellpadding="0">
+		<tr>
+			<?php
+			$struct['defaultValue'] = time();
+			$struct['displayName'] = 'Active On';
+			$struct['fieldName'] = 'activeOn';
+			$struct['dateTimeBit'] = 255;
+			echo Form::dateDropDownToHTML($struct);
+			?>	
+			</td>
+		</tr>
+		<tr>
+			<?php
+			$struct['defaultValue'] = (time()+86400);
+			$struct['displayName'] = 'Inactive On';
+			$struct['fieldName'] = 'inactiveOn';
+			$struct['dateTimeBit'] = 7;
+			echo Form::dateDropDownToHTML($struct);
+			?>
+		</tr>
+	</table>
+	</fieldset>
+
+		<br/>
+		<div style="text-align:center;">
+			<input type="submit" id="submit" name="submit" value="Add Lesson">
+			<input type="hidden" name="event" value="new">
+		</div>
+
+
+		<div style="font-size:85%">* denotes a required field</div>
+</form>

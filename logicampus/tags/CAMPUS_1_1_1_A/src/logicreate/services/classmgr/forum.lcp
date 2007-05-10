@@ -1,0 +1,504 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+include_once(INSTALLED_SERVICE_PATH."forum/LC_object.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LC_forum.php");
+
+class forum extends FacultyService {
+
+	var $presentor = "htmlPresentation";
+
+	function forum()
+	{	global $lcObj;
+		$lcObj->templateStyle='private';
+	}	
+
+	/* Added by Mike on 9/31/02 
+         * The function updates the thread counts on
+	 * the forum.
+	 */
+	function updateforum($fid) { 
+		$db = DB::getHandle();
+		$db->queryOne("select count(pkey) from forumPosts where parent=0 and fid='$fid' and status='y'");
+		$count = $db->Record[0];
+		$db->query("update forums set numthreads=$count where fid='$fid'");
+		$db->queryOne("select count(pkey) from forumPosts where fid='$fid' and status='y'");
+		$count = $db->Record[0];
+		$db->query("update forums set validposts=$count where fid='$fid'");
+	}
+
+
+	function Run($db,&$u,&$lcObj,&$t) {	
+
+		$lcObj->templateName='forum_main';
+
+		$frm = new forums();
+//		$group = createGroupCheck($u->groups);
+
+		$g = implode("' or groups='",$u->groups);
+		$db->query("select fid from forumPerms where perm='view' and (groups='$g')");
+		while($db->next_record()) {
+			$fids[] = $db->Record[0];
+		}
+		$fid = @implode(" ' or fid='",$fids);
+
+		$db->query("select * from forums where fid='$fid'");
+		while($db->next_record()) {
+		$list[] = $db->Record;
+		}
+
+		$t["forumlist"] = $frm->forumList2HTML($list);
+		$t["width"] = $this->forumWidth;
+
+		$t["_title"] = "Forums";
+	}
+
+
+	/**
+	 * change the forum ID based preference for 
+	 * recieving mails of this forum.
+	 * table forumPrefs, key is sendEmail, val is fid
+	 * double check to see if a user has read permission, else it would
+	 * be a way to steal messages
+	 */
+	function emailPrefRun($db,&$u,&$arg,&$t) {	
+		$pref = $arg->postvars[emailPref];
+		$nf = new newForum($arg->postvars[fid]);
+
+		//don't allow anon users, they have no email
+		if ($u->username == 'anonymous' or $u->username == '') {
+			$this->listRun($db,$u,$arg,$t);
+			return;
+		}
+
+		if ($nf->hasPerm("view",$u->groups) ) {
+			//allowed to view this forum
+			$db->query("select pref_val from forumPrefs where username = '".$u->username."' and pref_key = 'sendEmail' and pref_val = '".$arg->postvars[fid]."'");
+			if ($db->next_record() ) {
+				//has perm, must remove if checkbox is empty
+				if ( $pref != 'on' ) {
+					$db->query("delete from forumPrefs where username = '".$u->username."' and pref_key = 'sendEmail' and pref_val = '".$arg->postvars[fid]."'");
+				}
+			} else {
+				//has no perm, must insert if checkbox is on
+				if ( $pref == 'on' ) {
+					$db->query("insert into forumPrefs (username, pref_key, pref_val) VALUES ('".$u->username."','sendEmail','".$arg->postvars[fid]."')");
+				}
+			}
+		}
+
+		//all done, let's show the thread list again
+		$this->listRun($db,$u,$arg,$t);
+	}
+
+
+
+	/** 
+	 * Show a list of all threads (only approved ones) in a particular
+	 * forum.  Does this allow for result set browsing?
+	 */
+
+	function listRun($db,&$u,&$lcObj,&$t) {
+		$t["allowHTML"] = htmlspecialchars($this->_allowTags);
+		$t["postedMessage"] = $u->sessionvars["postedMessage"];
+		unset($u->sessionvars["postedMessage"]);
+
+		global $PATH_INFO;
+		$t["return"] = base64_encode($PATH_INFO);
+
+
+		if ($lcObj->postvars) {
+			$lcObj->getvars = array_merge($lcObj->getvars,$lcObj->postvars);	
+		}
+		$search = $lcObj->getvars["search"];
+		$forumID = $lcObj->getvars["fid"];
+		$post = new forumpost();
+		$frm = new forums();
+		if ($lcObj->getvars["start"]) { $lcObj->postvars["start"] = $lcObj->getvars["start"]; } 
+		$group = createGroupCheck($u->groups);
+
+
+// new forum object???
+		$nf = new newForum($forumID);
+		$isValid = $nf->hasPerm("view",$u->groups);
+		$canModerate = $nf->hasPerm("moderate",$u->groups);
+
+
+		if ($isValid) { 
+
+			$limit = intval($this->_postsPerPage);
+
+			if ($canModerate) { 
+				$clause = " parent=0 and fid='$forumID'";
+			} else {
+				$clause = " parent=0 and fid='$forumID' and status='y'";
+			}
+
+			if ($search) { 
+				$searchsql = "and (body like '%$search%' or message like '%$search%')";
+				$clause = " fid='$forumID' $searchsql";
+				$start=0;
+				$limit=0;
+			}
+
+			$start = intval($lcObj->postvars["start"]);
+			if ($start>0) { 
+				$start = ($lcObj->postvars["start"]-1) * $this->_postsPerPage;
+			}
+			$foruminfo = $nf->_get();
+			$t["forumname"] = $foruminfo["forumname"];
+			$db->queryOne("select count(pkey) from forumPosts where 1=1 and $clause");
+			$threadcount = $db->Record[0];
+$db->query("select * from forumPosts where 1=1 and $clause order by stamptime DESC limit $start,$limit");
+while($db->next_record()) {
+	$list[] = $db->Record;
+}
+//			$list = $post->_getAll("stamptime DESC",$clause,$start,$limit);
+			$html = $post->messageList2HTML($list,$canModerate);
+		}
+
+//
+// can the user POST a message?
+// (check 'write' permissions for this module
+//
+		if ($nf->hasPerm("post",$u->groups)) { 
+			$t["canwrite"] = true;
+		}
+
+// 
+// if we got a threadcount, check it against $this->postsPerPage
+// and do a page dropdown if needed
+//
+		if ($threadcount>$this->_postsPerPage) { 
+			$start = $lcObj->postvars["start"];
+			$pages = ceil($threadcount / $this->_postsPerPage);
+			$startcount =1;
+			while($startcount<=$pages) { 
+				$c = "";
+				if ($start==$startcount) { $c = " selected"; }				
+				$opt .= "<option value=\"$startcount\"$c>$startcount\n";
+				++$startcount;
+			}
+			$t["pages"] = $opt;
+
+			if ($start>1) { 
+				$nav["nav_first"] = "<a href=\"".modurl("forum/event=list/fid=$forumID/start=1")."\">first</a>";
+				$nav["nav_prev"] = "<a href=\"".modurl("forum/event=list/fid=$forumID/start=".($start-1))."\">prev</a>";
+			} else { 
+				$nav[] = "&nbsp;";
+				$nav[] = "&nbsp;";
+			}
+				$nav[] = "&nbsp;";
+				$nav[] = "&nbsp;";
+			if ($start<$pages) { 
+				$nav["nav_next"] = "<a href=\"".modurl("forum/event=list/fid=$forumID/start=".($start+1))."\">next</a>";
+				$nav["nav_last"] = "<a href=\"".modurl("forum/event=list/fid=$forumID/start=$pages")."\">last</a>";
+			} else { 
+				$nav[] = "&nbsp;";
+				$nav[] = "&nbsp;";
+			}
+			$t["nav"] = implode("&nbsp;",$nav);
+		}
+
+//
+// put the necessities in the $t template array
+//
+		$t['emailPref'] = $nf->getPref("sendEmail",$u->username);
+		//print_r($t);exit();
+		$t["fid"] = $forumID;
+		$t["parent"] = $message;
+		$t["messageslist"] = $html;
+		$t["width"] = $this->forumWidth;
+
+		$t["_title"] = "Forums: ".$foruminfo["forumname"];
+
+
+		$lcObj->templateName = "forum_forumview";
+	}
+
+
+
+	/**
+	 * show a message and all the approved replies to it.
+	 * if a user cannot see this post, redirect to main forum list.
+	 */
+	function readRun($db,&$u,&$lcObj,&$t) {	
+		$t["postedMessage"] = $u->sessionvars["postedMessage"];
+		unset($u->sessionvars["postedMessage"]);
+		$t["allowHTML"] = htmlspecialchars($this->_allowTags);
+
+		$forumID = $lcObj->getvars["fid"];
+		$message = $lcObj->getvars["m"];
+		$frm = new forums();
+		$group = createGroupCheck($u->groups);
+
+		global $PATH_INFO;
+		$t["return"] = base64_encode($PATH_INFO);
+
+// can we access this forums?
+		$nf = new newForum($forumID);
+		$isValid = $nf->hasPerm("view",$u->groups);
+		$canModerate = $nf->hasPerm("moderate",$u->groups);
+		if ($nf->hasPerm("post",$u->groups)) { 
+			$t["canwrite"] = true;
+		}
+
+		if ($isValid) { 
+			$foruminfo = $nf->_get();
+			$t["forumname"] = $foruminfo["forumname"];
+			$list = ForumPost::readMessage($message,$forumID,$canModerate);
+			if ($list[0]!="") { 
+				$html = ForumPost::message2HTML($list,$canModerate);
+				$t["threadname"] = stripslashes($list[0][message]);
+				$t[reTitle] = 'Re: '.stripslashes($list[0][message]);
+			} else {
+				$t["canwrite"] = false;
+			}
+		} else {
+			//cant see this post
+			if ($u->username == 'anonymous') {
+				global $HTTP_SERVER_VARS;
+				$u->sessionvars['loginredir'] = APP_URL.substr($HTTP_SERVER_VARS['PATH_INFO'],1);
+				$u->saveSession();
+				header("Location: ".APP_URL."login/main");
+				exit();
+			} else {
+				$t[message] = "You do not have permission to view this post.";
+				$this->presentor = "errorMessage";
+				return false;
+			}
+		}
+
+		$t["messagethread"] = $html;
+		$lcObj->templateName = "forum_messageview";
+
+		$t["_title"] = "Forums: ".$foruminfo["forumname"];
+
+		$t["width"] = $this->forumWidth;
+		$t["fid"] = $forumID;
+		$t["parent"] = $message;
+	}
+
+
+
+	/**
+	 * post a message in a forum.
+	 * email all persons who get notification
+	 * email all persons who opted in to email broadcasting
+	 * of a particular forum ID (fid)
+	 */
+	function postRun($db,&$u,&$lcObj,&$t) {	
+		$forumID = $lcObj->postvars["fid"];
+		$post = new forumpost();
+		$nf = new newForum($forumID);
+		$foruminfo = $nf->_get();
+		$frm = new forums();
+		$group = createGroupCheck($u->groups);
+
+		$toemail = split(',',$foruminfo["email"]);
+
+		$body = $lcObj->postvars["body"];
+		$message = $lcObj->postvars["message"];
+		// No body, no post
+		if ($body == "") 
+			{	
+				redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"]))); 
+			}
+		if ($nf->hasPerm("post",$u->groups)) { 
+			$isValid = true;
+		}
+
+		if ($isValid) { 
+
+			arrayIntoObject($post,$lcObj->postvars);
+
+			// clean up the body
+			$post->body = nl2br($post->body);
+			$post->body = strip_tags($post->body,$this->_allowTags);
+			$post->message = strip_tags($post->message);
+
+
+			// put the default status (y/n) for the message in the object
+			// taken from lcConfig table
+			$post->status = $foruminfo["defaultstatus"];
+
+			$post->username = $u->username;
+
+			// also, put the timedate format and timestamp 
+			// in the object
+			$post->timedate = date("Y-m-d h:i:s");
+			$post->stamptime = time();
+			$post->recentpost = time();
+			if ($post->message == "") { $post->message = "No Subject"; }
+
+
+			// add the message
+			$post->_add();
+			$messageID = $post->insertID;
+			$replyToID = $messageID;
+
+// we don't know if it's defaulted to 
+// 'enabled' ("y") or not
+// but either way, we need to update the 
+// value in the db for this message about how 
+// many children it has
+// IF it's a reply to a parent
+//
+// two things, really - update the 'replies' counter if 
+// it's a child message
+// and also update the 'numthreads' if it's not (in the forum db)
+// finally update the 'forum' posts count
+			//update the thread (post) info
+
+
+			if ( intval($post->parent) > 0) { 
+				$db->query("update forumPosts set replies = replies+1, recentpost=".time()."  where pkey=".$post->parent);
+				$replyToID = $post->parent;
+			} else {
+				$db->query("update forums set numthreads = numthreads+1 where fid='".$post->fid."'");
+			}
+
+			//update the forum info
+			$db->queryOne("select count(pkey) from forumPosts where fid='".$post->fid."'");
+			$count = $db->Record[0];		
+			$db->queryOne("select max(recentpost) from forumPosts where fid='".$post->fid."'");
+			$time = $db->Record[0];		
+			$db->query("update forums set validposts = $count, recentpost=$time where fid='".$post->fid."'");
+
+
+		}
+		$body = "Posted at ".date("m/d/Y h:i:s A")."\nBy User: ".$post->username."\nSubject: $message\n---------------\n$body\n";
+		$body = stripslashes($body). "\n\n";
+		$message = stripslashes($message);
+		if ($post->status != "y") { $body .= "\n---------------\nMessage is awaiting approval"; }
+		$body .= "\n---------------\n\nClick here to reply to this post:\n\n".appurl("forum/main/event=read/fid=$forumID/m=$replyToID");
+
+
+		// Build Subject 
+		if ($this->_emailPrepend == "") 
+			{ 
+				$subject = "[".$foruminfo["forumname"]."] - $message"; 
+			} else
+			  {
+			  	$subject = "[".$this->_emailPrepend." - ".$foruminfo["forumname"]."] - $message";
+			  }
+		// End Build Subject
+
+		//send emails, $toemail is an array
+		while (list ($k,$v) = @each($toemail) ) {
+		if ($v != '' ) 
+			mail($v,$subject,$body, "From: ".$this->_FromEmail."\nReply-To: ".$this->_ReplyTo."\nReturn-Path: ".$this->_ReturnPath."\n");
+		}
+
+		//send user opt-in emails
+		if ($post->status == 'y') {
+			$db->query("select forumPrefs.username, lcUsers.email from forumPrefs LEFT JOIN lcUsers on lcUsers.username = forumPrefs.username where pref_key = 'sendEmail' and pref_val = '".$forumID."'");
+			while ($db->next_record() ) {
+				mail($db->Record[1],$subject,$body, "From: ".$this->_FromEmail."\nReply-To: ".$this->_ReplyTo."\nReturn-Path: ".$this->_ReturnPath."\n");
+			}
+		}
+
+		$u->sessionvars["postedMessage"] = "Your post was accepted.  ";
+		if ($post->status != "y") { 
+			$u->sessionvars["postedMessage"] .= "It may be reviewed before it is \'live\', and therefore may not be viewable immediately.";
+		}
+		$lcObj->getvars["fid"] = $forumID;
+		redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
+
+
+	}
+
+
+
+
+
+	function mod_approveRun($db,&$u,&$lcObj,&$t) {	
+		$fid = $lcObj->getvars["fid"];
+		$pkey = $lcObj->getvars["pkey"];
+// new forum object???
+		$nf = new newForum($fid);
+		$canModerate = $nf->hasPerm("moderate",$u->groups);
+		if ($canModerate) { 
+			$db->query("update forumPosts set status='y' where pkey=$pkey and fid='$fid'");
+		}
+		redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
+		$this->run($db,$u,$lcObj,$t);
+	}
+
+	function mod_deleteRun($db,&$u,&$lcObj,&$t) {	
+		$fid = $lcObj->getvars["fid"];
+		$pkey = $lcObj->getvars["pkey"];
+
+		/****  Update Replies ******
+		** Test to see if item being deleted is a parent or a reply, if it is a reply, then update the count 
+		** of the replies to the parent 
+		****************************/
+
+		$db->queryOne("select parent from forumPosts where pkey=$pkey");
+		$parent = $db->Record[0]; // save for later on
+		/*****  End Replies ****/
+
+		// new forum object???
+		$nf = new newForum($fid);
+		$canModerate = $nf->hasPerm("moderate",$u->groups);
+		if ($canModerate) { 
+			$db->query("delete from forumPosts where pkey=$pkey and fid='$fid'");
+			$db->query("delete from forumPosts where parent=$pkey");
+
+			if ($parent != 0 ) 
+				{
+					$db->queryOne("select count(pkey) from forumPosts where parent=$pkey");
+					$count = intval($db->Record[0]);
+					$db->query("update forumPosts set replies = $count where pkey=$parent");
+				}
+		}
+$this->updateforum($fid);
+		// If you are deleting a parent then send the person back to the main forum
+		if ($parent == 0) 
+			{ 
+				redirect($db, modurl("forum/event=list/fid=$fid")); 
+				$this->run($db,$u,$lcObj,$t);
+			} 
+		    	else   // send them back where they came from
+				{
+					redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
+					$this->run($db,$u,$lcObj,$t);
+				}
+	}
+
+	function mod_suspendRun($db,&$u,&$lcObj,&$t) {	
+		$fid = $lcObj->getvars["fid"];
+		$pkey = $lcObj->getvars["pkey"];
+// new forum object???
+		$nf = new newForum($fid);
+		$canModerate = $nf->hasPerm("moderate",$u->groups);
+		if ($canModerate) { 
+			$db->query("update forumPosts set status='' where pkey=$pkey and fid='$fid'");
+		}
+		redirect($db,modurl("forum/".base64_decode($lcObj->getvars["return"])));
+		$this->run($db,$u,$lcObj,$t);
+	}
+
+
+
+}
+?>

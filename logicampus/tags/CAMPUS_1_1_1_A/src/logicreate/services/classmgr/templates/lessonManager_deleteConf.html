@@ -1,0 +1,27 @@
+<?=$t['sectionheader'];?>
+<h2>Are you SURE you want to delete this lesson?</h2>
+<p style="padding-left:20px;"><b>Title:</b> <?=$t['lessonTitle'];?></p>
+<p align="center">To avoid the deletion of this lesson, simply click on any link besides the one provided below.</p>
+<table width="60%" align="center" border=0 cellpadding=3 cellspacing=0 style="border:1px solid black;">
+<tr>
+	<th>Item</th>
+	<th>Will be...</th>
+</tr><tr>
+	<td><b>The Lesson</b></td>
+	<td>deleted.</td>
+</tr><tr>
+	<td><b>Lesson Content</b></td>
+	<td>kept available for other lessons.</td>
+</tr><tr>
+	<td><b>Lesson Assignments</b></td>
+	<td>kept available for other lessons.</td>
+</tr><tr>
+	<td><b>Lesson Objectives</b></td>
+	<td>kept available for other lessons.</td>
+</tr><tr>
+	<td><b>Lesson Weblinks</b></td>
+	<td>kept available for other lessons.</td>
+</tr><tr>
+	<td align="center" colspan=2><br />This link will delete the lesson, but <b>keep</b> the content, objectives, and assignments available for other lessons.<br/><br/><a href="<?=MOD_URL?>lessonManager/event=delete/id=<?=$t['id_class_lessons'];?>">Unlink lesson resources and delete lesson</a></td>
+</tr>
+</table>

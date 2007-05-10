@@ -1,0 +1,52 @@
+<center>
+<table bgcolor="#cecece" width="95%">
+<tr>
+  <td>
+By default everyone can view your files/directories. By checking off groups
+you are restricting who can view a specific file/directory to the groups you
+have checked. For instance, if you wanted to only allow Faculty and Helpdesk Staff to view a file/directory check both of those groups and click update. Anyone who is not in one of those two groups will not be able to see that file.
+  </td>
+</tr>
+</table>
+<br />
+<?php
+
+  $lcGroups = $t['lcGroups'];
+  $groups   = $t['groups'];
+
+  echo '<form method="post" action="'.APP_URL.'docs/main/event=perms/">'."\n";
+?>
+
+  <input type="hidden" name="perms[table]" value="<?=$t['table']?>" />
+  <input type="hidden" name="perms[field]" value="<?=$t['field']?>" />
+  <input type="hidden" name="perms[id]" value="<?=$t['id']?>" />
+  <input type="hidden" name="dirID" value="<?=$t['dirID']?>"/>
+
+<?
+  echo '<table width="95%">'."\n";
+  while(list($gid,$name) = each($lcGroups))
+  {
+    $checked = '';
+    if(count($groups) && in_array($gid,$groups))
+    {
+      $checked = ' checked';
+    }
+
+    echo '<tr>
+            <td>'.$name.' ('.$gid.')</td>
+            <td><input type="checkbox" name="gid['.$gid.']" value="1" '.$checked.'/></td>
+          </tr>'."\n";
+  }
+?>
+<tr>
+  <td colspan="2" align="center">
+    <br />
+    <input type="submit" value="Update Permissions"/>
+  </td>
+</tr>
+<?
+  echo '</table>'."\n";
+  echo '</form>';
+
+?>
+</center>

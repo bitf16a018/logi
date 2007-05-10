@@ -1,0 +1,34 @@
+	.datatable {
+		background-color:#CCC;
+	}
+	.datatable TR {
+		background-color:#EFEFEF;
+	}
+	.datatable TR TH {
+		padding: 0px 7px 0px 7px;
+		background-color:#036;
+		color:white;
+	}
+
+	.datatable TR.even {
+		background-color:white;
+	}
+
+	.datatable TR.odd {
+		background-color:#EFEFEF;
+	}
+
+	.datatable TR TD {
+		padding:0px 7px 0px 7px;
+	}
+
+	.center_justify {
+		text-align:center;
+	}
+	.left_justify {
+		text-align:left;
+	}
+	.right_justify {
+		text-align:right;
+	}
+

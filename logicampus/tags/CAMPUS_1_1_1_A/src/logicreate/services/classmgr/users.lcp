@@ -1,0 +1,656 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+class users extends FacultyService {
+
+	var $presentor = "htmlPresentation";
+	var $PAGE_SIZE = 30;
+	var $cleanedArray = array();
+
+	// Links
+	var $sectionTitle = 'User Administration';
+	var $navlinks = array(
+		'Classroom Manager' => '',
+		'Student Management' => 'users/',
+	);
+
+	var $applinks = array(
+		'Show Students' => 'users',
+		'Manage Student Groups' => 'studentgroups',
+	);	
+	var $inactivelinks = array( 'Student Management' );
+
+
+	/**
+	 * Show list of classes (sections) a student is in
+	 * and give option to add to new classes
+	 *
+	 */
+
+	function run (&$db,&$u,&$lc,&$t) {
+		$this->inactivelinks[] = 'List Users';
+		$lc->templateName = 'users_main';
+		$this->sectionTitle = 'Student Management';
+
+		$sql = 'select username, CONCAT(lastname,", ", firstname," (",username,")") as fullname,ss.* from profile as p left join class_student_sections as ss on ss.id_student=p.username left join class_sections as s on s.sectionNumber=ss.sectionNumber where s.id_classes=\''.$u->activeClassTaught->id_classes.'\' order by fullname';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+
+		while($db->next_record() )
+		{
+			$t['students'][] = $db->Record;
+		}
+
+		$dg = new datagrid('classmgr','users');
+		$dg->rowsPerPage = 100;
+		$dg->setRows($t['students']);
+		$dg->ignore = array (
+			'id_student',
+			'semester_id',
+			'dateWithdrawn',
+			'username'
+		);
+
+		$dg->headers = array (
+			'username'=>'Username',
+			'fullname'=>'Name',
+			'sectionNumber'=>'Section #',
+			'active'=>'Active/Dropped',
+			'activate'=>'Action',
+			'userinfo'=>'User Info'
+		);
+		$dg->prependColumn('<? if ($active==1) { $activate="Drop"; $act=0; } else { $activate="Activate"; $act=1; } ?><a href="<?=modurl("users/event=activate/active=$act/semester=$semester_id/username=".$username."/id=".$sectionNumber);?>"><?=$activate;?></a>',"activate");
+		$dg->prependColumn('<a href="<?=modurl("users/event=showUser/username=$username")?>">User Info</a>', 'userinfo');
+
+		$dg->overrideColumn('<? if ($active == 1)
+			{
+				echo "<span style=\"color: green;\">Active</span>";
+			} else {
+				echo "<span style=\"color: red;\">Dropped</span>";
+			}
+			?>
+			', 'active');
+		$t['table'] = $dg->toHTML();
+
+		# make options on section numbers
+		$x = split("\n", $u->activeClassTaught->sectionNumbers);
+		$t['secNumsDropDown']  = makeOptions($x, '', TRUE);
+
+		$t['showcollectedusers'] = 'none';
+		if (count($u->sessionvars['user_collection']) > 0)
+		{
+			$t['user_collection'] = $u->sessionvars['user_collection'];
+			$t['showcollectedusers'] = 'display';
+		}
+
+		$this->where = '1=1';
+		$this->order = " lc.username";
+		$this->table = " lcUsers";
+		$this->anySearchRun($db,$u,$lc,$t);
+
+	}
+
+	function updateEnrollment (&$db,&$u,&$lc,&$t)
+	{
+		# Update active semester and store in user session
+		if ($lc->postvars['semester'])
+		{
+			$u->sessionvars['enrollmentSemesterId'] = $lc->postvars['semester'];
+		} elseif ($u->sessionvars['enrollmentSemesterId'] == '')
+			{
+				$u->sessionvars['enrollmentSemesterId']  = semesterObj::getCurrentID();
+			}
+		
+
+		$name = $lc->postvars['username'];
+		if ($name=='') 
+		{ 
+			$name = $lc->getvars['username'];
+		}
+
+		if ($name == '')
+		{
+			$lc->templateName = 'users_error';
+			$t['error'] = '<h3>Fatal error:  No student selected.</h3>';
+			return;
+		}
+
+		$this->sectionTitle .= ' for <u><a style="font-size: 100%;" href="'.modurl("users/event=showUser/username=$name").'">'.$name.'</a></u>';
+		$t['username'] = $name;
+
+      	$f = new SiteForm();
+        $f->getForm('semester', array('semester'=>$u->sessionvars['administratio
+n']['classes']));
+        $f->action = modurl("users/main/username=$name");
+        $t['form'] = $f->ToHTML();
+
+		# Take active semesterId out of sessionvar
+		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+
+// get classes taken
+		$classes = classObj::getAllClassesTaken($name, $semesterId);
+		$d = new datagrid('classmgr','users');
+		$d->sortColumns = array("courseNumber",'facultyId');
+		$d->headers = array(
+			"activate"=>" ",
+			"sectionNumber"=>"Section",
+			"facultyName"=>"Faculty", 
+			"courseName"=>"Course name",
+			"courseFamilyNumber"=>"Course",
+			"courseFamily"=>"Family",
+			"classType"=>"Type",
+			"id_classes"=>"Class ID",
+			"id_semesters"=>"Semester ID",
+			"facultyId"=>'Facutly ID',
+			"id_student"=>"Student ID",
+			'semesterID'=>'Semester',
+			'courseNumber'=>'Course Number'
+			);
+		$d->prependColumn('<?$name="'.$name.'"; if ($active==1) { $activate="suspend"; $act=0; } else { $activate="activate"; $act=1; } ?><a href="<?=modurl("users/event=activate/active=$act/semester=$semesterID/username=".$name."/id=".$sectionNumber);?>"><?=$activate;?></a>',"activate");
+		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
+		$d->setRows($classes);
+		$d->ignore = array (
+				'id_class_resource', 
+				'stylesheet', 
+				'_dsn',
+				'_pkey', 
+				'sectionNumbers', 
+				'id_courses',
+				'active',
+				'dateWithdrawn',
+				'noexam',
+				'facultyId',
+				'__loaded',
+				'semester_id'
+		);
+		$t['classes'] = $d->toHTML();
+		$lc->templateName = 'users_updateEnrollment';
+		
+		$db->query("select classes.*, courses.* from classes, courses 
+				where classes.id_semesters=$semesterId 
+				and classes.id_courses = courses.id_courses order by courses.courseFamily, courses.courseNumber, courseName");
+		while($db->next_record()) {
+			$x = explode("\n",$db->Record['sectionNumbers']);
+			foreach($x as $k=>$v) { 
+				$c[$v] = $db->Record['courseFamily']." ".
+				$db->Record['courseNumber']." - ".$db->Record['courseName']." - ".
+				" ($v) - ".$db->Record['facultyId'];
+			}
+		}
+		$t['courses'] = makeOptions($c);
+	}
+
+
+	function addrun(&$db,&$u,&$lc,&$t) {
+		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+
+		$name = addslashes(stripslashes($lc->postvars['username']));
+		$sectionNumber = (int)$lc->postvars['id'];
+		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+		$db->query("insert into class_student_sections (id_student,sectionNumber,active,semester_id) values ('$name','$sectionNumber',1,$semesterId)");
+		$lc->templateName = 'users_updateEnrollment';
+		$this->run($db,$u,$lc,$t);
+	}
+
+	function activaterun (&$db,&$u,&$lc,&$t) {
+		$name = addslashes(stripslashes($lc->getvars['username']));
+		$sectionNumber = (int)$lc->getvars['id'];
+		$active= (int)$lc->getvars['active'];
+
+		$db->query("update class_student_sections set active=$active where id_student='$name' and sectionNumber=$sectionNumber");
+		$lc->templateName = 'users_updateEnrollment';
+		$this->run($db,$u,$lc,$t);
+	}
+
+
+	function removerun (&$db,&$u,&$lc,&$t) {
+// only dealing with current semester right now
+// 
+		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
+		$semesterId = $db->Record[0];
+
+		$name = addslashes(stripslashes($lc->getvars['username']));
+		$sectionNumber = (int)$lc->getvars['id'];
+		$db->query("delete from class_student_sections where id_student='$name' and sectionNumber=$sectionNumber and semester_id=$semesterId");
+		$lc->templateName = 'users_updateEnrollment';
+		$this->run($db,$u,$lc,$t);
+
+	}
+
+
+	/**
+	 * Search for users based on any criteria
+	 *
+   */ 
+
+	function anySearchRun(&$db, &$u, &$lc, &$t) {
+		
+		$lc->templateName = 'users_main';
+		$lc->templateStyle = 'private'; 
+		
+		$lc->getvars['firstletter'] != ''? $firstletter = $lc->getvars[firstletter]:$firstletter = $lc->postvars[firstletter];
+		// generic $where and $order set in each 
+		// method, which then call the anysearch method
+		$where = $this->where;
+		$order = $this->order;
+
+		$t['start'] = $lc->getvars['start'];
+		settype($t['start'],"integer");
+
+		if ($this->sql)  {
+			$db->query($this->sql. " LIMIT ".$t['start'].",".$this->PAGE_SIZE);
+		}else { 
+				if ($where == '1=1')
+				{
+					$t['showResults'] = 'none';
+				} else {
+					$t['showResults'] = 'block';
+					$sql =	"select *, lc.username as lc_username from lcUsers as lc LEFT JOIN profile on lc.username = profile.username where $where order by $order LIMIT ".$t[start].",".$this->PAGE_SIZE;
+			$db->query($sql);
+				}
+		}
+
+		while ($db->next_record() ) {
+			if ( ($db->Record['firstname']== '') and 
+           ($db->Record['lastname'] == '') ) {
+
+				$db->Record['profiledata'] = "<i>Incomplete profile data</i>";
+
+			} else {
+
+				$db->Record['profiledata'] = $db->Record['lastname'].", ".$db->Record['firstname'];
+
+			}
+			$t['users'][] = $db->Record;
+		}
+
+		if ($this->sql) { 
+			$db->query($this->count_sql);
+		} else { 
+
+			if ($this->second_where) { $where = $this->second_where; }
+			$db->query("select count(username) from ".$this->table." lc where $where");
+		}
+
+		$db->next_record();
+		$t['result_pages'] = ceil( $db->Record[0] / $this->PAGE_SIZE);
+		$t['current_page'] = ceil( $t[start] / $this->PAGE_SIZE) + 1;
+		$t['max_results'] = $db->Record[0];
+		$t['PAGE_SIZE'] = $this->PAGE_SIZE;
+
+
+		//profile
+		$db->query("describe profile");	//get profile meta data
+		$db->next_record(); 		//drop off pkey
+		$t['profile_opt'] .= "<option value='_email'>Email</option>\n";
+		$t['profile_opt'] .= "<option value='_username'>Username</option>\n";
+		while ($db->next_record() ) {
+			$t['profile_opt'] .= "<option value=\"".$db->Record[0]."\">".$db->Record[0]."</option>\n";
+		}
+
+		$db->query("select * from courses order by courseFamily, courseNumber, courseName");
+
+		while($db->next_record()) {
+
+			$x[$db->Record['id_courses']] = substr($db->Record['courseFamily']." ".$db->Record['courseNumber']." - ".$db->Record['courseName'], 0, 40);
+
+		}
+
+		$t['courses'] = makeOptions($x, (int)$this->course);
+		$db->query("select * from semesters");
+		while($db->next_record()) {
+			$s[$db->Record['id_semesters']] = $db->Record['semesterId'];
+		}
+		$t['semesters'] = makeOptions($s, (int)$this->semester);
+
+	}
+
+
+
+
+
+	/**
+	 * Search for users based on their username
+	 */
+	function firstLetterRun(&$db, &$u, &$lc, &$t) {
+		
+		$lc->getvars['firstletter'] != ''? $firstletter = $lc->getvars['firstletter']:$firstletter = $lc->postvars['firstletter'];
+
+
+		$t['opt1'] = 'event=firstLetter';
+		$t['opt2'] = 'firstletter='.$firstletter;
+
+		$this->run($db,$u,$lc,$t);
+
+		$this->where = "lc.username like '".$firstletter."%'";
+		$this->order = "lc.username";
+		$this->table = "lcUsers";
+
+		$this->anySearchRun($db,$u,$lc,$t);
+	}
+
+
+
+	/**
+	 * Search for a user based on a course/semester ID combo
+   *
+   * Updated on 2003-11-04 by Joe Stump <jstump@tapinternet.com>
+   *   - Added ability to search by section number (497)
+   *   - Modified templates to work with new section number searching
+	 */
+	function classSearchRun(&$db, &$u, &$lc, &$t) 
+  {
+
+		$lc->getvars['semesterPkey'] != '' ? $semester = $lc->getvars['semesterPkey'] : $semester = $lc->postvars['semesterPkey'];
+
+		$lc->getvars['coursePkey'] != '' ? $course= $lc->getvars['coursePkey'] : $course= $lc->postvars['coursePkey'];
+
+		$lc->getvars['sectionNumber'] != '' ? $section = $lc->getvars['sectionNumber'] : $section = $lc->postvars['sectionNumber'];
+
+		$this->course   = $course;
+		$this->semester = $semester;
+    $this->section  = $t['sectionNumber'] = $section; // Added by Joe Stump (497)
+
+		$this->sql = "SELECT lc.*,lc.username AS lc_username, 
+                         p.*,A.id_student, A.sectionNumber 
+                  FROM profile AS p,lcUsers AS lc, class_student_sections AS A,
+                       classes AS B 
+                  WHERE B.id_courses=$course AND 
+                        B.id_semesters=$semester AND 
+                        POSITION(A.sectionNumber IN B.sectionNumbers) > 0 AND 
+                        lc.username=A.id_student AND 
+                        p.username=lc.username";
+
+    if(strlen($section))
+    {
+      $this->sql .= "\n AND A.sectionNumber='$section'";
+    }
+
+		$this->count_sql = "SELECT COUNT(lc.pkey) 
+                        FROM lcUsers AS lc, 
+                             class_student_sections AS A, 
+                             classes AS B 
+                        LEFT JOIN profile ON lc.username=profile.username 
+                        WHERE B.id_courses=$course AND 
+                              B.id_semesters=$semester AND 
+                              POSITION(A.sectionNumber IN B.sectionNumbers) > 0
+                              AND lc.username=A.id_student";
+
+    if(strlen($section)) 
+    {
+      $this->count_sql .= "\n AND A.sectionNumber='$section'";
+    }
+
+		$this->Run($db,$u,$lc,$t);
+
+		$this->where = " groups like '%|$gid|%' $or ";
+		$this->order = "lc.username";
+		$this->table = "lcUsers";
+
+
+		$t['opt1'] = 'event=classSearch';
+		$t['opt2'] =  "coursePkey=$course/semesterPkey=$semester/sectionNumber=$section";
+
+
+		$this->anysearchRun($db,$u,$lc,$t);
+
+	}
+
+
+
+	/**
+	 * Search for a user based on one profile field
+	 */
+	function profileSearchRun(&$db, &$u, &$lc, &$t) {
+		
+		if ($lc->getvars['prof'] != '') {
+			$prof = $lc->getvars['prof'];
+		} else {
+			$prof = $lc->postvars['profile_field'].'|'.$lc->postvars['q'];
+		}
+
+		list ($prof_field,$prof_val)  = explode('|',addslashes(stripslashes($prof)));
+
+		$t[start] = $lc->getvars[start];
+		settype($t[start],"integer");
+
+		$this->order = "lc.username";
+		
+		$this->Run($db,$u,$lc,$t);
+		if (($prof_field=='_email') || ($prof_field=='_username')) {
+			$prof_field = substr($prof_field,1);
+			$this->where = "lc.".$prof_field." like '%$prof_val%' ";
+			$this->table = "lcUsers";
+		} else  {
+			$this->where = "profile.".$prof_field." like '%$prof_val%' ";
+			$this->second_where = "lc.".$prof_field." like '%$prof_val%' ";
+			$this->table = "profile";
+		}
+		$t[opt1] = 'event=profileSearch';
+		$t[opt2] = 'prof='.$prof;
+
+		$this->anysearchRun($db,$u,$lc,$t);
+	}
+
+
+
+	/**
+	 * Not currently being used, could be used to allow a facutly
+	 * member to update their own course families
+	 */
+	function editCourseFamilyInfoRun(&$db, &$u, &$lc, &$t) {
+
+		# load up the course family information for the given
+		# user account
+
+		$sql = "select id_profile_faculty_coursefamily from
+		profile_faculty_coursefamily where
+		username='".$u->username."'";
+
+		$db->query($sql);
+		while($db->next_record() )
+		{
+			$data['courseFamily'][$db->Record['id_profile_faculty_coursefamily']] =
+			$db->Record['id_profile_faculty_coursefamily'];
+
+		}
+		
+		$u->sessionvars['useraccount'] = $lc->getvars['username'];	
+		$lc->templateName = 'users_addFacultyAccountInfo';
+		$f = new SiteForm();
+		$f->getForm('adminfacultyaccount', $data);
+		$t['form'] = $f->ToHTML();
+		$t['user'] = $lc->getvars['username'];
+	}
+
+
+	/**
+	 * takes the facutly course families and stores them in the faculty profile
+	 */
+	function courseFamilyInfoPostRun(&$db, &$u, &$lc, &$t) {
+		
+			$username = $u->sessionvars['useraccount'];
+			$db->query("delete from profile_faculty_coursefamily where
+			username='".$u->sessionvars['useraccount']."'");
+
+			# Now let's recreate everything
+			while(list ($k, $v) = @each($lc->postvars['courseFamily']))
+			{
+				$db->query("insert into profile_faculty_coursefamily
+				set username='".$username."',
+				id_profile_faculty_coursefamily='".$v."'" );
+			}
+			$this->run($db, $u, $lc, $t);			
+			return;
+	}
+	
+	
+
+	/**
+	 * show a page for editing email, password, groups, and profile.
+	 */
+
+	function showUserRun (&$db, &$u, &$lc, &$t ) {
+		$lc->templateName = "users_showUser";
+
+
+			// USER
+		if ($user->username == "anonymous" ) {
+			$t[message] == "Cannot find user in database";
+			return;
+		}
+
+		# Build up a list of classes the user is enrolled in
+		$user = lcUser::getUserByUsername($lc->getvars['username']);
+
+		$t['user_info']['username'] = $user->username;
+		$t['user_info']['email'] = $user->email;
+
+# Helpdesk history and connection history
+
+			include_once(INSTALLED_SERVICE_PATH."helpdesk/history.lcp");
+			$lc->getvars['username'] = $user->username;
+			$h = new history();
+			$x = $lc->templateName;
+			$h->run($db,$u,$lc,$temp);
+			$t['incidents'] = $temp['incidents'];
+			$t['comment'] = $temp['comment'];
+			$t['history'] = $temp['history'];
+			$t['history'] = $temp['history'];
+			$t['username'] = $user->username;
+			$t['includedFromMain'] = true;
+			$lc->templateName = $x;
+		
+		# Grab *ALL* of the user's profile information.
+		$sql = "select u.*,p.*,f.*,s.* from lcUsers as u
+		left join profile as p on u.username=p.username
+		left join profile_faculty as f on u.username=f.username
+		left join profile_student as s on u.username=s.username
+		where u.username='".$lc->getvars['username']."'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+	    $t['user'] = $db->Record;
+
+		$t['photo'] = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
+			? IMAGES_URL.'photos/'.$db->Record['photo']
+			: IMAGES_URL.'noimage.png';
+
+
+		$t['workaddy'] = addressByLocation( $t['user']['campusLocation'] );
+
+
+	}
+
+
+	/**
+	 * A collection of users is stored in the user's session.
+	 * A collection of users can have specific operations performed on
+	 * all users at one time.  If a list of users is provided at call time,
+	 * this function will save the users to the session object.
+	 */
+	function collectUsersRun (&$db, &$u, &$lc, &$t ) {
+		// if we get some users, add them to the list
+		if ($lc->postvars['users']) {
+			$orclause = @join(" or pkey = ",$lc->postvars['users']);
+			$sql = "select pkey,username from lcUsers where pkey = $orclause";
+			$db->query($sql);
+			while ($db->next_record() ) {
+				$u->sessionvars['user_collection'][$db->Record[0]] = $db->Record[1];
+				$n++;
+			}
+			$u->saveSession();
+		}
+
+		$t['message'] = '<span style="color: blue;">'.$n.' users collected.</span>';
+		$this->run($db,$u,$lc,$t);
+	}
+
+	/**
+	 * Removes collected users
+	 *
+	 **/
+	function removecollectedUserRun (&$db, &$u, &$lc, &$t ) {
+		$user = $lc->getvars['username'] ;	
+		while(list ($pkey, $username) =
+		@each($u->sessionvars['user_collection']))
+		{
+			if ($user == $username) continue;
+			$array[$pkey] = $username;	
+		}
+		unset($u->sessionvars['user_collection']);
+		$u->sessionvars['user_collection'] = $array;
+		$this->run($db,$u,$lc,$t);
+		return;
+	}
+
+
+	/**
+	 * Erase the user collection from the current session
+	 *
+	 */
+	function clearCollectionRun (&$db, &$u, &$lc, &$t ) {
+		unset($u->sessionvars['user_collection']);
+		$this->run( $db, $u, $lc, $t ); 
+	}
+
+	/**
+	 * Add users to the class that are collected
+	 *
+	 */
+	function addCollectedUsersRun (&$db, &$u, &$lc, &$t ) {
+		$users = $u->sessionvars['user_collection'];
+		$id_semester = $u->activeClassTaught->id_semesters;
+		while(list ($pkey, $username) = @each($users) )
+		{
+			$section = $lc->postvars[$username];
+			$sql = "insert into class_student_sections set 
+					sectionNumber=$section, semester_id=$id_semester,
+					active=1, id_student='$username' ";
+			$db->query($sql);
+		}
+
+		unset($u->sessionvars['user_collection']);
+		$this->run($db, $u,$lc,$t);
+		return;
+	}
+
+}
+
+
+	/* Joins a phone array into a string 123-123-1234 */
+	function arrayToPhoneNumber($ar)
+	{
+		return $ar['area'].'-'.$ar['pre'].'-'.$ar['num'];
+	}
+
+?>

@@ -1,0 +1,49 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><br/><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><br/><?}?>
+
+<? /*
+<b>Total Points:</b> <?=$t['total'];?><br/>
+<b>Current Average:</b> <?=$t['average'];?><br/>
+*/ ?>
+
+<p>Grades that are shown in a form below can be changed by entering a
+value and updating the grades.  Grades which are links are assessments
+and can only be changed by altering the score for that test.</p>
+
+<form action="<?=modurl('entry');?>" method="post">
+<table width="95%"  border="0" cellspacing="1" cellpadding="1">
+<tr class="tabletitle">
+	<td>Entry</td>
+	<td>Score</td>
+	<td>Comments</td>
+</tr>
+<? while ( list(,$val) = @each($t['vals']) ) { ?>
+<tr>
+	<td valign="top"><?=$val->title;?></td>
+	<td valign="top">
+	<?
+        # if this is an assessment make a link instead of input field
+		 if ($val->entry->assessmentId) 
+		{ 
+			if (!$val->score) $val->score = '?';
+	?>
+	     <b><?=$val->score?></b>
+	      <a href="<?=APP_URL?>assessments/grade/event=view/studentid=<?=$val->username?>/id=<?=$val->entry->assessmentId?>">(edit grade)</a>
+		<? } else { ?>
+		<input type="text" name="score[<?=$val->idClassGradebookEntries;?>]" value="<?=$val->score;?>" />
+<? 		} ?> 
+	</td>
+	<td valign="top"><textarea name="comments[<?=$val->idClassGradebookEntries;?>]" rows=4 cols=30><?=$val->comments;?></textarea></td>
+</tr>
+<? } ?>
+  <tr> 
+    <td>&nbsp;</td>
+    <td>
+        <input type="submit" value="Update">
+	</td>
+  </tr>
+</table>
+<input type="hidden" name="event" value="showGrdbyStuUpdate" />
+<input type="hidden" name="user" value="<?=$t['user']->username;?>" />
+</form>
