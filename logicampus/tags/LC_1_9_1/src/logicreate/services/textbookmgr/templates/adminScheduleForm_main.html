@@ -1,0 +1,40 @@
+<h2>Textbook Manager</h2>
+
+Scheduling a forms to be sent out
+
+<br>
+
+<pre>
+steps
+	- select semester to bind this form to (books are going towards this semester
+	- select dates (within not greater than semester start date) (error checking)
+	- email out to instructors (inject into a mail queue)
+</pre>
+<center>
+[image icon for scheduling a form]<br>
+<a href="<?=modurl('adminScheduleForm/event=selectSemester');?>">Schedule a textbook form to be sent to faculty</a>
+</center>
+
+
+<br>
+<h3 style="margin-bottom: 1px;">Previously sent out forms</h3>
+<table style="font-size: 11px; font-family: verdana;" cellpadding="1" cellspacing="0" border="0" width="100%" summary="List of forms that were sent out already to faculty / instructors">
+<tr>
+	<th width="50%" bgcolor="tan" align="center">
+		Date Sent
+	</th>
+	<th width="50%" bgcolor="tan" align="center">
+		Semester
+	</th>
+</tr>
+<tr>
+	<td>April, 21st, 2003</td>
+	<td>SP2003</td>
+</tr>
+<tr>
+	<td>December, 26th, 2002</td>
+	<td>WI2002</td>
+</tr>
+</table>
+<br>
+<font size="1">note: above list will show the past 10 maybe 20 sent out forms</font>

@@ -1,0 +1,44 @@
+<h3>Online Users</h3>
+
+Curious as to who is currently logged onto the site?  You are in the right place!  The following users are currently logged into the site browsing various pages:
+
+
+<br><br>
+
+Total Users Browsing Site: [<?=$t[total]?>]<br>
+Total Users Not Logged In: [<?=$t[anonymous]?>]<br>
+Total Users Logged In: [<?=$t[loggedin]?>]
+<ul>
+<?
+$canViewProfile = false;
+
+if (in_array('faculty', $obj->user->groups) || in_array('admin', $obj->user->groups))
+{	$canViewProfile = true;
+}
+while (list($k, $v) = @each($t[users]))
+	{ 
+	if ($canViewProfile)
+	{
+		if (strlen($v['photo']) > 10)
+		{	?>
+			<li><img src="<?=IMAGES_URL;?>photos/<?=$v['photo'];?>" border="1" align="left">*<a href="<?=APP_URL?>users/view/<?=$v[username]?>"><?=$v[username]?></a>  
+			<?
+		} else
+		{
+			?>
+			<li><a href="<?=APP_URL?>users/view/<?=$v[username]?>"><?=$v[username]?></a>  
+			<?
+		}
+	} else
+	{?>
+	<li><?=$v['username'];?>
+	<?php
+	}
+	
+	if ($t[pm]) { ?>
+			<a href="<?=APP_URL?>pm/main/event=compose/sendto=<?=$v[username]?>">[send a message]</a>
+		<? } ?></li>
+		
+	<?	} ?>
+</ul>
+

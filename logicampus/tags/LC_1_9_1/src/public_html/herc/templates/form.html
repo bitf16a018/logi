@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+
+<BODY bgcolor="#ada592">
+
+
+
+<script language="javascript">
+	function requestDelete($fid,$name) {
+		if (confirm ('Are you sure you want to delete file: "'+$name+'"?') ) {
+			document.location='<?= MOD_URL ?>main/event=delete/pkey='+$fid;
+		}
+	}
+</script>
+<? if ($t['message']) {
+	?>
+	<div style="color: red;"><h3><?=$t['message']?></h3></div>
+<? } ?>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+
+      			Add or Modify an existing Form
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+
+				<td class="white">
+					<table width="100%"  border="0" cellspacing="2" cellpadding="4">
+						<tr>
+						<td nowrap align="center" valign="top">
+							<a href="<?=_APP_URL?>formMgr">
+								<img src="<?=_PICS_URL?>filenew.gif" border="0"></a>
+							<br>
+
+							<a href="<?=_APP_URL?>formMgr">
+							Site Forms</a>
+						</td>						
+						<td nowrap align="center" valign="top">
+							<a href="<?=_APP_URL?>formMgr/event=addModifyForm">
+								<img src="<?=_PICS_URL?>filenew.gif" border="0"></a>
+							<br>
+
+							<a href="<?=_APP_URL?>formMgr/event=addModifyForm">
+							Add a New Form</a>
+						</td>
+						
+						<td nowrap align="center" valign="middle" <? $t['contentArea'] == 'deletes' ? print 'bgcolor="#D0D0D0"': print '';?>>
+							<form method="POST">
+							Find a Form <input type="text" name="search" size="15">
+							<input type="hidden" name="event" value="search">
+							<input type="submit" value="Go">
+							</form>	
+						</td>
+						</tr>
+						
+						
+					</table>
+
+					</td>
+			</tr>
+		</table>
+
+	</td></tr>
+</table>
+<br>&nbsp;<br>
+			<div style="color: red;"><?=$t['error']?></div>
+			<?=$t['form']?>
+
+</body>
+</html>

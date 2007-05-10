@@ -1,0 +1,270 @@
+<?php
+
+include_once(LIB_PATH. 'Tree.php');
+include_once(LIB_PATH. 'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH. 'classLinksCategories.php');
+include_once(LIB_PATH. 'classLinks.php');
+
+
+class LessonWebliography extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+	
+	var $cleanedArray = array();
+
+	var $navlinks = array (
+		'Classroom Manager' => 'display/',
+		'Announcements'=>'announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'FAQ' => 'faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => 'lessonManager/',
+		'Objectives' => 'lessonObjectives/',
+		'Webliography' => 'lessonWebliography/'
+	);
+	var $applinks = array (
+		'Add a Lesson' => 'lessonNew/event=add/'
+	);
+	var $inactivelinks = array( 'Webliography' );
+	var $sectionTitle = 'Webliography';
+	
+	
+	/**
+	 * Show the main page of the lesson manager
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+//auto-comment		$lc->templateStyle = 'private';
+		$lc->templateName = 'lessonWebliography';
+		
+		$tree = new TreeList();
+		$tree->keyName = 'id_class_links_categories';
+		$tree->keyParentName = 'id_class_links_categories_parent';
+		
+		$class_id = $u->activeClassTaught->id_classes;
+
+		$sql = 'SELECT id_class_links_categories, id_class_links_categories_parent, txTitle as name FROM class_links_categories';
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->next_record())
+		{	$cats[] = $db->Record;
+		}
+		
+		$tree->loadData($cats);
+		$view = new ListView($tree);
+		$t['categoryHrc'] = $view->renderAsOptions();
+		
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		
+		$datagrid->setCellWidth('hits', '25');
+		$datagrid->setCellAlign('hits', 'center');
+		$datagrid->setCellWidth('options', '75');
+		$datagrid->setCellAlign('options', 'center');
+		$datagrid->setCellWidth('txTitle', '25%');
+		
+		$datagrid->table = 'class_links';
+		$datagrid->column = 'class_links.*, A.txTitle';
+		$datagrid->joins = ' LEFT JOIN class_links_categories as A ON class_links.id_class_links_categories=A.id_class_links_categories';
+		$datagrid->rowsPerPage = 5;
+		$datagrid->where = ' class_links.id_classes='.$u->activeClassTaught->id_classes;
+		$datagrid->headerClass = 'classheader';
+		$datagrid->table = 'class_links';
+		$datagrid->rowsPerPage = 10;
+		$datagrid->ignore = array('dateCreated', 'id_class_links', 'id_classes', 'createdby', 'description', 'id_class_links_categories','url');
+		
+		$datagrid->sortColumns = array('txTitle', 'title', 'hits', 'dateCreated');
+		
+		$datagrid->headers = array('txTitle'=>'Category', 'title'=>'Title', 'dateCreated'=>'Created On','hits'=>'Hits','lesson_titles'=>'Lessons','options'=>' ');
+		
+		$datagrid->overrideColumn('<?=date("F j Y",strtotime($dt_display));?>','dt_display');
+		$datagrid->overrideColumn('<?=$title;?><br/><a href="<?=$url;?>" target="_NEW"><?=$url;?></a>', 'title');
+
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_links, A.id_class_lessons, B.title
+			FROM class_lesson_links AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+
+		global $classmgr_itemsToTitles;
+		$classmgr_itemsToTitles = array();
+
+		while ($db->next_record()) {
+			$classmgr_itemsToTitles[$db->Record['id_class_links']][] = $db->Record['title'];
+		}
+		//collapse the double array into one string
+		//Also, N'JECT data into the datagrid's internal memory so that it
+		// becomes exposed to the internal column eval() statements
+		foreach($classmgr_itemsToTitles as $k=>$v) {
+			$classmgr_itemsToTitles[$k] = implode(" <br/>", $v);
+		}
+
+		
+		$datagrid->postpendCallbackColumn('classmgr_injectLessonTitles', 'lesson_titles');
+
+		$datagrid->postpendColumn('<nobr><a href="<?=modurl("lessonWebliography/event=process/id_class_links=$id_class_links/#edit");?>">edit</a> | <a onclick="if (confirm(\'Are you sure you want to delete this webliography?\')) { return true; } else { return false; }" href="<?=modurl("lessonWebliography/event=delete/id=$id_class_links");?>">delete</a></nobr>','options');
+		$datagrid->class = 'datagrid';
+		$t['table'] = $datagrid->toHTML();
+		
+		$formAddObj = new SiteForm($u->groups);
+		$formAddObj->getForm('lessoncategoryadd', $this->cleanedArray);
+		$formAddObj->action = modurl('lessonWebliography'); // i should do this in the manager/form itself
+		$t['lessoncategoryaddform'] = $formAddObj->ToHTML();
+		
+		$formRemObj = new SiteForm($u->groups);
+		$formRemObj->getForm('lessoncategoryremove', $this->cleanedArray);
+		$formRemObj->action = modurl('lessonWebliography'); // i should do this in the manager/form itself
+		$t['lessoncategoryremform'] = $formRemObj->ToHTML();
+		
+		$formLinkObj = new SiteForm($u->groups);
+		if (trim($t['classlinksprocesserror']) == '')
+		{	$this->cleanedClasslinksprocess = array(); // removing any leftovers.
+		}
+		$formLinkObj->getForm('classlinksprocess', $this->cleanedClasslinksprocess);
+		$formLinkObj->action = modurl('lessonWebliography'. $this->extraurl); // i should do this in the manager/form itself
+		$t['classlinksprocessform'] = $formLinkObj->ToHTML();
+	}
+
+	
+	function deleteRun(&$db,&$u,&$lc,&$t)
+	{	
+		$lc->getvars['id'] = intval($lc->getvars['id']);
+		$linkObj = classLinks::_getFromDB($lc->getvars['id'], 'id_class_links', 'id_classes='. $u->activeClassTaught->id_classes);
+		if ($linkObj->id_class_links == $lc->getvars['id'])
+		{	$linkObj->_deleteFromDB();
+		}
+		$db->query("delete from class_lesson_links where id_class_links=".$lc->getvars['id']);
+		$this->run($db, $u, $lc, $t);
+	}
+	
+	function processRun(&$db,&$u,&$lc,&$t)
+	{	
+		$formObj = new SiteForm($u->groups);
+		
+		if ($lc->postvars['submit'])
+		{
+			$t['classlinksprocesserror'] = $formObj->validateForm('classlinksprocess', $lc->postvars);
+			
+			if ($formObj->hasErrors() == false)
+			{	
+				if ((int)$lc->getvars['id_class_links'] > 0)
+				{	
+					// we are editing
+					$linkObj = classLinks::_getFromDB($lc->getvars['id_class_links'], 'id_class_links', 'id_classes='.$u->activeClassTaught->id_classes);
+					if (is_object($linkObj))
+					{	
+						$linkObj->_loadArray($formObj->cleanedArray);
+						$linkObj->id_classes = $u->activeClassTaught->id_classes;
+						$linkObj->_saveToDB();
+						
+					}
+				
+				} else
+				{
+					// we are adding a record
+					$linkObj = new classLinks();
+					$linkObj->_loadArray($formObj->cleanedArray);
+					$linkObj->id_classes = $u->activeClassTaught->id_classes;
+					$linkObj->dateCreated = date('Y-m-d H:i:s');
+					$linkObj->createdby = 'username';
+					$linkObj->hits = 0;
+					#debug($linkObj);
+					$linkObj->_saveToDB();
+					
+				}
+				
+				
+				//debug($linkObj);
+				
+			} else
+			{	
+				if ((int)$lc->getvars['id_class_links'] > 0)
+				{	$this->extraurl = '/id_class_links='. $lc->getvars['id_class_links'];
+				}
+				$this->extraurl .= '/#edit';
+				$this->cleanedClasslinksprocess = $formObj->cleanedArray;
+			}
+		} else
+		{	// load?
+			if ((int)$lc->getvars['id_class_links'] > 0)
+			{	$linkObj = classLinks::_getFromDB($lc->getvars['id_class_links'], 'id_class_links');
+				if (is_object($linkObj))
+				{	// erro
+					$t['classlinksprocesserror'] = 'Edit your link below';
+					$this->cleanedClasslinksprocess = $linkObj;
+					$this->extraurl = '/id_class_links='. $lc->getvars['id_class_links']. '/#edit';
+				}			
+			}
+		}
+		$this->run($db, $u, $lc, $t);
+		
+	}
+	
+
+	/*
+		Possible FOrms
+			lessoncategoryremove
+			lessoncategoryadd
+	*/
+	
+	function addcatRun(&$db,&$u,&$lc,&$t)
+	{
+		$category_to_add = $lc->postvars['categoryAdd']; 
+		
+		$formObj = new SiteForm($u->groups);
+		
+		$t['categoryadderror'] = $formObj->validateForm('lessoncategoryadd', $lc->postvars);
+		
+		if ($formObj->hasErrors() == false)
+		{	
+			$categoryLinks = new classLinksCategories();
+			$categoryLinks->_loadArray($formObj->cleanedArray);
+			$categoryLinks->id_classes= $u->activeClassTaught->id_classes;
+			$categoryLinks->_saveToDB();
+			
+		}
+		
+		$this->run($db, $u, $lc, $t);
+	}
+	
+	
+	function removecatRun(&$db,&$u,&$lc,&$t)
+	{
+		$formObj = new SiteForm($u->groups);
+		
+		$t['categoryremerror'] = $formObj->validateForm('lessoncategoryremove', $lc->postvars);
+		
+		if ($formObj->hasErrors() == false)
+		{	
+			// i am forced to manually apply id becuase form manager won't let me use a fieldname longer than 12 chars
+			$categoryLinks = classLinksCategories::_getFromDB($formObj->cleanedArray['categoryRem'], 'id_class_links_categories', 'id_classes='.$u->activeClassTaught->id_classes);
+			$categoryLinks->_deleteFromDB();	
+		}
+		
+		$this->run($db, $u, $lc, $t);
+	}
+	
+	
+}
+
+
+/**
+ * works with datagrid to generate data for column 'Lesson Titles'
+ */
+function classmgr_injectLessonTitles($row, &$ret) {
+	global $classmgr_itemsToTitles;
+	$ret = $classmgr_itemsToTitles[$row['id_class_links']];
+}
+
+
+?>

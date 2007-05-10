@@ -1,0 +1,255 @@
+<?
+include_once(LIB_PATH."eventsObj.php");
+include_once(LIB_PATH."lc_table_calendar.php");
+
+
+/**
+ * Classroom portal for students
+ * Show overview information and links to classroom
+ * activities. Shows last 5 lessons, last 5
+ * assignments, calendar, dictionary, thesarus, etc.
+ */
+class details extends StudentService {
+
+	var $presentor='htmlPresentation';
+	var $_PortalNumOfLessons = 5;		//added default value so that things don't break if
+						// the DB doesn't have a value
+						// what is this var for? MK 10-8-03
+
+	var $_PortalNumOfAssignments = 5;	// ditto
+
+	var $sectionTitle = 'Classroom Home';
+
+	var $inactivelinks = array(
+		'Classroom Home',
+	);
+
+	
+	/**
+	 *	An event that just simply displays the tools
+	 *	which link offsite to dictionary.com
+	 *
+	 *	@event
+	 */
+	function showtoolsRun($db, &$u, &$lc, &$t) {	
+		$this->inactivelinks = array('Dictionary / Thesaurus');
+		$this->sectionTitle = 'Dictionary & Thesaurus';
+		$lc->templateName = 'details_showtools';
+	}
+
+	
+	function viewMOTDRun($db,&$u, &$lc, &$t) { 
+		/*****
+		* MOTD
+		****/
+		$t['motd'] = LcSettings::getSystemMotd();
+		$t['currentTime'] = time();
+
+		$lc->templateName = 'details_motd';
+	}
+
+/*
+ *
+ * Default event
+ * 
+ * Input data:  id_classes (user object)
+ * Output data: detailed class page
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+
+			# Grab current time stamp
+			$ut = time();
+
+
+			# count total number of available lessons
+			$sql =  "SELECT count(*) as count 
+				FROM class_lessons 
+				WHERE id_classes='".$u->activeClassTaken->id_classes."' 
+				AND (activeOn <= $ut AND inactiveOn >= $ut) 
+				AND activeOn <= $ut and inactiveOn >= $ut";
+
+			$db->queryOne($sql);
+			$t['lessoncount'] = $db->Record['count'];
+			if ($t['lessoncount'] <= $this->_PortalNumOfLessons)
+			{
+				$t['_PortalNumOfLessons'] = $t['lessoncount'];
+			} else 
+			{
+				$t['_PortalNumOfLessons'] =
+				$this->_PortalNumOfLessons;
+			}
+
+
+			# count total number of available assignments
+			$sql =  "SELECT count(*) as count 
+				FROM class_assignments 
+				WHERE id_classes='".$u->activeClassTaken->id_classes."' 
+				AND activeDate <= $ut 
+				AND (dueDate >= $ut OR noDueDate = 1)";
+
+			$db->queryOne($sql);
+			$t['assignmentcount'] = $db->Record['count'];
+			if ($t['assignmentcount'] <= $this->_PortalNumOfAssignments)
+			{
+				$t['_PortalNumOfAssignments'] = $t['assignmentcount'];
+			} else 
+			{
+				$t['_PortalNumOfAssignments'] =
+				$this->_PortalNumOfAssignments;
+			}
+
+			$lc->templateName='details_main';
+
+
+			/*****
+			 * PULL IN LESSONS (only 5, configurable in control panel)
+			 ****/
+
+			$sql = "SELECT id_class_lessons, title, activeOn 
+			FROM class_lessons 
+			WHERE id_classes='".$u->activeClassTaken->id_classes."'
+			AND (activeOn <= $ut AND inactiveOn >= $ut) 
+			ORDER BY activeOn DESC 
+			LIMIT ".$this->_PortalNumOfLessons;
+
+			 $db->query($sql);
+			 if ($db->getNumRows())
+			 {
+			 	$t['lessons'] = '<ul>';
+				while ($db->next_record() )
+				{
+					$t['lessons'] .= '<li><a href="'.modurl('lessons/event=view').
+					'/id='.$db->Record['id_class_lessons'].'">'.$db->Record['title'].'</a></li>';
+					//('.date("m-d h:i A", $db->Record['activeOn']).')</a></li>';
+				}
+				$t['lessons'] .= '</ul>';
+			 } else {
+			 	$t['lessons'] = '<ul><li>No active lessons found</li></ul>';
+			 }
+
+			/*****
+			 * PULL IN ASSIGNMENT FOR CLASS (maximum is configurable in control panel)
+			 ****/
+			
+			$sql = "SELECT id_class_assignments, title, dueDate, noDueDate 
+			FROM class_assignments 
+			WHERE id_classes='".$u->activeClassTaken->id_classes."' 
+			AND activeDate <= $ut 
+			AND (dueDate >= $ut OR noDueDate = 1)
+			ORDER BY dueDate ASC, activeDate DESC 
+			LIMIT ".$this->_PortalNumOfAssignments;
+			
+			$db->query($sql);
+			if ($db->getNumRows())
+			{
+				$t['assignments'] = '<ul>';
+				while ($db->next_record() )
+				{
+					if ($db->Record['noDueDate'] == 0)
+					{
+					 	$date = date("m-d h:i A", $db->Record['dueDate']); 
+						$t['assignments'] .= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->Record['id_class_assignments'].'">'.$db->Record['title'].'<BR>Due:  '.$date.'</a></li>';
+
+					} else {
+						$t['noduedateassignments'].= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->Record['id_class_assignments'].'">'.$db->Record['title'].'</a></li>';
+
+					}
+				}
+				
+			$t['assignments'] .= '</ul>';
+			} else {
+				$t['assignments'] = '<ul><li>No active assignments found</li></ul>';
+			}
+	
+			/*****
+			* MOTD
+			****/
+			$file = CONTENT_PATH.'__messageoftheday__';
+			$fp = fopen ($file, 'r');
+			$t['motd'] = fread($fp, filesize($file) );
+			fclose($fp);
+			$t['motd'] = trim($t['motd']);
+	
+			if (strlen($t['motd']) == 0)
+			{
+				unset($t['motd']);
+			}
+			$x = truncateText($t['motd']);
+			$t['motd'] = "<a href='".appurl("classroom/details/event=viewMOTD")."'>$x</a>";
+
+// __FIX_ME - need a 'closing date' on announcements
+// or some other way of limiting what's shown
+
+			/** 
+			 * rs :: 10/10 this is not the right way to calculate the 
+			 *   "total" getNumRows()
+			 * there needs to be a limit clause with a group by counting, pulling
+			 * back all this data is not wise.
+			 */
+			$sql = "select * from class_announcements
+				where id_classes='{$u->activeClassTaken->id_classes}'
+				and dt_display <= ".DB::getFuncName('NOW()')." order by dt_display DESC";
+			$db->query($sql);
+			
+			$t['num_announcements'] = $db->getNumRows();
+			 if ($db->getNumRows())
+			 {
+			 	$t['announcements'] = '<ul>';
+				if($db->next_record() )
+				{
+					$t['announcements'] .= '<li><a href="'.modurl('announcements').'/event=view/id='.$db->Record['id_class_announcements'].'">'.truncateText($db->Record['tx_description']).'</a></li>';
+				}
+				$t['announcements'] .= '</ul>';
+			 } else {
+			 	$t['announcements'] = '<ul><li>No active announcements found</li></ul>';
+			 }
+
+
+			$t['sidebar'] = $u->sessionvars['activeLessonSidebar'];
+
+			// PULL IN A CLASS CALENDAR
+
+			$classId = (int)$u->activeClassTaken->id_classes;
+			$m = (int) $lc->getvars['m'];
+			$d = (int) $lc->getvars['d'];
+			$y = (int) $lc->getvars['y'];
+
+			$calendar = LC_Table_ClassCalendar::getMonthCalendar($classId,$y,$m,$d);
+
+			$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
+			$t['calendarRenderer']->setCompact(true);
+
+
+			/*****
+			* LOAD UP THE ID_CLASS_RESOURCE CONTENT 
+			* AND PASS IT TO THE TEMPLATE
+			****/
+
+			$sql = "SELECT id_class_resource FROM classes WHERE 
+					id_classes = '".$u->activeClassTaken->id_classes."'";
+			$db->queryOne($sql);
+			$id_content = $db->Record[0];
+
+			$sql = "SELECT txText from class_lesson_content WHERE 
+			id_class_lesson_content = '$id_content'";
+			$db->queryOne($sql);
+			$t['classresource'] = $db->Record[0];
+
+			// stupid hack to get a feedback message
+			if ($u->sessionvars['message']) {
+				$t['message'] = $u->sessionvars['message'];
+				unset($u->sessionvars['message']);
+			}
+
+		}
+}
+
+
+
+function truncateText($string,$len=240) { 
+if (strlen($string)<=$len) { return $string; }
+$string = substr($string,0,$len)." ... (more) ";
+return $string;
+}
+?>

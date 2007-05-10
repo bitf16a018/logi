@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+<script language="JavaScript">
+	function openwysiwyg() {
+		window.open('<?= BASE_URL?>herc/wysiwyg/_editor.php?formname=Editor','wysiwyg','navigation=0,resizable=yes,width=820,height=700,scrollbars=yes');
+		//window.open('<?=_APP_URL;?>content/event=wysiwyg','wysiwyg','navigation=0,resizable=yes,width=750,height=480,scrollbars=yes');
+	}
+	function sendNewFile(v) {
+		Editor.elements[2].value = v;
+	}
+	function getContent() {
+		return Editor.elements[2].value;
+	}
+</script>
+<? global $HTTP_USER_AGENT?>
+
+<style type="text/css">
+
+</style>
+
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+
+<script language="Javascript">
+        function changeTab(action) {
+                document.forms[0].action = action + '/event=changeTab';
+                //document.write(document.forms[0].action);
+                document.forms[0].submit();
+        }
+</script>
+
+<form method="post" name="Editor" action="<?=MOD_URL?>main/event=changeTab/prevTab=addPage">
+
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+
+		HTML Files
+
+      </td></tr>
+
+      <tr><td width="500" class="grey">
+
+	<table border="0" width="100%" cellpadding="10"><tr>
+	<td class="white" align="center">
+
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr><td colspan="2">
+				<div id="tab">
+					<ul>
+					<?= $t['tabTable'];?>
+					</ul>
+				</div>
+		</td></tr>
+	</table>
+	<table width="100%" cellspacing="0" cellpadding="3" border="0">
+	<tr><td class="grey" colspan="2">
+			File Name
+	</td></tr>
+	<tr><td colspan="2">
+			<input type="text" name="_save_[filename]" size="50" value="<?= $t['saved']['filename']?>" maxlength="50">
+	</td></tr>
+	<tr><td class="grey" colspan="2">
+			Document Title
+	</td></tr>
+	<tr><td colspan="2">
+			<input type="text" name="_save_[title]" size="50" value="<?= $t['saved']['title']?>" maxlength="50">
+	</td></tr>
+	<tr><td  class="grey" colspan="2">
+	<SCRIPT LANGUAGE="JavaScript" SRC="<?= BASE_URL;?>ua.js"></SCRIPT>
+	<script language="JavaScript"><!--
+		if ( (navigator.org == 'microsoft') && (navigator.OS == 'win')&& (navigator.version > 5) ) {
+			document.write('<img align="right" src="<?= _PICS_URL;?>visualEditor.gif" onclick="openwysiwyg();">');
+		}
+	// --></script>
+		File Contents &nbsp;&nbsp; (raw HTML)
+	</td></tr>
+	<tr><td colspan="2">
+			<textarea name="_save_[file]" rows="25" cols="70" wrap="physical"><?=$t['template'];?><?=$t['saved']['file'];?></textarea>
+		<br><p>
+	</td></tr>
+	<tr><td colspan="2">
+                If your images are broken, make sure they look like this in the
+text area:<br>
+                &lt;img src="<b>&lt;?=IMAGES_URL?&gt;</b>picture.jpg"&gt;<br>
+		<input type="submit" name="button" value="Save">
+	</td></tr></table>
+	</td></tr></table>
+
+</td></tr></table>
+</form>
+
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<project
+  name="logicampus">
+
+   <entity name="lc_action_log" description="log important actions">
+           <attribute
+              name = "lc_action_log_id"
+              type = "int"
+              size = "11"
+              primaryKey  = "true" />
+           <attribute
+              name = "lc_action_log_type_id"
+              type = "int"
+              size = "11" />
+           <attribute
+              name = "action_datetime"
+              type = "int"
+              size = "11" />
+           <attribute
+              name = "agent_ip"
+              type = "varchar"
+              size = "32" />
+           <attribute
+              name = "agent_url"
+              type = "varchar"
+              size = "32" />
+           <attribute
+              name = "file"
+              type = "varchar"
+              size = "255" />
+           <attribute
+              name = "line"
+              type = "varchar"
+              size = "32" />
+           <attribute
+              name = "agent_username"
+              type = "varchar"
+              size = "32" />
+           <attribute
+              name = "message"
+              type = "blob"
+              size = "32" />
+           <attribute
+              name = "class_id"
+              type = "int"
+              size = "11" />
+           <attribute
+              name = "semester_id"
+              type = "int"
+              size = "11" />
+	   <key
+	      attribute="lc_action_log_type_id"
+	      name="lc_action_log_type_idx"/>
+	   <key
+	      attribute="class_id"
+	      name="class_idx"/>
+	   <key
+	      attribute="semester_id"
+	      name="semester_idx"/>
+	   <key
+	      attribute="action_datetime"
+	      name="action_datetime_idx"/>
+   </entity>
+   <entity name="lc_action_log_type" description="types of actions that can be logged">
+           <attribute
+              name = "lc_action_log_type_id"
+              type = "int"
+              size = "11"
+              primaryKey  = "true" />
+           <attribute
+              name = "action_code"
+              type = "varchar"
+              size = "32" />
+           <attribute
+              name = "display_name"
+              type = "varchar"
+              size = "255" />
+   </entity>
+   <entity name="lc_event">
+	   <attribute 
+	      name = "lc_event_id"
+	      type = "int"
+	      size = "11" 
+	      extra = "unsigned"
+	      primaryKey  = "true" />
+	   <attribute 
+	      name = "calendar_type"
+	      type = "varchar"
+	      size = "255" />
+	   <attribute 
+	      name = "username"
+	      type = "varchar"
+	      size = "15" />
+	   <attribute 
+	      name = "title"
+	      type = "varchar"
+	      size = "255" />
+	   <attribute 
+	      name = "description"
+	      type = "text"/>
+	   <attribute 
+	      name = "location"
+	      type = "varchar"
+	      size = "255" />
+	   <attribute 
+	      name = "start_date"
+	      type = "int"
+	      size = "11" />
+	   <attribute 
+	      name = "end_date"
+	      type = "int"
+	      size = "11" />
+	   <attribute 
+	      name = "groups"
+	      type = "text"/>
+	   <attribute 
+	      name = "notgroups"
+	      type = "text"/>
+	   <attribute 
+	      name = "last_modified"
+	      type = "timestamp"
+	      size = "11" />
+	   <attribute 
+	      name = "repeat_type"
+	      type = "int"
+	      size = "11" />
+	   <attribute 
+	      name = "repeat_count"
+	      type = "int"
+	      size = "11"
+	      extra = "unsigned" />
+	   <attribute 
+	      name = "repeat_mask"
+	      type = "int"
+	      size = "11"
+	      extra = "unsigned" />
+	   <attribute 
+	      name = "repeat_exclude"
+	      type = "text"
+	      size = "11" />
+	   <attribute 
+	      name = "class_id"
+	      type = "int"
+	      size = "11"
+	      extra = "unsigned" />
+	   <key
+	      attribute="class_id"
+	      name="class_idx"/>
+	   <key
+	      attribute="start_date"
+	      name="start_date_idx"/>
+	   <key
+	      attribute="end_date"
+	      name="end_date_idx"/>
+   </entity>
+   <entity name="class_enrollment" description="hold enrollment info for one student in one class and section">
+		<attribute
+			name = "class_enrollment_id"
+			type = "int"
+			size = "11"
+			primaryKey  = "true" />
+		<attribute
+			name = "student_id"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "semester_id"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "class_id"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "section_number"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "enrolled_on"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "active"
+			type = "int"
+			size = "11" />
+		<attribute
+			name = "withdrew_on"
+			type = "int"
+			size = "11" />
+	   <key
+	      attribute="student_id"
+	      name="student_idx"/>
+	   <key
+	      attribute="semester_id"
+	      name="semester_idx"/>
+	   <key
+	      attribute="class_id"
+	      name="class_idx"/>
+	   <key
+	      attribute="active"
+	      name="active_idx"/>
+	</entity>
+</project>

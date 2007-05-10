@@ -1,0 +1,11 @@
+<?=$t['sectionheader'];?>
+<? if ( $t['message'] ) print '<span style="color:blue;">'.$t['message'].'</span>'; ?>
+<? if ( $t['error'] ) print '<span style="color:red;">'.$t['error'].'</span>'; ?>
+<FIELDSET>
+<LEGEND>Choose Semester</LEGEND>
+<h4>Dealing with semester <?=$t['semesterLabel'];?></h4>
+
+<?=$t['semform'];?>
+</FIELDSET>
+<br>
+<?=$t['table'];?>

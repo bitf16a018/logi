@@ -1,0 +1,19 @@
+<h3>Maillist subscriptions updated</h3>
+<? if (is_array($t['list'])) { ?>
+
+You are now subscribed to the following mailling list:<br><br>
+<ul>
+
+<?
+while(list($k, $v) = @each($t['list']))
+{ 
+	echo "<li>$v";
+}
+?>
+</ul>
+
+<? } else { ?>
+
+You have been removed from all mailling list.  If you wish to subscribe to a mailling list you can do so at anytime visiting the <a href="<?=APP_URL?>users/maillist">Mail List Subscriptions Page</a>.
+
+<? } ?>

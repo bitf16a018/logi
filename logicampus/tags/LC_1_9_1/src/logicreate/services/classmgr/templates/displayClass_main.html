@@ -1,0 +1,86 @@
+<?=$t['sectionheader'];?>
+<?
+	if ($t['motd']) {
+	?>
+	<div width="100%" style="border:1px solid #999999;background-color:#dddddd;margin:0 100px 15px 100px;padding:5px;"><b><?=lct('Message of the Day')?>:</b><p style="padding-left:20px;"><?=$t['motd'];?></p></div>
+	<?
+	}
+?>
+
+<table width="100%" border="0" cellspacing="10" cellpadding="2">
+  <tr> 
+    <td width="33%" valign="top" class="coursemaintitle"><?=lct('General Class Manager')?><br></td>
+    <td width="33%" valign="top" class="coursemaintitle"><?=lct('Content &amp; Lesson Links')?></td>
+    <td width="33%" valign="top" class="coursemaintitle"><?=lct('Student Communication')?></td>
+  </tr>
+  <tr>
+    <td valign="top">
+    <ol style="font-size:150%">
+
+	<li><a href="<?=modurl('classSetup');?>"><?=lct('Classroom Setup')?></a></li>
+
+	<li><a href="<?=APP_URL?>classmgr/textbooks"><?=lct('Textbooks')?></a></li>
+	<li><a href="<?=APP_URL?>classmgr/syllabusManage"><?=lct('Syllabus')?></a></li>
+
+	<li><a href="<?=APP_URL?>gradebook/"><?=lct('Gradebook')?></a></li>
+	<li><a href="<?=APP_URL?>classmgr/users/"><?=lct('Student Management')?></a></li>
+
+
+	
+	<li><a href="<?=modurl('dataexchange');?>"><?=lct('Export Class')?></a></li>
+	<li><a href="<?=APP_URL?>classroom/details/id_classes=<?=$t['classObj']->id_classes?>"><?=lct('View Classroom')?></a></li>
+	<li><a href="<?=APP_URL?>classmgr/examschedule/"><?=lct('Exam Scheduling')?></a></li>
+	
+	<li><a href="<?=APP_URL?>classmgr/orientations/"><?=lct('Orientation Scheduling')?></a></li>
+
+        <li><a href="<?=modurl('adjustDates');?>">Adjust All Dates</a></li>
+
+	<li><a href="<?=APP_URL?>classmgr/semestercopy/"><?=lct('Semester Copy')?></a></li>
+	<?
+	if ($t['ITVClass'])
+	{ ?>
+	<li><a href="<?=APP_URL?>classmgr/seminars/event=view"><?=lct('Seminar Scheduling')?></a></li>
+	<? } ?>
+	
+
+	</ol>
+    </td>
+    <td valign="top">
+    <ol style="font-size:150%">
+		<li><a href="<?=APP_URL?>classmgr/assignmentManage/"><?=lct('Assignments')?></a></li>
+	
+		<li><a href="<?=modurl('lessonContent');?>"><?=lct('Content')?></a></li>
+
+		<li><a href="<?=APP_URL?>assessments"><?=lct('Assessment Manager')?></a></li>
+
+		<li><a href="<?=APP_URL?>classmgr/faq/"><?=lct('FAQs')?></a></li>
+
+		<li><a href="<?=appurl('classdoclib');?>"><?=lct('File Manager')?></a></li>
+		<li><a href="<?=modurl('lessonManager');?>"><?=lct('Lessons')?></a></li>
+
+		<li><a href="<?=modurl('lessonObjectives');?>"><?=lct('Objectives')?></a></li>
+
+		<li><a href="<?=modurl('lessonWebliography');?>"><?=lct('Webliography')?></a></li>
+	</ol>
+    </td>
+    <td valign="top">
+    <ol style="font-size:150%">
+
+		<li><a href="<?=modurl('cal/');?>"><?=lct('Calendar')?></a></li>
+		<li><a href="<?=modurl('announcements/');?>"><?=lct('Announcements')?></a></li>
+
+		<li><a href="#" onClick = "window.open('<?=APP_URL?>classchat/main/event=initialize/id_classes=<?=$obj->user->activeClassTaught->id_classes?>','generic2','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=790,height=500');"><?=lct('Chat')?></a></li>
+
+		<li><a href="<?=modurl('contactStudents/');?>"><?=lct('Contact Students')?></a></li>
+
+		<li><a href="<?=appurl('classforums/main/');?>id_classes=<?=$t['classObj']->id_classes?>"><?=lct('Discussion Forums')?></a></li>
+
+		<li><a href="<?=modurl('studentPresentation');?>"><?=lct('Student Presentation')?></a></li>
+
+		<li><a href="<?=modurl('studentProfile');?>"><?=lct('Student Profile')?></a></li>
+
+
+	</ol>
+    </td>
+  </tr>
+</table>

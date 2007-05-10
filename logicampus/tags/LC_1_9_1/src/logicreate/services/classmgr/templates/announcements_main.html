@@ -1,0 +1,60 @@
+<?=$t['sectionheader'];?>
+
+
+<span style="color: blue;"><?=$t['goodtimes'];?></span>
+
+<?=$t['table'];?>
+
+<br>
+
+<a name="edit"></a>
+
+<span style="color: maroon;"><?=$t['error'];?></span>
+
+<input type="button" name="nothing" value="Use WYSIWYG" onclick="loadWys(this);">
+<?=$t['form'];?>
+
+	<?php
+		if (is_array($t['messages']))
+		{	echo '<center><h3>';
+			echo implode($t['messages'], '<br><br>');
+			echo '</h3></center>';
+		}
+	?>
+	
+	
+
+
+<script type="text/javascript">
+
+	/**
+	 * Button Code (Click button to engage wysiwyg)
+	 */
+	function loadWys(obj)
+	{	obj.style.display = 'none';
+		initEditor();
+	}
+	
+
+
+	
+	/**	Wysiwyg loader
+	 */
+	function initEditor() {
+	  editor = new HTMLArea("tx_description");
+	  editor.config.editorURL = "<?=BASE_URL;?>htmlarea/";
+		
+	  	/**
+	  		My Custom Stuff
+	  	 */
+	  	// inside htmlarea.js (execCommand())
+	  	// case "insertdoclibimage": this._insertDocLibImage(); break;
+	  	
+		editor.config.registerButton("insertdoclibcontentlinks", "Classroom Images", "doclib.gif", false, function(e) { e.execCommand("insertdoclibcontentlinks"); }); 
+		editor.config.toolbar.push(["separator", "insertdoclibcontentlinks"]);
+
+	  editor.generate();
+	
+	}
+
+</script>
