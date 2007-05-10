@@ -636,14 +636,14 @@ class StudentService extends Service {
 			$t['sectionheader']  .= '<h3>'.$this->sectionTitle;
 			if ($obj->user->activeClassTaken->courseName)
 				$t['sectionheader'] .= ' - '.$obj->user->activeClassTaken->courseName
-					.' <br/><a href="'.appurl('classroom/facultyProfile/').'">Contact Instructor</a>: '.$obj->user->activeClassTaken->facultyName;
+					.' <br/><a href="'.appurl('classroom/facultyProfile/').'">Contact Instructor</a>';
 			$t['sectionheader'] .= '</h3>';
 			return;
 		}
 
 		$t['sectionheader']  = '<table style="font-weight:bold;" width="100%" border=0 cellpadding=3 cellspacing=0><tr><td><big>'.$this->sectionTitle.'</big>';
 		if ($obj->user->activeClassTaken->courseName)
-			$t['sectionheader'] .= '</td><td align="right">'.$obj->user->activeClassTaken->courseName.' <br/><a href="'.appurl('classroom/facultyProfile').'">Contact Instructor</a>: '.$obj->user->activeClassTaken->facultyName;
+			$t['sectionheader'] .= '</td><td align="right">'.$obj->user->activeClassTaken->courseFamilyNumber.'&nbsp;'.$obj->user->activeClassTaken->courseName.' <br/><img align="middle" src="'.IMAGES_URL.'icon-users.png"/>&nbsp;<a href="'.appurl('classroom/facultyProfile').'">Contact Instructor</a>';
 		$t['sectionheader'] .= '</td></tr></table>';
 
 		if ( count($this->navlinks) > 0 ) {
