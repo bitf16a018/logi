@@ -1,0 +1,233 @@
+<?
+/**
+ * Show overview information and links to classroom
+ * activities. Shows last 5 lessons, last 5
+ * assignments, calendar, dictionary, thesarus, etc.
+ */
+include_once(LIB_PATH."eventsObj.php");
+
+
+class classroom extends StudentService {
+
+	var $presentor='htmlPresentation';
+	var $authorizer = 'takesClassesAuth';
+
+/**
+ * Default event
+ * 
+ * Input data: 
+ * Output data: 
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+				$ut = time();
+				$lc->templateName='main_main';
+				$lc->templateStyle='private';
+
+				/*****
+				 * CLASS SPECIFIC INFORMATION
+				 ****/
+				 $count = count($u->classesTaken);
+				 if ($count >= 1) 
+				 {
+				 	# Loop through all classes they are taking
+						for ($x=0; $x < $count; ++$x)  {
+							# build up SQL or clause for queries later on
+						$assignmentsOrClause .= 'class_assignments.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
+						$lessonsOrClause .= 'class_lessons.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
+
+						$t['classdata'][$u->classesTaken[$x]->id_classes] = '<ul>';
+						# Pull in last annoucement for each class
+						$sql = "
+						SELECT id_class_assignments, title, activeDate
+						FROM class_assignments
+						WHERE id_classes='".$u->classesTaken[$x]->id_classes."'
+						AND activeDate <= $ut  and (unix_timestamp(dateNoAccept)>$ut or dateNoAccept='0000-00-00 00:00:00') 
+						ORDER BY dueDate ASC, activeDate DESC 
+						LIMIT 1";
+
+						$db->queryOne($sql);
+						if (is_array($db->Record))
+						{
+							$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><a
+							href="'.APP_URL.'classroom/assignments/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->Record['id_class_assignments'].'">Assignment: '.$db->Record['title'].'</a></li>';
+						} else {
+								$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li>Assignment: none</li>';
+						}
+
+						# Pull in the last lesson for each class
+						$sql = "SELECT id_class_lessons, title 
+							FROM class_lessons 
+							WHERE id_classes='".$u->classesTaken[$x]->id_classes."'  
+							and activeOn <= $ut 
+							and inactiveOn > $ut
+							ORDER BY  activeOn DESC LIMIT 1";
+
+						$db->queryOne($sql);
+						if (is_array($db->Record))
+						{
+								$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><a
+								href="'.APP_URL.'classroom/lessons/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->Record['id_class_lessons'].'">Lesson: '.$db->Record['title'].'</a></li>';
+						} else {
+								$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li>Lesson: none</li>';
+						
+						}
+						$t['classdata'][$u->classesTaken[$x]->id_classes] .= '</ul>';
+
+						# Pull in the last event for each class
+						# __FIX_ME__
+							
+
+						} // close for loop
+
+					} else {
+						$lc->templateName = 'main_noclassestaken';
+						return;
+					}
+				# Clean up OrClause
+				$assignmentsOrClause = substr($assignmentsOrClause,0,-3);
+				$lessonsOrClause = substr($lessonsOrClause,0,-3);
+
+				/*****
+				 * PULL IN LESSONS
+				 *****/
+
+
+				$sql = "SELECT class_lessons.id_classes, id_class_lessons, title, classes.courseFamilyNumber
+					FROM class_lessons 
+					LEFT JOIN classes ON class_lessons.id_classes = classes.id_classes
+					WHERE ( $lessonsOrClause )
+					AND ( activeOn <= $ut AND inactiveOn > $ut )
+					ORDER BY  activeOn DESC
+					LIMIT 5";
+				$db->RESULT_TYPE = MYSQL_ASSOC;
+				$db->query($sql);
+
+
+				if ($db->getNumRows() >= 1)
+				{
+						$t['lessons'] = '<ul>';
+						while ($db->next_record() )
+						{
+							$t['lessons'] .= '<li>
+						<a href="'.APP_URL.'classroom/lessons/event=view/id_classes='.$db->Record['id_classes'].'/id='.$db->Record['id_class_lessons'].'">'.$db->Record['title'].'</a>&nbsp;-&nbsp;'.$db->Record['courseFamilyNumber'].'</li>';
+						}
+						$t['lessons'] .= '</ul>';
+				} else {
+					$t['lessons'] = '<ul><li>no active lessons found</li></ul>';
+				}
+				
+				/*****
+				 *  PULL IN ASSIGNMENTS
+				 ****/
+	
+				$sql = "
+				SELECT id_class_assignments, title, class_assignments.id_classes, classes.courseFamilyNumber
+				FROM class_assignments
+				LEFT JOIN classes ON class_assignments.id_classes = classes.id_classes
+				WHERE ( $assignmentsOrClause )
+				AND activeDate <= $ut 
+				AND (dueDate >= $ut OR noDueDate = 1)
+				ORDER BY dueDate ASC, activeDate DESC 
+				LIMIT 5";
+				$db->query($sql);
+
+				if ($db->getNumRows() >= 1)
+				{
+
+					$t['assignments'] = '<ul>';
+					while ($db->next_record() )
+					{
+						$t['assignments'] .= '<li>
+		<a href="'.APP_URL.'classroom/assignments/event=view/id_classes='.$db->Record['id_classes'].'/id='.$db->Record['id_class_assignments'].'">
+		'.$db->Record['title'].'</a>&nbsp;-&nbsp;'.$db->Record['courseFamilyNumber'].'</li>';
+					}
+			
+					$t['assignments'] .= '</ul>';
+				} else {
+					$t['assignments'] = '<ul><li>no active assignments found</li></ul>';
+				}
+				# Grab all classes for this user
+
+				# Grab last assignment, lesson and event for class
+
+				# Add a calendar
+
+				/*****
+				 * MOTD
+				 ****/
+				 $file = CONTENT_PATH.'__messageoftheday__';
+				$fp = fopen ($file, 'r');
+				$t['motd'] = fread($fp, filesize($file) );
+				fclose($fp);
+				$t['motd'] = trim($t['motd']);
+
+				if (strlen($t['motd']) == 0)
+				{
+					$t['motd'] = 'There is currently no message of the
+					day.';
+				}
+
+				
+				
+				/**
+				 *	Calendar for Portal page (Encompasses all classes that are taken by student)
+				 */				
+				$mut = (is_numeric($lc->getvars['m'])) ? 
+							(int)$lc->getvars['m'] : date('m');
+				$yut = (is_numeric($lc->getvars['y'])) ? 
+							(int)$lc->getvars['y'] : date('Y');
+				$dut = (is_numeric($lc->getvars['d'])) ? 
+							(int)$lc->getvars['d'] : date('d');
+				if ($yut > (date('Y') + 25)) $yut = date('Y');
+				
+				$calendar_epoch_time = strtotime("$mut/1/$yut");
+				$calendar_epoch_time = mktime(0,0,0,date('m',$calendar_epoch_time),1,date('Y',$calendar_epoch_time));
+
+				if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
+				{	foreach($u->classesTaken as $v)
+					{	$op_taken[] = trim($v->id_classes);
+					}
+					$op_taken = array_unique($op_taken);
+				} else
+				{	$op_taken[] = $u->activeClassTaken->id_classes;
+				}
+				
+				reset($u->classesTaken);
+				
+				$c = new cali($calendar_epoch_time,(strtotime("+1 months",$calendar_epoch_time)-1), '', $op_taken, $use_groups);
+				$c->showTitle = false;
+				$c->showTimes = false;
+				$c->linkMonthName = false;
+				$c->showEventCount = false;
+				$c->noNextPrev = true;
+				$c->monthLinkToZero = true;
+				$c->fl_no_link_numerical_day_event = false;
+
+				/**
+				 *	This is a marker to say when we were here.. so that if we click
+				 *	on any of the calendar links and the time is reasonable
+				 *	say within 2-3 mins we can provide a link back here (this calculation
+				 *	takes place within the mastercalendar/day module
+				 */
+				$u->sessionvars['mastercalendar']['comingfromclassroomportal'] = time();
+				
+				$c->calWidth = '100%';	
+				
+				/**
+				 *	marking this so the mastercalendar knows to display ALL classes 
+				 *	this student is taken within it's view.
+				 */		
+				$u->sessionvars['mastercalendar']['overallviews'] = 'vtaken';
+				
+				$c->monthReviewURL = appurl('mastercalendar/d='.$lc->getvars['d']);
+				$c->eventDayURL = appurl('mastercalendar/day');
+				$c->eventCountURL = appurl('mastercalendar/');
+				$t['calendar'] = $c->renderMonth(date('m',$calendar_epoch_time), date('Y',$calendar_epoch_time));
+
+		}
+
+
+
+}
+
+?>

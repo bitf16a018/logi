@@ -1,0 +1,24 @@
+<?=$t['sectionheader'];?>
+
+<form method="post" action='<?=modurl("semestercopy/event=selectWith");?>'>
+
+<table>
+<tr>
+<td valign='top'>
+<h4>FROM course</h4>
+<select name='id_classes_update_from' size='10'>
+<?=$t['fromoptions'];?>
+</select>
+</td>
+<td valign='top'>
+<h4>TO course</h4>
+<select name='id_classes_update_to' size='10'>
+<?=$t['tooptions'];?>
+</select>
+</td>
+</tr>
+</table>
+
+<input type="submit" value="Continue >>">
+</form>
+

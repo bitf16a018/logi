@@ -1,0 +1,35 @@
+Helpdesk module
+---------------
+The primary focus of this module is to provide students, faculty, and staff a way to communicate problems
+and resolutions to one another.  Typically in larger institutions there is dedicated IT staff to assist students and staff with problems.  This module helps the staff track those tickets and communicate resolutions to those tickets.  
+Users have to have an account before they have access to this module.  
+
+A FAQ system has been built in as well which allows staff to create FAQs of typical helpdesk tickets.  
+
+Database
+--------
+There a few objects here and they should all have sql files in META-INFO.
+What's not necessarily there yet (check) is the groups we use - 'hdadmin' and 
+'hdstaff'.  Staff can see everything, just not modify the status and category codes.
+
+
+Primary files
+-------------
+main.lcp 
+This file is the initial controller to decide which templates should be shown.
+It calls specific methods in the main file to do any db queries specific 
+to a user type (student vs hdadmin, for example)
+
+
+helpdeskView.lcp
+This is the file which shows an incident summary and details, and 
+the template gives the option to always add more stuff.  One can ALWAYS 
+add more detail right now - it'll 'reopen' an older ticket if it's 
+been closed already.
+
+helpdeskSubmit.lcp
+This handles logic for adding an initial entry and adding details 
+to an existing ticket.  addDetail has some extra logic to verify 
+changing of status from closed to reopened, and will mail() 
+the results to the original submitter (not to staff ever at this time).
+

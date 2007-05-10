@@ -1,0 +1,39 @@
+<?=$t['sectionheader'];?>
+
+<p>
+<u>Entering your question</u><br>
+
+	If you have a question that needs to be answered in a timely fashion, 
+	please use our <a href="<?=modurl();?>">helpdesk ticketing</a> system.
+	If you have a question that would be benefical to the community to view
+	it's answer, you may submit your question here. If you know the answer, 
+	you may provide the answer, but it's not required. All submitted questions
+	and answers are subjected to editing for spelling, grammar, categorizing 
+	and correctness.
+
+</p>
+<br><br>
+
+<form method="POST">
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+
+<tr>
+	<td width="10%" valign="top"><nobr>Question:<br><small style="font-size: 8px;"><i>(255 chars.max)</i></small></nobr></td>
+	<td> &nbsp;<input type="text" maxlength="255" size="45" name="faqquestion" value="<?=trim(htmlentities(stripslashes($t['ask']['faqquestion']), ENT_QUOTES));?>"></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+
+<tr>
+	<td width="10%" valign="top">Answer:</td>
+	<td> &nbsp;<textarea name="faqanswer" rows="10" cols="60"><?=stripslashes($t['ask']['faqanswer']);?></textarea></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+
+</table>
+
+	<input type="submit" value="Submit Question" name="submit">
+	<input type="hidden" value="ask" name="event">
+
+</form>

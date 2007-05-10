@@ -1,0 +1,59 @@
+
+<?
+if ($t[error]) { ?>
+
+<div style="color: red;"><?=$t[error]?></div>
+
+<? } ?>
+
+<h3>User Article Management</h3>
+
+<?
+if($t[returned]) { ?>
+
+The following are articles which have been submitted but which have been returned by the site administrator.  
+
+<br><br>
+<b>Returned Articles</b><br>
+
+<table border="0" cellpadding="4" cellspacing="1" width="100%">
+	<tr class="forum_head">
+		<td valign="top" width="40%"><b>Title</b></td>
+		<td width="40%"><b>Notes</b></td>
+		<td width="20%"><b>Actions</b></td>
+	</tr>
+	<? while (list($k, $v) =@each($t[returned]))
+			{	$n++; 
+				$class="row1";
+				if ($n % 2 == 0) { $class="row2"; } ?>
+				<tr class="<?=$class?>">
+					<td><?=$v[title]?></td>
+					<td><?=$v[notes]?></td>
+					<td><a href="<?=APP_URL?>users/articles/event=editReturn/pkey=<?=$v[pkey]?>">Re-Submit</a></td>
+				</tr>
+		<?	} ?>
+</table>
+<? }  else { ?>
+<b>Returned Articles</b><br>
+No returned articles.
+<? } ?> 
+
+
+<? if ($t[pending]) { ?>
+
+<br><br>
+		<b>Pending Articles</b><br>
+
+	<ul>
+<? # Pending Articles 
+	 while (list($k, $v) =@each($t[pending]))
+			{ ?>
+				<li><?=$v[title]?>		
+		<?	} ?>
+	</ul>
+<? } else { ?>
+		<br><br>
+		<b>Pending Articles</b><br>
+		No pending articles.
+
+<? } ?>

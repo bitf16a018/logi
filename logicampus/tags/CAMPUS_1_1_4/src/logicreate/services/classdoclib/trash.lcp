@@ -1,0 +1,82 @@
+<?
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+
+/**
+ * file management 
+ *
+ * manager the trash can
+ */
+
+class trash extends classdoclibService {
+
+
+	/** 
+	 * show all the files and folders in the trash
+	 *
+	 */
+	function run (&$db,&$u,&$lc,&$t) {
+		$db->query('select pkey,name,class_id from classdoclib_Trash where owner = \''.$u->username.'\'
+		and class_id = '.$u->activeClassTaught->id_classes);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		while($db->next_record()) {;
+			$t['trash'][] =$db->Record;
+		}
+	}
+
+
+
+	function filePropsRun (&$db,&$u,&$lc,&$t) {
+		$t['file'] = LC_file::getSingle($lc->getvars['fid'],FOLDER_EDIT);
+		if ($t['file'] == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder';
+			return;
+		}
+		$this->presentor = 'emptyPresentation';
+		$lc->templateName = 'editFolder_fileProps';
+
+	}
+
+
+	/**
+	 * move a folder to the 'trash'
+	 */
+	function trashRun(&$db,&$u,&$lc,&$t) {
+		//move the folder to the trash table
+		$trash = LC_folder::load($lc->getvars['fid'],FOLDER_EDIT);
+		if ($trash == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder.';
+			return;
+		}
+
+		//folder is okay, serialize it and stick it in the classdoclib_Trash
+		$body = serialize($trash);
+		$trash->owner = addslashes($trash->owner);
+		$trash->class_id = addslashes($trash->class_id);
+		$trash->name = addslashes($trash->name);
+		$sql = "insert into classdoclib_Trash 
+			(owner,class_id,name,data)
+			VALUES
+			('$trash->owner',$trash->class_id,'$trash->name','$body')";
+
+		$db->query($sql);
+
+		//repeat for folder->contents
+
+		//remove folder and contents from db
+		$trash->delete();
+
+		//redirect out
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = APP_URL.'classdoclib/main/';
+
+	}
+
+}
+
+
+?>

@@ -1,0 +1,54 @@
+<?=$t['sectionheader'];?>
+<br>
+<table border="0" cellpadding="0" cellspacing="0">
+	
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+			<td colspan='2'><table width='100%' cellpadding='0' cellspacing='0' border='0'><tr>
+			<td width='20%' class='white' align='center'>&nbsp;</td>
+				<td class="white" align="center">
+				<br>
+				<div align="right">
+				<form method="POST">
+				Create a link to: 
+				<select name="linkType">
+					<option value="html">HTML Page</option>
+					<option value="app">LCP Module</option>
+					<option value="ext">External Site</option>
+					<option value="hr">Menu Break</option>
+				</select>
+				<input type="submit" value="go">
+				<input type="hidden" name="event" value="itemAdd">
+				<input type="hidden" name="mid" value="<?=$t['mid']?>">
+				</form>
+				</div>
+			</td>
+			</tr>
+			</table>
+			</td></tr>
+			<tr><td colspan='2' class='white' align='center'>
+
+				<br>
+				<?= $t['menus'] ?>
+				<p>
+				
+		<table border="0" width="85%"><tr><td align="left">
+		<a href="<?=modurl('menu/event=cache/mid='.$t['mid'].'/');?>">Publish Menu</a>
+		</td></tr></table><p>
+		
+			</td></tr>
+			<tr>
+			<td colspan='2'><table width='100%' cellpadding='0' cellspacing='0' border='0'>
+						<tr><td class="white" colspan='2' align="left">
+				<p>
+				You need to save any changes to the menu itself.  Adding, updating, moving links
+				will not appear on the website until they are saved.
+				</td>
+			</tr>
+		</table></td></tr>
+		</table></td></tr>
+		</td>
+	</tr>
+</table>
