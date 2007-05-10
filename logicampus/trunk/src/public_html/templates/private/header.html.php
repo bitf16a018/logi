@@ -165,7 +165,9 @@
 <?php 
 	$sysMessages = $obj->user->getSessionMessages();
 	if ( count($sysMessages) ) {
-		echo lcMessageBox($sysMessages);
+		foreach ($sysMessages as $msgType => $msgText) {
+			echo lcMessageBox($msgText, $msgType);
+		}
 	}
 
 	if ($t['_newPrivMsgs']) {  
