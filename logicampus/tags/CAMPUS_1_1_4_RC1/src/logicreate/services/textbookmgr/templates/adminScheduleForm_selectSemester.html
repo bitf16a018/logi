@@ -1,0 +1,31 @@
+<h2>Textbook Manager</h2>
+Selecting a semester to get apply textbook applications to.
+
+<br><br>
+
+<?php
+if (is_array($t['errors']))
+{
+	echo '<font color="red">';
+	echo implode($t['errors'], '<br><br>');
+	echo '</font><br><br>';
+}
+?>
+<br><br>
+<center>
+<form action="" method="POST">
+
+<input type="submit" value="Select Semester" name="Submit">
+<select name="semesterId" size="1">
+<?php
+	foreach($t['op_semesters'] as $code=>$semdescription)
+	{
+		echo '
+		<option value="'. $code. '">'. 
+			$semdescription. '</option>';
+	}
+?>
+</select>
+<input type="hidden" name="event" value="selectSemester">
+</form>
+

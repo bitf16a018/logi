@@ -1,0 +1,51 @@
+<?=$t['sectionheader'];?>
+
+
+<table>
+<tr><td valign='top' width='50%'>
+
+<form method="POST" enctype="multipart/form-data">
+
+	<h3>Semester<h3>
+	<select name="semester_id">
+		<? while ( list($k,$s) = @each($t['sems']) ) { ?>
+			<option value="<?=$k;?>"><?=$s;?></option>
+		<? } ?>
+	</select>
+
+	<br/>
+	Browse for student file
+	<br/>
+	<input type="file" name="student_file">
+
+
+	<!--
+	<h3>Found:</h3>
+	(<?= sprintf("%d",$t['count']);?>) unique users and
+	<br>
+	(<?= sprintf("%d",$t['sections']);?>) unique sections.
+	-->
+
+	<br/>
+	<input type="hidden" name="event" value="syncStudentsConfirm">
+	<input type="hidden" name="userdump" value="<?=$t['userdump']?>">
+	<input type="submit" value="Upload Student File">
+</form>
+</td><td valign='top' width='50%'>
+
+<h3>Individual administration</h3>
+Note that this works only with the current semester.  If a student account exists, the password will not 
+be replaced with what you enter here.
+<form method="POST" enctype="multipart/form-data" action='<?=appurl("administration/users/event=syncStudentsIndividual");?>'>
+Raw data input below<BR>
+<i>UserID,Password,SSN,Section</i>
+<BR>
+<input type='text' name='line'>
+<BR>
+<input type='submit' name='button' value='Add/Update'>
+<input type='submit' name='button' value='Delete'>
+</form>
+
+
+</form>
+</td></tr></table>

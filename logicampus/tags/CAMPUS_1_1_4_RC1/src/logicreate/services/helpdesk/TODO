@@ -1,0 +1,15 @@
+TO DO LIST
+----------
+Add support for uploading an initial file - maybe for all transactions, include a file.
+
+Add support for changing category by an admin
+
+Separate logic for hdadmin and hdstaff
+
+Add filtering support for hdadmin/staff overview datagrid.  Filter/search by status, category at least
+
+Test outgoing mail() function in helpdeskSubmit event=addDetail
+
+Have Ryan review/improve visual issues
+----------
+unknown issues

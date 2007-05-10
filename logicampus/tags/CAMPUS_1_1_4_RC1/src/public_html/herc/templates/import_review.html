@@ -1,0 +1,16 @@
+<h3>Report of Import</h3>
+
+Import took <?=$t['seconds']?> seconds.<br>
+There were <?=$t['count']?> emails found in the import.<br>
+Total successfully created accounts:  <?=$t['total']-$t['diff']?><br>
+Total accounts not created because they were duplicates:  <?=$t['diff']?><br><br>
+
+Accounts that were duplicated in the database already.  If the email addresses below were not already subscribed to the mailing list, they were added.<br>
+
+
+<form method="POST">
+<TEXTAREA cols="60" rows="30">
+<?=$t['previousAccounts']?>
+</TEXTAREA>
+</form>
+	

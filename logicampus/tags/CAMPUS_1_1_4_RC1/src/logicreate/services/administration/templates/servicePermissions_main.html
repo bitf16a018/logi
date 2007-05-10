@@ -1,0 +1,7 @@
+<?=$t['sectionheader'];?>
+<p>Select an application below to modify group permissions on.</p>
+<?php if ($t['msg']) {?><span style="color:blue;"><?=$t['msg'];?></span><?php } ?>
+<?php if ($t['error']) {?><span style="color:red;"><?=$t['error'];?></span><?php } ?>
+<ul>
+	<li> <a href="<?=APP_URL?>administration/servicePermissions/event=chooseService/module=administration">Administration</a></li>
+</ul>

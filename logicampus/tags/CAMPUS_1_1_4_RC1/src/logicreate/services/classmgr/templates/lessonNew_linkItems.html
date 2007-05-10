@@ -1,0 +1,26 @@
+<?= $t['sectionheader']; ?>
+
+<h2 style="margin:0px;"><?= $t['pageHeading'];?></h2>
+<?php
+if ( strlen($t['message']) > 0 ) { ?>
+	<h3 style="margin:0px;color:red;"><?= $t['message'];?></h3>
+<?php } ?>
+
+<div style="float:right">
+	<form style="margin:0px;" action="<?= appurl('classmgr/lessonManager/');?>">
+		<input type="submit" value="Cancel"/>
+	</form>
+</div>
+
+<form action="<?= appurl('classmgr/lessonNew/event=next/step='.($t['step']+1));?>" style="margin:0px;">
+
+<input type="submit" value="Next &raquo;"/>
+<br/>
+<br/>
+
+<?php echo $t['table']->toHTML(); ?>
+
+<br/>
+<input type="submit" value="Next &raquo;"/>
+</form>
+

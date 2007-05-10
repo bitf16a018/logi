@@ -1,0 +1,20 @@
+<?php echo $t['sectionheader'];?>
+
+
+<div style="float:left;">
+	Forum: <?=$t['forumName'];?>
+</div>
+<?php if ( ! $x = $t['table']->toHTML() ) { ?>
+	<br style="clear:both;"/>
+	There are no posts in this forum.
+<?php } else {
+	echo $x;
+} ?>
+
+<p>&nbsp;</p>
+<?php // TODO: only do this based on permissions ?>
+<?php if (! $t['locked']) { ?>
+<form method="GET" action="<?php echo appurl('classforums/posts/event=newTopic/forum_id='.$t['forumId']); ?>">
+	<input type="submit" name="start_topic" id="start_topic" value="Start New Topic"/>
+</form>
+<? } ?>

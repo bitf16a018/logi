@@ -1,0 +1,97 @@
+<html>
+<head>
+
+	<script>
+	window.setTimeout("window.location.href='<?=modurl("main/event=userlist/");?>';",20000);
+	</script>
+
+	<style>
+
+	TD {
+	    color: #000000;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	.admin {
+	    color: #FF0000;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	.titlebar {
+	    background-color: #FF0000;
+	}
+	.title {
+	    color: #FFFFFF;
+	    font-style: bold;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 14px; 
+	}
+	.regname1 {
+	    background-color: #CCCCCC;
+	    color: #000000;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 12px;optio
+	}
+	.regmess1 {
+	    background-color: #DDDDDD;
+	    color: #000000;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	.regname2 { 
+	    background-color: #CCCCCC;
+	    color: #0000FF;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	.regmess2 {
+	    background-color: #DDDDDD;
+	    color: #0000FF;
+	    font-family: arial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	.regname3 {
+	    background-color: #CCCCCC;
+	    color: #FF0000;
+	    font-style: bold;
+	    font-family: aroptioial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	.regmess3 {
+	    background-color: #DDDDDD;
+	    color: #FF0000;
+	    font-style: bold;
+	    font-famioptioly: arial, helvetica, san-serif;
+	    font-size: 12px; 
+	}
+	</style>
+<? if (trim($obj->user->activeClassTaken->stylesheet) != '') { ?>
+	<link rel="stylesheet" type="text/css" href="<?=BASE_URL. 'templates/student/';?><?=$obj->user->activeClassTaken->stylesheet;?>">
+<? } ?>
+</head>
+
+
+
+<body bgcolor="silver">
+
+<span id="classroom">
+	<div class="colorbar">Users <a href="<?=modurl("main/event=userlist/time=".time());?>">refresh</a></div>
+
+<hr>
+
+<table width="100%" border="0" cellpadding="4" cellspacing="1">
+<?
+while(list($k,$v) = @each($t['users'])) { 
+extract($v);
+?>
+<tr>
+<td>
+<a target='_NEW' href="<?=appurl("users/view/$username");?>"><?=$username;?></a>
+</td></tr>
+<? }?>
+</table>
+
+</span>
+
+</body>
+</html>

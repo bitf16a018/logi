@@ -1,0 +1,18 @@
+<? hercBox('Alter Permissions for Module <i>'.$t[modName].'<i>'); ?>
+
+<form method="POST">
+<table border="0" align="center">
+	<tr><td colspan="2">Current Permissions:</td></tr>
+	<tr><th>Key</th><th>Value</th></tr>
+	<? while ( list($k,$v) = @each($t[modPerms]) ) { ?>
+	<tr><td><input type="text" size="10" maxlength="20" value="<?=$k?>" name="modPerms[<?=++$key;?>][key]"></td><td><input type="text" size="20" value="<?=$v?>" name="modPerms[<?=$key;?>][name]"></td></tr>
+	<? } ?>
+	<tr><td colspan="2">Create a new permission</td></tr>
+	<tr><td><input type="text" size="8" name="newPerm[key]"></td><td><input type="text" size="20" name="newPerm[name]"></td></tr>
+	<tr><td><input type="submit" value="update" name="b"></td><td align="right"><input type="submit" value="save" name="b"></td></tr>
+</table>
+<input type="hidden" name="modID" value="<?=$t[modID];?>">
+<input type="hidden" name="event" value="alter">
+</form>
+Permission keys will be available to the module programmer via $u->perms array.  Keys over 20 characters are not allowed.
+<? endHercBox(); ?>
