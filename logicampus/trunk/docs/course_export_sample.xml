@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lobcol>
+	<lob guid="">
+		<type>interaction</type>
+		<subtype>activity</subtype>
+		<lobtitle>
+		</lobtitle>
+		<loburltitle>
+		</loburltitle>
+		<lobcontent>
+		</lobcontent>
+		<lobbinary encoding="base64">
+		</lobbinary>
+		<lobpreview>
+		</lobpreview>
+		<lobfilename>
+		</lobfilename>
+		<lobpreviewbinary encoding="base64">
+		</lobpreviewbinary>
+		<lobpreviewfilename>
+		</lobpreviewfilename>
+
+		<metadata>
+			<subject abbrv="no">English</subject>
+			<subdisc abbrv="no">Literature</subdisc>
+			<bibliography>
+				<citation>
+					<source></source>
+					<article></article>
+					<page></page>
+					<publish></publish>
+					<media></media>
+					<author></author>
+					<url></url>
+					<date></date>
+				</citation>
+			</bibliography>
+			<difficulty></difficulty>
+			<standard></standard>
+			<objective></objective>
+			<author></author>
+		</metadata>
+		<lifecycle>
+			<createdon dateformat=""></createdon>
+			<updatedon dateformat=""></updatedon>
+			<version major="" minor=""></version>
+			<status></status>
+			<active></active>
+		</lifecycle>
+	</lob>
+	<lob guid="">
+		<type>content</type>
+		<subtype mime="text/html">text</subtype>
+		<lobtitle>
+		</lobtitle>
+		<loburltitle>
+		</loburltitle>
+		<lobcontent>
+		</lobcontent>
+		<lobbinary encoding="base64">
+		</lobbinary>
+		<lobpreview>
+		</lobpreview>
+		<lobfilename>
+		</lobfilename>
+		<lobpreviewbinary encoding="base64">
+		</lobpreviewbinary>
+		<lobpreviewfilename>
+		</lobpreviewfilename>
+		<metadata>
+			<subject abbrv="no">English</subject>
+			<subdisc abbrv="no">Literature</subdisc>
+			<bibliography>
+				<citation>
+					<source></source>
+					<article></article>
+					<page></page>
+					<publish></publish>
+					<media></media>
+					<author></author>
+					<url></url>
+					<date></date>
+				</citation>
+			</bibliography>
+			<difficulty></difficulty>
+			<standard></standard>
+			<objective></objective>
+			<author></author>
+		</metadata>
+		<lifecycle>
+			<createdon dateformat=""></createdon>
+			<updatedon dateformat=""></updatedon>
+			<version major="" minor=""></version>
+			<status></status>
+			<active></active>
+		</lifecycle>
+	</lob>
+
+	<lesson guid="">
+		<objective></objective>
+		<standard></standard>
+		<plan>
+			<step num="1">Perform step 1</step>
+			<step num="2">Perform step 2</step>
+		</plan>
+		<notes>
+		</notes>
+		<linkedlobs>
+			<uselob guid=""/>
+		</linkedlobs>
+		<learningpath>
+			<lobsequence order="" notbefore="" visible="" daysafter="" guid=""/>
+		</learningpath>
+	</lesson>
+</lobcol>
