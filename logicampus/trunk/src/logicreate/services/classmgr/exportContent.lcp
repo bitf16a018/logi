@@ -260,7 +260,7 @@ class ExportContent extends FacultyService {
 
 			$guid = lcUuid();
 			$lob_nodes[] = new xml_node('lob', 
-				array('guid'=>$guid, 'dbid'=>$db->record['id_class_lesson_content']), 
+				array('guid'=>$guid, 'dbid'=>$db->record['pkey']), 
 				$xml_child_nodes
 			);
 		}
