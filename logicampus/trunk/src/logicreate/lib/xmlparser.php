@@ -45,6 +45,7 @@ class xmlparser
 		$this->parser = xml_parser_create($this->charset);
 		xml_parser_set_option($this->parser, XML_OPTION_TARGET_ENCODING, $this->charset);
 		xml_parser_set_option($this->parser, XML_OPTION_SKIP_WHITE, 1);
+		xml_parser_set_option($this->parser, XML_OPTION_CASE_FOLDING, false);
 		
 		if (!@xml_parse_into_struct($this->parser,$this->data,$this->vals,$this->index)) 
 		{	$this->_raiseError("Error while parsing XML File: ".xml_error_string(xml_get_error_code($this->parser))." at line ".xml_get_current_line_number($this->parser));
@@ -102,8 +103,9 @@ class xml_node
 	var $attrs;
 	var $children;
 	var $value;
+	var $cdata = false;
 
-	
+
 	function xml_node($nTag, $nAttrs, $nChildren=null, $nValue=null, $base64_check=false) 
 	{
 		$this->tag = $nTag;
@@ -112,10 +114,10 @@ class xml_node
 		$this->value = '';
 		if (strlen($nValue) > 0)
 		{	
-			if ($base64_check && @$nAttrs['BASE64'])
-			{	$this->value = utf8_decode(html_entity_decode(base64_decode($nValue))); // i'm not sure i need to do this.. (html_entity_decode())
-			} else 
-			{	$this->value = utf8_decode(html_entity_decode($nValue));
+			if ($base64_check && @$nAttrs['BASE64']) {
+				$this->value = utf8_decode(html_entity_decode(base64_decode($nValue))); // i'm not sure i need to do this.. (html_entity_decode())
+			} else {
+				$this->value = utf8_decode(html_entity_decode($nValue));
 			}
 			
 		}
@@ -129,7 +131,7 @@ class xml_node
 		$attr_str = '';
 		if (is_array($this->attrs))
 		foreach($this->attrs as $key => $val)
-		{	$attrs[] = strtoupper($key) . '="'. utf8_encode(htmlspecialchars($val)). '"'; // encode this
+		{	$attrs[] = $key . '="'. utf8_encode(htmlspecialchars($val)). '"'; // encode this
 		}
 		
 		if ($attrs) 
@@ -157,12 +159,15 @@ class xml_node
 		# closed: <tag attrib="val"/>
 		$numtags = sizeof($keys);
 		$trimmeddata = trim($this->value);
-		if ($numtags && ($trimmeddata == "")) 
-		{	$tagstr .= ">\n";
-		} elseif ($numtags == false && ($trimmeddata == "")) 
-		{	$tagstr .= "/>\n";
-		} else 
-		{	$tagstr .= ">";
+		if ($numtags && ($trimmeddata == "")) {
+			$tagstr .= ">\n";
+		} elseif ($numtags == false && ($trimmeddata == "")) {
+			$tagstr .= "/>\n";
+		} else {
+			$tagstr .= ">";
+		}
+		if ($this->cdata) {
+			$tagstr .= "<![CDATA[";
 		}
 		
 		fwrite($fh, $tagstr);
@@ -178,15 +183,19 @@ class xml_node
 		}
 
 		# Write out each subtag
-		foreach($keys as $k) 
-		{	$this->children[$k]->wr_node( $fh, "$prepend_str\t" );
+		foreach($keys as $k) {
+			$this->children[$k]->wr_node( $fh, "$prepend_str\t" );
+		}
+		$tagstr = '';
+		if ($this->cdata) {
+			$tagstr .= "]]>\n".$prepend_str;
 		}
 
 		# Write out the end element if necessary
-		if ($numtags || ($trimmeddata != "")) 
-		{	$tagstr = "</{$this->tag}>\n";
-			if ($numtags) 
-			{	$tagstr = "$prepend_str$tagstr";
+		if ($numtags || ($trimmeddata != "")) {
+			$tagstr .= "</{$this->tag}>\n";
+			if ($numtags) {
+				$tagstr = $prepend_str.$tagstr;
 			}
 		fwrite( $fh, $tagstr );
 		}
