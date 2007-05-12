@@ -36,6 +36,8 @@
 			<author></author>
 			<description></description>
 			<notes></notes>
+			<copyright></copyright>
+			<license></license>
 			<!-- one of the following -->
 			<lobpreview>
 			</lobpreview>
@@ -86,6 +88,8 @@
 			<author></author>
 			<description></description>
 			<notes></notes>
+			<copyright></copyright>
+			<license></license>
 			<!-- one of the following -->
 			<lobpreview>
 			</lobpreview>
