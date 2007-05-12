@@ -7,18 +7,13 @@
 		</lobtitle>
 		<loburltitle>
 		</loburltitle>
+		<!-- one of the following -->
 		<lobcontent>
 		</lobcontent>
 		<lobbinary encoding="base64">
 		</lobbinary>
-		<lobpreview>
-		</lobpreview>
 		<lobfilename>
 		</lobfilename>
-		<lobpreviewbinary encoding="base64">
-		</lobpreviewbinary>
-		<lobpreviewfilename>
-		</lobpreviewfilename>
 
 		<metadata>
 			<subject abbrv="no">English</subject>
@@ -39,6 +34,13 @@
 			<standard></standard>
 			<objective></objective>
 			<author></author>
+			<!-- one of the following -->
+			<lobpreview>
+			</lobpreview>
+			<lobpreviewbinary encoding="base64">
+			</lobpreviewbinary>
+			<lobpreviewfilename>
+			</lobpreviewfilename>
 		</metadata>
 		<lifecycle>
 			<createdon dateformat=""></createdon>
@@ -59,14 +61,8 @@
 		</lobcontent>
 		<lobbinary encoding="base64">
 		</lobbinary>
-		<lobpreview>
-		</lobpreview>
 		<lobfilename>
 		</lobfilename>
-		<lobpreviewbinary encoding="base64">
-		</lobpreviewbinary>
-		<lobpreviewfilename>
-		</lobpreviewfilename>
 		<metadata>
 			<subject abbrv="no">English</subject>
 			<subdisc abbrv="no">Literature</subdisc>
@@ -86,6 +82,13 @@
 			<standard></standard>
 			<objective></objective>
 			<author></author>
+			<!-- one of the following -->
+			<lobpreview>
+			</lobpreview>
+			<lobpreviewbinary encoding="base64">
+			</lobpreviewbinary>
+			<lobpreviewfilename>
+			</lobpreviewfilename>
 		</metadata>
 		<lifecycle>
 			<createdon dateformat=""></createdon>
