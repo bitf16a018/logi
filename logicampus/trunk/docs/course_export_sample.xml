@@ -35,6 +35,7 @@
 			<objective></objective>
 			<author></author>
 			<description></description>
+			<caption></caption>
 			<notes></notes>
 			<copyright></copyright>
 			<license></license>
@@ -87,6 +88,7 @@
 			<objective></objective>
 			<author></author>
 			<description></description>
+			<caption></caption>
 			<notes></notes>
 			<copyright></copyright>
 			<license></license>
