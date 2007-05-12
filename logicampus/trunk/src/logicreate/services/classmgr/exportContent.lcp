@@ -1,0 +1,642 @@
+<?php
+/*
+ *
+ * Service will act as a gateway into the rest of the
+ * application.
+ *
+ 
+ NOTE::: making an attribute set to  array('BASE64'=>'1') will base64 encode 
+ the value and when reading the xml it will auto base64_Decode it.
+ NOTE::: I NEED CLASS SECTION NUMBERS
+ */
+include_once(LIB_PATH.'xmlparser.php');
+
+class ExportContent extends FacultyService {
+	var $presentor='emptyPresentation';
+
+	// links
+	var $navlinks = array(
+		'Classroom Manager' => 'display/',
+		'Announcements' => 'announcements/',
+	);
+	var $applinks = array(
+		'Data exchange'=>'dataexchange'
+	);
+	var $inactivelinks = array( 'Data exchange' );
+	
+	var $id_classes =0;
+	
+	var $obj_zip;
+	
+	
+	/**
+	 * construct a fancy filename for the users
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$classId = (int)$u->activeClassTaught->id_classes;
+		$this->presentor = 'htmlPresentation';
+		$lc->templateName='dataexchange_main';
+
+		$t['filename'] = 'classroom.zip';
+	}
+	
+	
+	/**
+	 * query all the relevant databases to make an XML file
+	 * to send to the user
+	 *
+	 * Change: MAK 8/21/03
+	 * Let's try to create a zip file with the XML and externalize all content from
+	 * classdoclib
+	 */
+	function downloadRun($db, &$u, &$lc, &$t) {
+		$this->obj_zip = new LcZipFile();
+	        $this->obj_zip->add_dir('library/');
+		$this->obj_zip->add_dir('content/');
+		$this->obj_zip->add_dir('assignments/');
+ 
+		$lc->templateName='dataexchange_main';
+//auto-comment		$lc->templateStyle = 'private';
+		
+		$classId = $u->activeClassTaught->id_classes;
+		$this->classId = $classId;
+		
+
+		// select base information (as much as I can in 1 query)
+		$sql = '
+		SELECT 
+			a.id_classes,		b.id_courses,
+			a.classType,		b.courseFamily,
+			a.facultyId,		b.courseNumber,
+			a.stylesheet,		b.courseName,
+			a.id_semesters,		b.courseDescription,
+			a.sectionNumbers,	b.preReq1,
+						b.preReq2,
+						b.preReq3,
+						b.preReq4,
+						b.coReq1,
+						b.coReq2,
+						b.coReq3,
+						b.coReq4,
+			s.semesterId,
+			a.noexam
+		FROM classes as a
+			INNER JOIN courses as b
+				ON a.id_courses=b.id_courses
+			INNER JOIN semesters as s
+				ON a.id_semesters=s.id_semesters
+		
+		WHERE a.id_classes='.$classId.'
+		';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$filename = 'classroom_'.$db->Record['courseFamily']. $db->Record['courseNumber'].'_'.$db->Record['semesterId'].'.zip';
+
+
+		$xml_raw_save = '';
+		
+		
+		$xmlObj = new xmlparser('<lobcol></lobcol>');
+		$root =& $xmlObj->getRoot();
+		
+		/*
+		$classroom_nodes[] = new xml_node('lob', 
+			array('guid'=>'lskdjfs')
+			);
+		 */
+
+		/*
+		$classroom_node[] = new xml_node('CLASSROOM', 
+						array(	'ID'=>$db->Record['id_classes'], 
+								'CLASSTYPE'=>$db->Record['classType'],
+								'ID_SEMESTERS'=>$db->Record['id_semesters'],
+								'STYLESHEET'=>$db->Record['stylesheet'], 
+								'FACULTYID'=>$db->Record['facultyId'],
+								'SECTIONNUMBERS'=>$db->Record['sectionNumbers'],
+								'NOEXAM'=>$db->Record['noexam']
+							 )
+						);
+
+		 */
+
+		$lobs = $this->get_content_nodes();
+		foreach ($lobs as $xmlnode) {
+			$root->children[] = $xmlnode;
+		}
+
+		$doclobs = $this->get_document_files();
+		foreach ($doclobs as $xmlnode) {
+			$root->children[] = $xmlnode;
+		}
+		
+
+//		print_r($lobs);exit();
+
+		//$root->children =& $classroom_nodes;
+		//$classroom_nodes[0]->children = $classroom_child_node;
+
+		$fh = tmpfile();
+		
+		$xmlObj->write_file($fh);
+        $file_size = ftell($fh);
+        rewind($fh);
+        // I think i'm going to have to rewrite this, becuase i can't pump out more than the php upload limit 15M
+        $silly = fread($fh, $file_size);
+	echo "<pre>\n".htmlspecialchars($silly)."\n</pre>\n";exit();
+       
+       
+        $this->obj_zip->add_file($silly,'learningobjects.xml');
+        $wiky = $this->obj_zip->file();
+        
+        fclose($fh);
+        ob_end_clean();
+
+	if (ini_get('zlib.output_compression'))
+		ini_set('zlib.output_compression', 'Off');
+
+        //header("Cache-control: public");
+	header('Cache-Control: no-store, no-cache, must-revalidate');
+	header('Cache-Control: post-check=0, pre-check=0', false);
+	header('Pragma: no-cache');
+        		//header("Content-type: text/html");
+		header("Content-type: application/zip");
+		header("Content-length: ". strlen($wiky));
+		header("Content-Disposition: attachment; filename=$filename");
+		echo $wiky;
+		exit;
+	}
+	
+	
+	
+	function get_document_files() {
+		$lob_nodes = array();
+		$sql = '
+		SELECT A.* , B.name as foldername
+		FROM classdoclib_Files as A
+		LEFT JOIN classdoclib_Folders as B on A.folder = B.pkey
+		WHERE B.class_id='.$this->classId.'
+		';
+
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord()) {
+			if (trim($db->Record['diskName']) == '')
+				continue;
+			/*
+			$xml_sub_child = null;
+			
+				
+			$xml_sub_child[] = new xml_node('daHasha',null, null, $db->Record['daHasha']);
+			$xml_sub_child[] = new xml_node('file', array('BASE64'=>'1'), null, $db->Record['file']);
+			$xml_sub_child[] = new xml_node('displayname', array('BASE64'=>'1'), null, $db->Record['displayname']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
+			$xml_sub_child[] = new xml_node('mime', null, null, $db->Record['mime']);
+			//$xml_sub_child[] = new xml_node('folder', null, null, $db->Record['folder']); // not needed at all! but for good measure we'll keep it
+			$xml_sub_child[] = new xml_node('owner', null, null, $db->Record['owner']);
+			$xml_sub_child[] = new xml_node('filedate', null, null, $db->Record['filedate']);
+			$xml_sub_child[] = new xml_node('size', null, null, $db->Record['size']);
+			$xml_sub_child[] = new xml_node('diskName', null, null, $db->Record['diskName']);
+			$xml_sub_child[] = new xml_node('trashed', null, null, $db->Record['trashed']);
+			$xml_sub_child[] = new xml_node('origfolder', null, null, $db->Record['origfolder']); // how to handle in copy!
+			
+			// instead of encoding the contents of a file into xml
+			// add in an identifier and copy the original file into
+			// the temp directory
+			
+			$this->obj_zip->add_file(
+						file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->Record['diskName'], 0, 2). '/'.substr($db->Record['diskName'],(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName']),
+						$this->current_dir.'library/'.str_replace('/', ' ', strip_tags($db->Record['diskName'])));
+		/**
+			$xml_sub_child[] = new xml_node('data', null, null, 
+											base64_encode(
+												file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->Record['diskName'], 0, 2). '/'.substr($db->Record['diskName'],(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName'])
+												)
+											);
+		**/								
+
+			$type_node = new xml_node('type',null,null,'content');
+			//subtype
+			list($type,$submime) = explode('/', $db->record['mime']);
+			$sub_type_node = new xml_node('subtype',array('mime'=>$db->record['mime']),null);
+			if ($type == 'image') {
+				$sub_type_node->value = 'image';
+			} else {
+				$sub_type_node->value = 'document';
+			}
+			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['displayname']);
+			$lob_title_node->cdata = true;
+			$lob_url = new xml_node('loburltitle',null,null,$db->record['file']);
+			$lob_file_node = new xml_node('lobfilename',null,null,$db->record['file']);
+			$lob_file_node->cdata = true;
+
+			$xml_child_nodes = array();
+			$xml_child_nodes[] = $type_node;
+			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $lob_title_node;
+			$xml_child_nodes[] = $lob_file_node;
+
+			//lifecycle
+			$createdon = strtotime($db->record['filedate']);
+
+			$lifecycleArray = array(
+				'version'=>'1.0', 
+				'createdon'=>$createdon, 'createdon_dateformat'=>'unix'
+			);
+
+			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
+
+			//metadata
+			$metadataArray = array(
+				'author'=>'Mark Kimsal', 
+				'description'=>$db->record['description']
+			);
+			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
+
+//			$meta_node->children[] = $author_node;
+//			$xml_child_nodes[] = $meta_node;
+
+			$guid = lcUuid();
+			$lob_nodes[] = new xml_node('lob', 
+				array('guid'=>$guid, 'dbid'=>$db->record['id_class_lesson_content']), 
+				$xml_child_nodes
+			);
+		}
+	return  $lob_nodes; 
+	}
+	
+	
+	function get_content_nodes() {
+		$xml_child_nodes = array();
+		$sql = '
+		SELECT * 
+		FROM class_lesson_content
+		WHERE id_classes='.$this->classId.'
+		'; 
+
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+
+		$lob_nodes = array();
+		while ($db->nextRecord()) {
+			$type_node = new xml_node('type',null,null,'content');
+			$sub_type_node = new xml_node('subtype',null,null,'text');
+			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['txTitle']);
+			$lob_title_node->cdata = true;
+			$lob_content_node = new xml_node('lobcontent',null,null,$db->record['txText']);
+			$lob_content_node->cdata = true;
+
+			$xml_child_nodes = array();
+			$xml_child_nodes[] = $type_node;
+			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $lob_title_node;
+			$xml_child_nodes[] = $lob_content_node;
+
+			//lifecycle
+			$lifecycleArray = array(
+				'version'=>'1.0', 
+				'createdon'=>time(), 'createdon_dateformat'=>'unix'
+			);
+
+			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
+
+			//metadata
+			$metadataArray = array(
+				'author'=>'Mark Kimsal'
+			);
+			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
+
+//			$meta_node = new xml_node('metadata',null,null);
+//			$author_node = new xml_node('author',null,null,'Mark Kimsal');
+//			$meta_node->children[] = $author_node;
+//			$xml_child_nodes[] = $meta_node;
+
+			$guid = lcUuid();
+			$lob_nodes[] = new xml_node('lob', 
+				array('guid'=>$guid, 'dbid'=>$db->record['id_class_lesson_content']), 
+				$xml_child_nodes
+			);
+		}
+		return $lob_nodes;
+	}
+	
+	
+	/**
+	 * make the lifecycle tag and all the possible sub nodes.
+	 * createdOn
+	 * updatedOn
+	 * createdOn_dateformat
+	 * updatedOn_dateformat
+	 * version
+	 * version_major
+	 * version_minor
+	 * status
+	 * active
+	 * createdBy
+	 * updatedBy
+	 */
+	function makeLifecycleNode($lifecycleStruct) {
+		$allow = array(
+			'createdon',
+			'updatedon',
+			'version',
+			'status',
+			'active',
+			'createdby',
+			'updatedby'
+		);
+		$lifecycle_node = new xml_node('lifecycle',null,null);
+		foreach ($allow as $tag) {
+			if ($lifecycleStruct[$tag] != '') {
+				$n = new xml_node(
+					$tag,
+					null,
+					null,
+					htmlentities($lifecycleStruct[$tag])
+				);
+
+
+				if ($tag == 'version'
+					&& $lifecycleStruct['version_major']) {
+						$n->attrs['major'] = $lifecycleStruct['version_major'];
+				}
+				if ($tag == 'createdon'
+					&& $lifecycleStruct['createdon_dateformat']) {
+						$n->attrs['dateformat'] = $lifecycleStruct['createdon_dateformat'];
+				}
+
+				$lifecycle_node->children[] = $n;
+			}
+		}
+
+		/*
+		$lifecycle_node = new xml_node('lifecycle',null,null);
+		$version_node = new xml_node('version',null,null,'1.0');
+		$lifecycle_node->children[] = $version_node;
+		$xml_child_nodes[] = $lifecycle_node;
+		 */
+		return $lifecycle_node;
+	}
+
+
+	function makeMetadataNode($metadataStruct) {
+		$allow = array(
+			'subject',
+			'subject_abbr',
+			'subdisc',
+			'subdisc_abbr',
+			'author',
+			'description',
+			'copyright',
+			'licence',
+			'objective'
+		);
+		$metadata_node = new xml_node('metadata',null,null);
+		foreach ($allow as $tag) {
+			if ($metadataStruct[$tag] != '') {
+				$n = new xml_node(
+					$tag,
+					null,
+					null,
+					htmlentities($metadataStruct[$tag])
+				);
+			$metadata_node->children[] = $n;
+			}
+		}
+		return $metadata_node;
+	}
+
+
+	// look at the objectives link, it uses id_class_lesson .. <-- NO S lessons
+	function get_lessons_nodes() {
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM class_lessons
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		$db2 = DB::getHandle();
+		$db2->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->next_record())
+		{	$xml_sub_child = null;
+			$xml_links = null;
+			$xml_objectives = null;
+			$xml_assignments = null;
+			$xml_sub_sub_child = null;
+			
+			// find all links to lessons
+			$sql2 = '
+			SELECT * FROM 
+			class_lesson_links
+			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
+			
+			$db2->query($sql2);
+			while ($db2->next_record())
+			{	$xml_links[] = new xml_node('id_class_links',null, null, $db2->Record['id_class_links']);
+			}
+			$xml_sub_sub_child[] = new xml_node('LINKS',null, $xml_links);
+			
+			$sql2 = '
+			SELECT * FROM 
+			class_lesson_objectives
+			WHERE id_class_lesson='. $db->Record['id_class_lessons'];
+			
+			$db2->query($sql2);
+			while ($db2->next_record())
+			{	$xml_objectives[] = new xml_node('id_class_objectives',null, null, $db2->Record['id_class_objectives']);
+			}
+			$xml_sub_sub_child[] = new xml_node('OBJECTIVES',null,$xml_objectives);
+
+			
+			$sql2 = '
+			SELECT * FROM 
+			class_assignments_link
+			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
+			
+			$db2->query($sql2);
+			while ($db2->next_record())
+			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->Record['id_class_assignments']);
+			}
+			$xml_sub_sub_child[] = new xml_node('ASSIGNMENTS',null,$xml_assignments);
+			
+			
+			
+			// refer to the CONTENT node in APPS for mappings
+//			$xml_sub_sub_child[] = new xml_node('CONTENT',null);
+			
+			$xml_sub_child[] = new xml_node('MAPPINGS',null, $xml_sub_sub_child);
+			
+			$xml_sub_child[] = new xml_node('createdOn',null, null, $db->Record['createdOn']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
+			$xml_sub_child[] = new xml_node('activeOn', null, null, $db->Record['activeOn']);
+			$xml_sub_child[] = new xml_node('inactiveOn', null, null, $db->Record['inactiveOn']);
+			$xml_sub_child[] = new xml_node('checkList', array('BASE64'=>'1'), null, $db->Record['checkList']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_lessons'=>$db->Record['id_class_lessons']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_LESSONS', null, $xml_child_node);
+	}
+	
+
+/*
+ *
+ * Processes the choices made above and makes a compresses .zip file.
+ * We should look at using XML to save this file so we can easily build 
+ * an import routine to pull stuff this export generated back into the system.
+ *
+ * Input data: classID
+ * Output data: form
+ *
+ */
+       
+	function exportClassRun(&$db,&$u,&$lc,&$t) {
+            $lc->templateName='dataexchange_main';
+//auto-comment			$lc->templateStyle = 'private';
+			
+       }       
+}
+
+
+class LcZipFile {
+
+	var $datasec = array();
+	var $ctrl_dir = array();
+	var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
+	var $old_offset = 0;
+
+
+	function add_dir($name) {
+		$name = str_replace("\\","/", $name);
+
+		$fr = "\x50\x4b\x03\x04";
+		$fr .= "\x0a\x00";
+		$fr .= "\x00\x00";
+		$fr .= "\x00\x00";
+		$fr .= "\x00\x00\x00\x00";
+
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+		$fr .= pack("v",strlen($name));
+		$fr .= pack("v",0);
+		$ft .= $name;
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+
+		$this->datasec[] = $fr;
+
+		$new_offset = $this->old_offset + strlen($fr);
+
+		$cdrec = "\x50\x4b\x01\x02";
+		$cdrec .="\x00\x00";
+		$cdrec .="\x0a\x00";
+		$cdrec .="\x00\x00";
+		$cdrec .="\x00\x00";
+		$cdrec .="\x00\x00\x00\x00";
+		$cdrec .= pack("V",0);
+		$cdrec .= pack("V",0);
+		$cdrec .= pack("V",0);
+		$cdrec .= pack("v",strlen($name));
+		$cdrec .= pack("v",0);
+		$cdrec .= pack("v",0);
+		$cdrec .= pack("v",0);
+		$cdrec .= pack("v",0);
+		$ext = "\x00\x00\x10\x00";
+		$ext = "\xff\xff\xff\xff";
+		$cdrec .= pack("V",16);
+		$cdrec .= pack("V",$this->old_offset);
+		$cdrec .= $name;
+
+		$this->ctrl_dir[] = $cdrec;
+		$this->old_offset = $new_offset;
+
+	}
+
+
+	function add_file($data, $name) { 
+		$name = str_replace("\\", "/", $name); 
+		$unc_len = strlen($data); 
+		$crc = crc32($data); 
+		$zdata = gzcompress($data); 
+		$zdata = substr ($zdata, 2, -4); 
+		//should be strlen if substr, or original ?
+		$c_len = strlen($zdata); 
+
+		$fr = "\x50\x4b\x03\x04"; 
+		$fr .= "\x14\x00"; 
+		$fr .= "\x00\x00"; 
+		$fr .= "\x08\x00"; 
+		$fr .= "\x00\x00\x00\x00"; 
+		$fr .= pack("V",$crc); 
+		$fr .= pack("V",$c_len); 
+		$fr .= pack("V",$unc_len); 
+		$fr .= pack("v", strlen($name) ); 
+		$fr .= pack("v", 0 ); 
+		$fr .= $name; 
+		$fr .= $zdata; 
+		$fr .= pack("V",$crc); 
+		$fr .= pack("V",$c_len); 
+		$fr .= pack("V",$unc_len); 
+
+		$this->datasec[] = $fr;
+
+		$new_offset = strlen(implode("", $this->datasec)); 
+
+		$cdrec = "\x50\x4b\x01\x02"; 
+		$cdrec .="\x00\x00"; 
+		$cdrec .="\x14\x00"; 
+		$cdrec .="\x00\x00"; 
+		$cdrec .="\x08\x00"; 
+		$cdrec .="\x00\x00\x00\x00"; 
+		$cdrec .= pack("V",$crc); 
+		$cdrec .= pack("V",$c_len); 
+		$cdrec .= pack("V",$unc_len); 
+		$cdrec .= pack("v", strlen($name) ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("V", 32 ); 
+		$cdrec .= pack("V", $this->old_offset ); 
+
+		$this -> old_offset = $new_offset; 
+
+		$cdrec .= $name; 
+		$this -> ctrl_dir[] = $cdrec; 
+	} 
+ 
+
+	function file() { 
+		$data = implode("", $this->datasec); 
+		$ctrldir = implode("", $this->ctrl_dir); 
+
+	   return 
+		$data. 
+		$ctrldir. 
+		$this -> eof_ctrl_dir. 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("V", strlen($ctrldir)). 
+		pack("V", strlen($data)). 
+		"\x00\x00"; 
+	} 
+
+}
+
+?>
+
