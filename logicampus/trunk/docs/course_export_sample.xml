@@ -3,6 +3,11 @@
 	<lob guid="">
 		<type>interaction</type>
 		<subtype>activity</subtype>
+
+		<lobdescription></lobdescription>
+		<lobcaption></lobcaption>
+		<lobnotes></lobnotes>
+
 		<lobtitle>
 		</lobtitle>
 		<loburltitle>
@@ -34,9 +39,6 @@
 			<standard></standard>
 			<objective></objective>
 			<author></author>
-			<description></description>
-			<caption></caption>
-			<notes></notes>
 			<copyright></copyright>
 			<license></license>
 			<!-- one of the following -->
@@ -58,6 +60,11 @@
 	<lob guid="">
 		<type>content</type>
 		<subtype mime="text/html">text</subtype>
+
+		<lobdescription></lobdescription>
+		<lobcaption></lobcaption>
+		<lobnotes></lobnotes>
+
 		<lobtitle>
 		</lobtitle>
 		<loburltitle>
@@ -87,9 +94,6 @@
 			<standard></standard>
 			<objective></objective>
 			<author></author>
-			<description></description>
-			<caption></caption>
-			<notes></notes>
 			<copyright></copyright>
 			<license></license>
 			<!-- one of the following -->
