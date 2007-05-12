@@ -21,10 +21,13 @@ html > body {
   font-size: 8.5pt;
 }
 
+/*
 H1,H2,H3,H4,H5
 {
-        margin:4px;
+        margin:4px 0px 4px 0px;
+	padding:0px;
 }
+*/
 
 acronym, .titleTip {
   border-bottom: 1px dotted rgb(153,153,153);
@@ -318,7 +321,7 @@ dd {
 
 H1,H2,H3,H4,H5
 {
-        margin:2px;
+        margin:2px 0px 2px 0px;
 }
 
 .bartitle {
