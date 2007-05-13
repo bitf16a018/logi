@@ -159,6 +159,14 @@ class lcClass {
 		$db->nextRecord();
 		return $db->record['total'];
 	}
+
+
+	function makeUniqueCode($lessonObj) {
+		return   $lessonObj->courseFamilyNumber 
+			. '_'. $lessonObj->id_classes
+			. '_'. $lessonObj->id_courses;
+			
+	}
 }
 
 ?>
