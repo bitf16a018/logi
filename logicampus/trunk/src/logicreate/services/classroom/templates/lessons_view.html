@@ -95,7 +95,7 @@
 
 
 	<div style="width:100%; text-align:center;">
-		<a href="<?= appurl('classroom/lessons/event=viewContent/id='.$t['content']['id_class_lesson_content']);?>">Start Lesson</a>
+		<a href="<?= $t['startUrl'];?>">Start Lesson</a>
 		&nbsp;&nbsp;
 		&nbsp;&nbsp;
 		&nbsp;&nbsp;
@@ -106,6 +106,17 @@
 
 </div>	
 
+		<h3>Lesson Trail</h3>
+		<?php
+		if ( is_array($t['seqItems']) ) {
+		?>
+		<ol>
+			<?php
+			foreach ($t['seqItems'] as $k=>$obj) {
+			?>
+			<li><?= $obj->lobTitle;?></li>
+			<?php } ?>
+		<?php } ?>
 
 <!--
 <div class="colorbar">
