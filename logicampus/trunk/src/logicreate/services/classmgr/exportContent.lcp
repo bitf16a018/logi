@@ -93,6 +93,7 @@ class ExportContent extends FacultyService {
 		
 		$filename = 'classroom_'.$db->Record['courseFamily']. $db->Record['courseNumber'].'_'.$db->Record['semesterId'].'.zip';
 
+		$this->courseFamily = $db->Record['courseFamily'];
 
 		$xml_raw_save = '';
 		
@@ -232,11 +233,16 @@ class ExportContent extends FacultyService {
 			$lob_file_node = new xml_node('lobfilename',null,null,$db->record['file']);
 			$lob_file_node->cdata = true;
 
+			$lob_desc_node = new xml_node('lobdescription',null,null,$db->record['description']);
+			$lob_desc_node->cdata = true;
+
+
 			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_file_node;
+			$xml_child_nodes[] = $lob_desc_node;
 
 			//lifecycle
 			$createdon = strtotime($db->record['filedate']);
@@ -251,7 +257,8 @@ class ExportContent extends FacultyService {
 			//metadata
 			$metadataArray = array(
 				'author'=>'Mark Kimsal', 
-				'description'=>$db->record['description']
+				'subject'=>$this->courseFamily,
+				'subject_abbr'=>'true'
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -305,7 +312,9 @@ class ExportContent extends FacultyService {
 
 			//metadata
 			$metadataArray = array(
-				'author'=>'Mark Kimsal'
+				'author'=>'Mark Kimsal',
+				'subject'=>$this->courseFamily,
+				'subject_abbr'=>'true'
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -385,11 +394,9 @@ class ExportContent extends FacultyService {
 	function makeMetadataNode($metadataStruct) {
 		$allow = array(
 			'subject',
-			'subject_abbr',
 			'subdisc',
 			'subdisc_abbr',
 			'author',
-			'description',
 			'copyright',
 			'licence',
 			'objective'
@@ -403,6 +410,12 @@ class ExportContent extends FacultyService {
 					null,
 					htmlentities($metadataStruct[$tag])
 				);
+
+				if ($tag == 'subject'
+					&& $metadataStruct['subject_abbr']) {
+						$n->attrs['abbr'] = $metadataStruct['subject_abbr'];
+				}
+
 			$metadata_node->children[] = $n;
 			}
 		}
