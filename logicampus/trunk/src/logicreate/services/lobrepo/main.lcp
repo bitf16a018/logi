@@ -1,0 +1,23 @@
+<?
+
+/**
+ * Learning Object Repository
+ */
+class Lobrepo extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='main_main';
+	}
+}
+
+?>

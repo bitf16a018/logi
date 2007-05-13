@@ -1,0 +1,117 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+
+/**
+ * Learning Object Repository
+ */
+class Import extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='import_main';
+	}
+
+
+	function handleUploadRun(&$db,&$u,&$lc,&$t) {
+		debug($lc->uploads);
+
+		if ($lc->uploads['lobxml']['error']) {
+			die('upload error');
+		}
+
+		$doc = domxml_open_file($lc->uploads['lobxml']['tmp_name']);
+		$root = $doc->child_nodes();
+		$collectionNode = $root[0];
+		$lobNodes = $collectionNode->child_nodes();
+		foreach ($lobNodes as $node) {
+			if ($node->node_type() == XML_TEXT_NODE) {
+				continue;
+			}
+			$lobObj = $this->processLobNode($node);
+			$lobObj->save();
+			debug($lobObj);
+		}
+
+		debug( htmlentities( file_get_contents( $lc->uploads['lobxml']['tmp_name']) ) );
+	}
+
+
+	/**
+	 * return a lob object
+	 */
+	function processLobNode($n) {
+		$result = $n->get_elements_by_tagname('type');
+		$type = $result[0];
+		/*
+		print_r($type);
+		echo "new lob: <br/>";
+//		debug($type);
+		echo $type->node_value();
+		echo "name lob: <br/>";
+		echo $type->tagname;
+		echo "<br/>";
+		 */
+		$children = $type->child_nodes();
+		$content = trim($children[0]->node_value());
+
+		$lob = null;
+		switch ($content) {
+			case 'content':
+				$lob = new LobContent();
+				$lob->set('lobType','content');
+				break;
+
+		}
+
+
+		$result = $n->get_elements_by_tagname('lobtitle');
+		$node = $result[0];
+		$children = $node->child_nodes();
+		$lob->set('lobTitle', trim($children[0]->node_value()) );
+
+		$result = $n->get_elements_by_tagname('lobcontent');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobContent', trim($children[0]->node_value()) );
+		}
+
+		$result = $n->get_elements_by_tagname('lobfilename');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobFilename', trim($children[0]->node_value()) );
+		}
+
+		$result = $n->get_elements_by_tagname('lobdescription');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobDescription', trim($children[0]->node_value()) );
+		}
+
+
+		$result = $n->get_elements_by_tagname('subtype');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobSubType', trim($children[0]->node_value()) );
+		}
+
+
+		return $lob;
+//		debug($children);
+	}
+}
+
+?>
