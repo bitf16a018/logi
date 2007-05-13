@@ -141,13 +141,15 @@ class ExportContent extends FacultyService {
 		$fh = tmpfile();
 		$xmlObj->write_file($fh);
 		// I think i'm going to have to rewrite this, becuase i can't pump out more than the php upload limit 15M
-		fclose($fh);
 		$file_size = ftell($fh);
 		rewind($fh);
+		/*
 		$zipname = tempnam();
 		$ziph = fopen( $zipname, 'b');
+		 */
 
 		$xmlchars = fread($fh, $file_size);
+		fclose($fh);
 //		echo "<pre>\n".htmlspecialchars($xmlchars)."\n</pre>\n";exit();
        
        
@@ -224,7 +226,7 @@ class ExportContent extends FacultyService {
 					'/'.substr($db->Record['diskName'],
 					(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName'])
 				,
-				'content/'.str_replace('/','_',strip_tags($db->Record['diskName']))
+				'content/'.str_replace('/','_',strip_tags($db->Record['file']))
 			);
 
 
@@ -603,8 +605,8 @@ class LcZipFile {
 		$crc = crc32($data); 
 		$zdata = gzcompress($data); 
 		//$zdata = substr ($zdata, 2, -4); 
-		$zdata = substr( substr($zdata, 0, strlen($zdata) - 4), 2);
-		//$zdata = substr( $zdata, 2, -4);
+		//$zdata = substr( substr($zdata, 0, strlen($zdata) - 4), 2);
+		$zdata = substr( $zdata, 2, -4);
 		//should be strlen if substr, or original ?
 		$c_len = strlen($zdata); 
 
