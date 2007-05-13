@@ -17,6 +17,10 @@ include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'classLessonContentObj.php');
 
+include_once(LIB_PATH.'lc_lob_renderer.php');
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+
 Class LessonContent extends FacultyService 
 {
 	## form stuff
@@ -37,7 +41,7 @@ Class LessonContent extends FacultyService
 	);
 	var $applinks = array (
 		'List Content' => 'lessonContent/',
-		'Add Content' => 'lessonContent/event=process'
+		'Add Content' => 'lessonContent/event=add'
 	);
 	var $inactivelinks = array( 'Content' );
 	var $sectionTitle = 'Lesson Content';
@@ -125,6 +129,72 @@ Class LessonContent extends FacultyService
 		$lc->postvars['NOTPOSTVARtxText'] = $db->Record['txText'];
 		
 		$this->processRun($db,$u,$lc,$t);
+	}
+
+
+	/**
+	 * Save a content obj to the db
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$guid = lcUuid();
+		$lob = new LobContent();
+		$lobMetaObj = new LobMetadata();
+
+		$lob->set('lobType','content');
+		$lob->set('lobGuid',$guid);
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
+//		debug($lob,1);
+//		debug($lc->postvars['txTitle'],1);
+		$lob->save();
+
+		$lobMetaObj->set('lobId',$lob->getPrimaryKey());
+		$lobMetaObj->set('lobKind','content');
+		$lobMetaObj->set('author', $lc->postvars['md_author']);
+		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
+		$lobMetaObj->set('license', $lc->postvars['md_license']);
+		$lobMetaObj->save();
+
+		$u->addSessionMessage('Successfully added content.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonContent/');
+	}
+
+
+	/**
+	 * Show page to allow choice of content 
+	 */
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonContent_add';
+		switch($lc->getvars['t']) {
+			case 'html':
+				$lc->templateName = 'lessonContent_html';
+				$formObj = new SiteForm();
+				$formObj->getForm('classcontentlesson');
+				$formObj->data[2][0]['cols'] = 80;
+				//debug($formObj->data);
+				//update the event.  why do this in code?
+				// so we don't have to update the DB with update statements
+				$formObj->data[6][0]['defaultValue'] = 'save';
+
+				$metafields = LC_Lob_Renderer::getMetadataForm();
+				//move the button and hidden fields to the end of the form
+				// to make room for the new fields
+				$formObj->data[9] = $formObj->data[6];
+				$formObj->data[8] = $formObj->data[5];
+				$formObj->data[7] = $formObj->data[4];
+
+				$formObj->data[4] = $metafields[0];
+				$formObj->data[5] = $metafields[1];
+				$formObj->data[6] = $metafields[2];
+
+				$formObj->action = modurl('lessonContent'); // i should do this in the manager/form itself
+				$t['form'] = $formObj->ToHTML();
+				break;
+
+		}
 	}
 
 
@@ -251,7 +321,6 @@ Class LessonContent extends FacultyService
 		
 		// we love run.. you should to!
 		//$this->run($db, $u, $lc, $t);
-		
 	}
 
 
