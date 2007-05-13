@@ -258,7 +258,9 @@ class ExportContent extends FacultyService {
 			$metadataArray = array(
 				'author'=>'Mark Kimsal', 
 				'subject'=>$this->courseFamily,
-				'subject_abbr'=>'true'
+				'subject_abbr'=>'true',
+				'copyright'=>date('Y'),
+				'license'=>'copyleft'
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -314,7 +316,9 @@ class ExportContent extends FacultyService {
 			$metadataArray = array(
 				'author'=>'Mark Kimsal',
 				'subject'=>$this->courseFamily,
-				'subject_abbr'=>'true'
+				'subject_abbr'=>'true',
+				'copyright'=>date('Y'),
+				'license'=>'copyleft'
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -398,7 +402,7 @@ class ExportContent extends FacultyService {
 			'subdisc_abbr',
 			'author',
 			'copyright',
-			'licence',
+			'license',
 			'objective'
 		);
 		$metadata_node = new xml_node('metadata',null,null);
