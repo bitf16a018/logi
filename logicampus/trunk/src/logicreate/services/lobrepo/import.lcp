@@ -24,13 +24,25 @@ class Import extends FacultyService {
 
 
 	function handleUploadRun(&$db,&$u,&$lc,&$t) {
-		debug($lc->uploads);
-
 		if ($lc->uploads['lobxml']['error']) {
 			die('upload error');
 		}
 
-		$doc = domxml_open_file($lc->uploads['lobxml']['tmp_name']);
+		debug($lc->uploads);
+
+		$tempdir = $this->tempdir('/tmp', 'campus');
+		$this->tempdir = $tempdir;
+		debug($tempdir);
+
+		//$za = zip_open($lc->uploads['lobxml']['tmp_name']);
+		//debug($za);
+
+		exec('unzip -d '. $tempdir.' '.$lc->uploads['lobxml']['tmp_name'] );
+
+//		exit();
+
+		$doc = domxml_open_file($tempdir.'/learningobjects.xml');
+
 		$root = $doc->child_nodes();
 		$collectionNode = $root[0];
 		$lobNodes = $collectionNode->child_nodes();
@@ -44,10 +56,16 @@ class Import extends FacultyService {
 			$lobObj->save();
 			$lobMetaObj->set('lobId',$lobObj->getPrimaryKey());
 			$lobMetaObj->save();
-			debug($lobObj);
+//			debug($lobObj);
 		}
 
-		debug( htmlentities( file_get_contents( $lc->uploads['lobxml']['tmp_name']) ) );
+		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
+
+
+		unlink($tempdir.'/learningobjects.xml');
+		rmdir($tempdir.'/interactions');
+		rmdir($tempdir.'/tests');
+		rmdir($tempdir);
 	}
 
 
@@ -100,6 +118,7 @@ class Import extends FacultyService {
 			$children = $node->child_nodes();
 			$lob->set('lobFilename', trim($children[0]->node_value()) );
 			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
+			$lob->set('lobBinary', file_get_contents($this->tempdir.'/content/'.trim($children[0]->node_value())) );
 		} else {
 			$urltitle = $lob->get('lobTitle');
 			$urltitle = str_replace(' ', '_', $urltitle);
@@ -196,6 +215,16 @@ class Import extends FacultyService {
 		return $lob;
 //		debug($children);
 	}
-}
 
+
+	function tempdir($dir, $prefix='', $mode=0700) {
+		if (substr($dir, -1) != '/') $dir .= '/';
+
+		do {
+			$path = $dir.$prefix.mt_rand(0, 9999999);
+		} while (!mkdir($path, $mode));
+
+		return $path;
+	}
+}
 ?>
