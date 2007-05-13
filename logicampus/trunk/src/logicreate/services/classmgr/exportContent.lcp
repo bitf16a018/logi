@@ -51,9 +51,10 @@ class ExportContent extends FacultyService {
 	 */
 	function downloadRun($db, &$u, &$lc, &$t) {
 		$this->obj_zip = new LcZipFile();
-	        $this->obj_zip->add_dir('library/');
+//	        $this->obj_zip->add_dir('library/');
+		$this->obj_zip->add_dir('interactions/');
+		$this->obj_zip->add_dir('tests/');
 		$this->obj_zip->add_dir('content/');
-		$this->obj_zip->add_dir('assignments/');
  
 		$lc->templateName='dataexchange_main';
 //auto-comment		$lc->templateStyle = 'private';
@@ -138,20 +139,22 @@ class ExportContent extends FacultyService {
 		//$classroom_nodes[0]->children = $classroom_child_node;
 
 		$fh = tmpfile();
-		
 		$xmlObj->write_file($fh);
-        $file_size = ftell($fh);
-        rewind($fh);
-        // I think i'm going to have to rewrite this, becuase i can't pump out more than the php upload limit 15M
-        $silly = fread($fh, $file_size);
-	echo "<pre>\n".htmlspecialchars($silly)."\n</pre>\n";exit();
+		// I think i'm going to have to rewrite this, becuase i can't pump out more than the php upload limit 15M
+		fclose($fh);
+		$file_size = ftell($fh);
+		rewind($fh);
+		$zipname = tempnam();
+		$ziph = fopen( $zipname, 'b');
+
+		$xmlchars = fread($fh, $file_size);
+//		echo "<pre>\n".htmlspecialchars($xmlchars)."\n</pre>\n";exit();
        
        
-        $this->obj_zip->add_file($silly,'learningobjects.xml');
-        $wiky = $this->obj_zip->file();
+		$this->obj_zip->add_file($xmlchars,'learningobjects.xml');
+		$wiky = $this->obj_zip->file();
         
-        fclose($fh);
-        ob_end_clean();
+		ob_end_clean();
 
 	if (ini_get('zlib.output_compression'))
 		ini_set('zlib.output_compression', 'Off');
@@ -203,13 +206,6 @@ class ExportContent extends FacultyService {
 			$xml_sub_child[] = new xml_node('trashed', null, null, $db->Record['trashed']);
 			$xml_sub_child[] = new xml_node('origfolder', null, null, $db->Record['origfolder']); // how to handle in copy!
 			
-			// instead of encoding the contents of a file into xml
-			// add in an identifier and copy the original file into
-			// the temp directory
-			
-			$this->obj_zip->add_file(
-						file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->Record['diskName'], 0, 2). '/'.substr($db->Record['diskName'],(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName']),
-						$this->current_dir.'library/'.str_replace('/', ' ', strip_tags($db->Record['diskName'])));
 		/**
 			$xml_sub_child[] = new xml_node('data', null, null, 
 											base64_encode(
@@ -217,6 +213,20 @@ class ExportContent extends FacultyService {
 												)
 											);
 		**/								
+
+			// instead of encoding the contents of a file into xml
+			// add in an identifier and copy the original file into
+			// the temp directory
+			
+			$this->obj_zip->add_file(
+				file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. 
+					substr($db->Record['diskName'], 0, 2). 
+					'/'.substr($db->Record['diskName'],
+					(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName'])
+				,
+				'content/'.str_replace('/','_',strip_tags($db->Record['diskName']))
+			);
+
 
 			$type_node = new xml_node('type',null,null,'content');
 			//subtype
@@ -550,14 +560,16 @@ class LcZipFile {
 		$fr .= pack("V",0);
 		$fr .= pack("v",strlen($name));
 		$fr .= pack("v",0);
-		$ft .= $name;
+		$fr .= $name;
+
 		$fr .= pack("V",0);
 		$fr .= pack("V",0);
 		$fr .= pack("V",0);
 
 		$this->datasec[] = $fr;
 
-		$new_offset = $this->old_offset + strlen($fr);
+	//	$new_offset = $this->old_offset + strlen($fr);
+		$new_offset = strlen(implode("", $this->datasec)); 
 
 		$cdrec = "\x50\x4b\x01\x02";
 		$cdrec .="\x00\x00";
@@ -573,8 +585,8 @@ class LcZipFile {
 		$cdrec .= pack("v",0);
 		$cdrec .= pack("v",0);
 		$cdrec .= pack("v",0);
-		$ext = "\x00\x00\x10\x00";
-		$ext = "\xff\xff\xff\xff";
+		//$ext = "\x00\x00\x10\x00";
+		//$ext = "\xff\xff\xff\xff";
 		$cdrec .= pack("V",16);
 		$cdrec .= pack("V",$this->old_offset);
 		$cdrec .= $name;
@@ -590,7 +602,9 @@ class LcZipFile {
 		$unc_len = strlen($data); 
 		$crc = crc32($data); 
 		$zdata = gzcompress($data); 
-		$zdata = substr ($zdata, 2, -4); 
+		//$zdata = substr ($zdata, 2, -4); 
+		$zdata = substr( substr($zdata, 0, strlen($zdata) - 4), 2);
+		//$zdata = substr( $zdata, 2, -4);
 		//should be strlen if substr, or original ?
 		$c_len = strlen($zdata); 
 
@@ -605,6 +619,8 @@ class LcZipFile {
 		$fr .= pack("v", strlen($name) ); 
 		$fr .= pack("v", 0 ); 
 		$fr .= $name; 
+		//end of local file header segment
+
 		$fr .= $zdata; 
 		$fr .= pack("V",$crc); 
 		$fr .= pack("V",$c_len); 
@@ -630,10 +646,10 @@ class LcZipFile {
 		$cdrec .= pack("v", 0 ); 
 		$cdrec .= pack("V", 32 ); 
 		$cdrec .= pack("V", $this->old_offset ); 
+		$cdrec .= $name; 
 
 		$this -> old_offset = $new_offset; 
 
-		$cdrec .= $name; 
 		$this -> ctrl_dir[] = $cdrec; 
 	} 
  
@@ -645,7 +661,7 @@ class LcZipFile {
 	   return 
 		$data. 
 		$ctrldir. 
-		$this -> eof_ctrl_dir. 
+		$this->eof_ctrl_dir. 
 		pack("v", sizeof($this->ctrl_dir)). 
 		pack("v", sizeof($this->ctrl_dir)). 
 		pack("V", strlen($ctrldir)). 
