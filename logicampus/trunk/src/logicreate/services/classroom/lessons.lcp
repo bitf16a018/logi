@@ -6,6 +6,7 @@ include_once(LIB_PATH.'datagrid.php');
 include(LIB_PATH.'lc_table.php');
 include(LIB_PATH.'lc_table_renderer.php');
 
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 
 /**
  * handles displaying online lessons
@@ -92,12 +93,13 @@ class lessons extends StudentService {
 	function viewRun(&$db,&$u,&$lc,&$t) {
 		
 		$lc->templateName='lessons_view';
-		$class_id = intval($lc->getvars['id']);
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = (int) $u->activeClassTaken->id_classes;
 
 		// Make sure they're allowed to access this lesson AND
 		#function checkContentPermission($activeClassTaken, $table, $tablePkey, $contentLabel, $contentPkey
 
-		$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_lessons', 'id_class_lessons', 'id_classes', $class_id);
+		$check = $this->checkContentPermission($class_id, 'class_lessons', 'id_class_lessons', 'id_classes', $lesson_id);
 		if (!$check)
 		{
 			$lc->templateName = 'main_nocontentaccess';
@@ -106,7 +108,7 @@ class lessons extends StudentService {
 		// actually retrieve the data from the db
 		$ut = time();
 		$sql = "select * from class_lessons
-			where id_class_lessons='".$class_id."'
+			where id_class_lessons='".$lesson_id."'
 			and id_classes='{$u->activeClassTaken->id_classes}'";
 		if (!$u->isFaculty())
 			$sql .= " and (activeOn < ".time()."
@@ -121,14 +123,14 @@ class lessons extends StudentService {
 		}
 
 		$db->queryOne("select id_class_lesson_content, txTitle,txText from class_lesson_content
-			where id_class_lessons='".$class_id."'");
+			where id_class_lessons='".$lesson_id."'");
 		$t['content'] = $db->Record;
 
 		$db->query("SELECT class_objectives.id_class_objectives, objective, f_hide 
 			FROM class_objectives
 			LEFT JOIN class_lesson_objectives on 
 				class_lesson_objectives.id_class_objectives = class_objectives.id_class_objectives
-			WHERE class_lesson_objectives.id_class_lesson='".$class_id."' 
+			WHERE class_lesson_objectives.id_class_lesson='".$lesson_id."' 
 			AND f_hide=0 ORDER BY i_sort ASC");
 		while ($db->next_record()) $t['objectives'][] = $db->Record;
 
@@ -146,7 +148,7 @@ class lessons extends StudentService {
 			  ON l.id_class_lessons=k.id_class_lessons
 
 			WHERE a.id_classes='".$u->activeClassTaken->id_classes."'
-			AND l.id_class_lessons='".$class_id."' 
+			AND l.id_class_lessons='".$lesson_id."' 
 			ORDER BY dueDate ASC";
 
 		$db->query($sql);
@@ -194,7 +196,7 @@ class lessons extends StudentService {
 		$sql = "SELECT l.id_class_links, title, url from class_links as l
 			LEFT JOIN class_lesson_links as ll 
 			  ON l.id_class_links=ll.id_class_links
-			WHERE ll.id_class_lessons='".$class_id."'";
+			WHERE ll.id_class_lessons='".$lesson_id."'";
 		$db->query($sql);
 		while ($db->next_record()) $t['weblinks'][] = $db->Record;
 
@@ -215,6 +217,16 @@ class lessons extends StudentService {
 			$this->presentor = 'printPresentation';
 		}
 
+
+		//SEQUENCE ITEMS
+		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id . ' ORDER BY rank');
+		$uniqcode = lcClass::makeUniqueCode($u->activeClassTaken);
+		//choose a start URL, viewer or content
+		if ($t['seqItems'][0]->lobMime == 'text/html') {
+			$t['startUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][0]->lobTitle);
+		} else {
+			$t['startUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][0]->lobTitle);
+		}
 	}
 
 
