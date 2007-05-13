@@ -7,6 +7,7 @@ class LobContentBase {
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobContentId;
+	var $lobGuid;
 	var $lobTitle;
 	var $lobType;
 	var $lobSubType;
@@ -20,6 +21,7 @@ class LobContentBase {
 
 	var $__attributes = array( 
 	'lobContentId'=>'integer',
+	'lobGuid'=>'varchar',
 	'lobTitle'=>'varchar',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
@@ -121,6 +123,7 @@ class LobContentPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_SelectStatement("lob_content",$where);
 		$st->fields['lob_content_id'] = 'lob_content_id';
+		$st->fields['lob_guid'] = 'lob_guid';
 		$st->fields['lob_title'] = 'lob_title';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
@@ -146,6 +149,7 @@ class LobContentPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_content");
 		$st->fields['lob_content_id'] = $this->lobContentId;
+		$st->fields['lob_guid'] = $this->lobGuid;
 		$st->fields['lob_title'] = $this->lobTitle;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
@@ -173,6 +177,7 @@ class LobContentPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_UpdateStatement("lob_content");
 		$st->fields['lob_content_id'] = $obj->lobContentId;
+		$st->fields['lob_guid'] = $obj->lobGuid;
 		$st->fields['lob_title'] = $obj->lobTitle;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
@@ -242,6 +247,7 @@ class LobContentPeerBase {
 	function row2Obj($row) {
 		$x = new LobContent();
 		$x->lobContentId = $row['lob_content_id'];
+		$x->lobGuid = $row['lob_guid'];
 		$x->lobTitle = $row['lob_title'];
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];

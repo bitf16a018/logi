@@ -308,6 +308,10 @@
 			primaryKey="true"
 			size="11"
 			type="INTEGER"/>
+		<attribute name="lob_guid"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
 		<attribute name="lob_title"
 			required="true"
 			default=""
