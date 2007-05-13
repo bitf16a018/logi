@@ -1,0 +1,85 @@
+<?
+
+include_once(LIB_PATH.'classLessonContentObj.php');
+include_once(LIB_PATH.'datagrid.php');
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+
+
+/**
+ * handles displaying online lessons
+ *
+ */
+class viewer extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Classroom Lessons';
+	var $inactivelinks = array(
+		'Lessons',
+	);
+
+
+	/**
+	 * Default event
+	 * 
+	 * Input data:  $u->activeClassTaken->id_classes
+	 * Output data: show all lessons for this class
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$ut = time();						
+		//print_r($lc->getvars);
+		$uniqCode = $lc->getvars[1];
+		$filename = addslashes(trim($lc->getvars[2]));
+		$lc->templateName = 'viewer_main';
+		
+		$viewerAuth = false;
+		$classId=-1;
+		foreach ($u->classesTaken as $classObj) {
+			$code = lcClass::makeUniqueCode($classObj);
+			if ($uniqCode == $code) {
+				$viewerAuth = true;
+				$classId = $classObj->id_classes;
+				break;
+			}
+		}
+
+		if (!$viewerAuth) {
+			$t['error'] = "You are not authorized to view this content.";
+			return;
+		}
+
+
+		$db->query("SELECT * FROM class_lesson_sequence as A 
+			WHERE link_text='".$filename."'
+			AND A.class_id = ".$classId);
+		$db->nextRecord();
+		$t['lob'] = $db->record;
+
+		if ($t['lob']['lob_type'] == 'activity') {
+			$db->query("SELECT * FROM class_assignments as A 
+				WHERE id_class_assignments='".$t['lob']['lob_id']."'");
+			$db->nextRecord();
+			$t['activity'] = $db->record;
+		}
+
+		if (! is_array($t['lob']) ) {
+			//temporary, content items are not part of lob sequence yet
+			$db->query("SELECT * FROM classdoclib_Files as A 
+				LEFT JOIN classdoclib_Folders as B on A.folder = B.pkey
+				WHERE file='".$filename."'
+				AND B.class_id = ".$classId);
+			$db->nextRecord();
+			$t['file'] = $db->record;
+		}
+
+		$t['uniqcode'] = $uniqCode;
+//print_r($u);
+
+	}
+}
+
+?>

@@ -1,0 +1,43 @@
+<?=$t['sectionheader'];?>
+
+<?php
+if ( strlen($t['error']) > 0 ) { ?>
+	<?= lcMessageBox($t['error'],'e');?>
+<?php } ?>
+
+	<div align="right" style="text-align:right;">
+		<a href="<?= appurl('classroom/viewer/'.$t['uniqcode'].'/43013-Manarola - 2004.jpg');?>" style="font-size:90%;">Next</a>
+	</div>
+
+<?php
+
+if ($t['file']['mime'] == 'image/jpeg') {
+
+//debug($t['file']);
+	echo '<h3>'.$t['file']['description'].'</h3>';
+	echo "<br/>\n";
+	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['file'].'"/>';
+}
+?>
+
+<?php
+if ($t['file']['mime'] == 'text/html') {
+
+	echo '<h3>'.$t['file']['title'].'</h3>';
+	echo "<br/>\n";
+	echo $t['file']['content'];
+}
+?>
+
+<?php
+//debug($t['lob']);
+//needs to be handled internall by the LMS.  Items such as tests and assignments and forums
+if ($t['lob']['lob_mime'] == 'X-LMS') {
+
+	echo '<h3>Assignment</h3>';
+	echo 'Name: '.$t['activity']['title'];
+	echo "<br/>\n";
+	echo 'Instructions: ';
+	echo $t['activity']['instructions'];
+}
+?>
