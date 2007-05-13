@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS `lob_content`;
 CREATE TABLE `lob_content` (
 		
 	`lob_content_id` integer (11) NOT NULL auto_increment, 
+	`lob_guid` varchar (255) NOT NULL, 
 	`lob_title` varchar (255) NOT NULL, 
 	`lob_type` varchar (255) NOT NULL, 
 	`lob_sub_type` varchar (255) NOT NULL, 
