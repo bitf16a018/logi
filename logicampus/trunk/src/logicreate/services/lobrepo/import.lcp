@@ -1,6 +1,7 @@
 <?
 
 include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
 
 /**
  * Learning Object Repository
@@ -38,7 +39,11 @@ class Import extends FacultyService {
 				continue;
 			}
 			$lobObj = $this->processLobNode($node);
+			$lobMetaObj = $this->processLobMeta($node);
+			$lobMetaObj->set('lobKind','content');
 			$lobObj->save();
+			$lobMetaObj->set('lobId',$lobObj->getPrimaryKey());
+			$lobMetaObj->save();
 			debug($lobObj);
 		}
 
@@ -117,6 +122,76 @@ class Import extends FacultyService {
 			$lob->set('lobSubType', trim($children[0]->node_value()) );
 		}
 
+
+		return $lob;
+//		debug($children);
+	}
+
+
+	/**
+	 * return a lob metadata object
+	 */
+	function processLobMeta($n) {
+		$result = $n->get_elements_by_tagname('metadata');
+		$meta = $result[0];
+		$children = $meta->child_nodes();
+
+
+		$lob = null;
+		$lob = new LobMetadata();
+
+		foreach($children as $childNode) {
+			if ($childNode->node_type() == XML_TEXT_NODE) {
+				continue;
+			}
+
+			$tag = $childNode->tagName();
+			$subchild = $childNode->child_nodes();
+			$lob->set($tag, trim($subchild[0]->node_value()) );
+		}
+/*
+
+		$result = $n->get_elements_by_tagname('lobtitle');
+		$node = $result[0];
+		$children = $node->child_nodes();
+		$lob->set('lobTitle', trim($children[0]->node_value()) );
+
+		$result = $n->get_elements_by_tagname('lobcontent');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobContent', trim($children[0]->node_value()) );
+		}
+
+		$result = $n->get_elements_by_tagname('lobfilename');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobFilename', trim($children[0]->node_value()) );
+			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
+		} else {
+			$urltitle = $lob->get('lobTitle');
+			$urltitle = str_replace(' ', '_', $urltitle);
+			$urltitle = urlencode($urltitle);
+			$lob->set('lobUrltitle', $urltitle );
+		}
+
+		$result = $n->get_elements_by_tagname('lobdescription');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobDescription', trim($children[0]->node_value()) );
+		}
+
+
+		$result = $n->get_elements_by_tagname('subtype');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobSubType', trim($children[0]->node_value()) );
+		}
+
+ */
 
 		return $lob;
 //		debug($children);
