@@ -63,12 +63,15 @@ class Import extends FacultyService {
 		 */
 		$children = $type->child_nodes();
 		$content = trim($children[0]->node_value());
+		$guid = $n->get_attribute('guid');
+		$dbid = $n->get_attribute('dbid');
 
 		$lob = null;
 		switch ($content) {
 			case 'content':
 				$lob = new LobContent();
 				$lob->set('lobType','content');
+				$lob->set('lobGuid',$guid);
 				break;
 
 		}
@@ -91,6 +94,12 @@ class Import extends FacultyService {
 		if (is_object($node) ){
 			$children = $node->child_nodes();
 			$lob->set('lobFilename', trim($children[0]->node_value()) );
+			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
+		} else {
+			$urltitle = $lob->get('lobTitle');
+			$urltitle = str_replace(' ', '_', $urltitle);
+			$urltitle = urlencode($urltitle);
+			$lob->set('lobUrltitle', $urltitle );
 		}
 
 		$result = $n->get_elements_by_tagname('lobdescription');
