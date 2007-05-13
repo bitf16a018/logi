@@ -64,10 +64,31 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 </form>
 	<hr>
 
-	<p style="clear:both;">&nbsp;</p>
-
 
 	<div style="width:48%;float:right;">
+		<fieldset>
+			<legend>Content Order</legend>
+			<a href="<?= appurl('classmgr/lessonSequence/id='.$t['lessonId']);?>">Change Lesson Sequence</a>
+			<?php
+			if ( ! is_array($t['seqItems']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Sequence Yet!</span>
+			<?php } ?>
+			<ol>
+				<?php
+				foreach ($t['seqItems'] as $k=>$obj) {
+				?>
+				<li><?= $obj->lobTitle;?></li>
+				<?php } ?>
+			</ol>
+
+		</fieldset>
+	</div>
+
+
+
+	<div style="width:48%;align:left;">
 		<fieldset>
 			<legend>Lesson Objectives</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lessonId']);?>">Change Objectives</a>
@@ -88,7 +109,7 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 	</div>
 
 
-	<div style="width:48%;float:left">
+	<div style="width:48%;align:left">
 		<fieldset>
 			<legend>Lesson Check List</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lessonId']);?>">Change Check List</a>
@@ -110,10 +131,8 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 	</div>
 
 
-	<p style="clear:both;">&nbsp;</p>
 
-
-	<div style="width:48%;float:right;">
+	<div style="width:48%;align:left;">
 		<fieldset>
 			<legend>Web Links</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkWeb/id='.$t['lessonId']);?>">Change Web Links</a>
@@ -134,7 +153,7 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 	</div>
 	
 
-	<div style="width:48%;float:left;">
+	<div style="width:48%;align:left;">
 		<fieldset>
 			<legend>Assignments</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lessonId']);?>">Change Assignments</a>
@@ -154,9 +173,10 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 		</fieldset>
 	</div>
 	
-	<p style="clear:both;">&nbsp;</p>
+<!--	<p style="clear:both;">&nbsp;</p>
+-->
 
-	<div style="width:48%;float:left;">
+	<div style="width:48%;align:left;">
 		<fieldset>
 			<legend>Assessments</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkAssessments/id='.$t['lessonId']);?>">Change Assessments</a>
