@@ -1,0 +1,26 @@
+<?php //echo $t['sectionheader'];?>
+<h4>Discover Learning Objects</h4>
+
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+These are all the learning objects that you have added to the system or that you have borrowed from other people.  Here you can add these objects to your classes.  Once the learning objects are in your classes you can organize them into lessons.
+
+<?php
+
+echo $t['lobTable']->toHtml();
+
+if (! is_object($t['lobTable']) ) {
+?>
+No Learning objects yet.
+<?php }
+?>
+
+<p>&nbsp;</p>
