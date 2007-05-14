@@ -28,15 +28,15 @@ class xmlparser
 	{
 		fwrite($fh, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
-		if (is_object($this->root))
-		{	$this->root->wr_node($fh);
-		} else 
-		{	return false;
+		if (is_object($this->root)) {
+			$this->root->wr_node($fh);
+		} else  {
+			return false;
 		}
 	}
 	
-	function &getRoot() 
-	{	return $this->root;
+	function &getRoot() {
+		return $this->root;
 	}
 	
 
