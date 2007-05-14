@@ -12,8 +12,11 @@ class Lobrepo extends FacultyService {
 
 	var $presentor='htmlPresentation';
 	var $sectionTitle = 'Classroom Manager';
-	var $navlinks = array (
-		''=>''
+	var $applinks = array (
+		'All Learning Objects'=>'',
+		'Import Learning Objects'=>'import',
+		'My Learning Objects'=>'myobj',
+		'Add Learning Objects'=>'add',
 		);
 
 

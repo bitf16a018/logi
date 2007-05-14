@@ -1,10 +1,17 @@
+<?php //echo $t['sectionheader'];?>
 <h4>Discover Learning Objects</h4>
 
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
 <a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
 &bull;  
 <a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
 
 <hr/>
+
+
 <?php
 
 echo $t['lobTable']->toHtml();
