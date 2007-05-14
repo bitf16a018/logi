@@ -247,8 +247,7 @@
 
 		function textAreaToHTML($v)
 		{
-			
-			static $in=3000;
+			static $in=2200;
 			
 			if ($v['message'] != '')
 			{
@@ -260,15 +259,16 @@
 			$HTML .= '<table cellpadding="0" cellspacing="0" border="0"><tr><td><textarea name="'.$v['fieldName'].'" cols="'.$v['cols'].'" rows="'.$v['rows'].'" id="'.$v['fieldName'].'">'.$v['defaultValue'].'</textarea>';
 
 
+			/*
 			if ($v['extra'] == 'E')
 				$HTML .='<img src="'.IMAGES_URL.'wysig-help.gif" align="right">Toolbar buttons can access your File Resources.';
+			 */
 			$HTML .= '</td></tr></table>';
 			$HTML .= $msg.'</td></tr>';
 
 			/*  We use the extra column to turn on or off the WYSIWYG
 			 *  editor
 			 */
-			
 			if ($v['extra'] == 'L')
 			{
 				$resize_script = '';
@@ -306,7 +306,6 @@
 				
 				$in =$in+1500;
 			}
-			
 			if ($v['extra'] == 'S')
 			{
 				$resize_script = '';
@@ -336,8 +335,7 @@
 				$in =$in+1500;
 
 			}
-			
-			
+
 			if ($v['extra'] == 'E')
 			{
 				$resize_script = '';
