@@ -9,7 +9,7 @@ CREATE TABLE `lob_user_link` (
 		
 	`lob_user_link_id` integer (11) NOT NULL auto_increment, 
 	`lob_id` integer (11) NOT NULL, 
-	`lob_kind` integer (11) NOT NULL, 
+	`lob_kind` varchar (255) NOT NULL, 
 	`user_id` integer (11) NOT NULL,
 	PRIMARY KEY (lob_user_link_id) 
 );

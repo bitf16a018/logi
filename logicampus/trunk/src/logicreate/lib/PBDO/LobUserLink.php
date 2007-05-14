@@ -14,7 +14,7 @@ class LobUserLinkBase {
 	var $__attributes = array( 
 	'lobUserLinkId'=>'integer',
 	'lobId'=>'integer',
-	'lobKind'=>'integer',
+	'lobKind'=>'varchar',
 	'userId'=>'integer');
 
 	var $__nulls = array();
