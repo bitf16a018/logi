@@ -78,6 +78,38 @@ class mysql extends DB {
 
 
 	/**
+	 * Send query to the DB
+	 *
+	 * Results are stored in $this->resultSet;
+	 * @return 	void
+	 * @param 	string	$queryString	SQL command to send
+	 */
+	function unbuffered_query($queryString,$log=true) {
+		global $debugmode,$REMOTE_ADDR;
+		$this->queryString = $queryString;
+
+		if ($this->driverID == 0 ) {$this->connect();}
+
+		$resSet = mysql_unbuffered_query($queryString,$this->driverID);
+		$this->row = 0;
+		if ( !$resSet ) {
+			$this->errorNumber = mysql_errno($this->driverID);
+			$this->errorMessage = mysql_error($this->driverID);
+			if (!strstr($this->queryString, 'lcUsers')) {
+				//print_r($this);
+				//die($this->queryString);
+			}
+			lcError::throwError(9,$this->errorMessage);
+			return false;
+		}
+		if (is_resource($resSet)) {
+			$this->resultSet[] = $resSet;
+		}
+		return true;
+	}
+
+
+	/**
 	 * Close connection
 	 *
 	 * @return void
