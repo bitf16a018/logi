@@ -419,8 +419,8 @@
 			type="INTEGER"/>
 		<attribute name="lob_kind"
 			required="true"
-			size="11"
-			type="INTEGER"/>
+			size="255"
+			type="VARCHAR"/>
 		<attribute name="user_id"
 			required="true"
 			size="11"
