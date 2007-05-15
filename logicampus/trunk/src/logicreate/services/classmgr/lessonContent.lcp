@@ -20,6 +20,7 @@ include_once(LIB_PATH.'classLessonContentObj.php');
 include_once(LIB_PATH.'lc_lob_renderer.php');
 include_once(LIB_PATH.'PBDO/LobContent.php');
 include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
 
 Class LessonContent extends FacultyService 
 {
@@ -147,8 +148,10 @@ Class LessonContent extends FacultyService
 		$guid = lcUuid();
 		$lob = new LobContent();
 		$lobMetaObj = new LobMetadata();
+		$lobUserObj = new LobUserLink();
 
 		$lob->set('lobType','content');
+		$lob->set('lobSubType','text');
 		$lob->set('lobGuid',$guid);
 		$lob->set('lobContent', $lc->postvars['txText']);
 		$lob->set('lobTitle', $lc->postvars['txTitle']);
@@ -163,6 +166,10 @@ Class LessonContent extends FacultyService
 		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
 		$lobMetaObj->set('license', $lc->postvars['md_license']);
 		$lobMetaObj->save();
+
+		$lobUserObj->set('lobId',$lob->getPrimaryKey());
+		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->save();
 
 		$u->addSessionMessage('Successfully added content.');
 
