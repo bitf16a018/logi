@@ -130,7 +130,7 @@ if ($QUERY_STRING!="") {
 		 *	index.php/foo/bar/lunix	=>	module=foo, service=bar, getvars[0]=lunix
 		 */
 	$url = $_SERVER['PATH_INFO'];
-	if (!$url) { $url = $HTTP_SERVER_VARS['PATH_INFO']; }
+	if (!$url) { $url = $_SERVER['PATH_INFO']; }
 	$name = explode("/",$url);
 	/*
 	 * move to default service if none is specified
@@ -161,7 +161,7 @@ if ($QUERY_STRING!="") {
 		 * x=4 if you want a random string in each URL
 		 */
 
-$lcObj->getvars = $HTTP_GET_VARS;
+$lcObj->getvars = $_GET;
 $lcObj->moduleName = $moduleName;
 $lcObj->serviceName = $serviceName;
 

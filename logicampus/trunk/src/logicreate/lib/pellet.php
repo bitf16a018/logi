@@ -296,16 +296,14 @@ class AdminAuth extends Service {
  */
 class HercAuth extends Service {
 	function authenticate(&$obj,&$u) {
-		global $HTTP_SERVER_VARS;
-
 		if ( (HERC_USER == '') || (HERC_PASSWD == '') ){
 			echo "No user/password defined.<br>\n";
 			echo "Follow the setup instructions.\n";
 			exit();
 		}
 
-		if ( PASSWD_IS_MD5) $HTTP_SERVER_VARS['PHP_AUTH_PW'] = md5($HTTP_SERVER_VARS['PHP_AUTH_PW']);
-		if ( $HTTP_SERVER_VARS['PHP_AUTH_USER'] == HERC_USER and $HTTP_SERVER_VARS['PHP_AUTH_PW'] == HERC_PASSWD) {
+		if ( PASSWD_IS_MD5) $_SERVER['PHP_AUTH_PW'] = md5($_SERVER['PHP_AUTH_PW']);
+		if ( $_SERVER['PHP_AUTH_USER'] == HERC_USER and $_SERVER['PHP_AUTH_PW'] == HERC_PASSWD) {
 			return true;
 		}
 		return false;
@@ -313,16 +311,14 @@ class HercAuth extends Service {
 
 
 	function authorize (&$obj,&$u) {
-		global $HTTP_SERVER_VARS;
-
 		if ( (HERC_USER == '') || (HERC_PASSWD == '') ){
 			echo "No user/password defined.<br>\n";
 			echo "Follow the setup instructions.\n";
 			exit();
 		}
 
-		if ( PASSWD_IS_MD5) $HTTP_SERVER_VARS['PHP_AUTH_PW'] = md5($HTTP_SERVER_VARS['PHP_AUTH_PW']);
-		if ( $HTTP_SERVER_VARS['PHP_AUTH_USER'] == HERC_USER and $HTTP_SERVER_VARS['PHP_AUTH_PW'] == HERC_PASSWD) {
+		if ( PASSWD_IS_MD5) $_SERVER['PHP_AUTH_PW'] = md5($_SERVER['PHP_AUTH_PW']);
+		if ( $_SERVER['PHP_AUTH_USER'] == HERC_USER and $_SERVER['PHP_AUTH_PW'] == HERC_PASSWD) {
 			return true;
 		}
 		return false;

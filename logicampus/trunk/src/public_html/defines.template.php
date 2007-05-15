@@ -58,10 +58,10 @@ if (! file_exists($relpath)) {
 	}
 }
 
-extract($HTTP_SERVER_VARS);
+extract($_SERVER);
 $PHPSESSID = @$_COOKIE['PHPSESSID'];
 
-$base = $HTTP_SERVER_VARS['HTTP_HOST'];
+$base = $_SERVER['HTTP_HOST'];
 $script = substr($SCRIPT_FILENAME,strrpos($SCRIPT_FILENAME,'/')+1); 
 $tail = str_replace($script,'',$SCRIPT_NAME);
 $tail = str_replace('herc/','',$tail);
@@ -82,7 +82,7 @@ define('SECURE_APP_URL',SECURE_BASE_URL.'index.php/');
 define('DEFAULT_SERVICE','welcome');
 define('DEFAULT_URL',APP_URL.DEFAULT_SERVICE);
 define('UNAUTHORIZED_SERVICE','welcome/login');
-define('COOKIE_HOST',$HTTP_SERVER_VARS['HTTP_HOST']);
+define('COOKIE_HOST',$_SERVER['HTTP_HOST']);
 
 //Templates, images, html content
 DEFINE('TEMPLATE_PATH_PARTIAL',DOCUMENT_ROOT.'templates/');

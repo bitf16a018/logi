@@ -40,7 +40,6 @@ class editFolder extends classdoclibService {
 		$u->sessionvars['classdoclib']['cut'][$lc->getvars['id']] = $folder;
 
 
-		global $_SERVER;
 		$t['url'] = $_SERVER['HTTP_REFERER'];
 		if ( $t['url'] == '' )
 			$t['url'] = APP_URL.'classdoclib/main';
@@ -66,7 +65,6 @@ class editFolder extends classdoclibService {
 
 
 
-		global $_SERVER;
 		$t['url'] = $_SERVER['HTTP_REFERER'];
 		if ( $t['url'] == '' )
 			$t['url'] = APP_URL.'classdoclib/main';
@@ -94,7 +92,6 @@ class editFolder extends classdoclibService {
 		unset($u->sessionvars['classdoclib']['cut']);
 
 
-		global $_SERVER;
 		$t['url'] = $_SERVER['HTTP_REFERER'];
 		if ( $t['url'] == '' )
 			$t['url'] = APP_URL.'classdoclib/main';

@@ -41,8 +41,8 @@
 
 
 //	$cookiehost = "web.tapinternet.com";
-extract($HTTP_SERVER_VARS);
-$PHPSESSID = $HTTP_COOKIE_VARS['PHPSESSID'];
+extract($_SERVER);
+$PHPSESSID = $_COOKIE['PHPSESSID'];
 $cookiehost = $HTTP_HOST;
 
 

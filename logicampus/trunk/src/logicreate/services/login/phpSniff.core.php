@@ -1,6 +1,6 @@
 <?php
 /*******************************************************************************
-	$Id: phpSniff.core.php,v 1.1.1.1 2003-11-21 23:14:12 hardcorelamer Exp $
+	$Id: phpSniff.core.php,v 1.2 2007-05-15 17:27:47 hardcorelamer Exp $
     
     phpSniff: HTTP_USER_AGENT Client Sniffer for PHP
 	Copyright (C) 2001 Roger Raymond ~ epsilon7@users.sourceforge.net
@@ -430,12 +430,12 @@ class phpSniff_core
 
     // medianes :: new test cookie routine
     function _test_cookies()
-    {   global $HTTP_COOKIE_VARS;
+    {   
         $cookies = array();
         if(isset($_COOKIE)) {
             $cookies = $_COOKIE;
-        } elseif(isset($HTTP_COOKIE_VARS)) {
-            $cookies = $HTTP_COOKIE_VARS;
+        } elseif(isset($_COOKIE)) {
+            $cookies = $_COOKIE;
         }
         if($this->_check_cookies)
         {   $fp = @fopen($this->_temp_file_path.$this->property('ip'),'r');

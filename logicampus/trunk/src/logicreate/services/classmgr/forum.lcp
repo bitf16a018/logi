@@ -278,8 +278,7 @@ while($db->next_record()) {
 		} else {
 			//cant see this post
 			if ($u->username == 'anonymous') {
-				global $HTTP_SERVER_VARS;
-				$u->sessionvars['loginredir'] = APP_URL.substr($HTTP_SERVER_VARS['PATH_INFO'],1);
+				$u->sessionvars['loginredir'] = APP_URL.substr($_SERVER['PATH_INFO'],1);
 				$u->saveSession();
 				header("Location: ".APP_URL."login/main");
 				exit();
