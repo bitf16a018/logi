@@ -6,6 +6,7 @@ include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'classLessonObj.php');
 // PBDO is the new standard, above object is DEPRECATED
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 
 include(LIB_PATH.'lc_table.php');
 include(LIB_PATH.'lc_table_renderer.php');
@@ -622,6 +623,8 @@ class LessonManager extends FacultyService {
 		while ( $db->next_record() )
 			$t['assessments'][] = $db->Record['display_name'];
 
+
+		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id);
 	}
 
 
