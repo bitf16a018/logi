@@ -133,6 +133,14 @@ Class LessonContent extends FacultyService
 
 
 	/**
+	 * Show a page to allow choice of content to add
+	 */
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonContent_add';
+	}
+
+
+	/**
 	 * Save a content obj to the db
 	 */
 	function saveRun(&$db,&$u,&$lc,&$t) {
@@ -199,6 +207,7 @@ Class LessonContent extends FacultyService
 
 
 	/**
+>>>>>>> 1.11
 	 *	One function to find them
 	 *	One function to bind them
 	 *	One function to rule them all
