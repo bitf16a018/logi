@@ -35,6 +35,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 
 	function paintRows() {
+		$u = lcUser::getCurrentUser();
 		$this->html .= "<tbody>\n";
 
 
@@ -111,7 +112,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 
 			//name and description first
-			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
+			$this->html .= '<td width="50%" valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
 			$this->html .= $this->table->tableModel->getValueAt($x,0);
 			$this->html .= '</b>';
 			$desc = $this->table->tableModel->getValueNamed($x,'description');
@@ -123,7 +124,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			//then type and mime
 			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
 			$this->html .= $this->table->tableModel->getValueAt($x,1);
-			$this->html .= '</b><br/>text/html</td>';
+			$this->html .= '</b>&nbsp;(text/html)</td>';
 
 			//then subject, sub-discipline
 			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
@@ -144,13 +145,16 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 			//then the extra rows for tags, categories, and links to your classroom
 
-
-			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Link this object to your class:&nbsp;&nbsp;';
-			$this->html .= ' <a href="#">ENGL 1011</a>&bull;';
-			$this->html .= ' <a href="#">ARTS 2022</a>';
-			$this->html .= '</td></tr>';
-
-			$this->html .= '</tr>';
+			if (is_array($u->classesTaught) ) {
+				$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Link this object to your class:&nbsp;&nbsp;';
+				foreach ($u->classesTaught as $classObj) {
+					$this->html .= ' <a href="'.appurl('lobrepo/myobj/event=class/l='.$this->table->tableModel->getValueNamed($x,'lobId').'/c='.$classObj->id_classes).'">';
+					$this->html .= $classObj->courseFamily. ' '.$classObj->courseNumber.'</a>&bull;';
+//					$this->html .= ' <a href="#">ARTS 2022</a>';
+				}
+				$this->html .= '</td></tr>';
+//				$this->html .= '</tr>';
+			}
 			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Browse more objects like this one:&nbsp;&nbsp;';
 			$this->html .= ' <a href="#">ENGL</a>&bull;';
 			$this->html .= ' <a href="#">PDF</a>&bull;';
