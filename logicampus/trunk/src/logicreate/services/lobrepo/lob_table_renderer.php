@@ -30,7 +30,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 
 	function startTable() {
-		$this->html .='<table border="5" width="100%">';
+		$this->html .='<table border="0" width="100%" class="datatable" style="background-color:white;border:0px">';
 	}
 
 
@@ -49,7 +49,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 			//paint the columns
 			$class = ($x % 2 == 0) ? 'even':'odd';
-			$this->html .= '<tr class="center_justify '.$class.'">';
+			$this->html .= '<tr class="center_justify '.$class.'" style="background-color:white;">';
 
 			for ($y = 0; $y < $numCols; ++$y ) {
 				$tCol = $colModel->getColumnAt($y);
@@ -80,6 +80,8 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 						$style .= "$i:$j;";
 					}
 				}
+
+				/*
 				$this->html .= '<td';
 				if ($width > -1) {
 					$this->html .= ' width="'.$width.'"';
@@ -94,27 +96,38 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 				}
 
 				$this->html .='>';
+				 */
 
 
+				$this->html .= '<td class="left_justify" style="font-size:140%;background-color:none;"><b>';
 				$this->html .= $renderer->getRenderedValue();
-				$this->html .= '</td>';
+				$this->html .= '</b></td>';
 			}
 
 			$this->html .= '</tr>';
-			$this->html .= '<tr><td colspan="6">';
-			$this->html .= ' <a href="#">Link 1</a>&bull;';
-			$this->html .= ' <a href="#">Link 2</a>&bull;';
-			$this->html .= ' <a href="#">Link 3</a>';
+			$this->html .= '<tr style="background-color:white;"><td colspan="6">Link this object to your class:&nbsp;&nbsp;';
+			$this->html .= ' <a href="#">ENGL 1011</a>&bull;';
+			$this->html .= ' <a href="#">ARTS 2022</a>';
 			$this->html .= '</td></tr>';
 
+			$this->html .= '</tr>';
+			$this->html .= '<tr style="background-color:white;"><td colspan="6">Browse more objects like this one:&nbsp;&nbsp;';
+			$this->html .= ' <a href="#">ENGL</a>&bull;';
+			$this->html .= ' <a href="#">PDF</a>&bull;';
+			$this->html .= ' <a href="#">Content pages</a>';
+			$this->html .= '</td></tr>';
+			$this->html .= '<tr style="background-color:white;"><td colspan="6"><hr/>';
+			$this->html .= '</td></tr>';
 		}
 	
 		$this->html .= "</tbody>\n";
 	}
 
 
+	/*
 	function paintHeaders() {
 		//don't use headers
 	}
+	 */
 }
 ?>
