@@ -288,6 +288,13 @@ class LC_Table_ItemModel extends LC_DefaultTableModel {
 	}
 
 
+	function getValueNamed($x,$colName) {
+//		$colName = $this->colMap[$y];
+		$r = $this->items[$x];
+		return $r[$colName];
+	}
+
+
 	/**
 	 * Returns the number of rows in the model.
 	 */
