@@ -51,6 +51,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			$class = ($x % 2 == 0) ? 'even':'odd';
 			$this->html .= '<tr class="center_justify '.$class.'" style="background-color:white;">';
 
+			/*
 			for ($y = 0; $y < $numCols; ++$y ) {
 				$tCol = $colModel->getColumnAt($y);
 				if ($tCol->maxWidth > -1 ) {
@@ -96,22 +97,61 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 				}
 
 				$this->html .='>';
-				 */
+				 * /
 
 
 				$this->html .= '<td class="left_justify" style="font-size:140%;background-color:none;"><b>';
 				$this->html .= $renderer->getRenderedValue();
 				$this->html .= '</b></td>';
 			}
+			*/
 
+//			$renderer = $this->table->getCellRenderer($x,$y);
+//			$this->table->prepareRenderer($renderer,$x,$y);
+
+
+			//name and description first
+			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
+			$this->html .= $this->table->tableModel->getValueAt($x,0);
+			$this->html .= '</b>';
+			$desc = $this->table->tableModel->getValueNamed($x,'description');
+			if ( strlen($desc) ) {
+				$this->html .= '<br/>'.$this->table->tableModel->getValueNamed($x,'description');
+			}
+			$this->html .= '</td>';
+
+			//then type and mime
+			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
+			$this->html .= $this->table->tableModel->getValueAt($x,1);
+			$this->html .= '</b><br/>text/html</td>';
+
+			//then subject, sub-discipline
+			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
+			$this->html .= $this->table->tableModel->getValueAt($x,2);
+			$this->html .= '</td>';
+
+			//then author / owner
+			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
+			$this->html .= $this->table->tableModel->getValueAt($x,3);
+			$this->html .= '</td>';
+
+
+			//then edit action
+			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
+			$this->html .= $this->table->tableModel->getValueAt($x,4);
+			$this->html .= '</b></td>';
 			$this->html .= '</tr>';
-			$this->html .= '<tr style="background-color:white;"><td colspan="6">Link this object to your class:&nbsp;&nbsp;';
+
+			//then the extra rows for tags, categories, and links to your classroom
+
+
+			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Link this object to your class:&nbsp;&nbsp;';
 			$this->html .= ' <a href="#">ENGL 1011</a>&bull;';
 			$this->html .= ' <a href="#">ARTS 2022</a>';
 			$this->html .= '</td></tr>';
 
 			$this->html .= '</tr>';
-			$this->html .= '<tr style="background-color:white;"><td colspan="6">Browse more objects like this one:&nbsp;&nbsp;';
+			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Browse more objects like this one:&nbsp;&nbsp;';
 			$this->html .= ' <a href="#">ENGL</a>&bull;';
 			$this->html .= ' <a href="#">PDF</a>&bull;';
 			$this->html .= ' <a href="#">Content pages</a>';

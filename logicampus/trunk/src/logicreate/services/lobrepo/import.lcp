@@ -2,6 +2,7 @@
 
 include_once(LIB_PATH.'PBDO/LobContent.php');
 include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
 
 /**
  * Learning Object Repository
@@ -52,14 +53,25 @@ class Import extends FacultyService {
 			}
 			$lobObj = $this->processLobNode($node);
 			$lobMetaObj = $this->processLobMeta($node);
-			$lobMetaObj->set('lobKind','content');
+			$lobUserObj = new LobUserLink();
+
 			$lobObj->save();
+
+			$lobMetaObj->set('lobKind','content');
 			$lobMetaObj->set('lobId',$lobObj->getPrimaryKey());
 			$lobMetaObj->save();
+
+			$lobUserObj->set('lobId',$lobObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->save();
+
 //			debug($lobObj);
 		}
 
-		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
+
+		$u->addSessionMessage('Successfully added content.');
+
+//		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
 
 
 		unlink($tempdir.'/learningobjects.xml');
