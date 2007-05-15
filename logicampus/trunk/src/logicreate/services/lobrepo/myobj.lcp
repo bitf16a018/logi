@@ -1,0 +1,78 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+include_once(SERVICE_PATH.'lobrepo/lob_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class Myobj extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $applinks = array (
+		'All Learning Objects'=>'',
+		'Import Learning Objects'=>'import',
+		'My Learning Objects'=>'myobj',
+		'Add Learning Objects'=>'add',
+		);
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='myobj_main';
+
+		//$lobs = LobContentPeer::doSelect();
+
+
+		$lobItems = array();
+		$idx=0;
+
+		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject
+		       	FROM lob_content as A
+			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id
+			LEFT JOIN lob_user_link as C on A.lob_content_id = C.lob_id
+			WHERE C.user_id = '.$u->userId.'
+			AND B.lob_kind = "content"
+			');
+
+
+		while($db->nextRecord()) {
+		//foreach ($lobs as $lobObj) {
+			$lobRec = $db->record;
+			$lobItems[$idx]['name'] = $lobRec['lob_title'];
+			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']). ' '.$lobRec['lob_type'];
+//			$lobItems[$idx]['subtype'] = $lobRec['lob_sub_type'];
+			$lobItems[$idx]['description'] = $lobRec['lob_description'];
+			$lobItems[$idx]['subject'] = $lobRec['subject'];
+			$lobItems[$idx]['author'] = $lobRec['author'];
+			$lobItems[$idx]['download'] = '<a href="'.appurl('lobrepo/view/c='.$lobRec['lob_content_id'].'').'">Download</a>';
+			$idx++;
+		}
+
+		$dm = new LC_Table_ItemModel($lobItems);
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->justify = 'left';
+	
+		$col_b = &$columnModel->getColumnAt(2);
+		$col_b->justify = 'left';
+	
+		$col_c = &$columnModel->getColumnAt(1);
+		$col_c->justify = 'left';
+
+		$col_d = &$columnModel->getColumnAt(4);
+		$col_d->justify = 'left';
+
+
+		$t['lobTable'] = new Lob_Table_Renderer($table);
+//		print_r($t['lobTable']);
+	}
+}
+
+?>
