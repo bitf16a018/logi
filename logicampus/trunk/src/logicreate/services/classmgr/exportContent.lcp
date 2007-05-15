@@ -51,17 +51,15 @@ class ExportContent extends FacultyService {
 	 */
 	function downloadRun($db, &$u, &$lc, &$t) {
 		$this->obj_zip = new LcZipFile();
-//	        $this->obj_zip->add_dir('library/');
 		$this->obj_zip->add_dir('interactions/');
 		$this->obj_zip->add_dir('tests/');
 		$this->obj_zip->add_dir('content/');
  
 		$lc->templateName='dataexchange_main';
-//auto-comment		$lc->templateStyle = 'private';
-		
+
 		$classId = $u->activeClassTaught->id_classes;
 		$this->classId = $classId;
-		
+
 
 		// select base information (as much as I can in 1 query)
 		$sql = '
@@ -562,8 +560,9 @@ class LcZipFile {
 		$fr .= pack("V",0);
 		$fr .= pack("v",strlen($name));
 		$fr .= pack("v",0);
-		$fr .= $name;
+		//end local file header
 
+		$ft .= $name;
 		$fr .= pack("V",0);
 		$fr .= pack("V",0);
 		$fr .= pack("V",0);

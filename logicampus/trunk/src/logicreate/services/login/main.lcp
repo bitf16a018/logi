@@ -165,7 +165,6 @@ var $presentor = "htmlPresentation";
 		global $HTTP_REFERER;
 
 		//permanent login cookie
-		global $_COOKIE;
 		$t['username'] = $_COOKIE['LC_LOGIN'];
 
 		if ($lcObj->getvars['clear'] == 'y') {
@@ -179,7 +178,6 @@ var $presentor = "htmlPresentation";
 		if ($lcObj->getvars['loginredir'] != '') {
 			$t['redir'] = $lcObj->getvars['loginredir'];
 		} else {
-			global $_SERVER;
 			$t['redir'] = $_SERVER['HTTP_REFERER'];
 			$t['redir'] = $HTTP_REFERER;
 		}

@@ -240,7 +240,6 @@ class lcSystem {
 	var $cssFile;
 
 	function lcSystem() {
-		// global $HTTP_POST_VARS,$HTTP_POST_FILES;
 		// doesn't check for magic_quotes_sybase, which may mess things up
 		 if (get_magic_quotes_gpc() ) { 
                         $stripquotes = create_function('&$data, $self',
