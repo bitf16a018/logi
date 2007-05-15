@@ -47,14 +47,15 @@ class Myobj extends FacultyService {
 			$lobItems[$idx]['name'] = $lobRec['lob_title'];
 			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']). ' '.$lobRec['lob_type'];
 //			$lobItems[$idx]['subtype'] = $lobRec['lob_sub_type'];
-			$lobItems[$idx]['description'] = $lobRec['lob_description'];
 			$lobItems[$idx]['subject'] = $lobRec['subject'];
 			$lobItems[$idx]['author'] = $lobRec['author'];
-			$lobItems[$idx]['download'] = '<a href="'.appurl('lobrepo/view/c='.$lobRec['lob_content_id'].'').'">Edit</a>';
+			$lobItems[$idx]['action'] = '<a href="'.appurl('lobrepo/view/c='.$lobRec['lob_content_id'].'').'">Edit</a>';
+			$lobItems[$idx]['description'] = $lobRec['lob_description'];
 			$idx++;
 		}
 
 		$dm = new LC_Table_ItemModel($lobItems);
+		$dm->ignoreColumn('description');
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
