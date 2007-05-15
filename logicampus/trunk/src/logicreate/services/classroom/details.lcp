@@ -229,7 +229,10 @@ class details extends StudentService {
 			$db->queryOne($sql);
 			$t['classresource'] = $db->Record['txText'];
 
+
 			// stupid hack to get a feedback message
+			// not sure if this is needed anymore, we have session messages in the
+			// user class now.
 			if ($u->sessionvars['message']) {
 				$t['message'] = $u->sessionvars['message'];
 				unset($u->sessionvars['message']);
