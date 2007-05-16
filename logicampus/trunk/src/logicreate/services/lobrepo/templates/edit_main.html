@@ -1,0 +1,66 @@
+<?php $lob = $t['lob'];?>
+<h4>Edit Learning Objects</h4>
+
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+<h3><?= $lob['lob_title'];?></h3>
+<?= $lob['lob_type'];?> &endash; <?= $lob['lob_sub_type'];?>
+
+<p>
+<?= $lob['lob_description'];?>
+</p>
+
+<table border="0" style="border:1px solid black;">
+	<tr>
+		<td>Size:</td><td><?= strlen($lob['lob_binary']); ?> bytes</td>
+	</tr><tr>
+		<td>URL name:</td><td><?= $lob['lob_urltitle'];?></td>
+	</tr><tr>
+		<td>Date created:</td><td><?= date('M d Y',$lob['created_on']);?></td>
+	</tr><tr>
+		<td>Last update on:</td><td><?= date('M d Y',$lob['updated_on']);?></td>
+	</tr>
+</table>
+
+<div style="width:200px">
+<fieldset>
+	<legend>Copyright</legend>
+
+	<ul>
+		<li>Author:&nbsp; <?=$lob['author'];?></li>
+		<li>Source:&nbsp; <?=$lob['source'];?></li>
+		<li>Copyright:&nbsp; <?=$lob['copyright'];?></li>
+		<li>License:&nbsp; <?=$lob['license'];?></li>
+	</ul>
+</fieldset>
+</div>
+
+
+<div style="width:200px">
+<fieldset>
+	<legend>Status</legend>
+
+	<ul>
+		<li>Private:&nbsp; <?=$lob['private'];?></li>
+		<li>Version:&nbsp; <?=$lob['version'];?></li>
+		<li>Last update on:&nbsp; <?= date('M d Y',$lob['updated_on']);?></li>
+		<li>Date created:&nbsp; <?= date('M d Y',$lob['created_on']);?></li>
+	</ul>
+</fieldset>
+</div>
+
+
+<br/>
+
+<h4>Notes</h4>
+Enter notes about this object for other faculty members to see.
+<br/>
+<textarea rows="15" cols="80"></textarea>
