@@ -51,7 +51,7 @@ class Myobj extends FacultyService {
 //			$lobItems[$idx]['subtype'] = $lobRec['lob_sub_type'];
 			$lobItems[$idx]['subject'] = $lobRec['subject'];
 			$lobItems[$idx]['author'] = $lobRec['author'];
-			$lobItems[$idx]['action'] = '<a href="'.appurl('lobrepo/view/c='.$lobRec['lob_content_id'].'').'">Edit</a>';
+			$lobItems[$idx]['action'] = '<a href="'.appurl('lobrepo/edit/c='.$lobRec['lob_content_id'].'').'">Edit</a>';
 			$lobItems[$idx]['description'] = $lobRec['lob_description'];
 			$lobItems[$idx]['lobId'] = $lobRec['lob_content_id'];
 			$idx++;

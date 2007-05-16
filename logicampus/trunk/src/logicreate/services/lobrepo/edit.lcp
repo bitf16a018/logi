@@ -1,0 +1,41 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class Edit extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='edit_main';
+
+		$lobId = addslashes(trim($lc->getvars['c']));
+
+		$db->unbuffered_query("
+			SELECT A.*, B.*
+			FROM lob_content as A 
+			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id
+			WHERE 1=1
+			AND A.lob_content_id = ".$lobId);
+		$db->nextRecord();
+//		debug($db->record,0);
+
+		$t['lob'] = $db->record;
+	}
+}
+
+?>
