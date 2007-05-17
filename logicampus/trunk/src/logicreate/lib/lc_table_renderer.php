@@ -331,6 +331,7 @@ class LC_TableFormatRenderer extends LC_TableCellRenderer {
 class LC_TableDateRenderer extends LC_TableCellRenderer {
 
 	var $dateFormat = 'n / j / Y';
+	var $showBadDates = false;
 
 	function LC_TableDateRenderer($format='') {
 		if ( strlen($format) > 0 ) {
@@ -340,6 +341,12 @@ class LC_TableDateRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		//is it a date string?
+		if (!$this->showBadDates && 
+			($this->value == '' ||
+			 $this->value == '0')) {
+				return '';
+		}
+
 		if ( (string)intval($this->value) != (string)$this->value) {
 			return date($this->dateFormat, strtotime($this->value));
 		} else {
