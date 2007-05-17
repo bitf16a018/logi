@@ -25,16 +25,28 @@ var $presentor = "htmlPresentation";
 
 	function pwpostRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
 
-		extract($lcObj->postvars["values"]);
-		if (trim($new)=="") { $error = "You did not enter a new password.  Please try again."; }
-		if (trim($old)!=$lcUser->password) { $error = "You did not enter the correct current password.  Please try again"; }
-		if ($new!=$confirm) { $error = "You didn't type the same password twice for your new password.  Please verify that you are typing what you are intending."; }
+		$new = trim($lcObj->postvars['values']['new']);
+		$old = trim($lcObj->postvars['values']['old']);
+		$confirm = trim($lcObj->postvars['values']['confirm']);
+
+		if ($new=="") { 
+			$error = "You did not enter a new password.  Please try again."; 
+		}
+
+		if ($old!=$lcUser->password
+			&& md5($old) != $lcUser->password) { 
+				$error = "You did not enter the correct current password.  Please try again"; 
+		}
+
+		if ($new!=$confirm) { 
+			$error = "You didn't type the same password twice for your new password.  Please verify that you are typing what you are intending."; 
+		}
 
 		if ($error) { 
 			$lcTemplate["error"] = $error;
 			$lcObj->templateName="prof3";
 		} else {
-			$lcUser->password = $new;
+			$lcUser->password = addslashes($new);
 			$lcUser->update();
 			$lcUser->updateMailServer();
 			$lcObj->templateName="prof2";
