@@ -76,6 +76,7 @@ include_once(LIB_PATH."pellet.php");
 include_once(LIB_PATH."LC_db.php");
 include_once(LIB_PATH."LC_user.php");
 include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH."lc_settings.php");
 
 $lcObj = new lcSystem();
 
