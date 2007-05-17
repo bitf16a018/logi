@@ -41,15 +41,17 @@ self.close();
 	<td><b>Comments:</b></td>
 </tr>
 <tr>
-	<td valign="top"><input type="text" name="score" value="<?=$t['val']->score;?>" size=5 maxlength=5 /></td>
-	<td><textarea name="comments" cols=30 rows=4><?=$t['val']->comments;?></textarea></td>
+	<td valign="top"><input type="text" name="score" value="<?=$t['val']->score;?>" size=5 maxlength=5 DISABLED = "disabled"/></td>
+	<td><textarea name="comments" cols=30 rows=4 DISABLED = "disabled"><?=$t['val']->comments;?></textarea></td>
 </tr>
 <tr>
 	<td colspan=2 align="center"><!--<input type="submit" value="Update score" />--></td>
 </tr>
 </table>
+<!--
 For now, the ability to update grades directly from the gradebook is turned off.  Please use the
 interfaces from your assignments area or your assessments area.
+-->
 <!--
 <input type="hidden" name="event" value="updateSingle" />
 <input type="hidden" name="entid" value="<?=$t['entry']->idClassGradebookEntries;?>" />

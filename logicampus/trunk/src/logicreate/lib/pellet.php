@@ -77,9 +77,14 @@ class Service {
 	function htmlPresentation (&$obj,&$t) {
 		//put the template and content together to form a 
 		// basic html page
-			include_once(TEMPLATE_PATH."header.html.php");
-			include_once($obj->module_root."templates/".$obj->templateName.".html");
-			include_once(TEMPLATE_PATH."footer.html.php");
+		include_once(TEMPLATE_PATH."header.html.php");
+		//for PHP5 we need to clean the scope of variables 
+		// from the previous include.
+		unset($sysMessages);
+		unset($k);
+		unset($v);
+		include_once($obj->module_root."templates/".$obj->templateName.".html");
+		include_once(TEMPLATE_PATH."footer.html.php");
 	}
 
 
@@ -89,9 +94,14 @@ class Service {
 	function printPresentation (&$obj,&$t) {
 		//put the template and content together to form a 
 		// basic html page
-			include_once(TEMPLATE_PATH."print-header.html.php");
-			include_once($obj->module_root."templates/".$obj->templateName.".html");
-			include_once(TEMPLATE_PATH."print-footer.html.php");
+		include_once(TEMPLATE_PATH."print-header.html.php");
+		//for PHP5 we need to clean the scope of variables 
+		// from the previous include.
+		unset($sysMessages);
+		unset($k);
+		unset($v);
+		include_once($obj->module_root."templates/".$obj->templateName.".html");
+		include_once(TEMPLATE_PATH."print-footer.html.php");
 	}
 
 
@@ -99,9 +109,14 @@ class Service {
 	 * Include basic header and footer and show an error message
 	 */
 	function errorMessage (&$obj,&$t) {
-			include_once(TEMPLATE_PATH."header.html.php");
-			print "<h3>Error:</h3> \n\n ".$t[message]." <p>\n".$t[details];
-			include_once(TEMPLATE_PATH."footer.html.php");
+		include_once(TEMPLATE_PATH."header.html.php");
+		//for PHP5 we need to clean the scope of variables 
+		// from the previous include.
+		unset($sysMessages);
+		unset($k);
+		unset($v);
+		print "<h3>Error:</h3> \n\n ".$t[message]." <p>\n".$t[details];
+		include_once(TEMPLATE_PATH."footer.html.php");
 	}
 
 
