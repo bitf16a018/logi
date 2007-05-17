@@ -1,0 +1,40 @@
+<?php
+echo $t['sectionheader'];
+?>
+
+<h2 style="margin:1px;">Dates for Lesson: (<?= $t['lessonTitle'];?>)</h2>
+<a href="<?=modurl('lessonManager');?>">Back to Lesson Manager</a>
+<br/><br/>
+
+<?php
+$tables = array ('assessment', 'assignment');
+$names = array ('Assessment', 'Assignment');
+
+for ($x=0; $x < count($tables); ++$x ) {
+$key = $tables[$x];
+$name = $names[$x];
+
+?>
+
+<div style="clear:both;">
+	<div align="right" style="float:right">
+		<input onclick="document.location.href='<?=modurl('adjustDates/event='.$key.'/lesson_id='.$t['lesson_id']);?>';" style="font-size:97%" type="button" value="Adjust Dates"/>
+	</div>
+	<img align="middle" border="0" style="margin:0px;padding:0px;" src="/images/calendar.png"/>
+	<H2 style="display:inline;margin:1px;"><?=$name;?> Dates</H2>
+</div>
+<?php
+
+if ($t[$key]->table->getRowCount() < 1) {
+	echo "<i>No {$key}s found for this lesson.</i>";
+} else {
+	echo $t[$key]->toHTML();
+}
+
+?>
+<br/><br/>
+
+<?php
+}
+?>
+

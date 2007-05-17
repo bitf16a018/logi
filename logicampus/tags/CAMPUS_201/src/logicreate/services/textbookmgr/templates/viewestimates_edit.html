@@ -1,0 +1,46 @@
+<?=$t['sectionheader'];?>
+<form method='post' action='<?=modurl("viewestimates/event=update/key=".$t['key']);?>'>
+
+<?php
+
+	echo '
+	<table cellpadding="1" cellspacing="1" border="0" width="100%">
+	<tr>
+		<td bgcolor="silver"><B>Bundle</B></td>
+		<td bgcolor="silver"><B>CFAM</B></td>
+		<td bgcolor="silver"><B>CNUM</B></td>
+		<td bgcolor="silver"><B>ISBN</B></td>
+		<td bgcolor="silver"><B>ED.</B></td>
+		<td bgcolor="silver"><B>TITLE</B></td>
+		<td bgcolor="silver"><B>AUTHOR</B></td>
+		<td bgcolor="silver"><B>TYPE</B></td>
+		<td bgcolor="silver"><B>SE</B></td>
+		<td bgcolor="silver"><B>SO</B></td>
+		<td bgcolor="silver"><B>NE</B></td>
+		<td bgcolor="silver"><B>NW</B></td>
+	</tr>';
+	
+	foreach($t['books'] as $key=>$book)
+	{
+		
+		echo '<tr>';
+		echo '<td valign="top" width="12">';
+		if ($book['bundled']) { echo "y"; } else { echo ""; }
+		echo '</td>';
+		echo '<td valign="top" width="35">'.$book['courseFamily'].'</td>';
+		echo '<td valign="top" width="35">'.$book['courseNumber'].'</td>';
+		echo '<td valign="top" width="100">'.$book['isbn'].'</td>';
+		echo '<td valign="top" width="15">'.$book['edition'].'</td>';
+		echo '<td valign="top">'.$book['title'].'</td>';
+		echo '<td valign="top">'.$book['author'].'</td>';
+		echo '<td valign="top">'.$book['type'].'</td>';
+		echo '<td valign="top" width="25"><input type="text" name="se" size="4" value="'.$book['se'].'"></td>';
+		echo '<td valign="top" width="25"><input type="text" name="so" size="4" value="'.$book['so'].'"></td>';
+		echo '<td valign="top" width="25"><input type="text" name="ne" size="4" value="'.$book['ne'].'"></td>';
+		echo '<td valign="top" width="25"><input type="text" name="nw" size="4" value="'.$book['nw'].'"></td>';
+		echo '</tr>';
+	}
+	echo '</table>';
+?>
+<input type='submit' value='Update'>
+</form>

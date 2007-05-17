@@ -1,0 +1,120 @@
+<h3>File management</h3>
+
+<center><font color="red">
+<?=$t["error"];?>
+</font></center>
+
+
+<table width="600" border="0">
+<tr>
+<td class="menu_head">
+Currently viewing folder: <img src="<?=IMAGES_URL?>folder.gif" border="0" width="17" height="15" valign="bottom"> <b><?=$t["catName"];?></b>
+</td></tr>
+
+<?// if (count ($t["files"]) ) { ?>
+<!--  <tr><td align="right" valign="top">
+
+	<form method="post">
+
+	<input type="hidden" name="event" value="act">
+	<input type="submit" name="button" value="Delete"> | 
+	<input type="submit" name="button" value="Move"> or 
+	<input type="submit" name="button" value="Copy">
+		to: <img src="<?=IMAGES_URL?>folder.gif" border="0" width="17" height="15" valign="bottom">
+		<select name="actionCategory">
+		<?=$t["catOpts"];?>
+		</select>
+</td></tr>
+<tr><td align="right" valign="top" >
+
+	<table width="600" border="0" cellpadding="2" cellspacing="2">
+	<tr>
+		<td class="menu_head">&nbsp;</td>
+		<td class="menu_head">&nbsp;</td>
+		<td width="200" class="menu_head"><a href="<?=appurl("classdoclib//order=displayname");?>">Filename</a></td>
+		<td width="50" class="menu_head"><a href="<?=appurl("classdoclib//order=size");?>">Size</a></td>
+		<td width="200" class="menu_head"><a href="<?=appurl("classdoclib//order=description");?>">Notes</a></td> 
+		<td width="100" class="menu_head"><a href="<?=appurl("classdoclib//order=filedate");?>">Date</a></td>
+		<td width="50" class="menu_head">Owner</td>
+		<? while (list ($k,$v) = @each($t['files']) ) {
+		 ++$c %2 ==0 ? $color="#C0C0C0": $color="#E0E0E0";?>
+			<tr>
+			<td bgcolor="<?=$color?>"><input type="checkbox" name="pkeys[]" value="<?=$v->pkey?>"></td>
+			<td bgcolor="<?=$color?>"><a href="<?=appurl("classdoclib/main/event=edit/pkey=".$v->pkey)?>">[edit]</a></td>
+			<td bgcolor="<?=$color?>"><a href="<?=appurl("classdoclib/main/event=view/pkey=".$v->pkey."/".$v->displayname)?>"><?=$v->displayname?></a></td>
+			<td bgcolor="<?=$color?>"><?=$v->size?></td>
+			<td bgcolor="<?=$color?>"><?=$v->description?></td>
+			<td bgcolor="<?=$color?>"><?=$v->filedate?></td><td bgcolor="<?=$color?>"><?=$v->username?></td>
+			</tr>
+		<? } ?>
+	</tr>
+	</table>
+	</form>
+
+
+</td></tr> -->
+
+<?// } ?>
+<tr><td valign="top">
+	<form method="get">
+	<?=$t["ExplorerView"];?>
+	</form>
+</td></tr>
+</table>
+
+
+
+
+	<hr width="600" align="left">
+
+
+	<table width="600" border="0" cellpadding="3">
+<tr><td valign="top">
+	<table width="300" border="0" cellpadding="1">
+	<tr><td class="menu_head" style="text-align: left;">
+		Add a new file
+	</td></tr>
+	<tr><td>
+		<a href="<?=appurl("classdoclib/addFile/event=selectFolder");?>">
+		Click Here</a>
+		<br><br>
+	</td></tr>
+</table>
+</td><td valign="top">
+<table widht="600">
+	<tr><td class="menu_head" style="text-align: left;">
+		<b>MOVE</b> <img src="<?=IMAGES_URL?>folder.gif" border="0" width="12" height="11" valign="bottom"> <u><?=$t["catName"];?></u>
+	</td></tr>
+	<tr><td valign="top">
+		<form method="post">
+		<input type="hidden" name="pkey" value="<?=$t["pkey"];?>">
+		<input type="hidden" name="event" value="updateFolder">
+		 underneath 
+			<select name="parent">
+			<option value="0">None [top level folder]
+			<?=$t["catOpts"];?>
+			</select>
+		<input type="submit" value="Move">
+		</form>
+	</td></tr>
+</table>
+</td></tr>
+<tr><td valign="top">
+<table width="300">
+	<tr><td class="menu_head" style="text-align: left;">
+		<b>CREATE</B> a folder 
+	</td></tr>
+	<tr><td>
+		<form method="post" action="<?=appurl("classdoclib//event=newFolder");?>">
+		called <input type="text" name="newfolder" maxlength="25" size="20"> 
+			as a subfolder of 
+		<select name="parent">
+		<option value="0">None [top level folder]
+		<?=$t["catOpts"];?>
+		</select>
+		<input type="submit" value="Create"></form>
+	</td></tr>
+</table>
+</td><td>&nbsp;
+</td></tr>
+</table>

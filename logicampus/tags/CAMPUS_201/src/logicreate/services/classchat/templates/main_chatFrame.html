@@ -1,0 +1,16 @@
+<HTML>
+	<HEAD>
+	<title>Class Chatroom for: <?= $t['title'];?></title>
+	</HEAD>
+
+	<FRAMESET COLS="*,150" border="0">
+		<FRAMESET ROWS="50,*,120,0" border="0">
+
+		<frame name="Title" scrolling="no" src="<?=modurl("main/event=chatTitle/fresh=".$t["fresh"]."/title=".base64_encode($t['title']));?>">
+		<frame style="border-top:2px solid black; border-bottom:2px solid black;" name="View" scrolling="yes" src="<?=modurl("main/event=messages/");?>">
+			<frame name="Controls" scrolling="no" src="<?=modurl("controls/");?>">
+		</FRAMESET>
+		<frame name="Users" src="<?=modurl("main/event=userlist");?>">
+
+	</FRAMESET>
+</HTML>
