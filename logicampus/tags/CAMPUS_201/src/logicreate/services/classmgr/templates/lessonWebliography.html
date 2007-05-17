@@ -1,0 +1,69 @@
+<style type="text/css">
+	#sectionheader table {
+		background-color:#FFCE7B;
+	}
+	#sectionheader table TR TH {
+		font-size:140%;
+		text-align:left;
+	}
+
+	#sectionheader table TR TD {
+		background-color:#FFCE7B;
+	}
+</style>
+
+<?=$t['sectionheader'];?>
+<?=$t['table'];?>
+
+
+<br><br>
+<b>New Link</b>
+<table style="border: 1px solid silver;" cellpadding="2" cellspacing="1" border="0" width="100%">
+<tr>
+	<td>
+	<a name="edit"></a>
+	<span style="color: red"><?=$t['classlinksprocesserror'];?></span>
+<?=$t['classlinksprocessform'];?>
+	</td>
+</tr>
+</table>
+
+<br><br>
+<b>Add Category</b>
+<table style="border: 1px solid silver;" cellpadding="2" cellspacing="1" border="0" width="100%">
+<tr>
+	<td>
+<span style="color: red"><?=$t['categoryadderror'];?></span>
+<?=$t['lessoncategoryaddform'];?>
+
+	</td>
+</tr>
+</table>
+
+
+<br><br>
+<b>Remove Categories</b>
+<table style="border: 1px solid silver;" cellpadding="2" cellspacing="1" border="0" width="100%">
+<tr>
+	<td>
+<span style="color: red"><?=$t['categoryremerror'];?></span>
+<?=$t['lessoncategoryremform'];?>
+
+	</td>
+</tr>
+</table>
+
+<script>
+
+	function confirmit()
+	{	
+		if (confirm('Are you sure you want to remove this category?'))
+		{	return true;
+		} else
+		{	return false;
+		}
+	}
+	
+	document.getElementById("removecatsubmit").onclick=confirmit;
+	
+</script>

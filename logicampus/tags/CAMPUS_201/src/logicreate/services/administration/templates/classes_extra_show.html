@@ -1,0 +1,27 @@
+<?=$t['sectionheader'];?>
+
+<h3>Manage Extra Faculty</h3>
+<FIELDSET>
+<LEGEND><strong>Class Information</strong></LEGEND>
+Primary Instructor: <?=$t['classInfo']['faculty']?><br>
+Course Name: <?=$t['classInfo']['courseFamily']?><?=$t['classInfo']['courseNumber'];?> <?=$t['classInfo']['courseName'];?><br>
+Section Numbers: <?=$t['classInfo']['sectionNumbers'];?>
+
+</FIELDSET>
+<h4><?=$t['name'];?></h4>
+
+
+<FIELDSET>
+<LEGEND><strong>Add Additional Users</strong></LEGEND>
+<form method='post' action='<?=modurl("classes_extra/event=add");?>'>
+	Faculty ID <input type='text' name='faculty'> 
+	Type: <select name='type'><option value='e'>Extra teacher</option><option value='o'>Observer</option></select>
+	<input type='hidden' name='id_classes' value='<?=$t['id_classes'];?>'>
+	<input type='submit' value='Add'>
+</form>
+</FIELDSET>
+
+
+
+<br><BR>
+<?=$t['table'];?>

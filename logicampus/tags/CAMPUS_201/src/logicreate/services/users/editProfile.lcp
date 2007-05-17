@@ -1,0 +1,258 @@
+<?
+
+/* Created by Keith Elder
+ * Last Modified:  9/12/02
+ * This file allows a registered user to edit their profile.  
+ * 
+ * It also allows for dynamic templates based on a user's group.  For example, 
+ * say I am a student, or parent.  Each user will have different profile information.
+ * As a developer create the fields you want in the profile table, and create your template for these
+ * form fields.  The templates are stored in MOD_PATH/templates/<userType>Profile.html.
+ * IE: studentProfile.html, alumniProfile.html, etc
+ * 
+ * When a student edits their profile, they will be presented with additional "student" fields
+ * and a parent will be presented with additional "parent" profile fields.  
+ *
+ * Also, form names used in templates should also be the same name as what was in the DB.
+ */
+
+include_once(LIB_PATH."lc_categories.php");
+include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH."SiteForms.php");
+include_once(LIB_PATH."documentLibraryLib.php");
+
+class editProfile extends RegAuth {
+
+
+	var $presentor = "htmlPresentation";
+	var $cleanedArray; # when form is submtted we store the cleaned input here
+	
+	# Constructor to set private template
+	function editProfile()
+	{
+		global $lcObj;
+//auto-comment		$lcObj->templateStyle = 'private';
+	}
+
+
+	/*
+	 * Allows a user to edit a their profile
+	 * It loads up a user's profile via the user object
+	 * and passes the groups to the form so it only
+	 * displays the needed fields for that user.
+	 */
+	
+	function Run($db, &$u, &$arg, &$t)
+	{
+		$arg->templateName = 'editProfile';
+		$u->loadProfile();
+		$f = new SiteForm($u->groups);
+
+		if ($t['error']) 
+		{
+			$this->cleanedArray = $arg->postvars;
+
+			# Convert phone numbers to strings
+			$this->cleanedArray['homePhone'] = arrayToPhoneNumber($this->cleanedArray['homePhone']);
+			$this->cleanedArray['workPhone'] = arrayToPhoneNumber($this->cleanedArray['workPhone']);
+			$this->cleanedArray['officePhone'] = arrayToPhoneNumber($this->cleanedArray['officePhone']);
+			$this->cleanedArray['faxPhone'] = arrayToPhoneNumber($this->cleanedArray['faxPhone']);
+			$this->cleanedArray['cellPhone'] = arrayToPhoneNumber($this->cleanedArray['cellPhone']);
+			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
+			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
+
+
+			$values = $this->cleanedArray;
+		} else {
+			$values = $u->profile->values;
+		}
+
+		$f->getForm('userprofile', $values);
+
+		// put the current photo in the "message" area of the photo upload form element. (the "help" area)
+		if (is_file(IMAGES_PATH.'photos/'.$values['photo'])) $f->modFormValue(
+			'photo', '<img src="'.IMAGES_URL.'photos/'.$values['photo'].'" alt="Your photo" />','message');
+
+		# Since we are using the standard profile form
+		# we need to modify the event to our event
+		$f->fieldPermissions = true;
+		$t['form'] = $f->ToHTML();
+	}
+
+	/* 
+	 * Processes the form from the run().
+	 */
+
+	function postRun(&$db, &$u, &$lc, &$t)
+	{
+		$f = new SiteForm($u->groups);
+		$f->fieldPermissions = true;
+
+		// check for photo, and error them if it isn't jpg/png
+		$photo = $lc->uploads['photo'];
+		if ( $photo['name'] ) {  // we're uploading a photo. do extra checks.
+
+			$photo['name'] = strtolower($photo['name']);
+			if ( $photo['name'] && !preg_match( '/\.(jpg|jpeg|png)$/', $photo['name'], $matches ) )
+				$t['error'] .= 'You may only upload JPG or PNG files for your photo.<br/>';
+
+			$ext = ( $matches[1] == 'jpg' ? 'jpeg' : $matches[1] );
+
+			if (function_exists('ImageCreate'))
+			{   
+				if (!function_exists("image$ext")) {
+					$t['error'] .= "The image you uploaded with the extension <b>$ext</b> is a file type that we cannot process. The following shows which image formats we can process.<br>";
+					$t['error'] .= '<b>.GIF</b>: &nbsp;'. (( function_exists('imagegif'))?'Yes':'No' ). '<br>';
+					$t['error'] .= '<b>.PNG</b>: '. (( function_exists('imagepng'))?'Yes':'No' ). '<br>';
+					$t['error'] .= '<b>.JPG</b>: &nbsp;'. (( function_exists('imagejpeg'))?'Yes':'No' ). '<br>';
+				}
+			} else 
+			{   $t['error'] .= '<div style="background: silver;"><font color="maroon" size="3">*** GD Extention is <b>Not</b> installed.  Please contact your site administrator.</div><br>';
+			}
+
+			if (!$t['error']) {  // no errors found, go on with the processing...
+
+				$imageCtor = "ImageCreateFrom$ext";
+				$largeImage = $imageCtor($photo['tmp_name']);
+
+				$dims = getimagesize($photo['tmp_name']);
+				if ($dims[0] > 150 || $dims[1] > 150) {
+
+					// needs shrinkage
+					$thumb_max_x = $thumb_max_y = 150;
+
+					// We already took care of the sanity checks. Now we just need to DO it.
+					$w = ImageSX($largeImage);
+					$h = ImageSY($largeImage);
+					if ($w > $h ) {
+						$w2 = $thumb_max_x;
+						$h2 = $h / ($w/$thumb_max_x);
+					} else {
+						$h2 = $thumb_max_y;
+						$w2 = $w / ($h/$thumb_max_y);
+					}
+
+					if (function_exists('imagecreatetruecolor'))
+					{ 	$thumbImage = imagecreatetruecolor($w2, $h2);	// Using truecolor with gd2 for better resizing
+					} else 
+					{	$thumbImage = ImageCreate($w2,$h2);
+					}
+					
+					ImageCopyResized($thumbImage,$largeImage,0,0,0,0,$w2,$h2,$w,$h);
+
+				} else {
+
+					$thumbImage = $largeImage; // we were GIVEN a "thumbImage"
+
+				}
+
+				$lcdr = new LC_DiskRepository(IMAGES_PATH.'photos/');
+				$filename = $lcdr->saveGDImage( array($u->username), $thumbImage );
+				if ( $filename == false ) {
+					trigger_error('Could not save photo');
+					return false;
+				}
+
+				$this->cleanedArray['photo'] = $lcdr->getFullPath($filename, false);
+			}
+		}
+
+		$t['error'] .= $f->validateForm('userprofile', $lc->postvars);
+
+		if (!$t['error']) {
+			$this->cleanedArray = array_merge( $this->cleanedArray, $f->cleanedArray);
+			$this->cleanedArray['homePhone'] = arrayToPhoneNumber($this->cleanedArray['homePhone']);
+			$this->cleanedArray['workPhone'] = arrayToPhoneNumber($this->cleanedArray['workPhone']);
+			$this->cleanedArray['officePhone'] = arrayToPhoneNumber($this->cleanedArray['officePhone']);
+			$this->cleanedArray['faxPhone'] = arrayToPhoneNumber($this->cleanedArray['faxPhone']);
+			$this->cleanedArray['cellPhone'] = arrayToPhoneNumber($this->cleanedArray['cellPhone']);
+			$this->cleanedArray['pagerPhone'] = arrayToPhoneNumber($this->cleanedArray['pagerPhone']);
+			$this->cleanedArray['emergencyPhone'] = arrayToPhoneNumber($this->cleanedArray['emergencyPhone']);
+
+			//if they didn't set a new photo, put their current value back in the db
+
+			//only wipe out the value if we don't already have one from above
+			// people might want to change their photo!
+			if ($this->cleanedArray['removePhoto'] == false)
+			{
+				//if they didn't submit a new one, put the old value back in the new array
+				if ( !$this->cleanedArray['photo'] ) {
+					$this->cleanedArray['photo'] = $u->profile->values['photo'];
+				}
+			} else {
+				//delete the file here
+				$lcdr = new LC_DiskRepository(IMAGES_PATH.'photos/');
+				$lcdr->deleteFileWithKeys( array($u->username) );
+				$this->cleanedArray['photo'] = '';
+			}
+
+			while(list ($k, $v) = @each($this->cleanedArray) )
+			{
+				$u->profile->set($k, $v);
+			}
+			$u->profile->save();	
+
+      /**
+      * Updated on 2003-11-04 by Joe Stump
+      *  - Added fix for missing information
+      */
+      if($u->profile->tableName == 'profile_student')
+      {
+        $arr = array();
+        $arr = $this->cleanedArray;
+
+        $sql = "REPLACE INTO profile_student
+                SET operatingSystem='".$arr['operatingSystem']."',
+                    connectType='".$arr['connectType']."',
+                    isp='".$arr['isp']."',
+                    username='".$u->username."'";
+//                WHERE username='".$u->username."'"; 
+
+
+        $db->query($sql);
+        
+      }
+
+
+			$t['message'] = 'Profile saved.';
+			$this->run($db, $u, $lc, $t);
+			return;
+
+		} else {
+
+			$t['error'] = '<br>'.$t['error'];
+
+			// there were errors, but if they uploaded a photo, submit it to the database anyway
+			if ( $this->cleanedArray['photo'] ) {
+				$u->profile->set('photo', $this->cleanedArray['photo']);
+				$u->profile->save();
+				$t['message'] = "There were errors with your profile, but your uploaded photo has been saved anyway.";
+			}
+
+			$this->Run($db, $u, $lc, $t);
+			return;
+		}
+	}
+
+
+	// Allows a user to change or add themselves to certain groups.
+	// Note, it doesn't preserve any of their 
+	// current permissions except for reg and public.  Everything else
+	// will be lost.
+	function changeUserTypeRun(&$db, &$u, &$arg, &$t)
+		{
+			$group = "|".implode("|",$arg->postvars["groups"])."|reg|public|";
+			$sql = "update lcUsers set groups='$group' where username='".$u->username."'";
+			$db->query($sql);
+			$arg->templateName = "userTypeChanged";
+			$t[message] = "User Type Altered";
+		}	
+}
+    /* Joins a phone array into a string 123-123-1234 */
+	    function arrayToPhoneNumber($ar)
+		    {
+				return $ar['area'].'-'.$ar['pre'].'-'.$ar['num'];
+			}
+
+
+?>

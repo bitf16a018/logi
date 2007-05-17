@@ -1,0 +1,23 @@
+<?=$t['sectionheader'];?>
+
+<form action='post' method='<?=modurl("dup/event=copyAll");?>'>
+<table>
+<tr><td valign='top'>
+<h3>Semester 1</h3>
+<select name='foo' size='20' enabled='false'>
+<?=$t['from'];?>
+</select>
+
+</td><td valign='top'>
+<h3>Semester 2</h3>
+<select name='foo' size='20' multiple>
+<?=$t['to'];?>
+</select>
+
+
+
+</td></tr>
+</table>
+<input type='submit' value='Copy all books from semester 1 to semester 2'>
+
+</form>

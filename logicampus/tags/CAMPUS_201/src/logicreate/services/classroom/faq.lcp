@@ -1,0 +1,70 @@
+<?
+/*
+ *
+ * handles class FAQs
+ *
+ */
+
+class faq extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'FAQs';
+	var $inactivelinks = array(
+		'FAQs'
+	);
+
+/*
+ *
+ * Default event
+ * 
+ * Input data: $u->activeClassTaken->id_classes
+ * Output data: a list of all the faqs under each category
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='faq_main';
+
+      		$search = addslashes(stripslashes($lc->postvars['search']));
+		if (!$search) { 
+      			$search = addslashes(stripslashes($lc->getvars['search']));
+		}
+		if ($search) { 
+			$where = " and (question like '%$search%' or answer like '%$search%')";
+			$t['search'] = $search;
+		}
+
+			// get the faqs
+			$sql = 'select * from class_faqs
+				where id_classes='.$u->activeClassTaken->id_classes.$where.'
+				order by category, clicks desc';
+			$db->query($sql);
+			while ($db->next_record())
+				$t['faqs'][] = $db->Record;
+
+			$inactivelinks[] = 'FAQs';
+
+		}
+
+
+		// display a particular faq and increment the clicks field
+		function viewRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName = 'faq_view';
+
+			// increment the clicks field by 1
+			$db->query('update class_faqs set clicks=clicks+1
+				where id_classes='.$u->activeClassTaken->id_classes.'
+				and id_class_faqs='.(int)$lc->getvars['id']);
+
+			// get the faq
+			$sql = 'select * from class_faqs
+				where id_classes='.$u->activeClassTaken->id_classes.'
+				and id_class_faqs='.(int)$lc->getvars['id'];
+			$db->queryOne($sql);
+			$t['faq'] = $db->Record;
+
+		}
+
+}
+
+?>

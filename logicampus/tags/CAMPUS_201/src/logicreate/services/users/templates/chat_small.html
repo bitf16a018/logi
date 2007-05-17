@@ -1,0 +1,39 @@
+<HTML>
+
+<HEAD>
+</HEAD>
+
+
+	<? if (($t['hasSidebar']) || ($t['hasSponsor']))  { ?>
+		<FRAMESET COLS="*,150" border="0">
+			<FRAMESET ROWS="*,120" border="0">
+				<frame name="Controls" src="<?=appurl("{$obj->moduleName}/chat/event=chat/fresh=".$t["fresh"]."/chatThread=".$t["chatThread"]);?>">
+				<frame name="View" src="<?=appurl("{$obj->moduleName}/chat/event=start1/ttt=".time()."/chatThread=".$t["chatThread"]);?>">
+			</FRAMESET>
+			<? if ( ($t['hasSidebar']) && (!$t['hasSponsor'])) { ?>
+				<frame name="users" src="<?=appurl("{$obj->moduleName}/chat/event=userlist");?>">
+			<? } ?>
+			<? if ( (!$t['hasSidebar']) && ($t['hasSponsor'])) { ?>
+				<frame name="sponsor" src="<?=appurl("{$obj->moduleName}/chat/event=showSponsor");?>">
+			<? } ?>
+			<? if ( ($t['hasSidebar']) && ($t['hasSponsor'])) { ?>
+
+			<FRAMESET ROWS="*,*" border="0">
+				<frame name="links" src="<?=appurl("{$obj->moduleName}/chat/event=showSidebar");?>">
+				<frame name="sponsor" src="<?=appurl("{$obj->moduleName}/chat/event=showSponsor");?>">
+			</FRAMESET>
+
+			<? } ?>
+
+
+
+	<? } else { ?>
+		<FRAMESET ROWS="*,80" border="0">
+			<frame name="Controls" src="<?=appurl("{$obj->moduleName}/chat/event=chat/fresh=".$t["fresh"]."/chatThread=".$t["chatThread"]);?>">
+			<frame name="View" src="<?=appurl("{$obj->moduleName}/chat/event=start1/ttt=".time()."/chatThread=".$t["chatThread"]);?>">
+		</FRAMESET>
+	<? } ?>
+	
+
+
+</HTML>

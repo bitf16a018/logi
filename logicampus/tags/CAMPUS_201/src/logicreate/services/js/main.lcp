@@ -1,0 +1,22 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+
+class js extends NoAuth 
+{
+
+	var $presentor = 'emptyPresentation';
+
+	
+	function run($db,&$u,&$lc,&$t) {
+	
+	}
+
+	function fullscreenRun($db, &$u, &$lc, &$t)
+	{	$lc->templateName = 'fullscreen';
+	}
+}
+?>

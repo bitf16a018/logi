@@ -1,0 +1,54 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+
+
+/**
+ * Class Forums
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class Topic extends StudentService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $applinks = array();
+	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
+	/**
+	 * Allow for the links to be translated
+	 */
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('New Topic') => '%classforums/topic/event=post'
+		);
+	}
+
+
+	function postRun (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'topic_post';
+
+	}
+}
+
+?>

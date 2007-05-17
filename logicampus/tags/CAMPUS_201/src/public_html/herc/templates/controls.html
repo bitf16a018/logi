@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+
+<head>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript"><!--
+
+function mouseOn(img, name)
+{
+    arguments[0].src = "<?= _PICS_URL;?>" + name + "_press.gif"
+}
+
+function mouseOff(img, name)
+{
+    arguments[0].src = "<?= _PICS_URL;?>" + name + "_active.gif"
+}
+
+
+function showConf(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>conf/' + mid;
+	}
+}
+
+function showPerms(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>perm/' + mid;
+	}
+}
+
+
+function showInfo(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>view/' + mid;
+	}
+}
+
+function showHelp(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>help/' + mid;
+	}
+}
+
+
+function showAdmin(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>adm/' + mid;
+	}
+}
+
+
+function showEdit(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>mod_edit/mid=' + mid;
+	}
+}
+function showDel(sel) {
+	if (sel.selectedIndex > -1 ) {
+		mid = sel.options[sel.selectedIndex].value;
+		if (mid != '__0' )
+		       parent.View.location ='<?= _APP_URL;?>moduleadmin/mid=' + mid+ '/event=confirmDel';
+	}
+}
+
+function showRefresh() {
+	window.location.reload();
+}
+function confModule(sel) {
+	sel2 = document.forms[0].elements[0]
+	mid = sel2.options[sel2.selectedIndex].value;
+	if (mid != '' )
+		parent.View.location = '<?= _APP_URL;?>' + mid;
+}
+
+function addModule() {
+        window.open('<?= _BASE_URL;?>testinstall.html','','url=0,width=400,height=300,scrollable=yes');
+}
+// -->
+</script>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>/templates/site.css" TYPE="text/css">
+
+	<style type="text/css">
+		.glow {
+		font-size: 13;
+		font-family: Arial;
+		color: black;
+		text-decoration:none;
+		}
+		.glow a:link { text-decoration:none;}
+		.glow a:visited { text-decoration:none;}
+		.glow a:hover { text-decoration:underline;background-color: #C2D5E7;}
+		.glow a:active { color: red;}
+		SELECT
+		{
+			color: #000022;
+			background-color: #C2D5E7;
+			border-color: #000044;
+			border-width: 1px;
+			border-left-width: 0px;
+			border-right-width: 0px;
+			border-style: dashed;
+		} 
+	</style>
+</head>
+<BODY bgcolor="#ada592" vlink="#000000" link="#000000">
+
+
+<table border="0" cellspacing="0" cellpadding="0" name="container"><tr><td width="200">
+
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr><td><img src="<?= _PICS_URL;?>table_UL.gif"></td>
+		<td class="selectedTab" background="<?= _PICS_URL;?>table_U.gif" width="100%">
+		  <b>Modules</b> </td><td><img src="<?= _PICS_URL;?>table_UR.gif"></td></tr>
+	</table>
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr><td background="<?= _PICS_URL;?>table_L.gif">
+		<img src="<?= _PICS_URL;?>table_L.gif"></td>
+		<td bgcolor="#FFFFFF" width="100%" align="center">
+
+	<br>
+	<form>
+		<select size="5" name="ModuleSel" onDoubleClick="showAdmin(document.forms[0].elements[0]);">
+       		<?= $t["modules_opt"];?>
+		</select>
+		<br>
+	<span style="font-size: 10;">Select Module Above.<br>
+				Choose Action Below.</span>
+	<p>
+
+		<div align="left" class="glow" style="padding-left:12px;line-height:16pt;">
+
+			<a href="#" onClick="showAdmin(document.forms[0].elements[0]);return false;"><b>Administrate</b></a> <br>
+			<a href="#" onClick="showPerms(document.forms[0].elements[0]);return false;"><b>Set Permissions</b></a> <br>
+			<a href="#" onClick="showConf(document.forms[0].elements[0]);return false;"><b>Configure</b></a> <br>
+			<a href="#" onClick="showInfo(document.forms[0].elements[0]);return false;"><b>View Stats</b></a> <br>
+
+		</div>
+
+		<p>
+		<div align="center" class="glow">
+			<a target="View" href="<?= _APP_URL;?>moduleadmin">New</a> | <a href="#" onClick="showDel(document.forms[0].elements[0]);">Delete</a>
+		</div>
+
+	</form>
+
+	</td><td background="<?= _PICS_URL;?>table_R.gif"><img src="<?= _PICS_URL;?>table_R.gif"></td></tr>
+	<tr><td background="<?= _PICS_URL;?>table_BL.gif"><img src="<?= _PICS_URL;?>table_BL.gif"></td><td background="<?= _PICS_URL;?>table_B.gif" width="100%"><img src="<?= _PICS_URL;?>table_B.gif"></td><td background="<?= _PICS_URL;?>table_BR.gif"><img src="<?= _PICS_URL;?>table_BR.gif"></td></tr>
+	</table>
+
+</td></tr></table name="container">
+
+
+
+<p>
+
+<table border="0" cellspacing="0" cellpadding="0" name="container"><tr><td width="200">
+
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr><td><img src="<?= _PICS_URL;?>table_UL.gif"></td><td class="selectedTab" background="<?= _PICS_URL;?>table_U.gif" width="100%" align="center">
+	 <b>Site</b> </td><td><img src="<?= _PICS_URL;?>table_UR.gif"></td></tr>
+	</table>
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr><td background="<?= _PICS_URL;?>table_L.gif"><img src="<?= _PICS_URL;?>table_L.gif"></td>
+		<td bgcolor="#FFFFFF" width="100%" align="left" class="glow">
+
+	<img src="<?= _PICS_URL;?>user.gif" width="20" height="20"><br>
+	&nbsp; <a href="<?= _APP_URL;?>groups" target="View">Groups</a> &nbsp; <a href="<?= _APP_URL;?>users" target="View">Users</a>
+	<br>&nbsp; <a href="<?= _APP_URL;?>email" target="View">Email</a>
+
+	<br><br>
+	<img src="<?= _PICS_URL;?>content.gif" width="20" height="20"><br>
+	&nbsp; <a href="<?= _APP_URL;?>adm/html/main/event=addPage" target="View">New HTML Page</a>
+	<br>
+			&nbsp; <a href="<?=_APP_URL;?>images/" target="View">Manage Images</a><br>
+	
+	&nbsp; <a href="<?= _APP_URL;?>cat" target="View">Manage Categories</a>
+	<br>
+	<br>
+	&nbsp; <a href="<?= _APP_URL;?>formMgr" target="View">Site Forms</a>
+	<br>
+	&nbsp; <a href="<?= _APP_URL;?>formMgr/type=admin" target="View">Form Fields</a>
+	
+	<br><br>
+	<img src="<?= _PICS_URL;?>stats.gif" width="20" height="20"><br>
+	&nbsp; <a href="<?= _APP_URL;?>usage" target="View">Usage Stats</a>
+	<br>
+	&nbsp; <a href="<?= DEFAULT_URL;?>" target="View">View Site</a>
+	<br>
+
+
+	</td><td background="<?= _PICS_URL;?>table_R.gif"><img src="<?= _PICS_URL;?>table_R.gif"></tr>
+	<tr><td background="<?= _PICS_URL;?>table_BL.gif"><img src="<?= _PICS_URL;?>table_BL.gif"></td><td background="<?= _PICS_URL;?>table_B.gif" width="100%"><img src="<?= _PICS_URL;?>table_B.gif"></td><td background="<?= _PICS_URL;?>table_BR.gif"><img src="<?= _PICS_URL;?>table_BR.gif"></td></tr>
+	</table>
+
+</td></tr></table name="container">
+
+
+</BODY>
+</HTML>
