@@ -211,7 +211,7 @@ class lessons extends StudentService {
 		// of the lesson
 
 		// Create the sidebar and stash it in the session
-			$u->sessionvars['activeLesson'] = $t['lesson'];
+		$u->sessionvars['activeLesson'] = $t['lesson'];
 
 		if ($lc->getvars['print']) {
 			$this->presentor = 'printPresentation';

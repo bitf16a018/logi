@@ -6,7 +6,8 @@ if ( strlen($t['error']) > 0 ) { ?>
 <?php } ?>
 
 	<div align="right" style="text-align:right;">
-		<a href="<?= appurl('classroom/viewer/'.$t['uniqcode'].'/43013-Manarola - 2004.jpg');?>" style="font-size:90%;">Next</a>
+		<!-- <a href="<?= appurl('classroom/viewer/'.$t['uniqcode'].'/43013-Manarola - 2004.jpg');?>" style="font-size:90%;">Next</a> -->
+		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next</a>
 	</div>
 
 <?php
