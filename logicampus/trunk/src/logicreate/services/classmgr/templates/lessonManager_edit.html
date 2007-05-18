@@ -90,6 +90,25 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 
 	<div style="width:48%;align:left;">
 		<fieldset>
+			<legend>Lesson Content</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkContent/id='.$t['lessonId']);?>">Change Content</a>
+			<?php
+			if ( ! is_array($t['content']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Content</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['content'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	<div style="width:48%;align:left;">
+		<fieldset>
 			<legend>Lesson Objectives</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lessonId']);?>">Change Objectives</a>
 			<?php

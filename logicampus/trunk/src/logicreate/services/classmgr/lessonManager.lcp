@@ -227,6 +227,87 @@ class LessonManager extends FacultyService {
 	/**
 	 * Edit the objectives to this lesson
 	 */
+	function linkContentRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		$user_id = intval($u->userId);
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Content';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveContent';
+		$t['pageHeading'] = 'Lesson Content';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		if( is_object($lesson))
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT B.lob_content_id, B.lob_title
+			FROM lob_user_link AS A
+			LEFT JOIN lob_content AS B on A.lob_id = B.lob_content_id
+			WHERE A.user_id = ".$user_id."
+			AND A.lob_kind = 'content'
+			ORDER BY A.user_id";
+
+		$lobs = array();
+		$db->query($sql);
+		while($db->nextRecord()) {
+			$lobs[] = $db->record;
+		}
+		$dm = new LC_Table_ItemModel($lobs);
+		$dm->ignoreColumn('user_id');
+
+		$table = new LC_Table($dm);
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		/*
+		$sql = "SELECT A.id_class_objectives, A.id_class_lesson, B.title
+			FROM class_lesson_objectives AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lesson = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->next_record()) {
+			$itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
+			$itemsToLessons[$db->Record['id_class_objectives']][] = $db->Record['id_class_lesson'];
+		}
+		 */
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->idName = 'lob_content_id';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Content');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+
+	/**
+	 * Edit the objectives to this lesson
+	 */
 	function linkObjectivesRun(&$db,&$u,&$lc,&$t) {
 		$lesson_id = intval($lc->getvars['id']);
 		$class_id = $u->activeClassTaught->id_classes;
@@ -360,6 +441,90 @@ class LessonManager extends FacultyService {
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
+
+
+	/**
+	 * Save the objectives to this lesson
+	 */
+	function saveContentRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		$user_id = intval($u->userId);
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.lob_id, B.lob_title
+			FROM lob_user_link AS A
+			LEFT JOIN lob_content as B on A.lob_id = B.lob_content_id
+			WHERE A.user_id = ".$user_id."
+			AND A.lob_kind = 'content'";
+
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['lob_id'];
+			$db->record['lob_mime'] = 'text/html';
+			$lobRecord[$db->record['lob_id']] = $db->record;
+		}
+
+		//clean input array to match allowable items
+		$validEntry = false;
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+				$validEntry = true;
+			}
+		}
+
+		/*
+		if (!$validEntry) {
+			$this->linkObjectivesRun($db,$u,$lc,$t);
+			$t['message'] = "You need to choose at least one objective.";
+			return false;
+		}
+		 */
+
+		//find content objects that we didn't recieve a checkbox for
+		$sql = ('SELECT class_lesson_sequence_id, lob_id
+			WHERE lesson_id = '.$lesson_id.'
+			AND lob_id NOT IN ('.implode(',',$itemArray).')');
+
+		//needs work to delete
+		/*
+		$deletes = array();
+		while ($db->nextRecord()) {
+			debug($db->record,1);
+			$deletes[] = $db->record['class_lesson_sequence_id'];
+		}
+		//wipe all previous content links for this lesson
+		if (count ($deletes) > 0 ) {
+		$db->query('DELETE from class_lesson_sequence
+			WHERE class_lesson_sequence_id IN ('.implode(',',$deletes).')');
+		}
+		 */
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_sequence
+		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime)
+		VALUES (%d, %d, %d, "content", "%s", "%s")';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+			$lob = $lobRecord[$v];
+
+			$db->query( sprintf($insert, $lesson_id, $class_id, $v, $lob['lob_title'], $lob['lob_mime']));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+	}
+
 
 
 	/**
