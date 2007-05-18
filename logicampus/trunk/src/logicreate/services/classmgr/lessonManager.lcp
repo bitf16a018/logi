@@ -244,11 +244,11 @@ class LessonManager extends FacultyService {
 
 
 		$sql = "SELECT B.lob_content_id, B.lob_title
-			FROM lob_user_link AS A
+			FROM lob_class_link AS A
 			LEFT JOIN lob_content AS B on A.lob_id = B.lob_content_id
-			WHERE A.user_id = ".$user_id."
+			WHERE A.class_id = ".$class_id."
 			AND A.lob_kind = 'content'
-			ORDER BY A.user_id";
+			ORDER BY B.lob_title";
 
 		$lobs = array();
 		$db->query($sql);
@@ -459,9 +459,9 @@ class LessonManager extends FacultyService {
 
 		//get all lesson items for security
 		$sql = "SELECT A.lob_id, B.lob_title
-			FROM lob_user_link AS A
+			FROM lob_class_link AS A
 			LEFT JOIN lob_content as B on A.lob_id = B.lob_content_id
-			WHERE A.user_id = ".$user_id."
+			WHERE A.class_id = ".$class_id."
 			AND A.lob_kind = 'content'";
 
 		$db->query($sql);

@@ -90,13 +90,18 @@ class content extends StudentService {
 
 		$db->query("SELECT * FROM lob_content as A 
 			LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_id
-			WHERE B.lob_title='".$filename."'
+			WHERE B.link_text='".$filename."'
 			AND B.lesson_id = ".$lesson_id."
 			AND B.class_id = ".$classId);
 		if ($db->nextRecord()) {
 			$t['file']['title'] = $db->record['lob_title'];
 			$t['file']['content'] = $db->record['lob_content'];
 			$t['file']['mime'] = 'text/html';
+		}
+		if ($db->record['lob_mime'] == 'image/jpeg') {
+			header('Content-type: '.$db->record['lob_mime']);
+			echo $db->record['lob_binary'];
+			exit();
 		}
 
 
@@ -105,9 +110,9 @@ class content extends StudentService {
 		$uniqcode = lcClass::makeUniqueCode($u->activeClassTaken);
 		//choose a start URL, viewer or content
 		if ($t['seqItems'][1]->lobMime == 'text/html') {
-			$t['nextUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][1]->lobTitle);
+			$t['nextUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][1]->linkText);
 		} else {
-			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][1]->lobTitle);
+			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][1]->linkText);
 		}
 
 
