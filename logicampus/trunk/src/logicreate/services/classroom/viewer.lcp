@@ -38,6 +38,7 @@ class viewer extends StudentService {
 		
 		$viewerAuth = false;
 		$classId=-1;
+		$lesson_id = $u->sessionvars['activeLesson']['id_class_lessons'];
 		foreach ($u->classesTaken as $classObj) {
 			$code = lcClass::makeUniqueCode($classObj);
 			if ($uniqCode == $code) {
@@ -66,6 +67,7 @@ class viewer extends StudentService {
 			$t['activity'] = $db->record;
 		}
 
+		/*
 		if (! is_array($t['lob']) ) {
 			//temporary, content items are not part of lob sequence yet
 			$db->query("SELECT * FROM classdoclib_Files as A 
@@ -75,6 +77,23 @@ class viewer extends StudentService {
 			$db->nextRecord();
 			$t['file'] = $db->record;
 		}
+		 */
+		if ($t['lob']['lob_type'] == 'content') {
+			$db->query("SELECT * FROM lob_content as A 
+				LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_id
+				WHERE B.link_text='".$filename."'
+				AND B.lesson_id = ".$lesson_id."
+				AND B.class_id = ".$classId);
+			if ($db->nextRecord()) {
+//				debug($db->record,1);
+				$t['file']['title'] = $db->record['lob_title'];
+				$t['file']['description'] = $db->record['lob_description'];
+				$t['file']['mime'] =  $db->record['lob_mime'];
+				$t['file']['file'] =  $db->record['lob_filename'];
+			}
+		}
+
+
 
 		$t['uniqcode'] = $uniqCode;
 //print_r($u);

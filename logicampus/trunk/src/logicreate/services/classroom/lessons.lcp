@@ -223,9 +223,9 @@ class lessons extends StudentService {
 		$uniqcode = lcClass::makeUniqueCode($u->activeClassTaken);
 		//choose a start URL, viewer or content
 		if ($t['seqItems'][0]->lobMime == 'text/html') {
-			$t['startUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][0]->lobTitle);
+			$t['startUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][0]->linkText);
 		} else {
-			$t['startUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][0]->lobTitle);
+			$t['startUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][0]->linkText);
 		}
 	}
 

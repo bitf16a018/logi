@@ -15,7 +15,9 @@ if ( strlen($t['error']) > 0 ) { ?>
 if ($t['file']['mime'] == 'image/jpeg') {
 
 //debug($t['file']);
-	echo '<h3>'.$t['file']['description'].'</h3>';
+
+	echo '<h3>'.$t['file']['title'].'</h3>';
+	echo ''.$t['file']['description'].'';
 	echo "<br/>\n";
 	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['file'].'"/>';
 }
