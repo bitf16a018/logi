@@ -439,4 +439,32 @@
 			attribute="user_id"
 			name="user_idx"/>
 	</entity>
+	<entity  name="lob_class_link">
+		<attribute name="lob_class_link_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_kind"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="class_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<key
+			attribute="lob_id"
+			name="lob_idx"/>
+		<key
+			attribute="lob_kind"
+			name="lob_kind_idx"/>
+		<key
+			attribute="class_id"
+			name="class_idx"/>
+	</entity>
 </project>
