@@ -1,6 +1,7 @@
 <?
 
 include_once(LIB_PATH.'classLessonContentObj.php');
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 //include_once(LIB_PATH.'datagrid.php');
 
 //include(LIB_PATH.'lc_table.php');
@@ -39,7 +40,8 @@ class content extends StudentService {
 		
 		$viewerAuth = false;
 		$classId=-1;
-		//$lesson_id=-1;
+		$lesson_id=-1;
+		$lesson_id = $u->sessionvars['activeLesson']['id_class_lessons'];
 		foreach ($u->classesTaken as $classObj) {
 			$code = lcClass::makeUniqueCode($classObj);
 			if ($uniqCode == $code) {
@@ -54,6 +56,7 @@ class content extends StudentService {
 			return;
 		}
 
+		/*
 		$db->query("SELECT * FROM classdoclib_Files as A 
 			LEFT JOIN classdoclib_Folders as B on A.folder = B.pkey
 			WHERE file='".$filename."'
@@ -83,6 +86,30 @@ class content extends StudentService {
 			$t['file']['content'] = $db->record['txText'];
 			$t['file']['mime'] = 'text/html';
 		}
+		 */
+
+		$db->query("SELECT * FROM lob_content as A 
+			LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_id
+			WHERE B.lob_title='".$filename."'
+			AND B.lesson_id = ".$lesson_id."
+			AND B.class_id = ".$classId);
+		if ($db->nextRecord()) {
+			$t['file']['title'] = $db->record['lob_title'];
+			$t['file']['content'] = $db->record['lob_content'];
+			$t['file']['mime'] = 'text/html';
+		}
+
+
+		//SEQUENCE ITEMS
+		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lesson_id . ' ORDER BY rank');
+		$uniqcode = lcClass::makeUniqueCode($u->activeClassTaken);
+		//choose a start URL, viewer or content
+		if ($t['seqItems'][1]->lobMime == 'text/html') {
+			$t['nextUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][1]->lobTitle);
+		} else {
+			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][1]->lobTitle);
+		}
+
 
 		//load the next learning object sequence
 
