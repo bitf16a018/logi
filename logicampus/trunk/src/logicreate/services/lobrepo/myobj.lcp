@@ -53,12 +53,14 @@ class Myobj extends FacultyService {
 			$lobItems[$idx]['author'] = $lobRec['author'];
 			$lobItems[$idx]['action'] = '<a href="'.appurl('lobrepo/edit/c='.$lobRec['lob_content_id'].'').'">Edit</a>';
 			$lobItems[$idx]['description'] = $lobRec['lob_description'];
+			$lobItems[$idx]['mimetype'] = $lobRec['lob_mime'];
 			$lobItems[$idx]['lobId'] = $lobRec['lob_content_id'];
 			$idx++;
 		}
 
 		$dm = new LC_Table_ItemModel($lobItems);
 		$dm->ignoreColumn('description');
+		$dm->ignoreColumn('mimetype');
 		$dm->ignoreColumn('lobId');
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();

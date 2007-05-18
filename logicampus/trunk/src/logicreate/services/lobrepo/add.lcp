@@ -32,6 +32,8 @@ class add extends FacultyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName = 'add_main';
+		$mimetype = Lc_Lob::getMimeForSubtype($lc->getvars['t']);
+		//$lc->getvars['ext'] = 'jpeg';
 		switch($lc->getvars['t']) {
 			case 'html':
 				$lc->templateName = 'add_html';
@@ -44,6 +46,7 @@ class add extends FacultyService {
 				$formObj->data[6][0]['defaultValue'] = 'save';
 
 				$metafields = LC_Lob_Renderer::getMetadataForm();
+//				debug($metafields,1);
 				//move the button and hidden fields to the end of the form
 				// to make room for the new fields
 				$formObj->data[9] = $formObj->data[6];
@@ -54,10 +57,47 @@ class add extends FacultyService {
 				$formObj->data[5] = $metafields[1];
 				$formObj->data[6] = $metafields[2];
 
+				//add hidden mimetype at the end
+
+//				function addHidden($name, $defaultValue='', $groups=array('public'), $row='')
+				$formObj->addHidden('mime',$mimetype);
+
 				$formObj->action = modurl('add'); // i should do this in the manager/form itself
 				$t['form'] = $formObj->ToHTML();
 				break;
+
+			case 'image':
+				$lc->templateName = 'add_image';
+				break;
 		}
+	}
+
+
+	function uploadToLob(&$lob,&$lc,$upName) {
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
+		$lob->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
+		$lob->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobSubType','image');
+		$n =& $lc->uploads[$upName]['name'];
+
+		$ext = substr (
+			$n, 
+		       (strrpos($n, '.')  - strlen($n) +1)
+			);
+		$m = Lc_Lob::getMimeForSubtype('image',$ext);
+		$lob->set('lobMime', $m);
+	}
+
+
+	function textToLob(&$lob,&$lc) {
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobSubType','text');
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
+		$lob->set('lobMime', $lc->postvars['mime']);
 	}
 
 
@@ -66,16 +106,23 @@ class add extends FacultyService {
 	 */
 	function saveRun(&$db,&$u,&$lc,&$t) {
 		$guid = lcUuid();
+
 		$lob = new LobContent();
 		$lobMetaObj = new LobMetadata();
 		$lobUserObj = new LobUserLink();
 
+//debug($lc,1);
+
 		$lob->set('lobType','content');
-		$lob->set('lobSubType','text');
 		$lob->set('lobGuid',$guid);
-		$lob->set('lobContent', $lc->postvars['txText']);
-		$lob->set('lobTitle', $lc->postvars['txTitle']);
-		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
+
+
+		if (@$lc->uploads['content']) {
+			$this->uploadToLob($lob,$lc,'content');
+		} else {
+			$this->textToLob($lob,$lc);
+		}
+
 //		debug($lob,1);
 //		debug($lc->postvars['txTitle'],1);
 		$lob->save();

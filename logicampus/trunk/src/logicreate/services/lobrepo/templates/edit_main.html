@@ -12,51 +12,73 @@
 <hr/>
 
 <h3><?= $lob['lob_title'];?></h3>
-<?= $lob['lob_type'];?> &endash; <?= $lob['lob_sub_type'];?>
-
-<p>
-<?= $lob['lob_description'];?>
-</p>
-
-<table border="0" style="border:1px solid black;">
+<table border="0" width="600">
 	<tr>
-		<td>Size:</td><td><?= strlen($lob['lob_binary']); ?> bytes</td>
-	</tr><tr>
-		<td>URL name:</td><td><?= $lob['lob_urltitle'];?></td>
-	</tr><tr>
-		<td>Date created:</td><td><?= date('M d Y',$lob['created_on']);?></td>
-	</tr><tr>
-		<td>Last update on:</td><td><?= date('M d Y',$lob['updated_on']);?></td>
+		<td valign="top">
+			<?php
+			if (strlen($lob['lob_description']) ) { ?>
+			<p>
+			<?= $lob['lob_description'];?>
+			</p>
+			<?php
+			} else { ?>
+			<i>no description</i>
+			<?php
+			} ?>
+		</td>
+		<td valign="top" width="200">
+			<div style="text-align:center;border:1px solid black;padding:3px;width:170px;">
+				<img src="<?=IMAGES_URL;?>/mimetype/<?=$t['icon'];?>" width="64" height="64"/>
+				<br/>
+				<?= $lob['lob_type'];?> &endash; <?= $lob['lob_sub_type'];?>
+			</div>
+			<table border="0" style="border:0px solid black;">
+				<tr>
+					<td>Size:</td><td><?= strlen($lob['lob_binary']); ?> bytes</td>
+				</tr><tr>
+					<td>URL name:</td><td><?= $lob['lob_urltitle'];?></td>
+				</tr><tr>
+					<td>Last update on:</td><td><?= date('M d Y',$lob['updated_on']);?></td>
+				</tr>
+			</table>
+		</td>
 	</tr>
 </table>
-
-<div style="width:200px">
-<fieldset>
-	<legend>Copyright</legend>
-
-	<ul>
-		<li>Author:&nbsp; <?=$lob['author'];?></li>
-		<li>Source:&nbsp; <?=$lob['source'];?></li>
-		<li>Copyright:&nbsp; <?=$lob['copyright'];?></li>
-		<li>License:&nbsp; <?=$lob['license'];?></li>
-	</ul>
-</fieldset>
-</div>
+<input type="button" value="Change this object"/>
 
 
-<div style="width:200px">
-<fieldset>
-	<legend>Status</legend>
+<table border="0" width="600">
+	<tr>
+		<td valign="top">
+			<div style="width:200px">
+			<fieldset>
+				<legend>Copyright</legend>
 
-	<ul>
-		<li>Private:&nbsp; <?=$lob['private'];?></li>
-		<li>Version:&nbsp; <?=$lob['version'];?></li>
-		<li>Last update on:&nbsp; <?= date('M d Y',$lob['updated_on']);?></li>
-		<li>Date created:&nbsp; <?= date('M d Y',$lob['created_on']);?></li>
-	</ul>
-</fieldset>
-</div>
+				<ul>
+					<li>Author:&nbsp; <?=$lob['author'];?></li>
+					<li>Source:&nbsp; <?=$lob['source'];?></li>
+					<li>Copyright:&nbsp; <?=$lob['copyright'];?></li>
+					<li>License:&nbsp; <?=$lob['license'];?></li>
+				</ul>
+			</fieldset>
+			</div>
+		</td>
+		<td valign="top" width="200">
+			<div style="width:200px">
+			<fieldset>
+				<legend>Status</legend>
 
+				<ul>
+					<li>Private:&nbsp; <?=$lob['private'];?></li>
+					<li>Version:&nbsp; <?=$lob['version'];?></li>
+					<li>Last update on:&nbsp; <?= date('M d Y',$lob['updated_on']);?></li>
+					<li>Date created:&nbsp; <?= date('M d Y',$lob['created_on']);?></li>
+				</ul>
+			</fieldset>
+			</div>
+		</td>
+	</tr>
+</table>
 
 <br/>
 
