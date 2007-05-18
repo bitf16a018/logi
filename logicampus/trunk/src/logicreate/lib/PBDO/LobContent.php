@@ -11,6 +11,7 @@ class LobContentBase {
 	var $lobTitle;
 	var $lobType;
 	var $lobSubType;
+	var $lobMime;
 	var $lobCaption;
 	var $lobDescription;
 	var $lobNotes;
@@ -25,6 +26,7 @@ class LobContentBase {
 	'lobTitle'=>'varchar',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
+	'lobMime'=>'varchar',
 	'lobCaption'=>'varchar',
 	'lobDescription'=>'text',
 	'lobNotes'=>'text',
@@ -127,6 +129,7 @@ class LobContentPeerBase {
 		$st->fields['lob_title'] = 'lob_title';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
+		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_caption'] = 'lob_caption';
 		$st->fields['lob_description'] = 'lob_description';
 		$st->fields['lob_notes'] = 'lob_notes';
@@ -153,6 +156,7 @@ class LobContentPeerBase {
 		$st->fields['lob_title'] = $this->lobTitle;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
+		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_caption'] = $this->lobCaption;
 		$st->fields['lob_description'] = $this->lobDescription;
 		$st->fields['lob_notes'] = $this->lobNotes;
@@ -181,6 +185,7 @@ class LobContentPeerBase {
 		$st->fields['lob_title'] = $obj->lobTitle;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
+		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_caption'] = $obj->lobCaption;
 		$st->fields['lob_description'] = $obj->lobDescription;
 		$st->fields['lob_notes'] = $obj->lobNotes;
@@ -251,6 +256,7 @@ class LobContentPeerBase {
 		$x->lobTitle = $row['lob_title'];
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
+		$x->lobMime = $row['lob_mime'];
 		$x->lobCaption = $row['lob_caption'];
 		$x->lobDescription = $row['lob_description'];
 		$x->lobNotes = $row['lob_notes'];
