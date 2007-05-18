@@ -78,9 +78,13 @@ class LC_TableLessonCheckboxRenderer extends LC_TableCellRenderer {
 	var $itemsToLessons = array();
 
 	function getRenderedValue() {
-		$itemKey = $this->value[$this->idName];
+		if (is_object($this->value) ) {
+			$itemKey = $this->value[$this->idName];
+		} else {
+			$itemKey = $this->value;
+		}
 		$selected = ( in_array($this->selectedVal, $this->itemsToLessons[$itemKey]))  ? ' CHECKED ':'';
-		return '<input name="item['.$this->row.']" value="'.$this->value[$this->idName].'" '.$selected.' type="checkbox">';
+		return '<input name="item['.$this->row.']" value="'.$itemKey.'" '.$selected.' type="checkbox">';
 	}
 }
 
