@@ -124,7 +124,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			//then type and mime
 			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
 			$this->html .= $this->table->tableModel->getValueAt($x,1);
-			$this->html .= '</b>&nbsp;(text/html)</td>';
+			$this->html .= '</b>&nbsp;('.$this->table->tableModel->getValueNamed($x,'mimetype').')</td>';
 
 			//then subject, sub-discipline
 			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
