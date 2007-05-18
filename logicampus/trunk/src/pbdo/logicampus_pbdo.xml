@@ -325,6 +325,10 @@
 			required="true"
 			size="255"
 			type="VARCHAR"/>
+		<attribute name="lob_mime"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
 		<attribute name="lob_caption"
 			size="255"
 			type="VARCHAR"/>

@@ -1,7 +1,7 @@
 -- Dumping SQL for project logicampus
 -- entity version: 0.0
 -- DB type: mysql
--- generated on: 05.12.2007
+-- generated on: 05.17.2007
 
 
 DROP TABLE IF EXISTS `lob_content`;
@@ -12,6 +12,7 @@ CREATE TABLE `lob_content` (
 	`lob_title` varchar (255) NOT NULL, 
 	`lob_type` varchar (255) NOT NULL, 
 	`lob_sub_type` varchar (255) NOT NULL, 
+	`lob_mime` varchar (255) NOT NULL, 
 	`lob_caption` varchar (255) NOT NULL, 
 	`lob_description` text NOT NULL, 
 	`lob_notes` text NOT NULL, 
