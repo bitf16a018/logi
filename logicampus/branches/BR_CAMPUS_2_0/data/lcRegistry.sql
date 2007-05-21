@@ -1,4 +1,4 @@
-INSERT INTO lcRegistry (mid, moduleName, displayName, author, copyright, perms, lastModified, showInMenu) VALUES ('menu', 'menu', 'Menus', 'Tap', '2001', '||', '2003-04-14 14:23:53', 0);
+INSERT INTO lcRegistry (mid, moduleName, displayName, author, copyright, perms, lastModified, showInMenu) VALUES ('menu', 'menu', 'Menus', 'Tap', '2001', '||', '2003-04-14 14:23:53', 1);
 INSERT INTO lcRegistry (mid, moduleName, displayName, author, copyright, perms, lastModified, showInMenu) VALUES ('html', 'html', 'HTML Viewer', 'Tap', '2001', '||', '2003-04-14 14:23:53', 1);
 INSERT INTO lcRegistry (mid, moduleName, displayName, author, copyright, perms, lastModified, showInMenu) VALUES ('welcome', 'welcome', 'Welcome', 'KE', '2002', '||', '2003-04-14 14:23:53', 1);
 INSERT INTO lcRegistry (mid, moduleName, displayName, author, copyright, perms, lastModified, showInMenu) VALUES ('faq', 'faq', 'FAQs', 'MK', '2002', '|ask;Ask a Question|', '2003-04-14 14:23:53', 1);
