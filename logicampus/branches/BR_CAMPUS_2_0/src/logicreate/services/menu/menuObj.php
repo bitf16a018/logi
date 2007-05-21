@@ -20,7 +20,6 @@ class MenuObj extends PersistantObject {
 
 		MenuObj::checkItemOpen($this->treeList,$blah);
 
-
 		if ($this->layout == '') {
 			//legacy code
 			$ret = '<table border="0" width="100%" cellpadding="0" cellspacing="0">';
@@ -36,7 +35,6 @@ class MenuObj extends PersistantObject {
 			$view->title = $this->title;	//xxx wierd, left over from renderItems()
 			$view->hideMenu = $this->hideMenu;	//xxx wierd, left over from renderItems()
 			$ret = $view->{$this->layout.'Menu'}();
-
 		}
 	return $ret;
 	}
@@ -98,7 +96,7 @@ class MenuObj extends PersistantObject {
 		$tree = new TreeList();
 
 		while ($db->nextRecord() ) {
-			$menuItems[] = new MenuItem($db->record);
+			$menuItems[] = MenuItem::create($db->record);
 			$lastrec = $db->Record;
 		}
 		$tree->loadObjects($menuItems);
@@ -145,6 +143,8 @@ class MenuObj extends PersistantObject {
         if (is_object($menu) )
         {
             $menu->hideMenu = (boolean)$fl_hidemenu;
+
+            $menu->hideMenu = true;
             print $menu->toHTML();
         }
         unset($menu);
@@ -372,8 +372,10 @@ class MenuItem extends PersistantObject {
 	var $linkText;
 	var $editPage;
 
-
 	function MenuItem($attrs="") {
+	}
+
+	function create($attrs="") {
 		if ($attrs == "") { return; }
 
 		switch($attrs['type']) {
@@ -392,17 +394,19 @@ class MenuItem extends PersistantObject {
 			}
 
 		//fix for both PHP4 and PHP5 with this crazy type of function that used to work.
+		/*
 		$vars = get_object_vars($x);
 		foreach ($vars as $key => $val) {
-			$this->{$key} = $val;
+			$x->{$key} = $val;
 		}
+		 */
+		return $x;
 	}
 
 
 
 	function toHTML() {
-
-	return $this->title;
+		return $this->title;
 	}
 
 

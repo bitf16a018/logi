@@ -106,7 +106,7 @@ class menuEditor extends HercAuth {
 	 * save the php serialized object into a mysql table for faster access
 	 */
 	function cacheRun (&$db, &$u, &$arg, &$t) {
-		$foo = MenuObj::get($arg->getvars[3]);
+		$foo = MenuObj::get($arg->getvars['mid']);
 		$sql = "replace into menuCache set menuid = '{$foo->menuid}', pkey = $foo->pkey, menuObj ='".addSlashes(serialize($foo))."', rank = {$foo->rank}, groups = '|".join('|',$foo->groups)."|', notgroups = '|".join('|',$foo->notgroups)."|'";
 		$db->query($sql);
 		header("Location: ".MOD_URL);
