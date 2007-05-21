@@ -43,8 +43,8 @@
     <!-- ##### Header ##### -->
 
     <div id="header">
-      <div class="superHeader">
       <!--
+      <div class="superHeader">
         <div class="left">
           <span class="doNotDisplay">Related sites:</span>
           <a href="./index.html">Link 1</a> |
@@ -58,8 +58,8 @@
           <a href="./index.html">Link 6</a> |
           <a href="./index.html">Link 7</a>
         </div>
-	  -->
       </div>
+	  -->
 
       <div class="midHeader">
         <h1 class="headerTitle">LogiCampus</h1>
@@ -87,7 +87,7 @@
 
     <!-- ##### Side Bar ##### -->
 
-    <div id="side-bar">
+    <div style="min-height:92%" id="side-bar">
       <div>
 	<?php
 		if ($t['_classesTaught'] != '') { 
@@ -142,13 +142,19 @@
 		menuObj::getCachedById('memberservices', $obj->user->groups);
 ?>
       </div>
-
-      <div>
+<?php
+     if($obj->user->isAdmin()) {
+?>
+      <div style="min-height:80%;">
 	<p class="sideBarTitle">
 <?php
 		menuObj::getCachedById('administration', $obj->user->groups);
 ?></p>
       </div>
+
+<?php
+	}
+?>
 
 <!--
       <div class="lighterBackground">
