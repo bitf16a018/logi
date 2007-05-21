@@ -97,8 +97,8 @@ class MenuObj extends PersistantObject {
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		$tree = new TreeList();
 
-		while ($db->next_record() ) {
-			$menuItems[] = new MenuItem($db->Record);
+		while ($db->nextRecord() ) {
+			$menuItems[] = new MenuItem($db->record);
 			$lastrec = $db->Record;
 		}
 		$tree->loadObjects($menuItems);
@@ -376,7 +376,7 @@ class MenuItem extends PersistantObject {
 	function MenuItem($attrs="") {
 		if ($attrs == "") { return; }
 
-		switch($attrs[type]) {
+		switch($attrs['type']) {
 			case "htm":
 				$x = PersistantObject::createFromArray("HTMLMenuItem",$attrs);
 				break;
@@ -391,7 +391,11 @@ class MenuItem extends PersistantObject {
 				break;
 			}
 
-	return $x;
+		//fix for both PHP4 and PHP5 with this crazy type of function that used to work.
+		$vars = get_object_vars($x);
+		foreach ($vars as $key => $val) {
+			$this->{$key} = $val;
+		}
 	}
 
 
@@ -532,8 +536,6 @@ class MenuListView {
 	}
 
 	function toEditableTable($title,$pkey) {
-
-
 
 		$ret = '<table border="1" width="85%" onMouseover="changeto(\'lightblue\')" onMouseout="changeback(\'white\')"><tr><td class="selectedTab" id="ignore" colspan="2">'. $title .'</td></tr>
 		';
