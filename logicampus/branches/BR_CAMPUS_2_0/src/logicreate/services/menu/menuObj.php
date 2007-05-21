@@ -549,10 +549,10 @@ class MenuListView {
 			$link = $node->contents;
 			$ret .= '<tr><td NOWRAP width="60%">'.$break.$link->linkText.'</td><td width="40%" align="center"> 
 					('.$link->rank.') 
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemUp/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'up_arrow.gif" alt="move up"></a> 
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemDown/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'down_arrow.gif" alt="move down"></a> &nbsp;
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemedit/mid='.$pkey.'">[edit]</a> 
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemmove/mid='.$pkey.'">[move]</a> 
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=itemUp/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'up_arrow.gif" alt="move up"></a> 
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=itemDown/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'down_arrow.gif" alt="move down"></a> &nbsp;
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=edit/mid='.$pkey.'">[edit]</a> 
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=move/mid='.$pkey.'">[move]</a> 
 					<a onclick="if (!confirm(\'Delete This Item?\')) {return false;}" href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemdelete/mid='.$pkey.'">[delete]</a></td></tr>';
 
 		}
