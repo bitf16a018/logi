@@ -1,7 +1,10 @@
-<h2>Private Messaging<h2>
+<h2>Private Messaging</h2>
+
+<a href="<?=APP_URL?>pm">Message Center</a>&nbsp;&bull;&nbsp;<a href="<?=APP_URL?>pm/main/event=compose">Compose New Message</a>
+
+<hr/>
 
 <table border="0" cellpadding="4" cellspacing="1" width="100%">
-<tr><td valign='top'><a href="<?=APP_URL?>pm/main/event=compose">Compose New Message</a> 
 </td>
 <td valign='top'>
 	<? if ($t['emailNotify']=='y') { ?>
@@ -11,8 +14,6 @@
 
 	<? } ?>
 </td>
-</tr>
-<tr>
 
 <td colspan='2' valign='top'>
 	<? if ($t['viewing']==0) { ?>
@@ -25,7 +26,6 @@
 </tr>
 </table>
 
-<hr>
 
 <div align='center'><h4><?=$t['message'];?></h4></div>
 
