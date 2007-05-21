@@ -143,8 +143,6 @@ class MenuObj extends PersistantObject {
         if (is_object($menu) )
         {
             $menu->hideMenu = (boolean)$fl_hidemenu;
-
-            $menu->hideMenu = true;
             print $menu->toHTML();
         }
         unset($menu);
@@ -392,14 +390,6 @@ class MenuItem extends PersistantObject {
 				$x = PersistantObject::createFromArray("APPMenuItem",$attrs);
 				break;
 			}
-
-		//fix for both PHP4 and PHP5 with this crazy type of function that used to work.
-		/*
-		$vars = get_object_vars($x);
-		foreach ($vars as $key => $val) {
-			$x->{$key} = $val;
-		}
-		 */
 		return $x;
 	}
 
