@@ -20,8 +20,8 @@ class menu extends HercAuth {
 		$menu = MenuObj::get($menuID);
 		$omenu = $menu;
 		$menuView = new MenuListView($menu->treeList);
-		$t[menus] = $menuView->toEditableTable($menu->title,$menu->pkey);
-		$t[mid] = $menu->pkey;
+		$t['menus'] = $menuView->toEditableTable($menu->title,$menu->pkey);
+		$t['mid'] = $menu->pkey;
 		$arg->templateName = 'main_details';
 
 		$db->queryOne("select * from menuCache where pkey=$menuID");

@@ -115,7 +115,7 @@ if ($QUERY_STRING!="") {
 	if ($url[1] == "adm") {
 	        $gdb->query("select * from lcRegistry where mid = '$url[2]'");
 		$gdb->next_record();	
-		$lcObj->moduleName = $gdb->Record[moduleName];
+		$lcObj->moduleName = $gdb->Record['moduleName'];
 		$serviceName = $url[3];
 		$className = $url[3];
 
@@ -136,7 +136,6 @@ if ($QUERY_STRING!="") {
 	        $lcObj->templateName = $serviceName;
 	}
         $lcObj->mid = $url[2];
-
 
 
 
@@ -246,8 +245,8 @@ if ( ! @include (MOD_PATH."admin/".$lcObj->serviceName.".lcp") ) {
 
 	if ($url[1] == 'adm' ) {
 		$gdb->query("select k,v from lcConfig where mid = '".$url[2]."'");
-		while ($gdb->next_record()  ){
-			$service->{$gdb->Record[0]} = $gdb->Record[1];
+		while ($gdb->nextRecord()  ){
+			$service->{$gdb->record['k']} = $gdb->record['v'];
 		}
 	}
 

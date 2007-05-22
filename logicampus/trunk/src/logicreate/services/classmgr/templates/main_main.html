@@ -1,10 +1,6 @@
 
 <h3><?=lct('Classroom Overview')?> - <?=$t['semesterDisplay'];?></h3>
 
-<table cellpadding="2" cellspacing="2" border="0" bgcolor="silver" width="100%">
-<tr>
-	<td bgcolor="white">
-
 <? if( LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE') ){ ?>
 <?=lct('The following is a list of classes you are teaching. To select
 another semester, select the semester you wish to view in the drop
@@ -23,25 +19,17 @@ down and press "Go".')?>
 <tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/' ?>">Delete a Class</a></td></tr>		
 </table>
 <? } ?>
+<br/>
 
 
-	<table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<?php
 		
-		if (count($t['classes']) == 0)
-		{	echo '
-			<tr>
-				<td>&nbsp;</td>
-			</tr>
-			<tr>
-				<td align="center" style="font-weight:bold; padding: 5px; color: purple;" bgcolor="#FFCE7B">No Classes Available</td>
-			</tr>
-			<tr>
-				<td>&nbsp;</td>
-			</tr>';
+		if (count($t['classes']) == 0) {
+			echo lcMessageBox('No classes available yet.');
 		} else
 		{
 		
+			echo '<table border="0" cellpadding="0" cellspacing="0" width="100%">';
 			foreach($t['classes'] as $null=>$class_record)
 			{
 				// the only reason this would be an object is if we hit this page for the first time!
@@ -93,17 +81,13 @@ down and press "Go".')?>
 				-->
 				<?php
 				
-			}
+			}//end foreach
+			echo '</table>';
 			
-		}
+		}//end if is array
 		
 	
 			?>
-</table>
-</td>
-</tr>
-
-</table>
 
 <br/></br>
 

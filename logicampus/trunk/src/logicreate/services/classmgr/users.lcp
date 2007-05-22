@@ -246,7 +246,7 @@ n']['classes']));
 // only dealing with current semester right now
 // 
 		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
-		$semesterId = $db->Record[0];
+		$semesterId = $db->Record['id_semesters'];
 
 		$name = addslashes(stripslashes($lc->getvars['username']));
 		$sectionNumber = (int)$lc->getvars['id'];
@@ -307,13 +307,13 @@ n']['classes']));
 		} else { 
 
 			if ($this->second_where) { $where = $this->second_where; }
-			$db->query("select count(username) from ".$this->table." lc where $where");
+			$db->query("select count(username) as usrcount from ".$this->table." lc where $where");
 		}
 
 		$db->next_record();
-		$t['result_pages'] = ceil( $db->Record[0] / $this->PAGE_SIZE);
+		$t['result_pages'] = ceil( $db->Record['usrcount'] / $this->PAGE_SIZE);
 		$t['current_page'] = ceil( $t[start] / $this->PAGE_SIZE) + 1;
-		$t['max_results'] = $db->Record[0];
+		$t['max_results'] = $db->Record['usrcount'];
 		$t['PAGE_SIZE'] = $this->PAGE_SIZE;
 
 
@@ -322,6 +322,7 @@ n']['classes']));
 		$db->next_record(); 		//drop off pkey
 		$t['profile_opt'] .= "<option value='_email'>Email</option>\n";
 		$t['profile_opt'] .= "<option value='_username'>Username</option>\n";
+		$db->setResultType('BOTH');
 		while ($db->next_record() ) {
 			$t['profile_opt'] .= "<option value=\"".$db->Record[0]."\">".$db->Record[0]."</option>\n";
 		}
@@ -593,7 +594,7 @@ n']['classes']));
 			$sql = "select pkey,username from lcUsers where pkey = $orclause";
 			$db->query($sql);
 			while ($db->next_record() ) {
-				$u->sessionvars['user_collection'][$db->Record[0]] = $db->Record[1];
+				$u->sessionvars['user_collection'][$db->Record['pkey']] = $db->Record['username'];
 				$n++;
 			}
 			$u->saveSession();
@@ -636,16 +637,26 @@ n']['classes']));
 	 *
 	 */
 	function addCollectedUsersRun (&$db, &$u, &$lc, &$t ) {
+
 		$users = $u->sessionvars['user_collection'];
-		$id_semester = $u->activeClassTaught->id_semesters;
-		while(list ($pkey, $username) = @each($users) )
-		{
+		$semesterId = (int)$u->activeClassTaught->id_semesters;
+		$classId = (int)$u->activeClassTaught->id_classes;
+
+		$classEnrollment = new lcClassEnrollment($classId,$semesterId);
+
+		while(list ($pkey, $username) = @each($users) ) {
+			$uname = trim(addslashes($username));
+
+			$db->query("SELECT pkey from lcUsers where username = '".$uname."'");
+			$db->nextRecord();
+			$userId = $db->record['pkey'];
+
 			$section = $lc->postvars[$username];
-			$sql = "insert into class_student_sections set 
-					sectionNumber=$section, semester_id=$id_semester,
-					active=1, id_student='$username' ";
-			$db->query($sql);
+			$sectionNumber = trim(addslashes($section));
+
+			$classEnrollment->addStudent($userId,$sectionNumber);
 		}
+		$classEnrollment->save();
 
 		unset($u->sessionvars['user_collection']);
 		$this->run($db, $u,$lc,$t);

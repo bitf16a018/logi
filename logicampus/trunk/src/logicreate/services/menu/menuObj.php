@@ -20,7 +20,6 @@ class MenuObj extends PersistantObject {
 
 		MenuObj::checkItemOpen($this->treeList,$blah);
 
-
 		if ($this->layout == '') {
 			//legacy code
 			$ret = '<table border="0" width="100%" cellpadding="0" cellspacing="0">';
@@ -36,7 +35,6 @@ class MenuObj extends PersistantObject {
 			$view->title = $this->title;	//xxx wierd, left over from renderItems()
 			$view->hideMenu = $this->hideMenu;	//xxx wierd, left over from renderItems()
 			$ret = $view->{$this->layout.'Menu'}();
-
 		}
 	return $ret;
 	}
@@ -97,8 +95,8 @@ class MenuObj extends PersistantObject {
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 		$tree = new TreeList();
 
-		while ($db->next_record() ) {
-			$menuItems[] = new MenuItem($db->Record);
+		while ($db->nextRecord() ) {
+			$menuItems[] = MenuItem::create($db->record);
 			$lastrec = $db->Record;
 		}
 		$tree->loadObjects($menuItems);
@@ -372,11 +370,13 @@ class MenuItem extends PersistantObject {
 	var $linkText;
 	var $editPage;
 
-
 	function MenuItem($attrs="") {
+	}
+
+	function create($attrs="") {
 		if ($attrs == "") { return; }
 
-		switch($attrs[type]) {
+		switch($attrs['type']) {
 			case "htm":
 				$x = PersistantObject::createFromArray("HTMLMenuItem",$attrs);
 				break;
@@ -390,15 +390,13 @@ class MenuItem extends PersistantObject {
 				$x = PersistantObject::createFromArray("APPMenuItem",$attrs);
 				break;
 			}
-
-	return $x;
+		return $x;
 	}
 
 
 
 	function toHTML() {
-
-	return $this->title;
+		return $this->title;
 	}
 
 
@@ -533,8 +531,6 @@ class MenuListView {
 
 	function toEditableTable($title,$pkey) {
 
-
-
 		$ret = '<table border="1" width="85%" onMouseover="changeto(\'lightblue\')" onMouseout="changeback(\'white\')"><tr><td class="selectedTab" id="ignore" colspan="2">'. $title .'</td></tr>
 		';
 
@@ -547,10 +543,10 @@ class MenuListView {
 			$link = $node->contents;
 			$ret .= '<tr><td NOWRAP width="60%">'.$break.$link->linkText.'</td><td width="40%" align="center"> 
 					('.$link->rank.') 
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemUp/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'up_arrow.gif" alt="move up"></a> 
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemDown/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'down_arrow.gif" alt="move down"></a> &nbsp;
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemedit/mid='.$pkey.'">[edit]</a> 
-					<a href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemmove/mid='.$pkey.'">[move]</a> 
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=itemUp/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'up_arrow.gif" alt="move up"></a> 
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=itemDown/mid='.$pkey.'"><img border="0" src="'.IMAGES_URL.'down_arrow.gif" alt="move down"></a> &nbsp;
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=edit/mid='.$pkey.'">[edit]</a> 
+					<a href="'.MOD_URL.'itemEditor/'.$link->pkey.'/event=move/mid='.$pkey.'">[move]</a> 
 					<a onclick="if (!confirm(\'Delete This Item?\')) {return false;}" href="'.MOD_URL.'menu/'.$link->pkey.'/event=itemdelete/mid='.$pkey.'">[delete]</a></td></tr>';
 
 		}
