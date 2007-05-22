@@ -532,14 +532,16 @@ class users extends AdminService {
 			$arg->templateName ="users_showDelete";
 			$db->query("select username from lcUsers where username = '".$arg->getvars['username']."'");
 			$db->next_record();
-			$t['username'] = $db->Record[0];
+			$t['username'] = $db->Record['username'];
 	}
 
-	# Deletes the user account
-	function processDeleteRun(&$db, &$u, &$lc, &$t)
-	{
-				
-		$user = lcUser::getUserByUserName($lc->postvars['username']);
+
+	/**
+	 * Deletes the user account
+	 */
+	function processDeleteRun(&$db, &$u, &$lc, &$t) {
+		$uname = trim(addslashes($lc->postvars['username']));
+		$user = lcUser::getUserByUserName();
 		$user->loggedIn = true;
 		$user->loadProfile();
 		$user->deleteUser();
@@ -547,6 +549,7 @@ class users extends AdminService {
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = modurl('users');
 	}
+
 
 	/**
 	 * if the submitted username is currently logged in, set a 

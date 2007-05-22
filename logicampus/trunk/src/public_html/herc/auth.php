@@ -12,8 +12,8 @@
  * http://www.tapinternet.com/
  ***************************************************/
 
-define(HERC_USER,'demo');
-define(HERC_PASSWD,'demo');
+define('HERC_USER','demo');
+define('HERC_PASSWD','demo');
 //set to 1 to use md5 passwords
-define(PASSWD_IS_MD5,0);
+define('PASSWD_IS_MD5',0);
 ?>

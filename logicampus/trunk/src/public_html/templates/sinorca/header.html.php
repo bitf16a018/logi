@@ -43,8 +43,8 @@
     <!-- ##### Header ##### -->
 
     <div id="header">
-      <div class="superHeader">
       <!--
+      <div class="superHeader">
         <div class="left">
           <span class="doNotDisplay">Related sites:</span>
           <a href="./index.html">Link 1</a> |
@@ -58,8 +58,8 @@
           <a href="./index.html">Link 6</a> |
           <a href="./index.html">Link 7</a>
         </div>
-	  -->
       </div>
+	  -->
 
       <div class="midHeader">
         <h1 class="headerTitle">LogiCampus</h1>
@@ -87,12 +87,12 @@
 
     <!-- ##### Side Bar ##### -->
 
-    <div id="side-bar">
+    <div style="min-height:92%" id="side-bar">
       <div>
 	<?php
 		if ($t['_classesTaught'] != '') { 
 	?>
-        	<p class="sideBarTitle"><?=lct('classroom manager')?></p>
+        	<p class="sideBarTitle"><?=lct('Classroom Manager')?></p>
 		<a class="menuitem" href="<?=APP_URL?>classmgr"><?=lct('Faculty Overview')?></a>
 		<ul>
 	<?php
@@ -114,7 +114,7 @@
 	<?php
 		if ($t['_classesTaken'] != '') { 
 	?>
-        	<p class="sideBarTitle"><?=lct('my classes')?></p>
+        	<p class="sideBarTitle"><?=lct('My Classes')?></p>
 		<a class="menuitem" href="<?=appurl('classroom/')?>"><?=lct('Classroom Portal');?></a>
 		<ul>
 	<?php
@@ -137,18 +137,24 @@
 
 
       <div class="lighterBackground">
-        <p class="sideBarTitle">&nbsp;</p>
+       	<p class="sideBarTitle"><?=lct('Member Services')?></p>
 <?php
-		menuObj::getCachedById('memberservices', $obj->user->groups);
+		menuObj::getCachedById('memberservices', $obj->user->groups,true);
 ?>
       </div>
-
-      <div>
+<?php
+     if($obj->user->isAdmin()) {
+?>
+      <div style="min-height:80%;">
 	<p class="sideBarTitle">
 <?php
 		menuObj::getCachedById('administration', $obj->user->groups);
 ?></p>
       </div>
+
+<?php
+	}
+?>
 
 <!--
       <div class="lighterBackground">

@@ -117,8 +117,8 @@ class itemEditor extends HercAuth {
 			case "htm":
 				$db->query("select filename, title from lcHtml");
 				while($db->next_record()) {
-					$t[html][$db->Record[0]] = $db->Record[1];
-					if ( $link->location == $db->Record[0] ) { $sel = $db->Record[0]; }
+					$t[html][$db->Record['filename']] = $db->Record['title'];
+					if ( $link->location == $db->Record['filename'] ) { $sel = $db->Record['filename']; }
 				}
 				$t[html] = makeOptions($t[html],$sel);
 				break;
@@ -127,8 +127,8 @@ class itemEditor extends HercAuth {
 				include_once(LIB_PATH."LC_html.php");
 				$db->query("select mid, moduleName from lcRegistry");
 				while($db->next_record()) {
-					$t[apps][$db->Record[0]] = $db->Record[1];
-					if ( $link->location == $db->Record[0] ) { $sel = $db->Record[1]; }
+					$t[apps][$db->Record['mid']] = $db->Record['moduleName'];
+					if ( $link->location == $db->Record['mid'] ) { $sel = $db->Record['moduleName']; }
 
 				}
 				$t[apps] = makeOptions($t[apps], $sel);
@@ -138,10 +138,10 @@ class itemEditor extends HercAuth {
 
 		// parent menus
 		$db->query("select pkey, title from menu order by title");
-		while($db->next_record()) {
-			$t[menuOpts] .= '<option value="'.$db->Record[0].'" ';
-			if ( $db->Record[0] == $t[menuItem]->menuID) {$t[menuOpts] .= 'SELECTED';}
-			$t[menuOpts] .= '>'.$db->Record[1].'</option>';
+		while($db->nextRecord()) {
+			$t['menuOpts'] .= '<option value="'.$db->record['pkey'].'" ';
+			if ( $db->record['pkey'] == $t['menuItem']->menuID) {$t['menuOpts'] .= 'SELECTED';}
+			$t['menuOpts'] .= '>'.$db->record['title'].'</option>';
 		}
 
 		$arg->templateName= $link->editPage;
