@@ -191,6 +191,7 @@
 			$HTML .= '<td valign="'.$this->rvalign.'" class="'.$this->cssRight.'">';
 			$HTML .= '<input type="text" id="'.$v['fieldName'].'" name="'.$v['fieldName'].'" value="'.$v['defaultValue'].'" size="'.$v['size'].'" maxlength="'.$v['maxlength'].'">';
 			$HTML .= $msg.'</td></tr>';
+			$HTML .= "\n";
 			return $HTML;
 		}	
 
@@ -226,6 +227,7 @@
 			$HTML .= '<td valign="'.$this->rvalign.'" class="'.$this->cssRight.'">';
 			$HTML .= '<input type="file" id="'.$v['fieldName'].'" name="'.$v['fieldName'].'" value="'.$v['defaultValue'].'" size="'.$v['size'].'">';
 			$HTML .= $msg.'</td></tr>';
+			$HTML .= "\n";
 			return $HTML;
 		}		
 
@@ -264,7 +266,9 @@
 				$HTML .='<img src="'.IMAGES_URL.'wysig-help.gif" align="right">Toolbar buttons can access your File Resources.';
 			 */
 			$HTML .= '</td></tr></table>';
+			$HTML .= "\n";
 			$HTML .= $msg.'</td></tr>';
+			$HTML .= "\n";
 
 			/*  We use the extra column to turn on or off the WYSIWYG
 			 *  editor
@@ -422,6 +426,7 @@
 			$HTML = '<tr><td valign="'.$this->lvalign.'" class="'.$this->cssLeft.'">'.$v['displayName'].'</td><td valign="'.$this->rvalign.'" class="'.$this->cssRight.'">';
 			$HTML .= '<input type="submit" id="'.$v['fieldName'].'" name="'.$v['fieldName'].'" value="'.$v['defaultValue'].'">';
 			$HTML .= '</td></tr>';
+			$HTML .= "\n";
 			return $HTML;
 		}
 		
@@ -457,6 +462,7 @@
 			}			
 			
 			$HTML .= '</td></tr>';
+			$HTML .= "\n";
 			return $HTML;
 		}		 
 		 
@@ -887,8 +893,9 @@
 			# Error checking for group permissions needs to be put in
 			# not sure the best way to handle it
 			
-			$HTML = '<table width="'.$this->width.'" border="'.$this->border.'" cellspacing="'.$this->cellspacing.'" cellpadding="'.$this->cellpadding.'">';
 			$HTML .= '<form action="'.$this->action.'" method="'.$this->method.'" enctype="'.$this->enctype.'">';
+			$HTML .= "\n";
+			$HTML = '<table width="'.$this->width.'" border="'.$this->border.'" cellspacing="'.$this->cellspacing.'" cellpadding="'.$this->cellpadding.'">';
 			while(list($k, $v) = @each($this->data))
 			{
 				# Check to see if the row has more than one form
@@ -961,6 +968,7 @@
 					#}
 					
 				 	$HTML .= '<tr><td valign="'.$this->lvalign.'" class="'.$this->cssLeft.'">'.$title.'</td><td valign="'.$this->rvalign.'" class="'.$this->cssRight.'">'.$tmpForm.' '.$msg.'</td></tr>';
+					$HTML .= "\n";
 				 	unset($tmpForm);
 				 	unset($title);
 				 	unset($msg);
@@ -984,7 +992,7 @@
 				$HTML .= $this->$func($v);
 				
 			}		
-			$HTML .= '</form></table>';
+			$HTML .= '</table></form>';
 			
 			if ($this->showRequiredMessage)
 			{	$HTML .= '<div style="font-size: 85%">'.$this->requiredMessage.'</div>';
@@ -1636,6 +1644,7 @@
 			if (count($this->data) >= 1)
 			{
 			$HTML .= '<tr><td class="grey">Field Type</td><td class="grey">Display Name (field name)</td><td class="grey">Sort</td><td class="grey">Action</td></tr>';
+			$HTML .= "\n";
 			while(list($k, $v) = @each($this->data))
 			{
 				if ($v['type'] == strtolower('row') )
@@ -1662,7 +1671,8 @@
 				unset($ast);
 			}
 			} else {
-				$HTML .= '<tr><td colspan="5">This form is empty.</td</tr>';
+				$HTML .= '<tr><td colspan="5">This form is empty.</td></tr>';
+				$HTML .= "\n";
 			}
 			$HTML .= '</table>';
 			return $HTML;
