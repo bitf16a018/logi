@@ -39,7 +39,9 @@ class classmgr extends FacultyService {
 		if ($id_semesters > 0 ) {
 			$semesterObj = semesterObj::_getFromDB($id_semesters, 'id_semesters');	
 		}
-		$t['semesterDisplay'] = $semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
+		if (LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')) {
+			$t['semesterDisplay'] = ' &endash; '.$semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
+		}
 		
 		
 		$f = new SiteForm();

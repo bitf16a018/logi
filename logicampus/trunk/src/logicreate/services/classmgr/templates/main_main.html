@@ -1,5 +1,7 @@
 
-<h3><?=lct('Classroom Overview')?> - <?=$t['semesterDisplay'];?></h3>
+<h3><?=lct('Classroom Overview')?> <?=$t['semesterDisplay'];?></h3>
+
+<br/>
 
 <? if( LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE') ){ ?>
 <?=lct('The following is a list of classes you are teaching. To select
@@ -8,17 +10,26 @@ down and press "Go".')?>
 
 
 	<?=$t['form'];?>
+
 <? } ?>
 
 <? if( LcSettings::isModuleOn('MODULE_SELF_ENROLLMENT') ){ ?>
 
-<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
-<tr><td class="portalbox"><b>Class Management</b></td></tr>
-<tr><td style="font-size: 9px;"></td></tr>
-<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=newClass' ?>">Add New Class</a></td></tr>
-<tr><td><a href="<?= BASE_URL.'index.php/classmgr/teacherclass/' ?>">Delete a Class</a></td></tr>		
-</table>
+<h4>Class Management</h4>
+<a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=newClass' ?>">Add New Class</a>&bull;
+<a href="<?= BASE_URL.'index.php/classmgr/teacherclass/' ?>">Delete a Class</a>
+
+<br/>
+<br/>
 <? } ?>
+
+
+<h4>Learning Objects</h4>
+<a href="<?= appurl('lobrepo/myobj');?>">My Learning Objects</a> 
+&bull;
+<a href="<?= appurl('lobrepo/');?>">All Learning Objects</a>
+
+<br/>
 <br/>
 
 
@@ -89,10 +100,4 @@ down and press "Go".')?>
 	
 			?>
 
-<br/></br>
-
-<h4>Learning Objects</h4>
-<a href="<?= appurl('lobrepo/myobj');?>">My Learning Objects</a> 
-&bull;
-<a href="<?= appurl('lobrepo/');?>">All Learning Objects</a>
 
