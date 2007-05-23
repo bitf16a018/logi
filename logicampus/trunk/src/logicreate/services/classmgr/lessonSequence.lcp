@@ -52,7 +52,7 @@ class LessonSequence extends FacultyService {
 		$class_id = $u->activeClassTaught->id_classes;
 		$lesson_id = (int) $lc->getvars['id'];
 
-		$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id);
+		$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id.' ORDER BY rank');
 
 		if (count ($sequences) < 1) { 
 			$sequences = $this->initSequences($class_id, $lesson_id, $db);
