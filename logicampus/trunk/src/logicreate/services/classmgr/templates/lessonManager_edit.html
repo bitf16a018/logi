@@ -93,14 +93,14 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 			<legend>Lesson Content</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkContent/id='.$t['lessonId']);?>">Change Content</a>
 			<?php
-			if ( ! is_array($t['content']) ) {
+			if ( ! is_array($t['contentItems']) ) {
 			?>
 			<br/>
 			<span style="color:red;font-style:italic;">No Content</span>
 			<?php } ?>
 			<ul>
 				<?php
-				foreach ($t['content'] as $k=>$v) {
+				foreach ($t['contentItems'] as $k=>$v) {
 				?>
 				<li><?= $v;?></li>
 				<?php } ?>

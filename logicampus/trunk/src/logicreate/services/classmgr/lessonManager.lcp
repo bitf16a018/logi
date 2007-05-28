@@ -727,8 +727,19 @@ class LessonManager extends FacultyService {
 			WHERE B.id_class_lesson='{$lesson_id}'
 			AND A.id_classes = '{$class_id}'";
 		$db->query($sql);
-		while ( $db->next_record() )
-			$t['objectives'][] = $db->Record['objective'];
+		while ( $db->nextRecord() )
+			$t['objectives'][] = $db->record['objective'];
+
+		// get the content
+		$sql = "SELECT A.lob_title
+			FROM class_lesson_sequence AS A
+			WHERE A.lesson_id='{$lesson_id}'
+			AND A.class_id = '{$class_id}'
+			ORDER BY rank";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['contentItems'][] = $db->record['lob_title'];
+
 
 
 		// Get the basic info about the lesson
