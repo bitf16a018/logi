@@ -36,9 +36,18 @@ class Preview extends FacultyService {
 //		debug($db->record,1);
 
 		$lob = $db->record;
+
+//		echo "content length: ";
+//j		echo $lob['lob_binary'];
+//		flush();
+//		ob_end_flush();
+//		exit();
 		if ($lob['lob_sub_type']) {
 			header('Content-Type: image/jpeg');
+			header('Content-length: '. strlen($lob['lob_binary']));
 			echo $lob['lob_binary'];
+			flush();
+			ob_end_flush();
 			exit();
 		}
 	}

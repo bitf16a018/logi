@@ -76,7 +76,7 @@ class add extends FacultyService {
 	function uploadToLob(&$lob,&$lc,$upName) {
 		$lob->set('lobContent', $lc->postvars['txText']);
 		$lob->set('lobTitle', $lc->postvars['txTitle']);
-		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
+
 		$lob->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
 		$lob->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
 		$lob->set('lobContent', $lc->postvars['txText']);
@@ -87,8 +87,17 @@ class add extends FacultyService {
 			$n, 
 		       (strrpos($n, '.')  - strlen($n) +1)
 			);
+
+		$ext = strtolower($ext);
 		$m = Lc_Lob::getMimeForSubtype('image',$ext);
 		$lob->set('lobMime', $m);
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'),$ext)
+		);
+
+
 	}
 
 
@@ -96,8 +105,13 @@ class add extends FacultyService {
 		$lob->set('lobContent', $lc->postvars['txText']);
 		$lob->set('lobSubType','text');
 		$lob->set('lobTitle', $lc->postvars['txTitle']);
-		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
 		$lob->set('lobMime', $lc->postvars['mime']);
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'))
+		);
+
 	}
 
 
@@ -122,7 +136,6 @@ class add extends FacultyService {
 		} else {
 			$this->textToLob($lob,$lc);
 		}
-
 //		debug($lob,1);
 //		debug($lc->postvars['txTitle'],1);
 		$lob->save();

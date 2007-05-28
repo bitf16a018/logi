@@ -35,6 +35,16 @@ class LC_Lob {
 		}
 
 	}
+
+	function createLinkText($name,$ext='') {
+		$ext = strtolower($ext);
+		$ret = str_replace(' ', '_',$name);
+		$ret = urlencode($ret);
+		if ($ext != '' && $ext != 'html' && $ext != 'htm') {
+			$ret .= '.'.$ext;
+		}
+		return $ret;
+	}
 }
 
 ?>
