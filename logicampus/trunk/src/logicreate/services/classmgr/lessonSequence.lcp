@@ -41,6 +41,56 @@ class LessonSequence extends FacultyService {
 
 
 
+	/**
+	 * move a sequence object up one rank
+	 */
+	function rankRun(&$db,&$u,&$lc,&$t) {
+		$class_id = $u->activeClassTaught->id_classes;
+		$lesson_id = (int) $lc->getvars['id'];
+		$curRank = (int) $lc->getvars['r'];
+		$upRank = $curRank - 1;
+		$dnRank = $curRank + 1;
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		//move currently ranked item into a temp position
+		$sql1 = "UPDATE class_lesson_sequence
+			SET rank=-1 
+			WHERE rank = ".$curRank;
+
+
+		if ($lc->getvars['ud'] == 'up') {
+			//move the above ranked item down
+			$sql2 = "UPDATE class_lesson_sequence
+				SET rank=rank+1 
+				WHERE rank = ".$upRank;
+			//move selected rank into new position
+			$sql3 = "UPDATE class_lesson_sequence
+				SET rank=".$upRank." 
+				WHERE rank =-1";
+		}
+
+		if ($lc->getvars['ud'] == 'dn') {
+			//move the below ranked item up
+			$sql2 = "UPDATE class_lesson_sequence
+				SET rank=rank-1 
+				WHERE rank = ".$dnRank;
+			//move selected rank into new position
+			$sql3 = "UPDATE class_lesson_sequence
+				SET rank=".$dnRank." 
+				WHERE rank =-1";
+		}
+
+		$db->query($sql1);
+		$db->query($sql2);
+		$db->query($sql3);
+
+		//redirect
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonSequence/id='.$lesson_id);
+
+	}
+
 
 	/**
 	 * show all the LOBs for this lesson (Learning OBjects)
@@ -52,6 +102,8 @@ class LessonSequence extends FacultyService {
 		$class_id = $u->activeClassTaught->id_classes;
 		$lesson_id = (int) $lc->getvars['id'];
 
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
 		$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id.' ORDER BY rank');
 
 		if (count ($sequences) < 1) { 
@@ -60,7 +112,6 @@ class LessonSequence extends FacultyService {
 			//die('no sequences yet');
 		}
 //		$t['seqItems'] = $sequences;
-
 
 		$dm = new LC_Table_ObjectModel($sequences);
 		$dm->ignoreColumn('_new');
@@ -77,8 +128,14 @@ class LessonSequence extends FacultyService {
 		$dm->ignoreColumn('lobMime');
 
 		$table = new LC_Table($dm);
-		$t['table'] = new LC_TableRenderer($table);
 
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(7);
+		$col->maxWidth=64;
+		$col->cellRenderer = new LC_Table_SequenceRenderer();
+		$col->cellRenderer->id = $lesson_id;
+
+		$t['table'] = new LC_TableRenderer($table);
 
 //		debug($sequences);
 	}
@@ -155,5 +212,18 @@ class LessonSequence extends FacultyService {
 	}
 
 }
+
+
+
+class LC_Table_SequenceRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+//		debug($this->value);
+		return '<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=up">Up</a> <br/>
+			<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=dn">Down</a>
+			';
+	}
+}
+
 
 ?>
