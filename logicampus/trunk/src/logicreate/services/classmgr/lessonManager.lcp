@@ -458,7 +458,7 @@ class LessonManager extends FacultyService {
 		}
 
 		//get all lesson items for security
-		$sql = "SELECT A.lob_id, B.lob_title, B.lob_urltitle
+		$sql = "SELECT A.lob_id, B.lob_title, B.lob_urltitle, B.lob_mime
 			FROM lob_class_link AS A
 			LEFT JOIN lob_content as B on A.lob_id = B.lob_content_id
 			WHERE A.class_id = ".$class_id."
@@ -467,7 +467,6 @@ class LessonManager extends FacultyService {
 		$db->query($sql);
 		while ($db->nextRecord()) {
 			$allowableItems[] = $db->record['lob_id'];
-			$db->record['lob_mime'] = 'text/html';
 			$lobRecord[$db->record['lob_id']] = $db->record;
 		}
 
