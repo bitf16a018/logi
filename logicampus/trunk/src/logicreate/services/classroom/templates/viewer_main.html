@@ -45,14 +45,21 @@ if ($t['lob']['lob_mime'] == 'X-LMS') {
 }
 
 
-debug($t['file']);
-if ($t['file']['mime'] == 'application/vnd.sun.xml.calc') {
-
-	echo '<h3>Assignment</h3>';
-	echo 'Name: '.$t['file']['title'];
+//debug($t['file']);
+if ( strstr($t['file']['mime'] , 'application/vnd.sun.xml.writer') ) {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<h3><?=$t['file']['title']?></h3>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+	<?
+	echo 'size: '.$t['file']['size'];
 	echo "<br/>\n";
-	echo 'Download: ';
-	echo '<a href="'.appurl('classroom/content/'.$t['uniqcode'].'/'.$t['file']['file']).'">this file</a>';
+//	echo 'Download: ';
+	echo '<a href="'.appurl('classroom/content/'.$t['uniqcode'].'/'.$t['file']['file']).'">Click to download.</a>';
+?>
+</fieldset>
+</div>
+<?php
 }
-
 ?>

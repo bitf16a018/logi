@@ -1,6 +1,7 @@
 <?
 
 include_once(LIB_PATH.'classLessonContentObj.php');
+include_once(LIB_PATH.'lc_lob.php');
 //include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 
@@ -90,7 +91,7 @@ class viewer extends StudentService {
 				$t['file']['title'] = $db->record['lob_title'];
 				$t['file']['description'] = $db->record['lob_description'];
 				$t['file']['mime'] =  $db->record['lob_mime'];
-				$t['file']['file'] =  $db->record['lob_filename'];
+				$t['file']['file'] =  $db->record['lob_urltitle'];
 			}
 		}
 
@@ -123,7 +124,7 @@ class viewer extends StudentService {
 			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqCode.'/'.$t['seqItems'][$nextIdx]->linkText);
 		}
 //print_r($u);
-
+		$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']['lob_mime']);
 	}
 }
 
