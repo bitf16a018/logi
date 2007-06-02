@@ -135,10 +135,10 @@ Class LessonContent extends FacultyService
 
 	/**
 	 * Show a page to allow choice of content to add
-	 */
 	function addRun(&$db,&$u,&$lc,&$t) {
 		$lc->templateName = 'lessonContent_add';
 	}
+	 */
 
 
 	/**

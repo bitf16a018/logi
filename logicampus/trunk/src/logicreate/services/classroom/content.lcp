@@ -142,16 +142,19 @@ class content extends StudentService {
 			$t['file']['content'] = $db->record['lob_content'];
 			$t['file']['mime'] = 'text/html';
 		}
-		if ($db->record['lob_mime'] == 'image/jpeg') {
+		if ( strstr($db->record['lob_mime'] , 'image') ) {
 			header('Content-type: '.$db->record['lob_mime']);
 			echo $db->record['lob_binary'];
 			exit();
 		}
 
-
+		if ( strstr($db->record['lob_sub_type'] , 'document') ) {
+			header('Content-type: '.$db->record['lob_mime']);
+			echo $db->record['lob_binary'];
+			exit();
+		}
 
 		//load the next learning object sequence
-
 		$lc->templateName = 'viewer_main';
 		$t['uniqcode'] = $uniqCode;
 	}
