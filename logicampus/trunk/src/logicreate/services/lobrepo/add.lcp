@@ -104,8 +104,6 @@ class add extends FacultyService {
 		$lob->set('lobUrltitle',
 			LC_Lob::createLinkText($lob->get('lobTitle'),$ext)
 		);
-
-
 	}
 
 
@@ -146,6 +144,7 @@ class add extends FacultyService {
 		} else {
 			$this->textToLob($lob,$lc);
 		}
+
 //		debug($lob,1);
 //		debug($lc->postvars['txTitle'],1);
 		$lob->save();
