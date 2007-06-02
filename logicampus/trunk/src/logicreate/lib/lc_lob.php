@@ -11,6 +11,12 @@ class LC_Lob {
 			case 'text/html':
 				return 'html.png';
 				break;
+			case 'application/pdf':
+				return 'pdf.png';
+				break;
+			case 'application/octet-stream':
+				return 'document.png';
+				break;
 			default:
 				return 'document.png';
 				break;
@@ -34,7 +40,24 @@ class LC_Lob {
 				return 'image/'.$ext;
 		}
 
+		if ($subType == 'document') {
+			switch($ext) {
+				case 'pdf':
+				return 'application/pdf';
+				break;
+
+				case 'sxw':
+				return 'application/vnd.sun.xml.writer';
+				break;
+
+				case 'sxc':
+				return 'application/vnd.sun.xml.calc';
+				break;
+			}
+		}
+		return "application/octet-stream";
 	}
+
 
 	function createLinkText($name,$ext='') {
 		$ext = strtolower($ext);

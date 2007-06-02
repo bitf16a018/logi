@@ -47,7 +47,7 @@ class Myobj extends FacultyService {
 		//foreach ($lobs as $lobObj) {
 			$lobRec = $db->record;
 			$lobItems[$idx]['name'] = $lobRec['lob_title'];
-			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']). ' '.$lobRec['lob_type'];
+			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']);
 //			$lobItems[$idx]['subtype'] = $lobRec['lob_sub_type'];
 			$lobItems[$idx]['subject'] = $lobRec['subject'];
 			$lobItems[$idx]['author'] = $lobRec['author'];

@@ -39,7 +39,7 @@ class Edit extends FacultyService {
 		if ($t['lob']['lob_sub_type'] == 'image') {
 			$t['iconUrl'] = appurl('lobrepo/preview/c='.$t['lob']['lob_content_id']);
 		} else {
-			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon('text/html');
+			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']['lob_mime']);
 		}
 	}
 }
