@@ -892,10 +892,10 @@
 			
 			# Error checking for group permissions needs to be put in
 			# not sure the best way to handle it
-			
-			$HTML .= '<form action="'.$this->action.'" method="'.$this->method.'" enctype="'.$this->enctype.'">';
+		
+			$HTML = '<form action="'.$this->action.'" method="'.$this->method.'" enctype="'.$this->enctype.'">';
 			$HTML .= "\n";
-			$HTML = '<table width="'.$this->width.'" border="'.$this->border.'" cellspacing="'.$this->cellspacing.'" cellpadding="'.$this->cellpadding.'">';
+			$HTML .= '<table width="'.$this->width.'" border="'.$this->border.'" cellspacing="'.$this->cellspacing.'" cellpadding="'.$this->cellpadding.'">';
 			while(list($k, $v) = @each($this->data))
 			{
 				# Check to see if the row has more than one form
