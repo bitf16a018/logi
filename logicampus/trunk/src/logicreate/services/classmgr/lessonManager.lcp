@@ -458,7 +458,7 @@ class LessonManager extends FacultyService {
 		}
 
 		//get all lesson items for security
-		$sql = "SELECT A.lob_id, B.lob_title
+		$sql = "SELECT A.lob_id, B.lob_title, B.lob_urltitle
 			FROM lob_class_link AS A
 			LEFT JOIN lob_content as B on A.lob_id = B.lob_content_id
 			WHERE A.class_id = ".$class_id."
@@ -511,14 +511,14 @@ class LessonManager extends FacultyService {
 
 		//insert each new link
 		$insert = 'INSERT INTO class_lesson_sequence
-		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime)
-		VALUES (%d, %d, %d, "content", "%s", "%s")';
+		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text)
+		VALUES (%d, %d, %d, "content", "%s", "%s", "%s")';
 
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 			$lob = $lobRecord[$v];
 
-			$db->query( sprintf($insert, $lesson_id, $class_id, $v, $lob['lob_title'], $lob['lob_mime']));
+			$db->query( sprintf($insert, $lesson_id, $class_id, $v, $lob['lob_title'], $lob['lob_mime'], $lob['lob_urltitle']));
 		}
 
 		$this->presentor = 'redirectPresentation';
@@ -706,6 +706,7 @@ class LessonManager extends FacultyService {
 
 
 		// get the content pages
+		/*
 		$sql = "SELECT A.id_class_lesson_content, A.txTitle
 			FROM class_lesson_content AS A
 			WHERE A.id_classes='{$class_id}'";
@@ -718,6 +719,7 @@ class LessonManager extends FacultyService {
 			where id_class_lessons='{$lesson_id}'";
 		$db->queryOne($sql);
 		$t['content'] = $db->Record['id_class_lesson_content'];
+		 */
 
 		// get the objectives
 		$sql = "SELECT A.objective 

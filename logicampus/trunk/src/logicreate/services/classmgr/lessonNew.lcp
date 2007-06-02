@@ -50,22 +50,8 @@ class LessonNew extends FacultyService {
 
 		$class_id = $u->activeClassTaught->id_classes;
 
-		// get the possible content choices for the pulldown 
-		$sql = "SELECT txTitle,id_class_lesson_content 
-			FROM class_lesson_content
-			WHERE id_classes='".$class_id."'";
-
-		$db->query($sql);
-		while ( $db->next_record() ) {
-			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
-		}
 
 		$t['allowSave'] = true;
-		if ( count($t['contentPages']) < 1 ) {
-			$t['message'] = "You need at least one content page in order to create a new lesson.";
-			$t['allowSave'] = false;
-		}
-
 		//setup date pulldowns
 		$t['activeOnStruct']['defaultValue'] = time();
 		$t['activeOnStruct']['displayName'] = 'Active On';
