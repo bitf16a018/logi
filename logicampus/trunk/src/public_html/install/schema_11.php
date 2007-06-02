@@ -1,138 +1,119 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-CREATE TABLE docs_directories (
-  directoryID int(11) unsigned NOT NULL auto_increment,
-  parentID int(11) unsigned NOT NULL default '0',
-  username varchar(32) NOT NULL default '',
-  name varchar(100) NOT NULL default '',
-  posted int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (directoryID),
-  KEY parentID (parentID),
-  KEY username (username),
-  KEY posted (posted),
-  FULLTEXT KEY name (name)
+CREATE TABLE assessment (
+  assessment_id int(11) NOT NULL auto_increment,
+  display_name varchar(255) default NULL,
+  class_id int(11) default NULL,
+  date_available int(14) default NULL,
+  date_unavailable int(11) default NULL,
+  mail_responses tinyint(1) default NULL,
+  auto_publish tinyint(1) default NULL,
+  num_retries tinyint(4) default NULL,
+  minute_limit int(11) default NULL,
+  description text,
+  instructions text,
+  show_result_type tinyint(1) NOT NULL default '0',
+  possible_points float NOT NULL default '0',
+  PRIMARY KEY  (assessment_id)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_directories VALUES (1,0,'root','Home',1068233407)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE docs_directories_files (
-  directoryID int(11) unsigned NOT NULL default '0',
-  fileID int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (directoryID,fileID)
+CREATE TABLE assessment_answer (
+  assessment_answer_id int(11) NOT NULL auto_increment,
+  assessment_id int(11) default NULL,
+  assessment_question_id int(11) default NULL,
+  student_id varchar(32) default NULL,
+  assessment_answer_values text,
+  id_classes int(11) unsigned NOT NULL default '0',
+  points_earned float default NULL,
+  points_given float default NULL,
+  PRIMARY KEY  (assessment_answer_id),
+  KEY id_classes (id_classes),
+  KEY assessment_id (assessment_id),
+  KEY assessment_question_id (assessment_question_id),
+  KEY student_id (student_id)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE docs_directories_groups (
-  directoryID int(11) unsigned NOT NULL default '0',
-  gid varchar(10) NOT NULL default '',
-  PRIMARY KEY  (directoryID,gid)
+CREATE TABLE assessment_log (
+  id_assessment_log int(10) unsigned NOT NULL auto_increment,
+  assessment_id int(11) unsigned NOT NULL default '0',
+  id_student varchar(32) NOT NULL default '',
+  start_date int(11) NOT NULL default '0',
+  end_date int(11) NOT NULL default '0',
+  id_classes int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (id_assessment_log),
+  KEY assessment_id (assessment_id)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE docs_files (
-  fileID int(11) unsigned NOT NULL auto_increment,
-  username varchar(32) NOT NULL default '',
-  name varchar(100) NOT NULL default '',
-  TYPE varchar(4) NOT NULL default '',
-  mime varchar(50) NOT NULL default '',
-  title varchar(100) NOT NULL default '',
-  abstract varchar(255) NOT NULL default '',
-  posted int(11) unsigned NOT NULL default '0',
-  hits int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (fileID),
-  KEY posted (posted),
-  KEY username (username),
-  KEY name (name),
-  KEY TYPE (TYPE),
-  FULLTEXT KEY title (title,abstract)
+CREATE TABLE assessment_question (
+  assessment_question_id int(11) NOT NULL auto_increment,
+  assessment_id int(11) default NULL,
+  question_type int(11) default NULL,
+  question_sort tinyint(4) unsigned NOT NULL default '0',
+  question_points float NOT NULL default '0',
+  question_display varchar(255) default NULL,
+  question_text mediumtext,
+  question_choices text,
+  question_input text NOT NULL,
+  file_hash varchar(32) NOT NULL default '',
+  PRIMARY KEY  (assessment_question_id)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE docs_files_groups (
-  fileID int(11) unsigned NOT NULL default '0',
-  gid varchar(10) NOT NULL default '',
-  PRIMARY KEY  (fileID,gid)
+CREATE TABLE assessment_grade (
+  assessment_grade_id int(11) NOT NULL auto_increment,
+  assessment_id int(11) default NULL,
+  student_id varchar(32) NOT NULL,
+  comments text default NULL,
+  points float(10,2) default NULL,
+  points_override float(10,2) default NULL,
+  PRIMARY KEY  (assessment_grade_id)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE docs_filetypes (
-  TYPE char(4) NOT NULL default '',
-  icon char(50) NOT NULL default '',
-  PRIMARY KEY  (TYPE)
-) TYPE=MyISAM
+DROP TABLE IF EXISTS `assessment_lesson_link`
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('gif','img.gif')
+CREATE TABLE `assessment_lesson_link` (
+	`assessment_lesson_link_id` integer (11) NOT NULL auto_increment,  --
+	`assessment_id` integer (11),  --
+	`lesson_id` integer (11),  --
+	PRIMARY KEY (assessment_lesson_link_id)
+)TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('png','img.gif')
+CREATE INDEX assessment_id ON assessment_lesson_link (assessment_id)
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('jpg','img.gif')
+CREATE INDEX lesson_id ON assessment_lesson_link (lesson_id)
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('doc','doc.gif')
+CREATE TABLE `assessment_event_link` (
+	`assessment_event_link_id` int (10) NOT NULL auto_increment,  --
+	`assessment_id` int (10),  --
+	`lc_event_id` int (10),  --
+	PRIMARY KEY (assessment_event_link_id)
+)TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('pdf','pdf.gif')
+CREATE INDEX assessment_idx ON assessment_event_link (assessment_id)
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('ppt','ppt.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('mov','mov.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('mpg','mov.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('mpeg','mov.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('avi','mov.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('html','html.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('htm','html.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('xls','xls.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('mdb','mdb.gif')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('txt','')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO docs_filetypes VALUES ('rtf','');
+CREATE INDEX lc_event_idx ON assessment_event_link (lc_event_id);
 campusdelimeter;
 $installTableSchemas[] = $table;
 
