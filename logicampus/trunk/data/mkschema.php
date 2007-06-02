@@ -28,7 +28,6 @@ $data['forms'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/lcFormInfo.sql'));
 $data['forminfo'] = explode(";\n",$setupFile);
 
-
 $setupFile = trim(file_get_contents('../data/lcPerms.sql'));
 $data['perms'] = explode(";\n",$setupFile);
 
@@ -40,6 +39,23 @@ $data['profile'] = explode(";\n",$setupFile);
 
 $setupFile = trim(file_get_contents('../data/lcGroups.sql'));
 $data['groups'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_content.mysql.sql'));
+$schemas['lob_content'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_metadata.mysql.sql'));
+$schemas['lob_metadata'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_user_link.mysql.sql'));
+$schemas['lob_user_link'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_class_link.mysql.sql'));
+$schemas['lob_class_link'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/class_lesson_sequence.mysql.sql'));
+$schemas['class_lesson_sequence'] = explode(";\n",$setupFile);
+
+
 
 $location = '../src/logicreate/services/';
 $d = dir($location);
