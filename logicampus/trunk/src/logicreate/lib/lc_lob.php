@@ -40,7 +40,7 @@ class LC_Lob {
 				return 'image/'.$ext;
 		}
 
-		if ($subType == 'document') {
+		if ($subType == 'document' || $subType == 'doc') {
 			switch($ext) {
 				case 'pdf':
 				return 'application/pdf';
