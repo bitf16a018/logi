@@ -32,7 +32,8 @@ class add extends FacultyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName = 'add_main';
-		$mimetype = Lc_Lob::getMimeForSubtype($lc->getvars['t']);
+		$ext = addslashes($lc->getvars['m']);
+		$mimetype = Lc_Lob::getMimeForSubtype($lc->getvars['t'],$ext);
 		//$lc->getvars['ext'] = 'jpeg';
 		switch($lc->getvars['t']) {
 			case 'html':
@@ -69,7 +70,14 @@ class add extends FacultyService {
 			case 'image':
 				$lc->templateName = 'add_image';
 				break;
+
+			case 'doc':
+				$lc->templateName = 'add_doc';
+				break;
+
 		}
+
+		$t['mimetype'] = $mimetype;
 	}
 
 
@@ -80,7 +88,7 @@ class add extends FacultyService {
 		$lob->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
 		$lob->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
 		$lob->set('lobContent', $lc->postvars['txText']);
-		$lob->set('lobSubType','image');
+		$lob->set('lobSubType',$lc->postvars['lob_sub_type']);
 		$n =& $lc->uploads[$upName]['name'];
 
 		$ext = substr (
@@ -89,7 +97,7 @@ class add extends FacultyService {
 			);
 
 		$ext = strtolower($ext);
-		$m = Lc_Lob::getMimeForSubtype('image',$ext);
+		$m = Lc_Lob::getMimeForSubtype($lc->postvars['lob_sub_type'],$ext);
 		$lob->set('lobMime', $m);
 
 		//create the link text in a standard way
@@ -133,6 +141,8 @@ class add extends FacultyService {
 
 		if (@$lc->uploads['content']) {
 			$this->uploadToLob($lob,$lc,'content');
+		} else if (@$lc->uploads['document']) {
+			$this->uploadToLob($lob,$lc,'document');
 		} else {
 			$this->textToLob($lob,$lc);
 		}
