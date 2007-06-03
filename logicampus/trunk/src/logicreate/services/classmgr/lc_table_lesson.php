@@ -79,6 +79,8 @@ class LC_TableLessonCheckboxRenderer extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
 		if (is_object($this->value) ) {
+			$itemKey = $this->value->{$this->idName};
+		} else if (is_array($this->value) ) {
 			$itemKey = $this->value[$this->idName];
 		} else {
 			$itemKey = $this->value;
