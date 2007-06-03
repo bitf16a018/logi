@@ -71,6 +71,7 @@ class add extends FacultyService {
 				$lc->templateName = 'add_image';
 				break;
 
+			case 'audio':
 			case 'doc':
 				$lc->templateName = 'add_doc';
 				break;
