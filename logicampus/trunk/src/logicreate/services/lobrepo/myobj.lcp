@@ -39,7 +39,6 @@ class Myobj extends FacultyService {
 			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id
 			LEFT JOIN lob_user_link as C on A.lob_content_id = C.lob_id
 			WHERE C.user_id = '.$u->userId.'
-			AND B.lob_kind = "content"
 			');
 
 
@@ -88,10 +87,20 @@ class Myobj extends FacultyService {
 
 		$c = (int)$lc->getvars['c'];
 		$l = (int)$lc->getvars['l'];
+		$sql = "SELECT lob_id, lob_kind
+			FROM lob_user_link
+			WHERE lob_id = ".$l."
+			AND user_id = ".$u->userId;
+		$db->query($sql);
+		//FIXME check for db errors
+		$db->nextRecord();
+		$lobId = $db->record['lob_id'];
+		$lobKind = $db->record['lob_kind'];
+
 		$lobClass = new LobClassLink();
-		$lobClass->set('lobId'   ,$l);
+		$lobClass->set('lobId'   ,$lobId);
 		$lobClass->set('classId' ,$c);
-		$lobClass->set('lobKind' ,'content');
+		$lobClass->set('lobKind' ,$lobKind);
 		$lobClass->save();
 		$u->addSessionMessage('Object linked to your class.');
 
