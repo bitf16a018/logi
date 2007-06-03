@@ -264,19 +264,18 @@ class LessonManager extends FacultyService {
 		// using LessonRenderer
 		// also, correct the checkbox selection state with a one to
 		// many lookup
-		/*
-		$sql = "SELECT A.id_class_objectives, A.id_class_lesson, B.title
-			FROM class_lesson_objectives AS A
+		$sql = "SELECT A.class_lesson_sequence_id, A.lesson_id, A.lob_id, B.title
+			FROM class_lesson_sequence AS A
 			LEFT JOIN class_lessons AS B
-			  ON A.id_class_lesson = B.id_class_lessons
+			  ON A.lesson_id = B.id_class_lessons
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_objectives']][] = $db->Record['id_class_lesson'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['lob_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['lob_id']][] = $db->record['lesson_id'];
 		}
-		 */
+		// */
 
 		$columnModel = &$table->getColumnModel();
 
@@ -285,7 +284,8 @@ class LessonManager extends FacultyService {
 		$table->setColumnNameAt(0,'&nbsp;');
 		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
-		$col->cellRenderer->idName = 'lob_content_id';
+		//only used for object values
+//		$col->cellRenderer->idName = 'lob_id';
 		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
@@ -491,33 +491,71 @@ class LessonManager extends FacultyService {
 
 		//find content objects that we didn't recieve a checkbox for
 		$sql = ('SELECT class_lesson_sequence_id, lob_id
+			FROM class_lesson_sequence
 			WHERE lesson_id = '.$lesson_id.'
+			AND class_id = '.$class_id.'
+			AND lob_type = "content"
 			AND lob_id NOT IN ('.implode(',',$itemArray).')');
 
 		//needs work to delete
-		/*
+		//*
 		$deletes = array();
+		$db->query($sql);
 		while ($db->nextRecord()) {
-			debug($db->record,1);
 			$deletes[] = $db->record['class_lesson_sequence_id'];
 		}
+
 		//wipe all previous content links for this lesson
 		if (count ($deletes) > 0 ) {
 		$db->query('DELETE from class_lesson_sequence
 			WHERE class_lesson_sequence_id IN ('.implode(',',$deletes).')');
 		}
-		 */
+		// */
+
+		//find objects that got a checkbox but are already present in the DB
+		$sql = ('SELECT class_lesson_sequence_id, lob_id
+			FROM class_lesson_sequence
+			WHERE lesson_id = '.$lesson_id.'
+			AND class_id = '.$class_id.'
+			AND lob_type = "content"
+			AND lob_id IN ('.implode(',',$itemArray).')');
+
+		$keepers = array();
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$keepers[] = $db->record['lob_id'];
+		}
+
+//		debug($itemArray);
+//		debug($keepers);
+		//so we're only inserting absolutely new checkboxes,
+		// this should keep the pkey count down significantly 
+		// over other methods of deleting all records in a class
+		// and then adding all new records.
+		$itemArray = array_diff($itemArray,$keepers);
+
+		//one last thing, we need to find out the maximum rank in the sequence
+		$sql = ('SELECT MAX(`rank`) as toprank
+			FROM class_lesson_sequence
+			WHERE lesson_id = '.$lesson_id.'
+			AND class_id = '.$class_id);
+
+		$db->query($sql);
+		$db->nextRecord();
+		$topRank = $db->record['toprank'];
+
 
 		//insert each new link
 		$insert = 'INSERT INTO class_lesson_sequence
-		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text)
-		VALUES (%d, %d, %d, "content", "%s", "%s", "%s")';
+		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text, rank)
+		VALUES (%d, %d, %d, "content", "%s", "%s", "%s",%d)';
 
 		foreach($itemArray as $k=>$v) {
 			if ($v < 1 ) continue;
 			$lob = $lobRecord[$v];
+			$topRank++;
 
-			$db->query( sprintf($insert, $lesson_id, $class_id, $v, $lob['lob_title'], $lob['lob_mime'], $lob['lob_urltitle']));
+			$db->query( sprintf($insert, $lesson_id, $class_id, $v, $lob['lob_title'], $lob['lob_mime'], $lob['lob_urltitle'], $topRank));
 		}
 
 		$this->presentor = 'redirectPresentation';
