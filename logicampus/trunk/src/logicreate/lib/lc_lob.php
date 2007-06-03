@@ -17,6 +17,12 @@ class LC_Lob {
 			case 'application/octet-stream':
 				return 'document.png';
 				break;
+			case 'X-LMS/assessment':
+				return 'quiz.png';
+				break;
+			case 'X-LMS/interaction':
+				return 'activity.png';
+				break;
 			default:
 				return 'document.png';
 				break;
@@ -55,6 +61,15 @@ class LC_Lob {
 				break;
 			}
 		}
+
+		if ($subType == 'audio') {
+			switch($ext) {
+				case 'mp3':
+				return 'audio/mpeg';
+				break;
+			}
+		}
+
 		return "application/octet-stream";
 	}
 
