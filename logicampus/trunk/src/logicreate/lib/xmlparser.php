@@ -158,26 +158,26 @@ class xml_node
 		# If there are no subtags and no data, then the tag should be
 		# closed: <tag attrib="val"/>
 		$numtags = sizeof($keys);
-		$trimmeddata = trim($this->value);
-		if ($numtags && ($trimmeddata == "")) {
+		$this->value = trim($this->value);
+		if ($numtags && ($this->value == '')) {
 			$tagstr .= ">\n";
-		} elseif ($numtags == false && ($trimmeddata == "")) {
+		} elseif ($numtags == false && ($this->value == '')) {
 			$tagstr .= "/>\n";
 		} else {
 			$tagstr .= ">";
 		}
-		if ($this->cdata) {
+		if ($this->cdata && ($this->value != '')) {
 			$tagstr .= "<![CDATA[";
 		}
 		
 		fwrite($fh, $tagstr);
 
 		# Write out the data if it is not purely whitespace
-		if ($trimmeddata != "") 
+		if ($this->value != "") 
 		{	if ($this->attrs['BASE64'])
-			{	fwrite($fh, base64_encode($trimmeddata));
+			{	fwrite($fh, base64_encode($this->value));
 			} else 
-			{	fwrite($fh, $trimmeddata);
+			{	fwrite($fh, $this->value);
 			}
 			
 		}
@@ -192,7 +192,7 @@ class xml_node
 		}
 
 		# Write out the end element if necessary
-		if ($numtags || ($trimmeddata != "")) {
+		if ($numtags || ($this->value != "")) {
 			$tagstr .= "</{$this->tag}>\n";
 			if ($numtags) {
 				$tagstr = $prepend_str.$tagstr;
