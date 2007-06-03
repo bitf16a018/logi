@@ -176,19 +176,21 @@ class ExportContent extends FacultyService {
 	function get_document_files() {
 		$lob_nodes = array();
 		$sql = '
-		SELECT A.* , B.name as foldername
-		FROM classdoclib_Files as A
-		LEFT JOIN classdoclib_Folders as B on A.folder = B.pkey
-		WHERE B.class_id='.$this->classId.'
-		';
+		SELECT B.*
+		FROM lob_class_link as A
+		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
+		WHERE A.class_id='.$this->classId.'
+		AND (lob_sub_type != "text") ';
 
 		$db = DB::getHandle();
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
 		while ($db->nextRecord()) {
-			if (trim($db->Record['diskName']) == '')
+			if (trim($db->record['lob_filename']) == ''){
+				die('slkdjf');
 				continue;
+			}
 			/*
 			$xml_sub_child = null;
 			
@@ -219,12 +221,9 @@ class ExportContent extends FacultyService {
 			// the temp directory
 			
 			$this->obj_zip->add_file(
-				file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. 
-					substr($db->Record['diskName'], 0, 2). 
-					'/'.substr($db->Record['diskName'],
-					(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName'])
+				$db->record['lob_binary']
 				,
-				'content/'.str_replace('/','_',strip_tags($db->Record['file']))
+				'content/'.str_replace('/','_',strip_tags($db->record['lob_filename']))
 			);
 
 
@@ -237,13 +236,13 @@ class ExportContent extends FacultyService {
 			} else {
 				$sub_type_node->value = 'document';
 			}
-			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['displayname']);
+			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
-			$lob_url = new xml_node('loburltitle',null,null,$db->record['file']);
-			$lob_file_node = new xml_node('lobfilename',null,null,$db->record['file']);
+			$lob_url = new xml_node('loburltitle',null,null,$db->record['lob_urltitle']);
+			$lob_file_node = new xml_node('lobfilename',null,null,$db->record['lob_filename']);
 			$lob_file_node->cdata = true;
 
-			$lob_desc_node = new xml_node('lobdescription',null,null,$db->record['description']);
+			$lob_desc_node = new xml_node('lobdescription',null,null,$db->record['lob_description']);
 			$lob_desc_node->cdata = true;
 
 
@@ -279,7 +278,7 @@ class ExportContent extends FacultyService {
 
 			$guid = lcUuid();
 			$lob_nodes[] = new xml_node('lob', 
-				array('guid'=>$guid, 'dbid'=>$db->record['pkey']), 
+				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
 				$xml_child_nodes
 			);
 		}
@@ -290,9 +289,11 @@ class ExportContent extends FacultyService {
 	function get_content_nodes() {
 		$xml_child_nodes = array();
 		$sql = '
-		SELECT * 
-		FROM class_lesson_content
-		WHERE id_classes='.$this->classId.'
+		SELECT B.* 
+		FROM lob_class_link A
+		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
+		WHERE class_id='.$this->classId.'
+		AND lob_sub_type = "text"
 		'; 
 
 		$db = DB::getHandle();
@@ -302,10 +303,10 @@ class ExportContent extends FacultyService {
 		$lob_nodes = array();
 		while ($db->nextRecord()) {
 			$type_node = new xml_node('type',null,null,'content');
-			$sub_type_node = new xml_node('subtype',null,null,'text');
-			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['txTitle']);
+			$sub_type_node = new xml_node('subtype',null,null,$db->record['lob_sub_type']);
+			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
-			$lob_content_node = new xml_node('lobcontent',null,null,$db->record['txText']);
+			$lob_content_node = new xml_node('lobcontent',null,null,$db->record['lob_content']);
 			$lob_content_node->cdata = true;
 
 			$xml_child_nodes = array();
