@@ -563,7 +563,7 @@ class LcZipFile {
 		$fr .= pack("v",0);
 		//end local file header
 
-		$ft .= $name;
+		$fr .= $name;
 		$fr .= pack("V",0);
 		$fr .= pack("V",0);
 		$fr .= pack("V",0);
