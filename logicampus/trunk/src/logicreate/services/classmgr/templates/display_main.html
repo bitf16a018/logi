@@ -41,9 +41,9 @@ if ($t['motd']) {
 			<li><a href="<?=modurl('lessonContent');?>"><?=lct('Content')?></a></li>
 			-->
 			<li><a href="<?=modurl('lessonObjectives');?>"><?=lct('Objectives')?></a></li>
-			<li><a href="<?=APP_URL?>classmgr/assignmentManage/"><?=lct('Assignments')?></a></li>
-			<li><a href="<?=APP_URL?>assessments"><?=lct('Assessment Manager')?></a></li>
-			<li><a href="<?=appurl('classdoclib');?>"><?=lct('File Manager')?></a></li>
+			<li><a href="<?=appurl('classmgr/assignmentManage/');?>"><?=lct('Assignments')?></a></li>
+			<li><a href="<?=appurl('assessments');?>"><?=lct('Assessment Manager')?></a></li>
+			<li><a href="<?=appurl('lobrepo/myobj');?>"><?=lct('Content / Learning Objects')?></a></li>
 			<li><a href="<?=modurl('lessonWebliography');?>"><?=lct('Webliography')?></a></li>
 			<br/>
 			<li><a href="<?=APP_URL?>classroom/details/id_classes=<?=$t['classObj']->id_classes?>"><?=lct('View Classroom')?></a></li>
