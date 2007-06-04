@@ -15,9 +15,9 @@ CREATE TABLE `lob_content` (
 	`lob_mime` varchar (255) NOT NULL, 
 	`lob_caption` varchar (255) NOT NULL, 
 	`lob_description` text NOT NULL, 
-	`lob_notes` text NOT NULL, 
-	`lob_content` text NOT NULL, 
-	`lob_binary` text NOT NULL, 
+	`lob_notes` longtext NOT NULL, 
+	`lob_content` longtext NOT NULL, 
+	`lob_binary` longblob NOT NULL, 
 	`lob_filename` varchar (255) NOT NULL, 
 	`lob_urltitle` varchar (255) NOT NULL,
 	PRIMARY KEY (lob_content_id) 

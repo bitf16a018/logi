@@ -337,13 +337,13 @@
 			type="TEXT"/>
 		<attribute name="lob_notes"
 			required="true"
-			type="TEXT"/>
+			type="LONGTEXT"/>
 		<attribute name="lob_content"
 			required="true"
-			type="TEXT"/>
+			type="LONGTEXT"/>
 		<attribute name="lob_binary"
 			required="true"
-			type="BLOB"/>
+			type="LONGBLOB"/>
 		<attribute name="lob_filename"
 			required="true"
 			size="255"
