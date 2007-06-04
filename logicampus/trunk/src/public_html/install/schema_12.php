@@ -1,158 +1,119 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-DROP TABLE IF EXISTS `class_forum`
+CREATE TABLE assessment (
+  assessment_id int(11) NOT NULL auto_increment,
+  display_name varchar(255) default NULL,
+  class_id int(11) default NULL,
+  date_available int(14) default NULL,
+  date_unavailable int(11) default NULL,
+  mail_responses tinyint(1) default NULL,
+  auto_publish tinyint(1) default NULL,
+  num_retries tinyint(4) default NULL,
+  minute_limit int(11) default NULL,
+  description text,
+  instructions text,
+  show_result_type tinyint(1) NOT NULL default '0',
+  possible_points float NOT NULL default '0',
+  PRIMARY KEY  (assessment_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE `class_forum` (
-	`class_forum_id` integer (11) NOT NULL auto_increment,  -- 
-	`name` varchar (255),  -- 
-	`class_id` integer (11),  -- 
-	`is_locked` tinyint (1),  -- 
-	`is_visible` tinyint (1),  -- 
-	`is_moderated` tinyint (1),  -- 
-	`allow_uploads` tinyint (1),  -- 
-	`description` varchar (255),  -- 
-	`recent_post_datetime` integer (11),  -- 
-	`recent_poster` varchar (32),  -- 
-	`thread_count` integer (11),  -- 
-	`post_count` integer (11),  -- 
-	`unanswered_count` integer (11),  -- 
-	`class_forum_category_id` integer (11),  -- 
-	PRIMARY KEY (class_forum_id)
-)TYPE=InnoDB
+CREATE TABLE assessment_answer (
+  assessment_answer_id int(11) NOT NULL auto_increment,
+  assessment_id int(11) default NULL,
+  assessment_question_id int(11) default NULL,
+  student_id varchar(32) default NULL,
+  assessment_answer_values text,
+  id_classes int(11) unsigned NOT NULL default '0',
+  points_earned float default NULL,
+  points_given float default NULL,
+  PRIMARY KEY  (assessment_answer_id),
+  KEY id_classes (id_classes),
+  KEY assessment_id (assessment_id),
+  KEY assessment_question_id (assessment_question_id),
+  KEY student_id (student_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX class_forum_category_idx ON class_forum (class_forum_category_id)
+CREATE TABLE assessment_log (
+  id_assessment_log int(10) unsigned NOT NULL auto_increment,
+  assessment_id int(11) unsigned NOT NULL default '0',
+  id_student varchar(32) NOT NULL default '',
+  start_date int(11) NOT NULL default '0',
+  end_date int(11) NOT NULL default '0',
+  id_classes int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (id_assessment_log),
+  KEY assessment_id (assessment_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX class_idx ON class_forum (class_id)
+CREATE TABLE assessment_question (
+  assessment_question_id int(11) NOT NULL auto_increment,
+  assessment_id int(11) default NULL,
+  question_type int(11) default NULL,
+  question_sort tinyint(4) unsigned NOT NULL default '0',
+  question_points float NOT NULL default '0',
+  question_display varchar(255) default NULL,
+  question_text mediumtext,
+  question_choices text,
+  question_input text NOT NULL,
+  file_hash varchar(32) NOT NULL default '',
+  PRIMARY KEY  (assessment_question_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-DROP TABLE IF EXISTS `class_forum_post`
+CREATE TABLE assessment_grade (
+  assessment_grade_id int(11) NOT NULL auto_increment,
+  assessment_id int(11) default NULL,
+  student_id varchar(32) NOT NULL,
+  comments text default NULL,
+  points float(10,2) default NULL,
+  points_override float(10,2) default NULL,
+  PRIMARY KEY  (assessment_grade_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE `class_forum_post` (
-	`class_forum_post_id` integer (11) NOT NULL auto_increment,  -- 
-	`class_forum_id` integer (11),  -- 
-	`is_sticky` tinyint (1),  -- 
-	`is_hidden` tinyint (1),  -- 
-	`reply_id` integer (11),  -- 
-	`thread_id` integer (11),  -- 
-	`subject` varchar (255),  -- 
-	`message` text,  -- 
-	`user_id` varchar (32),  -- 
-	`post_datetime` integer (11),  -- 
-	`last_edit_username` varchar (32),  -- 
-	`last_edit_datetime` integer (11),  -- 
-	PRIMARY KEY (class_forum_post_id)
-)TYPE=InnoDB
+DROP TABLE IF EXISTS `assessment_lesson_link`
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX is_sticky_idx ON class_forum_post (is_sticky)
+CREATE TABLE `assessment_lesson_link` (
+	`assessment_lesson_link_id` integer (11) NOT NULL auto_increment,  --
+	`assessment_id` integer (11),  --
+	`lesson_id` integer (11),  --
+	PRIMARY KEY (assessment_lesson_link_id)
+)TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX user_idx ON class_forum_post (user_id)
+CREATE INDEX assessment_id ON assessment_lesson_link (assessment_id)
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX thread_id ON class_forum_post (thread_id)
+CREATE INDEX lesson_id ON assessment_lesson_link (lesson_id)
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX reply_id ON class_forum_post (reply_id)
+CREATE TABLE `assessment_event_link` (
+	`assessment_event_link_id` int (10) NOT NULL auto_increment,  --
+	`assessment_id` int (10),  --
+	`lc_event_id` int (10),  --
+	PRIMARY KEY (assessment_event_link_id)
+)TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX class_forum_id ON class_forum_post (class_forum_id)
+CREATE INDEX assessment_idx ON assessment_event_link (assessment_id)
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX post_datetime ON class_forum_post (post_datetime)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-DROP TABLE IF EXISTS `class_forum_category`
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE `class_forum_category` (
-	`class_forum_category_id` integer (11) NOT NULL auto_increment,  -- 
-	`name` varchar (255),  -- 
-	`class_id` integer (11),  -- 
-	PRIMARY KEY (class_forum_category_id)
-)TYPE=InnoDB
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX class_idx ON class_forum_category (class_id)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-DROP TABLE IF EXISTS `class_forum_user_activity`
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE `class_forum_user_activity` (
-	`class_forum_user_activity_id` integer (11) NOT NULL auto_increment,  -- 
-	`class_forum_id` integer (11),  -- 
-	`user_id` integer (11),  -- 
-	`views` text,  -- 
-	PRIMARY KEY (class_forum_user_activity_id)
-)TYPE=InnoDB
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX class_forum_idx ON class_forum_user_activity (class_forum_id)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX user_idx ON class_forum_user_activity (user_id)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-DROP TABLE IF EXISTS `class_forum_trash_post`
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE `class_forum_trash_post` (
-	`class_forum_trash_post_id` integer (11) NOT NULL auto_increment,  -- 
-	`class_forum_id` integer (11),  -- 
-	`is_sticky` tinyint (1),  -- 
-	`is_hidden` tinyint (1),  -- 
-	`reply_id` integer (11),  -- 
-	`thread_id` integer (11),  -- 
-	`subject` varchar (255),  -- 
-	`message` text,  -- 
-	`user_id` varchar (32),  -- 
-	`post_datetime` integer (11),  -- 
-	`last_edit_username` varchar (32),  -- 
-	`last_edit_datetime` integer (11),  -- 
-	PRIMARY KEY (class_forum_trash_post_id)
-)TYPE=InnoDB
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX is_sticky_idx ON class_forum_trash_post (is_sticky)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX user_idx ON class_forum_trash_post (user_id)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX thread_id ON class_forum_trash_post (thread_id)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX reply_id ON class_forum_trash_post (reply_id);
+CREATE INDEX lc_event_idx ON assessment_event_link (lc_event_id);
 campusdelimeter;
 $installTableSchemas[] = $table;
 
