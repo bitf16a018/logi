@@ -146,18 +146,22 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			//then the extra rows for tags, categories, and links to your classroom
 
 			if (is_array($u->classesTaught) ) {
-				$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Link this object to your class:&nbsp;&nbsp;';
+				$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Link this object to your class:&nbsp;';
+				$lobId = $this->table->tableModel->getValueNamed($x,'lobId');
 				foreach ($u->classesTaught as $classObj) {
-					$this->html .= ' <a href="'.appurl('lobrepo/myobj/event=class/l='.$this->table->tableModel->getValueNamed($x,'lobId').'/c='.$classObj->id_classes).'">';
-					$this->html .= $classObj->courseFamily. ' '.$classObj->courseNumber.'</a>&bull;';
-//					$this->html .= ' <a href="#">ARTS 2022</a>';
+					if (in_array($classObj->id_classes,$this->classLinkIds[$lobId])) { 
+						$this->html .= ' <span style="color:black;">'.$classObj->courseFamily. ' '.$classObj->courseNumber.'</span> &bull;';
+					} else {
+						$this->html .= ' <a href="'.appurl('lobrepo/myobj/event=class/l='.$lobId.'/c='.$classObj->id_classes).'">';
+						$this->html .= $classObj->courseFamily. ' '.$classObj->courseNumber.'</a> &bull;';
+					}
 				}
 				$this->html .= '</td></tr>';
 //				$this->html .= '</tr>';
 			}
-			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Browse more objects like this one:&nbsp;&nbsp;';
-			$this->html .= ' <a href="#">ENGL</a>&bull;';
-			$this->html .= ' <a href="#">PDF</a>&bull;';
+			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Browse more objects like this one:&nbsp;';
+			$this->html .= ' <a href="#">ENGL</a> &bull;';
+			$this->html .= ' <a href="#">PDF</a> &bull;';
 			$this->html .= ' <a href="#">Content pages</a>';
 			$this->html .= '</td></tr>';
 			$this->html .= '<tr style="background-color:white;"><td colspan="6"><hr/>';
