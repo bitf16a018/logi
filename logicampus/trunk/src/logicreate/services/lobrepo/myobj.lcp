@@ -75,15 +75,21 @@ class Myobj extends FacultyService {
 		$col_d = &$columnModel->getColumnAt(4);
 		$col_d->justify = 'left';
 
+		$t['lobTable'] = new Lob_Table_Renderer($table);
+
+
+		//find the links between classes and learning objects
 		$idsTaught = array();
 		foreach ($u->classesTaught as $class) {
 			$idsTaught[] = $class->id_classes;
 		}
 
-		$t['lobTable'] = new Lob_Table_Renderer($table);
-		$classLinkObjs = LobClassLinkPeer::doSelect(' class_id IN ('.implode(',',$idsTaught).')');
+		if ( count($idsTaught)) {
+			$classLinkObjs = LobClassLinkPeer::doSelect(' class_id IN ('.implode(',',$idsTaught).')');
+		}
+
 		//organize the link IDs into nice arrays for the table renderer
-		$linkIds = array();
+		$linkIds = array(0);
 		foreach ($classLinkObjs as $linkObj) {
 			$linkIds[$linkObj->lobId][] = $linkObj->classId;
 		}
