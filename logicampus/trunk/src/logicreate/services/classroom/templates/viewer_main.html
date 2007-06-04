@@ -19,7 +19,7 @@ if ($t['file']['mime'] == 'image/jpeg') {
 	echo '<h3>'.$t['file']['title'].'</h3>';
 	echo ''.$t['file']['description'].'';
 	echo "<br/>\n";
-	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['file'].'"/>';
+	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['linkText'].'"/>';
 }
 ?>
 

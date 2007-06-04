@@ -35,7 +35,7 @@ class content extends StudentService {
 		$ut = time();						
 		//print_r($lc->getvars);
 		$uniqCode = $lc->getvars[1];
-		$filename = addslashes(trim($lc->getvars[2]));
+		$filename = addslashes(trim(urlencode($lc->getvars[2])));
 		$lc->templateName = 'viewer_main';
 		
 		$viewerAuth = false;

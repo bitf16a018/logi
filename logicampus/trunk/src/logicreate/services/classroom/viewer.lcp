@@ -35,7 +35,7 @@ class viewer extends StudentService {
 		$ut = time();						
 		//print_r($lc->getvars);
 		$uniqCode = $lc->getvars[1];
-		$filename = addslashes(trim($lc->getvars[2]));
+		$filename = addslashes(trim(urlencode($lc->getvars[2])));
 		$lc->templateName = 'viewer_main';
 		
 		$viewerAuth = false;
@@ -55,6 +55,9 @@ class viewer extends StudentService {
 			return;
 		}
 
+		echo("SELECT * FROM class_lesson_sequence as A 
+			WHERE link_text='".$filename."'
+			AND A.class_id = ".$classId);
 
 		$db->query("SELECT * FROM class_lesson_sequence as A 
 			WHERE link_text='".$filename."'
