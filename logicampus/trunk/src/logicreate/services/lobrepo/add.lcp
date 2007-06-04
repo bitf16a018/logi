@@ -159,6 +159,7 @@ class add extends FacultyService {
 
 		$lobUserObj->set('lobId',$lob->getPrimaryKey());
 		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->set('lobKind','content');
 		$lobUserObj->save();
 
 		$u->addSessionMessage('Successfully added content.');
