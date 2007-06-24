@@ -5,6 +5,20 @@ class LC_Lob_Renderer {
 
 	function getMetadataForm() {
 
+		$subject = array();
+		$subject[] = array(
+			'fieldName'     => 'md_subj',
+			'displayName'   => 'Subject',
+			'type'          => 'text',
+		);
+
+		$subdisc = array();
+		$subdisc[] = array(
+			'fieldName'     => 'md_subdisc',
+			'displayName'   => 'Sub-Discipline',
+			'type'          => 'text',
+		);
+
 		$author = array();
 		$author[] = array(
 			'fieldName'     => 'md_author',
@@ -26,7 +40,7 @@ class LC_Lob_Renderer {
 			'type'          => 'text',
 		);
 
-		return array($author, $copyright, $license);
+		return array($subject, $subdisc, $author, $copyright, $license);
 		/*
 [1] => Array
         (

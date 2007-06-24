@@ -2,6 +2,38 @@
 
 class LC_Lob {
 
+	var $lobObj;
+	var $lobMetaObj;
+
+	function LC_Lob($id=-1) {
+		if ($id < 1) {
+			$this->lobObj = new LobContent();
+			$this->lobMetaObj = new LobMetadata();
+		} else {
+			$this->lobObj = LobContent::load($id);
+			$this->lobMetaObj = LobMetadata::load(array('lob_id'=>$id));
+		}
+	}
+
+	function isFile() {
+		return $this->lobObj->lobSubType == 'document';
+	}
+
+	function get($key) {
+		return $this->lobObj->{$key};
+	}
+
+	function getMeta($key) {
+		return $this->lobMetaObj->{$key};
+	}
+
+	function set($key,$val) {
+		$this->lobObj->{$key} = $val;
+	}
+
+	function setMeta($key,$val) {
+		$this->lobMetaObj->{$key} = $val;
+	}
 
 	/**
 	 * @static
@@ -82,6 +114,61 @@ class LC_Lob {
 			$ret .= '.'.$ext;
 		}
 		return $ret;
+	}
+
+
+	function updateAsFile(&$vars,$upName) {
+		$this->set('lobTitle', $vars['txTitle']);
+
+		if (@$lc->uploads[$upName]) {
+			$this->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
+			$this->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
+		}
+		$this->set('lobSubType',$vars['lob_sub_type']);
+		$n =& $lc->uploads[$upName]['name'];
+
+		$ext = substr (
+			$n, 
+		       (strrpos($n, '.')  - strlen($n) +1)
+			);
+
+		$ext = strtolower($ext);
+		$m = Lc_Lob::getMimeForSubtype($vars['lob_sub_type'],$ext);
+		$this->set('lobMime', $m);
+
+		//create the link text in a standard way
+		$this->set('lobUrltitle',
+			LC_Lob::createLinkText($this->get('lobTitle'),$ext)
+		);
+	}
+
+
+	function updateAsText($vars) {
+		$this->set('lobContent', $vars['txText']);
+		$this->set('lobSubType','text');
+		$this->set('lobTitle', $vars['txTitle']);
+		$this->set('lobMime', $vars['mime']);
+
+		//create the link text in a standard way
+		$this->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'))
+		);
+	}
+
+
+	function updateMeta($vars) {
+		$this->setMeta('lobKind','content');
+		$this->setMeta('author', $vars['md_author']);
+		$this->setMeta('copyright', $vars['md_copyright']);
+		$this->setMeta('license', $vars['md_license']);
+		$this->setMeta('subject', $vars['md_subj']);
+		$this->setMeta('subdisc', $vars['md_subdisc']);
+	}
+
+
+	function save() {
+		$ret = $this->lobMetaObj->save();
+		return $this->lobObj->save() && $ret;
 	}
 }
 

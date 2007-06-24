@@ -121,26 +121,21 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			}
 			$this->html .= '</td>';
 
-			//then type and mime
-			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
-			$this->html .= $this->table->tableModel->getValueAt($x,1);
-			$this->html .= '</b>&nbsp;('.$this->table->tableModel->getValueNamed($x,'mimetype').')</td>';
-
 			//then subject, sub-discipline
-			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
-			$this->html .= $this->table->tableModel->getValueAt($x,2);
+			$this->html .= '<td width="20%" valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
+			$this->html .= $this->table->tableModel->getValueAt($x,1);
 			$this->html .= '</td>';
 
+			//then type and mime
+			$this->html .= '<td valign="top" class="left_justify" style="background-color:none;"><b>';
+			$this->html .= $this->table->tableModel->getValueAt($x,2);
+			$this->html .= '</b> ('.$this->table->tableModel->getValueNamed($x,'mimetype').')</td>';
+
 			//then author / owner
-			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
+			$this->html .= '<td width="20%" valign="top" class="left_justify" style="font-size:140%;background-color:none;">';
 			$this->html .= $this->table->tableModel->getValueAt($x,3);
 			$this->html .= '</td>';
 
-
-			//then edit action
-			$this->html .= '<td valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
-			$this->html .= $this->table->tableModel->getValueAt($x,4);
-			$this->html .= '</b></td>';
 			$this->html .= '</tr>';
 
 			//then the extra rows for tags, categories, and links to your classroom
@@ -170,12 +165,5 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 	
 		$this->html .= "</tbody>\n";
 	}
-
-
-	/*
-	function paintHeaders() {
-		//don't use headers
-	}
-	 */
 }
 ?>
