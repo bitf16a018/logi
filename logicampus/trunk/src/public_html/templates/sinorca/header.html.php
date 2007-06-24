@@ -6,6 +6,7 @@
     <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
     <meta name="author" content="haran" />
     <meta name="generator" content="author" />
+    <meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management" />
 
     <!-- Navigational metadata for large websites (an accessibility feature): -->
     <link rel="top"      href="./index.html" title="Homepage" />

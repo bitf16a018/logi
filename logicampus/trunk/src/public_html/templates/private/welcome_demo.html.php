@@ -5,8 +5,7 @@
 	<TITLE>LogiCampus</TITLE>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-	<meta http-equiv="keywords" content="">
-	<meta http-equiv="description" content="">
+        <meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management" />
 
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL.'/'.$t['cssFile'];?>">
 
