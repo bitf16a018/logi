@@ -28,11 +28,11 @@ class LC_Lob {
 	}
 
 	function set($key,$val) {
-		$this->lobObj->{$key} = $val;
+		$this->lobObj->set($key,$val);
 	}
 
 	function setMeta($key,$val) {
-		$this->lobMetaObj->{$key} = $val;
+		$this->lobMetaObj->set($key,$val);
 	}
 
 	/**
@@ -151,7 +151,7 @@ class LC_Lob {
 
 		//create the link text in a standard way
 		$this->set('lobUrltitle',
-			LC_Lob::createLinkText($lob->get('lobTitle'))
+			LC_Lob::createLinkText($this->get('lobTitle'))
 		);
 	}
 

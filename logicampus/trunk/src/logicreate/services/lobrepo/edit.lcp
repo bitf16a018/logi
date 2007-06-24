@@ -52,17 +52,15 @@ class Edit extends FacultyService {
 	function changeRun(&$db,&$u,&$lc,&$t) {
 		$id = intval($lc->getvars['id']);
 
-		if ($id < 1) {
-			$lobObj = new LobContent();
-			$lobMetaObj = new LobMetadata();
-		} else {
-			$lobObj = LobContent::load($id);
-			$lobMetaObj = LobMetadata::load(array('lob_id'=>$id));
-		}
-		$t['lobObj'] = $lobObj;
-		$t['lobMetaObj'] = $lobMetaObj;
+		$lob = new LC_Lob($id);
 
-		$lc->templateName = 'add_doc';
+		$t['lob'] = $lob;
+
+		if ($lob->isFile()) {
+			$lc->templateName = 'add_doc';
+		} else {
+			$lc->templateName = 'add_html';
+		}
 	}
 
 
@@ -82,15 +80,12 @@ class Edit extends FacultyService {
 		$lob->updateMeta($lc->postvars);
 
 		$lob->save();
+
 //		$lob->lobObj->lobBinary = '';
 //		debug($lob);
 //		exit();
 
-
-//		debug($lob,1);
-//		debug($lc->postvars['txTitle'],1);
-
-		$u->addSessionMessage('Successfully added content.');
+		$u->addSessionMessage('Successfully saved <i>&quot;'.htmlentities($lob->get('lobTitle')).'&quot;</i>.');
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('lobrepo/myobj');
