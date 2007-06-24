@@ -1,6 +1,8 @@
 <?
 
 include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
 
 include_once(LIB_PATH.'lc_lob.php');
 include_once(LIB_PATH.'lc_table.php');
@@ -41,6 +43,57 @@ class Edit extends FacultyService {
 		} else {
 			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']['lob_mime']);
 		}
+	}
+
+
+	/**
+	 * show edit form
+	 */
+	function changeRun(&$db,&$u,&$lc,&$t) {
+		$id = intval($lc->getvars['id']);
+
+		if ($id < 1) {
+			$lobObj = new LobContent();
+			$lobMetaObj = new LobMetadata();
+		} else {
+			$lobObj = LobContent::load($id);
+			$lobMetaObj = LobMetadata::load(array('lob_id'=>$id));
+		}
+		$t['lobObj'] = $lobObj;
+		$t['lobMetaObj'] = $lobMetaObj;
+
+		$lc->templateName = 'add_doc';
+	}
+
+
+	/**
+	 * Save a content obj to the db
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$id = intval($lc->postvars['lob_id']);
+		$lob = new LC_Lob($id);
+
+
+		if ($lob->isFile()) {
+			$lob->updateAsFile($lc->postvars, 'document');
+		} else {
+			$lob->updateAsText($lc->postvars);
+		}
+		$lob->updateMeta($lc->postvars);
+
+		$lob->save();
+//		$lob->lobObj->lobBinary = '';
+//		debug($lob);
+//		exit();
+
+
+//		debug($lob,1);
+//		debug($lc->postvars['txTitle'],1);
+
+		$u->addSessionMessage('Successfully added content.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj');
 	}
 }
 

@@ -50,13 +50,20 @@ class add extends FacultyService {
 //				debug($metafields,1);
 				//move the button and hidden fields to the end of the form
 				// to make room for the new fields
-				$formObj->data[9] = $formObj->data[6];
-				$formObj->data[8] = $formObj->data[5];
-				$formObj->data[7] = $formObj->data[4];
+				$submit = $formObj->data[6];
+				$hidden2 = $formObj->data[5];
+				$hidden1 = $formObj->data[4];
 
 				$formObj->data[4] = $metafields[0];
 				$formObj->data[5] = $metafields[1];
 				$formObj->data[6] = $metafields[2];
+				$formObj->data[7] = $metafields[3];
+				$formObj->data[8] = $metafields[4];
+
+				$formObj->data[11] = $submit;
+				$formObj->data[10] = $hidden2;
+				$formObj->data[9] = $hidden1;
+
 
 				//add hidden mimetype at the end
 
@@ -138,13 +145,16 @@ class add extends FacultyService {
 		$lob->set('lobGuid',$guid);
 
 
+
+
 		if (@$lc->uploads['content']) {
-			$this->uploadToLob($lob,$lc,'content');
+			$lob->updateAsFile($lc->postvars, 'content');
 		} else if (@$lc->uploads['document']) {
-			$this->uploadToLob($lob,$lc,'document');
+			$lob->updateAsFile($lc->postvars, 'document');
 		} else {
-			$this->textToLob($lob,$lc);
+			$lob->updateAsText($lc->postvars);
 		}
+
 
 //		debug($lob,1);
 //		debug($lc->postvars['txTitle'],1);
@@ -155,6 +165,8 @@ class add extends FacultyService {
 		$lobMetaObj->set('author', $lc->postvars['md_author']);
 		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
 		$lobMetaObj->set('license', $lc->postvars['md_license']);
+		$lobMetaObj->set('subject', $lc->postvars['md_subj']);
+		$lobMetaObj->set('subdisc', $lc->postvars['md_subdisc']);
 		$lobMetaObj->save();
 
 		$lobUserObj->set('lobId',$lob->getPrimaryKey());
