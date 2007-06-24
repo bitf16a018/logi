@@ -4,6 +4,7 @@ include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'LC_html.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'classLessonObj.php');
+include_once(LIB_PATH.'lc_lesson_sequence.php');
 // PBDO is the new standard, above object is DEPRECATED
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
@@ -480,83 +481,8 @@ class LessonManager extends FacultyService {
 				$validEntry = true;
 			}
 		}
-
-		/*
-		if (!$validEntry) {
-			$this->linkObjectivesRun($db,$u,$lc,$t);
-			$t['message'] = "You need to choose at least one objective.";
-			return false;
-		}
-		 */
-
-		//find content objects that we didn't recieve a checkbox for
-		$sql = ('SELECT class_lesson_sequence_id, lob_id
-			FROM class_lesson_sequence
-			WHERE lesson_id = '.$lesson_id.'
-			AND class_id = '.$class_id.'
-			AND lob_type = "content"
-			AND lob_id NOT IN ('.implode(',',$itemArray).')');
-
-		//needs work to delete
-		//*
-		$deletes = array();
-		$db->query($sql);
-		while ($db->nextRecord()) {
-			$deletes[] = $db->record['class_lesson_sequence_id'];
-		}
-
-		//wipe all previous content links for this lesson
-		if (count ($deletes) > 0 ) {
-		$db->query('DELETE from class_lesson_sequence
-			WHERE class_lesson_sequence_id IN ('.implode(',',$deletes).')');
-		}
-		// */
-
-		//find objects that got a checkbox but are already present in the DB
-		$sql = ('SELECT class_lesson_sequence_id, lob_id
-			FROM class_lesson_sequence
-			WHERE lesson_id = '.$lesson_id.'
-			AND class_id = '.$class_id.'
-			AND lob_type = "content"
-			AND lob_id IN ('.implode(',',$itemArray).')');
-
-		$keepers = array();
-		$db->query($sql);
-		while ($db->nextRecord()) {
-			$keepers[] = $db->record['lob_id'];
-		}
-
-//		debug($itemArray);
-//		debug($keepers);
-		//so we're only inserting absolutely new checkboxes,
-		// this should keep the pkey count down significantly 
-		// over other methods of deleting all records in a class
-		// and then adding all new records.
-		$itemArray = array_diff($itemArray,$keepers);
-
-		//one last thing, we need to find out the maximum rank in the sequence
-		$sql = ('SELECT MAX(`rank`) as toprank
-			FROM class_lesson_sequence
-			WHERE lesson_id = '.$lesson_id.'
-			AND class_id = '.$class_id);
-
-		$db->query($sql);
-		$db->nextRecord();
-		$topRank = $db->record['toprank'];
-
-
-		//insert each new link
-		$insert = 'INSERT INTO class_lesson_sequence
-		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text, rank)
-		VALUES (%d, %d, %d, "content", "%s", "%s", "%s",%d)';
-
-		foreach($itemArray as $k=>$v) {
-			if ($v < 1 ) continue;
-			$lob = $lobRecord[$v];
-			$topRank++;
-
-			$db->query( sprintf($insert, $lesson_id, $class_id, $v, $lob['lob_title'], $lob['lob_mime'], $lob['lob_urltitle'], $topRank));
-		}
+		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence->updateContent($itemArray,$lobRecord);
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
