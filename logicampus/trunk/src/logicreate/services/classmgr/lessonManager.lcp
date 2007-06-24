@@ -700,6 +700,7 @@ class LessonManager extends FacultyService {
 			FROM class_lesson_sequence AS A
 			WHERE A.lesson_id='{$lesson_id}'
 			AND A.class_id = '{$class_id}'
+			AND lob_type = 'content'
 			ORDER BY rank";
 		$db->query($sql);
 		while ( $db->nextRecord() )
