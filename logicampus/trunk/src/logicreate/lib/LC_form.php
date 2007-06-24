@@ -896,7 +896,7 @@
 			$HTML = '<form action="'.$this->action.'" method="'.$this->method.'" enctype="'.$this->enctype.'">';
 			$HTML .= "\n";
 			$HTML .= '<table width="'.$this->width.'" border="'.$this->border.'" cellspacing="'.$this->cellspacing.'" cellpadding="'.$this->cellpadding.'">';
-			while(list($k, $v) = @each($this->data))
+			foreach ($this->data as $k=>$v) 
 			{
 				# Check to see if the row has more than one form
 				# if it does, we need to process it differently
