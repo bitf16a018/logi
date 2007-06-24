@@ -54,10 +54,8 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 		<div style="font-size:85%;">** Make sure you save changes to the above items before changes items below this line.</div>
 
 </form>
-	<hr>
-
-
-	<div style="width:48%;float:right;">
+	<hr/>
+	<div style="padding-top:.5em;width:48%;float:right;">
 		<fieldset>
 			<legend>Lesson Sequence</legend>
 			<a href="<?= appurl('classmgr/lessonSequence/id='.$t['lessonId']);?>">Change Lesson Sequence</a>
@@ -78,9 +76,7 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 		</fieldset>
 	</div>
 
-
-
-	<div style="width:48%;align:left;">
+	<div style="padding-top:.5em;width:48%;align:left;">
 		<fieldset>
 			<legend>Lesson Content</legend>
 			<a href="<?= appurl('classmgr/lessonManager/event=linkContent/id='.$t['lessonId']);?>">Change Content</a>
