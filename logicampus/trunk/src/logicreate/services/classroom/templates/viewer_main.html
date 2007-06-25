@@ -44,6 +44,26 @@ if ($t['lob']['lob_mime'] == 'X-LMS') {
 	echo $t['activity']['instructions'];
 }
 
+if ($t['lob']['lob_mime'] == 'X-LMS/assessment') {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+<?php
+	echo '<h3>Test:&nbsp; '.$t['activity']['display_name'].'</h3>';
+	echo 'Time limit: '. $t['activity']['minute_limit'].' minutes';
+	echo "<br/>\n";
+	echo 'Retries: '. $t['activity']['num_retries'].' time(s)';
+	echo "<br/>\n";
+	echo 'Instructions: ';
+	echo $t['activity']['instructions'];
+	echo "<br/>\n";
+	echo '<a href="'.appurl('test/take/event=start/id=1').'">Start the test.</a>';
+	?>
+</fieldset>
+</div>
+<?php
+}
 
 //debug($t['file']);
 if ( strstr($t['file']['mime'] , 'application/') ) {
