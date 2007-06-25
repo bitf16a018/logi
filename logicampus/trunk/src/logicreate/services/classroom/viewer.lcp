@@ -35,7 +35,7 @@ class viewer extends StudentService {
 		$ut = time();						
 		//print_r($lc->getvars);
 		$uniqCode = $lc->getvars[1];
-		$filename = addslashes(trim(urlencode($lc->getvars[2])));
+		$filename = addslashes(trim(urldecode($lc->getvars[2])));
 		$lc->templateName = 'viewer_main';
 		
 		$viewerAuth = false;
@@ -55,10 +55,6 @@ class viewer extends StudentService {
 			return;
 		}
 
-		echo("SELECT * FROM class_lesson_sequence as A 
-			WHERE link_text='".$filename."'
-			AND A.class_id = ".$classId);
-
 		$db->query("SELECT * FROM class_lesson_sequence as A 
 			WHERE link_text='".$filename."'
 			AND A.class_id = ".$classId);
@@ -68,6 +64,13 @@ class viewer extends StudentService {
 		if ($t['lob']['lob_type'] == 'activity') {
 			$db->query("SELECT * FROM class_assignments as A 
 				WHERE id_class_assignments='".$t['lob']['lob_id']."'");
+			$db->nextRecord();
+			$t['activity'] = $db->record;
+		}
+
+		if ($t['lob']['lob_type'] == 'assessment') {
+			$db->query("SELECT * FROM assessment as A 
+				WHERE assessment_id ='".$t['lob']['lob_id']."'");
 			$db->nextRecord();
 			$t['activity'] = $db->record;
 		}
