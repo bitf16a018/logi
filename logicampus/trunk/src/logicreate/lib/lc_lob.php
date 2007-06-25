@@ -167,9 +167,12 @@ class LC_Lob {
 
 
 	function save() {
-		$ret = $this->lobMetaObj->save();
-		return $this->lobObj->save() && $ret;
+		$ret = $this->lobObj->save();
+		if ($this->lobMetaObj->isNew()) {
+			//might be a brand new object
+			$this->lobMetaObj->lobId = $this->lobObj->getPrimaryKey();
+		}
+		return $this->lobMetaObj->save() && $ret;
 	}
 }
-
 ?>

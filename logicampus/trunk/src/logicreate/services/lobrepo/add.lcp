@@ -107,13 +107,10 @@ class add extends FacultyService {
 		$lob = new LobContent();
 		$lobMetaObj = new LobMetadata();
 		$lobUserObj = new LobUserLink();
-
 //debug($lc,1);
 
 		$lob->set('lobType','content');
 		$lob->set('lobGuid',$guid);
-
-
 
 
 		if (@$lc->uploads['content']) {
