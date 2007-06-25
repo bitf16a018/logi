@@ -10,10 +10,20 @@ class LC_LessonSequence {
 		$this->classId  = $classId;
 	}
 
+	function updateTests($contentIds,$lobData) {
+		if (count($contentIds) < 1) { $contentIds = array(0);}
+		$this->updateSequence($contentIds, $lobData, 'assessment');
+	}
+
+	function updateContent($contentIds,$lobData) {
+		if (count($contentIds) < 1) { $contentIds = array(0);}
+		$this->updateSequence($contentIds, $lobData, 'content');
+	}
+
 	/**
 	 * Wrap utility function to update sequence table.
 	 */
-	function updateContent($contentIds,$lobData) {
+	function updateSequence($contentIds,$lobData,$type ='content') {
 		$db = Db::getHandle();
 
 		//find content objects that we didn't recieve a checkbox for
@@ -21,7 +31,7 @@ class LC_LessonSequence {
 			FROM class_lesson_sequence
 			WHERE lesson_id = '.$this->lessonId.'
 			AND class_id = '.$this->classId.'
-			AND lob_type = "content"
+			AND lob_type = "'.$type.'"
 			AND lob_id NOT IN ('.implode(',',$contentIds).')');
 
 		//needs work to delete
@@ -42,7 +52,7 @@ class LC_LessonSequence {
 			FROM class_lesson_sequence
 			WHERE lesson_id = '.$this->lessonId.'
 			AND class_id = '.$this->classId.'
-			AND lob_type = "content"
+			AND lob_type = "'.$type.'"
 			AND lob_id IN ('.implode(',',$contentIds).')');
 
 		$keepers = array();
@@ -73,16 +83,16 @@ class LC_LessonSequence {
 		//insert each new link
 		$insert = 'INSERT INTO class_lesson_sequence
 		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text, rank)
-		VALUES (%d, %d, %d, "content", "%s", "%s", "%s",%d)';
+		VALUES (%d, %d, %d, "'.$type.'", "%s", "%s", "%s",%d)';
 
+		debug($contentIds);
+		debug($lobData);
 		foreach($contentIds as $k=>$v) {
 			if ($v < 1 ) continue;
 			$lob = $lobData[$v];
 			$topRank++;
-
 			$db->query( sprintf($insert, $this->lessonId, $this->classId, $v, $lob['lob_title'], $lob['lob_mime'], $lob['lob_urltitle'], $topRank));
 		}
-
 	}
 
 }
