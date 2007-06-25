@@ -71,6 +71,14 @@ class Edit extends FacultyService {
 		$id = intval($lc->postvars['lob_id']);
 		$lob = new LC_Lob($id);
 
+		$saveUser = false;
+		if ($lob->lobObj->isNew()) {
+			$guid = lcUuid();
+			$lob->set('lobType','content');
+			$lob->set('lobGuid',$guid);
+			$saveUser = true;
+
+		}
 
 		if ($lob->isFile()) {
 			$lob->updateAsFile($lc->postvars, 'document');
@@ -78,8 +86,15 @@ class Edit extends FacultyService {
 			$lob->updateAsText($lc->postvars);
 		}
 		$lob->updateMeta($lc->postvars);
-
 		$lob->save();
+
+		if ($saveUser) {
+			$lobUserObj = new LobUserLink();
+			$lobUserObj->set('lobId',$lob->lobObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('lobKind','content');
+			$lobUserObj->save();
+		}
 
 //		$lob->lobObj->lobBinary = '';
 //		debug($lob);
