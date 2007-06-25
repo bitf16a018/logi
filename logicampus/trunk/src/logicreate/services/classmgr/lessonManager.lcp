@@ -948,12 +948,18 @@ class LessonManager extends FacultyService {
 		}
 
 		//get all lesson items for security
-		$sql = "SELECT A.assessment_id
+		$sql = "SELECT A.assessment_id, display_name
 			FROM assessment AS A
 			WHERE A.class_id = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['assessment_id'];
+		$lobRecord = array();
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['assessment_id'];
+			$lobRecord[$db->record['assessment_id']] = 
+				array('lob_title' => $db->record['display_name'],
+					'lob_urltitle' => $db->record['display_name'],
+					'lob_mime' => 'X-LMS/assessment'
+					);
 		}
 
 		//clean input array to match allowable items
@@ -990,6 +996,10 @@ class LessonManager extends FacultyService {
 
 			$db->query( sprintf($insert, $v, $lesson_id));
 		}
+
+		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence->updateTests($itemArray,$lobRecord);
+
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
