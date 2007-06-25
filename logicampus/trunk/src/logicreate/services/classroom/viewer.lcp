@@ -61,7 +61,7 @@ class viewer extends StudentService {
 		$db->nextRecord();
 		$t['lob'] = $db->record;
 
-		if ($t['lob']['lob_type'] == 'activity') {
+		if ($t['lob']['lob_type'] == 'assignment') {
 			$db->query("SELECT * FROM class_assignments as A 
 				WHERE id_class_assignments='".$t['lob']['lob_id']."'");
 			$db->nextRecord();

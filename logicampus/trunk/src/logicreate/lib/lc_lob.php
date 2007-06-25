@@ -52,6 +52,7 @@ class LC_Lob {
 			case 'X-LMS/assessment':
 				return 'quiz.png';
 				break;
+			case 'X-LMS/assignment':
 			case 'X-LMS/interaction':
 				return 'activity.png';
 				break;

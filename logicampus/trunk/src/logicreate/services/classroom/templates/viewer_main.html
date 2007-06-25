@@ -35,13 +35,24 @@ if ($t['file']['mime'] == 'text/html') {
 <?php
 //debug($t['lob']);
 //needs to be handled internall by the LMS.  Items such as tests and assignments and forums
-if ($t['lob']['lob_mime'] == 'X-LMS') {
-
+if ($t['lob']['lob_mime'] == 'X-LMS/assignment') {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+	<?php
 	echo '<h3>Assignment</h3>';
 	echo 'Name: '.$t['activity']['title'];
 	echo "<br/>\n";
 	echo 'Instructions: ';
 	echo $t['activity']['instructions'];
+	echo "<br/>\n";
+	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['activity']['id_class_assignments']).'">Start the test.</a>';
+	?>
+</fieldset>
+</div>
+<?php
+
 }
 
 if ($t['lob']['lob_mime'] == 'X-LMS/assessment') {
@@ -58,7 +69,7 @@ if ($t['lob']['lob_mime'] == 'X-LMS/assessment') {
 	echo 'Instructions: ';
 	echo $t['activity']['instructions'];
 	echo "<br/>\n";
-	echo '<a href="'.appurl('test/take/event=start/id=1').'">Start the test.</a>';
+	echo '<a href="'.appurl('test/take/event=start/id='.$t['activity']['assessment_id']).'">Start the test.</a>';
 	?>
 </fieldset>
 </div>

@@ -615,12 +615,19 @@ class LessonManager extends FacultyService {
 		}
 
 		//get all lesson items for security
-		$sql = "SELECT A.id_class_assignments
+		$sql = "SELECT A.id_class_assignments, title
 			FROM class_assignments AS A
 			WHERE A.id_classes = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['id_class_assignments'];
+
+		$lobRecord = array();
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_assignments'];
+			$lobRecord[$db->record['id_class_assignments']] = 
+				array('lob_title' => $db->record['title'],
+				'lob_urltitle' => urlencode($db->record['title']),
+				'lob_mime' => 'X-LMS/assignment'
+			);
 		}
 
 		//clean input array to match allowable items
@@ -645,6 +652,9 @@ class LessonManager extends FacultyService {
 
 			$db->query( sprintf($insert, $v, $lesson_id));
 		}
+
+		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence->updateAssignments($itemArray,$lobRecord);
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
@@ -957,7 +967,7 @@ class LessonManager extends FacultyService {
 			$allowableItems[] = $db->record['assessment_id'];
 			$lobRecord[$db->record['assessment_id']] = 
 				array('lob_title' => $db->record['display_name'],
-					'lob_urltitle' => $db->record['display_name'],
+					'lob_urltitle' => urlencode($db->record['display_name']),
 					'lob_mime' => 'X-LMS/assessment'
 					);
 		}
