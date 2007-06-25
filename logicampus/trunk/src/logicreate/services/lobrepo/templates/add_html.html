@@ -9,9 +9,6 @@
 
 <hr/>
 
-<?=$t['form'];?>
-
-
 
 <form action="<?= appurl('lobrepo/edit/event=save');?>" method="POST" enctype="application/x-www-form-urlencoded">
 <table width="100%" border="0" cellspacing="2" cellpadding="2">
@@ -56,9 +53,8 @@
 	</tr>
 	</table>
 
-	<input type="hidden" name="mime" value="text/html">
+	<input type="hidden" name="mime" value="<?=$t['mimetype'];?>">
 	<input type="hidden" name="event" value="save">
-	<input type="hidden" name="id_class_lesson_content" value="0">
 	<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobContentId');?>">
 </form>
 <div style="font-size: 85%">*denotes a required field</div>

@@ -32,46 +32,15 @@ class add extends FacultyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName = 'add_main';
+
+		$t['lob'] = new LC_Lob();
+
 		$ext = addslashes($lc->getvars['m']);
 		$mimetype = Lc_Lob::getMimeForSubtype($lc->getvars['t'],$ext);
 		//$lc->getvars['ext'] = 'jpeg';
 		switch($lc->getvars['t']) {
 			case 'html':
 				$lc->templateName = 'add_html';
-				$formObj = new SiteForm();
-				$formObj->getForm('classcontentlesson');
-				$formObj->data[2][0]['cols'] = 80;
-				//debug($formObj->data);
-				//update the event.  why do this in code?
-				// so we don't have to update the DB with update statements
-				$formObj->data[6][0]['defaultValue'] = 'save';
-
-				$metafields = LC_Lob_Renderer::getMetadataForm();
-//				debug($metafields,1);
-				//move the button and hidden fields to the end of the form
-				// to make room for the new fields
-				$submit = $formObj->data[6];
-				$hidden2 = $formObj->data[5];
-				$hidden1 = $formObj->data[4];
-
-				$formObj->data[4] = $metafields[0];
-				$formObj->data[5] = $metafields[1];
-				$formObj->data[6] = $metafields[2];
-				$formObj->data[7] = $metafields[3];
-				$formObj->data[8] = $metafields[4];
-
-				$formObj->data[11] = $submit;
-				$formObj->data[10] = $hidden2;
-				$formObj->data[9] = $hidden1;
-
-
-				//add hidden mimetype at the end
-
-//				function addHidden($name, $defaultValue='', $groups=array('public'), $row='')
-				$formObj->addHidden('mime',$mimetype);
-
-				$formObj->action = modurl('add'); // i should do this in the manager/form itself
-				$t['form'] = $formObj->ToHTML();
 				break;
 
 			case 'image':
