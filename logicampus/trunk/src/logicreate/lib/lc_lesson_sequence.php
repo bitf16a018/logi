@@ -10,6 +10,11 @@ class LC_LessonSequence {
 		$this->classId  = $classId;
 	}
 
+	function updateAssignments($contentIds,$lobData) {
+		if (count($contentIds) < 1) { $contentIds = array(0);}
+		$this->updateSequence($contentIds, $lobData, 'assignment');
+	}
+
 	function updateTests($contentIds,$lobData) {
 		if (count($contentIds) < 1) { $contentIds = array(0);}
 		$this->updateSequence($contentIds, $lobData, 'assessment');
