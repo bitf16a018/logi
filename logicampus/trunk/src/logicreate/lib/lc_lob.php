@@ -56,6 +56,15 @@ class LC_Lob {
 			case 'X-LMS/interaction':
 				return 'activity.png';
 				break;
+			case 'image/':
+			case 'image/jpeg':
+			case 'image/jpg':
+			case 'image/gif':
+			case 'image/bmp':
+			case 'image/png':
+			case 'image/mng':
+				return 'image.png';
+				break;
 			default:
 				return 'document.png';
 				break;
