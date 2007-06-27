@@ -55,6 +55,7 @@ class Edit extends FacultyService {
 		$lob = new LC_Lob($id);
 
 		$t['lob'] = $lob;
+		$t['mimetype'] = $lob->lobObj->lobMime;
 
 		if ($lob->isFile()) {
 			$lc->templateName = 'add_doc';

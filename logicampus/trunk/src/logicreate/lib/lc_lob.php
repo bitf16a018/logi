@@ -148,7 +148,9 @@ class LC_Lob {
 		$this->set('lobContent', $vars['txText']);
 		$this->set('lobSubType','text');
 		$this->set('lobTitle', $vars['txTitle']);
-		$this->set('lobMime', $vars['mime']);
+		if (@isset($vars['mime'])  && strlen($vars['mime'])) {
+			$this->set('lobMime', $vars['mime']);
+		}
 
 		//create the link text in a standard way
 		$this->set('lobUrltitle',
