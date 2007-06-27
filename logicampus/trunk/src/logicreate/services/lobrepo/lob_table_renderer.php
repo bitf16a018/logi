@@ -110,15 +110,40 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 //			$renderer = $this->table->getCellRenderer($x,$y);
 //			$this->table->prepareRenderer($renderer,$x,$y);
 
+			//create links for tag cloud
+			// and quick links to use this object in your class
+			$browseHtml  = '<span style="font-size:8pt;color:green;">Browse more objects like this one:&nbsp;';
+			$browseHtml .= ' <a href="#">ENGL</a> &bull;';
+			$browseHtml .= ' <a href="#">PDF</a> &bull;';
+			$browseHtml .= ' <a href="#">Content pages</a></span>';
+			if (is_array($u->classesTaught) ) {
+				$linkHtml = '<span style="font-size:8pt;background-color:white;color:green;">Link this object to your class:&nbsp;';
+				$lobId = $this->table->tableModel->getValueNamed($x,'lobId');
+				foreach ($u->classesTaught as $classObj) {
+					if (in_array($classObj->id_classes,$this->classLinkIds[$lobId])) { 
+						$linkHtml .= ' <span style="color:black;">'.$classObj->courseFamily. ' '.$classObj->courseNumber.'</span> &bull;';
+					} else {
+						$linkHtml .= ' <a href="'.appurl('lobrepo/myobj/event=class/l='.$lobId.'/c='.$classObj->id_classes).'">';
+						$linkHtml .= $classObj->courseFamily. ' '.$classObj->courseNumber.'</a> &bull;';
+					}
+				}
+				$linkHtml .= '</span>';
+			}
+
+
 
 			//name and description first
+			// with the links
 			$this->html .= '<td width="50%" valign="top" class="left_justify" style="font-size:140%;background-color:none;"><b>';
 			$this->html .= $this->table->tableModel->getValueAt($x,0);
 			$this->html .= '</b>';
 			$desc = $this->table->tableModel->getValueNamed($x,'description');
 			if ( strlen($desc) ) {
-				$this->html .= '<br/>'.$this->table->tableModel->getValueNamed($x,'description');
+				$this->html .= '<br/>'.$desc;
 			}
+
+			$this->html .= "<br/><br/>\n".$linkHtml."\n";
+			$this->html .= "<br/>\n".$browseHtml."\n";
 			$this->html .= '</td>';
 
 			//then subject, sub-discipline
@@ -127,7 +152,9 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			$this->html .= '</td>';
 
 			//then type and mime
-			$this->html .= '<td valign="top" class="left_justify" style="background-color:none;"><b>';
+			$this->html .= '<td valign="top" class="center_justify" style="background-color:none;">';
+			$this->html .= '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob::getMimeIcon($this->table->tableModel->getValueNamed($x,'mimetype')).'"/><br/>';
+			$this->html .= '<b>';
 			$this->html .= $this->table->tableModel->getValueAt($x,2);
 			$this->html .= '</b> ('.$this->table->tableModel->getValueNamed($x,'mimetype').')</td>';
 
@@ -138,29 +165,9 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 			$this->html .= '</tr>';
 
-			//then the extra rows for tags, categories, and links to your classroom
+			$this->html .= '<tr style="background-color:white;"><td colspan="4"><hr/>';
+			$this->html .= "</td></tr>\n";
 
-			if (is_array($u->classesTaught) ) {
-				$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Link this object to your class:&nbsp;';
-				$lobId = $this->table->tableModel->getValueNamed($x,'lobId');
-				foreach ($u->classesTaught as $classObj) {
-					if (in_array($classObj->id_classes,$this->classLinkIds[$lobId])) { 
-						$this->html .= ' <span style="color:black;">'.$classObj->courseFamily. ' '.$classObj->courseNumber.'</span> &bull;';
-					} else {
-						$this->html .= ' <a href="'.appurl('lobrepo/myobj/event=class/l='.$lobId.'/c='.$classObj->id_classes).'">';
-						$this->html .= $classObj->courseFamily. ' '.$classObj->courseNumber.'</a> &bull;';
-					}
-				}
-				$this->html .= '</td></tr>';
-//				$this->html .= '</tr>';
-			}
-			$this->html .= '<tr style="background-color:white;color:green;"><td colspan="6">Browse more objects like this one:&nbsp;';
-			$this->html .= ' <a href="#">ENGL</a> &bull;';
-			$this->html .= ' <a href="#">PDF</a> &bull;';
-			$this->html .= ' <a href="#">Content pages</a>';
-			$this->html .= '</td></tr>';
-			$this->html .= '<tr style="background-color:white;"><td colspan="6"><hr/>';
-			$this->html .= '</td></tr>';
 		}
 	
 		$this->html .= "</tbody>\n";
