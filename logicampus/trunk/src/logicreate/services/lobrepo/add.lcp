@@ -104,7 +104,7 @@ class add extends FacultyService {
 	function saveRun(&$db,&$u,&$lc,&$t) {
 		$guid = lcUuid();
 
-		$lob = new LobContent();
+		$lob = new LC_Lob($id);
 		$lobMetaObj = new LobMetadata();
 		$lobUserObj = new LobUserLink();
 //debug($lc,1);
@@ -126,7 +126,7 @@ class add extends FacultyService {
 //		debug($lc->postvars['txTitle'],1);
 		$lob->save();
 
-		$lobMetaObj->set('lobId',$lob->getPrimaryKey());
+		$lobMetaObj->set('lobId',$lob->get('lobContentId'));
 		$lobMetaObj->set('lobKind','content');
 		$lobMetaObj->set('author', $lc->postvars['md_author']);
 		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
@@ -135,7 +135,7 @@ class add extends FacultyService {
 		$lobMetaObj->set('subdisc', $lc->postvars['md_subdisc']);
 		$lobMetaObj->save();
 
-		$lobUserObj->set('lobId',$lob->getPrimaryKey());
+		$lobUserObj->set('lobId',$lob->get('lobContentId'));
 		$lobUserObj->set('userId',$u->userId);
 		$lobUserObj->set('lobKind','content');
 		$lobUserObj->save();
