@@ -5,7 +5,7 @@
 	<TITLE>LogiCampus <?=$t['title']?></TITLE>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-        <meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management" />
+        <meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management, LMS, CMS, classroom, grade book, online" />
 
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL.$t['cssFile'];?>">
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL?>datagrid.css">
