@@ -389,6 +389,7 @@ class '.$this->codeName.'Base {
 
 
 	function load($key,$dsn="default") {
+		$where = \'\';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k=\'$v\' and ";
