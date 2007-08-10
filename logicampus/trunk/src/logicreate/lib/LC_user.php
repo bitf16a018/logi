@@ -423,7 +423,7 @@ class lcUser {
 	function bindSession() {
 		if ($this->_sessionKey == "" ) { return false; }
 		if ($this->username == "anonymous" ){ return false; }
-		if ($this->username == "" ){ print "fatal error"; exit(); }
+		if ($this->username == "" ){ $this->username = 'anonymous'; return false; }
 		global $tail;
 		if (!$this->isAnonymous()) {
 			$PHPSESSID=md5 (uniqid (rand()));
