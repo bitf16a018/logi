@@ -76,7 +76,7 @@
 	<a style="color: white;" href="<?=APP_URL?>pm/"><?=lct('Messages')?> [<?=(int)$t['_privMsgs']?>]</a>
 
 	<?
-		if ($obj->user->username != 'anonymous') {
+		if (!$obj->user->isAnonymous() ) {
 	?>
 	| <a href="<?=appurl('login/out/');?>"><?=lct('Logout')?></a>
 	<?php
