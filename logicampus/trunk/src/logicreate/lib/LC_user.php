@@ -488,17 +488,19 @@ class lcUser {
 			return false;
 		}
 		*/
+		$username = addslashes($this->username);
+		$password = addslashes($this->password);
 		if(USE_MD5_PASSWORDS==TRUE) { 
-		   	$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password='" . md5($this->password) . "'";
+		   	$sql = "select count(username) as total from lcUsers where username='".$username."' and password='" . md5($password) . "'";
 	   	} else { 
-			$sql = "select count(username) as total from lcUsers where username='".$this->username."' and password='".$this->password."'";
+			$sql = "select count(username) as total from lcUsers where username='".$username."' and password='".$password."'";
 		}
 	   $db->query($sql,false);
 
 	   $db->next_record();
 
 	   if( $db->Record['total'] == 1 ) {
-		$db->query("select * from lcUsers where username = '$this->username'",false);
+		$db->query("select * from lcUsers where username = '$username' and password = '".$password."'",false);
 		$db->next_record();
 
 		$this->email = $db->Record['email'];
@@ -506,7 +508,7 @@ class lcUser {
 		$this->username = $db->Record['username'];
 		//__FIXME__ what is this fields for??
 		//$this->fields = $db->Record;
-		$this->sessionvars['_username'] = $this->username;
+		$this->sessionvars['_username'] = $username;
 		$this->groups = array_merge($this->groups,explode("|",substr($db->Record['groups'],1,-1)));
 		$this->userId = $db->Record['pkey'];
 //		$this->userType = $db->Record['userType'];
