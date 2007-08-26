@@ -1004,10 +1004,10 @@ class ErrorStack {
 				} else {
 					print $indent."function : <b>".$bt[$x]['function']."</b>";
 				}
-				print "\n";
-				print basename($bt[$x]['file'])." ";
-				print "(".$bt[$x]['line'].")<br />\n";
-				print "<br />\n";
+				print "\n<br/>";
+				print $indent.' '.basename($bt[$x]['file'])." ";
+				print "(".$bt[$x]['line'].")<br/>\n";
+				print "<br/>\n";
 			}
 		}
 	}
