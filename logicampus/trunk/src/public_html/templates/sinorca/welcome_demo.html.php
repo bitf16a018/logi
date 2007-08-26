@@ -5,7 +5,7 @@
 	<TITLE>LogiCampus</TITLE>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-        <meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management" />
+    	<meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management, LMS, CMS, classroom, grade book, online" />
 
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  media="screen" title="Sinorca (screen)" />
@@ -71,9 +71,17 @@
 	<p>
 	The system only allows one login of each username at one time.  Therefore, you may experience disruption in your demo as other people login to the system.  If the system says you don't have permission to do something, this may be because you have been logged out as someone else logs in with the same username.
 	</p>
-	<?PHP if(MODULE_REGISTRATION) { ?>
+	<?PHP if(LcSettings::isModuleOn('MODULE_REGISTRATION')) { ?>
 	<strong>To create your own student login</strong>, click below<BR>
-	<a href="<?= BASE_URL . "index.php/register/users/event=new" ?>">Create Account</a><br><br>
+	<a href="<?= BASE_URL . "index.php/register/users/event=new" ?>">Create Account</a><br/>
+
+	<strong>To browse our course catalog</strong>, click below.
+	<br/>
+	<a href="<?= BASE_URL . "index.php/welcome/catalog" ?>">Course Catalog</a><br/>
+	<br/>
+	<br/>
+
+
 	<?PHP } ?>
 	<strong>Login Information</strong><br>
 	LogiCampus works differently depending on which user you log in as.  
@@ -139,6 +147,8 @@
 	<a href="?switchlocale=en_US">English (US)</a>
 	<a href="?switchlocale=es_MX">Spanish (MX)</a>
 	<a href="?switchlocale=zh_CN">Chinese (PRC)</a>
+	<a href="?switchlocale=ru_RU">Russian</a>
+	<a href="?switchlocale=ja_JP">Japanese</a>
 
 	<p>&nbsp;</p>
 

@@ -68,8 +68,14 @@
 <td colspan="2">
 <div style="padding:.5em;">
 	<?PHP if(LcSettings::isModuleOn('MODULE_REGISTRATION')) { ?>
-	<strong>To create your own student login</strong>, click below<BR>
-	<a href="<?= BASE_URL . "index.php/register/users/event=new" ?>">Create Account</a><br><br>
+	<strong>To create your own student login</strong>, click below.
+	<br/>
+	<a href="<?= BASE_URL . "index.php/register/users/event=new" ?>">Create Account</a><br/>
+	<strong>To browse our course catalog</strong>, click below.
+	<br/>
+	<a href="<?= BASE_URL . "index.php/welcome/catalog" ?>">Course Catalog</a><br/>
+	<br/>
+	<br/>
 	<?PHP } ?>
 
 	<p style="clear:both;">&nbsp;</p>
@@ -77,13 +83,10 @@
 	<a href="?switchlocale=en_US">English (US)</a>
 	<a href="?switchlocale=es_MX">Spanish (MX)</a>
 	<a href="?switchlocale=zh_CN">Chinese (PRC)</a>
+	<a href="?switchlocale=ru_RU">Russian</a>
+	<a href="?switchlocale=ja_JP">Japanese</a>
 
 	<p>&nbsp;</p>
-
-	<strong>Requirements</strong><br>
-	If you are using Windows, in order to use the content editor that is built in, you must be running either IE version 5.5 or higher.
-	<br><br>
-	If you are using MAC OS X or Linux, we suggest using Mozilla 1.3 or higher (1.5 recommended).
 </div>
 </td>
 </tr>
