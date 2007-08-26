@@ -998,14 +998,14 @@ class ErrorStack {
 			$bt = $s->stack[$z]->backtrace;
 			print "<h3>".$s->stack[$z]->message ."</h3>\n";
 			for ($x=0; $x < count($bt); ++$x ) {
-				$indent = str_repeat("&nbsp;&nbsp;&nbsp;",$x);
+				$indent = "&nbsp;&nbsp;&nbsp;";
 				if ( isset($bt[$x]['class']) && strlen($bt[$x]['class']) > 0 ) {
 					print $indent."method : <b>".$bt[$x]['class']."::".$bt[$x]['function']."</b>";
 				} else {
 					print $indent."function : <b>".$bt[$x]['function']."</b>";
 				}
 				print "\n";
-				print $bt[$x]['file']." ";
+				print basename($bt[$x]['file'])." ";
 				print "(".$bt[$x]['line'].")<br />\n";
 				print "<br />\n";
 			}
