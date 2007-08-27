@@ -6,6 +6,7 @@ CREATE TABLE class_announcements (
   tx_description text NOT NULL,
   id_faculty_createdby varchar(50) NOT NULL default '0',
   dt_created datetime NOT NULL default '0000-00-00 00:00:00',
+  dt_hide datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (id_class_announcements),
   KEY class_date (id_classes,dt_created)
 ) TYPE=MyISAM;
