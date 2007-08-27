@@ -38,6 +38,20 @@ class Edit extends FacultyService {
 //		debug($db->record,0);
 
 		$t['lob'] = $db->record;
+		// Use start of content as description
+		if (strlen($t['lob']['lob_description']) < 1 && $t['lob']['lob_sub_type'] == 'text') {
+			$t['lob']['lob_description'] = substr($t['lob']['lob_content'],0,1000);
+			if (strlen($t['lob']['lob_content']) > 1000) {
+				$t['lob']['lob_description'] .= ' ...';
+			}
+		}
+		//get size in bytes
+		if ($t['lob']['lob_sub_type'] == 'text') {
+			$t['lob_bytes'] = strlen($t['lob']['lob_content']);
+		} else {
+			$t['lob_bytes'] = strlen($t['lob']['lob_binary']);
+		}
+
 		if ($t['lob']['lob_sub_type'] == 'image') {
 			$t['iconUrl'] = appurl('lobrepo/preview/c='.$t['lob']['lob_content_id']);
 		} else {
@@ -104,7 +118,7 @@ class Edit extends FacultyService {
 		$u->addSessionMessage('Successfully saved <i>&quot;'.htmlentities($lob->get('lobTitle')).'&quot;</i>.');
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('lobrepo/myobj');
+		$t['url'] = appurl('lobrepo/edit/c='.$id);
 	}
 }
 
