@@ -158,7 +158,6 @@ function _deleteToDB() { return $this->_deleteFromDB(); }
 	 */
 	function getClassesTaken($uname) {
 		$ret = array();
-		$db = DB::getHandle();
 		/*
 $sql = "SELECT classes.*, semesters.semesterID,courses.courseName, 
 profile_faculty.title, profile.firstname, profile.lastname
@@ -190,14 +189,17 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 		 */
 
 		$ret = LcClass::getActiveClassesForStudent($uname);
-
-		while ($db->next_record() ) {
+		return $ret;
+/**
+	* __FIXME__ Deprecated
+		foreach ($ret as $classObj) {
 			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
 			$temp = PersistantObject::createFromArray('classObj',$db->Record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
 		}
+		 */
 	return $ret;
 	}
 
