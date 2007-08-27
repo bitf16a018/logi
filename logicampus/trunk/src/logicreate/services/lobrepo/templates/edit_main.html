@@ -34,7 +34,7 @@
 			</div>
 			<table border="0" style="border:0px solid black;">
 				<tr>
-					<td>Size:</td><td><?= strlen($lob['lob_binary']); ?> bytes</td>
+					<td>Size:</td><td><?= $t['lob_bytes']; ?> bytes</td>
 				</tr><tr>
 					<td>URL name:</td><td><?= $lob['lob_urltitle'];?></td>
 				</tr>
@@ -77,6 +77,19 @@
 			</fieldset>
 			</div>
 		</td>
+		<td valign="top" width="200">
+			<div style="width:200px">
+			<fieldset>
+				<legend>Discipline</legend>
+
+				<ul>
+					<li>Subject:&nbsp; <?=$lob['subject'];?></li>
+					<li>Sub-discipline:&nbsp; <?=$lob['subdisc'];?></li>
+				</ul>
+			</fieldset>
+			</div>
+		</td>
+
 	</tr>
 </table>
 
