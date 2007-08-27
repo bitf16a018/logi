@@ -180,16 +180,17 @@ class ExportContent extends FacultyService {
 		FROM lob_class_link as A
 		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
 		WHERE A.class_id='.$this->classId.'
-		AND (lob_sub_type != "text") ';
+		AND (lob_sub_type = "document" OR lob_sub_type = "image") ';
 
 		$db = DB::getHandle();
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		
+
 		while ($db->nextRecord()) {
 			if (trim($db->record['lob_filename']) == ''){
-				die('slkdjf');
-				continue;
+				// __FIXME__ make the filename safe for saving.
+				// change quotes?  change dots?  change spaces?
+				$db->record['lob_filename'] = $db->record['lob_title'];
 			}
 			/*
 			$xml_sub_child = null;
