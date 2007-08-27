@@ -137,8 +137,8 @@ class mysql extends DB {
 		$ret = is_array($this->Record);
 		if ( ! $ret ) {
 			if( is_resource($this->resultSet[$resID]) ) {
-				mysql_free_result($this->resultSet[$resID]);
-				array_pop($this->resultSet);
+				$stuff = array_pop($this->resultSet);
+				mysql_free_result($stuff);
 			}
 		}
 		return $ret;
