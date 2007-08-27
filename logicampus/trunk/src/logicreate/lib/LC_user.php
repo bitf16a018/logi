@@ -33,25 +33,25 @@ class lcUser {
 	function getUserByUsername($uname) {
 		$db = DB::getHandle();
 		$db->query("select * from lcUsers where username = '$uname'",false);
-		$db->next_record();
-		switch($db->Record['userType']) {
+		$db->nextRecord();
+		switch($db->record['userType']) {
 			case USERTYPE_FACULTY:
-				$temp = new FacultyUser($db->Record['username']);
+				$temp = new FacultyUser($db->record['username']);
 				break;
 			case USERTYPE_STUDENT:
-				$temp = new StudentUser($db->Record['username']);
+				$temp = new StudentUser($db->record['username']);
 				break;
 			case USERTYPE_STANDARD:
-				$temp = new StandardUser($db->Record['username']);
+				$temp = new StandardUser($db->record['username']);
 				break;
 			default:
 				$temp = new lcUser();
 		}
 		$temp->username = $uname;
-		$temp->password = $db->Record["password"];
-		$temp->email = $db->Record["email"];
-		$temp->groups = array_merge($temp->groups,explode("|",substr($db->Record['groups'],1,-1)));
-		$temp->userId = $db->Record['pkey'];
+		$temp->password = $db->record["password"];
+		$temp->email = $db->record["email"];
+		$temp->groups = array_merge($temp->groups,explode("|",substr($db->record['groups'],1,-1)));
+		$temp->userId = $db->record['pkey'];
 		$temp->loadProfile();
 	return $temp;
 	}
@@ -160,13 +160,13 @@ class lcUser {
 	function getUserByPkey($key) {
 		$db = DB::getHandle();
 		$db->query("select * from lcUsers where pkey = $key",false);
-		if ( !$db->next_record() ) {  return new lcUser();  }
+		if ( !$db->nextRecord() ) {  return new lcUser();  }
 		$temp =   new lcUser();
-		$temp->username = $db->Record['username'];
-		$temp->password = $db->Record['password'];
-		$temp->email = $db->Record[email];
-		$temp->groups = array_merge($temp->groups,explode("|",$db->Record['groups']));
-		$temp->userId = $db->Record['pkey'];
+		$temp->username = $db->record['username'];
+		$temp->password = $db->record['password'];
+		$temp->email = $db->record['email'];
+		$temp->groups = array_merge($temp->groups,explode("|",$db->record['groups']));
+		$temp->userId = $db->record['pkey'];
 	return $temp;
 	}
 
@@ -177,7 +177,7 @@ class lcUser {
 	 * logged into the site or not
 	 */
 	function isAnonymous() {
-		return !$this->loggedIn;
+		return !$this->loggedIn || $this->userId < 1;
 	}
 
 
@@ -490,34 +490,36 @@ class lcUser {
 		*/
 		$username = addslashes($this->username);
 		$password = addslashes($this->password);
-		if(USE_MD5_PASSWORDS==TRUE) { 
-		   	$sql = "select count(username) as total from lcUsers where username='".$username."' and password='" . md5($password) . "'";
-	   	} else { 
-			$sql = "select count(username) as total from lcUsers where username='".$username."' and password='".$password."'";
+		if(LcSettings::getValue('USE_MD5_PASSWORDS')==TRUE) { 
+			$password = md5($password);
 		}
-	   $db->query($sql,false);
 
-	   $db->next_record();
+		$countSql = "select count(username) as total from lcUsers where username='".$username."' and password='" . $password . "'";
 
-	   if( $db->Record['total'] == 1 ) {
-		$db->query("select * from lcUsers where username = '$username' and password = '".$password."'",false);
-		$db->next_record();
+		$db->query($countSql,false);
 
-		$this->email = $db->Record['email'];
-		$this->password = $db->Record['password'];
-		$this->username = $db->Record['username'];
-		//__FIXME__ what is this fields for??
-		//$this->fields = $db->Record;
-		$this->sessionvars['_username'] = $username;
-		$this->groups = array_merge($this->groups,explode("|",substr($db->Record['groups'],1,-1)));
-		$this->userId = $db->Record['pkey'];
-//		$this->userType = $db->Record['userType'];
+		$db->nextRecord();
 
-		return true;
-	   } else {
-		$this->groups[] = 'public';
-		return false;
-	   }
+		if( $db->record['total'] == 1 ) {
+			$db->query("select * from lcUsers where username = '$username' and password = '".$password."'",false);
+			if (!$db->nextRecord()) {
+				die('some wierdo problem.');
+			}
+
+			$this->email = $db->record['email'];
+			$this->password = $db->record['password'];
+			$this->username = $db->record['username'];
+			//__FIXME__ what is this fields for??
+			//$this->fields = $db->record;
+			$this->sessionvars['_username'] = $username;
+			$this->groups = array_merge($this->groups,explode("|",substr($db->record['groups'],1,-1)));
+			$this->userId = $db->record['pkey'];
+	//		$this->userType = $db->record['userType'];
+			return true;
+		} else {
+			$this->groups[] = 'public';
+			return false;
+		}
 	}
 
 
