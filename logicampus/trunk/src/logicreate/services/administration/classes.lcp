@@ -277,7 +277,8 @@ class classes extends AdminService
 	}
 
 	# Displays Classes by default (chooses current semster by default)	
-	function Run($db,&$u,&$lc,&$t) {
+	function run($db,&$u,&$lc,&$t) {
+
 //auto-comment		$lc->templateStyle='private';
 		$lc->templateName = 'classes_main';
 		
