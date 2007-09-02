@@ -71,10 +71,10 @@ class lcUser {
 			return $temp;
 		}
 
-		if (rand(1,10) >= 80 ) {
+		if (rand(1,20) >= 20 ) {
 		//gc cleanup, mysql specific with DATE_SUB
 			global $PHPSESSID;
-			$db->query("DELETE from lcSessions WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) > gc",false);
+			$db->query("DELETE FROM lcSessions WHERE DATE_SUB(CURDATE(), INTERVAL 1 DAY) > gc",false);
 		}
 		$db->query("select * from lcSessions where sesskey = '$sessID'",false);
 		$j = $db->next_record();
@@ -377,8 +377,8 @@ class lcUser {
 		$this->sessionvars['__sysMessages'] = $this->sysMessages;
 		$this->sysMessages = array();
 
-		if ($this->_sessionKey == "") { return; }
-		if ($this->username == "") { print "no username"; exit();}
+		if ($this->_sessionKey == "") { return false; }
+		if ($this->username == "") { return false; /*print "no username"; exit();*/}
 		//unhook session from user, reverse rolse
 		$sessBlob = $this->sessionvars;
 		unset($this->sessionvars);
