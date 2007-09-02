@@ -9,9 +9,10 @@ class LC_Lob {
 		if ($id < 1) {
 			$this->lobObj = new LobContent();
 			$this->lobMetaObj = new LobMetadata();
+			$this->lobMetaObj->createdOn = time();
 		} else {
 			$this->lobObj = LobContent::load($id);
-			$this->lobMetaObj = LobMetadata::load(array('lob_id'=>$id));
+			$this->lobMetaObj = LobMetadata::load(array('lob_id'=>$id, 'lob_kind'=>$this->lobObj->lobType));
 		}
 	}
 
@@ -34,6 +35,85 @@ class LC_Lob {
 	function setMeta($key,$val) {
 		$this->lobMetaObj->set($key,$val);
 	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getLicense() {
+		return $this->lobMetaObj->license;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getCopyright() {
+		return $this->lobMetaObj->copyright;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getSource() {
+		return $this->lobMetaObj->source;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getAuthor() {
+		return $this->lobMetaObj->author;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getSubject() {
+		return $this->lobMetaObj->subject;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getSubdiscipline() {
+		return $this->lobMetaObj->subdisc;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getVersion() {
+		return $this->lobMetaObj->version;
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getEditedOn() {
+		if ($this->lobMetaObj->updatedOn < 1) {
+			return 'unkonwn';
+		}
+		return date('M d \'y',$this->lobMetaObj->updatedOn);
+	}
+
+	/**
+	 *  Get Metadata
+	 **/
+	function getCreatedOn() {
+		if ($this->lobMetaObj->createdOn < 1) {
+			return 'unkonwn';
+		}
+
+		return date('M d \'y',$this->lobMetaObj->createdOn);
+	}
+
+
+	/**
+	 * Return the text to create a link to this object
+	 */
+	function getUrl() {
+		return  $this->lobObj->lobUrltitle;
+	}
+
 
 	/**
 	 * @static
@@ -167,6 +247,21 @@ class LC_Lob {
 		);
 	}
 
+	function makePublic() {
+		$this->lobMetaObj->private = 0;
+	}
+
+	function makePrivate() {
+		$this->lobMetaObj->private = 1;
+	}
+
+	function isPrivate() {
+		if ($this->lobMetaObj->private ) {
+			return 'yes';
+		} else {
+			return 'no';
+		}
+	}
 
 	function updateMeta($vars) {
 		$this->setMeta('lobKind','content');
@@ -180,6 +275,8 @@ class LC_Lob {
 
 	function save() {
 		$ret = $this->lobObj->save();
+		$this->lobMetaObj->version++;
+		$this->lobMetaObj->updatedOn = time();
 		if ($this->lobMetaObj->isNew()) {
 			//might be a brand new object
 			$this->lobMetaObj->lobId = $this->lobObj->getPrimaryKey();
