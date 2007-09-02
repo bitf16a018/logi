@@ -11,14 +11,14 @@
 
 <hr/>
 
-<h3><?= $lob['lob_title'];?></h3>
+<h3><?= $lob->lobTitle;?></h3>
 <table border="0" width="600">
 	<tr>
 		<td valign="top">
 			<?php
-			if (strlen($lob['lob_description']) ) { ?>
+			if (strlen($t['lob_description']) ) { ?>
 			<p>
-			<?= $lob['lob_description'];?>
+			<?= $t['lob_description'];?>
 			</p>
 			<?php
 			} else { ?>
@@ -30,19 +30,19 @@
 			<div style="text-align:center;border:1px solid black;padding:3px;width:170px;">
 				<img src="<?=$t['iconUrl'];?>" width="64" height="64"/>
 				<br/>
-				<?= $lob['lob_type'];?> &ndash; <?= $lob['lob_sub_type'];?>
+				<?= $lob->lobType;?> &ndash; <?= $lob->lobSubType;?>
 			</div>
 			<table border="0" style="border:0px solid black;">
 				<tr>
 					<td>Size:</td><td><?= $t['lob_bytes']; ?> bytes</td>
 				</tr><tr>
-					<td>URL name:</td><td><?= $lob['lob_urltitle'];?></td>
+				<td>URL name:</td><td><?= $lob->getUrl();?></td>
 				</tr>
 			</table>
 		</td>
 	</tr>
 </table>
-<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob['lob_content_id']);?>">
+<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->lobContentId);?>">
 <input type="submit" value="Change this object"/>
 </form>
 
@@ -55,10 +55,10 @@
 				<legend>Copyright</legend>
 
 				<ul>
-					<li>Author:&nbsp; <?=$lob['author'];?></li>
-					<li>Source:&nbsp; <?=$lob['source'];?></li>
-					<li>Copyright:&nbsp; <?=$lob['copyright'];?></li>
-					<li>License:&nbsp; <?=$lob['license'];?></li>
+					<li>Author:&nbsp; <?=$lob->getAuthor();?></li>
+					<li>Source:&nbsp; <?=$lob->getSource();?></li>
+					<li>Copyright:&nbsp; <?=$lob->getCopyright();?></li>
+					<li>License:&nbsp; <?=$lob->getLicense();?></li>
 				</ul>
 			</fieldset>
 			</div>
@@ -69,10 +69,10 @@
 				<legend>Status</legend>
 
 				<ul>
-					<li>Private:&nbsp; <?=$lob['private'];?></li>
-					<li>Version:&nbsp; <?=$lob['version'];?></li>
-					<li>Last update on:&nbsp; <?= date('M d Y',$lob['updated_on']);?></li>
-					<li>Date created:&nbsp; <?= date('M d Y',$lob['created_on']);?></li>
+					<li>Private:&nbsp; <?=$lob->isPrivate();?></li>
+					<li>Version:&nbsp; <?=$lob->getVersion();?></li>
+					<li>Last update on:&nbsp; <?= $lob->getEditedOn();?></li>
+					<li>Date created:&nbsp; <?= $lob->getCreatedOn();?></li>
 				</ul>
 			</fieldset>
 			</div>
@@ -83,8 +83,8 @@
 				<legend>Discipline</legend>
 
 				<ul>
-					<li>Subject:&nbsp; <?=$lob['subject'];?></li>
-					<li>Sub-discipline:&nbsp; <?=$lob['subdisc'];?></li>
+					<li>Subject:&nbsp; <?=$lob->getSubject();?></li>
+					<li>Sub-discipline:&nbsp; <?=$lob->getSubdiscipline();?></li>
 				</ul>
 			</fieldset>
 			</div>

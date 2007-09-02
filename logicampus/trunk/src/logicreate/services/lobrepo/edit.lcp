@@ -28,34 +28,27 @@ class Edit extends FacultyService {
 
 		$lobId = addslashes(trim($lc->getvars['c']));
 
-		$db->unbuffered_query("
-			SELECT A.*, B.*
-			FROM lob_content as A 
-			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id
-			WHERE 1=1
-			AND A.lob_content_id = ".$lobId);
-		$db->nextRecord();
-//		debug($db->record,0);
+		$lob = new LC_Lob($lobId);
 
-		$t['lob'] = $db->record;
+		$t['lob'] = $lob;
 		// Use start of content as description
-		if (strlen($t['lob']['lob_description']) < 1 && $t['lob']['lob_sub_type'] == 'text') {
-			$t['lob']['lob_description'] = substr($t['lob']['lob_content'],0,1000);
-			if (strlen($t['lob']['lob_content']) > 1000) {
-				$t['lob']['lob_description'] .= ' ...';
+		if (strlen($t['lob']->lobObj->lobDescription) < 1 && $t['lob']->lobObj->lobSubType == 'text') {
+			$t['lob_description'] = substr($t['lob']->lobObj->lobContent,0,1000);
+			if (strlen($t['lob']->lobObj->lobContent) > 1000) {
+				$t['lob_description'] .= ' ...';
 			}
 		}
 		//get size in bytes
-		if ($t['lob']['lob_sub_type'] == 'text') {
-			$t['lob_bytes'] = strlen($t['lob']['lob_content']);
+		if ($t['lob']->lobObj->lobSubType == 'text') {
+			$t['lob_bytes'] = strlen($t['lob']->lobObj->lobContent);
 		} else {
-			$t['lob_bytes'] = strlen($t['lob']['lob_binary']);
+			$t['lob_bytes'] = strlen($t['lob']->lobObj->lobBinary);
 		}
 
-		if ($t['lob']['lob_sub_type'] == 'image') {
-			$t['iconUrl'] = appurl('lobrepo/preview/c='.$t['lob']['lob_content_id']);
+		if ($t['lob']->lobSubType == 'image') {
+			$t['iconUrl'] = appurl('lobrepo/preview/c='.$t['lob']->lobContentId);
 		} else {
-			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']['lob_mime']);
+			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']->lobMime);
 		}
 	}
 
@@ -102,6 +95,10 @@ class Edit extends FacultyService {
 		}
 		$lob->updateMeta($lc->postvars);
 		$lob->save();
+		//get the new ID if a new save
+		if ($id == 0) {
+			$id = $lob->lobObj->getPrimaryKey();
+		}
 
 		if ($saveUser) {
 			$lobUserObj = new LobUserLink();
