@@ -21,6 +21,8 @@
 
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_lesson.php');
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
  
 class display extends FacultyService {
 
@@ -30,10 +32,11 @@ class display extends FacultyService {
 		''=>''
 		);
 
-/*
- *
- * Event will present a list of all available activities in the
- * classmgr app.
+/**
+ * Display a list of all available activities in the
+ *  classmgr app.
+ * Also, show a table of all lessons in the class and all the 
+ *  content linked to that lesson.
  *
  * Input data: id_classes
  * Output data: main class page
@@ -65,7 +68,16 @@ class display extends FacultyService {
 		{
 			$t['Internet'] = true;
 		}
-		
+
+		$classId = $u->activeClassTaught->id_classes;
+		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
+
+		$t['contentCount'] = array();
+		$t['assignmentCount'] = array();
+		$t['testCount'] = array();
+		foreach ($t['lessonList'] as $idx => $lessonObj) {
+			$t['contentCount'][$idx] = $lessonObj->getContentCount();
+		}
 	}
 }
 
