@@ -1071,7 +1071,7 @@
 		# This has to be a hidden field type in your form
 		# to use this validation
 		
-		function validateForm($code, $arr)
+		function validateForm($code, &$arr)
 		{		
 			#debug($code,1);
 			$db = DB::getHandle();
