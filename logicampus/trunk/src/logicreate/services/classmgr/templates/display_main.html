@@ -100,86 +100,29 @@ color:#333;
 			</div>
 		</td>
 	</tr>
-	<tr class="table_disable"><td class="table_disable">
-		<i>Lesson Title 1 (finished)</i>
-	</td>
-	<td class="table_disable">
-		<i>Starts in: already started</i>
-	</td>
-	<td  class="table_disable">
-		<i>Ends in: already finished</i>
-	</td>
-	</tr>
-	<tr class="table_disable">
-		<td colspan="3"  class="table_disable">
-			<i>
-			Content: 
-				<a href="#">File 1</a>,
-				<a href="#">File 2</a>,
-				<a href="#">File 3</a>,
-				<a href="#">File 4</a>,
-				<a href="#">File 5</a>,
-				<a href="#">Image 1</a>,
-				<a href="#">Image 2</a>,
-				<a href="#">Image 3</a>,
-				<a href="#">Image 4</a>,
-				<a href="#">Page 1</a>,
-				<a href="#">Page 2</a>,
-				<a href="#">Page 3</a>,
-				<a href="#">Page 4</a>
-			<br/>
-			Assignments:
-				<a href="#">Homework 1</a>,
-				<a href="#">Homework 1</a>,
-				<a href="#">Homework 1</a>,
-				<a href="#">Homework 1</a>, 
-				<a href="#">Homework 1</a>, 
-			<br/>
-			Tests:&nbsp; <a href="#">Test1</a>, <a href="#">Practice Test2</a>, <a href="#">Test3</a>
-		</i>
-		</td>
-	</tr>
-
-
 
 <?php
-for ($xx=2; $xx < 5; $xx++) {
+$now = time();
+foreach ($t['lessonList'] as $idx=>$lessonObj) {
+if ($lessonObj->isFinished() ) {
+	$class = 'table_disable';}  else { $class = ''; }
 ?>
-	<tr><td>
-		Lesson Title <?= $xx;?>
+
+	
+	<tr class="<?=$class;?>"><td class="<?=$class;?>">
+			<?= ($idx + 1);?>.&nbsp; <a href="<?= appurl('classmgr').'/lessonManager/event=edit/id='.$lessonObj->getId();?>"><?= $lessonObj->getTitle();?></a>
 	</td>
-	<td>
-		Starts in: 2 days
+	<td class="<?=$class;?>">
+		Starts in: <?= $lessonObj->daysTilStart();?> day(s)
 	</td>
-	<td>
-		Ends in: 7 days
+	<td  class="<?=$class;?>">
+		Ends in: <?= $lessonObj->daysTilEnd();?> day(s)
 	</td>
 	</tr>
-	<tr>
-		<td colspan="3">
-			Content: 
-				<a href="#">File 1</a>,
-				<a href="#">File 2</a>,
-				<a href="#">File 3</a>,
-				<a href="#">File 4</a>,
-				<a href="#">File 5</a>,
-				<a href="#">Image 1</a>,
-				<a href="#">Image 2</a>,
-				<a href="#">Image 3</a>,
-				<a href="#">Image 4</a>,
-				<a href="#">Page 1</a>,
-				<a href="#">Page 2</a>,
-				<a href="#">Page 3</a>,
-				<a href="#">Page 4</a>
+	<tr class="<?=$class;?>">
+		<td colspan="3"  class="<?=$class;?>">
+			Number of <em>content</em> items in use: <?= $t['contentCount'][$idx];?>
 			<br/>
-			Assignments:
-				<a href="#">Homework 1</a>,
-				<a href="#">Homework 1</a>,
-				<a href="#">Homework 1</a>,
-				<a href="#">Homework 1</a>, 
-				<a href="#">Homework 1</a>, 
-			<br/>
-			Tests:&nbsp; <a href="#">Test1</a>, <a href="#">Practice Test2</a>, <a href="#">Test3</a>,
 		</td>
 	</tr>
 <?php } ?>
