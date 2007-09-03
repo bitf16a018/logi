@@ -2,13 +2,13 @@
 echo $t['sectionheader'];
 ?>
 
-<div style="clear:both;">
+<div>
 	<div align="left">
 		<img align="middle" src="/images/calendar.png"/>
 		<H2 style="display:inline;margin:1px;"><?= $t['itemName'];?> Dates</H2>
 	</div>
 </div>
-<br style="clear:both;">
+<br/>
 
 <form style="margin:0px;" method="POST" action="<?= modurl('adjustDates/event=save'.$t['itemName']);?>">
 <?php 

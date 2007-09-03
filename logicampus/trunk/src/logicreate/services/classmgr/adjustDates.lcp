@@ -49,7 +49,6 @@ class AdjustDates extends FacultyService {
 		// LESSONS
 		$t['lesson'] = $this->getLessonTable($class_id,$db);
 
-
 		// ASSESSMENTS
 		$t['assessment'] = $this->getAssessmentTable($class_id,$db);
 
