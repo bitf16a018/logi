@@ -90,8 +90,8 @@ class LC_LessonSequence {
 		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text, rank)
 		VALUES (%d, %d, %d, "'.$type.'", "%s", "%s", "%s",%d)';
 
-		debug($contentIds);
-		debug($lobData);
+		//debug($contentIds);
+		//debug($lobData);
 		foreach($contentIds as $k=>$v) {
 			if ($v < 1 ) continue;
 			$lob = $lobData[$v];

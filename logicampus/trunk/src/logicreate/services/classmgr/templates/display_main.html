@@ -75,4 +75,113 @@ if ($t['motd']) {
 </table>
 
 
+<!-- table of lesson details -->
+
+<style type="text/css">
+.table_disable
+{
+background-color:#EEE;
+color:#333;
+}
+
+.table_disable A
+{
+background-color:#EEE;
+color:#333;
+}
+
+</style>
+
+<table width="100%" border="0" cellspacing="7" cellpadding="2">
+	<tr> 
+		<td width="30%" colspan="3" valign="top">
+			<div class="coursemaintitle">
+				Lesson Overview
+			</div>
+		</td>
+	</tr>
+	<tr class="table_disable"><td class="table_disable">
+		<i>Lesson Title 1 (finished)</i>
+	</td>
+	<td class="table_disable">
+		<i>Starts in: already started</i>
+	</td>
+	<td  class="table_disable">
+		<i>Ends in: already finished</i>
+	</td>
+	</tr>
+	<tr class="table_disable">
+		<td colspan="3"  class="table_disable">
+			<i>
+			Content: 
+				<a href="#">File 1</a>,
+				<a href="#">File 2</a>,
+				<a href="#">File 3</a>,
+				<a href="#">File 4</a>,
+				<a href="#">File 5</a>,
+				<a href="#">Image 1</a>,
+				<a href="#">Image 2</a>,
+				<a href="#">Image 3</a>,
+				<a href="#">Image 4</a>,
+				<a href="#">Page 1</a>,
+				<a href="#">Page 2</a>,
+				<a href="#">Page 3</a>,
+				<a href="#">Page 4</a>
+			<br/>
+			Assignments:
+				<a href="#">Homework 1</a>,
+				<a href="#">Homework 1</a>,
+				<a href="#">Homework 1</a>,
+				<a href="#">Homework 1</a>, 
+				<a href="#">Homework 1</a>, 
+			<br/>
+			Tests:&nbsp; <a href="#">Test1</a>, <a href="#">Practice Test2</a>, <a href="#">Test3</a>
+		</i>
+		</td>
+	</tr>
+
+
+
+<?php
+for ($xx=2; $xx < 5; $xx++) {
+?>
+	<tr><td>
+		Lesson Title <?= $xx;?>
+	</td>
+	<td>
+		Starts in: 2 days
+	</td>
+	<td>
+		Ends in: 7 days
+	</td>
+	</tr>
+	<tr>
+		<td colspan="3">
+			Content: 
+				<a href="#">File 1</a>,
+				<a href="#">File 2</a>,
+				<a href="#">File 3</a>,
+				<a href="#">File 4</a>,
+				<a href="#">File 5</a>,
+				<a href="#">Image 1</a>,
+				<a href="#">Image 2</a>,
+				<a href="#">Image 3</a>,
+				<a href="#">Image 4</a>,
+				<a href="#">Page 1</a>,
+				<a href="#">Page 2</a>,
+				<a href="#">Page 3</a>,
+				<a href="#">Page 4</a>
+			<br/>
+			Assignments:
+				<a href="#">Homework 1</a>,
+				<a href="#">Homework 1</a>,
+				<a href="#">Homework 1</a>,
+				<a href="#">Homework 1</a>, 
+				<a href="#">Homework 1</a>, 
+			<br/>
+			Tests:&nbsp; <a href="#">Test1</a>, <a href="#">Practice Test2</a>, <a href="#">Test3</a>,
+		</td>
+	</tr>
+<?php } ?>
+</table>
 
