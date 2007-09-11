@@ -767,9 +767,7 @@
 			define (_MINUTES,16);
 			define (_12HOUR, 32);
 			
-			if ($endyear<$startyear) { $s = $startyear; $startyear = $endyear; $endyear = $s; }
-
-
+			if ($endyear<=$startyear) { $s = $startyear; $startyear = $endyear; $endyear = $s+2; }
 
 			if ( $date != ""  &&  $date !="0000-00-00 00:00:00") {
 				if ( (string)intval($date) != (string)$date) {
