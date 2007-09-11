@@ -38,6 +38,8 @@ echo 'lcConfig'
 mysql -u $1 -p$2 $db < ../data/lcConfig.sql
 echo 'lcGroups'
 mysql -u $1 -p$2 $db < ../data/lcGroups.sql
+echo 'class_enrollment'
+mysql -u $1 -p$2 $db < ../data/class_enrollment.mysql.sql
 echo '***********************'
 echo 'INSTALLING base modules'
 sh ./install_metainfo.sh $1 $2 $db
