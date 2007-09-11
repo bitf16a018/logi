@@ -5,6 +5,7 @@ include_once(LIB_PATH.'LC_html.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'classLessonObj.php');
 include_once(LIB_PATH.'lc_lesson_sequence.php');
+include_once(LIB_PATH.'lc_lob.php');
 // PBDO is the new standard, above object is DEPRECATED
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
@@ -964,10 +965,12 @@ class LessonManager extends FacultyService {
 		$db->query($sql);
 		$lobRecord = array();
 		while ($db->nextRecord()) {
+			$linkText = LC_Lob::createLinkText($db->record['display_name']);
 			$allowableItems[] = $db->record['assessment_id'];
+			$db->record['display_name'];
 			$lobRecord[$db->record['assessment_id']] = 
 				array('lob_title' => $db->record['display_name'],
-					'lob_urltitle' => urlencode($db->record['display_name']),
+					'lob_urltitle' => $linkText,
 					'lob_mime' => 'X-LMS/assessment'
 					);
 		}
