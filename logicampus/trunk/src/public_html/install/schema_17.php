@@ -1,52 +1,161 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-CREATE TABLE exam_schedule_classes (
-  id_exam_schedule_classes int(11) NOT NULL auto_increment,
-  id_classes int(11) unsigned NOT NULL default '0',
-  id_semester int(11) unsigned NOT NULL default '0',
-  status int(1) NOT NULL default '1',
-  received_date datetime NOT NULL default '0000-00-00 00:00:00',
-  south_campus int(1) NOT NULL default '0',
-  southeast_campus int(1) NOT NULL default '0',
-  northeast_campus int(1) NOT NULL default '0',
-  northwest_campus int(1) NOT NULL default '0',
-  note text NOT NULL,
-  PRIMARY KEY  (id_exam_schedule_classes),
-  KEY id_semester (id_semester),
-  KEY id_classes (id_classes)
-) TYPE=MyISAM
+DROP TABLE IF EXISTS `lc_forum`
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE exam_schedule_classes_dates (
-  id_exam_schedule_classes_dates int(11) NOT NULL auto_increment,
-  id_classes bigint(20) unsigned NOT NULL default '0',
-  id_exam_schedule_dates bigint(20) unsigned NOT NULL default '0',
-  new_exam int(1) NOT NULL default '0',
-  title varchar(255) NOT NULL default '',
-  instructions text NOT NULL,
-  south_copies int(1) default '0',
-  southeast_copies int(1) default '0',
-  northeast_copies int(1) default '0',
-  northwest_copies int(1) default '0',
-  num_of_copies int(11) default '0',
-  note text,
-  status tinyint(1) NOT NULL default '1',
-  PRIMARY KEY  (id_exam_schedule_classes_dates),
-  KEY id_exam_schedule_dates (id_exam_schedule_dates),
-  KEY id_classes (id_classes)
-) TYPE=MyISAM
+CREATE TABLE `lc_forum` (
+  `lc_forum_id` int(11) NOT NULL auto_increment,
+  `lc_forum_parent_id` int(11) default NULL,
+  `lc_forum_name` varchar(70) default NULL,
+  `lc_forum_description` varchar(255) default NULL,
+  `lc_forum_recent_post_id` int(11) default '0',
+  `lc_forum_recent_post_timedate` int(11) default '0',
+  `lc_forum_recent_poster` varchar(30) default NULL,
+  `lc_forum_thread_count` int(11) default '0',
+  `lc_forum_post_count` int(11) default '0',
+  `lc_forum_unanswered_count` int(11) default '0',
+  `lc_forum_section_id` int(11) default '0',
+  `lc_forum_numeric_link` int(11) default NULL,
+  `lc_forum_char_link` varchar(10) default NULL,
+  PRIMARY KEY  (`lc_forum_id`)
+) TYPE=MyISAM AUTO_INCREMENT=3
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE exam_schedule_dates (
-  id_exam_schedule_dates bigint(20) unsigned NOT NULL auto_increment,
-  id_semester bigint(20) unsigned NOT NULL default '0',
-  date_start datetime NOT NULL default '0000-00-00 00:00:00',
-  date_end datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (id_exam_schedule_dates)
-) TYPE=MyISAM;
+INSERT INTO `lc_forum` (`lc_forum_id`, `lc_forum_parent_id`, `lc_forum_name`, `lc_forum_description`, `lc_forum_recent_post_id`, `lc_forum_recent_post_timedate`, `lc_forum_recent_poster`, `lc_forum_thread_count`, `lc_forum_post_count`, `lc_forum_unanswered_count`, `lc_forum_section_id`, `lc_forum_numeric_link`, `lc_forum_char_link`) VALUES (1, 0, 'General discussion', 'Talk about the latest happenings', NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL)
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum` (`lc_forum_id`, `lc_forum_parent_id`, `lc_forum_name`, `lc_forum_description`, `lc_forum_recent_post_id`, `lc_forum_recent_post_timedate`, `lc_forum_recent_poster`, `lc_forum_thread_count`, `lc_forum_post_count`, `lc_forum_unanswered_count`, `lc_forum_section_id`, `lc_forum_numeric_link`, `lc_forum_char_link`) VALUES (2, 0, 'Relaxing', 'Talk about non-school stuff here - sports, movies and more', NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL)
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+DROP TABLE IF EXISTS `lc_forum_moderator`
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE `lc_forum_moderator` (
+  `lc_forum_moderator_id` int(11) NOT NULL auto_increment,
+  `lc_forum_id` int(11) default '0',
+  `lc_forum_moderator_username` varchar(32) default NULL,
+  PRIMARY KEY  (`lc_forum_moderator_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+DROP TABLE IF EXISTS `lc_forum_perm`
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE `lc_forum_perm` (
+  `lc_forum_perm_id` int(10) unsigned NOT NULL auto_increment,
+  `lc_forum_id` int(11) default '0',
+  `lc_forum_perm_action` varchar(4) default NULL,
+  `lc_forum_perm_label` varchar(32) default NULL,
+  `lc_forum_perm_group` varchar(10) default NULL,
+  PRIMARY KEY  (`lc_forum_perm_id`)
+) TYPE=MyISAM AUTO_INCREMENT=13
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (1, 1, 'read', 'You can read', 'reg')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (2, 1, 'read', 'You can read', 'admin')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (3, 1, 'read', 'You can read', 'public')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (4, 1, 'post', 'You may post a message', 'reg')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (5, 1, 'dele', 'You may delete a message', 'admin')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (6, 2, 'read', 'You can read', 'reg')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (7, 2, 'read', 'You can read', 'admin')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (8, 2, 'read', 'You can read', 'public')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (9, 2, 'post', 'You may post a message', 'reg')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (10, 2, 'post', 'You may post a message', 'admin')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (11, 2, 'post', 'You may post a message', 'public')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_perm` (`lc_forum_perm_id`, `lc_forum_id`, `lc_forum_perm_action`, `lc_forum_perm_label`, `lc_forum_perm_group`) VALUES (12, 2, 'dele', 'You may delete a message', 'fadmin')
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+DROP TABLE IF EXISTS `lc_forum_post`
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE `lc_forum_post` (
+  `lc_forum_post_id` int(11) NOT NULL auto_increment,
+  `lc_forum_id` int(11) NOT NULL default '0',
+  `lc_forum_post_parent_id` int(11) default NULL,
+  `lc_forum_post_thread_id` int(11) default NULL,
+  `lc_forum_post_title` varchar(255) default NULL,
+  `lc_forum_post_message` text,
+  `lc_forum_post_username` varchar(32) default NULL,
+  `lc_forum_post_timedate` int(11) default '0',
+  `lc_forum_post_status` int(11) default '0',
+  `lc_forum_reply_count` int(11) default '0',
+  `lc_forum_recent_post_id` int(11) default '0',
+  `lc_forum_recent_post_timedate` int(11) default '0',
+  `lc_forum_recent_poster` varchar(30) default NULL,
+  `lc_forum_file1_name` varchar(100) default NULL,
+  `lc_forum_file1_sys_name` varchar(100) default NULL,
+  `lc_forum_file1_size` varchar(100) default NULL,
+  `lc_forum_file1_mime` varchar(100) default NULL,
+  `lc_forum_file1_count` int(11) default '0',
+  `lc_forum_file2_name` varchar(100) default NULL,
+  `lc_forum_file2_sys_name` varchar(100) default NULL,
+  `lc_forum_file2_size` varchar(100) default NULL,
+  `lc_forum_file2_mime` varchar(100) default NULL,
+  `lc_forum_file2_count` int(11) default '0',
+  PRIMARY KEY  (`lc_forum_post_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+DROP TABLE IF EXISTS `lc_forum_section`
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE `lc_forum_section` (
+  `lc_forum_section_id` int(11) NOT NULL auto_increment,
+  `lc_forum_section_name` varchar(50) default NULL,
+  `lc_forum_section_parent_id` int(11) default '0',
+  PRIMARY KEY  (`lc_forum_section_id`),
+  KEY `lc_forum_section_parent_id` (`lc_forum_section_parent_id`)
+) TYPE=MyISAM AUTO_INCREMENT=2
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+INSERT INTO `lc_forum_section` (`lc_forum_section_id`, `lc_forum_section_name`, `lc_forum_section_parent_id`) VALUES (1, 'General', NULL);
 campusdelimeter;
 $installTableSchemas[] = $table;
 
