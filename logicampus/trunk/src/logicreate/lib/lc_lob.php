@@ -198,8 +198,16 @@ class LC_Lob {
 
 	function createLinkText($name,$ext='') {
 		$ext = strtolower($ext);
-		$ret = str_replace(' ', '_',$name);
-		$ret = urlencode($ret);
+
+		$ret = str_replace('&', ' and ', $name);
+		$ret = str_replace(' ', '_', $ret);
+
+		$pattern = '/[\x{21}-\x{2C}]|[\x{2F}]|[\x{5B}-\x{5E}]/';
+		$ret = preg_replace($pattern, '_', $ret);
+		$ret = str_replace('___', '_', $ret);
+		$ret = str_replace('__', '_', $ret);
+		$ret = str_replace('__', '_', $ret);
+
 		if ($ext != '' && $ext != 'html' && $ext != 'htm') {
 			$ret .= '.'.$ext;
 		}
