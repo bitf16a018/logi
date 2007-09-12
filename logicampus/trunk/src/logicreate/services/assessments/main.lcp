@@ -118,11 +118,10 @@ class assessments extends FacultyService {
 	 * take down name, description, instructions,
 	 */
 	function addRun($db,&$u,&$lc,&$t) {
-		
 		$lc->templateName = 'main_add';
 //auto-comment		$lc->templateStyle = 'private';
 		$f = new SiteForm();
-		$f->getform('addassessment', $lc->postvars);
+		$f->getForm('addassessment', $lc->postvars);
 		$t['form'] = $f->ToHTML();
 	}
 
