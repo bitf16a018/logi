@@ -52,8 +52,10 @@ class add extends FacultyService {
 				$lc->templateName = 'add_doc';
 				break;
 
+			case 'text':
+				$lc->templateName = 'add_text';
+				break;
 		}
-
 		$t['mimetype'] = $mimetype;
 	}
 
@@ -86,7 +88,8 @@ class add extends FacultyService {
 
 	function textToLob(&$lob,&$lc) {
 		$lob->set('lobContent', $lc->postvars['txText']);
-		$lob->set('lobSubType','text');
+		LC_Lob::getSubType($lc->postvars['mime']);
+		$lob->set('lobSubType',$lc->postvars['lob_sub_type']);
 		$lob->set('lobTitle', $lc->postvars['txTitle']);
 		$lob->set('lobMime', $lc->postvars['mime']);
 
@@ -107,14 +110,13 @@ class add extends FacultyService {
 		$lob = new LC_Lob($id);
 		$lobMetaObj = new LobMetadata();
 		$lobUserObj = new LobUserLink();
-//debug($lc,1);
+		//debug($lc,1);
 
 		$lob->set('lobType','content');
 		$lob->set('lobGuid',$guid);
 
-
 		if (@$lc->uploads['content']) {
-			$lob->updateAsFile($lc->postvars, 'content');
+			$lob->updateAsFile($lc->postvars, $lc->uploads['content']['name'], $lc->uploads['content']['tmp_name']);
 		} else if (@$lc->uploads['document']) {
 			$lob->updateAsFile($lc->postvars, 'document');
 		} else {

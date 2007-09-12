@@ -30,7 +30,7 @@
 			<div style="text-align:center;border:1px solid black;padding:3px;width:170px;">
 				<img src="<?=$t['iconUrl'];?>" width="64" height="64"/>
 				<br/>
-				<?= $lob->lobType;?> &ndash; <?= $lob->lobSubType;?>
+				<?= $lob->getType();?> &ndash; <?= $lob->getSubType();?>
 			</div>
 			<table border="0" style="border:0px solid black;">
 				<tr>
@@ -42,7 +42,7 @@
 		</td>
 	</tr>
 </table>
-<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->lobContentId);?>">
+<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->getContentId());?>">
 <input type="submit" value="Change this object"/>
 </form>
 

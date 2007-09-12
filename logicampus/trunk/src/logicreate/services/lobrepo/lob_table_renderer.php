@@ -52,70 +52,16 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 			$class = ($x % 2 == 0) ? 'even':'odd';
 			$this->html .= '<tr class="center_justify '.$class.'" style="background-color:white;">';
 
-			/*
-			for ($y = 0; $y < $numCols; ++$y ) {
-				$tCol = $colModel->getColumnAt($y);
-				if ($tCol->maxWidth > -1 ) {
-					$width = $tCol->maxWidth;
-				} else {
-					$width = -1;
-				}
-				if ( strlen($tCol->justify) > 0 ) {
-					$justify = $tCol->justify.'_justify';
-				} else {
-					$justify = '';
-				}
-
-				if ( strlen($tCol->style) > 0 ) {
-					$style = $tCol->style;
-				} else {
-					$style = '';
-				}
-
-
-				$renderer = $this->table->getCellRenderer($x,$y);
-				$this->table->prepareRenderer($renderer,$x,$y);
-
-				$css = $renderer->getCellCSS();
-				if ( count ($css) > 0 ) {
-					foreach ($css as $i=>$j) {
-						$style .= "$i:$j;";
-					}
-				}
-
-				/*
-				$this->html .= '<td';
-				if ($width > -1) {
-					$this->html .= ' width="'.$width.'"';
-				}
-
-				if ( strlen($justify) > 0) {
-					$this->html .= ' class="'.$justify.'"';
-				}
-
-				if ( strlen($style) > 0) {
-					$this->html .= ' style="'.$style.'"';
-				}
-
-				$this->html .='>';
-				 * /
-
-
-				$this->html .= '<td class="left_justify" style="font-size:140%;background-color:none;"><b>';
-				$this->html .= $renderer->getRenderedValue();
-				$this->html .= '</b></td>';
-			}
-			*/
-
-//			$renderer = $this->table->getCellRenderer($x,$y);
-//			$this->table->prepareRenderer($renderer,$x,$y);
-
 			//create links for tag cloud
 			// and quick links to use this object in your class
-			$browseHtml  = '<span style="font-size:8pt;color:green;">Browse more objects like this one:&nbsp;';
-			$browseHtml .= ' <a href="#">ENGL</a> &bull;';
-			$browseHtml .= ' <a href="#">PDF</a> &bull;';
-			$browseHtml .= ' <a href="#">Content pages</a></span>';
+			$browseHtml  = '<span style="font-size:8pt;color:green;">Browse more:&nbsp;';
+			$browseHtml .= ' <a href="#">'.
+				$this->table->tableModel->getValueNamed($x,'subject')
+				.'</a> &bull;';
+			$browseHtml .= ' <a href="#">'.
+				$this->table->tableModel->getValueNamed($x,'subdisc')
+				.'</a>';
+//			$browseHtml .= ' <a href="#">Content pages</a></span>';
 			if (is_array($u->classesTaught) ) {
 				$linkHtml = '<span style="font-size:8pt;background-color:white;color:green;">Link this object to your class:&nbsp;';
 				$lobId = $this->table->tableModel->getValueNamed($x,'lobId');

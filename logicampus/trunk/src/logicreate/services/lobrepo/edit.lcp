@@ -39,7 +39,9 @@ class Edit extends FacultyService {
 			}
 		}
 		//get size in bytes
-		if ($t['lob']->lobObj->lobSubType == 'text') {
+		if ($t['lob']->lobObj->lobSubType == 'text'
+			|| 
+			$t['lob']->lobObj->lobSubType == 'html') {
 			$t['lob_bytes'] = strlen($t['lob']->lobObj->lobContent);
 		} else {
 			$t['lob_bytes'] = strlen($t['lob']->lobObj->lobBinary);
@@ -89,7 +91,7 @@ class Edit extends FacultyService {
 		}
 
 		if ($lob->isFile()) {
-			$lob->updateAsFile($lc->postvars, 'document');
+			$lob->updateAsFile($lc->postvars, $lc->uploads['document']['name'], $lc->uploads['document']['tmp_name']);
 		} else {
 			$lob->updateAsText($lc->postvars);
 		}
