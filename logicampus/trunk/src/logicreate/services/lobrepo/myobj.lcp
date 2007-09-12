@@ -34,7 +34,7 @@ class Myobj extends FacultyService {
 
 		$lobItems = array();
 		$idx=0;
-		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject
+		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject, B.subdisc
 		       	FROM lob_content as A
 			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id
 			LEFT JOIN lob_user_link as C on A.lob_content_id = C.lob_id
@@ -46,19 +46,20 @@ class Myobj extends FacultyService {
 		//foreach ($lobs as $lobObj) {
 			$lobRec = $db->record;
 			$lobItems[$idx]['name'] = '<a href="'.appurl('lobrepo/edit/c='.$lobRec['lob_content_id'].'').'">'.$lobRec['lob_title'].'</a>';
-//			$lobItems[$idx]['subtype'] = $lobRec['lob_sub_type'];
 			$lobItems[$idx]['subject'] = $lobRec['subject'];
 			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']);
 			$lobItems[$idx]['author'] = $lobRec['author'];
 			$lobItems[$idx]['description'] = $lobRec['lob_description'];
 			$lobItems[$idx]['mimetype'] = $lobRec['lob_mime'];
 			$lobItems[$idx]['lobId'] = $lobRec['lob_content_id'];
+			$lobItems[$idx]['subdisc'] = $lobRec['subdisc'];
 			$idx++;
 		}
 
 		$dm = new LC_Table_ItemModel($lobItems);
 		$dm->ignoreColumn('description');
 		$dm->ignoreColumn('mimetype');
+		$dm->ignoreColumn('subdisc');
 		$dm->ignoreColumn('lobId');
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();

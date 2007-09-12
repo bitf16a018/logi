@@ -116,6 +116,30 @@ class LC_Lob {
 
 
 	/**
+	 * Return the type
+	 */
+	function getType() {
+		return  $this->lobObj->lobType;
+	}
+
+
+	/**
+	 * Return the sub type
+	 */
+	function getSubType() {
+		return  $this->lobObj->lobSubType;
+	}
+
+
+	/**
+	 * Return the primary key
+	 */
+	function getContentId() {
+		return  $this->lobObj->lobContentId;
+	}
+
+
+	/**
 	 * @static
 	 */
 	function getMimeIcon($mime) {
@@ -215,15 +239,15 @@ class LC_Lob {
 	}
 
 
-	function updateAsFile(&$vars,$upName) {
+	function updateAsFile(&$vars, $name='', $tmp_name='') {
 		$this->set('lobTitle', $vars['txTitle']);
 
-		if (@$lc->uploads[$upName]) {
-			$this->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
-			$this->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
+		if ($tmp_name != '') {
+			$this->set('lobFilename', urlencode( $name ) );
+			$this->set('lobBinary', file_get_contents( $tmp_name ) );
 		}
 		$this->set('lobSubType',$vars['lob_sub_type']);
-		$n =& $lc->uploads[$upName]['name'];
+		$n =& $name;
 
 		$ext = substr (
 			$n, 
@@ -243,7 +267,7 @@ class LC_Lob {
 
 	function updateAsText($vars) {
 		$this->set('lobContent', $vars['txText']);
-		$this->set('lobSubType','text');
+		$this->set('lobSubType',$vars['lob_sub_type']);
 		$this->set('lobTitle', $vars['txTitle']);
 		if (@isset($vars['mime'])  && strlen($vars['mime'])) {
 			$this->set('lobMime', $vars['mime']);
