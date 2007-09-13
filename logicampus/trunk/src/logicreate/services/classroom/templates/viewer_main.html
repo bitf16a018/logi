@@ -41,13 +41,13 @@ if ($t['lob']['lob_mime'] == 'X-LMS/assignment') {
 <fieldset>
 	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
 	<?php
-	echo '<h3>Assignment</h3>';
+	echo '<h3>Activity</h3>';
 	echo 'Name: '.$t['activity']['title'];
 	echo "<br/>\n";
 	echo 'Instructions: ';
 	echo $t['activity']['instructions'];
 	echo "<br/>\n";
-	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['activity']['id_class_assignments']).'">Start the test.</a>';
+	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['activity']['id_class_assignments']).'">Start the activity.</a>';
 	?>
 </fieldset>
 </div>
