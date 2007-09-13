@@ -126,14 +126,24 @@ class viewer extends StudentService {
 		}
 		$nextIdx = $curIdx+1;
 		$prevIdx = $curIdx-1;
-		if ($prevIdx < 0 ) { $prevIdx = 0; }
 
 		//choose a start URL, viewer or content
+		if ( is_object($t['seqItems'][$nextIdx]) ) {
 		if ($t['seqItems'][$nextIdx]->lobMime == 'text/html') {
 			$t['nextUrl'] = appurl('classroom/content/'.$uniqCode.'/'.$t['seqItems'][$nextIdx]->linkText);
 		} else {
 			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqCode.'/'.$t['seqItems'][$nextIdx]->linkText);
 		}
+		}
+		//choose a previous URL, viewer or content
+		if ($prevIdx > -1) {
+		if ($t['seqItems'][$prevIdx]->lobMime == 'text/html') {
+			$t['prevUrl'] = appurl('classroom/content/'.$uniqCode.'/'.$t['seqItems'][$prevIdx]->linkText);
+		} else {
+			$t['prevUrl'] = appurl('classroom/viewer/'.$uniqCode.'/'.$t['seqItems'][$prevIdx]->linkText);
+		}
+		}
+
 //print_r($u);
 		$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']['lob_mime']);
 	}
