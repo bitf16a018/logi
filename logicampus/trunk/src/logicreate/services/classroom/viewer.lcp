@@ -96,7 +96,11 @@ class viewer extends StudentService {
 //				debug($db->record,1);
 				$t['file']['title'] = $db->record['lob_title'];
 				$t['file']['description'] = $db->record['lob_description'];
-				$t['file']['mime'] =  $db->record['lob_mime'];
+				if ($db->record['lob_mime'] =='' ) {
+					$t['file']['mime'] = 'application/octet-stream';
+				} else {
+					$t['file']['mime'] =  $db->record['lob_mime'];
+				}
 				$t['file']['linkText'] =  $db->record['lob_urltitle'];
 				$t['file']['bytesize'] =  strlen($db->record['lob_binary']);
 			}
