@@ -6,8 +6,12 @@ if ( strlen($t['error']) > 0 ) { ?>
 <?php } ?>
 
 	<div align="right" style="text-align:right;">
-		<!-- <a href="<?= appurl('classroom/viewer/'.$t['uniqcode'].'/43013-Manarola - 2004.jpg');?>" style="font-size:90%;">Next</a> -->
-		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next</a>
+	<?php if ($t['prevUrl']) { ?>
+		<a href="<?= $t['prevUrl'];?>" style="font-size:90%;">&lt;&lt;&nbsp;Prev</a>&nbsp;&nbsp;
+	<?php } ?>
+	<?php if ($t['nextUrl']) { ?>
+		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next&nbsp;&gt;&gt;</a>
+	<?php } ?>
 	</div>
 
 <?php
@@ -91,3 +95,14 @@ if ( strstr($t['file']['mime'] , 'application/') ) {
 <?php
 }
 ?>
+
+<p></p>
+	<div align="right" style="float:right;text-align:right;">
+	<?php if ($t['prevUrl']) { ?>
+		<a href="<?= $t['prevUrl'];?>" style="font-size:90%;">&lt;&lt;&nbsp;Prev</a>&nbsp;&nbsp;
+	<?php } ?>
+	<?php if ($t['nextUrl']) { ?>
+		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next&nbsp;&gt;&gt;</a>
+	<?php } ?>
+	</div>
+
