@@ -73,10 +73,12 @@ class display extends FacultyService {
 		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
 
 		$t['contentCount'] = array();
-		$t['assignmentCount'] = array();
+		$t['activityCount'] = array();
 		$t['testCount'] = array();
 		foreach ($t['lessonList'] as $idx => $lessonObj) {
 			$t['contentCount'][$idx] = $lessonObj->getContentCount();
+			$t['activityCount'][$idx] = $lessonObj->getObjectCountByType('activity');
+			$t['assessmentCount'][$idx] = $lessonObj->getObjectCountByType('assessment');
 		}
 	}
 }

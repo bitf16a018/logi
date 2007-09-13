@@ -76,6 +76,24 @@ class LC_Lesson {
 	}
 
 	/**
+	 * Count 'interaction' items linked to this lesson in class_lesson_sequence
+	 */
+	function getObjectCountByType($type='content') {
+		$db = DB::getHandle();
+		$sql = "SELECT
+		count(class_lesson_sequence_id) as total
+		FROM class_lesson_sequence
+		WHERE lesson_id = ".$this->lessonDo->getPrimaryKey()."
+		AND lob_type = '".$type."'
+		";
+
+		$db->query($sql);
+		$db->nextRecord();
+		return $db->record['total'];
+	}
+
+
+	/**
 	 * Returns integer representing the number of days left until this lesson starts
 	 */
 	function daysTilStart() {
