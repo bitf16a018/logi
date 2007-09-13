@@ -56,37 +56,17 @@ class content extends StudentService {
 			return;
 		}
 
-		/*
-		$db->query("SELECT * FROM classdoclib_Files as A 
-			LEFT JOIN classdoclib_Folders as B on A.folder = B.pkey
-			WHERE file='".$filename."'
-			AND B.class_id = ".$classId);
-		if ($db->nextRecord()) {
-			$file = $db->record;
-			$fullpath = LC_DiskRepository::getFullPath($file['diskName']);
-			if ($file['mime'] == 'image/jpeg') {
-				header('Content-type: image/jpeg');
-			} else {
-				header('Content-type: '.$file['mime']);
-			}
+		// actually retrieve the data from the db
+		$ut = time();
+		$sql = "select * from class_lessons
+			where id_class_lessons='".$lesson_id."'
+			and id_classes='{$u->activeClassTaken->id_classes}'";
+		if (!$u->isFaculty())
+			$sql .= " and (activeOn < ".time()."
+				and inactiveOn > ".time().')';
+		$db->queryOne($sql);
+		$t['lesson'] = $db->record;
 
-			$fd = fopen($fullpath,"r");
-			fpassthru($fd);
-			exit();
-		}
-		//else it's not a download file, but an HTML page
-		// we need to show HTML content pages in here so embedded images
-		// will get the correct HTTP headers and no template around their binary data.
-		// This is because most LMS's content objects do not distinguish between html and non-html content
-		$db->query("SELECT * FROM class_lesson_content as A 
-			WHERE txTitle='".$filename."'
-			AND A.id_classes = ".$classId);
-		if ($db->nextRecord()) {
-			$t['file']['title'] = $db->record['txTitle'];
-			$t['file']['content'] = $db->record['txText'];
-			$t['file']['mime'] = 'text/html';
-		}
-		 */
 
 		/*
 		$db->query("SELECT * FROM lob_content as A 
