@@ -162,13 +162,13 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 
 	<div style="width:48%;align:left;">
 		<fieldset>
-			<legend>Assignments</legend>
-			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lessonId']);?>">Change Assignments</a>
+			<legend>Activities</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lessonId']);?>">Change Activities</a>
 			<?php
 			if ( ! is_array($t['assignments']) ) {
 			?>
 			<br/>
-			<span style="font-style:italic;">No Assignments</span>
+			<span style="font-style:italic;">No Activities</span>
 			<?php } ?>
 			<ul>
 				<?php

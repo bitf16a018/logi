@@ -623,10 +623,11 @@ class LessonManager extends FacultyService {
 
 		$lobRecord = array();
 		while ($db->nextRecord()) {
+			$linkText = LC_Lob::createLinkText($db->record['title']);
 			$allowableItems[] = $db->record['id_class_assignments'];
 			$lobRecord[$db->record['id_class_assignments']] = 
 				array('lob_title' => $db->record['title'],
-				'lob_urltitle' => urlencode($db->record['title']),
+				'lob_urltitle' => $linkText,
 				'lob_mime' => 'X-LMS/assignment'
 			);
 		}
