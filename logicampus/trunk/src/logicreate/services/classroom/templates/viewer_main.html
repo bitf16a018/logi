@@ -5,7 +5,8 @@ if ( strlen($t['error']) > 0 ) { ?>
 	<?= lcMessageBox($t['error'],'e');?>
 <?php } ?>
 
-	<div align="right" style="text-align:right;">
+<div style="padding:5px;">
+	<div align="right" style="float:right;text-align:right;">
 	<?php if ($t['prevUrl']) { ?>
 		<a href="<?= $t['prevUrl'];?>" style="font-size:90%;">&lt;&lt;&nbsp;Prev</a>&nbsp;&nbsp;
 	<?php } ?>
@@ -13,6 +14,10 @@ if ( strlen($t['error']) > 0 ) { ?>
 		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next&nbsp;&gt;&gt;</a>
 	<?php } ?>
 	</div>
+	<H2 style="display:inline;margin:1px;"><?= $t['lesson']['title'];?></H2>
+	&nbsp;<a href="<?= appurl('classroom/lessons/event=view/id='.$t['lesson']['id_class_lessons']);?>">[lesson home]</a>
+	<hr style="margin:0px;padding:0px"/>
+	<p></p>
 
 <?php
 
@@ -105,4 +110,4 @@ if ( strstr($t['file']['mime'] , 'application/') ) {
 		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next&nbsp;&gt;&gt;</a>
 	<?php } ?>
 	</div>
-
+</div>

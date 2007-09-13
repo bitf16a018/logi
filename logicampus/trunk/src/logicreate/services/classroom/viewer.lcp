@@ -55,6 +55,18 @@ class viewer extends StudentService {
 			return;
 		}
 
+		// actually retrieve the data from the db
+		$ut = time();
+		$sql = "select * from class_lessons
+			where id_class_lessons='".$lesson_id."'
+			and id_classes='{$u->activeClassTaken->id_classes}'";
+		if (!$u->isFaculty())
+			$sql .= " and (activeOn < ".time()."
+				and inactiveOn > ".time().')';
+		$db->queryOne($sql);
+		$t['lesson'] = $db->record;
+
+
 		$db->query("SELECT * FROM class_lesson_sequence as A 
 			WHERE link_text='".$filename."'
 			AND A.class_id = ".$classId);

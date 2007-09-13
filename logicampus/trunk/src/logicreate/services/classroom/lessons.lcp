@@ -115,16 +115,12 @@ class lessons extends StudentService {
 				and inactiveOn > ".time().')';
 
 		$db->queryOne($sql);
-		$t['lesson'] = $db->Record;
+		$t['lesson'] = $db->record;
 
 		if (!$t['lesson']['id_class_lessons']) {
 			$lc->templateName = 'main_nocontentaccess';
 			return;
 		}
-
-		$db->queryOne("select id_class_lesson_content, txTitle,txText from class_lesson_content
-			where id_class_lessons='".$lesson_id."'");
-		$t['content'] = $db->Record;
 
 		$db->query("SELECT class_objectives.id_class_objectives, objective, f_hide 
 			FROM class_objectives
