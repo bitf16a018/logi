@@ -176,9 +176,10 @@ class ExportContent extends FacultyService {
 	function get_document_files() {
 		$lob_nodes = array();
 		$sql = '
-		SELECT B.*
+		SELECT B.*,C.*
 		FROM lob_class_link as A
 		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
+		LEFT JOIN lob_metadata AS C ON C.lob_id = B.lob_content_id
 		WHERE A.class_id='.$this->classId.'
 		AND (lob_sub_type = "document" OR lob_sub_type = "image") ';
 
@@ -192,30 +193,7 @@ class ExportContent extends FacultyService {
 				// change quotes?  change dots?  change spaces?
 				$db->record['lob_filename'] = $db->record['lob_title'];
 			}
-			/*
-			$xml_sub_child = null;
-			
-				
-			$xml_sub_child[] = new xml_node('daHasha',null, null, $db->Record['daHasha']);
-			$xml_sub_child[] = new xml_node('file', array('BASE64'=>'1'), null, $db->Record['file']);
-			$xml_sub_child[] = new xml_node('displayname', array('BASE64'=>'1'), null, $db->Record['displayname']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('mime', null, null, $db->Record['mime']);
-			//$xml_sub_child[] = new xml_node('folder', null, null, $db->Record['folder']); // not needed at all! but for good measure we'll keep it
-			$xml_sub_child[] = new xml_node('owner', null, null, $db->Record['owner']);
-			$xml_sub_child[] = new xml_node('filedate', null, null, $db->Record['filedate']);
-			$xml_sub_child[] = new xml_node('size', null, null, $db->Record['size']);
-			$xml_sub_child[] = new xml_node('diskName', null, null, $db->Record['diskName']);
-			$xml_sub_child[] = new xml_node('trashed', null, null, $db->Record['trashed']);
-			$xml_sub_child[] = new xml_node('origfolder', null, null, $db->Record['origfolder']); // how to handle in copy!
-			
-		/**
-			$xml_sub_child[] = new xml_node('data', null, null, 
-											base64_encode(
-												file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->Record['diskName'], 0, 2). '/'.substr($db->Record['diskName'],(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName'])
-												)
-											);
-		**/								
+		
 
 			// instead of encoding the contents of a file into xml
 			// add in an identifier and copy the original file into
@@ -230,8 +208,8 @@ class ExportContent extends FacultyService {
 
 			$type_node = new xml_node('type',null,null,'content');
 			//subtype
-			list($type,$submime) = explode('/', $db->record['mime']);
-			$sub_type_node = new xml_node('subtype',array('mime'=>$db->record['mime']),null);
+			list($type,$submime) = explode('/', $db->record['lob_mime']);
+			$sub_type_node = new xml_node('subtype',array('mime'=>$db->record['lob_mime']),null);
 			if ($type == 'image') {
 				$sub_type_node->value = 'image';
 			} else {
@@ -255,22 +233,25 @@ class ExportContent extends FacultyService {
 			$xml_child_nodes[] = $lob_desc_node;
 
 			//lifecycle
-			$createdon = strtotime($db->record['filedate']);
+			$createdon = $db->record['created_on'];
 
 			$lifecycleArray = array(
-				'version'=>'1.0', 
+				'version'=>$db->record['version'], 
 				'createdon'=>$createdon, 'createdon_dateformat'=>'unix'
 			);
+
 
 			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
 
 			//metadata
 			$metadataArray = array(
-				'author'=>'Mark Kimsal', 
-				'subject'=>$this->courseFamily,
+				'author'=>$db->record['author'],
+				'subject'=>$db->record['subject'],
+				'subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
-				'copyright'=>date('Y'),
-				'license'=>'copyleft'
+				'subdisc_abbr'=>'false',
+				'copyright'=>$db->record['copyright'],
+				'license'=>$db->record['license']
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -326,11 +307,12 @@ class ExportContent extends FacultyService {
 
 			//metadata
 			$metadataArray = array(
-				'author'=>'Mark Kimsal',
-				'subject'=>$this->courseFamily,
+				'author'=>$db->record['author'],
+				'subject'=>$db->record['subject'],
+				'subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
-				'copyright'=>date('Y'),
-				'license'=>'copyleft'
+				'copyright'=>$db->record['copyright'],
+				'license'=>$db->record['license']
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -411,7 +393,6 @@ class ExportContent extends FacultyService {
 		$allow = array(
 			'subject',
 			'subdisc',
-			'subdisc_abbr',
 			'author',
 			'copyright',
 			'license',
@@ -430,6 +411,11 @@ class ExportContent extends FacultyService {
 				if ($tag == 'subject'
 					&& $metadataStruct['subject_abbr']) {
 						$n->attrs['abbr'] = $metadataStruct['subject_abbr'];
+				}
+
+				if ($tag == 'subdisc'
+					&& $metadataStruct['subdisc_abbr']) {
+						$n->attrs['abbr'] = $metadataStruct['subdisc_abbr'];
 				}
 
 			$metadata_node->children[] = $n;
