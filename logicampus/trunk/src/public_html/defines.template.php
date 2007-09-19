@@ -58,15 +58,17 @@ if (! file_exists($relpath)) {
 	}
 }
 
-extract($_SERVER);
+$relpath='../logicreate/';
 $PHPSESSID = @$_COOKIE['PHPSESSID'];
 
 $base = $_SERVER['HTTP_HOST'];
-$script = substr($SCRIPT_FILENAME,strrpos($SCRIPT_FILENAME,'/')+1); 
-$tail = str_replace($script,'',$SCRIPT_NAME);
+$scriptFile = $_SERVER['SCRIPT_FILENAME'];
+$scriptName = $_SERVER['SCRIPT_NAME'];
+$script = substr($scriptFile,strrpos($scriptFile,'/')+1);
+$tail = str_replace($script,'',$scriptName);
 $tail = str_replace('herc/','',$tail);
-$doc = str_replace($script,'',$SCRIPT_FILENAME);
-//$doc = str_replace('herc/','',$doc);
+$doc = dirname(__FILE__).'/';
+
 
 
 define('DOCUMENT_ROOT',$doc);
@@ -82,7 +84,7 @@ define('SECURE_APP_URL',SECURE_BASE_URL.'index.php/');
 define('DEFAULT_SERVICE','welcome');
 define('DEFAULT_URL',APP_URL.DEFAULT_SERVICE);
 define('UNAUTHORIZED_SERVICE','welcome/login');
-define('COOKIE_HOST',$_SERVER['HTTP_HOST']);
+define('COOKIE_HOST',$base);
 
 //Templates, images, html content
 DEFINE('TEMPLATE_PATH_PARTIAL',DOCUMENT_ROOT.'templates/');
