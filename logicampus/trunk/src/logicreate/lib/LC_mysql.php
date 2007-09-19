@@ -292,7 +292,7 @@ class mysql extends DB {
  	 *
  	 */
 	function disconnect() {
-		mysql_close();
+		mysql_close($this->driverID);
 	}
 
 
