@@ -83,12 +83,16 @@ $execution_time=get_microtime();
 	//first time
 	//the db settings aren't correct, and we have the file
 	//  "first_time.php" present
-	if ( ! is_resource($gdb->driverID) ) {
+	if ( ! is_resource($gdb->driverID)
+		|| (strstr( $gdb->errorMessage, 'Can\'t select DB') !== false)
+	) {
 		if (file_exists('install')) {
-			header('Location: install/');
+			header('Location: '.BASE_URL.'install/');
 			exit();
 		}
 	}
+
+
 
 // ************* I18N ******************************
 //if get vars, switchlocale, then set a cookie
