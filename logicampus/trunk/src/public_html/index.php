@@ -77,13 +77,17 @@ $execution_time=get_microtime();
 @include_once(LIB_PATH."LC_html.php");
 @include_once(LIB_PATH."inputValidation.php");
 
-
 	//start the error system
 	$lcObj = new lcSystem();
 
 	//first time
-	if (file_exists('first_time.php') ) {
-		include('first_time.php');
+	//the db settings aren't correct, and we have the file
+	//  "first_time.php" present
+	if ( ! is_resource($gdb->driverID) ) {
+		if (file_exists('install')) {
+			header('Location: install/');
+			exit();
+		}
 	}
 
 // ************* I18N ******************************
@@ -312,7 +316,7 @@ if($event != '' ) {
 			$service->$event_full($_db,$lcUser,$lcObj,$lcTemplate);
 			
 		} else { 
-			$lcTemplate[message] = "The function <i>$event</i> does not exist.";
+			$lcTemplate['message'] = "The function <i>$event</i> does not exist.";
 			lcSystem::systemPreTemplate($lcObj,$lcTemplate);
 			$service->errorMessage($lcObj, $lcTemplate);
 			closepage();
