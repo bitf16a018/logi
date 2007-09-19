@@ -103,7 +103,7 @@ if (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS']=='on') {
 define('CONTENT_PATH',DOCUMENT_ROOT.$relpath.'content/');
 define('HTML_PATH',DOCUMENT_ROOT.'lchtml/');	//legacy
 define('CACHE_PATH',DOCUMENT_ROOT.$relpath.'cache/');
-define('WEBMASTER_EMAIL','Email@address.com');
+define('WEBMASTER_EMAIL','Email@example.com');
 define('LOG_USAGE_DB',true);
 define('LOG_EXECUTION_TIME',true);
 define('LOG_OUTPUT',false );
