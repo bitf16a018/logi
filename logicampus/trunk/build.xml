@@ -39,114 +39,150 @@
     </tstamp>
 
     <property name="lc.version" value="${version.number}${version.extra}" />
-    <property name="build" location="temp/logicampus-${lc.version}" />
+    <property name="package.prefix" value="logicampus-${lc.version}" />
 
     <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
     <mkdir dir="${dist}"/>
+	<!--
     <mkdir dir="${build}/logicreate/"/>
     <mkdir dir="${build}/logicreate/lang/"/>
     <mkdir dir="${build}/public_html/"/>
     <mkdir dir="${build}/docs/"/>
     <mkdir dir="${build}/public_html/images/"/>
+	-->
 
   </target>
 
 
   <target name="dist" depends="init"
 	  description="generate an LC dist for Logicampus">
-	<copy todir="${build}/logicreate/">
-	  <fileset dir="${lcsrc}">
+
+	<tarfileset dir="${lcsrc}" prefix="${package.prefix}/logicreate/" id="srcdir" defaultexcludes="yes">
 		<include name="classLibrary/**"/>
-		<exclude name="classLibrary/*CVS*"/>
 		<include name="cache/**"/>
-		<exclude name="cache/*CVS*"/>
 		<include name="data/**"/>
-		<exclude name="data/*CVS*"/>
 		<include name="lib/**"/>
-		<exclude name="lib/*CVS*"/>
 		<include name="services/**"/>
-		<exclude name="services/*CVS*"/>
 		<include name="content/**"/>
-		<exclude name="content/*CVS*"/>
-		<exclude name="**/*~"/>
-	  </fileset>
-	</copy>
-	<copy todir="${build}/logicreate/scripts/">
-		<fileset dir="${scripts}">
-			<include name="**"/>
-			<exclude name="*CVS*"/>
-	  	</fileset>
-	</copy>
-	<copy todir="${build}">
-		<fileset dir="${docs}"> 
-			<include name="README"/> 
-			<include name="license.txt"/>
-		</fileset> 
-	</copy>
-	<copy todir="${build}/docs/">
-	  <fileset dir="${docs}">
-	  </fileset>
-	</copy>
-	<copy todir="${build}">
-	  <fileset dir="${docs}">
-	  	<include name="INSTALL" />
-	  	<include name="SAMPLE_DATA" />
-	  </fileset>
-	</copy>
-	<!-- readme and license -->
-	<copy todir="${build}">
-		<fileset dir="./">
-			<include name="README" />
-			<include name="LICENSE" />
-			<include name="changelog.txt" />
-			<include name="changelog.html" />
-			<include name="UPGRADE" />
-	  </fileset>
-	</copy>
-	<copy todir="${build}/public_html/">
-		<fileset dir="${docs}"> 
-			<include name="license.txt"/>
-		</fileset> 
-	</copy> 
-	<copy todir="${build}/public_html/">
-	  <fileset dir="${src}">
+		<include name="lang/fallback.php"/>
+    </tarfileset>
+
+	<tarfileset id="scripts" dir="${scripts}" prefix="${package.prefix}/logicreate/scripts/" defaultexcludes="yes">
+		<include name="**"/>
+  	</tarfileset>
+
+	<tarfileset id="datascripts" dir="${data}" prefix="${package.prefix}/logicreate/scripts/" defaultexcludes="yes">
+		<include name="wipe_clean.sh"/>
+		<include name="install_metainfo.sh"/>
+	</tarfileset>
+
+
+	<tarfileset id="datadir" dir="${data}" prefix="${package.prefix}/logicreate/data/">
+		<include name="*.sql"/>
+	</tarfileset>
+
+
+	<tarfileset id="docs" dir="./" prefix="${package.prefix}">
+		<include name="${docs}license.txt"/>
+		<include name="${docs}INSTALL" />
+		<include name="${docs}SAMPLE_DATA" />
+		<include name="README" />
+		<include name="LICENSE" />
+		<include name="changelog.txt" />
+		<include name="changelog.html" />
+	</tarfileset>
+
+
+	<tarfileset id="html" dir="${src}" prefix="${package.prefix}/public_html/" >
 		<include name="herc/**"/>
 		<include name="htmlarea/**"/>
-		<exclude name="herc/**/*CVS*"/>
 		<exclude name="herc/wysiwyg"/>
 		<exclude name="herc/content.php" />
-		<exclude name="**/*~"/>
-	  </fileset>
-	</copy>
-	<copy todir="${build}/public_html/">
-	  <fileset dir="${src}">
 		<include name="images/**"/>
-		<exclude name="images/**/*CVS*"/>
-		<exclude name="images/**/*~"/>
-	  </fileset>
-	</copy>
-	<copy todir="${build}/public_html/">
-	  <filterset>
-		<filter token="LC_BUILD_DATE" value="${build.date}"/>
-		<filter token="LC_VERSION" value="${version.number}${version.extra}"/>
-	  </filterset>
-	  <fileset dir="${src}">
 		<include name="license.txt"/>
 		<include name="ua.js"/>
 		<include name="templates/**"/>
+		<exclude name="templates/*/images/"/>
 		<include name="install/**"/>
-		<exclude name="install/*CVS*"/>
 		<include name="commentrec/**"/>
-		<exclude name="commentrec/*CVS*"/>
-		<include name="templates/private/**"/>
-		<include name="templates/default/**"/>
-		<include name="templates/debug/**"/>
-		<exclude name="templates/**/*CVS*"/>
-		<exclude name="templates/**/*~"/>
-	  </fileset>
-	</copy>
+	</tarfileset>
+
+
+
+	<tarfileset id="patches" dir="patches" prefix="${package.prefix}/patches">
+		<include name="**"/>
+	</tarfileset>
+
+
+	<!-- before files are copied to temp dir, put DB info into defines.php -->
+	<antcall target="setup"/>
+
+	<mkdir dir="filtertmp"/>
+	<filter token="version.number" value="${version.number}"/>
+	<filter token="build.date" value="${build.date}"/>
+	<filter token="version.extra" value="${version.extra}"/>
+	<copy file="${src}/index.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/defines.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/defines.template.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/settings.advanced.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/settings.simple.php" todir="filtertmp" filtering="true"/>
+
+	<tarfileset id="htmlfilter" dir="filtertmp" prefix="${package.prefix}/public_html/">
+		<include name="**"/>
+	</tarfileset>
+
+
+	<!-- build translation files and install -->
+	<antcall target="translate"/>
+
+	<tarfileset id="translate" dir="lang" prefix="${package.prefix}/logicreate/lang/">
+		<include name="lct.en_US.php"/>
+		<include name="lct.es_MX.php"/>
+		<include name="lct.zh_CN.php"/>
+	</tarfileset>
+
+
+
+
+	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" compression="gzip">
+		<tarfileset refid="srcdir"/>
+		<tarfileset refid="scripts"/>
+		<tarfileset refid="datadir"/>
+		<tarfileset refid="datascripts"/>
+		<tarfileset refid="docs"/>
+		<tarfileset refid="html"/>
+		<tarfileset refid="htmlfilter"/>
+		<tarfileset refid="patches"/>
+		<tarfileset refid="translate"/>
+	</tar>
+	<echo message="Tar saved as 'dist/${lc.version}.tar.gz'!" />
+
+	<!--
+	<zip destfile="${dist}/logicampus-${lc.version}.zip">
+		<tarfileset refid="srcdir"/>
+		<tarfileset refid="scripts"/>
+		<tarfileset refid="datadir"/>
+		<tarfileset refid="datascripts"/>
+		<tarfileset refid="docs"/>
+		<tarfileset refid="html"/>
+		<tarfileset refid="htmlfilter"/>
+		<tarfileset refid="patches"/>
+		<tarfileset refid="translate"/>
+	</zip>
+	<echo message="Zip saved as 'dist/${lc.version}.zip'!" />
+	-->
+	<delete dir="filtertmp"/>
+	<!--
+	-->
+
+<!--
+	<zip destfile="${dist}/logicampus-${lc.version}.zip" basedir="temp/"/>
+-->
+
+
 	<!-- need to recopy images because they shouldn't be filtered by the filterset tag -->
+
+<!--
 	<copy todir="${build}/public_html/" overwrite="true">
 	  <fileset dir="${src}">
 		<include name="templates/private/images/**"/>
@@ -164,83 +200,21 @@
 	  </fileset>
 	</copy>
 
-	<copy todir="${build}/logicreate/">
-	  <fileset dir="${src}">
-		<include name="cache/**"/>
-		<exclude name="cache/**/*CVS*"/>
-		<exclude name="cache/**/*~"/>
-	  </fileset>
-	</copy>
-
-	<mkdir dir="${build}/patches"/>
-	<copy todir="${build}/patches">
-	  <fileset dir="patches">
-		<include name="**"/>
-		<exclude name="**CVS**"/>
-		<exclude name="**~"/>
-	  </fileset>
-	</copy>
-
-	<filter token="LC_VERSION" value="${lc.version}"/>
-	<filter token="LC_BUILD_DATE" value="${build.date}"/>
-	<copy file="${src}/index.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/defines.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/defines.template.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/settings.advanced.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/settings.simple.php" todir="${build}/public_html/" filtering="true"/>
-	<copy file="${src}/first_time.php" todir="${build}/public_html/" filtering="true"/>
-
 
 	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite="true"/>
 
+-->
 
-	<!-- move the data files to where the installer can get them -->
-	<antcall target="copy_data"/>
 
-	<!-- build translation files and install -->
-	<antcall target="translate"/>
 
   	<!-- apply LCPL to files -->
 	<!--
 	<antcall target="apply_license"/>
 	-->
 
-	<!-- After license is applied, copy defines.php over -->
-	<antcall target="setup"/>
-
-	<!-- After license is applied, copy install.php over -->
-	<echo message="copying installation instructions."/>
-	<copy file="${src}/install.php" todir="${build}/public_html/" overwrite="true">
-		<filterset>
-			<filter token="build.date" value="${build.date}"/>
-			<filter token="version.number" value="${version.number}"/>
-			<filter token="version.extra" value="${version.extra}"/>
-		</filterset>
-	</copy>
-
-
-	<!-- tar up -->
-	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" basedir="temp/" compression="gzip"/>
-	<zip destfile="${dist}/logicampus-${lc.version}.zip" basedir="temp/"/>
-
-	<!-- clean up temp-->
-	<antcall target="cleantemp"/>
 	<echo message="Archive saved in 'dist/' directory!" />
   </target>
 
-
-	<target name="copy_data"
-		description="move data/*sql to logicreate/data/ for the install.php script" >
-
-		<mkdir dir="${build}/logicreate/data"/>
-		<copy todir="${build}/logicreate/scripts" file="${data}/wipe_clean.sh"/>
-		<copy todir="${build}/logicreate/scripts" file="${data}/install_metainfo.sh"/>
-		<copy todir="${build}/logicreate/data" overwrite="true">
-			<fileset dir="${data}">
-				<include name="*.sql"/>
-			</fileset>
-		</copy> 
-	</target>
 
 	<target name="apply_license"
 		description="uses a combination of bash and perl in the build/ dir to apply a common license to all code files" 
@@ -268,13 +242,6 @@
 			<arg value="buildtrans.php"/>
 			<arg value="zh_CN"/>
 		</exec>
-
-
-		<copy todir="${build}/logicreate/lang/" file="lang/lct.en_US.php"/>
-		<copy todir="${build}/logicreate/lang/" file="lang/lct.es_MX.php"/>
-		<copy todir="${build}/logicreate/lang/" file="lang/lct.zh_CN.php"/>
-		<copy todir="${build}/logicreate/lang/" file="${lcsrc}/lang/fallback.php"/>
-
 	</target>
 
 
@@ -283,20 +250,15 @@
 
 	<target name="clean"
 		description="removes temp directory and defines file" >
-		<!-- Delete the ${build} and ${dist} directory trees -->
-		<delete dir="${build}"/>
+		<delete dir="filtertmp"/>
 		<delete file="${src}/defines.php"/>
+		<!--
 		<delete>
 			<fileset dir="${dist}" includes="*"/>
 		</delete>
+		-->
 	</target>
 
-	<target name="cleantemp"
-		description="removes temp and dist directories"
-		unless="leavetemp">
-		<!-- Delete the ${build} and ${dist} directory trees -->
-		<delete dir="temp"/>
-	</target>
 
 	<target name="patch"
 		description="creates a patch against cvs, patch.txt" >
