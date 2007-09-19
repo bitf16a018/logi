@@ -957,7 +957,7 @@ class ErrorStack {
 		$newstack = array();
 		$found = false;
 		$s =& ErrorStack::_singleton();
-		for ($x= $s->count; $x >= 0; --$x)  {
+		for ($x= ($s->count-1); $x >= 0; --$x)  {
 			if ( ($s->stack[$x]->type == $t) and (!$found)) {
 				$ret = $s->stack[$x];
 				$found = true;
@@ -1075,7 +1075,7 @@ class lcError {
 	 * doesn't cut it
 	 */
 	function throwError ($level,$m,$c='error') {
-		ErrorStack::_errorHandler($level,$m,$f,$l,$c);
+		ErrorStack::_errorHandler($level,$m,'',-1,$c);
 	}
 
 	function addBackTrace ($bt) {
