@@ -153,6 +153,14 @@ class mysql extends DB {
 
 
 	/**
+	 * Release the most recent result ID
+	 */
+	function freeResult() {
+		$stuff = array_pop($this->resultSet);
+		mysql_free_result($stuff);
+	}
+
+	/**
 	 * Short hand for query() and next_record().
 	 *
 	 * @param string $sql SQL Command

@@ -51,8 +51,8 @@ class ExportContent extends FacultyService {
 	 */
 	function downloadRun($db, &$u, &$lc, &$t) {
 		$this->obj_zip = new LcZipFile();
-		$this->obj_zip->add_dir('interactions/');
-		$this->obj_zip->add_dir('tests/');
+//		$this->obj_zip->add_dir('interactions/');
+//		$this->obj_zip->add_dir('tests/');
 		$this->obj_zip->add_dir('content/');
  
 		$lc->templateName='dataexchange_main';
@@ -97,7 +97,7 @@ class ExportContent extends FacultyService {
 		$xml_raw_save = '';
 		
 		
-		$xmlObj = new xmlparser('<lobcol></lobcol>');
+		$xmlObj = new xmlparser('<lobcol xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd"></lobcol>');
 		$root =& $xmlObj->getRoot();
 		
 		/*
@@ -119,17 +119,36 @@ class ExportContent extends FacultyService {
 						);
 
 		 */
+		//get the semester start dates
+		$this->semesterId = $db->Record['id_semesters'];
+		$db->query("SELECT * FROM semesters WHERE id_semesters = ".$this->semesterId);
+		$db->nextRecord();
+		$db->freeResult();
+		$this->semStart =  strtotime($db->record['dateStart']);
+		$this->semEnd =  strtotime($db->record['dateEnd']);
 
 		$lobs = $this->get_content_nodes();
 		foreach ($lobs as $xmlnode) {
 			$root->children[] = $xmlnode;
 		}
+		unset($lobs);
 
 		$doclobs = $this->get_document_files();
 		foreach ($doclobs as $xmlnode) {
 			$root->children[] = $xmlnode;
 		}
-		
+		unset($doclobs);
+
+		//do homework (interactions)
+//		$xmlObj = new xmlparser('<lobcol></lobcol>');
+//		$root =& $xmlObj->getRoot();
+		$hmwlobs = $this->get_homework_nodes();
+		foreach ($hmwlobs as $xmlnode) {
+			$root->children[] = $xmlnode;
+		}
+		unset($hmwlobs);
+	
+
 
 //		print_r($lobs);exit();
 
@@ -141,6 +160,7 @@ class ExportContent extends FacultyService {
 		// I think i'm going to have to rewrite this, becuase i can't pump out more than the php upload limit 15M
 		$file_size = ftell($fh);
 		rewind($fh);
+
 		/*
 		$zipname = tempnam();
 		$ziph = fopen( $zipname, 'b');
@@ -150,19 +170,24 @@ class ExportContent extends FacultyService {
 		fclose($fh);
 //		echo "<pre>\n".htmlspecialchars($xmlchars)."\n</pre>\n";exit();
        
-       
+
 		$this->obj_zip->add_file($xmlchars,'learningobjects.xml');
+
+		//$this->obj_zip->add_file($xmlchars,'interactions.xml');
+
+		//do tests (assessments)
+		//$this->obj_zip->add_file('<?xml version="1.0"? >','assessments.xml');
 		$wiky = $this->obj_zip->file();
         
 		ob_end_clean();
 
-	if (ini_get('zlib.output_compression'))
-		ini_set('zlib.output_compression', 'Off');
+		if (ini_get('zlib.output_compression'))
+			ini_set('zlib.output_compression', 'Off');
 
-        //header("Cache-control: public");
-	header('Cache-Control: no-store, no-cache, must-revalidate');
-	header('Cache-Control: post-check=0, pre-check=0', false);
-	header('Pragma: no-cache');
+		//header("Cache-control: public");
+		header('Cache-Control: no-store, no-cache, must-revalidate');
+		header('Cache-Control: post-check=0, pre-check=0', false);
+		header('Pragma: no-cache');
         		//header("Content-type: text/html");
 		header("Content-type: application/zip");
 		header("Content-length: ". strlen($wiky));
@@ -172,7 +197,9 @@ class ExportContent extends FacultyService {
 	}
 	
 	
-	
+	/**
+	 * return an array of arrays that represent document lobs
+	 */
 	function get_document_files() {
 		$lob_nodes = array();
 		$sql = '
@@ -231,6 +258,7 @@ class ExportContent extends FacultyService {
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_file_node;
 			$xml_child_nodes[] = $lob_desc_node;
+			$xml_child_nodes[] = $lob_url;
 
 			//lifecycle
 			$createdon = $db->record['created_on'];
@@ -323,13 +351,141 @@ class ExportContent extends FacultyService {
 
 			$guid = lcUuid();
 			$lob_nodes[] = new xml_node('lob', 
-				array('guid'=>$guid, 'dbid'=>$db->record['id_class_lesson_content']), 
+				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
 				$xml_child_nodes
 			);
 		}
 		return $lob_nodes;
 	}
 	
+
+	/**
+	 * return an array of arrays that represent document lobs
+	 */
+	function get_homework_nodes() {
+		$lob_nodes = array();
+		$sql = '
+		SELECT B.*
+		FROM class_assignments_link as A
+		LEFT JOIN class_assignments AS B ON A.id_class_assignments = B.id_class_assignments
+		WHERE A.id_class_assignments='.$this->classId;
+
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+
+		/*
+		while ($db->nextRecord()) {
+			echo "debug offset = ". (( $db->record['dueDate'] - $this->semStart ) / 60 / 60/ 24);
+			debug($db->record);
+		}
+		exit();
+		 */
+		while ($db->nextRecord()) {
+			$type_node = new xml_node('type',null,null,'interaction');
+			//subtype
+			list($type,$submime) = explode('/', $db->record['lob_mime']);
+			//$sub_type_node = new xml_node('subtype',array('mime'=>$db->record['lob_mime']),null);
+			$sub_type_node = new xml_node('subtype',null,null);
+			$resp_node = new xml_node('logicampus:response',null,null);
+
+			/*
+			1=>"Upload a file",
+			2=>"Text response",
+			3=>"Upload and text",
+			4=>"Forum post",
+			6=>"Audio Response",
+			5=>"None",
+			 */
+
+			switch ($db->record['responseType']) {
+				case 1:
+				case 2:
+				case 3:
+				case 6:
+				$sub_type_node->value = 'assignment';
+				break;
+
+				case 5:
+				$sub_type_node->value = 'activity';
+				break;
+
+				case 4:
+				$sub_type_node->value = 'forum';
+				break;
+			}
+
+			switch ($db->record['responseType']) {
+				case 1:
+					$resp_node->value = 'upload';
+					break;
+				case 2:
+					$resp_node->value = 'text';
+					break;
+				case 3:
+					$resp_node->value = 'textandupload';
+					break;
+				case 4:
+					$resp_node->value = 'forum';
+					break;
+				case 5:
+					$resp_node->value = 'none';
+					break;
+				case 6:
+					$resp_node->value = 'audio';
+					break;
+			}
+
+			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['title']);
+			$lob_title_node->cdata = true;
+
+			$lob_desc_node = new xml_node('lobdescription',null,null,$db->record['instructions']);
+			$lob_desc_node->cdata = true;
+
+
+			$xml_child_nodes = array();
+			$xml_child_nodes[] = $type_node;
+			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $resp_node;
+			$xml_child_nodes[] = $lob_title_node;
+			$xml_child_nodes[] = $lob_desc_node;
+
+			//lifecycle
+			$createdon = $db->record['created_on'];
+
+			$lifecycleArray = array(
+				'version'=>$db->record['version'], 
+				'createdon'=>time(), 'createdon_dateformat'=>'unix'
+			);
+
+			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
+
+			/*
+			//metadata
+			$metadataArray = array(
+				'author'=>$db->record['author'],
+				'subject'=>$db->record['subject'],
+				'subdisc'=>$db->record['subdisc'],
+				'subject_abbr'=>'true',
+				'subdisc_abbr'=>'false',
+				'copyright'=>$db->record['copyright'],
+				'license'=>$db->record['license']
+			);
+			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
+			 */
+
+//			$meta_node->children[] = $author_node;
+//			$xml_child_nodes[] = $meta_node;
+
+			$guid = lcUuid();
+			$lob_nodes[] = new xml_node('lob', 
+				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
+				$xml_child_nodes
+			);
+		}
+	return  $lob_nodes; 
+	}
+
 	
 	/**
 	 * make the lifecycle tag and all the possible sub nodes.
@@ -661,4 +817,3 @@ class LcZipFile {
 }
 
 ?>
-
