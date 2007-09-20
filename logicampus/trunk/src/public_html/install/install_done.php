@@ -70,7 +70,7 @@ $db_host = '';
 
 
 <p>
-It seems that you're all done.
+Installation is complete.
 </p>
 
 

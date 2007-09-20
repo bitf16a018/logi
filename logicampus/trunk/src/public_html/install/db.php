@@ -15,6 +15,8 @@ function getErrMessage($id) {
 	case 2:
 		return "The user does not have permissions to create the chosen database.";
 
+	case 4:
+		return "An error occured that stopped the installation.  Make sure the user has all the proper permissions.<br/>You might need to drop and re-create the database since the installation was not properly finished.";
 	}
 }
 
