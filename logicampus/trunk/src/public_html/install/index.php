@@ -37,6 +37,26 @@ function printbool($val) {
 		echo "false";
 	}
 }
+
+function getErrMessage($id) {
+	switch ($id) {
+	case 3:
+		return "That user and password were not accepted by the server.";
+
+	case 1:
+		return "The database user cannot access the chosen database.";
+
+	case 2:
+		return "The user does not have permissions to create the chosen database.";
+
+	case 4:
+		return "An error occured that stopped the installation.  Make sure the user has all the proper permissions.<br/>You might need to drop and re-create the database since the installation was not properly finished.";
+
+	}
+}
+
+
+
 ?><html>
 <head><title>LogiCampus Installation</title></head>
 <body>
@@ -46,6 +66,21 @@ function printbool($val) {
 <div style="background-color:#9C0000;color:white">
 &nbsp;
 </div>
+
+
+<?php
+	if (isset($_GET['errid'])) {
+		$errid = $_GET['errid'];
+?>
+<br/>
+<div style="border:1px solid red;background-color:#FEE;">
+	<h3 style="color:red;">There was an error:</h3>
+		<p><?=getErrMessage($errid);?></p>
+</div>
+<?php
+	}
+?>
+
 <!--
 <p>
 Here is an overview of the settings for this installation.  If there are any settings that are not "OK" you need to change them before procedding to the next step.
@@ -84,7 +119,7 @@ You can try the default settings by clicking the following button.
 </p>
 
 
-<form method="GET" style="padding:0px;margin:0px;" action="<?php echo BASE_URL;?>">
+<form method="GET" style="padding:0px;margin:0px;" action="install_proc.php">
 <input type="submit" value="Attempt Installation"/>
 <input type="hidden" name="install" value="1"/>
 </form>

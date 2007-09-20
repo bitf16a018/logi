@@ -92,22 +92,22 @@ if ($results['connect'] ) {
 
 	//try to see if all the tables are installed
 	$results['hastables'] = $gdb->query("select count(*) from lcUsers");
+	$results['hastables'] &= $gdb->query("select count(*) from class_lessons");
+	//the above is pretty weak, but I'm trying to keep it DB agnostic
 	if (!$results['hastables'] ) {
 		$e = ErrorStack:: pullError();
 		$results['createtables'] = tryToMakeTables($gdb);
-
 		if (!$results['createtables']) {
-			die ('died on making tables.');
-			include('install.php');
-			exit();
+			$errorIds[] = 4;
+			redirBack();
 		} else {
 			$gdb->disconnect();
 			header("Location: install_done.php");
 			exit();
 		}
 	}
-	if (!$results['hastables'] && !$_GET['install'] ) {
-		include('install.php');
+	if ($results['hastables'] ) {
+		header("Location: install_done.php");
 		exit();
 	}
 }
@@ -124,10 +124,30 @@ function tryToMakeTables(&$gdb) {
 		foreach ($installTableSchemas as $schema) {
 			if (trim($schema) == '') { continue;}
 			if (!$gdb->query($schema)) {
+				//if the error has "already exists in it, just continue"
+				//__FIXME__ mysql specific
+				if ($gdb->errorNumber == 1050) {
+					continue;
+				}
+				//__FIXME__ english specific
+				if (strstr($gdb->errorMessage, "already exists") ) {
+					continue;
+				}
+				//if the error is duplicate key, just keep going
+				//__FIXME__ mysql specific
+				if ($gdb->errorNumber == 1062 || $gdb->errorNumber == 1061) {
+					continue;
+				}
+				//__FIXME__ english specific
+				if (strstr($gdb->errorMessage, "Duplicate") ) {
+					continue;
+				}
+				/*
 				echo "query failed. ($x)\n";
 				echo $gdb->errorMessage."\n";
 				print_r($schema);
 				exit();
+				// */
 				return false;
 			}
 		}
@@ -141,9 +161,21 @@ function tryToMakeTables(&$gdb) {
 		foreach ($installTableSchemas as $schema) {
 			if (trim($schema) == '') { continue;}
 			if (!$gdb->query($schema)) {
+				//if the error is duplicate key, just keep going
+				//__FIXME__ mysql specific
+				if ($gdb->errorNumber == 1062 || $gdb->errorNumber == 1061) {
+					continue;
+				}
+				//__FIXME__ english specific
+				if (strstr($gdb->errorMessage, "Duplicate") ) {
+					continue;
+				}
+
+				/*
 				echo "data insert failed.\n";
 				print_r($schema);
 				exit();
+				// */
 				return false;
 			}
 		}
@@ -154,13 +186,18 @@ function tryToMakeTables(&$gdb) {
 
 function redirBack() {
 	global $errorIds;
-	if (strstr($_SERVER['HTTP_REFERER'], '?') ) {
+	if (@$_GET['install'] == '1') {
+		$referer = 'index.php';
+	} else {
+		$referer = $_SERVER['HTTP_REFERER'];
+	}
+	if (strstr($referer, '?') ) {
 		$getstr = '&';
 	} else {
 		$getstr = '?';
 	}
 	$getstr .= 'errid='.$errorIds[0];
-	header('Location: '.$_SERVER['HTTP_REFERER'].$getstr);
+	header('Location: '.$referer.$getstr);
 	exit();
 }
 
