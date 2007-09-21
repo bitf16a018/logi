@@ -1,136 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<lobcol>
-	<lob guid="">
-		<type>interaction</type>
-		<subtype>activity</subtype>
+<lob:lobcol 
+	xmlns:lob="http://logicampus.sourceforge.net/2006/learning_object.dtd"
+	xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd" 
+	xmlns:lesson="http://logicampus.sourceforge.net/2006/lob_lesson.dtd" 
+	xmlns:class="http://logicampus.sourceforge.net/2006/lob_class.dtd">
 
-		<lobdescription></lobdescription>
-		<lobcaption></lobcaption>
-		<lobnotes></lobnotes>
+	<lob:obj guid="">
+		<lob:type>interaction</type>
+		<lob:subtype>activity</subtype>
 
-		<lobtitle>
-		</lobtitle>
-		<loburltitle>
-		</loburltitle>
+		<lob:lobdescription></lobdescription>
+		<lob:lobcaption></lobcaption>
+		<lob:lobnotes></lobnotes>
+
+		<lob:lobtitle>
+		</lob:lobtitle>
+		<lob:loburltitle>
+		</lob:loburltitle>
 		<!-- one of the following -->
-		<lobcontent>
-		</lobcontent>
-		<lobbinary encoding="base64">
-		</lobbinary>
-		<lobfilename>
-		</lobfilename>
+		<lob:lobcontent>
+		</lob:lobcontent>
+		<lob:lobbinary encoding="base64">
+		</lob:lobbinary>
+		<lob:lobfilename>
+		</lob:lobfilename>
 
-		<metadata>
-			<subject abbrv="no">English</subject>
-			<subdisc abbrv="no">Literature</subdisc>
-			<bibliography>
-				<citation>
-					<source></source>
-					<article></article>
-					<page></page>
-					<publish></publish>
-					<media></media>
-					<author></author>
-					<url></url>
-					<date></date>
-				</citation>
-			</bibliography>
-			<category></category>
-			<category></category>
-			<difficulty></difficulty>
-			<standard></standard>
-			<objective></objective>
-			<author></author>
-			<copyright></copyright>
-			<license></license>
+		<lob:metadata>
+			<lob:subject abbrv="no">English</lob:subject>
+			<lob:subdisc abbrv="no">Literature</lob:subdisc>
+			<lob:bibliography>
+				<lob:citation>
+					<lob:source></lob:source>
+					<lob:article></lob:article>
+					<lob:page></lob:page>
+					<lob:publish></lob:publish>
+					<lob:media></lob:media>
+					<lob:author></lob:author>
+					<lob:url></lob:url>
+					<lob:date></lob:date>
+				</lob:citation>
+			</lob:bibliography>
+			<lob:category></lob:category>
+			<lob:category></lob:category>
+			<lob:difficulty></lob:difficulty>
+			<lob:standard></lob:standard>
+			<lob:objective></lob:objective>
+			<lob:author></lob:author>
+			<lob:copyright></lob:copyright>
+			<lob:license></lob:license>
 			<!-- one of the following -->
-			<lobpreview>
-			</lobpreview>
-			<lobpreviewbinary encoding="base64">
-			</lobpreviewbinary>
-			<lobpreviewfilename>
-			</lobpreviewfilename>
-		</metadata>
-		<lifecycle>
-			<createdon dateformat=""></createdon>
-			<updatedon dateformat=""></updatedon>
-			<version major="" minor=""></version>
-			<status></status>
-			<active></active>
-		</lifecycle>
-	</lob>
-	<lob guid="">
-		<type>content</type>
-		<subtype mime="text/html">text</subtype>
+			<lob:lobpreview>
+			</lob:lobpreview>
+			<lob:lobpreviewbinary encoding="base64">
+			</lob:lobpreviewbinary>
+			<lob:lobpreviewfilename>
+			</lob:lobpreviewfilename>
+		</lob:metadata>
+		<lob:lifecycle>
+			<lob:createdon dateformat=""></lob:createdon>
+			<lob:updatedon dateformat=""></lob:updatedon>
+			<lob:version major="" minor=""></lob:version>
+			<lob:status></lob:status>
+			<lob:active></lob:active>
+		</lob:lifecycle>
+	</lob:obj>
+	<lob:obj guid="">
+		<lob:type>content</lob:type>
+		<lob:subtype mime="text/html">text</lob:subtype>
 
-		<lobdescription></lobdescription>
-		<lobcaption></lobcaption>
-		<lobnotes></lobnotes>
+		<lob:lobdescription></lob:lobdescription>
+		<lob:lobcaption></lob:lobcaption>
+		<lob:lobnotes></lob:lobnotes>
 
-		<lobtitle>
-		</lobtitle>
-		<loburltitle>
-		</loburltitle>
-		<lobcontent>
-		</lobcontent>
-		<lobbinary encoding="base64">
-		</lobbinary>
-		<lobfilename>
-		</lobfilename>
-		<metadata>
-			<subject abbrv="no">English</subject>
-			<subdisc abbrv="no">Literature</subdisc>
-			<bibliography>
-				<citation>
-					<source></source>
-					<article></article>
-					<page></page>
-					<publish></publish>
-					<media></media>
-					<author></author>
-					<url></url>
-					<date></date>
-				</citation>
-			</bibliography>
-			<category></category>
-			<category></category>
-			<difficulty></difficulty>
-			<standard></standard>
-			<objective></objective>
-			<author></author>
-			<copyright></copyright>
-			<license></license>
+		<lob:lobtitle>
+		</lob:lobtitle>
+		<lob:loburltitle>
+		</lob:loburltitle>
+		<lob:lobcontent>
+		</lob:lobcontent>
+		<lob:lobbinary encoding="base64">
+		</lob:lobbinary>
+		<lob:lobfilename>
+		</lob:lobfilename>
+		<lob:metadata>
+			<lob:subject abbrv="no">English</lob:subject>
+			<lob:subdisc abbrv="no">Literature</lob:subdisc>
+			<lob:bibliography>
+				<lob:citation>
+					<lob:source></lob:source>
+					<lob:article></lob:article>
+					<lob:page></lob:page>
+					<lob:publish></lob:publish>
+					<lob:media></lob:media>
+					<lob:author></lob:author>
+					<lob:url></lob:url>
+					<lob:date></lob:date>
+				</lob:citation>
+			</lob:bibliography>
+			<lob:category></lob:category>
+			<lob:category></lob:category>
+			<lob:difficulty></lob:difficulty>
+			<lob:standard></lob:standard>
+			<lob:objective></lob:objective>
+			<lob:author></lob:author>
+			<lob:copyright></lob:copyright>
+			<lob:license></lob:license>
 			<!-- one of the following -->
-			<lobpreview>
-			</lobpreview>
-			<lobpreviewbinary encoding="base64">
-			</lobpreviewbinary>
-			<lobpreviewfilename>
-			</lobpreviewfilename>
-		</metadata>
-		<lifecycle>
-			<createdon dateformat=""></createdon>
-			<updatedon dateformat=""></updatedon>
-			<version major="" minor=""></version>
-			<status></status>
-			<active></active>
-		</lifecycle>
-	</lob>
+			<lob:lobpreview>
+			</lob:lobpreview>
+			<lob:lobpreviewbinary encoding="base64">
+			</lob:lobpreviewbinary>
+			<lob:lobpreviewfilename>
+			</lob:lobpreviewfilename>
+		</lob:metadata>
+		<lob:lifecycle>
+			<lob:createdon dateformat=""></lob:createdon>
+			<lob:updatedon dateformat=""></lob:updatedon>
+			<lob:version major="" minor=""></lob:version>
+			<lob:status></lob:status>
+			<lob:active></lob:active>
+		</lob:lifecycle>
+	</lob:lob>
 
-	<lesson guid="">
-		<objective></objective>
-		<standard></standard>
-		<plan>
-			<step num="1">Perform step 1</step>
-			<step num="2">Perform step 2</step>
-		</plan>
-		<notes>
-		</notes>
-		<linkedlobs>
-			<uselob guid=""/>
-		</linkedlobs>
-		<learningpath>
-			<lobsequence order="" notbefore="" visible="" daysafter="" guid=""/>
-		</learningpath>
-	</lesson>
-</lobcol>
+	<lesson:lesson guid="">
+		<lesson:objective></lesson:objective>
+		<lesson:standard></lesson:standard>
+
+		<lesson:start type="offset" format="unix">123123</lesson:end>
+		<lesson:end type="offset" format="days">25</lesson:end>
+
+		<lesson:plan>
+			<lesson:step num="1">Perform step 1</lesson:step>
+			<lesson:step num="2">Perform step 2</lesson:step>
+		</lesson:plan>
+		<lesson:notes>
+		</lesson:notes>
+		<lesson:learningpath>
+			<lesson:lobsequence order="1" notbefore="" visible="1">
+				<!-- only 1 learning object -->
+				<lesson:lob refid="be76c53d-1403-475c-ab85-ce559e84d5a8"/>
+				<!-- one of the following -->
+				<lesson:start type="offset" format="unix">123123</lesson:start>
+				<lesson:start type="offset" format="days">2.3</lesson:start>
+				<lesson:start type="date" format="mm-dd-yyyy">01-28-2008</lesson:start>
+				<!-- one of the following -->
+				<lesson:end type="offset" format="unix">123123</lesson:end>
+				<lesson:end type="offset" format="days">2.3</lesson:end>
+				<lesson:end type="date" format="mm-dd-yyyy">01-28-2008</lesson:end>
+			</lesson:lobsequence>
+		</lesson:learningpath>
+	</lesson:lesson>
+
+	<class:classroom>
+		<!-- only one of the following -->
+		<class:term>semester</class:term>
+		<class:term>vary</class:term>
+
+		<!-- only one of the following -->
+		<class:registration>open</class:registration>
+		<class:registration>private</class:registration>
+		<class:registration>invitation</class:registration>
+		<class:registration>enrollment</class:registration>
+
+		<class:setting key="">value</class:setting>
+		<class:setting key="">value</class:setting>
+		<class:setting key="">value</class:setting>
+	</class:classroom>
+</lob:lobcol>
