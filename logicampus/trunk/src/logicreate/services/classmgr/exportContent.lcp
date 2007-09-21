@@ -97,7 +97,7 @@ class ExportContent extends FacultyService {
 		$xml_raw_save = '';
 		
 		
-		$xmlObj = new xmlparser('<lobcol xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd"></lobcol>');
+		$xmlObj = new xmlparser('<lobcol xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd" xmlns:lob="http://logicampus.sourceforge.net/2006/learning_object.dtd"></lobcol>');
 		$root =& $xmlObj->getRoot();
 		
 		/*
@@ -147,7 +147,13 @@ class ExportContent extends FacultyService {
 			$root->children[] = $xmlnode;
 		}
 		unset($hmwlobs);
-	
+
+
+		$tstlobs = $this->get_test_nodes();
+		foreach ($tstlobs as $xmlnode) {
+			$root->children[] = $xmlnode;
+		}
+		unset($tstlobs);
 
 
 //		print_r($lobs);exit();
@@ -242,13 +248,13 @@ class ExportContent extends FacultyService {
 			} else {
 				$sub_type_node->value = 'document';
 			}
-			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['lob_title']);
+			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
-			$lob_url = new xml_node('loburltitle',null,null,$db->record['lob_urltitle']);
-			$lob_file_node = new xml_node('lobfilename',null,null,$db->record['lob_filename']);
+			$lob_url = new xml_node('lob:urltitle',null,null,$db->record['lob_urltitle']);
+			$lob_file_node = new xml_node('lob:filename',null,null,$db->record['lob_filename']);
 			$lob_file_node->cdata = true;
 
-			$lob_desc_node = new xml_node('lobdescription',null,null,$db->record['lob_description']);
+			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['lob_description']);
 			$lob_desc_node->cdata = true;
 
 
@@ -264,8 +270,8 @@ class ExportContent extends FacultyService {
 			$createdon = $db->record['created_on'];
 
 			$lifecycleArray = array(
-				'version'=>$db->record['version'], 
-				'createdon'=>$createdon, 'createdon_dateformat'=>'unix'
+				'lob:version'=>$db->record['version'], 
+				'lob:createdon'=>$createdon, 'createdon_dateformat'=>'unix'
 			);
 
 
@@ -273,13 +279,13 @@ class ExportContent extends FacultyService {
 
 			//metadata
 			$metadataArray = array(
-				'author'=>$db->record['author'],
-				'subject'=>$db->record['subject'],
-				'subdisc'=>$db->record['subdisc'],
+				'lob:author'=>$db->record['author'],
+				'lob:subject'=>$db->record['subject'],
+				'lob:subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
 				'subdisc_abbr'=>'false',
-				'copyright'=>$db->record['copyright'],
-				'license'=>$db->record['license']
+				'lob:copyright'=>$db->record['copyright'],
+				'lob:license'=>$db->record['license']
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 
@@ -299,9 +305,10 @@ class ExportContent extends FacultyService {
 	function get_content_nodes() {
 		$xml_child_nodes = array();
 		$sql = '
-		SELECT B.* 
+		SELECT B.*, C.* 
 		FROM lob_class_link A
 		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
+		LEFT JOIN lob_metadata AS C ON B.lob_content_id = C.lob_id
 		WHERE class_id='.$this->classId.'
 		AND lob_sub_type = "text"
 		'; 
@@ -314,9 +321,9 @@ class ExportContent extends FacultyService {
 		while ($db->nextRecord()) {
 			$type_node = new xml_node('type',null,null,'content');
 			$sub_type_node = new xml_node('subtype',null,null,$db->record['lob_sub_type']);
-			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['lob_title']);
+			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
-			$lob_content_node = new xml_node('lobcontent',null,null,$db->record['lob_content']);
+			$lob_content_node = new xml_node('lob:content',null,null,$db->record['lob_content']);
 			$lob_content_node->cdata = true;
 
 			$xml_child_nodes = array();
@@ -327,22 +334,24 @@ class ExportContent extends FacultyService {
 
 			//lifecycle
 			$lifecycleArray = array(
-				'version'=>'1.0', 
-				'createdon'=>time(), 'createdon_dateformat'=>'unix'
+				'lob:version'=>'1.0', 
+				'lob:createdon'=>time(), 'createdon_dateformat'=>'unix'
 			);
 
 			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
 
 			//metadata
 			$metadataArray = array(
-				'author'=>$db->record['author'],
-				'subject'=>$db->record['subject'],
-				'subdisc'=>$db->record['subdisc'],
+				'lob:author'=>$db->record['author'],
+				'lob:subject'=>$db->record['subject'],
+				'lob:subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
-				'copyright'=>$db->record['copyright'],
-				'license'=>$db->record['license']
+				'subdisc_abbr'=>'false',
+				'lob:copyright'=>$db->record['copyright'],
+				'lob:license'=>$db->record['license']
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
+
 
 //			$meta_node = new xml_node('metadata',null,null);
 //			$author_node = new xml_node('author',null,null,'Mark Kimsal');
@@ -436,10 +445,10 @@ class ExportContent extends FacultyService {
 					break;
 			}
 
-			$lob_title_node = new xml_node('lobtitle',null,null,$db->record['title']);
+			$lob_title_node = new xml_node('lob:title',null,null,$db->record['title']);
 			$lob_title_node->cdata = true;
 
-			$lob_desc_node = new xml_node('lobdescription',null,null,$db->record['instructions']);
+			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['instructions']);
 			$lob_desc_node->cdata = true;
 
 
@@ -454,8 +463,8 @@ class ExportContent extends FacultyService {
 			$createdon = $db->record['created_on'];
 
 			$lifecycleArray = array(
-				'version'=>$db->record['version'], 
-				'createdon'=>time(), 'createdon_dateformat'=>'unix'
+				'lob:version'=>$db->record['version'], 
+				'lob:createdon'=>time(), 'createdon_dateformat'=>'unix'
 			);
 
 			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
@@ -463,13 +472,13 @@ class ExportContent extends FacultyService {
 			/*
 			//metadata
 			$metadataArray = array(
-				'author'=>$db->record['author'],
-				'subject'=>$db->record['subject'],
-				'subdisc'=>$db->record['subdisc'],
+				'lob:author'=>$db->record['author'],
+				'lob:subject'=>$db->record['subject'],
+				'lob:subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
 				'subdisc_abbr'=>'false',
-				'copyright'=>$db->record['copyright'],
-				'license'=>$db->record['license']
+				'lob:copyright'=>$db->record['copyright'],
+				'lob:license'=>$db->record['license']
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 			 */
@@ -485,6 +494,100 @@ class ExportContent extends FacultyService {
 		}
 	return  $lob_nodes; 
 	}
+
+
+	/**
+	 * return an array of arrays that represent document lobs
+	 */
+	function get_test_nodes() {
+		$lob_nodes = array();
+		$sql = '
+		SELECT A.*
+		FROM assessment as A
+		WHERE A.class_id='.$this->classId;
+
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+
+		/*
+		while ($db->nextRecord()) {
+			debug($db->record);
+		}
+		exit();
+		// */
+		while ($db->nextRecord()) {
+			$type_node = new xml_node('type',null,null,'assessment');
+
+
+			$xml_child_nodes = array();
+
+			$lob_title_node = new xml_node('lob:title',null,null,$db->record['display_name']);
+			$lob_title_node->cdata = true;
+
+			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['description']);
+			$lob_desc_node->cdata = true;
+
+			$lob_instr_node = new xml_node('instructions',null,null,$db->record['instructions']);
+			$lob_desc_node->cdata = true;
+
+
+			$xml_child_nodes[] = $type_node;
+			$xml_child_nodes[] = $lob_title_node;
+			$xml_child_nodes[] = $lob_desc_node;
+			$xml_child_nodes[] = $lob_instr_node;
+
+
+			$attrs = array( 
+				'mail_responses',
+				'auto_publish',
+				'num_retries', 
+				'minute_limit', 
+				'show_result_type',
+				'possible_points'
+			);
+			foreach($attrs as $at) {
+				$xml_child_nodes[] = new xml_node('logicampus:'.$at, null,null, $db->record[$at]);
+			}
+
+
+			//lifecycle
+			$createdon = $db->record['created_on'];
+
+			$lifecycleArray = array(
+				'lob:version'=>$db->record['version'], 
+				'lob:createdon'=>time(), 'createdon_dateformat'=>'unix'
+			);
+
+			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
+
+			/*
+			//metadata
+			$metadataArray = array(
+				'lob:author'=>$db->record['author'],
+				'lob:subject'=>$db->record['subject'],
+				'lob:subdisc'=>$db->record['subdisc'],
+				'subject_abbr'=>'true',
+				'subdisc_abbr'=>'false',
+				'lob:copyright'=>$db->record['copyright'],
+				'lob:license'=>$db->record['license']
+			);
+			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
+			 */
+
+//			$meta_node->children[] = $author_node;
+//			$xml_child_nodes[] = $meta_node;
+
+			$guid = lcUuid();
+			$lob_nodes[] = new xml_node('lob', 
+				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
+				$xml_child_nodes
+			);
+		}
+	return  $lob_nodes; 
+	}
+
+
 
 	
 	/**
@@ -503,15 +606,15 @@ class ExportContent extends FacultyService {
 	 */
 	function makeLifecycleNode($lifecycleStruct) {
 		$allow = array(
-			'createdon',
-			'updatedon',
-			'version',
-			'status',
-			'active',
-			'createdby',
-			'updatedby'
+			'lob:createdon',
+			'lob:updatedon',
+			'lob:version',
+			'lob:status',
+			'lob:active',
+			'lob:createdby',
+			'lob:updatedby'
 		);
-		$lifecycle_node = new xml_node('lifecycle',null,null);
+		$lifecycle_node = new xml_node('lob:lifecycle',null,null);
 		foreach ($allow as $tag) {
 			if ($lifecycleStruct[$tag] != '') {
 				$n = new xml_node(
@@ -526,8 +629,8 @@ class ExportContent extends FacultyService {
 					&& $lifecycleStruct['version_major']) {
 						$n->attrs['major'] = $lifecycleStruct['version_major'];
 				}
-				if ($tag == 'createdon'
-					&& $lifecycleStruct['createdon_dateformat']) {
+				if ($tag == 'lob:createdon'
+					&& $lifecycleStruct['lob:createdon_dateformat']) {
 						$n->attrs['dateformat'] = $lifecycleStruct['createdon_dateformat'];
 				}
 
@@ -547,14 +650,14 @@ class ExportContent extends FacultyService {
 
 	function makeMetadataNode($metadataStruct) {
 		$allow = array(
-			'subject',
-			'subdisc',
-			'author',
-			'copyright',
-			'license',
-			'objective'
+			'lob:subject',
+			'lob:subdisc',
+			'lob:author',
+			'lob:copyright',
+			'lob:license',
+			'lob:objective'
 		);
-		$metadata_node = new xml_node('metadata',null,null);
+		$metadata_node = new xml_node('lob:metadata',null,null);
 		foreach ($allow as $tag) {
 			if ($metadataStruct[$tag] != '') {
 				$n = new xml_node(
@@ -564,12 +667,12 @@ class ExportContent extends FacultyService {
 					htmlentities($metadataStruct[$tag])
 				);
 
-				if ($tag == 'subject'
+				if ($tag == 'lob:subject'
 					&& $metadataStruct['subject_abbr']) {
 						$n->attrs['abbr'] = $metadataStruct['subject_abbr'];
 				}
 
-				if ($tag == 'subdisc'
+				if ($tag == 'lob:subdisc'
 					&& $metadataStruct['subdisc_abbr']) {
 						$n->attrs['abbr'] = $metadataStruct['subdisc_abbr'];
 				}
