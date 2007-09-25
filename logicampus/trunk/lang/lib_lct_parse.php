@@ -57,9 +57,9 @@ function findLctInFile($f) {
 		//handle inline brackets {$this->foo}
 		if (is_array($token) && $token[1] == '{' ) { $indent++; /*echo "*** INDENT ".$indent."\n"; // */}
 		if (is_string($token) ) {
-			if ($token == "\n" || $token == "\r\n" ) {
-				$line++;
-			}
+
+			$line += substr_count($text,"\n");
+
 			if ($token == '{') {
 			  $indent++;
 	//echo "*** INDENT ".$indent."\n";
@@ -100,6 +100,8 @@ function findLctInFile($f) {
 		if (is_array($token)) {
 			// token array
 			list($id, $text) = $token;
+
+			$line += substr_count($text,"\n");
 
 			switch ($id) {
 				case T_COMMENT:
