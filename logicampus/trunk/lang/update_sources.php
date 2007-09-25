@@ -19,10 +19,57 @@ $lctCounts = 0;
 
 echo "*** openening messages.en_US.xml\n";
 $msgDoc = new DomDocument('1.0', 'UTF-8');
-//$msgDoc = new DomDocument( file_get_contents("messages.en_US.xml") );
 $msgDoc->substituteEntities=false;
+$msgDoc->resolveExternals=false;
 $msgDoc->preserveWhiteSpace=true;
-$msgDoc->load( "./messages.en_US.xml");
+$msgDoc->validateOnParse=false;
+if (!@$msgDoc->load( "./messages.en_US.xml") ) {
+	
+	//create a new XML envelope
+	$msgDoc->encoding = 'UTF-8';
+	$msgDoc->version  = '1.0';
+	$root = $msgDoc->createElement('xliff');
+	$root->setAttribute('version','1.1');
+
+	$file = $msgDoc->createElement('file');
+	$file->setAttribute('source-language', 'en_US');
+	$file->setAttribute('target-language', 'en_US');
+	$file->setAttribute('original', 'logicampus modules');
+	$file->setAttribute('tool', 'logicampus lct extractor');
+	$file->setAttribute('datatype', 'text/x-php');
+
+	$msgDoc->appendChild($root);
+
+	$root->appendChild($msgDoc->createTextNode("\n"));
+	$root->appendChild($file);
+
+	$body = $msgDoc->createElement('body');
+	$root->appendChild($msgDoc->createTextNode("\n"));
+	$root->appendChild($body);
+	$root->appendChild($msgDoc->createTextNode("\n"));
+} else {
+	//extract the body node so code can attach to it
+
+	$xliffTag =& $msgDoc->documentElement;
+	$list = $xliffTag->getElementsByTagName('body');
+	//there can be only one... body tag
+	$body =& $list->item(0);
+}
+
+//now the $body tag can be used to add trans-unit nodes into
+
+
+
+$currentId = 1;
+//find the max ID
+$xpath = new DomXPath($msgDoc);
+$maxIdQuery = "//trans-unit/@id[not(. <= ../preceding-sibling::trans-unit/@id) and not(. <= ../following-sibling::trans-unit/@id)]";
+$elements = $xpath->query($maxIdQuery);
+foreach ($elements as $ele) {
+	$currentId = $ele->nodeValue;
+	$currentId++;
+	echo "*** Found previous nodes, starting ID is ".$currentId."\n";
+}
 
 
 //get list of files in one module
@@ -38,6 +85,7 @@ foreach($modules as $mod) {
 		if ($file == '.') continue;
 		if ($file == '..') continue;
 		if ($file == 'CVS') continue;
+		if ( strstr($file, '~') ) { continue; }
 		if (! strstr($file, '.html') ) { continue; }
 		$modFiles[] = $file;
 	}
@@ -64,17 +112,57 @@ foreach($modules as $mod) {
 
 		foreach ($lctFuncs as $lctObj) {
 			$untrans = substr($lctObj->params[0],1,-1);
-			$untrans = htmlentities($untrans,ENT_QUOTES, 'UTF-8');
-			echo "*** got this key: ".$lctObj->params[0]."\n";
+//			echo "*** got this key: ".$untrans."\n";
+
+			//search the message document first to find a source tag with this value already
+			$sameTuQuery = "/xliff/body/trans-unit[source='\n\t\t\t".$untrans."\n\t\t']";
+			$elements = $xpath->query($sameTuQuery);
+//			echo "*** XPath looking for duplicates of '".$untrans."'\n";
+//			print_r($sameTuQuery);// = "/language/trans-unit[source=\"".$untrans."\"]";
+			if ($elements->length) {
+				//already got this TU
+				//let's add another context to it
+				
+				$fileLine = substr($lctObj->file,7).':'.$lctObj->line;
+				$tu = $elements->item(0);
+				$ctxs = $tu->getElementsByTagName('context');
+				$found = false;
+				for ($xi=0; $xi < $ctxs->length; $xi++) {
+					if ($found) {continue;}
+
+					$context = $ctxs->item($xi);
+					if ($context->nodeValue == $fileLine) {
+						$found = true;
+						continue;
+					}
+				}
+				if ( !$found ) {
+					$context = $msgDoc->createElement('context', $fileLine);
+					$tu->appendChild($msgDoc->createTextNode("\t"));
+					$tu->appendChild($context);
+					$tu->appendChild($msgDoc->createTextNode("\n\t"));
+				}
+				continue;
+			}
+
+
 
 			$nltab    = $msgDoc->createTextNode("\n\t");
 			$tabtab   = $msgDoc->createTextNode("\t\t");
 			$tab      = $msgDoc->createTextNode("\t");
 			$nl       = $msgDoc->createTextNode("\n");
 
-			$tu = $msgDoc->createElement('tu');
+			$tu = $msgDoc->createElement('trans-unit');
+			$tu->setAttribute('id',$currentId);
+			$currentId++;
+
+			//there is no need to encode entities in an xpath query.. weird
+			// but you do want it encoded before it goes into the actual XML
+			$untrans = htmlentities($untrans,ENT_QUOTES, 'UTF-8');
+
 
 			$source = $msgDoc->createElement('source', "\n\t\t\t".$untrans."\n\t\t");
+			//$source = $msgDoc->createElement('source', $untrans);
 			$source->setAttribute('xml:lang','en_US');
 
 			$target = $msgDoc->createElement('target', "\n\t\t\t".$untrans."\n\t\t");
@@ -93,10 +181,10 @@ foreach($modules as $mod) {
 			$tu->appendChild($context);
 			$tu->appendChild($msgDoc->createTextNode("\n\t"));
 
-			$msgDoc->firstChild->appendChild($nl);
-			$msgDoc->firstChild->appendChild($tab);
-			$msgDoc->firstChild->appendChild($tu);
-			$msgDoc->firstChild->appendChild($msgDoc->createTextNode("\n"));
+			$body->appendChild($nl);
+			$body->appendChild($tab);
+			$body->appendChild($tu);
+			$body->appendChild($msgDoc->createTextNode("\n"));
 
 
 		}
@@ -112,7 +200,8 @@ foreach($modules as $mod) {
 
 
 echo "*** SAVING messages.en_US.xml...\n";
-print_r($msgDoc->saveXML());
+$msgDoc->save('messages.en_US.xml');
+//print_r($msgDoc->saveXML());
 
 
 echo "**** STATS:\n";
