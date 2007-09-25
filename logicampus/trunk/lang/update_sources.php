@@ -44,9 +44,9 @@ if (!@$msgDoc->load( "./messages.en_US.xml") ) {
 	$root->appendChild($file);
 
 	$body = $msgDoc->createElement('body');
-	$root->appendChild($msgDoc->createTextNode("\n"));
-	$root->appendChild($body);
-	$root->appendChild($msgDoc->createTextNode("\n"));
+	$file->appendChild($msgDoc->createTextNode("\n"));
+	$file->appendChild($body);
+	$file->appendChild($msgDoc->createTextNode("\n"));
 } else {
 	//extract the body node so code can attach to it
 
@@ -115,7 +115,7 @@ foreach($modules as $mod) {
 //			echo "*** got this key: ".$untrans."\n";
 
 			//search the message document first to find a source tag with this value already
-			$sameTuQuery = "/xliff/body/trans-unit[source='\n\t\t\t".$untrans."\n\t\t']";
+			$sameTuQuery = "/xliff/file/body/trans-unit[source='\n\t\t\t".$untrans."\n\t\t']";
 			$elements = $xpath->query($sameTuQuery);
 //			echo "*** XPath looking for duplicates of '".$untrans."'\n";
 //			print_r($sameTuQuery);// = "/language/trans-unit[source=\"".$untrans."\"]";
@@ -123,24 +123,26 @@ foreach($modules as $mod) {
 				//already got this TU
 				//let's add another context to it
 				
-				$fileLine = substr($lctObj->file,7).':'.$lctObj->line;
+				$sourcefile = substr($lctObj->file,7);
+				$sourceline = $lctObj->line;
 				$tu = $elements->item(0);
-				$ctxs = $tu->getElementsByTagName('context');
+				$ctxg = $tu->getElementsByTagName('context-group');
 				$found = false;
-				for ($xi=0; $xi < $ctxs->length; $xi++) {
+				for ($xi=0; $xi < $ctxg->length; $xi++) {
 					if ($found) {continue;}
+					$ctxg_node = $ctxg->item($xi);
 
-					$context = $ctxs->item($xi);
-					if ($context->nodeValue == $fileLine) {
+					if ($ctxg_node->getAttribute('name') == 'x-php-reference-'.crc32($sourcefile.'a'.$sourceline)) {
 						$found = true;
 						continue;
 					}
 				}
 				if ( !$found ) {
-					$context = $msgDoc->createElement('context', $fileLine);
-					$tu->appendChild($msgDoc->createTextNode("\t"));
-					$tu->appendChild($context);
-					$tu->appendChild($msgDoc->createTextNode("\n\t"));
+					$context_group = makeContextFileLine($msgDoc, $sourcefile, $sourceline);
+
+					$tu->appendChild($msgDoc->createTextNode("\n\t\t"));
+					$tu->appendChild($context_group);
+					$tu->appendChild($msgDoc->createTextNode("\n\t\t"));
 				}
 				continue;
 			}
@@ -169,7 +171,15 @@ foreach($modules as $mod) {
 			$target->setAttribute('xml:lang','en_US');
 
 			//remove the "../src/" from the filename
-			$context = $msgDoc->createElement('context', substr($lctObj->file,7).':'.$lctObj->line);
+
+			$sourcefile = substr($lctObj->file,7);
+			$sourceline = $lctObj->line;
+			$context_group = makeContextFileLine($msgDoc, $sourcefile, $sourceline);
+
+/*			$context_group->appendChild($msgDoc->createTextNode("\n\t\t\t"));
+			$context_group->appendChild($context_group);
+			$context_group->appendChild($msgDoc->createTextNode("\n\t\t"));
+ */
 
 			$tu->appendChild($msgDoc->createTextNode("\n\t\t"));
 			$tu->appendChild($source);
@@ -178,7 +188,7 @@ foreach($modules as $mod) {
 			$tu->appendChild($target);
 
 			$tu->appendChild($msgDoc->createTextNode("\n\t\t"));
-			$tu->appendChild($context);
+			$tu->appendChild($context_group);
 			$tu->appendChild($msgDoc->createTextNode("\n\t"));
 
 			$body->appendChild($nl);
@@ -220,4 +230,25 @@ echo "***  pct trnsltd ".sprintf("%.2f",(($lctFiles/$totalFiles)*100))." %\n";
 //next file in module
 //next module in list
 //
+//
+//
+function makeContextFileLine(&$doc, $f, $l) {
+	$context_group = $doc->createElement('context-group');
+	$context_group->setAttribute('name','x-php-reference-'.crc32($f.'a'.$l));
+	$context_group->setAttribute('purpose','location');
+	$file = $doc->createElement('context', $f);
+	$file->setAttribute('context-type','sourcefile');
+
+
+	$line = $doc->createElement('context', $l);
+	$line->setAttribute('context-type','linenumber');
+
+	$context_group->appendChild($doc->createTextNode("\n\t\t\t"));
+	$context_group->appendChild($file);
+	$context_group->appendChild($doc->createTextNode("\n\t\t\t"));
+	$context_group->appendChild($line);
+	$context_group->appendChild($doc->createTextNode("\n\t\t"));
+
+	return $context_group;
+}
 ?>
