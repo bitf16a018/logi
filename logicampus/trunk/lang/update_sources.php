@@ -24,7 +24,19 @@ $msgDoc->resolveExternals=false;
 $msgDoc->preserveWhiteSpace=true;
 $msgDoc->validateOnParse=false;
 if (!@$msgDoc->load( "./messages.en_US.xml") ) {
-	
+	//we can't use it, have to start another way in order to get a doctype
+	unset($msgDoc);
+	$impl = new DomImplementation();
+/*	<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+ *	*/
+	$dtd = $impl->createDocumentType('xliff','-//XLIFF//DTD XLIFF//EN', 'http://www.oasis-open.org/committees/xliff/documents/xliff-core-1.1.dtd');
+	$msgDoc = $impl->createDocument(null, null ,$dtd);
+	$msgDoc->substituteEntities=false;
+	$msgDoc->resolveExternals=false;
+	$msgDoc->preserveWhiteSpace=true;
+	$msgDoc->validateOnParse=false;
+
+
 	//create a new XML envelope
 	$msgDoc->encoding = 'UTF-8';
 	$msgDoc->version  = '1.0';
@@ -33,7 +45,7 @@ if (!@$msgDoc->load( "./messages.en_US.xml") ) {
 
 	$file = $msgDoc->createElement('file');
 	$file->setAttribute('source-language', 'en_US');
-	$file->setAttribute('target-language', 'en_US');
+	$file->setAttribute('target-language', '');
 	$file->setAttribute('original', 'logicampus modules');
 	$file->setAttribute('tool', 'logicampus lct extractor');
 	$file->setAttribute('datatype', 'text/x-php');
@@ -44,6 +56,11 @@ if (!@$msgDoc->load( "./messages.en_US.xml") ) {
 	$root->appendChild($file);
 
 	$body = $msgDoc->createElement('body');
+	$head = $msgDoc->createElement('header');
+	$file->appendChild($msgDoc->createTextNode("\n"));
+	$file->appendChild($head);
+	$file->appendChild($msgDoc->createTextNode("\n"));
+
 	$file->appendChild($msgDoc->createTextNode("\n"));
 	$file->appendChild($body);
 	$file->appendChild($msgDoc->createTextNode("\n"));
@@ -168,7 +185,7 @@ foreach($modules as $mod) {
 			$source->setAttribute('xml:lang','en_US');
 
 			$target = $msgDoc->createElement('target', "\n\t\t\t".$untrans."\n\t\t");
-			$target->setAttribute('xml:lang','en_US');
+			$target->setAttribute('xml:lang','');
 
 			//remove the "../src/" from the filename
 
