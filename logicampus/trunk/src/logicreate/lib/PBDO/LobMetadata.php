@@ -7,28 +7,26 @@ class LobMetadataBase {
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobMetadataId;
-	var $lobId;
-	var $lobKind;
+	var $lobRepoEntryId;
 	var $subject;
 	var $subdisc;
 	var $author;
 	var $copyright;
 	var $license;
-	var $version;
+	var $userVersion;
 	var $status;
 	var $updatedOn;
 	var $createdOn;
 
 	var $__attributes = array( 
 	'lobMetadataId'=>'integer',
-	'lobId'=>'integer',
-	'lobKind'=>'varchar',
+	'lobRepoEntryId'=>'integer',
 	'subject'=>'varchar',
 	'subdisc'=>'varchar',
 	'author'=>'varchar',
 	'copyright'=>'varchar',
 	'license'=>'varchar',
-	'version'=>'varchar',
+	'userVersion'=>'varchar',
 	'status'=>'varchar',
 	'updatedOn'=>'integer',
 	'createdOn'=>'integer');
@@ -57,6 +55,7 @@ class LobMetadataBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -123,14 +122,13 @@ class LobMetadataPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_SelectStatement("lob_metadata",$where);
 		$st->fields['lob_metadata_id'] = 'lob_metadata_id';
-		$st->fields['lob_id'] = 'lob_id';
-		$st->fields['lob_kind'] = 'lob_kind';
+		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
 		$st->fields['subject'] = 'subject';
 		$st->fields['subdisc'] = 'subdisc';
 		$st->fields['author'] = 'author';
 		$st->fields['copyright'] = 'copyright';
 		$st->fields['license'] = 'license';
-		$st->fields['version'] = 'version';
+		$st->fields['user_version'] = 'user_version';
 		$st->fields['status'] = 'status';
 		$st->fields['updated_on'] = 'updated_on';
 		$st->fields['created_on'] = 'created_on';
@@ -149,14 +147,13 @@ class LobMetadataPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_metadata");
 		$st->fields['lob_metadata_id'] = $this->lobMetadataId;
-		$st->fields['lob_id'] = $this->lobId;
-		$st->fields['lob_kind'] = $this->lobKind;
+		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
 		$st->fields['subject'] = $this->subject;
 		$st->fields['subdisc'] = $this->subdisc;
 		$st->fields['author'] = $this->author;
 		$st->fields['copyright'] = $this->copyright;
 		$st->fields['license'] = $this->license;
-		$st->fields['version'] = $this->version;
+		$st->fields['user_version'] = $this->userVersion;
 		$st->fields['status'] = $this->status;
 		$st->fields['updated_on'] = $this->updatedOn;
 		$st->fields['created_on'] = $this->createdOn;
@@ -177,14 +174,13 @@ class LobMetadataPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_UpdateStatement("lob_metadata");
 		$st->fields['lob_metadata_id'] = $obj->lobMetadataId;
-		$st->fields['lob_id'] = $obj->lobId;
-		$st->fields['lob_kind'] = $obj->lobKind;
+		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
 		$st->fields['subject'] = $obj->subject;
 		$st->fields['subdisc'] = $obj->subdisc;
 		$st->fields['author'] = $obj->author;
 		$st->fields['copyright'] = $obj->copyright;
 		$st->fields['license'] = $obj->license;
-		$st->fields['version'] = $obj->version;
+		$st->fields['user_version'] = $obj->userVersion;
 		$st->fields['status'] = $obj->status;
 		$st->fields['updated_on'] = $obj->updatedOn;
 		$st->fields['created_on'] = $obj->createdOn;
@@ -247,14 +243,13 @@ class LobMetadataPeerBase {
 	function row2Obj($row) {
 		$x = new LobMetadata();
 		$x->lobMetadataId = $row['lob_metadata_id'];
-		$x->lobId = $row['lob_id'];
-		$x->lobKind = $row['lob_kind'];
+		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
 		$x->subject = $row['subject'];
 		$x->subdisc = $row['subdisc'];
 		$x->author = $row['author'];
 		$x->copyright = $row['copyright'];
 		$x->license = $row['license'];
-		$x->version = $row['version'];
+		$x->userVersion = $row['user_version'];
 		$x->status = $row['status'];
 		$x->updatedOn = $row['updated_on'];
 		$x->createdOn = $row['created_on'];
