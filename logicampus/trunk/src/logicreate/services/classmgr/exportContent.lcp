@@ -100,11 +100,7 @@ class ExportContent extends FacultyService {
 		$xmlObj = new xmlparser('<lobcol xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd" xmlns:lob="http://logicampus.sourceforge.net/2006/learning_object.dtd"></lobcol>');
 		$root =& $xmlObj->getRoot();
 		
-		/*
-		$classroom_nodes[] = new xml_node('lob', 
-			array('guid'=>'lskdjfs')
-			);
-		 */
+
 
 		/*
 		$classroom_node[] = new xml_node('CLASSROOM', 
@@ -149,11 +145,20 @@ class ExportContent extends FacultyService {
 		unset($hmwlobs);
 
 
+
 		$tstlobs = $this->get_test_nodes();
 		foreach ($tstlobs as $xmlnode) {
 			$root->children[] = $xmlnode;
 		}
 		unset($tstlobs);
+
+
+		$lesslobs = $this->get_lesson_nodes();
+		foreach ($lesslobs as $xmlnode) {
+			$root->children[] = $xmlnode;
+		}
+		unset($lesslobs);
+
 
 
 //		print_r($lobs);exit();
@@ -174,7 +179,7 @@ class ExportContent extends FacultyService {
 
 		$xmlchars = fread($fh, $file_size);
 		fclose($fh);
-//		echo "<pre>\n".htmlspecialchars($xmlchars)."\n</pre>\n";exit();
+		echo "<pre>\n".htmlspecialchars($xmlchars)."\n</pre>\n";exit();
        
 
 		$this->obj_zip->add_file($xmlchars,'learningobjects.xml');
@@ -239,10 +244,10 @@ class ExportContent extends FacultyService {
 			);
 
 
-			$type_node = new xml_node('type',null,null,'content');
+			$type_node = new xml_node('lob:type',null,null,'content');
 			//subtype
 			list($type,$submime) = explode('/', $db->record['lob_mime']);
-			$sub_type_node = new xml_node('subtype',array('mime'=>$db->record['lob_mime']),null);
+			$sub_type_node = new xml_node('lob:subtype',array('mime'=>$db->record['lob_mime']),null);
 			if ($type == 'image') {
 				$sub_type_node->value = 'image';
 			} else {
@@ -319,8 +324,8 @@ class ExportContent extends FacultyService {
 
 		$lob_nodes = array();
 		while ($db->nextRecord()) {
-			$type_node = new xml_node('type',null,null,'content');
-			$sub_type_node = new xml_node('subtype',null,null,$db->record['lob_sub_type']);
+			$type_node = new xml_node('lob:type',null,null,'content');
+			$sub_type_node = new xml_node('lob:subtype',null,null,$db->record['lob_sub_type']);
 			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
 			$lob_content_node = new xml_node('lob:content',null,null,$db->record['lob_content']);
@@ -358,8 +363,8 @@ class ExportContent extends FacultyService {
 //			$meta_node->children[] = $author_node;
 //			$xml_child_nodes[] = $meta_node;
 
-			$guid = lcUuid();
-			$lob_nodes[] = new xml_node('lob', 
+			$guid = $db->record['lob_guid'];
+			$lob_nodes[] = new xml_node('lob:obj', 
 				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
 				$xml_child_nodes
 			);
@@ -391,11 +396,10 @@ class ExportContent extends FacultyService {
 		exit();
 		 */
 		while ($db->nextRecord()) {
-			$type_node = new xml_node('type',null,null,'interaction');
+			$type_node = new xml_node('lob:type',null,null,'interaction');
 			//subtype
 			list($type,$submime) = explode('/', $db->record['lob_mime']);
-			//$sub_type_node = new xml_node('subtype',array('mime'=>$db->record['lob_mime']),null);
-			$sub_type_node = new xml_node('subtype',null,null);
+			$sub_type_node = new xml_node('lob:subtype',null,null);
 			$resp_node = new xml_node('logicampus:response',null,null);
 
 			/*
@@ -487,13 +491,144 @@ class ExportContent extends FacultyService {
 //			$xml_child_nodes[] = $meta_node;
 
 			$guid = lcUuid();
-			$lob_nodes[] = new xml_node('lob', 
+			$lob_nodes[] = new xml_node('lob:obj', 
 				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
 				$xml_child_nodes
 			);
 		}
 	return  $lob_nodes; 
 	}
+
+
+	/**
+	 * return an array of arrays that represent the classroom
+	 * as a learning object sequence, or trail.
+	 */
+	function get_lesson_nodes() {
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$lob_nodes         = array();
+
+		$sql = '
+			SELECT A.*
+			FROM class_lessons AS A
+			WHERE id_classes = '.$this->classId;
+
+		$db->query($sql);
+		$lessons = array();
+		while($db->nextRecord()) {
+			$lessons[] = $db->record;
+		}
+
+		foreach ($lessons as $lessonRec) {
+			$lessonId = $lessonRec['id_class_lessons'];
+
+			$sql = '
+			SELECT A.*
+			FROM class_lesson_sequence as A
+			WHERE A.lesson_id='.$lessonId.'
+			ORDER BY rank';
+			$db->query($sql);
+
+					//*
+			$lobArray = array();
+			while ($db->nextRecord()) {
+			//	echo "debug offset = ". (( $db->record['dueDate'] - $this->semStart ) / 60 / 60/ 24);
+				$lobArray[]  = $db->record;
+			}
+			 //*/
+
+			$getTestSql = 'SELECT date_available, date_unavailable  FROM assessment WHERE assessment_id = %d';
+			$getAsignSql = 'SELECT activeDate, dueDate, noDueDate FROM class_assignments WHERE id_class_assignments = %d';
+			foreach ($lobArray as $idx=>$lob) {
+				switch($lob['lob_type']) {
+					case 'activity':
+					case 'assignment':
+						$db->query( sprintf($getAsignSql, $lob['lob_id']) );
+						$db->nextRecord();
+						if ($db->record['dueDate'] < $this->semStart ) {
+							$lob['start_offset'] =  0;
+						} else {
+							$lob['start_offset'] =  ( $db->record['dueDate'] - $this->semStart );
+							$lob['allow_after_days'] =  sprintf('%.2f',( $db->record['dueDate'] - $this->semStart )/60/60/24);
+						}
+						$lobArray[$idx] = $lob;
+					break;
+
+					case 'assessment':
+						$db->query( sprintf($getTestSql, $lob['lob_id']) );
+						$db->nextRecord();
+						if ($db->record['date_available'] < $this->semStart ) {
+							$lob['start_offset'] =  0;
+						} else {
+							$lob['start_offset'] =  ( $db->record['date_available'] - $this->semStart );
+							$lob['allow_after_days'] =  sprintf('%.2f',( $db->record['date_available'] - $this->semStart )/60/60/24);
+						}
+						$lobArray[$idx] = $lob;
+					break;
+				}
+			}
+
+			//start building nodes
+			$xml_child_nodes   = array();
+			$less_seq_node = new xml_node('lesson:learningpath');
+
+			foreach($lobArray as $idx => $lob) {
+				unset($lob_seq_node);
+				$lob_seq_node = new xml_node('lesson:lobsequence',array('order'=>$lob['rank'], 'visible'=>'yes'));
+				$lob_ref_node = new xml_node('lesson:lob',array('refid'=>$lob['lob_guid']));
+				$lob_sta_node = new xml_node('lesson:start',array('type'=>'offset', format=>'unix'), null, $lob['start_offset']);
+				$lob_end_node = new xml_node('lesson:end',array('type'=>'offset', format=>'unix'), null, $lob['start_offset']);
+
+				$lob_seq_node->children[] = $lob_ref_node;
+				$lob_seq_node->children[] = $lob_sta_node;
+				$lob_seq_node->children[] = $lob_end_node;
+
+				$less_seq_node->children[] = $lob_seq_node;
+			}
+			$xml_child_nodes[] = $less_seq_node;
+
+			$guid = lcUuid();
+			$lob_nodes[] = new xml_node('lesson:lesson', 
+				array('guid'=>$guid, 'dbid'=>$lessonId), 
+				$xml_child_nodes);
+
+		}//end foreach lessons
+		return $lob_nodes;
+	
+/*
+	<lesson:lesson guid="">
+		<lesson:objective></lesson:objective>
+		<lesson:standard></lesson:standard>
+
+		<lesson:start type="offset" format="unix">123123</lesson:end>
+		<lesson:end type="offset" format="days">25</lesson:end>
+
+		<lesson:plan>
+			<lesson:step num="1">Perform step 1</lesson:step>
+			<lesson:step num="2">Perform step 2</lesson:step>
+		</lesson:plan>
+		<lesson:notes>
+		</lesson:notes>
+		<lesson:learningpath>
+			<lesson:lobsequence order="1" notbefore="" visible="1">
+				<!-- only 1 learning object -->
+				<lesson:lob refid="be76c53d-1403-475c-ab85-ce559e84d5a8"/>
+				<!-- one of the following -->
+				<lesson:start type="offset" format="unix">123123</lesson:start>
+				<lesson:start type="offset" format="days">2.3</lesson:start>
+				<lesson:start type="date" format="mm-dd-yyyy">01-28-2008</lesson:start>
+				<!-- one of the following -->
+				<lesson:end type="offset" format="unix">123123</lesson:end>
+				<lesson:end type="offset" format="days">2.3</lesson:end>
+				<lesson:end type="date" format="mm-dd-yyyy">01-28-2008</lesson:end>
+			</lesson:lobsequence>
+		</lesson:learningpath>
+	</lesson:lesson>
+*/
+
+	}
+
 
 
 	/**
@@ -579,7 +714,7 @@ class ExportContent extends FacultyService {
 //			$xml_child_nodes[] = $meta_node;
 
 			$guid = lcUuid();
-			$lob_nodes[] = new xml_node('lob', 
+			$lob_nodes[] = new xml_node('lob:obj', 
 				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
 				$xml_child_nodes
 			);
