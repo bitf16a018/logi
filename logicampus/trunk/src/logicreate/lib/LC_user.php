@@ -868,14 +868,14 @@ class UserProfile {
 	 * set a value in the object's value array
 	 */
 	function set($k,$v) {
-		if ($this->values[$k] == $v) {
+		if (@$this->values[$k] == $v) {
 			return true;
 		}
 
 		// don't allow set access to keys
 		// that aren't already in the database
 		if (! in_array($k,$this->common_attribs) && 
-			(is_array($this->spcific_attribs) && ! in_array($k,$this->specific_attribs)) ) {
+			(is_array($this->specific_attribs) && ! in_array($k,$this->specific_attribs)) ) {
 			return false;
 			//$this->keys[] = $k;
 		}
