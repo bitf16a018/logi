@@ -1,45 +1,50 @@
 <?
 
-class LobContentBase {
+class LobTestQstBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
-	var $lobContentId;
-	var $lobText;
-	var $lobBinary;
-	var $lobFilename;
-	var $lobCaption;
+	var $lobTestQstId;
+	var $lobTestId;
 
 	var $__attributes = array( 
-	'lobContentId'=>'integer',
-	'lobText'=>'longtext',
-	'lobBinary'=>'longblob',
-	'lobFilename'=>'varchar',
-	'lobCaption'=>'varchar');
+	'lobTestQstId'=>'integer',
+	'lobTestId'=>'integer');
 
-	var $__nulls = array( 
-	'lobText'=>'lobText',
-	'lobBinary'=>'lobBinary');
+	var $__nulls = array();
+
+	/**
+	 * Retrieves one lob_test object via the foreign key lob_test_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Object the related object.
+	 */
+	function getLobTestByLobTestId($dsn='default') {
+		if ( $this->lobTestId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobTestPeer::doSelect('lob_test_id = \''.$this->lobTestId.'\'',$dsn);
+		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
+		return $array[0];
+	}
 
 
 
 	function getPrimaryKey() {
-		return $this->lobContentId;
+		return $this->lobTestQstId;
 	}
 
 
 	function setPrimaryKey($val) {
-		$this->lobContentId = $val;
+		$this->lobTestQstId = $val;
 	}
 
 
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(LobContentPeer::doInsert($this,$dsn));
+			$this->setPrimaryKey(LobTestQstPeer::doInsert($this,$dsn));
 		} else {
-			LobContentPeer::doUpdate($this,$dsn);
+			LobTestQstPeer::doUpdate($this,$dsn);
 		}
 	}
 
@@ -52,21 +57,21 @@ class LobContentBase {
 			}
 			$where = substr($where,0,-5);
 		} else {
-			$where = "lob_content_id='".$key."'";
+			$where = "lob_test_qst_id='".$key."'";
 		}
-		$array = LobContentPeer::doSelect($where,$dsn);
+		$array = LobTestQstPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
 
 
 	function loadAll($dsn="default") {
-		$array = LobContentPeer::doSelect('',$dsn);
+		$array = LobTestQstPeer::doSelect('',$dsn);
 		return $array;
 	}
 
 
 	function delete($deep=false,$dsn="default") {
-		LobContentPeer::doDelete($this,$deep,$dsn);
+		LobTestQstPeer::doDelete($this,$deep,$dsn);
 	}
 
 
@@ -103,25 +108,22 @@ class LobContentBase {
 }
 
 
-class LobContentPeerBase {
+class LobTestQstPeerBase {
 
-	var $tableName = 'lob_content';
+	var $tableName = 'lob_test_qst';
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_SelectStatement("lob_content",$where);
-		$st->fields['lob_content_id'] = 'lob_content_id';
-		$st->fields['lob_text'] = 'lob_text';
-		$st->fields['lob_binary'] = 'lob_binary';
-		$st->fields['lob_filename'] = 'lob_filename';
-		$st->fields['lob_caption'] = 'lob_caption';
+		$st = new PBDO_SelectStatement("lob_test_qst",$where);
+		$st->fields['lob_test_qst_id'] = 'lob_test_qst_id';
+		$st->fields['lob_test_id'] = 'lob_test_id';
 
 
 		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
-			$array[] = LobContentPeer::row2Obj($db->record);
+			$array[] = LobTestQstPeer::row2Obj($db->record);
 		}
 		return $array;
 	}
@@ -129,17 +131,12 @@ class LobContentPeerBase {
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_InsertStatement("lob_content");
-		$st->fields['lob_content_id'] = $this->lobContentId;
-		$st->fields['lob_text'] = $this->lobText;
-		$st->fields['lob_binary'] = $this->lobBinary;
-		$st->fields['lob_filename'] = $this->lobFilename;
-		$st->fields['lob_caption'] = $this->lobCaption;
+		$st = new PBDO_InsertStatement("lob_test_qst");
+		$st->fields['lob_test_qst_id'] = $this->lobTestQstId;
+		$st->fields['lob_test_id'] = $this->lobTestId;
 
-		$st->nulls['lob_text'] = 'lob_text';
-		$st->nulls['lob_binary'] = 'lob_binary';
 
-		$st->key = 'lob_content_id';
+		$st->key = 'lob_test_qst_id';
 		$db->executeQuery($st);
 
 		$obj->_new = false;
@@ -152,17 +149,12 @@ class LobContentPeerBase {
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_UpdateStatement("lob_content");
-		$st->fields['lob_content_id'] = $obj->lobContentId;
-		$st->fields['lob_text'] = $obj->lobText;
-		$st->fields['lob_binary'] = $obj->lobBinary;
-		$st->fields['lob_filename'] = $obj->lobFilename;
-		$st->fields['lob_caption'] = $obj->lobCaption;
+		$st = new PBDO_UpdateStatement("lob_test_qst");
+		$st->fields['lob_test_qst_id'] = $obj->lobTestQstId;
+		$st->fields['lob_test_id'] = $obj->lobTestId;
 
-		$st->nulls['lob_text'] = 'lob_text';
-		$st->nulls['lob_binary'] = 'lob_binary';
 
-		$st->key = 'lob_content_id';
+		$st->key = 'lob_test_qst_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
@@ -185,7 +177,7 @@ class LobContentPeerBase {
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_DeleteStatement("lob_content","lob_content_id = '".$obj->getPrimaryKey()."'");
+		$st = new PBDO_DeleteStatement("lob_test_qst","lob_test_qst_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -217,12 +209,9 @@ class LobContentPeerBase {
 
 
 	function row2Obj($row) {
-		$x = new LobContent();
-		$x->lobContentId = $row['lob_content_id'];
-		$x->lobText = $row['lob_text'];
-		$x->lobBinary = $row['lob_binary'];
-		$x->lobFilename = $row['lob_filename'];
-		$x->lobCaption = $row['lob_caption'];
+		$x = new LobTestQst();
+		$x->lobTestQstId = $row['lob_test_qst_id'];
+		$x->lobTestId = $row['lob_test_id'];
 
 		$x->_new = false;
 		return $x;
@@ -233,7 +222,7 @@ class LobContentPeerBase {
 
 
 //You can edit this class, but do not change this next line!
-class LobContent extends LobContentBase {
+class LobTestQst extends LobTestQstBase {
 
 
 
@@ -241,7 +230,7 @@ class LobContent extends LobContentBase {
 
 
 
-class LobContentPeer extends LobContentPeerBase {
+class LobTestQstPeer extends LobTestQstPeerBase {
 
 }
 

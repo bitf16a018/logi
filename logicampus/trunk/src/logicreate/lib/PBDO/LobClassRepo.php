@@ -1,39 +1,57 @@
 <?
 
-class LobUserLinkBase {
+class LobClassRepoBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
-	var $lobUserLinkId;
+	var $lobClassRepoId;
 	var $lobRepoEntryId;
-	var $userId;
+	var $lobCopyStyle;
+	var $lobType;
+	var $classId;
+	var $lobVersion;
 
 	var $__attributes = array( 
-	'lobUserLinkId'=>'integer',
+	'lobClassRepoId'=>'integer',
 	'lobRepoEntryId'=>'integer',
-	'userId'=>'integer');
+	'lobCopyStyle'=>'char',
+	'lobType'=>'varchar',
+	'classId'=>'integer',
+	'lobVersion'=>'integer');
 
 	var $__nulls = array();
+
+	/**
+	 * Retrieves an array of lob_class_content objects via the foreign key lob_class_repo_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Array related objects.
+	 */
+	function getLobClassContentsByLobClassRepoId($dsn='default') {
+		if ( $this->lobClassRepoId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobClassContentPeer::doSelect('lob_class_repo_id = \''.$this->lobClassRepoId.'\'',$dsn);
+		return $array;
+	}
 
 
 
 	function getPrimaryKey() {
-		return $this->lobUserLinkId;
+		return $this->lobClassRepoId;
 	}
 
 
 	function setPrimaryKey($val) {
-		$this->lobUserLinkId = $val;
+		$this->lobClassRepoId = $val;
 	}
 
 
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(LobUserLinkPeer::doInsert($this,$dsn));
+			$this->setPrimaryKey(LobClassRepoPeer::doInsert($this,$dsn));
 		} else {
-			LobUserLinkPeer::doUpdate($this,$dsn);
+			LobClassRepoPeer::doUpdate($this,$dsn);
 		}
 	}
 
@@ -46,21 +64,21 @@ class LobUserLinkBase {
 			}
 			$where = substr($where,0,-5);
 		} else {
-			$where = "lob_user_link_id='".$key."'";
+			$where = "lob_class_repo_id='".$key."'";
 		}
-		$array = LobUserLinkPeer::doSelect($where,$dsn);
+		$array = LobClassRepoPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
 
 
 	function loadAll($dsn="default") {
-		$array = LobUserLinkPeer::doSelect('',$dsn);
+		$array = LobClassRepoPeer::doSelect('',$dsn);
 		return $array;
 	}
 
 
 	function delete($deep=false,$dsn="default") {
-		LobUserLinkPeer::doDelete($this,$deep,$dsn);
+		LobClassRepoPeer::doDelete($this,$deep,$dsn);
 	}
 
 
@@ -97,23 +115,26 @@ class LobUserLinkBase {
 }
 
 
-class LobUserLinkPeerBase {
+class LobClassRepoPeerBase {
 
-	var $tableName = 'lob_user_link';
+	var $tableName = 'lob_class_repo';
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_SelectStatement("lob_user_link",$where);
-		$st->fields['lob_user_link_id'] = 'lob_user_link_id';
+		$st = new PBDO_SelectStatement("lob_class_repo",$where);
+		$st->fields['lob_class_repo_id'] = 'lob_class_repo_id';
 		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
-		$st->fields['user_id'] = 'user_id';
+		$st->fields['lob_copy_style'] = 'lob_copy_style';
+		$st->fields['lob_type'] = 'lob_type';
+		$st->fields['class_id'] = 'class_id';
+		$st->fields['lob_version'] = 'lob_version';
 
 
 		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
-			$array[] = LobUserLinkPeer::row2Obj($db->record);
+			$array[] = LobClassRepoPeer::row2Obj($db->record);
 		}
 		return $array;
 	}
@@ -121,13 +142,16 @@ class LobUserLinkPeerBase {
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_InsertStatement("lob_user_link");
-		$st->fields['lob_user_link_id'] = $this->lobUserLinkId;
+		$st = new PBDO_InsertStatement("lob_class_repo");
+		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
 		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
-		$st->fields['user_id'] = $this->userId;
+		$st->fields['lob_copy_style'] = $this->lobCopyStyle;
+		$st->fields['lob_type'] = $this->lobType;
+		$st->fields['class_id'] = $this->classId;
+		$st->fields['lob_version'] = $this->lobVersion;
 
 
-		$st->key = 'lob_user_link_id';
+		$st->key = 'lob_class_repo_id';
 		$db->executeQuery($st);
 
 		$obj->_new = false;
@@ -140,13 +164,16 @@ class LobUserLinkPeerBase {
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_UpdateStatement("lob_user_link");
-		$st->fields['lob_user_link_id'] = $obj->lobUserLinkId;
+		$st = new PBDO_UpdateStatement("lob_class_repo");
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
-		$st->fields['user_id'] = $obj->userId;
+		$st->fields['lob_copy_style'] = $obj->lobCopyStyle;
+		$st->fields['lob_type'] = $obj->lobType;
+		$st->fields['class_id'] = $obj->classId;
+		$st->fields['lob_version'] = $obj->lobVersion;
 
 
-		$st->key = 'lob_user_link_id';
+		$st->key = 'lob_class_repo_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
@@ -169,7 +196,7 @@ class LobUserLinkPeerBase {
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_DeleteStatement("lob_user_link","lob_user_link_id = '".$obj->getPrimaryKey()."'");
+		$st = new PBDO_DeleteStatement("lob_class_repo","lob_class_repo_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -201,10 +228,13 @@ class LobUserLinkPeerBase {
 
 
 	function row2Obj($row) {
-		$x = new LobUserLink();
-		$x->lobUserLinkId = $row['lob_user_link_id'];
+		$x = new LobClassRepo();
+		$x->lobClassRepoId = $row['lob_class_repo_id'];
 		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
-		$x->userId = $row['user_id'];
+		$x->lobCopyStyle = $row['lob_copy_style'];
+		$x->lobType = $row['lob_type'];
+		$x->classId = $row['class_id'];
+		$x->lobVersion = $row['lob_version'];
 
 		$x->_new = false;
 		return $x;
@@ -215,7 +245,7 @@ class LobUserLinkPeerBase {
 
 
 //You can edit this class, but do not change this next line!
-class LobUserLink extends LobUserLinkBase {
+class LobClassRepo extends LobClassRepoBase {
 
 
 
@@ -223,7 +253,7 @@ class LobUserLink extends LobUserLinkBase {
 
 
 
-class LobUserLinkPeer extends LobUserLinkPeerBase {
+class LobClassRepoPeer extends LobClassRepoPeerBase {
 
 }
 

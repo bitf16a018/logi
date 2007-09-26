@@ -1,19 +1,21 @@
 <?
 
-class LobContentBase {
+class LobClassContentBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
-	var $lobContentId;
+	var $lobClassContentId;
+	var $lobClassRepoId;
 	var $lobText;
 	var $lobBinary;
 	var $lobFilename;
 	var $lobCaption;
 
 	var $__attributes = array( 
-	'lobContentId'=>'integer',
+	'lobClassContentId'=>'integer',
+	'lobClassRepoId'=>'integer',
 	'lobText'=>'longtext',
 	'lobBinary'=>'longblob',
 	'lobFilename'=>'varchar',
@@ -23,23 +25,36 @@ class LobContentBase {
 	'lobText'=>'lobText',
 	'lobBinary'=>'lobBinary');
 
+	/**
+	 * Retrieves one lob_class_repo object via the foreign key lob_class_repo_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Object the related object.
+	 */
+	function getLobClassRepoByLobClassRepoId($dsn='default') {
+		if ( $this->lobClassRepoId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobClassRepoPeer::doSelect('lob_class_repo_id = \''.$this->lobClassRepoId.'\'',$dsn);
+		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
+		return $array[0];
+	}
+
 
 
 	function getPrimaryKey() {
-		return $this->lobContentId;
+		return $this->lobClassContentId;
 	}
 
 
 	function setPrimaryKey($val) {
-		$this->lobContentId = $val;
+		$this->lobClassContentId = $val;
 	}
 
 
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(LobContentPeer::doInsert($this,$dsn));
+			$this->setPrimaryKey(LobClassContentPeer::doInsert($this,$dsn));
 		} else {
-			LobContentPeer::doUpdate($this,$dsn);
+			LobClassContentPeer::doUpdate($this,$dsn);
 		}
 	}
 
@@ -52,21 +67,21 @@ class LobContentBase {
 			}
 			$where = substr($where,0,-5);
 		} else {
-			$where = "lob_content_id='".$key."'";
+			$where = "lob_class_content_id='".$key."'";
 		}
-		$array = LobContentPeer::doSelect($where,$dsn);
+		$array = LobClassContentPeer::doSelect($where,$dsn);
 		return $array[0];
 	}
 
 
 	function loadAll($dsn="default") {
-		$array = LobContentPeer::doSelect('',$dsn);
+		$array = LobClassContentPeer::doSelect('',$dsn);
 		return $array;
 	}
 
 
 	function delete($deep=false,$dsn="default") {
-		LobContentPeer::doDelete($this,$deep,$dsn);
+		LobClassContentPeer::doDelete($this,$deep,$dsn);
 	}
 
 
@@ -103,15 +118,16 @@ class LobContentBase {
 }
 
 
-class LobContentPeerBase {
+class LobClassContentPeerBase {
 
-	var $tableName = 'lob_content';
+	var $tableName = 'lob_class_content';
 
 	function doSelect($where,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_SelectStatement("lob_content",$where);
-		$st->fields['lob_content_id'] = 'lob_content_id';
+		$st = new PBDO_SelectStatement("lob_class_content",$where);
+		$st->fields['lob_class_content_id'] = 'lob_class_content_id';
+		$st->fields['lob_class_repo_id'] = 'lob_class_repo_id';
 		$st->fields['lob_text'] = 'lob_text';
 		$st->fields['lob_binary'] = 'lob_binary';
 		$st->fields['lob_filename'] = 'lob_filename';
@@ -121,7 +137,7 @@ class LobContentPeerBase {
 		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
-			$array[] = LobContentPeer::row2Obj($db->record);
+			$array[] = LobClassContentPeer::row2Obj($db->record);
 		}
 		return $array;
 	}
@@ -129,8 +145,9 @@ class LobContentPeerBase {
 	function doInsert(&$obj,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_InsertStatement("lob_content");
-		$st->fields['lob_content_id'] = $this->lobContentId;
+		$st = new PBDO_InsertStatement("lob_class_content");
+		$st->fields['lob_class_content_id'] = $this->lobClassContentId;
+		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
 		$st->fields['lob_text'] = $this->lobText;
 		$st->fields['lob_binary'] = $this->lobBinary;
 		$st->fields['lob_filename'] = $this->lobFilename;
@@ -139,7 +156,7 @@ class LobContentPeerBase {
 		$st->nulls['lob_text'] = 'lob_text';
 		$st->nulls['lob_binary'] = 'lob_binary';
 
-		$st->key = 'lob_content_id';
+		$st->key = 'lob_class_content_id';
 		$db->executeQuery($st);
 
 		$obj->_new = false;
@@ -152,8 +169,9 @@ class LobContentPeerBase {
 	function doUpdate(&$obj,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_UpdateStatement("lob_content");
-		$st->fields['lob_content_id'] = $obj->lobContentId;
+		$st = new PBDO_UpdateStatement("lob_class_content");
+		$st->fields['lob_class_content_id'] = $obj->lobClassContentId;
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
 		$st->fields['lob_text'] = $obj->lobText;
 		$st->fields['lob_binary'] = $obj->lobBinary;
 		$st->fields['lob_filename'] = $obj->lobFilename;
@@ -162,7 +180,7 @@ class LobContentPeerBase {
 		$st->nulls['lob_text'] = 'lob_text';
 		$st->nulls['lob_binary'] = 'lob_binary';
 
-		$st->key = 'lob_content_id';
+		$st->key = 'lob_class_content_id';
 		$db->executeQuery($st);
 		$obj->_modified = false;
 
@@ -185,7 +203,7 @@ class LobContentPeerBase {
 	function doDelete(&$obj,$deep=false,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_DeleteStatement("lob_content","lob_content_id = '".$obj->getPrimaryKey()."'");
+		$st = new PBDO_DeleteStatement("lob_class_content","lob_class_content_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -217,8 +235,9 @@ class LobContentPeerBase {
 
 
 	function row2Obj($row) {
-		$x = new LobContent();
-		$x->lobContentId = $row['lob_content_id'];
+		$x = new LobClassContent();
+		$x->lobClassContentId = $row['lob_class_content_id'];
+		$x->lobClassRepoId = $row['lob_class_repo_id'];
 		$x->lobText = $row['lob_text'];
 		$x->lobBinary = $row['lob_binary'];
 		$x->lobFilename = $row['lob_filename'];
@@ -233,7 +252,7 @@ class LobContentPeerBase {
 
 
 //You can edit this class, but do not change this next line!
-class LobContent extends LobContentBase {
+class LobClassContent extends LobClassContentBase {
 
 
 
@@ -241,7 +260,7 @@ class LobContent extends LobContentBase {
 
 
 
-class LobContentPeer extends LobContentPeerBase {
+class LobClassContentPeer extends LobClassContentPeerBase {
 
 }
 
