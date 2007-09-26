@@ -40,17 +40,32 @@ $data['profile'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/lcGroups.sql'));
 $data['groups'] = explode(";\n",$setupFile);
 
+$setupFile = trim(file_get_contents('../data/lob_activity.mysql.sql'));
+$schemas['lob_activity'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_class_content.mysql.sql'));
+$schemas['lob_class_content'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_class_repo.mysql.sql'));
+$schemas['lob_class_repo'] = explode(";\n",$setupFile);
+
 $setupFile = trim(file_get_contents('../data/lob_content.mysql.sql'));
 $schemas['lob_content'] = explode(";\n",$setupFile);
 
 $setupFile = trim(file_get_contents('../data/lob_metadata.mysql.sql'));
 $schemas['lob_metadata'] = explode(";\n",$setupFile);
 
+$setupFile = trim(file_get_contents('../data/lob_repo_entry.mysql.sql'));
+$schemas['lob_repo_entry'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_test.mysql.sql'));
+$schemas['lob_test'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_test_qst.mysql.sql'));
+$schemas['lob_test_qst'] = explode(";\n",$setupFile);
+
 $setupFile = trim(file_get_contents('../data/lob_user_link.mysql.sql'));
 $schemas['lob_user_link'] = explode(";\n",$setupFile);
-
-$setupFile = trim(file_get_contents('../data/lob_class_link.mysql.sql'));
-$schemas['lob_class_link'] = explode(";\n",$setupFile);
 
 $setupFile = trim(file_get_contents('../data/class_lesson_sequence.mysql.sql'));
 $schemas['class_lesson_sequence'] = explode(";\n",$setupFile);
