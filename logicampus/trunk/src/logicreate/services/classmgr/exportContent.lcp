@@ -98,6 +98,7 @@ class ExportContent extends FacultyService {
 		
 		
 		$xmlObj = new xmlparser('<lobcol xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd" xmlns:lob="http://logicampus.sourceforge.net/2006/learning_object.dtd"></lobcol>');
+		$xmlObj->doctype = '<!DOCTYPE lobcol PUBLIC "-//LOBCOL//DTD LOBCOL//EN" "http://logicampus.sf.net/learning-objects/lobcol-1.0.dtd">';
 		$root =& $xmlObj->getRoot();
 		
 
@@ -656,25 +657,24 @@ class ExportContent extends FacultyService {
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 
-		/*
+		$testRecs = array();
 		while ($db->nextRecord()) {
-			debug($db->record);
+			$testRecs[] = $db->record;
 		}
-		exit();
-		// */
-		while ($db->nextRecord()) {
+
+		foreach ($testRecs as $tstidx => $testRec) {
 			$type_node = new xml_node('type',null,null,'assessment');
 
 
 			$xml_child_nodes = array();
 
-			$lob_title_node = new xml_node('lob:title',null,null,$db->record['display_name']);
+			$lob_title_node = new xml_node('lob:title',null,null,$testRec['display_name']);
 			$lob_title_node->cdata = true;
 
-			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['description']);
+			$lob_desc_node = new xml_node('lob:description',null,null,$testRec['description']);
 			$lob_desc_node->cdata = true;
 
-			$lob_instr_node = new xml_node('instructions',null,null,$db->record['instructions']);
+			$lob_instr_node = new xml_node('instructions',null,null,$testRec['instructions']);
 			$lob_desc_node->cdata = true;
 
 
@@ -693,15 +693,15 @@ class ExportContent extends FacultyService {
 				'possible_points'
 			);
 			foreach($attrs as $at) {
-				$xml_child_nodes[] = new xml_node('logicampus:'.$at, null,null, $db->record[$at]);
+				$xml_child_nodes[] = new xml_node('logicampus:'.$at, null,null, $testRec[$at]);
 			}
 
 
 			//lifecycle
-			$createdon = $db->record['created_on'];
+			$createdon = $testRec['created_on'];
 
 			$lifecycleArray = array(
-				'lob:version'=>$db->record['version'], 
+				'lob:version'=>$testRec['version'], 
 				'lob:createdon'=>time(), 'createdon_dateformat'=>'unix'
 			);
 
@@ -710,27 +710,54 @@ class ExportContent extends FacultyService {
 			/*
 			//metadata
 			$metadataArray = array(
-				'lob:author'=>$db->record['author'],
-				'lob:subject'=>$db->record['subject'],
-				'lob:subdisc'=>$db->record['subdisc'],
+				'lob:author'=>$testRec['author'],
+				'lob:subject'=>$testRec['subject'],
+				'lob:subdisc'=>$testRec['subdisc'],
 				'subject_abbr'=>'true',
 				'subdisc_abbr'=>'false',
-				'lob:copyright'=>$db->record['copyright'],
-				'lob:license'=>$db->record['license']
+				'lob:copyright'=>$testRec['copyright'],
+				'lob:license'=>$testRec['license']
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 			 */
 
-//			$meta_node->children[] = $author_node;
-//			$xml_child_nodes[] = $meta_node;
 
 			$guid = lcUuid();
-			$this->testGuid[ $db->record['assessment_id'] ] = $guid;
+			$this->testGuid[ $testRec['assessment_id'] ] = $guid;
 
-			$lob_nodes[] = new xml_node('lob:obj', 
-				array('guid'=>$guid, 'dbid'=>$db->record['assessment_id']), 
+			$testLob = new xml_node('lob:obj', 
+				array('guid'=>$guid, 'dbid'=>$testRec['assessment_id']), 
 				$xml_child_nodes
 			);
+
+			//questions
+			$db->query('SELECT * FROM assessment_question WHERE assessment_id = '.$testRec['assessment_id']);
+			$questionRecs = array();
+			while ($db->nextRecord()) {
+				$questionRecs[]  = $db->record;
+			}
+
+			foreach ($questionRecs as $qidx=>$questionRec) {
+				$qust_node = new xml_node('lob:question', array('order'=>$questionRec['question_sort']));
+				$qtext = new xml_node('lob:question-text', null,null, $questionRec['question_text']);
+				$qtext->cdata = true;
+				$qust_node->children[] = $qtext;
+				$qust_node->children[] = new xml_node('lob:question-type', null,null, $questionRec['question_display']);
+				//debug ( unserialize ( base64_decode( $questionRec['question_choices'])));
+				$choices =  unserialize ( base64_decode( $questionRec['question_choices']));
+				foreach ($choices as $qchoice) {
+					$incomplete = get_object_vars($qchoice);
+					$answer_node = new xml_node('lob:question-choice', null,null, $incomplete['label']);
+					$answer_node->cdata = true;
+					if ($incomplete['correct']) {
+						$answer_node->attrs['correct'] = 'yes';
+					}
+					$qust_node->children[] = $answer_node;
+				}
+				$testLob->children[] = $qust_node;
+			}
+
+			$lob_nodes[] = $testLob;
 		}
 	return  $lob_nodes; 
 	}
