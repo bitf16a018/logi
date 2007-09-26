@@ -10,6 +10,7 @@ class xmlparser
 	var $vals;                    // @var vals    (array)        
 	var $index;                   // @var index   (array)        
 	var $charset = "ISO-8859-1"; 
+	var $doctype = '';
 
 
 	function xmlparser($data='') 
@@ -27,7 +28,9 @@ class xmlparser
 	function write_file($fh)
 	{
 		fwrite($fh, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		
+		if ( $this->doctype != '') {
+			fwrite($fh, $this->doctype."\n");
+		}	
 		if (is_object($this->root)) {
 			$this->root->wr_node($fh);
 		} else  {
