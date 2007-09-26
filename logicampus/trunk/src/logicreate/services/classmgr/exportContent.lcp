@@ -298,6 +298,8 @@ class ExportContent extends FacultyService {
 //			$xml_child_nodes[] = $meta_node;
 
 			$guid = lcUuid();
+			$this->contentGuid[ $db->record['lob_content_id'] ] = $guid;
+
 			$lob_nodes[] = new xml_node('lob', 
 				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
 				$xml_child_nodes
@@ -364,6 +366,7 @@ class ExportContent extends FacultyService {
 //			$xml_child_nodes[] = $meta_node;
 
 			$guid = $db->record['lob_guid'];
+			$this->contentGuid[$db->record['lob_content_id']] = $guid;
 			$lob_nodes[] = new xml_node('lob:obj', 
 				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
 				$xml_child_nodes
@@ -491,6 +494,8 @@ class ExportContent extends FacultyService {
 //			$xml_child_nodes[] = $meta_node;
 
 			$guid = lcUuid();
+			$this->activityGuid[ $db->record['id_class_assignments'] ] = $guid;
+
 			$lob_nodes[] = new xml_node('lob:obj', 
 				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
 				$xml_child_nodes
@@ -542,8 +547,13 @@ class ExportContent extends FacultyService {
 			$getAsignSql = 'SELECT activeDate, dueDate, noDueDate FROM class_assignments WHERE id_class_assignments = %d';
 			foreach ($lobArray as $idx=>$lob) {
 				switch($lob['lob_type']) {
+					case 'content':
+						$lobArray[$idx]['lob_guid'] = $this->contentGuid[ $lob['lob_id'] ];
+					break;
+
 					case 'activity':
 					case 'assignment':
+						$lob['lob_guid'] = $this->activityGuid[ $lob['lob_id'] ];
 						$db->query( sprintf($getAsignSql, $lob['lob_id']) );
 						$db->nextRecord();
 						if ($db->record['dueDate'] < $this->semStart ) {
@@ -556,6 +566,7 @@ class ExportContent extends FacultyService {
 					break;
 
 					case 'assessment':
+						$lob['lob_guid'] = $this->testGuid[ $lob['lob_id'] ];
 						$db->query( sprintf($getTestSql, $lob['lob_id']) );
 						$db->nextRecord();
 						if ($db->record['date_available'] < $this->semStart ) {
@@ -714,8 +725,10 @@ class ExportContent extends FacultyService {
 //			$xml_child_nodes[] = $meta_node;
 
 			$guid = lcUuid();
+			$this->testGuid[ $db->record['assessment_id'] ] = $guid;
+
 			$lob_nodes[] = new xml_node('lob:obj', 
-				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
+				array('guid'=>$guid, 'dbid'=>$db->record['assessment_id']), 
 				$xml_child_nodes
 			);
 		}
