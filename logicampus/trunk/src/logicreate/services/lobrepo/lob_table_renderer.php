@@ -99,7 +99,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 			//then type and mime
 			$this->html .= '<td valign="top" class="center_justify" style="background-color:none;">';
-			$this->html .= '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob::getMimeIcon($this->table->tableModel->getValueNamed($x,'mimetype')).'" title="Mime: '.$this->table->tableModel->getValueNamed($x,'mimetype').'" alt="Mime: '.$this->table->tableModel->getValueNamed($x,'mimetype').'" /><br/>';
+			$this->html .= '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($this->table->tableModel->getValueNamed($x,'mimetype')).'" title="Mime: '.$this->table->tableModel->getValueNamed($x,'mimetype').'" alt="Mime: '.$this->table->tableModel->getValueNamed($x,'mimetype').'" /><br/>';
 			$this->html .= '<b>';
 			$this->html .= $this->table->tableModel->getValueAt($x,2);
 			$this->html .= '</b></td>';

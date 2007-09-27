@@ -16,7 +16,7 @@ class LearningObjectTest extends UnitTestCase {
 	/**
 	 * make a new content object (lob)
 	 */
-	function testContentCreate() {
+	function testCreateTextContent() {
 		$content = new Lc_Lob_Content();
 		$sample = 'Hello, World!  This is some text.';
 		$content->setTextContent($sample);
@@ -42,10 +42,15 @@ class LearningObjectTest extends UnitTestCase {
 	 * Make a new content object (lob).
 	 * Save a file to it.
 	 */
-	function testCanCreateFileContent() {
+	function testCreateFileContent() {
 		$content = new Lc_Lob_Content();
-		$sample = file_get_contents('sample_content.zip');
-		$content->setBinContent($sample);
+
+		$content->setFile(SERVICE_PATH.'unitTest/sample_content.zip');
+		$this->assertEqual ($content->getFilename(), 'sample_content.zip');
+
+
+		$content->setFile(SERVICE_PATH.'unitTest/sample_content.zip', 'myzip.zip');
+		$this->assertEqual ($content->getFilename(), 'myzip.zip');
 
 		$savedGood = $content->save();
 		$this->newContentId = $content->getRepoId();
@@ -92,22 +97,41 @@ class LearningObjectTest extends UnitTestCase {
 		$classContent = $lob->useInClass('notify');
 		$e = ErrorStack::pullError('php');
 		//e might be an error saying that the repo doesn't have all its data.
-		/*
 		if ($e) {
-			$this->assertTrue( is_null($classContent) );
+			$this->fail();
 		} else {
-		 */
-		$this->assertTrue( is_object($classContent) );
-		$this->assertEqual( $classContent->type , 'content' );
-		$id = $classContent->getRepoId();
-		$this->assertTrue( $id > 0 );
+			$this->assertTrue( is_object($classContent) );
+			$this->assertEqual( $classContent->type , 'content' );
+			$id = $classContent->getRepoId();
+			$this->assertTrue( $id > 0 );
+		}
 	}
 
 
 	/**
 	 * Make a new test object and save it as a lob
 	 */
-	function testAssessmentCreate() {
+	function testCreateATest() {
+		$test = new Lc_Lob_Test();
+
+		$test->set('lobTitle', 'my first test');
+
+		$this->assertEqual($test->get('lobTitle'), 'my first test');
+
+		$choices = array(1=>'George Washington', 2=>'Abe Lincoln', 3=>'Dennis Hopper', 4=>'Queen Latifa');
+		$correct = array (1, 3);
+		$test->addQuestion('Who is the first president and the first queen?', $choices, $correct);
+
+		$this->assertEqual( $test->getQuestionCount(), 1);
+
+		$savedGood = $test->save();
+		$this->newContentId = $test->getRepoId();
+
+
+		$this->assertTrue( $savedGood );
+		$this->assertEqual( strtolower(get_class($test)), strtolower('lc_lob_test'));
+
+
 		$this->pass();
 	}
 
@@ -115,7 +139,7 @@ class LearningObjectTest extends UnitTestCase {
 	/**
 	 * Make a new activity object and save it as a lob
 	 */
-	function testActivityCreate() {
+	function testCreateAnActivity() {
 
 		$this->pass();
 	}
@@ -124,7 +148,7 @@ class LearningObjectTest extends UnitTestCase {
 	/**
 	 * Can the user view his/her own objects?
 	 */
-	function testMyView() {
+	function testViewMyObjs() {
 
 		$this->pass();
 	}
