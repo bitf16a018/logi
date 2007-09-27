@@ -29,6 +29,10 @@ class Lc_Lob {
 		return $this->repoObj->lobSubType == 'document';
 	}
 
+	function isText() {
+		return $this->repoObj->lobSubType == 'text';
+	}
+
 	function get($key) {
 		return $this->repoObj->{$key};
 	}
@@ -243,14 +247,17 @@ class Lc_Lob {
 
 
 	function save() {
-		$ret = $this->repoObj->save();
+		$this->repoObj->save();
+		$ret = ($this->repoObj->getPrimaryKey() > 0);
 		$this->lobMetaObj->version++;
 		$this->lobMetaObj->updatedOn = time();
 		if ($this->lobMetaObj->isNew()) {
 			//might be a brand new object
 			$this->lobMetaObj->lobId = $this->repoObj->getPrimaryKey();
 		}
-		return $this->lobMetaObj->save() && $ret;
+		$this->lobMetaObj->save();
+		$meta = ($this->lobMetaObj->getPrimaryKey() > 0);
+		return $meta && $ret;
 	}
 
 	/**
@@ -338,6 +345,24 @@ class Lc_Lob_Content extends Lc_Lob {
 			$this->lobMetaObj = new LobMetadata();
 			$this->lobMetaObj->createdOn = time();
 		}
+	}
+
+
+	/**
+	 * Set the textual content
+	 */
+	function setTextContent(&$content) {
+		$this->lobSub->lobContent =& $content;
+		$this->repoObj->lobSubType = 'text';
+	}
+
+
+	/**
+	 * Set the textual content
+	 */
+	function setBinContent(&$binary) {
+		$this->lobSub->lobBinary =& $binary;
+		$this->repoObj->lobSubType = 'document';
 	}
 }
 
