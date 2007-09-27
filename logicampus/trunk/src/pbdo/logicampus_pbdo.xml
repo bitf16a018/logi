@@ -229,6 +229,7 @@
 	      attribute="rank"
 	      name="rank_idx"/>
 	</entity>
+
 	<entity  name="class_lesson_sequence">
 		<attribute name="class_lesson_sequence_id"
 			required="true"
@@ -252,11 +253,11 @@
 			type="INTEGER"/>
 		<attribute name="lob_mime"
 			required="true"
-			size="255"
+			size="100"
 			type="VARCHAR"/>
 		<attribute name="lob_type"
 			required="true"
-			size="255"
+			size="100"
 			type="VARCHAR"/>
 		<attribute name="lob_title"
 			required="true"
@@ -302,8 +303,8 @@
 			name="rank_idx"/>
 	</entity>
 
-	<entity  name="lob_content">
-		<attribute name="lob_content_id"
+	<entity  name="lob_repo_entry">
+		<attribute name="lob_repo_entry_id"
 			required="true"
 			primaryKey="true"
 			size="11"
@@ -319,54 +320,142 @@
 			type="VARCHAR"/>
 		<attribute name="lob_type"
 			required="true"
-			size="255"
+			size="100"
 			type="VARCHAR"/>
 		<attribute name="lob_sub_type"
 			required="true"
-			size="255"
+			size="100"
 			type="VARCHAR"/>
 		<attribute name="lob_mime"
+			required="true"
+			size="100"
+			type="VARCHAR"/>
+		<attribute name="lob_description"
+			required="false"
+			type="TEXT"/>
+		<attribute name="lob_notes"
+			required="false"
+			type="LONGTEXT"/>
+		<attribute name="lob_urltitle"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_version"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<key
+			attribute="lob_guid"
+			name="lob_guid_idx"/>
+	</entity>
+
+	<entity  name="lob_content">
+		<attribute name="lob_content_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_text"
+			required="false"
+			type="LONGTEXT"/>
+		<attribute name="lob_binary"
+			required="false"
+			type="LONGBLOB"/>
+		<attribute name="lob_filename"
 			required="true"
 			size="255"
 			type="VARCHAR"/>
 		<attribute name="lob_caption"
 			size="255"
 			type="VARCHAR"/>
-		<attribute name="lob_description"
+		<attribute name="lob_repo_entry_id"
 			required="true"
-			type="TEXT"/>
-		<attribute name="lob_notes"
-			required="true"
-			type="LONGTEXT"/>
-		<attribute name="lob_content"
-			required="true"
-			type="LONGTEXT"/>
-		<attribute name="lob_binary"
-			required="true"
-			type="LONGBLOB"/>
-		<attribute name="lob_filename"
-			required="true"
-			size="255"
-			type="VARCHAR"/>
-		<attribute name="lob_urltitle"
-			required="true"
-			size="255"
-			type="VARCHAR"/>
+			size="11"
+			type="INTEGER"/>
+		<key
+			attribute="lob_repo_entry_id"
+			name="lob_repo_entry_idx"/>
+		<foreign-key foreignTable="lob_repo_entry">
+			<reference
+				local="lob_repo_entry_id"
+				foreign="lob_repo_entry_id"/>
+		</foreign-key>
 	</entity>
+
+
+	<entity  name="lob_test">
+		<attribute name="lob_test_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+
+		<attribute name="lob_repo_entry_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<key
+			attribute="lob_repo_entry_id"
+			name="lob_repo_entry_idx"/>
+		<foreign-key foreignTable="lob_repo_entry">
+			<reference
+				local="lob_repo_entry_id"
+				foreign="lob_repo_entry_id"/>
+		</foreign-key>
+	</entity>
+
+	<entity  name="lob_test_qst">
+		<attribute name="lob_test_qst_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+
+		<attribute name="lob_test_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<key
+			attribute="lob_test_id"
+			name="lob_test_idx"/>
+		<foreign-key foreignTable="lob_test">
+			<reference
+				local="lob_test_id"
+				foreign="lob_test_id"/>
+		</foreign-key>
+	</entity>
+
+	<entity  name="lob_activity">
+		<attribute name="lob_activity_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+
+		<attribute name="lob_repo_entry_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<key
+			attribute="lob_repo_entry_id"
+			name="lob_repo_entry_idx"/>
+		<foreign-key foreignTable="lob_repo_entry">
+			<reference
+				local="lob_repo_entry_id"
+				foreign="lob_repo_entry_id"/>
+		</foreign-key>
+	</entity>
+
 	<entity  name="lob_metadata">
 		<attribute name="lob_metadata_id"
 			required="true"
 			primaryKey="true"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="lob_id"
+		<attribute name="lob_repo_entry_id"
 			required="true"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="lob_kind"
-			required="true"
-			size="255"
-			type="VARCHAR"/>
 		<attribute name="subject"
 			required="true"
 			default=""
@@ -388,7 +477,7 @@
 			required="true"
 			size="255"
 			type="VARCHAR"/>
-		<attribute name="version"
+		<attribute name="user_version"
 			required="true"
 			size="255"
 			type="VARCHAR"/>
@@ -405,66 +494,113 @@
 			size="11"
 			type="integer"/>
 		<key
-			attribute="lob_id"
-			name="lob_idx"/>
-		<key
-			attribute="lob_kind"
-			name="lob_kind_idx"/>
+			attribute="lob_repo_entry_id"
+			name="lob_repo_entry_idx"/>
 	</entity>
+
 	<entity  name="lob_user_link">
 		<attribute name="lob_user_link_id"
 			required="true"
 			primaryKey="true"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="lob_id"
+		<attribute name="lob_repo_entry_id"
 			required="true"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="lob_kind"
-			required="true"
-			size="255"
-			type="VARCHAR"/>
 		<attribute name="user_id"
 			required="true"
 			size="11"
 			type="INTEGER"/>
 		<key
-			attribute="lob_id"
-			name="lob_idx"/>
-		<key
-			attribute="lob_kind"
-			name="lob_kind_idx"/>
+			attribute="lob_repo_entry_id"
+			name="lob_repo_entry_idx"/>
 		<key
 			attribute="user_id"
 			name="user_idx"/>
 	</entity>
-	<entity  name="lob_class_link">
-		<attribute name="lob_class_link_id"
+
+	<entity  name="lob_class_repo">
+		<attribute name="lob_class_repo_id"
 			required="true"
 			primaryKey="true"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="lob_id"
-			required="true"
-			size="11"
-			type="INTEGER"/>
-		<attribute name="lob_kind"
-			required="true"
-			size="255"
-			type="VARCHAR"/>
 		<attribute name="class_id"
 			required="true"
 			size="11"
 			type="INTEGER"/>
+		<attribute name="lob_repo_entry_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_guid"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_copy_style"
+			required="true"
+			size="1"
+			type="CHAR"/>
+		<attribute name="lob_type"
+			required="true"
+			size="100"
+			type="VARCHAR"/>
+		<attribute name="lob_sub_type"
+			required="true"
+			size="100"
+			type="VARCHAR"/>
+		<attribute name="lob_version"
+			required="true"
+			size="11"
+			type="INTEGER"/>
 		<key
-			attribute="lob_id"
-			name="lob_idx"/>
+			attribute="lob_version"
+			name="lob_version_idx"/>
 		<key
-			attribute="lob_kind"
-			name="lob_kind_idx"/>
+			attribute="lob_repo_entry_id"
+			name="lob_repo_entry_idx"/>
+		<key
+			attribute="lob_type"
+			name="lob_type_idx"/>
 		<key
 			attribute="class_id"
 			name="class_idx"/>
+		<key
+			attribute="lob_guid"
+			name="lob_guid_idx"/>
+	</entity>
+
+	<entity  name="lob_class_content">
+		<attribute name="lob_class_content_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_class_repo_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_text"
+			required="false"
+			type="LONGTEXT"/>
+		<attribute name="lob_binary"
+			required="false"
+			type="LONGBLOB"/>
+		<attribute name="lob_filename"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_caption"
+			size="255"
+			type="VARCHAR"/>
+		<key
+			attribute="lob_class_repo_id"
+			name="lob_class_repo_idx"/>
+		<foreign-key foreignTable="lob_class_repo">
+			<reference
+				local="lob_class_repo_id"
+				foreign="lob_class_repo_id"/>
+		</foreign-key>
 	</entity>
 </project>
