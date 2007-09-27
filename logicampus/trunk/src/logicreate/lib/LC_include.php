@@ -982,7 +982,7 @@ class ErrorStack {
 		if ($level == 2048 ) return;
 
 		//if ( is_array($context)) $context = 'error';
-		$e = new lcError($level,$message,$context);
+		$e = new lcError($level,$message,'php',$context);
 		$bt = debug_backtrace();
 		array_shift($bt);
 		$e->addBackTrace($bt);
@@ -1050,10 +1050,11 @@ class lcError {
 	var $priority;
 	var $type;
 
-	function lcError($p=0,$m='',$t='error') {
+	function lcError($p=0,$m='',$t='error',$context) {
 		if ($m == '' )
 			$m = $php_errormsg;
 
+		//forget the context, it's too huge to print_r on and still make sense of the bt
 		$this->message = $m;
 		$this->priority = $p;
 		$this->type = $t;
@@ -1079,6 +1080,9 @@ class lcError {
 	}
 
 	function addBackTrace ($bt) {
+		for ($x=count($bt); $x > 4; $x--) {
+			array_pop($bt);
+		}
 		$this->backtrace = $bt;
 		/*
 		//start at 1, skip the backtrace to this function, not necassary
