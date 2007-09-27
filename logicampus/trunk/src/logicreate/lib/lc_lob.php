@@ -351,6 +351,7 @@ class Lc_Lob_Content extends Lc_Lob {
 			$this->repoObj   = LobRepoEntry::load($id);
 			$content         = $this->repoObj->getLobContentsByLobRepoEntryId();
 			$this->lobSub    = $content[0];
+			$this->lobMetaObj = LobMetadata::load(array('lob_repo_entry_id'=>$id));
 		}
 	}
 
@@ -391,6 +392,13 @@ class Lc_Lob_Content extends Lc_Lob {
 
 	function getFilename() {
 		return $this->lobSub->lobFilename;
+	}
+
+	/**
+	 * Return the text content contained in "lobSub"
+	 */
+	function getTextContent() {
+		return $this->lobSub->lobText;
 	}
 }
 
