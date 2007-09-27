@@ -13,6 +13,7 @@ class PBDO_SQLStatement {
 	var $offset;
 	var $tableName = ' ';
 	var $database;
+	var $join     = '';
 
 	function PBDO_SQLStatement($table,$where='') {
 		$this->tableName = $table;
