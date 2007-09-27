@@ -33,8 +33,8 @@ class Lobrepo extends FacultyService {
 		$idx=0;
 
 		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject
-		       	FROM lob_content as A
-			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id');
+		       	FROM lob_repo_entry as A
+			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id');
 
 
 		while($db->nextRecord()) {

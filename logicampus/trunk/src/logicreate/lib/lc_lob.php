@@ -3,6 +3,8 @@
 include_once(LIB_PATH.'PBDO/LobRepoEntry.php');
 include_once(LIB_PATH.'PBDO/LobMetadata.php');
 include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobTest.php');
+include_once(LIB_PATH.'PBDO/LobTestQst.php');
 
 /**
  * Base class for all lob types (content, test, activity)
@@ -21,7 +23,7 @@ class Lc_Lob {
 			$this->lobMetaObj->createdOn = time();
 		} else {
 			$this->repoObj = LobRepoEntry::load($id);
-			$this->lobMetaObj = LobMetadata::load(array('lob_id'=>$id, 'lob_kind'=>$this->repoObj->lobType));
+			$this->lobMetaObj = LobMetadata::load(array('lob_repo_entry_id'=>$id));
 		}
 	}
 
@@ -53,7 +55,7 @@ class Lc_Lob {
 	 *  Get version
 	 **/
 	function getVersion() {
-		return $this->repoObj->version;
+		return $this->repoObj->lobVersion;
 	}
 
 	/**
@@ -161,25 +163,8 @@ class Lc_Lob {
 	}
 
 
-	function createLinkText($name,$ext='') {
-		$ext = strtolower($ext);
 
-		$ret = str_replace('&', ' and ', $name);
-		$ret = str_replace(' ', '_', $ret);
-
-		$pattern = '/[\x{21}-\x{2C}]|[\x{2F}]|[\x{5B}-\x{5E}]|[\x{7E}]/';
-		$ret = preg_replace($pattern, '_', $ret);
-		$ret = str_replace('___', '_', $ret);
-		$ret = str_replace('__', '_', $ret);
-		$ret = str_replace('__', '_', $ret);
-
-		if ($ext != '' && $ext != 'html' && $ext != 'htm') {
-			$ret .= '.'.$ext;
-		}
-		return $ret;
-	}
-
-
+	/*
 	function updateAsFile(&$vars, $name='', $tmp_name='') {
 		$this->set('lobTitle', $vars['txTitle']);
 
@@ -196,16 +181,18 @@ class Lc_Lob {
 			);
 
 		$ext = strtolower($ext);
-		$m = Lc_Lob::getMimeForSubtype($vars['lob_sub_type'],$ext);
+		$m = Lc_Lob_Util::getMimeForSubtype($vars['lob_sub_type'],$ext);
 		$this->set('lobMime', $m);
 
 		//create the link text in a standard way
 		$this->set('lobUrltitle',
-			Lc_Lob::createLinkText($this->get('lobTitle'),$ext)
+			Lc_Lob_Util::createLinkText($this->get('lobTitle'),$ext)
 		);
 	}
+	 */
 
 
+	/*
 	function updateAsText($vars) {
 		$this->set('lobContent', $vars['txText']);
 		$this->set('lobSubType',$vars['lob_sub_type']);
@@ -216,9 +203,10 @@ class Lc_Lob {
 
 		//create the link text in a standard way
 		$this->set('lobUrltitle',
-			Lc_Lob::createLinkText($this->get('lobTitle'))
+			Lc_Lob_Util::createLinkText($this->get('lobTitle'))
 		);
 	}
+	 */
 
 	function makePublic() {
 		$this->lobMetaObj->private = 0;
@@ -252,13 +240,23 @@ class Lc_Lob {
 			$this->repoObj->set('lobGuid',$guid);
 		}
 
-		$this->repoObj->version++;
+		if ($this->repoObj->lobType == '') {
+			$this->repoObj->lobType = $this->type;
+		}
+
+		$this->repoObj->lobVersion++;
 		$this->repoObj->save();
 		$ret = ($this->repoObj->getPrimaryKey() > 0);
+		
+
+		$this->lobSub->lobRepoEntryId = $this->repoObj->getPrimaryKey();
+		$this->lobSub->save();
+
 		$this->lobMetaObj->updatedOn = time();
+		$this->lobMetaObj->lobRepoEntryId = $this->repoObj->getPrimaryKey();
 		if ($this->lobMetaObj->isNew()) {
 			//might be a brand new object
-			$this->lobMetaObj->lobId = $this->repoObj->getPrimaryKey();
+			$this->lobMetaObj->lobRepoEntryId = $this->repoObj->getPrimaryKey();
 		}
 		$this->lobMetaObj->save();
 		$meta = ($this->lobMetaObj->getPrimaryKey() > 0);
@@ -344,11 +342,15 @@ class Lc_Lob_Content extends Lc_Lob {
 	var $type = 'content';
 
 	function Lc_Lob_Content($id = -1) {
-		if ($id == -1) {
-			$this->lobSub = new LobContent();
-			$this->repoObj     = new LobRepoEntry();
+		if ($id < 1) {
+			$this->lobSub     = new LobContent();
+			$this->repoObj    = new LobRepoEntry();
 			$this->lobMetaObj = new LobMetadata();
 			$this->lobMetaObj->createdOn = time();
+		} else {
+			$this->repoObj   = LobRepoEntry::load($id);
+			$content         = $this->repoObj->getLobContentsByLobRepoEntryId();
+			$this->lobSub    = $content[0];
 		}
 	}
 
@@ -357,8 +359,10 @@ class Lc_Lob_Content extends Lc_Lob {
 	 * Set the textual content
 	 */
 	function setTextContent(&$content) {
-		$this->lobSub->lobContent =& $content;
+		$this->lobSub->lobText =& $content;
 		$this->repoObj->lobSubType = 'text';
+		$this->repoObj->lobBytes = strlen($content);
+		$this->lobSub->lobBinary = null;
 	}
 
 
@@ -368,8 +372,65 @@ class Lc_Lob_Content extends Lc_Lob {
 	function setBinContent(&$binary) {
 		$this->lobSub->lobBinary =& $binary;
 		$this->repoObj->lobSubType = 'document';
+		$this->repoObj->lobBytes = strlen($content);
+		$this->lobSub->lobText = null;
+	}
+
+	/**
+	 * Set the textual content
+	 */
+	function setFile($filename, $filetitle = '') {
+		if ($filetitle == '') {
+			$filetitle = basename($filename);
+		}
+		$binary = file_get_contents($filename);
+		$this->setBinContent($binary);
+		$this->lobSub->lobFilename = $filetitle;
+	}
+
+
+	function getFilename() {
+		return $this->lobSub->lobFilename;
 	}
 }
+
+
+/**
+ * Hold lob repo entries and lob content entries
+ */
+class Lc_Lob_Test extends Lc_Lob {
+
+	var $type = 'test';
+	var $questionObjs = array();
+	var $mime = 'X-LMS/test';
+
+	function Lc_Lob_Test($id = -1) {
+		if ($id == -1) {
+			$this->repoObj    = new LobRepoEntry();
+			$this->lobSub     = new LobTest();
+			$this->lobMetaObj = new LobMetadata();
+			$this->lobMetaObj->createdOn = time();
+		} else {
+			$this->repoObj   = LobRepoEntry::load($id);
+			$tests           = $this->repoObj->getLobTestsByLobRepoEntryId();
+			$this->lobSub    = $tests[0];
+		}
+	}
+
+	function addQuestion($qtext, $type = 'QUESTION_ESSAY', $choices = '', $answers = '') {
+
+		$q = new LobTestQst();
+		$q->qstText =  $qtext;
+		if ( is_array($choices) ) {
+		}
+		$this->questionObjs[] = $q;
+	}
+
+	function getQuestionCount() {
+		return count($this->questionObjs);
+	}
+}
+
 
 
 /**
@@ -464,5 +525,36 @@ class Lc_Lob_Util {
 		return "application/octet-stream";
 	}
 
+	/**
+	 * Make the text URL friendly by removing characters that would
+	 * have to be URL encoded to be valid.
+	 *
+	 * @static
+	 */
+	function createLinkText($name,$ext='') {
+		$ext = strtolower($ext);
+
+		$ret = str_replace('&', ' and ', $name);
+		$ret = str_replace(' ', '_', $ret);
+
+		$pattern = '/[\x{21}-\x{2C}]|[\x{2F}]|[\x{5B}-\x{5E}]|[\x{7E}]/';
+		$ret = preg_replace($pattern, '_', $ret);
+		$ret = str_replace('___', '_', $ret);
+		$ret = str_replace('__', '_', $ret);
+		$ret = str_replace('__', '_', $ret);
+
+		if ($ext != '' && $ext != 'html' && $ext != 'htm') {
+			$ret .= '.'.$ext;
+		}
+		return $ret;
+	}
+
+
+	/**
+	 * Return a number of bytes as at least 0.00 kilobytes
+	 */
+	function formatBytes($intSize) {
+		return sprintf('%0.2f', ($intSize/1000)). ' Kb';
+	}
 }
 ?>

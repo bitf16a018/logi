@@ -7,6 +7,7 @@ include_once(LIB_PATH.'PBDO/LobUserLink.php');
 include_once(LIB_PATH.'lc_table.php');
 include_once(LIB_PATH.'lc_table_renderer.php');
 include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_lob_class.php');
 include_once(SERVICE_PATH.'lobrepo/lob_table_renderer.php');
 
 /**
@@ -35,9 +36,9 @@ class Myobj extends FacultyService {
 		$lobItems = array();
 		$idx=0;
 		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject, B.subdisc
-		       	FROM lob_content as A
-			LEFT JOIN lob_metadata as B on A.lob_content_id = B.lob_id
-			LEFT JOIN lob_user_link as C on A.lob_content_id = C.lob_id
+		       	FROM lob_repo_entry as A
+			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id
+			LEFT JOIN lob_user_link as C on A.lob_repo_entry_id = C.lob_repo_entry_id
 			WHERE C.user_id = '.$u->userId.'
 			');
 
@@ -45,7 +46,7 @@ class Myobj extends FacultyService {
 		while($db->nextRecord()) {
 		//foreach ($lobs as $lobObj) {
 			$lobRec = $db->record;
-			$lobItems[$idx]['name'] = '<a href="'.appurl('lobrepo/edit/c='.$lobRec['lob_content_id'].'').'">'.$lobRec['lob_title'].'</a>';
+			$lobItems[$idx]['name'] = '<a href="'.appurl('lobrepo/edit/c='.$lobRec['lob_repo_entry_id'].'').'">'.$lobRec['lob_title'].'</a>';
 			$lobItems[$idx]['subject'] = $lobRec['subject'];
 			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']);
 			$lobItems[$idx]['author'] = $lobRec['author'];
@@ -83,7 +84,7 @@ class Myobj extends FacultyService {
 		}
 
 		if ( count($idsTaught)) {
-			$classLinkObjs = LobClassLinkPeer::doSelect(' class_id IN ('.implode(',',$idsTaught).')');
+			$classLinkObjs = LobClassRepoPeer::doSelect(' class_id IN ('.implode(',',$idsTaught).')');
 		}
 
 		//organize the link IDs into nice arrays for the table renderer

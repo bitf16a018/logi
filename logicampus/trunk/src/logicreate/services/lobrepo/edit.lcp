@@ -28,7 +28,7 @@ class Edit extends FacultyService {
 
 		$lobId = addslashes(trim($lc->getvars['c']));
 
-		$lob = new LC_Lob($lobId);
+		$lob = new Lc_Lob($lobId);
 
 		$t['lob'] = $lob;
 		// Use start of content as description
@@ -38,19 +38,12 @@ class Edit extends FacultyService {
 				$t['lob_description'] .= ' ...';
 			}
 		}
-		//get size in bytes
-		if ($t['lob']->lobObj->lobSubType == 'text'
-			|| 
-			$t['lob']->lobObj->lobSubType == 'html') {
-			$t['lob_bytes'] = strlen($t['lob']->lobObj->lobContent);
-		} else {
-			$t['lob_bytes'] = strlen($t['lob']->lobObj->lobBinary);
-		}
+		$t['lob_bytes'] = Lc_Lob_Util::formatBytes($t['lob']->repoObj->lobBytes);
 
 		if ($t['lob']->lobSubType == 'image') {
 			$t['iconUrl'] = appurl('lobrepo/preview/c='.$t['lob']->lobContentId);
 		} else {
-			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']->lobMime);
+			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob_Util::getMimeIcon($t['lob']->lobMime);
 		}
 	}
 
@@ -79,38 +72,60 @@ class Edit extends FacultyService {
 	 */
 	function saveRun(&$db,&$u,&$lc,&$t) {
 		$id = intval($lc->postvars['lob_id']);
-		$lob = new LC_Lob($id);
+		$lob = new LC_Lob_Content($id);
 
-		$saveUser = false;
-		if ($lob->lobObj->isNew()) {
-			$guid = lcUuid();
-			$lob->set('lobType','content');
-			$lob->set('lobGuid',$guid);
-			$saveUser = true;
-
-		}
-
-		if ($lob->isFile()) {
-			$lob->updateAsFile($lc->postvars, $lc->uploads['document']['name'], $lc->uploads['document']['tmp_name']);
+		if (isset($lc->postvars['lob_type']) ) {
+			if ($lc->postvars['lob_type'] == 'document') {
+				$lob->updateAsFile(
+						$lc->postvars, 
+						$lc->uploads['document']['name'], 
+						$lc->uploads['document']['tmp_name']);
+			}
 		} else {
-			$lob->updateAsText($lc->postvars);
+			if ($lob->isFile()) {
+				$lob->updateAsFile(
+						$lc->postvars, 
+						$lc->uploads['document']['name'], 
+						$lc->uploads['document']['tmp_name']);
+			} else {
+				$lob->setTextContent($lc->postvars['txText']);
+				$lob->set('lobTitle', $vars['txTitle']);
+				if (@isset($vars['mime'])  && strlen($vars['mime'])) {
+					$lob->set('lobMime', $vars['mime']);
+				}
+
+				//create the link text in a standard way
+				$lob->set('lobUrltitle',
+					Lc_Lob_Util::createLinkText($lob->get('lobTitle'))
+				);
+
+			}
 		}
+
+
+		if ($lob->repoObj->isNew()) {
+			$saveUser = true;
+		} else {
+			$saveUser = false;
+		}
+
+
 		$lob->updateMeta($lc->postvars);
 		$lob->save();
 		//get the new ID if a new save
 		if ($id == 0) {
-			$id = $lob->lobObj->getPrimaryKey();
+			$id = $lob->repoObj->getPrimaryKey();
 		}
 
 		if ($saveUser) {
 			$lobUserObj = new LobUserLink();
-			$lobUserObj->set('lobId',$lob->lobObj->getPrimaryKey());
+			$lobUserObj->set('lobRepoEntryId',$lob->repoObj->getPrimaryKey());
 			$lobUserObj->set('userId',$u->userId);
 			$lobUserObj->set('lobKind','content');
 			$lobUserObj->save();
 		}
 
-//		$lob->lobObj->lobBinary = '';
+//		$lob->repoObj->lobBinary = '';
 //		debug($lob);
 //		exit();
 

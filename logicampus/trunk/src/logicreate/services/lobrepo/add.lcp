@@ -36,8 +36,7 @@ class add extends FacultyService {
 		$t['lob'] = new LC_Lob();
 
 		$ext = addslashes($lc->getvars['m']);
-		$mimetype = Lc_Lob::getMimeForSubtype($lc->getvars['t'],$ext);
-		//$lc->getvars['ext'] = 'jpeg';
+		$mimetype = Lc_Lob_Util::getMimeForSubtype($lc->getvars['t'],$ext);
 		switch($lc->getvars['t']) {
 			case 'html':
 				$lc->templateName = 'add_html';
@@ -98,54 +97,6 @@ class add extends FacultyService {
 			LC_Lob::createLinkText($lob->get('lobTitle'))
 		);
 
-	}
-
-
-	/**
-	 * Save a content obj to the db
-	 */
-	function saveRun(&$db,&$u,&$lc,&$t) {
-		$guid = lcUuid();
-
-		$lob = new LC_Lob($id);
-		$lobMetaObj = new LobMetadata();
-		$lobUserObj = new LobUserLink();
-		//debug($lc,1);
-
-		$lob->set('lobType','content');
-		$lob->set('lobGuid',$guid);
-
-		if (@$lc->uploads['content']) {
-			$lob->updateAsFile($lc->postvars, $lc->uploads['content']['name'], $lc->uploads['content']['tmp_name']);
-		} else if (@$lc->uploads['document']) {
-			$lob->updateAsFile($lc->postvars, 'document');
-		} else {
-			$lob->updateAsText($lc->postvars);
-		}
-
-
-//		debug($lob,1);
-//		debug($lc->postvars['txTitle'],1);
-		$lob->save();
-
-		$lobMetaObj->set('lobId',$lob->get('lobContentId'));
-		$lobMetaObj->set('lobKind','content');
-		$lobMetaObj->set('author', $lc->postvars['md_author']);
-		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
-		$lobMetaObj->set('license', $lc->postvars['md_license']);
-		$lobMetaObj->set('subject', $lc->postvars['md_subj']);
-		$lobMetaObj->set('subdisc', $lc->postvars['md_subdisc']);
-		$lobMetaObj->save();
-
-		$lobUserObj->set('lobId',$lob->get('lobContentId'));
-		$lobUserObj->set('userId',$u->userId);
-		$lobUserObj->set('lobKind','content');
-		$lobUserObj->save();
-
-		$u->addSessionMessage('Successfully added content.');
-
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('lobrepo/myobj');
 	}
 }
 

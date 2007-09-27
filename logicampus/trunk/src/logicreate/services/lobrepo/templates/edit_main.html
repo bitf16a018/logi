@@ -34,7 +34,7 @@
 			</div>
 			<table border="0" style="border:0px solid black;">
 				<tr>
-					<td>Size:</td><td><?= $t['lob_bytes']; ?> bytes</td>
+					<td>Size:</td><td><?= $t['lob_bytes']; ?></td>
 				</tr><tr>
 				<td>URL name:</td><td><?= $lob->getUrl();?></td>
 				</tr>
@@ -42,7 +42,7 @@
 		</td>
 	</tr>
 </table>
-<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->getContentId());?>">
+<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->getRepoId());?>">
 <input type="submit" value="Change this object"/>
 </form>
 
