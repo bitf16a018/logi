@@ -11,17 +11,32 @@ class LobContentBase {
 	var $lobBinary;
 	var $lobFilename;
 	var $lobCaption;
+	var $lobRepoEntryId;
 
 	var $__attributes = array( 
 	'lobContentId'=>'integer',
 	'lobText'=>'longtext',
 	'lobBinary'=>'longblob',
 	'lobFilename'=>'varchar',
-	'lobCaption'=>'varchar');
+	'lobCaption'=>'varchar',
+	'lobRepoEntryId'=>'integer');
 
 	var $__nulls = array( 
 	'lobText'=>'lobText',
 	'lobBinary'=>'lobBinary');
+
+	/**
+	 * Retrieves one lob_repo_entry object via the foreign key lob_repo_entry_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Object the related object.
+	 */
+	function getLobRepoEntryByLobRepoEntryId($dsn='default') {
+		if ( $this->lobRepoEntryId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobRepoEntryPeer::doSelect('lob_repo_entry_id = \''.$this->lobRepoEntryId.'\'',$dsn);
+		if ( count($array) > 1 ) { trigger_error('multiple objects on one-to-one relationship'); }
+		return $array[0];
+	}
 
 
 
@@ -116,6 +131,7 @@ class LobContentPeerBase {
 		$st->fields['lob_binary'] = 'lob_binary';
 		$st->fields['lob_filename'] = 'lob_filename';
 		$st->fields['lob_caption'] = 'lob_caption';
+		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
 
 
 		$array = array();
@@ -135,6 +151,7 @@ class LobContentPeerBase {
 		$st->fields['lob_binary'] = $this->lobBinary;
 		$st->fields['lob_filename'] = $this->lobFilename;
 		$st->fields['lob_caption'] = $this->lobCaption;
+		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
 
 		$st->nulls['lob_text'] = 'lob_text';
 		$st->nulls['lob_binary'] = 'lob_binary';
@@ -158,6 +175,7 @@ class LobContentPeerBase {
 		$st->fields['lob_binary'] = $obj->lobBinary;
 		$st->fields['lob_filename'] = $obj->lobFilename;
 		$st->fields['lob_caption'] = $obj->lobCaption;
+		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
 
 		$st->nulls['lob_text'] = 'lob_text';
 		$st->nulls['lob_binary'] = 'lob_binary';
@@ -223,6 +241,7 @@ class LobContentPeerBase {
 		$x->lobBinary = $row['lob_binary'];
 		$x->lobFilename = $row['lob_filename'];
 		$x->lobCaption = $row['lob_caption'];
+		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
 
 		$x->_new = false;
 		return $x;
