@@ -344,6 +344,10 @@
 			required="true"
 			size="11"
 			type="INTEGER"/>
+		<attribute name="lob_bytes"
+			required="true"
+			size="11"
+			type="INTEGER"/>
 		<key
 			attribute="lob_guid"
 			name="lob_guid_idx"/>
@@ -512,12 +516,19 @@
 			required="true"
 			size="11"
 			type="INTEGER"/>
+		<attribute name="is_owner"
+			required="false"
+			size="11"
+			type="INTEGER"/>
 		<key
 			attribute="lob_repo_entry_id"
 			name="lob_repo_entry_idx"/>
 		<key
 			attribute="user_id"
-			name="user_idx"/>
+			name="user_id"/>
+		<key
+			attribute="is_owner_id"
+			name="is_owner_idx"/>
 	</entity>
 
 	<entity  name="lob_class_repo">
@@ -551,6 +562,10 @@
 			size="100"
 			type="VARCHAR"/>
 		<attribute name="lob_version"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_bytes"
 			required="true"
 			size="11"
 			type="INTEGER"/>

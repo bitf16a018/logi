@@ -16,7 +16,8 @@ CREATE TABLE `lob_repo_entry` (
 	`lob_description` text, 
 	`lob_notes` text, 
 	`lob_urltitle` varchar (255) NOT NULL, 
-	`lob_version` integer (11) NOT NULL,
+	`lob_version` integer (11) NOT NULL, 
+	`lob_bytes` integer (11) NOT NULL,
 	PRIMARY KEY (lob_repo_entry_id) 
 );
 

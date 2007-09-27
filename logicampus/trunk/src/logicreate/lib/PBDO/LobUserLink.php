@@ -9,13 +9,16 @@ class LobUserLinkBase {
 	var $lobUserLinkId;
 	var $lobRepoEntryId;
 	var $userId;
+	var $isOwner;
 
 	var $__attributes = array( 
 	'lobUserLinkId'=>'integer',
 	'lobRepoEntryId'=>'integer',
-	'userId'=>'integer');
+	'userId'=>'integer',
+	'isOwner'=>'integer');
 
-	var $__nulls = array();
+	var $__nulls = array( 
+	'isOwner'=>'isOwner');
 
 
 
@@ -108,6 +111,7 @@ class LobUserLinkPeerBase {
 		$st->fields['lob_user_link_id'] = 'lob_user_link_id';
 		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
 		$st->fields['user_id'] = 'user_id';
+		$st->fields['is_owner'] = 'is_owner';
 
 
 		$array = array();
@@ -125,7 +129,9 @@ class LobUserLinkPeerBase {
 		$st->fields['lob_user_link_id'] = $this->lobUserLinkId;
 		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
 		$st->fields['user_id'] = $this->userId;
+		$st->fields['is_owner'] = $this->isOwner;
 
+		$st->nulls['is_owner'] = 'is_owner';
 
 		$st->key = 'lob_user_link_id';
 		$db->executeQuery($st);
@@ -144,7 +150,9 @@ class LobUserLinkPeerBase {
 		$st->fields['lob_user_link_id'] = $obj->lobUserLinkId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
 		$st->fields['user_id'] = $obj->userId;
+		$st->fields['is_owner'] = $obj->isOwner;
 
+		$st->nulls['is_owner'] = 'is_owner';
 
 		$st->key = 'lob_user_link_id';
 		$db->executeQuery($st);
@@ -205,6 +213,7 @@ class LobUserLinkPeerBase {
 		$x->lobUserLinkId = $row['lob_user_link_id'];
 		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
 		$x->userId = $row['user_id'];
+		$x->isOwner = $row['is_owner'];
 
 		$x->_new = false;
 		return $x;
