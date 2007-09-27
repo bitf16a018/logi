@@ -1080,7 +1080,7 @@ class lcError {
 	}
 
 	function addBackTrace ($bt) {
-		for ($x=count($bt); $x > 4; $x--) {
+		for ($x=count($bt); $x > 6; $x--) {
 			array_pop($bt);
 		}
 		$this->backtrace = $bt;
