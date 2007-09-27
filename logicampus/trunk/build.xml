@@ -63,6 +63,7 @@
 		<include name="data/**"/>
 		<include name="lib/**"/>
 		<include name="services/**"/>
+		<exclude name="services/unitTest"/>
 		<include name="content/**"/>
 		<include name="lang/fallback.php"/>
     </tarfileset>
