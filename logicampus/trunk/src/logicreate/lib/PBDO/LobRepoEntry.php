@@ -29,7 +29,9 @@ class LobRepoEntryBase {
 	'lobUrltitle'=>'varchar',
 	'lobVersion'=>'integer');
 
-	var $__nulls = array();
+	var $__nulls = array( 
+	'lobDescription'=>'lobDescription',
+	'lobNotes'=>'lobNotes');
 
 	/**
 	 * Retrieves an array of lob_content objects via the foreign key lob_repo_entry_id.
@@ -190,6 +192,8 @@ class LobRepoEntryPeerBase {
 		$st->fields['lob_urltitle'] = $this->lobUrltitle;
 		$st->fields['lob_version'] = $this->lobVersion;
 
+		$st->nulls['lob_description'] = 'lob_description';
+		$st->nulls['lob_notes'] = 'lob_notes';
 
 		$st->key = 'lob_repo_entry_id';
 		$db->executeQuery($st);
@@ -216,6 +220,8 @@ class LobRepoEntryPeerBase {
 		$st->fields['lob_urltitle'] = $obj->lobUrltitle;
 		$st->fields['lob_version'] = $obj->lobVersion;
 
+		$st->nulls['lob_description'] = 'lob_description';
+		$st->nulls['lob_notes'] = 'lob_notes';
 
 		$st->key = 'lob_repo_entry_id';
 		$db->executeQuery($st);

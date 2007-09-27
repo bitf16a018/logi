@@ -7,18 +7,22 @@ class LobClassRepoBase {
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobClassRepoId;
+	var $classId;
 	var $lobRepoEntryId;
+	var $lobGuid;
 	var $lobCopyStyle;
 	var $lobType;
-	var $classId;
+	var $lobSubType;
 	var $lobVersion;
 
 	var $__attributes = array( 
 	'lobClassRepoId'=>'integer',
+	'classId'=>'integer',
 	'lobRepoEntryId'=>'integer',
+	'lobGuid'=>'varchar',
 	'lobCopyStyle'=>'char',
 	'lobType'=>'varchar',
-	'classId'=>'integer',
+	'lobSubType'=>'varchar',
 	'lobVersion'=>'integer');
 
 	var $__nulls = array();
@@ -124,10 +128,12 @@ class LobClassRepoPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_SelectStatement("lob_class_repo",$where);
 		$st->fields['lob_class_repo_id'] = 'lob_class_repo_id';
+		$st->fields['class_id'] = 'class_id';
 		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
+		$st->fields['lob_guid'] = 'lob_guid';
 		$st->fields['lob_copy_style'] = 'lob_copy_style';
 		$st->fields['lob_type'] = 'lob_type';
-		$st->fields['class_id'] = 'class_id';
+		$st->fields['lob_sub_type'] = 'lob_sub_type';
 		$st->fields['lob_version'] = 'lob_version';
 
 
@@ -144,10 +150,12 @@ class LobClassRepoPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_class_repo");
 		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
+		$st->fields['class_id'] = $this->classId;
 		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
+		$st->fields['lob_guid'] = $this->lobGuid;
 		$st->fields['lob_copy_style'] = $this->lobCopyStyle;
 		$st->fields['lob_type'] = $this->lobType;
-		$st->fields['class_id'] = $this->classId;
+		$st->fields['lob_sub_type'] = $this->lobSubType;
 		$st->fields['lob_version'] = $this->lobVersion;
 
 
@@ -166,10 +174,12 @@ class LobClassRepoPeerBase {
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_UpdateStatement("lob_class_repo");
 		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
+		$st->fields['class_id'] = $obj->classId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
+		$st->fields['lob_guid'] = $obj->lobGuid;
 		$st->fields['lob_copy_style'] = $obj->lobCopyStyle;
 		$st->fields['lob_type'] = $obj->lobType;
-		$st->fields['class_id'] = $obj->classId;
+		$st->fields['lob_sub_type'] = $obj->lobSubType;
 		$st->fields['lob_version'] = $obj->lobVersion;
 
 
@@ -230,10 +240,12 @@ class LobClassRepoPeerBase {
 	function row2Obj($row) {
 		$x = new LobClassRepo();
 		$x->lobClassRepoId = $row['lob_class_repo_id'];
+		$x->classId = $row['class_id'];
 		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
+		$x->lobGuid = $row['lob_guid'];
 		$x->lobCopyStyle = $row['lob_copy_style'];
 		$x->lobType = $row['lob_type'];
-		$x->classId = $row['class_id'];
+		$x->lobSubType = $row['lob_sub_type'];
 		$x->lobVersion = $row['lob_version'];
 
 		$x->_new = false;
