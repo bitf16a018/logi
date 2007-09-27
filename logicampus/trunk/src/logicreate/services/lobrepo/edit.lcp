@@ -28,13 +28,13 @@ class Edit extends FacultyService {
 
 		$lobId = addslashes(trim($lc->getvars['c']));
 
-		$lob = new Lc_Lob($lobId);
+		$lob = new Lc_Lob_Content($lobId);
 
 		$t['lob'] = $lob;
 		// Use start of content as description
-		if (strlen($t['lob']->lobObj->lobDescription) < 1 && $t['lob']->lobObj->lobSubType == 'text') {
-			$t['lob_description'] = substr($t['lob']->lobObj->lobContent,0,1000);
-			if (strlen($t['lob']->lobObj->lobContent) > 1000) {
+		if (strlen($t['lob']->repoObj->lobDescription) < 1 && $t['lob']->isText()) {
+			$t['lob_description'] = substr($t['lob']->lobSub->lobText,0,1000);
+			if (strlen($t['lob']->lobSub->lobText) > 1000) {
 				$t['lob_description'] .= ' ...';
 			}
 		}
@@ -54,10 +54,10 @@ class Edit extends FacultyService {
 	function changeRun(&$db,&$u,&$lc,&$t) {
 		$id = intval($lc->getvars['id']);
 
-		$lob = new LC_Lob($id);
+		$lob = new Lc_Lob_Content($id);
 
 		$t['lob'] = $lob;
-		$t['mimetype'] = $lob->lobObj->lobMime;
+		$t['mimetype'] = $lob->repObj->lobMime;
 
 		if ($lob->isFile()) {
 			$lc->templateName = 'add_doc';
@@ -72,7 +72,7 @@ class Edit extends FacultyService {
 	 */
 	function saveRun(&$db,&$u,&$lc,&$t) {
 		$id = intval($lc->postvars['lob_id']);
-		$lob = new LC_Lob_Content($id);
+		$lob = new Lc_Lob_Content($id);
 
 		if (isset($lc->postvars['lob_type']) ) {
 			if ($lc->postvars['lob_type'] == 'document') {
@@ -89,9 +89,9 @@ class Edit extends FacultyService {
 						$lc->uploads['document']['tmp_name']);
 			} else {
 				$lob->setTextContent($lc->postvars['txText']);
-				$lob->set('lobTitle', $vars['txTitle']);
-				if (@isset($vars['mime'])  && strlen($vars['mime'])) {
-					$lob->set('lobMime', $vars['mime']);
+				$lob->set('lobTitle', $lc->postvars['txTitle']);
+				if (@isset($lc->postvars['mime'])  && strlen($lc->postvars['mime'])) {
+					$lob->set('lobMime', $lc->postvars['mime']);
 				}
 
 				//create the link text in a standard way
