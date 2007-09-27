@@ -32,6 +32,18 @@ class LobRepoEntryBase {
 	var $__nulls = array();
 
 	/**
+	 * Retrieves an array of lob_content objects via the foreign key lob_repo_entry_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Array related objects.
+	 */
+	function getLobContentsByLobRepoEntryId($dsn='default') {
+		if ( $this->lobRepoEntryId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobContentPeer::doSelect('lob_repo_entry_id = \''.$this->lobRepoEntryId.'\'',$dsn);
+		return $array;
+	}
+
+	/**
 	 * Retrieves an array of lob_test objects via the foreign key lob_repo_entry_id.
 	 * 
 	 * @param String $dsn the name of the data source to use for the sql query.
