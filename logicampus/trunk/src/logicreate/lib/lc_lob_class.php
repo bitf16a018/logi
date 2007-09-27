@@ -28,8 +28,14 @@ class Lc_Lob_Class extends Lc_Lob {
 	 * Skip the meta object for now
 	 */
 	function save() {
-		$ret = $this->repoObj->save();
-//		$this->lobMetaObj->version++;
+		if ($this->repoObj->lobGuid == '') {
+			$guid = lcUuid();
+			$this->repoObj->set('lobGuid',$guid);
+		}
+		$this->repoObj->version++;
+		$this->repoObj->save();
+		$ret = ($this->repoObj->getPrimaryKey() > 0);
+		return $ret;
 //		$this->lobMetaObj->updatedOn = time();
 //		if ($this->lobMetaObj->isNew()) {
 			//might be a brand new object
