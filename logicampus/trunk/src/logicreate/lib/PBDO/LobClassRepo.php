@@ -14,6 +14,7 @@ class LobClassRepoBase {
 	var $lobType;
 	var $lobSubType;
 	var $lobVersion;
+	var $lobBytes;
 
 	var $__attributes = array( 
 	'lobClassRepoId'=>'integer',
@@ -23,7 +24,8 @@ class LobClassRepoBase {
 	'lobCopyStyle'=>'char',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
-	'lobVersion'=>'integer');
+	'lobVersion'=>'integer',
+	'lobBytes'=>'integer');
 
 	var $__nulls = array();
 
@@ -135,6 +137,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
 		$st->fields['lob_version'] = 'lob_version';
+		$st->fields['lob_bytes'] = 'lob_bytes';
 
 
 		$array = array();
@@ -157,6 +160,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
 		$st->fields['lob_version'] = $this->lobVersion;
+		$st->fields['lob_bytes'] = $this->lobBytes;
 
 
 		$st->key = 'lob_class_repo_id';
@@ -181,6 +185,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
 		$st->fields['lob_version'] = $obj->lobVersion;
+		$st->fields['lob_bytes'] = $obj->lobBytes;
 
 
 		$st->key = 'lob_class_repo_id';
@@ -247,6 +252,7 @@ class LobClassRepoPeerBase {
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
 		$x->lobVersion = $row['lob_version'];
+		$x->lobBytes = $row['lob_bytes'];
 
 		$x->_new = false;
 		return $x;

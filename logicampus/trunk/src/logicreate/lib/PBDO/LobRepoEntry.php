@@ -16,6 +16,7 @@ class LobRepoEntryBase {
 	var $lobNotes;
 	var $lobUrltitle;
 	var $lobVersion;
+	var $lobBytes;
 
 	var $__attributes = array( 
 	'lobRepoEntryId'=>'integer',
@@ -27,7 +28,8 @@ class LobRepoEntryBase {
 	'lobDescription'=>'text',
 	'lobNotes'=>'longtext',
 	'lobUrltitle'=>'varchar',
-	'lobVersion'=>'integer');
+	'lobVersion'=>'integer',
+	'lobBytes'=>'integer');
 
 	var $__nulls = array( 
 	'lobDescription'=>'lobDescription',
@@ -167,6 +169,7 @@ class LobRepoEntryPeerBase {
 		$st->fields['lob_notes'] = 'lob_notes';
 		$st->fields['lob_urltitle'] = 'lob_urltitle';
 		$st->fields['lob_version'] = 'lob_version';
+		$st->fields['lob_bytes'] = 'lob_bytes';
 
 
 		$array = array();
@@ -191,6 +194,7 @@ class LobRepoEntryPeerBase {
 		$st->fields['lob_notes'] = $this->lobNotes;
 		$st->fields['lob_urltitle'] = $this->lobUrltitle;
 		$st->fields['lob_version'] = $this->lobVersion;
+		$st->fields['lob_bytes'] = $this->lobBytes;
 
 		$st->nulls['lob_description'] = 'lob_description';
 		$st->nulls['lob_notes'] = 'lob_notes';
@@ -219,6 +223,7 @@ class LobRepoEntryPeerBase {
 		$st->fields['lob_notes'] = $obj->lobNotes;
 		$st->fields['lob_urltitle'] = $obj->lobUrltitle;
 		$st->fields['lob_version'] = $obj->lobVersion;
+		$st->fields['lob_bytes'] = $obj->lobBytes;
 
 		$st->nulls['lob_description'] = 'lob_description';
 		$st->nulls['lob_notes'] = 'lob_notes';
@@ -289,6 +294,7 @@ class LobRepoEntryPeerBase {
 		$x->lobNotes = $row['lob_notes'];
 		$x->lobUrltitle = $row['lob_urltitle'];
 		$x->lobVersion = $row['lob_version'];
+		$x->lobBytes = $row['lob_bytes'];
 
 		$x->_new = false;
 		return $x;
