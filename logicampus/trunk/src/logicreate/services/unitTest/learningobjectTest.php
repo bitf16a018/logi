@@ -11,15 +11,51 @@ class LearningObjectTest extends UnitTestCase {
 
 	var $description = "Learning objects and publishing to the repository.";
 
+	var $newContentId = 0;
 
 	/**
 	 * make a new content object (lob)
 	 */
 	function testContentCreate() {
 		$content = new Lc_Lob_Content();
+		$sample = 'Hello, World!  This is some text.';
+		$content->setTextContent($sample);
+
+		$savedGood = $content->save();
+		$this->newContentId = $content->getRepoId();
+
+
+		$this->assertTrue( $savedGood );
 		$this->assertEqual( strtolower(get_class($content)), strtolower('lc_lob_content'));
 
 		$this->assertEqual( $content->type, 'content');
+		$this->assertTrue( $content->isText() );
+
+		$this->assertTrue( is_object($content->repoObj) );
+		$this->assertTrue( is_object($content->lobSub) );
+		$this->assertEqual( strtolower(get_class(($content->lobSub))), 'lobcontent');
+		$this->assertTrue( is_object($content->lobMetaObj) );
+	}
+
+
+	/**
+	 * Make a new content object (lob).
+	 * Save a file to it.
+	 */
+	function testCanCreateFileContent() {
+		$content = new Lc_Lob_Content();
+		$sample = file_get_contents('sample_content.zip');
+		$content->setBinContent($sample);
+
+		$savedGood = $content->save();
+		$this->newContentId = $content->getRepoId();
+
+
+		$this->assertTrue( $savedGood );
+		$this->assertEqual( strtolower(get_class($content)), strtolower('lc_lob_content'));
+
+		$this->assertEqual( $content->type, 'content');
+		$this->assertTrue( $content->isFile() );
 
 		$this->assertTrue( is_object($content->repoObj) );
 		$this->assertTrue( is_object($content->lobSub) );
