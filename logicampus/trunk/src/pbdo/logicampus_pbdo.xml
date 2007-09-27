@@ -527,7 +527,7 @@
 			attribute="user_id"
 			name="user_id"/>
 		<key
-			attribute="is_owner_id"
+			attribute="is_owner"
 			name="is_owner_idx"/>
 	</entity>
 

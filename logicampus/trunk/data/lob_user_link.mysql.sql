@@ -16,5 +16,5 @@ CREATE TABLE `lob_user_link` (
 
 CREATE INDEX lob_repo_entry_idx ON lob_user_link (lob_repo_entry_id);
 CREATE INDEX user_id ON lob_user_link (user_id);
-CREATE INDEX is_owner_idx ON lob_user_link (is_owner_id);
+CREATE INDEX is_owner_idx ON lob_user_link (is_owner);
 
