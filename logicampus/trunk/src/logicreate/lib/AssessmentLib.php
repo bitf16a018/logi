@@ -18,12 +18,12 @@
  *
  */
 
-define( QUESTION_TRUEFALSE, 1 );
-define( QUESTION_MCHOICE, 2 );
-define( QUESTION_MANSWER, 3 );
-define( QUESTION_MATCHING, 4 );
-define( QUESTION_FILLINBLANK, 5 );
-define( QUESTION_ESSAY, 6 );
+define( 'QUESTION_TRUEFALSE',   1 );
+define( 'QUESTION_MCHOICE',     2 );
+define( 'QUESTION_MANSWER',     3 );
+define( 'QUESTION_MATCHING',    4 );
+define( 'QUESTION_FILLINBLANK', 5 );
+define( 'QUESTION_ESSAY',       6 );
 
 
 /**
