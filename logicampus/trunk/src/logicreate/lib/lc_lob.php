@@ -247,9 +247,14 @@ class Lc_Lob {
 
 
 	function save() {
+		if ($this->repoObj->lobGuid == '') {
+			$guid = lcUuid();
+			$this->repoObj->set('lobGuid',$guid);
+		}
+
+		$this->repoObj->version++;
 		$this->repoObj->save();
 		$ret = ($this->repoObj->getPrimaryKey() > 0);
-		$this->lobMetaObj->version++;
 		$this->lobMetaObj->updatedOn = time();
 		if ($this->lobMetaObj->isNew()) {
 			//might be a brand new object
