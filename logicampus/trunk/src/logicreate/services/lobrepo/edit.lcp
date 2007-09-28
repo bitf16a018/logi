@@ -61,6 +61,8 @@ class Edit extends FacultyService {
 
 		if ($lob->isFile()) {
 			$lc->templateName = 'add_doc';
+		} else if ($lob->isImage()) {
+			$lc->templateName = 'add_image';
 		} else {
 			$lc->templateName = 'add_html';
 		}
@@ -74,17 +76,22 @@ class Edit extends FacultyService {
 		$id = intval($lc->postvars['lob_id']);
 		$lob = new Lc_Lob_Content($id);
 
-		if (isset($lc->postvars['lob_type']) ) {
-			if ($lc->postvars['lob_type'] == 'document') {
-				$lob->updateAsFile(
-						$lc->postvars, 
-						$lc->uploads['document']['name'], 
-						$lc->uploads['document']['tmp_name']);
-			}
-		} else {
+		if ($lc->postvars['lob_sub_type'] == 'document') {
+			$lob->setFile(
+					$lc->uploads['content']['tmp_name'], 
+					$lc->uploads['content']['name']);
+			$lob->updateAsFile($lc->postvars['txTitle'], 'document');
+		}
+		if ($lc->postvars['lob_sub_type'] == 'image') {
+			$lob->setFile(
+					$lc->uploads['content']['tmp_name'], 
+					$lc->uploads['content']['name']);
+			$lob->updateAsFile($lc->postvars['txTitle'], 'image');
+		}
+
+		if ($lc->postvars['lob_sub_type'] == 'text') {
 			if ($lob->isFile()) {
-				$lob->updateAsFile(
-						$lc->postvars, 
+				$lob->setFile(
 						$lc->uploads['document']['name'], 
 						$lc->uploads['document']['tmp_name']);
 			} else {
@@ -94,13 +101,15 @@ class Edit extends FacultyService {
 					$lob->set('lobMime', $lc->postvars['mime']);
 				}
 
-				//create the link text in a standard way
-				$lob->set('lobUrltitle',
-					Lc_Lob_Util::createLinkText($lob->get('lobTitle'))
-				);
-
 			}
 		}
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			Lc_Lob_Util::createLinkText($lob->get('lobTitle'))
+		);
+
+		$lob->setCaption($lc->postvars['caption']);
 
 
 		if ($lob->repoObj->isNew()) {

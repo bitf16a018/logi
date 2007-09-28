@@ -36,7 +36,8 @@
 
 <input type="hidden" name="event" value="save">
 <input type="hidden" name="mimetype" value="<?=$t['mimetype'];?>">
+<input type="hidden" name="lob_type" value="content">
 <input type="hidden" name="lob_sub_type" value="document">
-<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobContentId');?>">
+<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobRepoEntryId');?>">
 
 </form>

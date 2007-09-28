@@ -28,6 +28,13 @@ class Lc_Lob {
 		}
 	}
 
+	function isImage() {
+		return $this->repoObj->lobSubType == 'image';
+	}
+
+	/**
+	 * Document style content, word processing files, audio, etc
+	 */
 	function isFile() {
 		return $this->repoObj->lobSubType == 'document';
 	}
@@ -165,49 +172,25 @@ class Lc_Lob {
 
 
 
-	/*
-	function updateAsFile(&$vars, $name='', $tmp_name='') {
-		$this->set('lobTitle', $vars['txTitle']);
+	function updateAsFile($title, $subType = 'document') {
+		$this->set('lobSubType',$subType);
 
-		if ($tmp_name != '') {
-			$this->set('lobFilename', urlencode( $name ) );
-			$this->set('lobBinary', file_get_contents( $tmp_name ) );
-		}
-		$this->set('lobSubType',$vars['lob_sub_type']);
-		$n =& $name;
-
+		$this->set('lobTitle', $title);
+		$n = $this->lobSub->lobFilename;
 		$ext = substr (
 			$n, 
 		       (strrpos($n, '.')  - strlen($n) +1)
 			);
-
 		$ext = strtolower($ext);
-		$m = Lc_Lob_Util::getMimeForSubtype($vars['lob_sub_type'],$ext);
+		$m = Lc_Lob_Util::getMimeForSubtype($subType,$ext);
 		$this->set('lobMime', $m);
-
-		//create the link text in a standard way
-		$this->set('lobUrltitle',
-			Lc_Lob_Util::createLinkText($this->get('lobTitle'),$ext)
-		);
 	}
-	 */
 
 
-	/*
-	function updateAsText($vars) {
-		$this->set('lobContent', $vars['txText']);
-		$this->set('lobSubType',$vars['lob_sub_type']);
-		$this->set('lobTitle', $vars['txTitle']);
-		if (@isset($vars['mime'])  && strlen($vars['mime'])) {
-			$this->set('lobMime', $vars['mime']);
-		}
-
-		//create the link text in a standard way
-		$this->set('lobUrltitle',
-			Lc_Lob_Util::createLinkText($this->get('lobTitle'))
-		);
+	function updateAsText($title, $subType = 'text') {
+		$this->set('lobSubType',$subType);
+		$this->set('lobTitle', $title);
 	}
-	 */
 
 	function makePublic() {
 		$this->lobMetaObj->private = 0;
@@ -399,7 +382,7 @@ class Lc_Lob_Content extends Lc_Lob {
 	function setBinContent(&$binary) {
 		$this->lobSub->lobBinary =& $binary;
 		$this->repoObj->lobSubType = 'document';
-		$this->repoObj->lobBytes = strlen($content);
+		$this->repoObj->lobBytes = strlen($binary);
 		$this->lobSub->lobText = null;
 	}
 
@@ -415,6 +398,20 @@ class Lc_Lob_Content extends Lc_Lob {
 		$this->lobSub->lobFilename = $filetitle;
 	}
 
+
+	/**
+	 * Return the caption for this content, mostly for images
+	 */
+	function getCaption() {
+		return $this->lobSub->lobCaption;
+	}
+
+	/**
+	 * Set the caption for this content, mostly for images
+	 */
+	function setCaption($cap) {
+		$this->lobSub->lobCaption = $cap;
+	}
 
 	function getFilename() {
 		return $this->lobSub->lobFilename;
