@@ -34,6 +34,7 @@ class lcUser {
 		$db = DB::getHandle();
 		$db->query("select * from lcUsers where username = '$uname'",false);
 		$db->nextRecord();
+		$db->freeResult();
 		switch($db->record['userType']) {
 			case USERTYPE_FACULTY:
 				$temp = new FacultyUser($db->record['username']);
@@ -75,24 +76,27 @@ class lcUser {
 		//gc cleanup, mysql specific with DATE_SUB
 			global $PHPSESSID;
 			$db->query("DELETE FROM lcSessions WHERE DATE_SUB(CURDATE(), INTERVAL 1 DAY) > gc",false);
+			$db->freeResult();
 		}
 		$db->query("select * from lcSessions where sesskey = '$sessID'",false);
-		$j = $db->next_record();
+		$j = $db->nextRecord();
+		$db->freeResult();
 
 		if (!$j) {
 			//trigger_error('second try to get session for: '.$sessID);
 			$db->query("select * from lcSessions where sesskey = '$sessID'",false);
-			$j = $db->next_record();
+			$j = $db->nextRecord();
+			$db->freeResult();
 		}
 
 
 		if (function_exists("gzuncompress")) { 
-			$temp2 = unserialize(gzuncompress(base64_decode($db->Record['sessdata'])));
+			$temp2 = unserialize(gzuncompress(base64_decode($db->record['sessdata'])));
 		} else {
-			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
+			$temp2 = unserialize(base64_decode($db->record['sessdata']));
 		}
 		if (!$temp2) { 
-			$temp2 = unserialize(base64_decode($db->Record['sessdata']));
+			$temp2 = unserialize(base64_decode($db->record['sessdata']));
 		}
 
 		if ($temp2['_userobj']->username!='anonymous') { 
@@ -101,13 +105,13 @@ class lcUser {
 		if ($j) {
 			$sessArr = $temp2;
 			/*
-			$sessArr = unserialize(gzuncompress(base64_decode($db->Record["sessdata"])));
+			$sessArr = unserialize(gzuncompress(base64_decode($db->record["sessdata"])));
 			if (!$sessArr) {
-				$sessArr = unserialize((base64_decode($db->Record["sessdata"])));
+				$sessArr = unserialize((base64_decode($db->record["sessdata"])));
 			}
 			*/
 
-			$origSession = crc32($db->Record['sessdata']);
+			$origSession = crc32($db->record['sessdata']);
 			if ( is_object($sessArr['_userobj']) && $sessArr['_userobj']->userType > 0) {
 				$temp = $sessArr['_userobj'];
 //				$temp = lcUser::getUserByUsername($sessArr['_userobj']->username);
@@ -161,6 +165,7 @@ class lcUser {
 		$db = DB::getHandle();
 		$db->query("select * from lcUsers where pkey = $key",false);
 		if ( !$db->nextRecord() ) {  return new lcUser();  }
+		$db->freeResult();
 		$temp =   new lcUser();
 		$temp->username = $db->record['username'];
 		$temp->password = $db->record['password'];
@@ -499,6 +504,7 @@ class lcUser {
 		$db->query($countSql,false);
 
 		$db->nextRecord();
+		$db->freeResult();
 
 		if( $db->record['total'] == 1 ) {
 			$db->query("select * from lcUsers where username = '$username' and password = '".$password."'",false);
@@ -537,8 +543,9 @@ class lcUser {
 
 		$sql = "select mid from lcRegistry where moduleName = '$mname'";
 		$db->query($sql,false);
-		$db->next_record();		//get the moduleID from the registry
-		$mid = $db->Record['mid'];
+		$db->nextRecord();		//get the moduleID from the registry
+		$db->freeResult();
+		$mid = $db->record['mid'];
 		 // usefull for both mid and moduleName values.
 		 
 		$where = '';
@@ -550,9 +557,8 @@ class lcUser {
 
 		$sql = sprintf($sql,$where);
 		$db->query($sql,false);
-		while ($db->next_record() ) {
-			$ret[] = $db->Record['action'];
-
+		while ($db->nextRecord() ) {
+			$ret[] = $db->record['action'];
 		}
 	$this->perms = $ret;
 
