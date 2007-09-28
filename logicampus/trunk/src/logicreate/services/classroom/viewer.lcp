@@ -115,6 +115,7 @@ class viewer extends StudentService {
 					$t['file']['mime'] =  $db->record['lob_mime'];
 				}
 				$t['file']['linkText'] =  $db->record['link_text'];
+				$t['file']['caption'] =  $db->record['lob_caption'];
 //				$t['file']['bytesize'] =  strlen($db->record['lob_binary']);
 			}
 		}
