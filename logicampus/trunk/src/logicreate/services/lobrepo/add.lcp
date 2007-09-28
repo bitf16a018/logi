@@ -33,7 +33,7 @@ class add extends FacultyService {
 	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName = 'add_main';
 
-		$t['lob'] = new LC_Lob();
+		$t['lob'] = new LC_Lob_Content();
 
 		$ext = addslashes($lc->getvars['m']);
 		$mimetype = Lc_Lob_Util::getMimeForSubtype($lc->getvars['t'],$ext);

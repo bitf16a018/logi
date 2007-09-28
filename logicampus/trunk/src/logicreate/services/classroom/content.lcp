@@ -102,28 +102,30 @@ class content extends StudentService {
 		}
 
 
-//		debug($t['seqItems'][$curIdx],1);
 
 		//cannot find content in the sequence, might be a linked image
 		// try to find it just linked up to this class
 		if ($curIdx == -1) {
 			$db->query("SELECT * FROM lob_content as A 
-				LEFT JOIN lob_class_link AS B on A.lob_content_id = B.lob_id
+				LEFT JOIN lob_class_repo AS B on A.lob_content_id = B.lob_id
 				WHERE A.lob_urltitle = '".$filename."'
 				AND B.class_id = ".$classId);
 
 		} else {
-			$db->query("SELECT * FROM lob_content as A 
-				LEFT JOIN lob_class_link AS B on A.lob_content_id = B.lob_id
-				WHERE A.lob_content_id = ".$t['seqItems'][$curIdx]->lobId."
+			$db->query("SELECT A.*, 'image/jpeg' as lob_mime, B.lob_sub_type 
+				FROM lob_class_content as A 
+				LEFT JOIN lob_class_repo AS B 
+					ON A.lob_class_repo_id = B.lob_class_repo_id
+				WHERE A.lob_class_repo_id = ".$t['seqItems'][$curIdx]->lobId."
 				AND B.class_id = ".$classId);
 		}
 		if ($db->nextRecord()) {
 			$t['file']['title'] = $db->record['lob_title'];
-			$t['file']['content'] = $db->record['lob_content'];
+			$t['file']['content'] = $db->record['lob_text'];
 			$t['file']['mime'] = 'text/html';
 		}
-		if ( strstr($db->record['lob_mime'] , 'image') ) {
+
+		if ( strstr($db->record['lob_sub_type'] , 'image') ) {
 			header('Content-type: '.$db->record['lob_mime']);
 			echo $db->record['lob_binary'];
 			exit();
