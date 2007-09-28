@@ -743,8 +743,10 @@ class PersistantObject {
 		$db = DB::getHandle();
 		$db->query("select $fields from $table where $prime = '$id'");
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		if ($db->next_record() )
-			$at = $db->Record;
+		if ($db->nextRecord() ) {
+			$at = $db->record;
+		}
+		$db->freeResult();
 		$obj = PersistantObject::createFromArray($class,$at);
 
 	return $obj;
