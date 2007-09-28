@@ -99,8 +99,9 @@ class viewer extends StudentService {
 		}
 		 */
 		if ($t['lob']['lob_type'] == 'content') {
-			$db->query("SELECT * FROM lob_content as A 
-				LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_id
+			$db->query("SELECT * FROM lob_class_content as A 
+				LEFT JOIN class_lesson_sequence AS B 
+					ON A.lob_class_repo_id = B.lob_id
 				WHERE B.link_text='".$filename."'
 				AND B.lesson_id = ".$lesson_id."
 				AND B.class_id = ".$classId);
@@ -113,11 +114,10 @@ class viewer extends StudentService {
 				} else {
 					$t['file']['mime'] =  $db->record['lob_mime'];
 				}
-				$t['file']['linkText'] =  $db->record['lob_urltitle'];
-				$t['file']['bytesize'] =  strlen($db->record['lob_binary']);
+				$t['file']['linkText'] =  $db->record['link_text'];
+//				$t['file']['bytesize'] =  strlen($db->record['lob_binary']);
 			}
 		}
-
 
 
 		$t['uniqcode'] = $uniqCode;
@@ -157,7 +157,7 @@ class viewer extends StudentService {
 		}
 
 //print_r($u);
-		$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob::getMimeIcon($t['lob']['lob_mime']);
+		$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob_Util::getMimeIcon($t['lob']['lob_mime']);
 	}
 }
 
