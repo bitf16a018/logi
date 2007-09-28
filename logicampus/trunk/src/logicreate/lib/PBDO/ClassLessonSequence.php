@@ -10,8 +10,9 @@ class ClassLessonSequenceBase {
 	var $lessonId;
 	var $classId;
 	var $lobId;
-	var $lobMime;
 	var $lobType;
+	var $lobSubType;
+	var $lobMime;
 	var $lobTitle;
 	var $linkText;
 	var $visible;
@@ -25,8 +26,9 @@ class ClassLessonSequenceBase {
 	'lessonId'=>'integer',
 	'classId'=>'integer',
 	'lobId'=>'integer',
-	'lobMime'=>'varchar',
 	'lobType'=>'varchar',
+	'lobSubType'=>'varchar',
+	'lobMime'=>'varchar',
 	'lobTitle'=>'varchar',
 	'linkText'=>'varchar',
 	'visible'=>'int',
@@ -132,8 +134,9 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lesson_id'] = 'lesson_id';
 		$st->fields['class_id'] = 'class_id';
 		$st->fields['lob_id'] = 'lob_id';
-		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_type'] = 'lob_type';
+		$st->fields['lob_sub_type'] = 'lob_sub_type';
+		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_title'] = 'lob_title';
 		$st->fields['link_text'] = 'link_text';
 		$st->fields['visible'] = 'visible';
@@ -159,8 +162,9 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lesson_id'] = $this->lessonId;
 		$st->fields['class_id'] = $this->classId;
 		$st->fields['lob_id'] = $this->lobId;
-		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_type'] = $this->lobType;
+		$st->fields['lob_sub_type'] = $this->lobSubType;
+		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_title'] = $this->lobTitle;
 		$st->fields['link_text'] = $this->linkText;
 		$st->fields['visible'] = $this->visible;
@@ -191,8 +195,9 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lesson_id'] = $obj->lessonId;
 		$st->fields['class_id'] = $obj->classId;
 		$st->fields['lob_id'] = $obj->lobId;
-		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_type'] = $obj->lobType;
+		$st->fields['lob_sub_type'] = $obj->lobSubType;
+		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_title'] = $obj->lobTitle;
 		$st->fields['link_text'] = $obj->linkText;
 		$st->fields['visible'] = $obj->visible;
@@ -265,8 +270,9 @@ class ClassLessonSequencePeerBase {
 		$x->lessonId = $row['lesson_id'];
 		$x->classId = $row['class_id'];
 		$x->lobId = $row['lob_id'];
-		$x->lobMime = $row['lob_mime'];
 		$x->lobType = $row['lob_type'];
+		$x->lobSubType = $row['lob_sub_type'];
+		$x->lobMime = $row['lob_mime'];
 		$x->lobTitle = $row['lob_title'];
 		$x->linkText = $row['link_text'];
 		$x->visible = $row['visible'];

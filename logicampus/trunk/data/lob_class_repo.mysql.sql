@@ -16,6 +16,7 @@ CREATE TABLE `lob_class_repo` (
 	`lob_copy_style` char (1) NOT NULL, 
 	`lob_type` varchar (100) NOT NULL, 
 	`lob_sub_type` varchar (100) NOT NULL, 
+	`lob_mime` varchar (100) NOT NULL, 
 	`lob_version` integer (11) NOT NULL, 
 	`lob_bytes` integer (11) NOT NULL,
 	PRIMARY KEY (lob_class_repo_id) 
