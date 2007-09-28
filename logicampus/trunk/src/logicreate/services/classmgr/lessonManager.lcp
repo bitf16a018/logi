@@ -245,11 +245,12 @@ class LessonManager extends FacultyService {
 		$t['title'] = $lesson->get('title');
 
 
-		$sql = "SELECT B.lob_content_id, B.lob_title
-			FROM lob_class_link AS A
-			LEFT JOIN lob_content AS B on A.lob_id = B.lob_content_id
+		$sql = "SELECT B.lob_repo_entry_id, B.lob_title
+			FROM lob_class_repo AS A
+			LEFT JOIN lob_repo_entry AS B 
+				ON A.lob_repo_entry_id = B.lob_repo_entry_id
 			WHERE A.class_id = ".$class_id."
-			AND A.lob_kind = 'content'
+			AND B.lob_type = 'content'
 			ORDER BY B.lob_title";
 
 		$lobs = array();
@@ -459,17 +460,17 @@ class LessonManager extends FacultyService {
 			$itemArray = array();
 		}
 
+
 		//get all lesson items for security
-		$sql = "SELECT A.lob_id, B.lob_title, B.lob_urltitle, B.lob_mime
-			FROM lob_class_link AS A
-			LEFT JOIN lob_content as B on A.lob_id = B.lob_content_id
-			WHERE A.class_id = ".$class_id."
-			AND A.lob_kind = 'content'";
+		$sql = "
+			SELECT A.lob_repo_entry_id, A.lob_title, A.lob_urltitle, 'text/html' as lob_mime
+			FROM lob_class_repo AS A
+			WHERE A.class_id = ".$class_id."";
 
 		$db->query($sql);
 		while ($db->nextRecord()) {
-			$allowableItems[] = $db->record['lob_id'];
-			$lobRecord[$db->record['lob_id']] = $db->record;
+			$allowableItems[] = $db->record['lob_repo_entry_id'];
+			$lobRecord[$db->record['lob_repo_entry_id']] = $db->record;
 		}
 
 		//clean input array to match allowable items
@@ -482,6 +483,7 @@ class LessonManager extends FacultyService {
 				$validEntry = true;
 			}
 		}
+
 		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
 		$lessonSequence->updateContent($itemArray,$lobRecord);
 
@@ -623,7 +625,7 @@ class LessonManager extends FacultyService {
 
 		$lobRecord = array();
 		while ($db->nextRecord()) {
-			$linkText = LC_Lob::createLinkText($db->record['title']);
+			$linkText = LC_Lob_Util::createLinkText($db->record['title']);
 			$allowableItems[] = $db->record['id_class_assignments'];
 			$lobRecord[$db->record['id_class_assignments']] = 
 				array('lob_title' => $db->record['title'],
