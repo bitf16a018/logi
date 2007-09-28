@@ -10,6 +10,8 @@ class LobClassRepoBase {
 	var $classId;
 	var $lobRepoEntryId;
 	var $lobGuid;
+	var $lobTitle;
+	var $lobUrltitle;
 	var $lobCopyStyle;
 	var $lobType;
 	var $lobSubType;
@@ -21,6 +23,8 @@ class LobClassRepoBase {
 	'classId'=>'integer',
 	'lobRepoEntryId'=>'integer',
 	'lobGuid'=>'varchar',
+	'lobTitle'=>'varchar',
+	'lobUrltitle'=>'varchar',
 	'lobCopyStyle'=>'char',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
@@ -133,6 +137,8 @@ class LobClassRepoPeerBase {
 		$st->fields['class_id'] = 'class_id';
 		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
 		$st->fields['lob_guid'] = 'lob_guid';
+		$st->fields['lob_title'] = 'lob_title';
+		$st->fields['lob_urltitle'] = 'lob_urltitle';
 		$st->fields['lob_copy_style'] = 'lob_copy_style';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
@@ -156,6 +162,8 @@ class LobClassRepoPeerBase {
 		$st->fields['class_id'] = $this->classId;
 		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
 		$st->fields['lob_guid'] = $this->lobGuid;
+		$st->fields['lob_title'] = $this->lobTitle;
+		$st->fields['lob_urltitle'] = $this->lobUrltitle;
 		$st->fields['lob_copy_style'] = $this->lobCopyStyle;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
@@ -181,6 +189,8 @@ class LobClassRepoPeerBase {
 		$st->fields['class_id'] = $obj->classId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
 		$st->fields['lob_guid'] = $obj->lobGuid;
+		$st->fields['lob_title'] = $obj->lobTitle;
+		$st->fields['lob_urltitle'] = $obj->lobUrltitle;
 		$st->fields['lob_copy_style'] = $obj->lobCopyStyle;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
@@ -248,6 +258,8 @@ class LobClassRepoPeerBase {
 		$x->classId = $row['class_id'];
 		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
 		$x->lobGuid = $row['lob_guid'];
+		$x->lobTitle = $row['lob_title'];
+		$x->lobUrltitle = $row['lob_urltitle'];
 		$x->lobCopyStyle = $row['lob_copy_style'];
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
