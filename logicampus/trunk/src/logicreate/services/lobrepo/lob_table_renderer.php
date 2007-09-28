@@ -64,7 +64,7 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 //			$browseHtml .= ' <a href="#">Content pages</a></span>';
 			if (is_array($u->classesTaught) ) {
 				$linkHtml = '<span style="font-size:8pt;background-color:white;color:green;">Link this object to your class:&nbsp;';
-				$lobId = $this->table->tableModel->getValueNamed($x,'lobId');
+				$lobId = $this->table->tableModel->getValueNamed($x,'lobRepoEntryId');
 				foreach ($u->classesTaught as $classObj) {
 					if (in_array($classObj->id_classes,$this->classLinkIds[$lobId])) { 
 						$linkHtml .= ' <span style="color:black;">'.$classObj->courseFamily. ' '.$classObj->courseNumber.'</span> &bull;';

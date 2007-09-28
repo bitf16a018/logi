@@ -24,6 +24,7 @@ class Lc_Lob {
 		} else {
 			$this->repoObj = LobRepoEntry::load($id);
 			$this->lobMetaObj = LobMetadata::load(array('lob_repo_entry_id'=>$id));
+			$this->type = $this->repoObj->lobType;
 		}
 	}
 
@@ -105,7 +106,7 @@ class Lc_Lob {
 	 **/
 	function getEditedOn() {
 		if ($this->lobMetaObj->updatedOn < 1) {
-			return 'unkonwn';
+			return 'unknown';
 		}
 		return date('M d \'y',$this->lobMetaObj->updatedOn);
 	}
@@ -115,7 +116,7 @@ class Lc_Lob {
 	 **/
 	function getCreatedOn() {
 		if ($this->lobMetaObj->createdOn < 1) {
-			return 'unkonwn';
+			return 'unknown';
 		}
 
 		return date('M d \'y',$this->lobMetaObj->createdOn);
@@ -274,8 +275,9 @@ class Lc_Lob {
 	 * Make a copy or reference (link) of this lob in the 
 	 * class_repo.
 	 */
-	function useInClass($linkStyle = 'notify') {
-		$subData = null;
+	function useInClass($classId = -1, $copyStyle = 'notify') {
+		$subLob = null;
+		$classRepo = null;
 
 		if ($this->type == 'unknown') {
 			return null;
@@ -290,7 +292,7 @@ class Lc_Lob {
 					trigger_error('learning object missing internal data.');
 					return null;
 				}
-				$subData  = $results[0];
+				$subLob  = $results[0];
 				include_once(LIB_PATH.'lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassContent();
 				break;
@@ -301,7 +303,7 @@ class Lc_Lob {
 					trigger_error('learning object missing internal data.');
 					return null;
 				}
-				$subData  = $results[0];
+				$subLob  = $results[0];
 				include_once(LIB_PATH.'lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassActivity();
 				break;
@@ -312,23 +314,45 @@ class Lc_Lob {
 					trigger_error('learning object missing internal data.');
 					return null;
 				}
-				$subData  = $results[0];
+				$subLob  = $results[0];
 				include_once(LIB_PATH.'lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassTest();
 				break;
 		}
 
-		$classLob->save();
-		$classRepoEntry = new Lc_Lob_Class();
-		return $classLob;
+		//load or make a new class repository entry
+		$classRepo = LobClassRepo::load( array ('lob_repo_entry_id'=> $repo->lobRepoEntryId) );
+		if (isset($classRepo)) {
+
+		} else {
+			$classRepo = new LobClassRepo();
+			$classRepo->type = $this->type;
+		}
+
+		$classLob->repoObj = $classRepo;
+		$classLob->loadSub();
+
 		//copy all values to classRepoEntry
 		//
+		$classLob->repoObj->classId        = $classId;
+		$classLob->repoObj->lobRepoEntryId = $repo->get('lobRepoEntryId');
+		$classLob->repoObj->lobGuid        = $repo->get('lobGuid');
+		$classLob->repoObj->lobCopyStyle   = $copyStyle;
+		$classLob->repoObj->lobType        = $repo->lobType;
+		$classLob->repoObj->lobSubType     = $repo->lobSubType;
+		$classLob->repoObj->lobVersion     = $repo->lobVersion;
+		$classLob->repoObj->lobBytes       = $repo->lobBytes;
+
+
+		//update values of the sub object
+		//
+		$classLob->copySub($subLob);
+
 		//save, get id
 		//
-		//decide which type of sub-data object to make
-		//
-		//update with lob repo id
-		//save
+		$classLob->save();
+
+		return $classLob;
 	}
 }
 
@@ -481,7 +505,6 @@ class Lc_Lob_Util {
 				break;
 		}
 	}
-
 
 
 	/**

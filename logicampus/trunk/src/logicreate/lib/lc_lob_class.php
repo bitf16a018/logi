@@ -23,6 +23,50 @@ class Lc_Lob_Class extends Lc_Lob {
 		}
 	}
 
+	/**
+	 * Load a specific sub lob based on this type
+	 */
+	function loadSub() {
+		switch($this->type) {
+			case 'content':
+				if ($this->repoObj->getPrimaryKey() > 0) {
+					$results = $this->repoObj->getLobClassContentsByLobClassRepoId();
+					$this->lobSub = $results[0];
+				} else {
+					$this->lobSub = new LobClassContent();
+				}
+				break;
+
+			case 'activity':
+				/*
+				$results  = $this->getLobActivitysByLobRepoEntryId();
+				if (! count($results) ) {
+					trigger_error('learning object missing internal data.');
+					return null;
+				}
+				$subLob  = $results[0];
+				include_once(LIB_PATH.'lc_lob_class.php');
+				$classLob = new Lc_Lob_ClassActivity();
+				 */
+				trigger_error('un-implemented');
+				break;
+
+			case 'test':
+				/*
+				$results  = $this->getLobTestsByLobRepoEntryId();
+				if (! count($results) ) {
+					trigger_error('learning object missing internal data.');
+					return null;
+				}
+				$subLob  = $results[0];
+				include_once(LIB_PATH.'lc_lob_class.php');
+				$classLob = new Lc_Lob_ClassTest();
+				*/
+
+				trigger_error('un-implemented');
+				break;
+		}
+	}
 
 	/**
 	 * Skip the meta object for now
@@ -67,6 +111,34 @@ class Lc_Lob_ClassContent extends Lc_Lob_Class {
 			$this->repoObj = LobClassRepo::load($id);
 			$this->lobSub = LobClassContent::load($id);
 		}
+	}
+
+	/**
+	 * Copy all the values of a specific sub Object to this lobSub
+	 */
+	function copySub(&$repoSub) {
+		$this->lobSub->lobText     = $repoSub->lobText;
+		$this->lobSub->lobBinary   = $repoSub->lobBinary;
+		$this->lobSub->lobFilename = $repoSub->lobFilename;
+		$this->lobSub->lobCaption  = $repoSub->lobCaption;
+	}
+
+	/**
+	 * Skip the meta object for now
+	 */
+	function save() {
+		if ($this->repoObj->lobGuid == '') {
+			$guid = lcUuid();
+			$this->repoObj->set('lobGuid',$guid);
+		}
+		$this->repoObj->version++;
+		$this->repoObj->save();
+		$ret = ($this->repoObj->getPrimaryKey() > 0);
+
+		$this->lobSub->lobClassRepoId = $this->repoObj->getPrimaryKey();
+		$this->lobSub->save();
+
+		return $ret;
 	}
 }
 ?>
