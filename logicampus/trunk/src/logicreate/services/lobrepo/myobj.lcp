@@ -52,7 +52,7 @@ class Myobj extends FacultyService {
 			$lobItems[$idx]['author'] = $lobRec['author'];
 			$lobItems[$idx]['description'] = $lobRec['lob_description'];
 			$lobItems[$idx]['mimetype'] = $lobRec['lob_mime'];
-			$lobItems[$idx]['lobId'] = $lobRec['lob_content_id'];
+			$lobItems[$idx]['lobRepoEntryId'] = $lobRec['lob_repo_entry_id'];
 			$lobItems[$idx]['subdisc'] = $lobRec['subdisc'];
 			$idx++;
 		}
@@ -61,7 +61,7 @@ class Myobj extends FacultyService {
 		$dm->ignoreColumn('description');
 		$dm->ignoreColumn('mimetype');
 		$dm->ignoreColumn('subdisc');
-		$dm->ignoreColumn('lobId');
+		$dm->ignoreColumn('lobRepoEntryId');
 		$table = new LC_Table($dm);
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
@@ -103,21 +103,26 @@ class Myobj extends FacultyService {
 
 		$c = (int)$lc->getvars['c'];
 		$l = (int)$lc->getvars['l'];
-		$sql = "SELECT lob_id, lob_kind
+
+		$lob = new Lc_Lob($l);
+		$lob->useInClass($c, 'notify');
+//debug($lob,1);
+
+/*
+		$sql = "SELECT lob_repo_entry_id
 			FROM lob_user_link
-			WHERE lob_id = ".$l."
+			WHERE lob_repo_entry_id = ".$l."
 			AND user_id = ".$u->userId;
 		$db->query($sql);
 		//FIXME check for db errors
 		$db->nextRecord();
-		$lobId = $db->record['lob_id'];
-		$lobKind = $db->record['lob_kind'];
+		$lobId = $db->record['lob_repo_entry_id'];
 
-		$lobClass = new LobClassLink();
-		$lobClass->set('lobId'   ,$lobId);
+		$lobClass = new LobClassRepo();
+		$lobClass->set('lobRepoEntryId'   ,$lobId);
 		$lobClass->set('classId' ,$c);
-		$lobClass->set('lobKind' ,$lobKind);
 		$lobClass->save();
+*/
 		$u->addSessionMessage('Object linked to your class.');
 
 		$this->presentor = 'redirectPresentation';
