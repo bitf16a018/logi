@@ -15,6 +15,7 @@ class LobClassRepoBase {
 	var $lobCopyStyle;
 	var $lobType;
 	var $lobSubType;
+	var $lobMime;
 	var $lobVersion;
 	var $lobBytes;
 
@@ -28,6 +29,7 @@ class LobClassRepoBase {
 	'lobCopyStyle'=>'char',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
+	'lobMime'=>'varchar',
 	'lobVersion'=>'integer',
 	'lobBytes'=>'integer');
 
@@ -142,6 +144,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_copy_style'] = 'lob_copy_style';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
+		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_version'] = 'lob_version';
 		$st->fields['lob_bytes'] = 'lob_bytes';
 
@@ -167,6 +170,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_copy_style'] = $this->lobCopyStyle;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
+		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_version'] = $this->lobVersion;
 		$st->fields['lob_bytes'] = $this->lobBytes;
 
@@ -194,6 +198,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_copy_style'] = $obj->lobCopyStyle;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
+		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_version'] = $obj->lobVersion;
 		$st->fields['lob_bytes'] = $obj->lobBytes;
 
@@ -263,6 +268,7 @@ class LobClassRepoPeerBase {
 		$x->lobCopyStyle = $row['lob_copy_style'];
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
+		$x->lobMime = $row['lob_mime'];
 		$x->lobVersion = $row['lob_version'];
 		$x->lobBytes = $row['lob_bytes'];
 
