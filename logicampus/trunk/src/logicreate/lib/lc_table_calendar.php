@@ -735,7 +735,13 @@ debug($date);
 					$this->html .= '<br/>';
 				}
 				$this->html .= $value;
-				$this->html .= '</div></a></td>';
+
+				if ($date > 0 && $date <= $this->table->getDaysInMonth() ) {
+					$this->html .=  '</div> '; 
+				}
+
+
+				$this->html .= '</a></td>';
 			}
 
 			$this->html .= '</tr>';
