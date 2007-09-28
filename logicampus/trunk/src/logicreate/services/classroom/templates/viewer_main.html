@@ -23,16 +23,27 @@ if ( strlen($t['error']) > 0 ) { ?>
 
 if ($t['file']['mime'] == 'image/jpeg' || $t['file']['mime'] == 'image/png') {
 
+?>
+	<div align="left" style="margin:auto;width:auto;text-align:center;">
+<?php
 //debug($t['file']);
 
 	echo '<h3>'.$t['file']['title'].'</h3>';
 	echo ''.$t['file']['description'].'';
 	echo "<br/>\n";
 	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['linkText'].'"/>';
-}
+	echo "<br/>\n";
+	echo '<em>'.$t['file']['caption'].'</em>';
 ?>
 
+	</div>
 <?php
+
+
+
+}
+
+
 if ($t['file']['mime'] == 'text/html') {
 
 	echo '<h3>'.$t['file']['title'].'</h3>';
