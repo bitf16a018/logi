@@ -301,6 +301,9 @@
 		<key
 			attribute="rank"
 			name="rank_idx"/>
+		<key
+			attribute="link_text"
+			name="link_text_idx"/>
 	</entity>
 
 	<entity  name="lob_repo_entry">
@@ -546,6 +549,15 @@
 			size="11"
 			type="INTEGER"/>
 		<attribute name="lob_guid"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_title"
+			required="true"
+			default=""
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="lob_urltitle"
 			required="true"
 			size="255"
 			type="VARCHAR"/>

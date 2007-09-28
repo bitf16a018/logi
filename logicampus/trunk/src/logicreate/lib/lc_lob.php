@@ -342,6 +342,8 @@ class Lc_Lob {
 		$classLob->repoObj->lobSubType     = $repo->lobSubType;
 		$classLob->repoObj->lobVersion     = $repo->lobVersion;
 		$classLob->repoObj->lobBytes       = $repo->lobBytes;
+		$classLob->repoObj->lobTitle       = $repo->lobTitle;
+		$classLob->repoObj->lobUrltitle       = $repo->lobUrltitle;
 
 
 		//update values of the sub object
