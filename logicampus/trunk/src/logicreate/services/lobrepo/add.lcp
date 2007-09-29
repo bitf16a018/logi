@@ -54,6 +54,10 @@ class add extends FacultyService {
 			case 'text':
 				$lc->templateName = 'add_text';
 				break;
+
+			case 'activity':
+				$lc->templateName = 'add_activity';
+				break;
 		}
 		$t['mimetype'] = $mimetype;
 	}

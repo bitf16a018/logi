@@ -8,12 +8,12 @@ class LobActivityBase {
 	var $_entityVersion = '';	//Source version number
 	var $lobActivityId;
 	var $lobRepoEntryId;
-	var $repsonseTypeId;
+	var $responseTypeId;
 
 	var $__attributes = array( 
 	'lobActivityId'=>'integer',
 	'lobRepoEntryId'=>'integer',
-	'repsonseTypeId'=>'tinyint');
+	'responseTypeId'=>'tinyint');
 
 	var $__nulls = array();
 
@@ -120,7 +120,7 @@ class LobActivityPeerBase {
 		$st = new PBDO_SelectStatement("lob_activity",$where);
 		$st->fields['lob_activity_id'] = 'lob_activity_id';
 		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
-		$st->fields['repsonse_type_id'] = 'repsonse_type_id';
+		$st->fields['response_type_id'] = 'response_type_id';
 
 
 		$array = array();
@@ -137,7 +137,7 @@ class LobActivityPeerBase {
 		$st = new PBDO_InsertStatement("lob_activity");
 		$st->fields['lob_activity_id'] = $this->lobActivityId;
 		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
-		$st->fields['repsonse_type_id'] = $this->repsonseTypeId;
+		$st->fields['response_type_id'] = $this->responseTypeId;
 
 
 		$st->key = 'lob_activity_id';
@@ -156,7 +156,7 @@ class LobActivityPeerBase {
 		$st = new PBDO_UpdateStatement("lob_activity");
 		$st->fields['lob_activity_id'] = $obj->lobActivityId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
-		$st->fields['repsonse_type_id'] = $obj->repsonseTypeId;
+		$st->fields['response_type_id'] = $obj->responseTypeId;
 
 
 		$st->key = 'lob_activity_id';
@@ -217,7 +217,7 @@ class LobActivityPeerBase {
 		$x = new LobActivity();
 		$x->lobActivityId = $row['lob_activity_id'];
 		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
-		$x->repsonseTypeId = $row['repsonse_type_id'];
+		$x->responseTypeId = $row['response_type_id'];
 
 		$x->_new = false;
 		return $x;
