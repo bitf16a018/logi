@@ -168,7 +168,7 @@ class mysql extends DB {
 	function queryOne($sql) {
 		$this->query($sql);
 		$ret = $this->nextRecord();
-		array_pop($this->resultSet);
+		$this->freeResult();
 		return $ret;
 	}
 
