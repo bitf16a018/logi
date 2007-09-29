@@ -245,7 +245,7 @@ class LessonManager extends FacultyService {
 		$t['title'] = $lesson->get('title');
 
 
-		$sql = "SELECT B.lob_repo_entry_id, B.lob_title
+		$sql = "SELECT A.lob_class_repo_id, B.lob_title
 			FROM lob_class_repo AS A
 			LEFT JOIN lob_repo_entry AS B 
 				ON A.lob_repo_entry_id = B.lob_repo_entry_id
@@ -463,14 +463,14 @@ class LessonManager extends FacultyService {
 
 		//get all lesson items for security
 		$sql = "
-			SELECT A.lob_repo_entry_id, A.lob_title, A.lob_urltitle, 'text/html' as lob_mime
+			SELECT A.lob_class_repo_id, A.lob_title, A.lob_urltitle, A.lob_mime
 			FROM lob_class_repo AS A
 			WHERE A.class_id = ".$class_id."";
 
 		$db->query($sql);
 		while ($db->nextRecord()) {
-			$allowableItems[] = $db->record['lob_repo_entry_id'];
-			$lobRecord[$db->record['lob_repo_entry_id']] = $db->record;
+			$allowableItems[] = $db->record['lob_class_repo_id'];
+			$lobRecord[$db->record['lob_class_repo_id']] = $db->record;
 		}
 
 		//clean input array to match allowable items

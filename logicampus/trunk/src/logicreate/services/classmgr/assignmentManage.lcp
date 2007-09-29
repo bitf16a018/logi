@@ -28,24 +28,10 @@ class assignmentManage extends FacultyService {
 
 	var $presentor = 'htmlPresentation';
 
-	// links
-	var $navlinks = array (
-		'Classroom Manager' => 'display/',
-		'Announcements'=>'announcements/',
-		'Assessment Manager' => '%assessments/',
-		'Assignments' => 'assignmentManage/',
-		'Content' => 'lessonContent/',
-		'FAQ' => 'faq/',
-		'File Resource Manager' => '%classdoclib/',
-		'Gradebook' => '%gradebook/',
-		'Lessons' => 'lessonManager/',
-		'Objectives' => 'lessonObjectives/',
-		'Webliography' => 'lessonWebliography/'
-	);
-	var $inactivelinks = array( 'Assignments' );
+	var $inactivelinks = array( 'Activities' );
 	var $applinks = array(
-		'List Assignments' => 'assignmentManage/',
-		'Add Assignment' => 'assignmentManage/event=editAssignment/',
+		'List Activities' => 'assignmentManage/',
+		'Add Activities' => 'assignmentManage/event=editAssignment/',
 		'Add a Lesson' => 'lessonNew/event=add/'
 	);
 
@@ -680,7 +666,7 @@ class assignmentManage extends FacultyService {
 		$t['table'] = $datagrid->toHTML();
 
 		$this->sectionTitle = "Assignment Manager";
-		$this->inactivelinks[] = 'List Assignments';
+		$this->inactivelinks[] = 'List Activities';
 		$lc->templateName='assignmentManage_main';
 	}
 
@@ -1094,8 +1080,8 @@ class assignmentManage extends FacultyService {
 			if ( $lc->getvars['id_class_assignments'] ) {
 				$this->sectionTitle = 'Edit Assignment';
 			} else {
-				$this->sectionTitle = 'Add Assignment';
-				$this->inactivelinks[] = 'Add Assignment';
+				$this->sectionTitle = 'Add Activity';
+				$this->inactivelinks[] = 'Add Activity';
 			}
 			$lc->templateName='assignmentManage_editAssignment';
 		}
@@ -1143,9 +1129,8 @@ class assignmentManage extends FacultyService {
 
 	function buildAppLinks() {
 		$this->applinks = array(
-		lct('List Assignments') => 'assignmentManage/',
-		lct('Add Assignment') => 'assignmentManage/event=editAssignment/',
-		lct('Add a Lesson') => 'lessonManager/event=edit/'
+		lct('List Activities') => 'assignmentManage/',
+		lct('Add Activity') => 'assignmentManage/event=editAssignment/'
 		);
 	}
  

@@ -59,6 +59,7 @@ class classmgr extends FacultyService {
 				WHERE
 					class_id='.$classObj->id_classes);
 			$db->nextRecord();
+			$db->freeResult();
 			$t['classEnrollmentStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_enrollment']);
 
 			$db->query('
@@ -67,6 +68,7 @@ class classmgr extends FacultyService {
 				WHERE
 					id_classes='.$classObj->id_classes);
 			$db->nextRecord();
+			$db->freeResult();
 			$t['classEntriesStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_entries']);
 
 
@@ -77,6 +79,7 @@ class classmgr extends FacultyService {
 					class_id='.$classObj->id_classes.'
 					AND date_available >= '.(time()+86400*5));
 			$db->nextRecord();
+			$db->freeResult();
 			$t['classAssessmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assessments']);
 
 			$db->query('
@@ -86,6 +89,7 @@ class classmgr extends FacultyService {
 					id_classes='.$classObj->id_classes.'
 					AND activeDate >= '.(time()+86400*5));
 			$db->nextRecord();
+			$db->freeResult();
 			$t['classAssignmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assignments']);
 
 		}
