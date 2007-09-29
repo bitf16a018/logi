@@ -22,13 +22,13 @@ class MenuObj extends PersistantObject {
 
 		if ($this->layout == '') {
 			//legacy code
-			$ret = '<table border="0" width="100%" cellpadding="0" cellspacing="0">';
+			$ret = '<table border="0" width="100%" cellpadding="0" cellspacing="0" summary="navigation">';
 			if ($this->hideMenu !== true)
 			{	//$ret .='<tr><td class="menu_head" colspan="2">'. $this->title .'</td></tr>';
 			}	
 			$ret .="\n\t\t";
 			$ret .= MenuObj::renderItems ($this->treeList);
-			$ret .= "</table>\n<p>\n\n";
+			$ret .= "</table>\n<p>&nbsp;</p>\n\n";
 		} else {
 
 			$view = new MenuView($this->treeList);
