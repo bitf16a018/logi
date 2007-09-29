@@ -143,6 +143,7 @@ class lcClass {
 			WHERE 1=1
 			AND B.dateEnd >= NOW()");
 		$db->nextRecord();
+		$db->freeResult();
 		return $db->record['total'];
 	}
 
@@ -156,6 +157,7 @@ class lcClass {
 		$db->query("SELECT count(*) as total
 			FROM courses");
 		$db->nextRecord();
+		$db->freeResult();
 		return $db->record['total'];
 	}
 

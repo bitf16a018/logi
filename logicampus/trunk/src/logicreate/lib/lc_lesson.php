@@ -72,6 +72,7 @@ class LC_Lesson {
 
 		$db->query($sql);
 		$db->nextRecord();
+		$db->freeResult();
 		return $db->record['total'];
 	}
 
@@ -89,6 +90,7 @@ class LC_Lesson {
 
 		$db->query($sql);
 		$db->nextRecord();
+		$db->freeResult();
 		return $db->record['total'];
 	}
 
