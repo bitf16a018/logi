@@ -36,16 +36,21 @@ if ($t['motd']) {
 				Create Class Content
 			</div>
 			<ol style="font-size:130%">
+			<li><a href="<?=appurl('classmgr/assignmentManage/');?>"><?=lct('Activities')?></a></li>
+			<li><a href="<?=appurl('assessments');?>"><?=lct('Assessment Manager')?></a></li>
+			<li><a href="<?=appurl('lobrepo/myobj');?>"><?=lct('Content')?></a></li>
+
+			<br/>
+
 			<li><a href="<?=modurl('lessonManager');?>"><?=lct('Lessons')?></a></li>
 			<!--
 			<li><a href="<?=modurl('lessonContent');?>"><?=lct('Content')?></a></li>
 			-->
 			<li><a href="<?=modurl('lessonObjectives');?>"><?=lct('Objectives')?></a></li>
-			<li><a href="<?=appurl('classmgr/assignmentManage/');?>"><?=lct('Assignments')?></a></li>
-			<li><a href="<?=appurl('assessments');?>"><?=lct('Assessment Manager')?></a></li>
-			<li><a href="<?=appurl('lobrepo/myobj');?>"><?=lct('Content / Learning Objects')?></a></li>
 			<li><a href="<?=modurl('lessonWebliography');?>"><?=lct('Webliography')?></a></li>
+
 			<br/>
+
 			<li><a href="<?=APP_URL?>classroom/details/id_classes=<?=$t['classObj']->id_classes?>"><?=lct('View Classroom')?></a></li>
 			<li><a href="<?=modurl('adjustDates');?>">Adjust All Dates</a></li>
 			<li><a href="<?=modurl('dataexchange');?>"><?=lct('Export Class')?></a></li>
