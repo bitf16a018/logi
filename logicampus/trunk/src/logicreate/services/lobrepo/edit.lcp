@@ -145,6 +145,52 @@ class Edit extends FacultyService {
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('lobrepo/edit/c='.$id);
 	}
+
+
+	function saveActRun(&$db,&$u,&$lc,&$t) {
+		$id = intval($lc->postvars['lob_id']);
+		$lob = new Lc_Lob_Activity($id);
+
+
+		if ($lob->repoObj->isNew()) {
+			$saveUser = true;
+		} else {
+			$saveUser = false;
+		}
+
+		$lob->setResponseType( intval( $lc->postvars['responseType'] ) );
+		$lob->set('lobSubType', $lob->getResponseTypeName() );
+
+		$lob->set('lobDescription', $lc->postvars['instructions']);
+		$lob->set('lobNotes', $lc->postvars['notes']);
+		$lob->set('lobTitle', $lc->postvars['title']);
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			Lc_Lob_Util::createLinkText($lob->get('lobTitle'))
+		);
+
+
+
+		$lob->save();
+		//get the new ID if a new save
+		if ($id == 0) {
+			$id = $lob->repoObj->getPrimaryKey();
+		}
+
+
+		if ($saveUser) {
+			$lobUserObj = new LobUserLink();
+			$lobUserObj->set('lobRepoEntryId',$lob->repoObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('lobKind','content');
+			$lobUserObj->save();
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/edit/c='.$id);
+
+	}
+
 }
 
 ?>

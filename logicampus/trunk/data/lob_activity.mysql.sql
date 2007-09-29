@@ -9,7 +9,7 @@ CREATE TABLE `lob_activity` (
 		
 	`lob_activity_id` integer (11) NOT NULL auto_increment, 
 	`lob_repo_entry_id` integer (11) NOT NULL, 
-	`repsonse_type_id` tinyint (4) NOT NULL,
+	`response_type_id` tinyint (4) NOT NULL,
 	PRIMARY KEY (lob_activity_id) 
 );
 
