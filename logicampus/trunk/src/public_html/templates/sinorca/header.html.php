@@ -69,11 +69,11 @@
       <div class="subHeader">
         <span class="doNotDisplay">Navigation:</span>
 
-	<a alt="Home" href="<?=appurl('');?>"><?=lct('Home Page')?></a> |
-	<a href="<?=appurl('faq/')?>"><?=lct('FAQs')?></a> |
-	<a href="<?=appurl('mastercalendar/')?>"><?=lct('Calendar')?></a> |
-	<a href="<?=appurl('helpdesk/')?>"><?=lct('Help Desk')?></a> |
-	<a style="color: white;" href="<?=APP_URL?>pm/"><?=lct('Messages')?> [<?=(int)$t['_privMsgs']?>]</a>
+	<a title="Home" href="<?=appurl('');?>"><?=lct('Home Page')?></a> |
+	<a title="questions" href="<?=appurl('faq/')?>"><?=lct('FAQs')?></a> |
+	<a title="calendar" href="<?=appurl('mastercalendar/')?>"><?=lct('Calendar')?></a> |
+	<a title="help" href="<?=appurl('helpdesk/')?>"><?=lct('Help Desk')?></a> |
+	<a title="messages" style="color: white;" href="<?=APP_URL?>pm/"><?=lct('Messages')?> [<?=(int)$t['_privMsgs']?>]</a>
 
 	<?
 		if (!$obj->user->isAnonymous() ) {
