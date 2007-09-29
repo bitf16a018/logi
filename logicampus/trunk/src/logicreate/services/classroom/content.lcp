@@ -112,7 +112,7 @@ class content extends StudentService {
 				AND B.class_id = ".$classId);
 
 		} else {
-			$db->query("SELECT A.*, 'image/jpeg' as lob_mime, B.lob_sub_type 
+			$db->query("SELECT A.*, B.lob_mime, B.lob_sub_type 
 				FROM lob_class_content as A 
 				LEFT JOIN lob_class_repo AS B 
 					ON A.lob_class_repo_id = B.lob_class_repo_id
