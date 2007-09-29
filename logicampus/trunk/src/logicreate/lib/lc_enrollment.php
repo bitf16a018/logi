@@ -145,6 +145,7 @@ class lcClassEnrollment {
 			WHERE active=1
 			AND B.dateEnd >= NOW()");
 		$db->nextRecord();
+		$db->freeResult();
 		return $db->record['total'];
 	}
 
@@ -159,6 +160,7 @@ class lcClassEnrollment {
 			FROM lcUsers AS A
 			WHERE userType=".USERTYPE_STUDENT);
 		$db->nextRecord();
+		$db->freeResult();
 		return $db->record['total'];
 	}
 
