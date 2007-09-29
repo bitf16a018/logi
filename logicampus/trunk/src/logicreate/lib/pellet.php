@@ -574,7 +574,7 @@ class FacultyService extends Service {
 		lct('Classroom Manager') => '%classmgr/display/',
 		lct('Announcements')=>'%classmgr/announcements/',
 		lct('Assessment Manager') => '%assessments/',
-		lct('Assignments') => '%classmgr/assignmentManage/',
+		lct('Activities') => '%classmgr/assignmentManage/',
 		lct('FAQ') => '%classmgr/faq/',
 		lct('Learning Objects') => '%lobrepo/myobj/',
 		lct('Gradebook') => '%gradebook/',
