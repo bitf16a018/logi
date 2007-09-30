@@ -246,7 +246,7 @@
 			default="0"
 			size="11"
 			type="INTEGER"/>
-		<attribute name="lob_id"
+		<attribute name="lob_class_repo_id"
 			required="true"
 			default="0"
 			size="11"
@@ -259,10 +259,6 @@
 			required="true"
 			size="100"
 			type="VARCHAR"/>
-		<attribute name="lob_mime"
-			required="true"
-			size="100"
-			type="VARCHAR"/>
 		<attribute name="lob_title"
 			required="true"
 			size="255"
@@ -271,19 +267,23 @@
 			required="true"
 			size="255"
 			type="VARCHAR"/>
-		<attribute name="visible"
-			required="true"
-			size="4"
-			type="int"/>
 		<attribute name="not_before_seq_id"
 			required="false"
 			size="11"
 			type="int"/>
-		<attribute name="allow_after_days"
+		<attribute name="start_offset"
 			required="false"
 			size="11"
 			type="int"/>
-		<attribute name="allow_on"
+		<attribute name="end_offset"
+			required="false"
+			size="11"
+			type="int"/>
+		<attribute name="due_offset"
+			required="false"
+			size="11"
+			type="int"/>
+		<attribute name="grace_period_days"
 			required="false"
 			size="11"
 			type="int"/>
@@ -292,7 +292,16 @@
 			default="0"
 			size="11"
 			type="INTEGER"/>
-
+		<attribute name="hide_until_start"
+			required="true"
+			size="2"
+			default="0"
+			type="int"/>
+		<attribute name="hide_after_end"
+			required="true"
+			size="2"
+			default="0"
+			type="int"/>
 		<key
 			attribute="class_id"
 			name="class_idx"/>
@@ -300,8 +309,8 @@
 			attribute="lesson_id"
 			name="lesson_idx"/>
 		<key
-			attribute="lob_id"
-			name="lob_idx"/>
+			attribute="lob_class_repo_id"
+			name="lob_class_repo_idx"/>
 		<key
 			attribute="rank"
 			name="rank_idx"/>
@@ -405,6 +414,14 @@
 			required="true"
 			size="11"
 			type="INTEGER"/>
+		<attribute name="num_retry"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="is_practice"
+			required="true"
+			size="2"
+			type="TINYINT"/>
 		<key
 			attribute="lob_repo_entry_id"
 			name="lob_repo_entry_idx"/>
@@ -633,6 +650,58 @@
 		<attribute name="lob_caption"
 			size="255"
 			type="VARCHAR"/>
+		<key
+			attribute="lob_class_repo_id"
+			name="lob_class_repo_idx"/>
+		<foreign-key foreignTable="lob_class_repo">
+			<reference
+				local="lob_class_repo_id"
+				foreign="lob_class_repo_id"/>
+		</foreign-key>
+	</entity>
+
+	<entity  name="lob_class_activity">
+		<attribute name="lob_class_activity_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_class_repo_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="response_type_id"
+			required="true"
+			size="4"
+			type="TINYINT"/>
+		<key
+			attribute="lob_class_repo_id"
+			name="lob_class_repo_idx"/>
+		<foreign-key foreignTable="lob_class_repo">
+			<reference
+				local="lob_class_repo_id"
+				foreign="lob_class_repo_id"/>
+		</foreign-key>
+	</entity>
+
+	<entity  name="lob_class_test">
+		<attribute name="lob_class_test_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_class_repo_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="num_retry"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="is_practice"
+			required="true"
+			size="2"
+			type="TINYINT"/>
 		<key
 			attribute="lob_class_repo_id"
 			name="lob_class_repo_idx"/>
