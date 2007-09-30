@@ -72,17 +72,18 @@ class viewer extends StudentService {
 			AND A.class_id = ".$classId);
 		$db->nextRecord();
 		$t['lob'] = $db->record;
+		$db->freeResult();
 
 		if ($t['lob']['lob_type'] == 'assignment') {
-			$db->query("SELECT * FROM class_assignments as A 
-				WHERE id_class_assignments='".$t['lob']['lob_id']."'");
+			$db->query("SELECT * FROM lob_class_activity as A 
+				WHERE lob_class_repo_id='".$t['lob']['lob_class_repo_id']."'");
 			$db->nextRecord();
 			$t['activity'] = $db->record;
 		}
 
 		if ($t['lob']['lob_type'] == 'assessment') {
 			$db->query("SELECT * FROM assessment as A 
-				WHERE assessment_id ='".$t['lob']['lob_id']."'");
+				WHERE assessment_id ='".$t['lob']['lob_class_repo_id']."'");
 			$db->nextRecord();
 			$t['activity'] = $db->record;
 		}
@@ -101,7 +102,7 @@ class viewer extends StudentService {
 		if ($t['lob']['lob_type'] == 'content') {
 			$db->query("SELECT * FROM lob_class_content as A 
 				LEFT JOIN class_lesson_sequence AS B 
-					ON A.lob_class_repo_id = B.lob_id
+					ON A.lob_class_repo_id = B.lob_class_repo_id
 				WHERE B.link_text='".$filename."'
 				AND B.lesson_id = ".$lesson_id."
 				AND B.class_id = ".$classId);

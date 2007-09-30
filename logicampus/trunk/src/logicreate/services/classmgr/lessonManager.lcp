@@ -27,21 +27,6 @@ class LessonManager extends FacultyService {
 		'List Lessons' => 'lessonManager/',
 		'Add a Lesson' => 'lessonNew/event=add'
 	);
-        var $navlinks = array (
-                'Classroom Manager' => 'display/',
-                'Announcements'=>'announcements/',
-                'Assessment Manager' => '%assessments/',
-                'Assignments' => 'assignmentManage/',
-                'Content' => 'lessonContent/',
-                'FAQ' => 'faq/',
-                'File Resource Manager' => '%classdoclib/',
-                'Gradebook' => '%gradebook/',
-                'Lessons' => 'lessonManager/',
-                'Objectives' => 'lessonObjectives/',
-                'Webliography' => 'lessonWebliography/'
-        );
-
-
 
 
 	/**
@@ -95,18 +80,21 @@ class LessonManager extends FacultyService {
 		$class_id = $u->activeClassTaught->id_classes;
 		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
 
-		$this->sectionTitle = 'Change Assignments';
+		$this->sectionTitle = 'Change Activities';
 		$lc->templateName = 'lessonManager_linkItems';
 		$t['saveEvent'] = 'saveAssignments';
-		$t['pageHeading'] = 'Lesson Assignments';
+		$t['pageHeading'] = 'Lesson Activities';
 		$t['lessonId'] = $lesson_id;
 		$lesson = ClassLessons::load($lesson_id);
 		$t['title'] = $lesson->get('title');
 
-		$sql = "SELECT A.id_class_assignments, A.title
-			FROM class_assignments AS A
-			WHERE A.id_classes = ".$class_id."
-			ORDER BY A.title";
+		$db->setResultType('ASSOC');
+		$sql = "SELECT A.lob_class_repo_id, A.lob_title
+			FROM lob_class_activity AS B
+			LEFT JOIN lob_class_repo AS A
+				ON B.lob_class_repo_id = A.lob_class_repo_id
+			WHERE A.class_id = ".$class_id."
+			ORDER BY A.lob_title";
 
 		$dm = new LinkedItemsModel($sql,$db);
 
@@ -117,16 +105,18 @@ class LessonManager extends FacultyService {
 		// using LessonRenderer
 		// also, correct the checkbox selection state with a one to
 		// many lookup
-		$sql = "SELECT A.id_class_assignments, A.id_class_lessons, B.title
-			FROM class_assignments_link AS A
+		$sql = "SELECT A.lob_class_repo_id, A.class_id, B.title, A.lesson_id
+			FROM class_lesson_sequence AS A
 			LEFT JOIN class_lessons AS B
-			  ON A.id_class_lessons = B.id_class_lessons
-			WHERE B.id_classes = ".$class_id."
+			  ON A.lesson_id = B.id_class_lessons
+			WHERE A.class_id = ".$class_id."
+			AND A.lob_type = 'assignment'
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_assignments']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_assignments']][] = $db->Record['id_class_lessons'];
+		$db->setResultType('ASSOC');
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['lob_class_repo_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['lob_class_repo_id']][] = $db->record['lesson_id'];
 		}
 
 
@@ -138,7 +128,7 @@ class LessonManager extends FacultyService {
 		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		$col->cellRenderer->selectedKey = 'id_class_lessons';
-		$col->cellRenderer->idName = 'id_class_assignments';
+		$col->cellRenderer->idName = 'lob_class_repo_id';
 		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
@@ -151,7 +141,7 @@ class LessonManager extends FacultyService {
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
 		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
-		$col_c->cellRenderer->idName = 'id_class_assignments';
+		$col_c->cellRenderer->idName = 'lob_class_repo_id';
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -267,7 +257,7 @@ class LessonManager extends FacultyService {
 		// using LessonRenderer
 		// also, correct the checkbox selection state with a one to
 		// many lookup
-		$sql = "SELECT A.class_lesson_sequence_id, A.lesson_id, A.lob_id, B.title
+		$sql = "SELECT A.class_lesson_sequence_id, A.lesson_id, A.lob_class_repo_id, B.title
 			FROM class_lesson_sequence AS A
 			LEFT JOIN class_lessons AS B
 			  ON A.lesson_id = B.id_class_lessons
@@ -275,8 +265,8 @@ class LessonManager extends FacultyService {
 			ORDER BY B.title";
 		$db->query($sql);
 		while ($db->nextRecord()) {
-			$itemsToTitles[$db->record['lob_id']][] = $db->record['title'];
-			$itemsToLessons[$db->record['lob_id']][] = $db->record['lesson_id'];
+			$itemsToTitles[$db->record['lob_class_repo_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['lob_class_repo_id']][] = $db->record['lesson_id'];
 		}
 		// */
 
@@ -288,7 +278,7 @@ class LessonManager extends FacultyService {
 		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
 		$col->cellRenderer->selectedVal = $lesson_id;
 		//only used for object values
-//		$col->cellRenderer->idName = 'lob_id';
+//		$col->cellRenderer->idName = 'lob_class_repo_id';
 		$col->cellRenderer->itemsToLessons = $itemsToLessons;
 
 		$col_b = &$columnModel->getColumnAt(1);
@@ -463,7 +453,7 @@ class LessonManager extends FacultyService {
 
 		//get all lesson items for security
 		$sql = "
-			SELECT A.lob_class_repo_id, A.lob_title, A.lob_urltitle, A.lob_mime
+			SELECT A.lob_class_repo_id, A.lob_title, A.lob_urltitle, A.lob_mime, A.lob_type, A.lob_sub_type
 			FROM lob_class_repo AS A
 			WHERE A.class_id = ".$class_id."";
 
@@ -618,17 +608,18 @@ class LessonManager extends FacultyService {
 		}
 
 		//get all lesson items for security
-		$sql = "SELECT A.id_class_assignments, title
-			FROM class_assignments AS A
-			WHERE A.id_classes = ".$class_id;
+		$sql = 
+			"SELECT A.lob_class_repo_id, lob_title
+			FROM lob_class_repo AS A
+			WHERE A.class_id = ".$class_id;
 		$db->query($sql);
 
 		$lobRecord = array();
 		while ($db->nextRecord()) {
-			$linkText = LC_Lob_Util::createLinkText($db->record['title']);
-			$allowableItems[] = $db->record['id_class_assignments'];
-			$lobRecord[$db->record['id_class_assignments']] = 
-				array('lob_title' => $db->record['title'],
+			$linkText = LC_Lob_Util::createLinkText($db->record['lob_title']);
+			$allowableItems[] = $db->record['lob_class_repo_id'];
+			$lobRecord[$db->record['lob_class_repo_id']] = 
+				array('lob_title' => $db->record['lob_title'],
 				'lob_urltitle' => $linkText,
 				'lob_mime' => 'X-LMS/assignment'
 			);
@@ -642,20 +633,7 @@ class LessonManager extends FacultyService {
 				$itemArray[$k] = intval($v);
 			}
 		}
-		//wipe all previous assignment links for this lesson
-		$db->query('DELETE from class_assignments_link 
-			WHERE id_class_lessons = '.$lesson_id);
 
-		//insert each new link
-		$insert = 'INSERT INTO class_assignments_link
-		(id_class_assignments,id_class_lessons)
-		VALUES (%d, %d)';
-
-		foreach($itemArray as $k=>$v) {
-			if ($v < 1 ) continue;
-
-			$db->query( sprintf($insert, $v, $lesson_id));
-		}
 
 		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
 		$lessonSequence->updateAssignments($itemArray,$lobRecord);

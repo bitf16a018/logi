@@ -38,6 +38,14 @@ class Lc_Lob_Class extends Lc_Lob {
 				break;
 
 			case 'activity':
+
+				if ($this->repoObj->getPrimaryKey() > 0) {
+					$results = $this->repoObj->getLobClassActivitysByLobClassRepoId();
+					$this->lobSub = $results[0];
+				} else {
+					$this->lobSub = new LobClassActivity();
+				}
+
 				/*
 				$results  = $this->getLobActivitysByLobRepoEntryId();
 				if (! count($results) ) {
@@ -47,8 +55,8 @@ class Lc_Lob_Class extends Lc_Lob {
 				$subLob  = $results[0];
 				include_once(LIB_PATH.'lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassActivity();
-				 */
 				trigger_error('un-implemented');
+				 */
 				break;
 
 			case 'test':
@@ -122,6 +130,55 @@ class Lc_Lob_ClassContent extends Lc_Lob_Class {
 		$this->lobSub->lobFilename = $repoSub->lobFilename;
 		$this->lobSub->lobCaption  = $repoSub->lobCaption;
 	}
+
+	/**
+	 * Skip the meta object for now
+	 */
+	function save() {
+		if ($this->repoObj->lobGuid == '') {
+			$guid = lcUuid();
+			$this->repoObj->set('lobGuid',$guid);
+		}
+		$this->repoObj->version++;
+		$this->repoObj->save();
+		$ret = ($this->repoObj->getPrimaryKey() > 0);
+
+		$this->lobSub->lobClassRepoId = $this->repoObj->getPrimaryKey();
+		$this->lobSub->save();
+
+		return $ret;
+	}
+}
+
+class Lc_Lob_ClassActivity extends Lc_Lob_Class {
+
+	var $repoObj;
+	var $type = 'activity';
+
+	function Lc_Lob_ClassActivity($id=-1) {
+
+		include_once(LIB_PATH.'PBDO/LobClassActivity.php');
+		if ($id < 1) {
+			$this->repoObj = new LobClassRepo();
+			$this->lobSub = new LobClassActivity();
+		} else {
+			$this->repoObj = LobClassRepo::load($id);
+			$this->lobSub = LobClassActivity::load($id);
+		}
+	}
+
+	/**
+	 * Copy all the values of a specific sub Object to this lobSub
+	 */
+	function copySub(&$repoSub) {
+		$this->lobSub->responseTypeId  = $repoSub->responseTypeId;
+		/*
+		$this->lobSub->instructions  = $repoSub->lobDescription;
+		$this->lobSub->lobFilename   = $repoSub->lobFilename;
+		$this->lobSub->lobCaption    = $repoSub->lobCaption;
+		 */
+	}
+
 
 	/**
 	 * Skip the meta object for now

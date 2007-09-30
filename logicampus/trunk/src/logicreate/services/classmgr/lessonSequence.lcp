@@ -10,6 +10,7 @@ include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 
 include(LIB_PATH.'lc_table.php');
 include(LIB_PATH.'lc_table_renderer.php');
+include(LIB_PATH.'lc_lob.php');
 //include(SERVICE_PATH.'classmgr/lc_table_lesson.php');
 
 
@@ -110,6 +111,9 @@ class LessonSequence extends FacultyService {
 			//debug($seqItems);
 			//die('no sequences yet');
 		}
+		foreach ($sequences as $objIdx => $obj) {
+			$sequences[$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+		}
 //		$t['seqItems'] = $sequences;
 
 		$dm = new LC_Table_ObjectModel($sequences);
@@ -123,13 +127,14 @@ class LessonSequence extends FacultyService {
 		$dm->ignoreColumn('classLessonSequenceId');
 		$dm->ignoreColumn('lessonId');
 		$dm->ignoreColumn('classId');
-		$dm->ignoreColumn('lobId');
-		$dm->ignoreColumn('lobMime');
+		$dm->ignoreColumn('lobClassRepoId');
+		$dm->ignoreColumn('lobSubType');
+		$dm->ignoreColumn('linkText');
 
 		$table = new LC_Table($dm);
 
 		$columnModel = &$table->getColumnModel();
-		$col = &$columnModel->getColumnAt(7);
+		$col = &$columnModel->getColumnAt(8);
 		$col->maxWidth=64;
 		$col->cellRenderer = new LC_Table_SequenceRenderer();
 		$col->cellRenderer->id = $lesson_id;
@@ -156,7 +161,7 @@ class LessonSequence extends FacultyService {
 			$lob = new ClassLessonSequence();
 			$lob->set('lessonId', $lesson_id);
 			$lob->set('classId',  $class_id);
-			$lob->set('lobId',    $db->record['id_class_assignments']);
+			$lob->set('lobClassRepoId',    $db->record['id_class_assignments']);
 			$lob->set('lobMime',  'X-LMS');
 			$lob->set('lobType',  'activity');
 			$lob->set('lobTitle', $db->record['title']);
@@ -178,7 +183,7 @@ class LessonSequence extends FacultyService {
 			$lob = new ClassLessonSequence();
 			$lob->set('lessonId', $lesson_id);
 			$lob->set('classId',  $class_id);
-			$lob->set('lobId',    $db->record['id_class_lesson_content']);
+			$lob->set('lobClassRepoId',    $db->record['id_class_lesson_content']);
 			$lob->set('lobMime',  'text/html');
 			$lob->set('lobType',  'content');
 			$lob->set('lobTitle', $db->record['txTitle']);

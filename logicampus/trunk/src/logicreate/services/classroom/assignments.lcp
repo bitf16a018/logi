@@ -103,28 +103,17 @@ class assignments extends StudentService {
 		function viewRun(&$db,&$u,&$lc,&$t) {
 
 			$lc->templateName = 'assignments_view';
-			$this->sectionTitle = 'View Assignment';
+			$this->sectionTitle = 'View Activity';
 			# Set up thee active date for students
 			# if it is a teacher viewing the class
 			# we'll overide it below so they can view
 			# the assignment
 			$todays_epoch_date = mktime(23,59,59,date('m'),date('d'),date('y'));
 			$activeDate = "and activeDate <= $todays_epoch_date";
+			$activeDate = "";
 
 			$lc->getvars['id'] = (int)$lc->getvars['id'];
 
-			while(list ($k, $v) = @each($u->classesTaught) )
-			{
-			 	if ($v->id_classes ==
-				$u->activeClassTaken->id_classes)
-				{
-					# Person viewing the class is teaching the
-					# class
-					$activeDate = '';
-					$t['msg'] = '<div style="color: blue;"><h3>Faculty</h3>Remember that you are allowed to see all assignments no matter what the active date is.  Students, however, will not be able to access an assignment
-					until it is active.</div>';
-				}
-			}
 
 			//load the gradebook grading type
 			$db->query("SELECT calculation_type
@@ -136,15 +125,15 @@ class assignments extends StudentService {
 
 			//load the assignment
 			$sql = "SELECT A.*, B.total_points, B.id_class_gradebook_entries
-				FROM class_assignments AS A
+				FROM lob_class_repo AS A
 				LEFT JOIN class_gradebook_entries AS B
-				  ON B.assignment_id = A.id_class_assignments
-				WHERE A.id_classes='{$u->activeClassTaken->id_classes}'
+				  ON B.assignment_id = A.lob_class_repo_id
+				WHERE A.class_id='{$u->activeClassTaken->id_classes}'
 				$activeDate
-				and A.id_class_assignments='{$lc->getvars['id']}'";
+				and A.lob_class_repo_id='".sprintf('%d',$lc->getvars['id'])."'";
 			$db->queryOne($sql);
 
-			if (!$db->Record['id_class_assignments']) {
+			if (!$db->Record['lob_class_repo_id']) {
 				$this->presentor = 'errorMessage';
 				$t['message'] = '<div style="color: red;">An error has occured. Either you are trying to access an assignment which has not been activated by your teacher, or you are trying to access an assignment for which you do not have permission to access.</div>';
 				return;

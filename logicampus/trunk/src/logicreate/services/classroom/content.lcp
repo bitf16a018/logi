@@ -70,7 +70,7 @@ class content extends StudentService {
 
 		/*
 		$db->query("SELECT * FROM lob_content as A 
-			LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_id
+			LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_class_repo_id
 			WHERE B.link_text='".$filename."'
 			AND B.lesson_id = ".$lesson_id."
 			AND B.class_id = ".$classId);
@@ -107,7 +107,7 @@ class content extends StudentService {
 		// try to find it just linked up to this class
 		if ($curIdx == -1) {
 			$db->query("SELECT * FROM lob_content as A 
-				LEFT JOIN lob_class_repo AS B on A.lob_content_id = B.lob_id
+				LEFT JOIN lob_class_repo AS B on A.lob_content_id = B.lob_class_repo_id
 				WHERE A.lob_urltitle = '".$filename."'
 				AND B.class_id = ".$classId);
 
@@ -116,7 +116,7 @@ class content extends StudentService {
 				FROM lob_class_content as A 
 				LEFT JOIN lob_class_repo AS B 
 					ON A.lob_class_repo_id = B.lob_class_repo_id
-				WHERE A.lob_class_repo_id = ".$t['seqItems'][$curIdx]->lobId."
+				WHERE A.lob_class_repo_id = ".$t['seqItems'][$curIdx]->lobClassRepoId."
 				AND B.class_id = ".$classId);
 		}
 		if ($db->nextRecord()) {
