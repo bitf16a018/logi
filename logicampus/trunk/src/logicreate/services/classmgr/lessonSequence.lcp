@@ -129,12 +129,13 @@ class LessonSequence extends FacultyService {
 		$dm->ignoreColumn('classId');
 		$dm->ignoreColumn('lobClassRepoId');
 		$dm->ignoreColumn('lobSubType');
+		$dm->ignoreColumn('lobMime');
 		$dm->ignoreColumn('linkText');
 
 		$table = new LC_Table($dm);
 
 		$columnModel = &$table->getColumnModel();
-		$col = &$columnModel->getColumnAt(8);
+		$col = &$columnModel->getColumnAt(7);
 		$col->maxWidth=64;
 		$col->cellRenderer = new LC_Table_SequenceRenderer();
 		$col->cellRenderer->id = $lesson_id;

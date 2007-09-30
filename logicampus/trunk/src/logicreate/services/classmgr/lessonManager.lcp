@@ -110,7 +110,7 @@ class LessonManager extends FacultyService {
 			LEFT JOIN class_lessons AS B
 			  ON A.lesson_id = B.id_class_lessons
 			WHERE A.class_id = ".$class_id."
-			AND A.lob_type = 'assignment'
+			AND A.lob_type = 'activity'
 			ORDER BY B.title";
 		$db->query($sql);
 		$db->setResultType('ASSOC');
@@ -736,15 +736,16 @@ class LessonManager extends FacultyService {
 
 
 		// get the assignments
-		$sql = "SELECT A.id_class_assignments, A.title
-			FROM class_assignments AS A
-			LEFT JOIN class_assignments_link  AS B
-			  ON A.id_class_assignments=B.id_class_assignments
-			WHERE B.id_class_lessons='{$lesson_id}'
-			AND A.id_classes = '{$class_id}'";
+		$sql = "SELECT A.lob_class_repo_id, A.lob_title
+			FROM lob_class_repo AS A
+			LEFT JOIN class_lesson_sequence  AS B
+			  ON A.lob_class_repo_id=B.lob_class_repo_id
+			WHERE B.lesson_id='{$lesson_id}'
+			AND A.class_id = '{$class_id}'
+			AND A.lob_type = 'activity'";
 		$db->query($sql);
-		while ( $db->next_record() )
-			$t['assignments'][] = $db->Record['title'];
+		while ( $db->nextRecord() )
+			$t['assignments'][] = $db->record['lob_title'];
 
 		// get the ssessments
 		$sql = "SELECT A.assessment_id, A.display_name

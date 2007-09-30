@@ -168,6 +168,36 @@ class lcClass {
 			. '_'. $lessonObj->id_courses;
 			
 	}
+
+	/**
+	 * Determine the amount of time this student
+	 * has been in this class.
+	 *
+	 * Use either the class' semester start date, or the students enrollment
+	 * date.
+	 *
+	 * @static
+	 */
+	function calcOffsetForStudent($studentRecord, $classId, $semesterId=-1) {
+		if ($semesterId == -1) {
+			//use student's enrollment date
+		} else {
+			//use the semester's start date
+			$db = DB::getHandle();
+			$db->query("SELECT dateStart, dateEnd
+				FROM semesters 
+				WHERE semesterID = '".$semesterId."'");
+			$db->nextRecord();
+			$db->freeResult();
+			$ut = time();
+
+			$startTs = strtotime($db->record['dateStart']);
+			$endTs   = strtotime($db->record['dateEnd']);
+			return array ('start'=> ($ut - $startTs), 'end'=>($ut-$endTs));
+			debug( strtotime($db->record['dateStart']),1);
+		}
+
+	}
 }
 
 ?>
