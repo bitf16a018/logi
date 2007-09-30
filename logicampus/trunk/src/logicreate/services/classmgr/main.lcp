@@ -82,12 +82,16 @@ class classmgr extends FacultyService {
 			$db->freeResult();
 			$t['classAssessmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assessments']);
 
+			$offSets = lcClass::calcOffsetForStudent($u, $classObj->id_classes, $classObj->semesterID);
 			$db->query('
-				SELECT count(id_class_assignments) as total_assignments
-				FROM class_assignments
+				SELECT count(lob_class_activity_id) as total_assignments
+				FROM lob_class_activity AS A
+				LEFT JOIN class_lesson_sequence AS B
+					 ON A.lob_class_repo_id = B.lob_class_repo_id
 				WHERE
-					id_classes='.$classObj->id_classes.'
-					AND activeDate >= '.(time()+86400*5));
+					B.class_id='.$classObj->id_classes.'
+					AND B.start_offset - '.$offSets['start'].' <= '.((86400*5) ));
+
 			$db->nextRecord();
 			$db->freeResult();
 			$t['classAssignmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assignments']);

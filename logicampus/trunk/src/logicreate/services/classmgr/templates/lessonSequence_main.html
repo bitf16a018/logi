@@ -1,6 +1,11 @@
 <?= $t['sectionheader']; ?>
 
+<form name="seq_form" id="seq_form" action="<?=appurl('classmgr');?>/lessonSequence/event=save/id=<?=$t['id'];?>" method="POST">
+
 <?php
 echo $t['table']->toHtml();
 
 ?>
+
+<input type="submit" name="save_btn" id="save_btn" value="Save Changes"/>
+</form>
