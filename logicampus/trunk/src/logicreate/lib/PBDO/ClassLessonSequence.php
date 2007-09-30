@@ -9,38 +9,44 @@ class ClassLessonSequenceBase {
 	var $classLessonSequenceId;
 	var $lessonId;
 	var $classId;
-	var $lobId;
+	var $lobClassRepoId;
 	var $lobType;
 	var $lobSubType;
-	var $lobMime;
 	var $lobTitle;
 	var $linkText;
-	var $visible;
 	var $notBeforeSeqId;
-	var $allowAfterDays;
-	var $allowOn;
+	var $startOffset;
+	var $endOffset;
+	var $dueOffset;
+	var $gracePeriodDays;
 	var $rank;
+	var $hideUntilStart;
+	var $hideAfterEnd;
 
 	var $__attributes = array( 
 	'classLessonSequenceId'=>'integer',
 	'lessonId'=>'integer',
 	'classId'=>'integer',
-	'lobId'=>'integer',
+	'lobClassRepoId'=>'integer',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
-	'lobMime'=>'varchar',
 	'lobTitle'=>'varchar',
 	'linkText'=>'varchar',
-	'visible'=>'int',
 	'notBeforeSeqId'=>'int',
-	'allowAfterDays'=>'int',
-	'allowOn'=>'int',
-	'rank'=>'integer');
+	'startOffset'=>'int',
+	'endOffset'=>'int',
+	'dueOffset'=>'int',
+	'gracePeriodDays'=>'int',
+	'rank'=>'integer',
+	'hideUntilStart'=>'int',
+	'hideAfterEnd'=>'int');
 
 	var $__nulls = array( 
 	'notBeforeSeqId'=>'notBeforeSeqId',
-	'allowAfterDays'=>'allowAfterDays',
-	'allowOn'=>'allowOn');
+	'startOffset'=>'startOffset',
+	'endOffset'=>'endOffset',
+	'dueOffset'=>'dueOffset',
+	'gracePeriodDays'=>'gracePeriodDays');
 
 
 
@@ -133,17 +139,19 @@ class ClassLessonSequencePeerBase {
 		$st->fields['class_lesson_sequence_id'] = 'class_lesson_sequence_id';
 		$st->fields['lesson_id'] = 'lesson_id';
 		$st->fields['class_id'] = 'class_id';
-		$st->fields['lob_id'] = 'lob_id';
+		$st->fields['lob_class_repo_id'] = 'lob_class_repo_id';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
-		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_title'] = 'lob_title';
 		$st->fields['link_text'] = 'link_text';
-		$st->fields['visible'] = 'visible';
 		$st->fields['not_before_seq_id'] = 'not_before_seq_id';
-		$st->fields['allow_after_days'] = 'allow_after_days';
-		$st->fields['allow_on'] = 'allow_on';
+		$st->fields['start_offset'] = 'start_offset';
+		$st->fields['end_offset'] = 'end_offset';
+		$st->fields['due_offset'] = 'due_offset';
+		$st->fields['grace_period_days'] = 'grace_period_days';
 		$st->fields['rank'] = 'rank';
+		$st->fields['hide_until_start'] = 'hide_until_start';
+		$st->fields['hide_after_end'] = 'hide_after_end';
 
 
 		$array = array();
@@ -161,21 +169,25 @@ class ClassLessonSequencePeerBase {
 		$st->fields['class_lesson_sequence_id'] = $this->classLessonSequenceId;
 		$st->fields['lesson_id'] = $this->lessonId;
 		$st->fields['class_id'] = $this->classId;
-		$st->fields['lob_id'] = $this->lobId;
+		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
-		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_title'] = $this->lobTitle;
 		$st->fields['link_text'] = $this->linkText;
-		$st->fields['visible'] = $this->visible;
 		$st->fields['not_before_seq_id'] = $this->notBeforeSeqId;
-		$st->fields['allow_after_days'] = $this->allowAfterDays;
-		$st->fields['allow_on'] = $this->allowOn;
+		$st->fields['start_offset'] = $this->startOffset;
+		$st->fields['end_offset'] = $this->endOffset;
+		$st->fields['due_offset'] = $this->dueOffset;
+		$st->fields['grace_period_days'] = $this->gracePeriodDays;
 		$st->fields['rank'] = $this->rank;
+		$st->fields['hide_until_start'] = $this->hideUntilStart;
+		$st->fields['hide_after_end'] = $this->hideAfterEnd;
 
 		$st->nulls['not_before_seq_id'] = 'not_before_seq_id';
-		$st->nulls['allow_after_days'] = 'allow_after_days';
-		$st->nulls['allow_on'] = 'allow_on';
+		$st->nulls['start_offset'] = 'start_offset';
+		$st->nulls['end_offset'] = 'end_offset';
+		$st->nulls['due_offset'] = 'due_offset';
+		$st->nulls['grace_period_days'] = 'grace_period_days';
 
 		$st->key = 'class_lesson_sequence_id';
 		$db->executeQuery($st);
@@ -194,21 +206,25 @@ class ClassLessonSequencePeerBase {
 		$st->fields['class_lesson_sequence_id'] = $obj->classLessonSequenceId;
 		$st->fields['lesson_id'] = $obj->lessonId;
 		$st->fields['class_id'] = $obj->classId;
-		$st->fields['lob_id'] = $obj->lobId;
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
-		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_title'] = $obj->lobTitle;
 		$st->fields['link_text'] = $obj->linkText;
-		$st->fields['visible'] = $obj->visible;
 		$st->fields['not_before_seq_id'] = $obj->notBeforeSeqId;
-		$st->fields['allow_after_days'] = $obj->allowAfterDays;
-		$st->fields['allow_on'] = $obj->allowOn;
+		$st->fields['start_offset'] = $obj->startOffset;
+		$st->fields['end_offset'] = $obj->endOffset;
+		$st->fields['due_offset'] = $obj->dueOffset;
+		$st->fields['grace_period_days'] = $obj->gracePeriodDays;
 		$st->fields['rank'] = $obj->rank;
+		$st->fields['hide_until_start'] = $obj->hideUntilStart;
+		$st->fields['hide_after_end'] = $obj->hideAfterEnd;
 
 		$st->nulls['not_before_seq_id'] = 'not_before_seq_id';
-		$st->nulls['allow_after_days'] = 'allow_after_days';
-		$st->nulls['allow_on'] = 'allow_on';
+		$st->nulls['start_offset'] = 'start_offset';
+		$st->nulls['end_offset'] = 'end_offset';
+		$st->nulls['due_offset'] = 'due_offset';
+		$st->nulls['grace_period_days'] = 'grace_period_days';
 
 		$st->key = 'class_lesson_sequence_id';
 		$db->executeQuery($st);
@@ -269,17 +285,19 @@ class ClassLessonSequencePeerBase {
 		$x->classLessonSequenceId = $row['class_lesson_sequence_id'];
 		$x->lessonId = $row['lesson_id'];
 		$x->classId = $row['class_id'];
-		$x->lobId = $row['lob_id'];
+		$x->lobClassRepoId = $row['lob_class_repo_id'];
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
-		$x->lobMime = $row['lob_mime'];
 		$x->lobTitle = $row['lob_title'];
 		$x->linkText = $row['link_text'];
-		$x->visible = $row['visible'];
 		$x->notBeforeSeqId = $row['not_before_seq_id'];
-		$x->allowAfterDays = $row['allow_after_days'];
-		$x->allowOn = $row['allow_on'];
+		$x->startOffset = $row['start_offset'];
+		$x->endOffset = $row['end_offset'];
+		$x->dueOffset = $row['due_offset'];
+		$x->gracePeriodDays = $row['grace_period_days'];
 		$x->rank = $row['rank'];
+		$x->hideUntilStart = $row['hide_until_start'];
+		$x->hideAfterEnd = $row['hide_after_end'];
 
 		$x->_new = false;
 		return $x;
