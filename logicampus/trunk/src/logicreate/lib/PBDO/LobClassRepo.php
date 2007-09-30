@@ -47,6 +47,30 @@ class LobClassRepoBase {
 		return $array;
 	}
 
+	/**
+	 * Retrieves an array of lob_class_activity objects via the foreign key lob_class_repo_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Array related objects.
+	 */
+	function getLobClassActivitysByLobClassRepoId($dsn='default') {
+		if ( $this->lobClassRepoId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobClassActivityPeer::doSelect('lob_class_repo_id = \''.$this->lobClassRepoId.'\'',$dsn);
+		return $array;
+	}
+
+	/**
+	 * Retrieves an array of lob_class_test objects via the foreign key lob_class_repo_id.
+	 * 
+	 * @param String $dsn the name of the data source to use for the sql query.
+	 * @return Array related objects.
+	 */
+	function getLobClassTestsByLobClassRepoId($dsn='default') {
+		if ( $this->lobClassRepoId == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		$array = LobClassTestPeer::doSelect('lob_class_repo_id = \''.$this->lobClassRepoId.'\'',$dsn);
+		return $array;
+	}
+
 
 
 	function getPrimaryKey() {

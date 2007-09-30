@@ -5,6 +5,7 @@ include_once(LIB_PATH.'PBDO/LobMetadata.php');
 include_once(LIB_PATH.'PBDO/LobContent.php');
 include_once(LIB_PATH.'PBDO/LobTest.php');
 include_once(LIB_PATH.'PBDO/LobTestQst.php');
+include_once(LIB_PATH.'PBDO/LobActivity.php');
 
 /**
  * Base class for all lob types (content, test, activity)
@@ -281,7 +282,7 @@ class Lc_Lob {
 				break;
 
 			case 'activity':
-				$results  = $this->getLobActivitysByLobRepoEntryId();
+				$results  = $repo->getLobActivitysByLobRepoEntryId();
 				if (! count($results) ) {
 					trigger_error('learning object missing internal data.');
 					return null;
@@ -292,7 +293,7 @@ class Lc_Lob {
 				break;
 
 			case 'test':
-				$results  = $this->getLobTestsByLobRepoEntryId();
+				$results  = $rep->getLobTestsByLobRepoEntryId();
 				if (! count($results) ) {
 					trigger_error('learning object missing internal data.');
 					return null;
@@ -428,7 +429,7 @@ class Lc_Lob_Content extends Lc_Lob {
 
 
 /**
- * Hold lob repo entries and lob content entries
+ * Hold lob repo entries and lob test entries
  */
 class Lc_Lob_Test extends Lc_Lob {
 
@@ -466,6 +467,59 @@ class Lc_Lob_Test extends Lc_Lob {
 
 
 /**
+ * Hold lob repo entries and lob activity entries
+ */
+class Lc_Lob_Activity extends Lc_Lob {
+
+	var $type = 'activity';
+	var $questionObjs = array();
+	var $mime = 'X-LMS/activity';
+
+	function Lc_Lob_Activity($id = -1) {
+		if ($id < 1) {
+			$this->repoObj    = new LobRepoEntry();
+			$this->lobSub     = new LobActivity();
+			$this->lobMetaObj = new LobMetadata();
+			$this->lobMetaObj->createdOn = time();
+			$this->repoObj->lobMime = $this->mime;
+		} else {
+			$this->repoObj   = LobRepoEntry::load($id);
+			$tests           = $this->repoObj->getLobActivitysByLobRepoEntryId();
+			$this->lobSub    = $tests[0];
+		}
+	}
+
+	/**
+	 * Available response types are:
+	 *
+	 * 1 = upload file
+	 * 2 = text response
+	 * 3 = upload & text
+	 * 4 = forum post
+	 * 5 = None
+	 * 6 = audio
+	 */ 
+	function setResponseType($typeInt=5) {
+		$this->lobSub->responseTypeId = $typeInt;
+	}
+
+	function getResponseTypeName($typeInt=-1) {
+		if ($typeInt == -1) { $typeInt = $this->lobSub->responseTypeId; }
+		switch ($typeInt) {
+
+			case 1: return 'File Upload';
+			case 2: return 'Text Response';
+			case 3: return 'File Upload and Text Response';
+			case 4: return 'Forum Post';
+			case 5: return 'None';
+			case 6: return 'Audio Recording';
+		}
+	}
+}
+
+
+
+/**
  * Handle static functions to reduce the size of Lc_Lob class
  */
 class Lc_Lob_Util {
@@ -485,9 +539,11 @@ class Lc_Lob_Util {
 				return 'document.png';
 				break;
 			case 'X-LMS/assessment':
+			case 'X-LMS/test':
 				return 'quiz.png';
 				break;
 			case 'X-LMS/assignment':
+			case 'X-LMS/activity':
 			case 'X-LMS/interaction':
 				return 'activity.png';
 				break;
@@ -504,6 +560,14 @@ class Lc_Lob_Util {
 				return 'document.png';
 				break;
 		}
+	}
+
+
+	/**
+	 * @static
+	 */
+	function getSubTypeIcon($subType) {
+		return Lc_Lob_Util::getMimeIcon( Lc_Lob_Util::getMimeForSubtype($subType));
 	}
 
 
@@ -529,7 +593,7 @@ class Lc_Lob_Util {
 				return 'image/'.$ext;
 		}
 
-		if ($subType == 'document' || $subType == 'doc') {
+		if ($subtype == 'document' || $subtype == 'doc') {
 			switch($ext) {
 				case 'pdf':
 				return 'application/pdf';
@@ -545,7 +609,7 @@ class Lc_Lob_Util {
 			}
 		}
 
-		if ($subType == 'audio') {
+		if ($subtype == 'audio') {
 			switch($ext) {
 				case 'mp3':
 				return 'audio/mpeg';

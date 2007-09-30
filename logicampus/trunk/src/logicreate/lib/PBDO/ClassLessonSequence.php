@@ -12,6 +12,7 @@ class ClassLessonSequenceBase {
 	var $lobClassRepoId;
 	var $lobType;
 	var $lobSubType;
+	var $lobMime;
 	var $lobTitle;
 	var $linkText;
 	var $notBeforeSeqId;
@@ -30,6 +31,7 @@ class ClassLessonSequenceBase {
 	'lobClassRepoId'=>'integer',
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
+	'lobMime'=>'varchar',
 	'lobTitle'=>'varchar',
 	'linkText'=>'varchar',
 	'notBeforeSeqId'=>'int',
@@ -142,6 +144,7 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lob_class_repo_id'] = 'lob_class_repo_id';
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
+		$st->fields['lob_mime'] = 'lob_mime';
 		$st->fields['lob_title'] = 'lob_title';
 		$st->fields['link_text'] = 'link_text';
 		$st->fields['not_before_seq_id'] = 'not_before_seq_id';
@@ -172,6 +175,7 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
+		$st->fields['lob_mime'] = $this->lobMime;
 		$st->fields['lob_title'] = $this->lobTitle;
 		$st->fields['link_text'] = $this->linkText;
 		$st->fields['not_before_seq_id'] = $this->notBeforeSeqId;
@@ -209,6 +213,7 @@ class ClassLessonSequencePeerBase {
 		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
+		$st->fields['lob_mime'] = $obj->lobMime;
 		$st->fields['lob_title'] = $obj->lobTitle;
 		$st->fields['link_text'] = $obj->linkText;
 		$st->fields['not_before_seq_id'] = $obj->notBeforeSeqId;
@@ -288,6 +293,7 @@ class ClassLessonSequencePeerBase {
 		$x->lobClassRepoId = $row['lob_class_repo_id'];
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
+		$x->lobMime = $row['lob_mime'];
 		$x->lobTitle = $row['lob_title'];
 		$x->linkText = $row['link_text'];
 		$x->notBeforeSeqId = $row['not_before_seq_id'];

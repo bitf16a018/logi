@@ -32,12 +32,12 @@ class LC_LessonSequence {
 		$db = Db::getHandle();
 
 		//find content objects that we didn't recieve a checkbox for
-		$sql = ('SELECT class_lesson_sequence_id, lob_id
+		$sql = ('SELECT class_lesson_sequence_id, lob_class_repo_id
 			FROM class_lesson_sequence
 			WHERE lesson_id = '.$this->lessonId.'
 			AND class_id = '.$this->classId.'
 			AND lob_type = "'.$type.'"
-			AND lob_id NOT IN ('.implode(',',$contentIds).')');
+			AND lob_class_repo_id NOT IN ('.implode(',',$contentIds).')');
 
 		//needs work to delete
 		$deletes = array();
@@ -53,17 +53,17 @@ class LC_LessonSequence {
 		}
 
 		//find objects that got a checkbox but are already present in the DB
-		$sql = ('SELECT class_lesson_sequence_id, lob_id
+		$sql = ('SELECT class_lesson_sequence_id, lob_class_repo_id
 			FROM class_lesson_sequence
 			WHERE lesson_id = '.$this->lessonId.'
 			AND class_id = '.$this->classId.'
 			AND lob_type = "'.$type.'"
-			AND lob_id IN ('.implode(',',$contentIds).')');
+			AND lob_class_repo_id IN ('.implode(',',$contentIds).')');
 
 		$keepers = array();
 		$db->query($sql);
 		while ($db->nextRecord()) {
-			$keepers[] = $db->record['lob_id'];
+			$keepers[] = $db->record['lob_class_repo_id'];
 		}
 
 //		debug($contentIds);
@@ -87,16 +87,16 @@ class LC_LessonSequence {
 
 		//insert each new link
 		$insert = 'INSERT INTO class_lesson_sequence
-		(lesson_id,class_id, lob_id, lob_type, lob_title, lob_mime, link_text, rank)
-		VALUES (%d, %d, %d, "'.$type.'", "%s", "%s", "%s",%d)';
+		(lesson_id,class_id, lob_class_repo_id, lob_type, lob_sub_type, lob_mime, lob_title, link_text, rank)
+		VALUES (%d, %d, %d, "'.$type.'", "%s", "%s", "%s", "%s", %d)';
 
-		//debug($contentIds);
-		//debug($lobData);
+		//debug($contentIds,1);
+		//debug($lobData,1);
 		foreach($contentIds as $k=>$v) {
 			if ($v < 1 ) continue;
 			$lob = $lobData[$v];
 			$topRank++;
-			$db->query( sprintf($insert, $this->lessonId, $this->classId, $v, $lob['lob_title'], $lob['lob_mime'], $lob['lob_urltitle'], $topRank));
+			$db->query( sprintf($insert, $this->lessonId, $this->classId, $v, $lob['lob_sub_type'], $lob['lob_mime'], $lob['lob_title'], $lob['lob_urltitle'], $topRank));
 		}
 	}
 

@@ -67,7 +67,7 @@ if ($t['lob']['lob_mime'] == 'X-LMS/assignment') {
 	echo 'Instructions: ';
 	echo $t['activity']['instructions'];
 	echo "<br/>\n";
-	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['activity']['id_class_assignments']).'">Start the activity.</a>';
+	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['activity']['lob_class_repo_id']).'">Start the activity.</a>';
 	?>
 </fieldset>
 </div>
