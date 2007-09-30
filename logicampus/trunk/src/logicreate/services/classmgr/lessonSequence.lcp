@@ -112,7 +112,15 @@ class LessonSequence extends FacultyService {
 			//die('no sequences yet');
 		}
 		foreach ($sequences as $objIdx => $obj) {
+
+			//change the "type" field into an image representing the mime.
+			//no reason why i'm changing lobType instead of lobMime
 			$sequences[$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+
+			//change unix timestamp offset into days
+			$sequences[$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+			$sequences[$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+
 		}
 //		$t['seqItems'] = $sequences;
 
@@ -131,16 +139,58 @@ class LessonSequence extends FacultyService {
 		$dm->ignoreColumn('lobSubType');
 		$dm->ignoreColumn('lobMime');
 		$dm->ignoreColumn('linkText');
+		$dm->ignoreColumn('notBeforeSeqId');
+		$dm->ignoreColumn('endOffset');
+		$dm->ignoreColumn('gracePeriodDays');
+		$dm->ignoreColumn('hideUntilStart');
+		$dm->ignoreColumn('hideAfterEnd');
+
 
 		$table = new LC_Table($dm);
 
 		$columnModel = &$table->getColumnModel();
-		$col = &$columnModel->getColumnAt(7);
+		$columnModel->tableColumns[0]->name  =' ';
+		$columnModel->tableColumns[1]->name  ='Title';
+
+		$colA = &$columnModel->getColumnAt(0);
+		$colA->maxWidth=64;
+
+		$colD = &$columnModel->getColumnAt(1);
+		$colD->justify='left';
+
+		$col = &$columnModel->getColumnAt(4);
 		$col->maxWidth=64;
+		$col->name = 'Rank';
 		$col->cellRenderer = new LC_Table_SequenceRenderer();
 		$col->cellRenderer->id = $lesson_id;
 
+
+		$colB = &$columnModel->getColumnAt(2);
+		$colB->maxWidth=64;
+		$colB->name = 'Start';
+		$colB->cellRenderer = new LC_TableSelectRenderer();
+		$colB->cellRenderer->idName = 'startOffset';
+		$colB->cellRenderer->fieldName = 'startOffset';
+		$colB->cellRenderer->options = array(0=>'0');
+		for ($qq=1; $qq< 21; $qq++) { 
+			$colB->cellRenderer->options[] = $qq;
+		}
+
+		$colC = &$columnModel->getColumnAt(3);
+		$colC->maxWidth=64;
+		$colC->name = 'Due';
+		$colC->cellRenderer = new LC_TableSelectRenderer();
+		$colC->cellRenderer->idName = 'dueOffset';
+		$colC->cellRenderer->fieldName = 'dueOffset';
+		$colC->cellRenderer->options = array(0=>'Never');
+		for ($qq=1; $qq< 21; $qq++) { 
+			$colC->cellRenderer->options[] = $qq;
+		}
+
+
+
 		$t['table'] = new LC_TableRenderer($table);
+		$t['id'] = $lesson_id;
 
 //		debug($sequences);
 	}
@@ -199,6 +249,39 @@ class LessonSequence extends FacultyService {
 		return $sequenceItems;
 	}
 
+
+	/**
+	 * Save all the days for the sequenced items.
+	 *
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$class_id = $u->activeClassTaught->id_classes;
+		$lesson_id = (int) $lc->getvars['id'];
+
+		$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id.' ORDER BY rank');
+//debug($lc->postvars,0);
+//debug($sequences,1);
+		foreach ($sequences as $objIdx => $obj) {
+			$save = false;
+			if( isset($lc->postvars['startOffset'][$objIdx]) ) {
+				$sequences[$objIdx]->startOffset = ($lc->postvars['startOffset'][$objIdx] * 60*60*24);
+				$save = true;
+			}
+			if( isset($lc->postvars['dueOffset'][$objIdx]) ) {
+				$sequences[$objIdx]->dueOffset = ($lc->postvars['dueOffset'][$objIdx] * 60*60*24);
+				$save = true;
+			}
+			if ($save) {
+				$sequences[$objIdx]->save();
+			}
+		}
+
+		$u->addSessionMessage('Dates have been saved.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonSequence/id='.$lesson_id);
+
+	}
 
 	/**
 	 * Do they have authority for this lesson? Yes, return true. No, give them an error
