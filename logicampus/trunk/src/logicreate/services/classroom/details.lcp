@@ -56,7 +56,7 @@ class details extends StudentService {
  * Output data: detailed class page
  *
  */
-		function Run(&$db,&$u,&$lc,&$t) {
+		function run(&$db,&$u,&$lc,&$t) {
 
 			# Grab current time stamp
 			$ut = time();
@@ -80,16 +80,19 @@ class details extends StudentService {
 				$this->_PortalNumOfLessons;
 			}
 
+			$enrollOffsets = lcClass::calcOffsetForStudent($u, $u->activeClassTaken->id_classes, $u->activeClassTaken->semesterID);
+			$lesson_start_offset =  0;
 
 			# count total number of available assignments
-			$sql =  "SELECT count(*) as count 
-				FROM class_assignments 
-				WHERE id_classes='".$u->activeClassTaken->id_classes."' 
-				AND activeDate <= $ut 
-				AND (dueDate >= $ut OR noDueDate = 1)";
-
+			$sql =  "SELECT count(*) as num_activity 
+				FROM class_lesson_sequence 
+				WHERE class_id='".$u->activeClassTaken->id_classes."' 
+				AND (start_offset <= ".$enrollOffsets['start'] ." OR start_offset IS NULL)
+				AND (due_offset >= ".$enrollOffsets['start']." OR due_offset IS NULL)
+				AND lob_type = 'assignment'";
 			$db->queryOne($sql);
-			$t['assignmentcount'] = $db->Record['count'];
+
+			$t['assignmentcount'] = $db->Record['num_activity'];
 			if ($t['assignmentcount'] <= $this->_PortalNumOfAssignments)
 			{
 				$t['_PortalNumOfAssignments'] = $t['assignmentcount'];
@@ -132,36 +135,40 @@ class details extends StudentService {
 			 * PULL IN ASSIGNMENT FOR CLASS (maximum is configurable in control panel)
 			 ****/
 			
-			$sql = "SELECT id_class_assignments, title, dueDate, noDueDate 
-			FROM class_assignments 
-			WHERE id_classes='".$u->activeClassTaken->id_classes."' 
-			AND activeDate <= $ut 
-			AND (dueDate >= $ut OR noDueDate = 1)
-			ORDER BY dueDate ASC, activeDate DESC 
-			LIMIT ".$this->_PortalNumOfAssignments;
+			$sql = 
+				"SELECT lob_class_repo_id, lob_title, due_offset
+				FROM class_lesson_sequence 
+				WHERE class_id='".$u->activeClassTaken->id_classes."' 
+				AND (start_offset <= ".$enrollOffsets['start'] ." OR start_offset IS NULL)
+				AND (due_offset >= ".$enrollOffsets['start']." OR due_offset IS NULL)
+				AND lob_type = 'assignment'
+				ORDER BY due_offset ASC, start_offset DESC
+				LIMIT ".$this->_PortalNumOfAssignments;
+
+
 			
 			$db->query($sql);
-			if ($db->getNumRows())
-			{
+			if ($db->getNumRows()) {
 				$t['assignments'] = '<ul>';
-				while ($db->next_record() )
+				while ($db->nextRecord() )
 				{
-					if ($db->Record['noDueDate'] == 0)
+					if ($db->record['due_offset'] != 0)
 					{
-					 	$date = date("m-d h:i A", $db->Record['dueDate']); 
-						$t['assignments'] .= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->Record['id_class_assignments'].'">'.$db->Record['title'].'<BR>Due:  '.$date.'</a></li>';
+// __FIXME__ get the class start date into the session somehow
+//					 	$date = date("m-d h:i A", (time() + $db->record['due_offset'])); 
+						$t['assignments'] .= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->record['lob_class_repo_id'].'">'.$db->record['lob_title'].'<BR>Due:  '.$date.'</a></li>';
 
 					} else {
-						$t['noduedateassignments'].= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->Record['id_class_assignments'].'">'.$db->Record['title'].'</a></li>';
+						$t['noduedateassignments'].= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->record['lob_class_repo_id'].'">'.$db->record['lob_title'].'</a></li>';
 
 					}
 				}
-				
-			$t['assignments'] .= '</ul>';
+				$t['assignments'] .= '</ul>';
 			} else {
 				$t['assignments'] = '<ul><li>No active assignments found</li></ul>';
 			}
 	
+
 			/*****
 			* MOTD
 			****/

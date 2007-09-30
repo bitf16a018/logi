@@ -12,12 +12,12 @@ class LC_LessonSequence {
 
 	function updateAssignments($contentIds,$lobData) {
 		if (count($contentIds) < 1) { $contentIds = array(0);}
-		$this->updateSequence($contentIds, $lobData, 'assignment');
+		$this->updateSequence($contentIds, $lobData, 'activity');
 	}
 
 	function updateTests($contentIds,$lobData) {
 		if (count($contentIds) < 1) { $contentIds = array(0);}
-		$this->updateSequence($contentIds, $lobData, 'assessment');
+		$this->updateSequence($contentIds, $lobData, 'test');
 	}
 
 	function updateContent($contentIds,$lobData) {
