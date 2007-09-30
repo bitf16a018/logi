@@ -57,6 +57,7 @@ class ForumAdmin extends FacultyService {
 		$col_a->cellRenderer = new LC_TableCheckboxRenderer();
 		$col_a->cellRenderer->fieldName = 'move';
 		$col_a->cellRenderer->idName = 'classForumId';
+		$col_a->cellRenderer->selectedKey = 'classForumId';
 		$col_a->cellRenderer->selectedVal = '1';
 		$col_a->maxWidth=35;
 		$col_a->justify = 'center';
@@ -326,6 +327,7 @@ class ForumAdmin extends FacultyService {
 		$col_a->cellRenderer->fieldName = 'move';
 		$col_a->cellRenderer->idName = 'classForumId';
 		$col_a->cellRenderer->selectedVal = '1';
+		$col_a->cellRenderer->selectedKey = 'classForumId';
 		$col_a->maxWidth=35;
 		$col_a->justify = 'center';
 
