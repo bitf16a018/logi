@@ -12,28 +12,9 @@ CREATE TABLE class_announcements (
 ) TYPE=MyISAM;
 
 
-CREATE TABLE class_assignments (
-  id_class_assignments int(1) unsigned NOT NULL auto_increment,
-  title varchar(255) NOT NULL default '',
-  instructions text NOT NULL,
-  dueDate int(11) unsigned NOT NULL default '0',
-  noDueDate tinyint(1) NOT NULL default '0',
-  activeDate int(11) unsigned NOT NULL default '0',
-  responseType tinyint(3) unsigned NOT NULL default '0',
-  id_classes int(10) unsigned NOT NULL default '0',
-  dateNoAccept datetime NOT NULL default '0000-00-00 00:00:00',
-  id_forum int(10) unsigned NOT NULL default '0',
-  id_forum_thread int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (id_class_assignments),
-  KEY id_classes (id_classes),
-  KEY activeDate (activeDate),
-  KEY class_date (id_classes,activeDate)
-) TYPE=MyISAM;
-
-
 CREATE TABLE class_assignments_grades (
   id_class_assignments_grades int(10) unsigned NOT NULL auto_increment,
-  id_class_assignments int(10) unsigned NOT NULL default '0',
+  lob_class_repo_id int(11) unsigned NOT NULL default '0',
   id_student varchar(32) NOT NULL default '',
   comments text NOT NULL,
   grade float(10,2) default NULL,
@@ -41,17 +22,9 @@ CREATE TABLE class_assignments_grades (
   KEY id_class_assignments (id_class_assignments)
 ) TYPE=MyISAM;
 
-CREATE TABLE class_assignments_link (
-  id_class_lessons int(11) unsigned NOT NULL default '0',
-  id_class_assignments int(11) unsigned NOT NULL default '0',
-  KEY id_class_lessons (id_class_lessons),
-  KEY id_class_assignments (id_class_assignments)
-) TYPE=MyISAM;
-
-
 CREATE TABLE class_assignments_turnin (
   id_class_assignments_turnin int(10) unsigned NOT NULL auto_increment,
-  id_class_assignments int(10) unsigned NOT NULL default '0',
+  lob_class_repo_id int(10) unsigned NOT NULL default '0',
   id_student varchar(32) NOT NULL default '',
   dateTurnin datetime NOT NULL default '0000-00-00 00:00:00',
   assign_type int(10) unsigned NOT NULL default '0',
@@ -61,7 +34,7 @@ CREATE TABLE class_assignments_turnin (
   assign_file_size int(11) NOT NULL default '0',
   assign_file_blob longblob NOT NULL,
   PRIMARY KEY  (id_class_assignments_turnin),
-  KEY id_class_assignments (id_class_assignments)
+  KEY `lob_class_repo_idx` (`lob_class_repo_id`)
 ) TYPE=MyISAM;
 
 

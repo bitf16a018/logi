@@ -44,65 +44,6 @@
     <key attribute="id_faculty_createdby"
 	    name="id_faculty_createdby"/>
   </entity>
-  <entity  name="class_assignments">
-    <attribute name="id_class_assignments"
-            required="true"
-            primaryKey="true"
-            size="1"
-            type="INTEGER"/>
-    <attribute name="title"
-            required="true"
-            size="255"
-            type="VARCHAR"/>
-    <attribute name="instructions"
-            required="true"
-            size=""
-            type="LONGVARCHAR"/>
-    <attribute name="dueDate"
-            required="true"
-            default="0"
-            size="11"
-            type="INTEGER"/>
-    <attribute name="noDueDate"
-            required="true"
-            default="0"
-            size="1"
-            type="TINYINT"/>
-    <attribute name="activeDate"
-            required="true"
-            default="0"
-            size="11"
-            type="INTEGER"/>
-    <attribute name="responseType"
-            required="true"
-            default="0"
-            size="3"
-            type="TINYINT"/>
-    <attribute name="id_classes"
-            required="true"
-            default="0"
-            size="10"
-            type="INTEGER"/>
-    <attribute name="dateNoAccept"
-            required="true"
-            default="0000-00-00 00:00:00"
-            size=""
-            type="DATETIME"/>
-    <attribute name="id_forum"
-            required="true"
-            default="0"
-            size="10"
-            type="INTEGER"/>
-    <attribute name="id_forum_thread"
-            required="true"
-            default="0"
-            size="10"
-            type="INTEGER"/>
-    <index>
-      <index-column name="activeDate"/>
-      <index-column name="id_classes"/>
-    </index>
-  </entity>
   <entity  name="class_assignments_grades">
     <attribute name="id_class_assignments_grades"
             required="true"
@@ -126,18 +67,6 @@
             required="false"
             size="10,2"
             type="FLOAT"/>
-  </entity>
-  <entity  name="class_assignments_link">
-    <attribute name="id_class_lessons"
-            required="true"
-            default="0"
-            size="11"
-            type="INTEGER"/>
-    <attribute name="id_class_assignments"
-            required="true"
-            default="0"
-            size="11"
-            type="INTEGER"/>
   </entity>
   <entity  name="class_assignments_turnin">
     <attribute name="id_class_assignments_turnin"
