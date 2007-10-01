@@ -438,4 +438,42 @@ class LC_TableCheckboxRenderer extends LC_TableCellRenderer {
 		return '<input id="'.$this->fieldName.'['.$this->row.']" name="'.$this->fieldName.'['.$this->row.']" value="'.$idValue.'" '.$selected.' type="checkbox">';
 	}
 }
+
+class LC_TableSelectRenderer extends LC_TableCellRenderer {
+
+	var $selectedVal;
+	var $selectedKey;
+	var $idName;
+	var $fieldName = 'item';
+	var $options = array();
+
+	function LC_TableSelectRenderer() {
+		$this->options = array( 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+	}
+
+	function getRenderedValue() {
+		$html = '<select id="'.$this->fieldName.'['.$this->row.']" name="'.$this->fieldName.'['.$this->row.']'.'">'."\n\t";
+		//is the value an array ?
+		if ( is_array($this->value) ) {
+			$idValue = $this->value[$this->idName];
+			$selected = ($this->selectedVal == $this->value[$this->selectedKey]) ? ' CHECKED ':'';
+		}
+		//is it a PBDO object wrapper?
+		else if ( is_object($this->value) && is_object($this->value->_dao) ) {
+			$idValue = $this->value->_dao->getPrimaryKey();
+			$selected = ($this->selectedVal == $this->value->_dao->{$this->selectedKey}) ? ' CHECKED ':'';
+		}
+		//is it a regular object?
+		else if ( is_object($this->value) ) {
+			$idValue = $this->value->{$this->idName};
+			$selected = ($this->selectedVal == $this->value->{$this->selectedKey}) ? ' CHECKED ':'';
+		}
+
+		foreach ($this->options as $v) {
+			if ($v == $this->value) { $selected = 'selected="SELECTED"';} else { $selected = '';}
+			$html .= "<option value=\"".$v."\" ".$selected.">".$v."</option>\n\t";
+		}
+		return $html."\n\t</select>&nbsp;Days\n";
+	}
+}
 ?>
