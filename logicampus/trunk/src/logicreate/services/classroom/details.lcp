@@ -48,204 +48,203 @@ class details extends StudentService {
 		$lc->templateName = 'details_motd';
 	}
 
-/*
- *
- * Default event
- * 
- * Input data:  id_classes (user object)
- * Output data: detailed class page
- *
- */
-		function run(&$db,&$u,&$lc,&$t) {
+	/**
+	 * Default event.
+	 * 
+	 * Input data:  id_classes (user object)
+	 * Output data: detailed class page
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		# Grab current time stamp
+		$ut = time();
 
-			# Grab current time stamp
-			$ut = time();
-
-
-			# count total number of available lessons
-			$sql =  "SELECT count(*) as count 
-				FROM class_lessons 
-				WHERE id_classes='".$u->activeClassTaken->id_classes."' 
-				AND (activeOn <= $ut AND inactiveOn >= $ut) 
-				AND activeOn <= $ut and inactiveOn >= $ut";
-
-			$db->queryOne($sql);
-			$t['lessoncount'] = $db->Record['count'];
-			if ($t['lessoncount'] <= $this->_PortalNumOfLessons)
-			{
-				$t['_PortalNumOfLessons'] = $t['lessoncount'];
-			} else 
-			{
-				$t['_PortalNumOfLessons'] =
-				$this->_PortalNumOfLessons;
-			}
-
-			$enrollOffsets = lcClass::calcOffsetForStudent($u, $u->activeClassTaken->id_classes, $u->activeClassTaken->semesterID);
-			$lesson_start_offset =  0;
-
-			# count total number of available assignments
-			$sql =  "SELECT count(*) as num_activity 
-				FROM class_lesson_sequence 
-				WHERE class_id='".$u->activeClassTaken->id_classes."' 
-				AND (start_offset <= ".$enrollOffsets['start'] ." OR start_offset IS NULL)
-				AND (due_offset >= ".$enrollOffsets['start']." OR due_offset IS NULL)
-				AND lob_type = 'assignment'";
-			$db->queryOne($sql);
-
-			$t['assignmentcount'] = $db->Record['num_activity'];
-			if ($t['assignmentcount'] <= $this->_PortalNumOfAssignments)
-			{
-				$t['_PortalNumOfAssignments'] = $t['assignmentcount'];
-			} else 
-			{
-				$t['_PortalNumOfAssignments'] =
-				$this->_PortalNumOfAssignments;
-			}
-
-			$lc->templateName='details_main';
-
-
-			/*****
-			 * PULL IN LESSONS (only 5, configurable in control panel)
-			 ****/
-
-			$sql = "SELECT id_class_lessons, title, activeOn 
+		# count total number of available lessons
+		$sql =  "SELECT count(*) as count 
 			FROM class_lessons 
-			WHERE id_classes='".$u->activeClassTaken->id_classes."'
+			WHERE id_classes='".$u->activeClassTaken->id_classes."' 
 			AND (activeOn <= $ut AND inactiveOn >= $ut) 
-			ORDER BY activeOn DESC 
-			LIMIT ".$this->_PortalNumOfLessons;
+			AND activeOn <= $ut and inactiveOn >= $ut";
 
-			 $db->query($sql);
-			 if ($db->getNumRows())
-			 {
-			 	$t['lessons'] = '<ul>';
-				while ($db->next_record() )
-				{
-					$t['lessons'] .= '<li><a href="'.modurl('lessons/event=view').
-					'/id='.$db->Record['id_class_lessons'].'">'.$db->Record['title'].'</a></li>';
-					//('.date("m-d h:i A", $db->Record['activeOn']).')</a></li>';
-				}
-				$t['lessons'] .= '</ul>';
-			 } else {
-			 	$t['lessons'] = '<ul><li>No active lessons found</li></ul>';
-			 }
+		$db->queryOne($sql);
+		$t['lessoncount'] = $db->Record['count'];
+		if ($t['lessoncount'] <= $this->_PortalNumOfLessons)
+		{
+			$t['_PortalNumOfLessons'] = $t['lessoncount'];
+		} else 
+		{
+			$t['_PortalNumOfLessons'] =
+			$this->_PortalNumOfLessons;
+		}
 
-			/*****
-			 * PULL IN ASSIGNMENT FOR CLASS (maximum is configurable in control panel)
-			 ****/
-			
-			$sql = 
-				"SELECT lob_class_repo_id, lob_title, due_offset
-				FROM class_lesson_sequence 
-				WHERE class_id='".$u->activeClassTaken->id_classes."' 
-				AND (start_offset <= ".$enrollOffsets['start'] ." OR start_offset IS NULL)
-				AND (due_offset >= ".$enrollOffsets['start']." OR due_offset IS NULL)
-				AND lob_type = 'assignment'
-				ORDER BY due_offset ASC, start_offset DESC
-				LIMIT ".$this->_PortalNumOfAssignments;
+		$enrollOffsets = lcClass::calcOffsetForStudent($u, $u->activeClassTaken->id_classes, $u->activeClassTaken->semesterID);
+		$lesson_start_offset =  0;
+
+		$lc->templateName='details_main';
 
 
-			
-			$db->query($sql);
-			if ($db->getNumRows()) {
-				$t['assignments'] = '<ul>';
-				while ($db->nextRecord() )
-				{
-					if ($db->record['due_offset'] != 0)
-					{
-// __FIXME__ get the class start date into the session somehow
-//					 	$date = date("m-d h:i A", (time() + $db->record['due_offset'])); 
-						$t['assignments'] .= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->record['lob_class_repo_id'].'">'.$db->record['lob_title'].'<BR>Due:  '.$date.'</a></li>';
+		/*****
+		 * PULL IN LESSONS (only 5, configurable in control panel)
+		 ****/
 
-					} else {
-						$t['noduedateassignments'].= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->record['lob_class_repo_id'].'">'.$db->record['lob_title'].'</a></li>';
+		$sql = "SELECT id_class_lessons, title, activeOn 
+		FROM class_lessons 
+		WHERE id_classes='".$u->activeClassTaken->id_classes."'
+		AND (activeOn <= $ut AND inactiveOn >= $ut) 
+		ORDER BY activeOn DESC 
+		LIMIT ".$this->_PortalNumOfLessons;
 
-					}
-				}
-				$t['assignments'] .= '</ul>';
-			} else {
-				$t['assignments'] = '<ul><li>No active assignments found</li></ul>';
-			}
-	
-
-			/*****
-			* MOTD
-			****/
-			$t['motd'] = LcSettings::getSystemMotd();
-			if (strlen($t['motd']) == 0)
+		 $db->query($sql);
+		 if ($db->getNumRows())
+		 {
+			$t['lessons'] = '<ul>';
+			while ($db->next_record() )
 			{
-				unset($t['motd']);
+				$t['lessons'] .= '<li><a href="'.modurl('lessons/event=view').
+				'/id='.$db->Record['id_class_lessons'].'">'.$db->Record['title'].'</a></li>';
+				//('.date("m-d h:i A", $db->Record['activeOn']).')</a></li>';
 			}
+			$t['lessons'] .= '</ul>';
+		 } else {
+			$t['lessons'] = '<ul><li>No active lessons found</li></ul>';
+		 }
+
+		/*****
+		 * PULL IN ASSIGNMENT FOR CLASS (maximum is configurable in control panel)
+		 ****/
+		
+		# count total number of available assignments
+		$sql = 
+			"SELECT count(lob_class_repo_id) as num_activity
+			FROM class_lesson_sequence 
+			WHERE class_id='".$u->activeClassTaken->id_classes."' 
+			AND ( (start_offset + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
+			AND ( (due_offset   + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
+			AND lob_type = 'activity'";
+
+		$db->queryOne($sql);
+
+		$t['assignmentcount'] = $db->record['num_activity'];
+		if ($t['assignmentcount'] <= $this->_PortalNumOfAssignments)
+		{
+			$t['_PortalNumOfAssignments'] = $t['assignmentcount'];
+		} else 
+		{
+			$t['_PortalNumOfAssignments'] =
+			$this->_PortalNumOfAssignments;
+		}
+
+		$sql = 
+			"SELECT lob_class_repo_id, lob_title, due_offset, class_lesson_sequence_id, lesson_id
+			FROM class_lesson_sequence 
+			WHERE class_id='".$u->activeClassTaken->id_classes."' 
+			AND ( (start_offset + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
+			AND ( (due_offset   + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
+			AND lob_type = 'activity'
+			ORDER BY due_offset ASC, start_offset DESC
+			LIMIT ".$this->_PortalNumOfAssignments;
+
+
+		
+		$db->query($sql);
+		if ($db->getNumRows()) {
+			$t['assignments'] = '<ul>';
+			while ($db->nextRecord() )
+			{
+				if ($db->record['due_offset'] != 0)
+				{
+// __FIXME__ get the class start date into the session somehow
+					 	$date = date("m-d h:i A", ($enrollOffsets['start'] + $db->record['due_offset'])); 
+
+					$t['assignments'] .= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->record['class_lesson_sequence_id'].'/l='.$db->record['lesson_id'].'">'.$db->record['lob_title'].'<BR>Due:  '.$date.'</a></li>';
+
+				} else {
+					$t['noduedateassignments'].= '<li><a href="'.modurl('assignments/event=view').'/id='.$db->record['class_lesson_sequence_id'].'/l='.$db->record['lesson_id'].'">'.$db->record['lob_title'].'</a></li>';
+
+				}
+			}
+			$t['assignments'] .= '</ul>';
+		} else {
+			$t['assignments'] = '<ul><li>No active assignments found</li></ul>';
+		}
+
+
+		/*****
+		* MOTD
+		****/
+		$t['motd'] = LcSettings::getSystemMotd();
+		if (strlen($t['motd']) == 0)
+		{
+			unset($t['motd']);
+		}
 
 // __FIX_ME - need a 'closing date' on announcements
 // or some other way of limiting what's shown
 
-			/** 
-			 * rs :: 10/10 this is not the right way to calculate the 
-			 *   "total" getNumRows()
-			 * there needs to be a limit clause with a group by counting, pulling
-			 * back all this data is not wise.
-			 */
-			$sql = "select * from class_announcements
-				where id_classes='{$u->activeClassTaken->id_classes}'
-				and dt_display <= ".DB::getFuncName('NOW()')." order by dt_display DESC";
-			$db->query($sql);
-			
-			$t['num_announcements'] = $db->getNumRows();
-			 if ($db->getNumRows())
-			 {
-			 	$t['announcements'] = '<ul>';
-				if($db->next_record() )
-				{
-					$t['announcements'] .= '<li><a href="'.modurl('announcements').'/event=view/id='.$db->Record['id_class_announcements'].'">'.truncateText($db->Record['tx_description']).'</a></li>';
-				}
-				$t['announcements'] .= '</ul>';
-			 } else {
-			 	$t['announcements'] = '<ul><li>No active announcements found</li></ul>';
-			 }
-
-
-			$t['sidebar'] = $u->sessionvars['activeLessonSidebar'];
-
-			// PULL IN A CLASS CALENDAR
-
-			$classId = (int)$u->activeClassTaken->id_classes;
-			$m = (int) $lc->getvars['m'];
-			$d = (int) $lc->getvars['d'];
-			$y = (int) $lc->getvars['y'];
-
-			$calendar = LC_Table_ClassCalendar::getMonthCalendar($classId,$y,$m,$d);
-
-			$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
-			$t['calendarRenderer']->setCompact(true);
-
-
-			/*****
-			* LOAD UP THE ID_CLASS_RESOURCE CONTENT 
-			* AND PASS IT TO THE TEMPLATE
-			****/
-
-			$sql = "SELECT id_class_resource FROM classes WHERE 
-					id_classes = '".$u->activeClassTaken->id_classes."'";
-			$db->queryOne($sql);
-			$id_content = $db->Record['id_class_resource'];
-
-			$sql = "SELECT txText from class_lesson_content WHERE 
-			id_class_lesson_content = '$id_content'";
-			$db->queryOne($sql);
-			$t['classresource'] = $db->Record['txText'];
-
-
-			// stupid hack to get a feedback message
-			// not sure if this is needed anymore, we have session messages in the
-			// user class now.
-			if ($u->sessionvars['message']) {
-				$t['message'] = $u->sessionvars['message'];
-				unset($u->sessionvars['message']);
+		/* 
+		//  rs :: 10/10 this is not the right way to calculate the 
+		//    "total" getNumRows()
+		//  there needs to be a limit clause with a group by counting, pulling
+		//  back all this data is not wise.
+		 */
+		$sql = "select * from class_announcements
+			where id_classes='{$u->activeClassTaken->id_classes}'
+			and dt_display <= ".DB::getFuncName('NOW()')." order by dt_display DESC";
+		$db->query($sql);
+		
+		$t['num_announcements'] = $db->getNumRows();
+		 if ($db->getNumRows())
+		 {
+			$t['announcements'] = '<ul>';
+			if($db->next_record() )
+			{
+				$t['announcements'] .= '<li><a href="'.modurl('announcements').'/event=view/id='.$db->Record['id_class_announcements'].'">'.truncateText($db->Record['tx_description']).'</a></li>';
 			}
+			$t['announcements'] .= '</ul>';
+		 } else {
+			$t['announcements'] = '<ul><li>No active announcements found</li></ul>';
+		 }
 
+
+		$t['sidebar'] = $u->sessionvars['activeLessonSidebar'];
+
+		// PULL IN A CLASS CALENDAR
+
+		$classId = (int)$u->activeClassTaken->id_classes;
+		$m = (int) $lc->getvars['m'];
+		$d = (int) $lc->getvars['d'];
+		$y = (int) $lc->getvars['y'];
+
+		$calendar = LC_Table_ClassCalendar::getMonthCalendar($classId,$y,$m,$d);
+
+		$t['calendarRenderer'] = new LC_TableRenderer_Calendar($calendar);
+		$t['calendarRenderer']->setCompact(true);
+
+
+		/*****
+		* LOAD UP THE ID_CLASS_RESOURCE CONTENT 
+		* AND PASS IT TO THE TEMPLATE
+		****/
+
+		$sql = "SELECT id_class_resource FROM classes WHERE 
+				id_classes = '".$u->activeClassTaken->id_classes."'";
+		$db->queryOne($sql);
+		$id_content = $db->Record['id_class_resource'];
+
+		$sql = "SELECT txText from class_lesson_content WHERE 
+		id_class_lesson_content = '$id_content'";
+		$db->queryOne($sql);
+		$t['classresource'] = $db->Record['txText'];
+
+
+		// stupid hack to get a feedback message
+		// not sure if this is needed anymore, we have session messages in the
+		// user class now.
+		if ($u->sessionvars['message']) {
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
 		}
+
+	}
 }
 
 

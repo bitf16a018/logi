@@ -109,6 +109,10 @@ class assignments extends StudentService {
 	 */
 	function viewRun(&$db,&$u,&$lc,&$t) {
 
+		if (isset($lc->getvars['l'])) {
+			$this->switchActiveLesson(intval($lc->getvars['l']), $u->activeClassTaken->id_classes, $u);
+		}
+
 		$lc->templateName = 'assignments_view';
 		$this->sectionTitle = 'View Activity';
 		# Set up thee active date for students
@@ -494,6 +498,24 @@ $sql.='
 
 		$lc->templateName='assignments_uploadAssignment';
 
+	}
+
+	/**
+	 * update the session vars
+	 */
+	function switchActiveLesson($lessonId,$classId,&$u) {
+		$ut = time();
+		$sql = "select * from class_lessons
+			where id_class_lessons='".$lessonId."'
+			and id_classes='".$classId."'";
+		if (!$u->isFaculty())
+			$sql .= " and (activeOn < ".time()."
+				and inactiveOn > ".time().')';
+
+		$db = DB::getHandle();
+		$db->queryOne($sql);
+		$lesson =& $db->record;
+		$u->sessionvars['activeLesson'] = $lesson;
 	}
 }
 
