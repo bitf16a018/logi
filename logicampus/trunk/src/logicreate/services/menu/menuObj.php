@@ -269,11 +269,12 @@ class MenuView extends ListView {
 		
 		$ret .="\n\t\t";
 		while ($this->tree->traverse() ) {
+			$parent_expanded = false;
 			if ($this->tree->p_CurrentNode->expanded !== true) { $this->tree->p_CurrentNode->expanded = false; }
-			unset($break);
-			
-			if ($this->tree->p_CurrentNode->expanded == true)
-			{	$parent_expanded = true;
+			$break = '';
+
+			if ($this->tree->p_CurrentNode->expanded == true) {
+				$parent_expanded = true;
 			}
 			
 			// run through children //
