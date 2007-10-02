@@ -16,6 +16,7 @@ class LobClassRepoBase {
 	var $lobType;
 	var $lobSubType;
 	var $lobMime;
+	var $lobDescription;
 	var $lobVersion;
 	var $lobBytes;
 
@@ -30,10 +31,12 @@ class LobClassRepoBase {
 	'lobType'=>'varchar',
 	'lobSubType'=>'varchar',
 	'lobMime'=>'varchar',
+	'lobDescription'=>'text',
 	'lobVersion'=>'integer',
 	'lobBytes'=>'integer');
 
-	var $__nulls = array();
+	var $__nulls = array( 
+	'lobDescription'=>'lobDescription');
 
 	/**
 	 * Retrieves an array of lob_class_content objects via the foreign key lob_class_repo_id.
@@ -169,6 +172,7 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_type'] = 'lob_type';
 		$st->fields['lob_sub_type'] = 'lob_sub_type';
 		$st->fields['lob_mime'] = 'lob_mime';
+		$st->fields['lob_description'] = 'lob_description';
 		$st->fields['lob_version'] = 'lob_version';
 		$st->fields['lob_bytes'] = 'lob_bytes';
 
@@ -195,9 +199,11 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_type'] = $this->lobType;
 		$st->fields['lob_sub_type'] = $this->lobSubType;
 		$st->fields['lob_mime'] = $this->lobMime;
+		$st->fields['lob_description'] = $this->lobDescription;
 		$st->fields['lob_version'] = $this->lobVersion;
 		$st->fields['lob_bytes'] = $this->lobBytes;
 
+		$st->nulls['lob_description'] = 'lob_description';
 
 		$st->key = 'lob_class_repo_id';
 		$db->executeQuery($st);
@@ -223,9 +229,11 @@ class LobClassRepoPeerBase {
 		$st->fields['lob_type'] = $obj->lobType;
 		$st->fields['lob_sub_type'] = $obj->lobSubType;
 		$st->fields['lob_mime'] = $obj->lobMime;
+		$st->fields['lob_description'] = $obj->lobDescription;
 		$st->fields['lob_version'] = $obj->lobVersion;
 		$st->fields['lob_bytes'] = $obj->lobBytes;
 
+		$st->nulls['lob_description'] = 'lob_description';
 
 		$st->key = 'lob_class_repo_id';
 		$db->executeQuery($st);
@@ -293,6 +301,7 @@ class LobClassRepoPeerBase {
 		$x->lobType = $row['lob_type'];
 		$x->lobSubType = $row['lob_sub_type'];
 		$x->lobMime = $row['lob_mime'];
+		$x->lobDescription = $row['lob_description'];
 		$x->lobVersion = $row['lob_version'];
 		$x->lobBytes = $row['lob_bytes'];
 
