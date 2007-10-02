@@ -13,6 +13,7 @@ CREATE TABLE `class_lesson_sequence` (
 	`lob_class_repo_id` integer (11) NOT NULL, 
 	`lob_type` varchar (100) NOT NULL, 
 	`lob_sub_type` varchar (100) NOT NULL, 
+	`lob_mime` varchar (100) NOT NULL, 
 	`lob_title` varchar (255) NOT NULL, 
 	`link_text` varchar (255) NOT NULL, 
 	`not_before_seq_id` int (11), 

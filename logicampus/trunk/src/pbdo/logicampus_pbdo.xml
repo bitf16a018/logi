@@ -634,6 +634,58 @@
 			name="lob_guid_idx"/>
 	</entity>
 
+	<entity  name="lob_class_metadata">
+		<attribute name="lob_class_metadata_id"
+			required="true"
+			primaryKey="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="lob_class_repo_id"
+			required="true"
+			size="11"
+			type="INTEGER"/>
+		<attribute name="subject"
+			required="true"
+			default=""
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="subdisc"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="author"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="copyright"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="license"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="user_version"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="status"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="updated_on"
+			required="true"
+			size="11"
+			type="integer"/>
+		<attribute name="created_on"
+			required="true"
+			size="11"
+			type="integer"/>
+		<key
+			attribute="lob_class_repo_id"
+			name="lob_class_repo_idx"/>
+	</entity>
+
 	<entity  name="lob_class_content">
 		<attribute name="lob_class_content_id"
 			required="true"

@@ -255,6 +255,10 @@ class Lc_Lob {
 		return $this->repoObj;
 	}
 
+	function &getMetadata() {
+		return $this->lobMetaObj;
+	}
+
 	/**
 	 * Make a copy or reference (link) of this lob in the 
 	 * class_repo.
@@ -262,12 +266,14 @@ class Lc_Lob {
 	function useInClass($classId = -1, $copyStyle = 'notify') {
 		$subLob = null;
 		$classRepo = null;
+		$classMeta = null;
 
 		if ($this->type == 'unknown') {
 			return null;
 		}
 
 		$repo = $this->getRepoEntry();
+		$meta = $this->getMetadata();
 
 		switch($this->type) {
 			case 'content':
@@ -313,7 +319,18 @@ class Lc_Lob {
 			$classRepo->type = $this->type;
 		}
 
+		//load or make a new class metadata entry
+		$classMeta = LobClassMetadata::load( array ('lob_class_repo_id'=> $classRepo->lobClassRepoId) );
+		if (isset($classMeta)) {
+
+		} else {
+			$classMeta = new LobClassMetadata();
+			$classMeta->lobClassRepoId = $classRepo->lobClassRepoId;
+		}
+
+
 		$classLob->repoObj = $classRepo;
+		$classLob->lobMetaObj = $classMeta;
 		$classLob->loadSub();
 
 		//copy all values to classRepoEntry
@@ -329,7 +346,19 @@ class Lc_Lob {
 		$classLob->repoObj->lobTitle       = $repo->lobTitle;
 		$classLob->repoObj->lobUrltitle    = $repo->lobUrltitle;
 		$classLob->repoObj->lobMime        = $repo->lobMime;
+		$classLob->repoObj->lobDescription = $repo->lobDescription;
 
+		//copy all the values to lobClassMetadata
+		//
+		$classLob->lobMetaObj->subject        = $meta->subject;
+		$classLob->lobMetaObj->subdisc        = $meta->subdisc;
+		$classLob->lobMetaObj->author         = $meta->author;
+		$classLob->lobMetaObj->copyright      = $meta->copyright;
+		$classLob->lobMetaObj->license        = $meta->license;
+		$classLob->lobMetaObj->userVersion    = $meta->userVersion;
+		$classLob->lobMetaObj->status         = $meta->status;
+		$classLob->lobMetaObj->updatedOn      = $meta->updatedOn;
+		$classLob->lobMetaObj->createdOn      = $meta->createdOn;
 
 		//update values of the sub object
 		//
