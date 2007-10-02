@@ -1,8 +1,50 @@
 <?php
 
+include_once(LIB_PATH.'PBDO/Classes.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_lesson.php');
 
 class lcClass {
 
+	var $lessons = array();
+	var $classId = -1;
+	var $classDo = null;
+	var $startDate = 0;
+	var $endDate = 0;
+
+	/**
+	 * Load up a Classes data object
+	 */
+	function lcClass ($classId=0) {
+		if ($classId > 0 ) {
+			$this->classDo = Classes::load($classId);
+		} else {
+			$this->classDo = new Classes();
+		}
+		$this->classId = $classId;
+		//load up the start and end dates for this class
+		if ($this->classDo->idSemesters > 0) {
+			$semester = semesterObj::_getFromDB($this->classDo->idSemesters,'id_semesters');
+			$this->startDate = strtotime($semester->dateStart);
+			$this->endDate = strtotime($semester->dateStart);
+		} else {
+		//load up the start and end dates of this student's enrollment
+		}
+	}
+
+	/**
+	 * Load a LC_Lesson object
+	 *
+	 * @return boolean true if the class was loaded with no problems
+	 */
+	function loadLesson($lessonId) {
+		$this->lessons[$lessonId] = new LC_Lesson($lessonId);
+		if ($this->lessons[$lessonId]->lessonDo->idClasses != $this->classId) {
+			unset($this->lessons[$lessonId]);
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * returns an array of classes 

@@ -1,4 +1,5 @@
 <?php
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
 
 /**
  * A lesson is the wrapper for content and content sequence for
@@ -11,8 +12,7 @@ class LC_Lesson {
 
 	function LC_Lesson($id=-1) {
 		if ($id > 0) {
-			$this->lessonDo = new ClassLesson();
-			$this->lessonDo->load($id);
+			$this->lessonDo = ClassLessons::load($id);
 		}
 	}
 
@@ -94,6 +94,13 @@ class LC_Lesson {
 		return $db->record['total'];
 	}
 
+
+	/**
+	 * __TODO__ make this relative to when a user enrolls
+	 */
+	function getStartDate() {
+		return $this->lessonDo->activeOn;
+	}
 
 	/**
 	 * Returns integer representing the number of days left until this lesson starts

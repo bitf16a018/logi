@@ -133,13 +133,14 @@ class assignments extends StudentService {
 
 
 		//load the assignment
-		$lobClassId    = intval($lc->getvars['id']);
+		//$lobClassId    = intval($lc->getvars['id']);
+		$classSeqId    = intval($lc->getvars['id']);
 		$classId  = $u->activeClassTaken->id_classes;
 		$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
 
 		$lessonSequence = new LC_LessonSequence($classId,$lessonId);
 		$lessonSequence->loadItems();
-		$activityLob = $lessonSequence->fetchObject($lobClassId);
+		$activityLob = $lessonSequence->fetchObject($classSeqId);
 
 
 		if ( !is_object($activityLob) ) {
