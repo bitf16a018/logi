@@ -79,8 +79,8 @@ function run(&$db,&$u,&$lc,&$t) {
 
 			# Pull in the last event for each class
 			# __FIX_ME__
-				}
-			}
+		}
+	}
 			# Clean up OrClause
 			$assignmentsOrClause = substr($assignmentsOrClause,0,-3);
 			$lessonsOrClause = substr($lessonsOrClause,0,-3);

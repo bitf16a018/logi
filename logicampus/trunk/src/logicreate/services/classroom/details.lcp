@@ -115,10 +115,13 @@ class details extends StudentService {
 		# count total number of available assignments
 		$sql = 
 			"SELECT count(lob_class_repo_id) as num_activity
-			FROM class_lesson_sequence 
+			FROM class_lesson_sequence AS A
+			LEFT JOIN class_lessons AS B
+				ON A.lesson_id = B.id_class_lessons
 			WHERE class_id='".$u->activeClassTaken->id_classes."' 
-			AND ( (start_offset + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
-			AND ( (due_offset   + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
+
+			AND ( (start_offset + activeOn <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
+			AND ( (due_offset   + activeOn <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
 			AND lob_type = 'activity'";
 
 		$db->queryOne($sql);
@@ -134,11 +137,13 @@ class details extends StudentService {
 		}
 
 		$sql = 
-			"SELECT lob_class_repo_id, lob_title, due_offset, class_lesson_sequence_id, lesson_id
-			FROM class_lesson_sequence 
+			"SELECT lob_class_repo_id, lob_title, due_offset, class_lesson_sequence_id, lesson_id, B.activeOn
+			FROM class_lesson_sequence AS A
+			LEFT JOIN class_lessons AS B
+				ON A.lesson_id = B.id_class_lessons
 			WHERE class_id='".$u->activeClassTaken->id_classes."' 
-			AND ( (start_offset + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
-			AND ( (due_offset   + ". $enrollOffsets['start'] ." <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
+			AND ( (start_offset + activeOn <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
+			AND ( (due_offset   + activeOn <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
 			AND lob_type = 'activity'
 			ORDER BY due_offset ASC, start_offset DESC
 			LIMIT ".$this->_PortalNumOfAssignments;
