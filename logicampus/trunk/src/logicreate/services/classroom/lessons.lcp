@@ -131,29 +131,30 @@ class lessons extends StudentService {
 		while ($db->next_record()) $t['objectives'][] = $db->Record;
 
 
-		//ASSIGNMENTS TABLE
-		// modified this sql statemnet to order by dueDate 
-		//  instead of activeDate in desc order
-		$t['assignments'] = array();
-		$sql = "SELECT a.id_class_assignments, a.title, a.dueDate, a.responseType
-			FROM class_assignments as a
-			LEFT JOIN class_assignments_link as k 
-			  ON k.id_class_assignments=a.id_class_assignments
+		$activities = array();
 
-			LEFT JOIN class_lessons as l 
-			  ON l.id_class_lessons=k.id_class_lessons
+		$query = "SELECT 
+				A.lob_class_repo_id
+				, B.lob_class_activity_id
+				, A.lob_title
+				, A.due_offset
+				, B.response_type_id
 
-			WHERE a.id_classes='".$u->activeClassTaken->id_classes."'
-			AND l.id_class_lessons='".$lesson_id."' 
-			ORDER BY dueDate ASC";
+			FROM lob_class_activity as B
+			LEFT JOIN class_lesson_sequence as A
+				ON A.lob_class_repo_id = B.lob_class_repo_id
+
+			WHERE A.class_id='".$u->activeClassTaken->id_classes."'
+			AND A.class_lesson_sequence_id IS NOT NULL
+			ORDER BY A.due_offset ASC";
 
 		$db->query($sql);
-		while ($db->next_record()) $t['assignments'][] = $db->Record;
+		while ($db->nextRecord()) $t['assignments'][] = $db->record;
 		//can't figure this out with a join
-		foreach($t['assignments'] as $k =>$v) {
+		foreach($activities as $k =>$v) {
 			$db->query("SELECT dateTurnin 
 				FROM class_assignments_turnin
-				WHERE id_class_assignments = ".$v['id_class_assignments']."
+				WHERE id_class_assignments = ".$v['lob_class_repo_id']."
 				AND id_student = '".$u->username."'");
 			if ($db->next_record()) {
 				$t['assignments'][$k]['dateTurnin'] = $db->Record['dateTurnin'];
@@ -162,7 +163,8 @@ class lessons extends StudentService {
 			}
 		}
 
-		$dataModel = new MyAssignmentModel($t['assignments']);
+		$dataModel = new  MyAssignmentModel($query,$db);
+
 		$table = new LC_Table($dataModel);
 
 		$columnModel = &$table->getColumnModel();
@@ -351,16 +353,7 @@ class MyLessonModel extends LC_TableModel {
 }
 
 
-class MyAssignmentModel extends LC_TableModel {
-
-	var $assignments = array();
-
-	/**
-	 * make a 5 x 10 grid of nonsense
-	 */
-	function MyAssignmentModel($a) {
-		$this->assignments = $a;
-	}
+class MyAssignmentModel extends LC_Table_SqlModel {
 
 
 	//sub-class
@@ -368,7 +361,7 @@ class MyAssignmentModel extends LC_TableModel {
 	 * Returns the number of rows in the model.
 	 */
 	function getRowCount() {
-		return (count($this->assignments));
+		return (count($this->rs));
 	}
 
 
@@ -408,16 +401,17 @@ class MyAssignmentModel extends LC_TableModel {
 	 * return the value at an x,y coord
 	 */
 	function getValueAt($x,$y) {
-		$assignment = $this->assignments[$x];
+		$record = $this->rs[$x];
 		switch ($y) {
 			case 0:
-				return $assignment;
+				//LC_TableAssignmentRenderer needs whole object
+				return $record;
 			case 1:
-				return $assignment['dueDate'];
+				return $record['due_offset'];
 			case 2:
-				return $assignment;
+				return $record;
 			case 3:
-				return $assignment['dateTurnin'] > 0 ? 'Yes':'No';
+				return $record['dateTurnin'] > 0 ? 'Yes':'No';
 		}
 
 		// 1 upload file
@@ -428,7 +422,7 @@ class MyAssignmentModel extends LC_TableModel {
 		// 5 none
 		if ($y == 4) {
 			//return words for the response type code
-			switch ($assignment['responseType']) {
+			switch ($record['response_type_id']) {
 				case 1:
 					return 'Upload File';
 				case 2:
@@ -462,7 +456,7 @@ class LC_TableIconRenderer extends LC_TableCellRenderer {
 class LC_TableAssignmentRenderer  extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
-		return '<a href="'.appurl('classroom/assignments/event=view/id='.$this->value['id_class_assignments']).'">'.$this->value['title'].'</a>';
+		return '<a href="'.appurl('classroom/assignments/event=view/id='.$this->value['lob_class_repo_id']).'">'.$this->value['lob_title'].'</a>';
 	}
 }
 
