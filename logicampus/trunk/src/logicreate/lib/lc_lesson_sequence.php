@@ -34,25 +34,25 @@ class LC_LessonSequence {
 		}
 	}
 
-	function getSequence($classRepoId) {
+	function getSequence($sequenceId) {
 		foreach ($this->items as $seqItem) {
-			if ($seqItem->lobClassRepoId == $classRepoId) {
+			if ($seqItem->classLessonSequenceId == $sequenceId) {
 				return $seqItem;
 			}
 		}
 	}
 
-	function getStartDate(&$lessonObj, $classRepoId) {
+	function getStartDate(&$lessonObj, $sequenceId) {
 		foreach ($this->items as $seqItem) {
-			if ($seqItem->lobClassRepoId == $classRepoId) {
+			if ($seqItem->classLessonSequenceId == $sequenceId) {
 				return $lessonObj->getStartDate() + $seqItem->startOffset;
 			}
 		}
 	}
 
-	function getDueDate(&$lessonObj, $classRepoId) {
+	function getDueDate(&$lessonObj, $sequenceId) {
 		foreach ($this->items as $seqItem) {
-			if ($seqItem->lobClassRepoId == $classRepoId) {
+			if ($seqItem->classLessonSequenceId == $sequenceId) {
 				return $lessonObj->getStartDate() + $seqItem->dueOffset;
 			}
 		}

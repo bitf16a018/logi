@@ -155,7 +155,7 @@ class lessons extends StudentService {
 		//__TODO__ add "turned in" status
 
 		$dataModel = new  MyAssignmentModel($query,$db);
-
+//debug(date('m d Y', $classObj->lessons[$lesson_id]->getStartDate()),1);
 		$dataModel->startDate = $classObj->lessons[$lesson_id]->getStartDate();
 
 		$table = new LC_Table($dataModel);
@@ -401,6 +401,7 @@ class MyAssignmentModel extends LC_Table_SqlModel {
 				//LC_TableAssignmentRenderer needs whole object
 				return $record;
 			case 1:
+				if ($record['due_offset'] == 0) { return 0; }
 				return $record['due_offset']+ $this->startDate;
 			case 2:
 				return $record;

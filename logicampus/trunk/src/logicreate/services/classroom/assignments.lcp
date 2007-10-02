@@ -138,10 +138,9 @@ class assignments extends StudentService {
 		$classId  = $u->activeClassTaken->id_classes;
 		$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
 
-		$lessonSequence = new LC_LessonSequence($classId,$lessonId);
+		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();
 		$activityLob = $lessonSequence->fetchObject($classSeqId);
-
 
 		if ( !is_object($activityLob) ) {
 			$this->presentor = 'errorMessage';
@@ -150,10 +149,10 @@ class assignments extends StudentService {
 		}
 
 		$t['activity'] = $activityLob;
-		$sequence = $lessonSequence->getSequence($lobClassId);
+		$sequence = $lessonSequence->getSequence($classSeqId);
 		$lesson = new LC_Lesson($lessonId);
-		$t['startDate'] = $lessonSequence->getStartDate($lesson, $lobClassId);
-		$t['dueDate'] = $lessonSequence->getDueDate($lesson, $lobClassId);
+		$t['startDate'] = $lessonSequence->getStartDate($lesson, $classSeqId);
+		$t['dueDate'] = $lessonSequence->getDueDate($lesson, $classSeqId);
 		$t['noDueDate'] = $sequence->dueOffset > 0;
 
 		if ($lc->getvars['print']) {
