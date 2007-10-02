@@ -5,6 +5,7 @@ include_once(LIB_PATH.'PBDO/LobClassRepo.php');
 include_once(LIB_PATH.'PBDO/LobClassContent.php');
 include_once(LIB_PATH.'PBDO/LobClassActivity.php');
 include_once(LIB_PATH.'PBDO/LobClassTest.php');
+include_once(LIB_PATH.'PBDO/LobClassMetadata.php');
 
 class Lc_Lob_Class extends Lc_Lob {
 	var $repoObj;
@@ -87,13 +88,13 @@ class Lc_Lob_Class extends Lc_Lob {
 		$this->repoObj->version++;
 		$this->repoObj->save();
 		$ret = ($this->repoObj->getPrimaryKey() > 0);
-		return $ret;
-//		$this->lobMetaObj->updatedOn = time();
-//		if ($this->lobMetaObj->isNew()) {
+
+		$this->lobMetaObj->updatedOn = time();
+		if ($this->lobMetaObj->isNew()) {
 			//might be a brand new object
-//			$this->lobMetaObj->lobId = $this->repoObj->getPrimaryKey();
-//		}
-//		return $this->lobMetaObj->save() && $ret;
+			$this->lobMetaObj->lobId = $this->repoObj->getPrimaryKey();
+		}
+		return $this->lobMetaObj->save() && $ret;
 	}
 
 
@@ -108,7 +109,6 @@ class Lc_Lob_Class extends Lc_Lob {
 
 class Lc_Lob_ClassContent extends Lc_Lob_Class {
 
-	var $repoObj;
 	var $type = 'content';
 
 	function Lc_Lob_ClassContent($id=-1) {
@@ -146,24 +146,28 @@ class Lc_Lob_ClassContent extends Lc_Lob_Class {
 		$this->lobSub->lobClassRepoId = $this->repoObj->getPrimaryKey();
 		$this->lobSub->save();
 
-		return $ret;
+		$this->lobMetaObj->updatedOn = time();
+		if ($this->lobMetaObj->isNew()) {
+			//might be a brand new object
+			$this->lobMetaObj->lobId = $this->repoObj->getPrimaryKey();
+		}
+		return $this->lobMetaObj->save() && $ret;
 	}
 }
 
 class Lc_Lob_ClassActivity extends Lc_Lob_Class {
 
-	var $repoObj;
 	var $type = 'activity';
 
 	function Lc_Lob_ClassActivity($id=-1) {
-
 		include_once(LIB_PATH.'PBDO/LobClassActivity.php');
 		if ($id < 1) {
 			$this->repoObj = new LobClassRepo();
-			$this->lobSub = new LobClassActivity();
+			$this->lobSub  = new LobClassActivity();
 		} else {
 			$this->repoObj = LobClassRepo::load($id);
-			$this->lobSub = LobClassActivity::load($id);
+			$subs  = LobClassActivityPeer::doSelect( 'lob_class_repo_id = '.$id);
+			$this->lobSub = $subs[0];
 		}
 	}
 
@@ -195,7 +199,12 @@ class Lc_Lob_ClassActivity extends Lc_Lob_Class {
 		$this->lobSub->lobClassRepoId = $this->repoObj->getPrimaryKey();
 		$this->lobSub->save();
 
-		return $ret;
+		$this->lobMetaObj->updatedOn = time();
+		if ($this->lobMetaObj->isNew()) {
+			//might be a brand new object
+			$this->lobMetaObj->lobId = $this->repoObj->getPrimaryKey();
+		}
+		return $this->lobMetaObj->save() && $ret;
 	}
 }
 ?>

@@ -49,6 +49,9 @@ $schemas['lob_class_content'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/lob_class_repo.mysql.sql'));
 $schemas['lob_class_repo'] = explode(";\n",$setupFile);
 
+$setupFile = trim(file_get_contents('../data/lob_class_metadata.mysql.sql'));
+$schemas['lob_class_metadata'] = explode(";\n",$setupFile);
+
 $setupFile = trim(file_get_contents('../data/lob_content.mysql.sql'));
 $schemas['lob_content'] = explode(";\n",$setupFile);
 
