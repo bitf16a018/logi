@@ -259,6 +259,10 @@
 			required="true"
 			size="100"
 			type="VARCHAR"/>
+		<attribute name="lob_mime"
+			required="true"
+			size="100"
+			type="VARCHAR"/>
 		<attribute name="lob_title"
 			required="true"
 			size="255"
@@ -602,6 +606,9 @@
 			required="true"
 			size="100"
 			type="VARCHAR"/>
+		<attribute name="lob_description"
+			required="false"
+			type="TEXT"/>
 		<attribute name="lob_version"
 			required="true"
 			size="11"

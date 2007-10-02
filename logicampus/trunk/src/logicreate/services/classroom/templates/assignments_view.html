@@ -1,16 +1,19 @@
 <?=$t['sectionheader'];?>
 <?=$t['msg'];?>
 
+<?=
+debug($t['sequence']);
+?>
 <TABLE width="100%">
 <tr>
 	<td><b>Title:</b></td>
-	<td><?=$t['assignment']['title'];?></td>
+	<td><?=$t['activity']->get('lobTitle');?></td>
 </tr>
 <tr>
-	<td><b>Became active on:</b></td><td><?=date('l jS of F Y', $t['assignment']['activeDate']);?></td>
+<td><b>Became active on:</b></td><td><?=date('l jS F Y', $t['startDate']);?></td>
 </tr>
 <tr>
-	<td><b>Due on:</b></td><td><?=$t['assignment']['noDueDate'] ? '<i>No due date</i>' : date('l jS of F Y', $t['assignment']['dueDate']);?></td>
+<td><b>Due on:</b></td><td><?php echo $t['noDueDate'] ?  date('l jS F Y', $t['dueDate']) : '<i>No due date</i>' ;?></td>
 </tr>
 
 <tr>
@@ -22,7 +25,7 @@
 		<table cellpadding="10" cellspacing="0" border="0" width="100%">
 		<tr>
 			<td>
-				<?=$t['assignment']['instructions'];?>
+				<?=$t['activity']->get('lobDescription');?>
 			</td>
 		</tr>
 		</table>
