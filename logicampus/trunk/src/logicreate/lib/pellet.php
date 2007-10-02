@@ -610,7 +610,7 @@ class StudentService extends Service {
 		global $lcUser;
 		global $lcTemplate;
 
-		if ( $lcObj->getvars['id_classes']!='' &&
+		if ( isset($lcObj->getvars['id_classes'])  &&
 			$lcUser->activeClassTaken->id_classes != $lcObj->getvars['id_classes'] )
 		{
 			for ($k=0; $k<count($lcUser->classesTaken); ++$k) {
@@ -642,7 +642,7 @@ class StudentService extends Service {
 		$this->buildNavLinks();
 		$this->buildAppLinks();
 
-		if ($obj->getvars['print']) {
+		if (isset($obj->getvars['print'])) {
 			$t['sectionheader']  .= '<h3>'.$this->sectionTitle;
 			if ($obj->user->activeClassTaken->courseName)
 				$t['sectionheader'] .= ' - '.$obj->user->activeClassTaken->courseName
