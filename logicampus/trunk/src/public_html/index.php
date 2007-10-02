@@ -123,9 +123,9 @@ define('HERC',false);
 		//for others to use via the lcObj
 		//
 
-if ($QUERY_STRING!="") {
-	$QUERY_STRING = ereg_replace("&","/",$QUERY_STRING);
-	$PATH_INFO .= "/$QUERY_STRING";
+if (isset($_SERVER['QUERY_STRING'])) {
+	$_SERVER['QUERY_STRING'] = ereg_replace("&","/",$_SERVER['QUERY_STRING']);
+	$_SERVER['PATH_INFO'] .= "/".$_SERVER['QUERY_STRING'];
 }
 
 
@@ -158,7 +158,8 @@ if ($QUERY_STRING!="") {
 	if ($className == "main") { $className = $name[1]; }
 	if ($serviceName == "") { $serviceName = "main"; $className = $moduleName;}
 	$gdb->query("select * from lcRegistry where moduleName ='$moduleName'",false);
-	$gdb->next_record();
+	$gdb->nextRecord();
+	$gdb->freeResult();
 	$module = $gdb->Record;
 
 		/*
@@ -276,9 +277,9 @@ $service->className = $className;
 $service->module = $moduleName;
 $service->templateName = $serviceName;
 
-DEFINE(MOD_URL,APP_URL.$moduleName."/");
-DEFINE(SECURE_MOD_URL,SECURE_APP_URL.$moduleName."/");
-DEFINE(MOD_PATH,SERVICE_PATH.$moduleName."/");
+DEFINE('MOD_URL',APP_URL.$moduleName."/");
+DEFINE('SECURE_MOD_URL',SECURE_APP_URL.$moduleName."/");
+DEFINE('MOD_PATH',SERVICE_PATH.$moduleName."/");
 
 
 
