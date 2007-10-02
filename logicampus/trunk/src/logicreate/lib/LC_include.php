@@ -1002,11 +1002,10 @@ class ErrorStack {
 			for ($x=0; $x < count($bt); ++$x ) {
 				$indent = "&nbsp;&nbsp;&nbsp;";
 				if ( isset($bt[$x]['class']) && strlen($bt[$x]['class']) > 0 ) {
-					print $indent."method : <b>".$bt[$x]['class']."::".$bt[$x]['function']."</b>";
+					print $indent."<b>".$bt[$x]['class']."::".$bt[$x]['function']."</b>";
 				} else {
-					print $indent."function : <b>".$bt[$x]['function']."</b>";
+					print $indent."<b>".$bt[$x]['function']."</b>";
 				}
-				print "\n<br/>";
 				print $indent.' '.basename($bt[$x]['file'])." ";
 				print "(".$bt[$x]['line'].")<br/>\n";
 				print "<br/>\n";
