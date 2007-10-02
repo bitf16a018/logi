@@ -69,6 +69,7 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 
 	}
 
+	/*
 	function updateSessionVars(&$db, &$u) {
 		include_once(LIB_PATH.'lc_class.php');
 
@@ -83,7 +84,7 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 		}
 		
 		include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
-		
+
 		$u->classesTaken = classObj::getClassesTaken($u->username);
 		$u->classesTaught = classObj::getClassesTaught($u->username);
 
@@ -108,6 +109,7 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 
 		}
 	}
+	 */
 
 	
 /**
@@ -659,7 +661,7 @@ function closepage($logUsage = true) {
 		$db->query( sprintf($sql, $lcUser->username, $lcUser->_sessionKey, $system,$screen),false);
 	}
 	/* */
-	if (REPORT_BUGS) {
+	if (defined('REPORT_BUGS')) {
 
 
 	}

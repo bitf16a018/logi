@@ -274,14 +274,15 @@ class TreeListNode {
 	var $sibling = 0;
 	var $child = 0;
 	var $parent;
-	var $expanded;
+	var $expanded = false;
 	var $contents;
-	 
-	 
+	var $indent = 0;
+
+
 	/**
 	 * wrap an arbitrary piece of data in a tree node
 	 */
-	function & TreeListNode(&$d) {
+	function TreeListNode(&$d) {
 		$this->contents = $d;
 	}
 	 
@@ -290,7 +291,7 @@ class TreeListNode {
 	 * @return boolean  True for has a sibling node
 	 */
 	function hasSibling() {
-		return $this->sibling != 0;
+		return is_object($this->sibling);// != 0;
 	}
 	 
 	/**
