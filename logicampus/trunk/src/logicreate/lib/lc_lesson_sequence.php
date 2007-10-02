@@ -1,13 +1,61 @@
 <?php
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 
 class LC_LessonSequence {
 
 	var $lessonId = -1;
 	var $classId  = -1;
+	var $items    = array();
 
 	function LC_LessonSequence($lessonId,$classId) {
 		$this->lessonId = $lessonId;
 		$this->classId  = $classId;
+	}
+
+	/**
+	 *  Load all class_lesson_sequence items and store them in ->items
+	 */
+	function loadItems() {
+		$this->items = ClassLessonSequencePeer::doSelect( 'class_id = '.$this->classId.' and lesson_id = '.$this->lessonId);
+	}
+
+	function fetchObject($sequenceId) {
+		$type = 'content';
+		foreach ($this->items as $seqItem) {
+			if ($seqItem->classLessonSequenceId == $sequenceId) {
+				$type = $seqItem->lobType;
+			}
+		}
+		switch($type) {
+			case 'activity':
+				$activityLob = new Lc_Lob_ClassActivity($seqItem->lobClassRepoId);
+				return $activityLob;
+				break;
+		}
+	}
+
+	function getSequence($classRepoId) {
+		foreach ($this->items as $seqItem) {
+			if ($seqItem->lobClassRepoId == $classRepoId) {
+				return $seqItem;
+			}
+		}
+	}
+
+	function getStartDate(&$lessonObj, $classRepoId) {
+		foreach ($this->items as $seqItem) {
+			if ($seqItem->lobClassRepoId == $classRepoId) {
+				return $lessonObj->getStartDate() + $seqItem->startOffset;
+			}
+		}
+	}
+
+	function getDueDate(&$lessonObj, $classRepoId) {
+		foreach ($this->items as $seqItem) {
+			if ($seqItem->lobClassRepoId == $classRepoId) {
+				return $lessonObj->getStartDate() + $seqItem->dueOffset;
+			}
+		}
 	}
 
 	function updateAssignments($contentIds,$lobData) {
@@ -100,4 +148,6 @@ class LC_LessonSequence {
 		}
 	}
 
+	function fetchLob() {
+	}
 }

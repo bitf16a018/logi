@@ -94,7 +94,10 @@ class lessons extends StudentService {
 		
 		$lc->templateName='lessons_view';
 		$lesson_id = intval($lc->getvars['id']);
+
 		$class_id = (int) $u->activeClassTaken->id_classes;
+		$classObj = new lcClass($class_id);
+		$classObj->loadLesson($lesson_id);
 
 		// Make sure they're allowed to access this lesson AND
 		#function checkContentPermission($activeClassTaken, $table, $tablePkey, $contentLabel, $contentPkey
@@ -135,7 +138,7 @@ class lessons extends StudentService {
 
 		$query = "SELECT 
 				A.lob_class_repo_id
-				, B.lob_class_activity_id
+				, A.class_lesson_sequence_id
 				, A.lob_title
 				, A.due_offset
 				, B.response_type_id
@@ -146,24 +149,14 @@ class lessons extends StudentService {
 
 			WHERE A.class_id='".$u->activeClassTaken->id_classes."'
 			AND A.class_lesson_sequence_id IS NOT NULL
+			AND A.lesson_id = ".$lesson_id."
 			ORDER BY A.due_offset ASC";
 
-		$db->query($sql);
-		while ($db->nextRecord()) $t['assignments'][] = $db->record;
-		//can't figure this out with a join
-		foreach($activities as $k =>$v) {
-			$db->query("SELECT dateTurnin 
-				FROM class_assignments_turnin
-				WHERE id_class_assignments = ".$v['lob_class_repo_id']."
-				AND id_student = '".$u->username."'");
-			if ($db->next_record()) {
-				$t['assignments'][$k]['dateTurnin'] = $db->Record['dateTurnin'];
-			} else {
-				$t['assignments'][$k]['dateTurnin'] = 0;
-			}
-		}
+		//__TODO__ add "turned in" status
 
 		$dataModel = new  MyAssignmentModel($query,$db);
+
+		$dataModel->startDate = $classObj->lessons[$lesson_id]->getStartDate();
 
 		$table = new LC_Table($dataModel);
 
@@ -355,6 +348,7 @@ class MyLessonModel extends LC_TableModel {
 
 class MyAssignmentModel extends LC_Table_SqlModel {
 
+	var $startDate = 0; //add this to any relative dates
 
 	//sub-class
 	/**
@@ -407,7 +401,7 @@ class MyAssignmentModel extends LC_Table_SqlModel {
 				//LC_TableAssignmentRenderer needs whole object
 				return $record;
 			case 1:
-				return $record['due_offset'];
+				return $record['due_offset']+ $this->startDate;
 			case 2:
 				return $record;
 			case 3:
@@ -456,7 +450,7 @@ class LC_TableIconRenderer extends LC_TableCellRenderer {
 class LC_TableAssignmentRenderer  extends LC_TableCellRenderer {
 
 	function getRenderedValue() {
-		return '<a href="'.appurl('classroom/assignments/event=view/id='.$this->value['lob_class_repo_id']).'">'.$this->value['lob_title'].'</a>';
+		return '<a href="'.appurl('classroom/assignments/event=view/id='.$this->value['class_lesson_sequence_id']).'">'.$this->value['lob_title'].'</a>';
 	}
 }
 
