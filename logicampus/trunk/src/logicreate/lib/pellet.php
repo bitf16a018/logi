@@ -115,7 +115,8 @@ class Service {
 		unset($sysMessages);
 		unset($k);
 		unset($v);
-		print "<h3>Error:</h3> \n\n ".$t[message]." <p>\n".$t[details];
+
+		print "<h3>Error:</h3> \n\n ".$t['message']." <p>\n".$t['details'];
 		include_once(TEMPLATE_PATH."footer.html.php");
 	}
 
@@ -780,7 +781,7 @@ function HTTPAuthPresentation (&$obj,&$t) {
 
 function _errorMessage (&$obj,&$t) {
 		include_once("templates/mod_header.html");
-		print "<h3>Error:</h3> \n\n ".$t[message]." <p>\n".$t[details];
+		print "<h3>Error:</h3> \n\n ".$t['message']." <p>\n".$t['details'];
 		include_once("templates/mod_footer.html");
 }
 
