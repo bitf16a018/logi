@@ -58,6 +58,14 @@ class LC_LessonSequence {
 		}
 	}
 
+	function isPastDueDate(&$lessonObj, $sequenceId) {
+		$dueDate = $this->getDueDate($lessonObj, $sequenceId);
+		if ($dueDate <= time() ) {
+			return false;
+		}
+		return true;
+	}
+
 	function updateAssignments($contentIds,$lobData) {
 		if (count($contentIds) < 1) { $contentIds = array(0);}
 		$this->updateSequence($contentIds, $lobData, 'activity');
