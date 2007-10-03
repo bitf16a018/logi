@@ -1,0 +1,13 @@
+<?
+
+/* Display standard DEMO information about LogiCampus */
+class about extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'about_main';
+	}
+
+}
+?>

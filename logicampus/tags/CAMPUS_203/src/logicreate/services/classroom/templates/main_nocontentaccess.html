@@ -1,0 +1,18 @@
+HELP
+<h3>Error</h3>
+You do not have access to the piece of classroom content you are trying to access.  We
+suggest starting from the <a href="<?=APP_URL?>classroom">Clasroom Portal Page</a> as
+something has changed. If you feel you have reached this page in error, contact the <a href="<?=APP_URL?>helpdesk">Help Desk</a>.
+
+
+<br><br>
+
+Please provide us with the following information if you contact us:<br>
+
+<ul>
+	<li><b>Active Class:</b> <?=$obj->user->activeClassTaken->courseName?></li>
+	<li><b>Active Class ID:</b> <?=$obj->user->activeClassTaken->id_classes?></li>
+	<li><b>Faculty ID:</b> <?=$obj->user->activeClassTaken->facultyId?></li>
+	<li><b>Previous URL:</b> <?=$obj->user->sessionvars['_CAMEFROM']?></li>
+	<li><b>Current URL:</b> <?=APP_URL?><?=$_SERVER['REQUEST_URI']?></li>
+</ul>

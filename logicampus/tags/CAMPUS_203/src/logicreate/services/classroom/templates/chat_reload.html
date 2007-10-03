@@ -1,0 +1,39 @@
+<script>
+function loadpage() {
+	<?
+	while(list($k, $v) = @each($t['rows'])) {
+		if ( ($v['username']!=$obj->user->username) || (substr($v['message'],0,10)=="<!--URL-->") || ($t['immediatePost']==false) ) {
+		if (!$name[$v['username']][$v['timeint']]) { 
+		?>
+		parent.Controls.document.writeln('<table width="100%"><tr><td width="100" valign="top"><?=$v['username'];?><BR><div style="font-size: 7pt"><?=date("g:i A",$v['timeint']);?></div></td><td align="left" valign="top"><?=$v['message'];?></td></tr></table>');
+		<?
+		}
+		$name[$v['username']][$v['timeint']]=true;
+		}
+		$lastkey = $v['pkey'];
+	}
+	?>
+
+	<? 
+	if ($lastkey>0) {
+	?>
+
+	var urlindex = parent.Controls.document.location.href.indexOf("#");
+	if (urlindex>-1)  {
+		var urlbase = parent.Controls.document.location.href.substr(0,urlindex);
+		} else {
+		var urlbase = parent.Controls.document.location.href;
+	}
+//	alert(parent.Controls.document.body.height);
+parent.Controls.window.scroll(0,50*<?=$lastkey;?>); 
+	<? }
+
+	?>
+
+}
+</script>
+<body onload='loadpage();'>
+<script>
+
+</script>
+</body>

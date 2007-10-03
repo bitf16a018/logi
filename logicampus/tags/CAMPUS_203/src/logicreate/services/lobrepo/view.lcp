@@ -1,0 +1,50 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class View extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='view_main';
+
+		$lobId = addslashes(trim($lc->getvars['c']));
+
+		$db->unbuffered_query("SELECT * FROM lob_content as A 
+			WHERE 1=1
+			AND A.lob_content_id = ".$lobId);
+		$db->nextRecord();
+		//debug($db->record,1);
+
+		if ($db->record['lob_sub_type'] == 'image') {
+			header('Content-type: image/jpeg');
+			ob_end_clean();
+			echo $db->record['lob_binary'];
+			exit();
+		} else {
+//			header('Content-type: text/html');
+//			header('Content-type: '.$file['mime']);
+//			ob_end_clean();
+			$t['content'] = $db->record['lob_content'];
+//			echo $db->record['lob_content'];
+		}
+
+	}
+}
+
+?>

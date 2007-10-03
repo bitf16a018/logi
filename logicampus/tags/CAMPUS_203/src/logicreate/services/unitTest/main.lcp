@@ -1,0 +1,114 @@
+<?
+
+class UnitTest extends NoAuth {
+
+	var $presentor = 'emptyPresentation';
+
+	function run(&$db, &$u, &$lc, &$t) {
+
+		require_once(SERVICE_PATH.'unitTest/simpletest/unit_tester.php');
+
+		$d = dir(SERVICE_PATH.'unitTest');
+		while (false !== ($entry = $d->read())) {
+			if ($entry == 'main.lcp' || strpos($entry,'~') || (substr($entry,0,1) == '.') || $entry == 'unitTest.php' ) continue;
+			if ( ! stristr($entry, 'test') ) { continue;}
+			if ( strpos($entry,'.php') ) {
+				include(SERVICE_PATH.'unitTest/'.$entry);
+				$count++;
+				$tests[$count]['name'] = substr($entry,0,-4);
+				$tests[$count]['file'] = $entry;
+
+
+				$className = $tests[$count]['name'];
+				$tests[$count]['obj'] = new $className();
+			}
+		}
+		$t['tests'] = $tests;
+		$lc->templateName = 'main';
+	}
+
+
+	/**
+	 * foobar
+	 */
+	function performTestRun(&$db, &$u, &$lc, &$t) {
+
+		require_once(SERVICE_PATH.'unitTest/simpletest/unit_tester.php');
+		require_once(SERVICE_PATH.'unitTest/simpletest/reporter.php');
+		require_once(SERVICE_PATH.'unitTest/logicampus_reporter.php');
+		require_once(SERVICE_PATH.'unitTest/simpletest/mock_objects.php');
+
+		//$dsnPool =& Cgn_ObjectStore::getObject('object://defaultDatabaseLayer');
+
+		$suite = new TestSuite('All tests');
+		$filename = str_replace('.', '', trim($lc->getvars['test']));
+		$filename = str_replace('/', '', $filename);
+
+
+		$suite->addTestFile(SERVICE_PATH.'unitTest/'.$lc->getvars['test'].'.php');
+
+		$reporter = new LcHtmlReporter();
+		$reporter->service = $lc->getvars['test'];
+		ob_start();
+		$suite->run($reporter);
+		//$suite->run(new HtmlReporter());
+		$output = ob_get_contents();
+		ob_end_clean();
+echo $output;
+
+//debug($reporter->passfailtrail);
+
+/*
+		while ( list($k,$v ) = @each($testObj->results) ) {
+			$t['results'][$k] = $v == $testObj->tests[$k]['expected']? 'PASS':'FAIL';
+		}
+
+		$t['s'] = $lc->getvars['test'];
+		$t['m'] = 'unitTest';
+
+		foreach($testObj->results as $rslt=>$expect) {
+			if ($expect == $testObj->tests[$rslt]['expected']) {
+				$good++;
+			} else {
+				$bad++;
+			}
+		}
+		//$t['results'] = $testObj->results;
+		$t['css'] = ($bad == 0) ? 'PASS':'FAIL';
+*/
+	}
+
+
+	/**
+	 * show details about one particular test case
+	 */
+	function inspectRun(&$db, &$u, &$lc, &$t) {
+		require_once(SERVICE_PATH.'unitTest/simpletest/unit_tester.php');
+
+		$testName = $lc->getvars['t'];
+		$moduleName = $lc->getvars['m'];
+		$serviceName = $lc->getvars['s'];
+		include(SERVICE_PATH.'unitTest/'.$serviceName.'.php');
+		$test = new $serviceName();
+
+		$file = fopen(SERVICE_PATH.'unitTest/'.$serviceName.'.php','r');
+		if (!$file) exit();
+		flush();
+
+		print "<pre>\n";
+		while (!feof($file) ) {
+			$line = fgets($file);
+			while(list($k,$v) = each($test->tests) ) {
+				if ( strpos($line,'function '.$v['name']) ) {
+					$link = '<a name="'.$k.'"/>';
+				}
+			}
+			echo $link; unset($link);
+			reset ($test->tests);
+			echo htmlspecialchars($line);
+		}
+		fclose($file);
+		print "</pre>\n";
+	}
+}
+?>

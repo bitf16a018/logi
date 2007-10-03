@@ -1,0 +1,79 @@
+<?=$t['sectionheader'];?>
+
+<p>
+	<u>Add a category</u> <br>
+	You must provide at least 1 character for a category name but not 
+	exceed 100.
+</p>
+
+<p>
+	<u>Update a category</u> <br>
+	Min characters 1 max 100
+</p>
+
+<p>
+	<u>Deleting a category</u> <br>
+	If FAQs are attached to this category, they automatically get 
+	pushed into an uncategorized section of the FAQs, the first page.
+	You can go 	<a href="<?=modurl(LC_FAQ_MOD_BASE);?>">here</a> to view them, 
+	they will go below the categories until you reassign them.
+</p>
+
+
+<br><br>
+<?php
+
+if (count($t['a_category']) > 0)
+{	
+	// list out categories
+	foreach($t['a_category'] as $id_faq_category=>$tx_category)
+	{	
+		$tx_category = trim(htmlentities(stripslashes($tx_category), ENT_QUOTES));
+		
+		// will display a form for each category that will handle updating and deleteing
+		echo '
+		<form method="POST">
+		
+		<table style="border: 1px solid silver;" cellpadding="4" cellspacing="0" border="0" width="100%">
+		<tr>
+			<td><nobr><input type="text" size="45" maxlength="100" name="tx_category" value="'.$tx_category.'">
+		( '. $t['category_faq_count'][$id_faq_category]. ' FAQs )</nobr>
+			</td>
+			<td><input type="submit" value="Update" name="submit">
+				<input type="submit" value="Remove" name="submit"
+					onClick="if (confirm(\'Are you sure you want to remove this category?\')) { return true; } else { return false; }">
+				
+			</td>
+		</tr>
+		
+		</table>
+		<input type="hidden" name="event" value="categories">
+		<input type="hidden" name="id_faq_category" value="'.$id_faq_category.'">
+		
+		</form>
+		<br>
+		';
+		
+	}
+	
+} else
+{	echo '<center>No categories available</center>';
+}
+
+
+echo '
+<hr size="1">
+	<h5>Add Category</h5>
+		<form method="POST">
+		
+		<table style="border: 1px solid silver;" cellpadding="4" cellspacing="0" border="0" width="100%">
+		<tr>
+			<td><input type="text" size="45" maxlength="100" name="tx_category" value=""></td>
+			<td><input type="submit" value="Add" name="submit"></td>
+		</tr>
+		</table>
+		<intput type="hidden" name="event" value="categories">
+		</form>		
+		';
+		
+?>

@@ -1,0 +1,141 @@
+<table width='100%'>
+	<tr><td>
+<div style='doc_error'><?=$t['message'];?></div>
+</td></tr>
+</table>
+<?= $t['sectionheader'];?>
+<table border="0" width="100%">
+	<tr>
+
+		<td rowspan="2" valign="top">
+			<table width="100%" align="center" border="0" cellspacing="6">
+				<tr>
+					<td width="240" valign="top">
+						<table width="100%" border="0" cellspacing="2">
+							<tr>
+								<td class="menu_head">
+									BROWSE <br>
+									<table width="100%" border="0" cellpadding="4">
+										<tr><td bgcolor="white">
+										<?=$t["ExplorerView"];?>
+										</td></tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+
+		</td>
+		<td valign="top" style="margin-top:0px;padding-top:0px;">
+
+		<? if ( count ($obj->user->sessionvars['classdoclib']['copy']) + count($obj->user->sessionvars['classdoclib']['cut']) >= 1 ) { ?>
+
+			<div id="sectionheader">
+			<table width="100%" border="0" style="margin:0px;padding:0px;">
+				<tr>
+					<td valign="top">
+					<div style="padding:5px;border:1px;border-style:solid;">
+					<b>Clipboard</b><br>
+					<? while ( list ( $k,$v) = @each($obj->user->sessionvars['classdoclib']['cut']) ) { ?>
+					<? $t['clipboardFull'] = true;?>
+					<img src="<?=IMAGES_URL?>folder.gif"> <?= $v->name; ?> <i>Cut</i><br>
+					<? } ?>
+					<? while ( list ( $k,$v) = @each($obj->user->sessionvars['classdoclib']['copy']) ) { ?>
+					<? $t['clipboardFull'] = true;?>
+					<img src="<?=IMAGES_URL?>folder.gif"> <?= $v->name; ?> <i>Copy</i><br>
+					<? } ?>
+						<a href="<?=APP_URL?>classdoclib/editFolder/event=paste/id=0">Paste clip board at top<img src="<?=IMAGES_URL?>folder_blue_open.png" border=0 height="16" width="16" alt="edit" title="edit"></a>
+					</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<? } ?>
+		</td>
+	</tr>
+
+	<tr>
+		<td valign="top">
+
+
+
+			<!-- main file area -->
+
+
+<table width="100%" align="left" border="0" cellspacing="6">
+
+	<tr><td valign="top" width="460">
+
+	<?
+	if (!$t['openFolder']) { ?>
+	<p>Click on one of the folders on the left to view the files and folders it contains.</p>
+	<? } else { ?>
+	<table width="100%" border="1">
+	<tr><td class="menu_head">
+			<center><img src="<?=IMAGES_URL?>file-trash.png" border="0" width="17" height="15" valign="bottom"> 
+			<h2 style="display:inline;padding-bottom:1px;"><?=$t["catName"];?></h2></center>
+	</td></tr>
+	<? if ( $t['manager'] ) { ?>
+	<tr><td align="center">
+ 
+			<a href="<?=APP_URL?>classdoclib/editFolder/event=emptyTrash/id=<?=$t['pkey']?>" onclick='return confirm("Are you sure?");'>EMPTY TRASH<img src="<?=IMAGES_URL?>folder_blue_open.png" border=0 height="16" width="16" alt="edit" title="edit"></a>
+			&nbsp;
+			<? if ($t['clipboardFull']) {?>
+			<a href="<?=APP_URL?>classdoclib/editFolder/event=paste/id=<?=$t['pkey']?>">Paste clip board here<img src="<?=IMAGES_URL?>folder_blue_open.png" border=0 height="16" width="16" alt="edit" title="edit"></a>
+			<? } ?>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
+			<b>Folder Notes:</b><br>
+			<?= $t['notes']; ?>
+	</td></tr>
+	<? } ?>
+
+	<tr><td width="100%" valign="top">
+		<? if(  count($t['files']) == 0 ) { ?>
+		There are no files in this folder
+		<? } else { //print header ?>
+		<table width="100%" cellspacing="2">
+			<tr><td width="54%" class="menu_head">
+				<b>Name</b>
+			</td><td width="23%" class="menu_head">
+				<b>Action</b>
+			</td><td width="10%" class="menu_head">
+				<b>Size</b>
+			</td><td width="12%" class="menu_head">
+				<b>Modified</b>
+			</td></tr>
+		<? } ?>
+		<? while ( list($k,$v) = @each($t['files']) ) { ?>
+			<tr><td bgcolor="#d0d0d0">
+
+				<img src="<?=IMAGES_URL?>document.gif" border="0">
+				<a href="<?=APP_URL?>classdoclib/download/pkey=<?=$v->pkey?>/<?=$v->file?>">
+				<?= $v->file; ?></a>  
+			</td><td bgcolor="#d0d0d0" align="center" NOWRAP>
+				<a href="<?=modurl('editFile/fid='. $v->folder.'/file='.$v->pkey); ?>"><img src="<?=IMAGES_URL?>file-new.png" border="0" width="24" height="24" alt="new file" title="edit/move">[edit]</a>
+			</td><td bgcolor="#d0d0d0">
+				<?= $v->size ?>
+			</td><td bgcolor="#d0d0d0">
+				<?= $v->filedate ?>
+			</td></tr>
+			<tr><td colspan="4" bgcolor="#d0d0d0">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $v->description ?> &nbsp;
+			</td></tr>
+		<? } ?>
+	</table>
+
+
+	</td></tr>
+</table>
+<? } ?>
+
+		<!-- end main area -->
+		</td>
+	</tr>
+</table>
+
+

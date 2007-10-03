@@ -1,0 +1,35 @@
+<?=$t['sectionheader'];?>
+
+<br>
+<? for ($x=0; $x< count($t['menus']); ++$x) { ?>
+
+	<table width="100%" border="0" cellspacing="2" align="center" style="border: 1px; border-style:solid;">
+		<tr><td width="60%">
+				Menu Title: "<b><?= $t['menus'][$x]->title; ?></b>"
+		</td>
+		<td rowspan="3" valign="top">
+			Order <br>
+			<a href="<?= modurl('menu/event=menueditorUp/mid='.$t['menus'][$x]->pkey);?>"><img src="<?=IMAGES_URL?>up_arrow.gif" width=8 height=13 border=0></a>
+			&nbsp;
+			<a href="<?= modurl('menu/event=menueditorDown/mid='.$t['menus'][$x]->pkey);?>"><img src="<?=IMAGES_URL?>down_arrow.gif" width=8 height=13 border=0></a>
+			<br>
+			(<?=$t['menus'][$x]->rank?>)
+		</td>
+		</tr>
+			<tr><td >
+				Number of links: <?= $t['menus'][$x]->linkCount; ?>
+				<a href="<?= modurl('menu/event=details/mid='.$t['menus'][$x]->pkey);?>">[edit links]</a>
+			</td></tr>
+			<tr><td>
+				Layout: <?= $t['menus'][$x]->layout; ?>
+			</td></tr>
+			<tr><td colspan="2">
+			<a href="<?= modurl('menu/event=menueditor/mid='.$t['menus'][$x]->pkey);?>">[edit menu properties]</a>
+			</td></tr>
+		</table>
+
+				<br>
+<? } ?>
+
+	
+

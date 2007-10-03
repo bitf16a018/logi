@@ -1,0 +1,77 @@
+<?
+/*
+ * profile
+ * Last updated 3/29/2001
+ * 
+ * Purpose:
+ * add/update user profile 
+ */
+
+class prof extends RegAuth {
+
+var $presentor = "htmlPresentation";
+
+	function prof()
+	{
+		global $lcObj;
+//auto-comment		$lcObj->templateStyle = 'private';
+	}
+
+	function Run($db,&$lcUser,&$lcObj,&$lcTemplate) {	
+
+		$lcTemplate["email"] = $lcUser->email;
+		$lcObj->templateName = "prof";
+	}
+
+	function pwpostRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
+
+		$new = trim($lcObj->postvars['values']['new']);
+		$old = trim($lcObj->postvars['values']['old']);
+		$confirm = trim($lcObj->postvars['values']['confirm']);
+
+		if ($new=="") { 
+			$error = "You did not enter a new password.  Please try again."; 
+		}
+
+		if ($old!=$lcUser->password
+			&& md5($old) != $lcUser->password) { 
+				$error = "You did not enter the correct current password.  Please try again"; 
+		}
+
+		if ($new!=$confirm) { 
+			$error = "You didn't type the same password twice for your new password.  Please verify that you are typing what you are intending."; 
+		}
+
+		if ($error) { 
+			$lcTemplate["error"] = $error;
+			$lcObj->templateName="prof3";
+		} else {
+			$lcUser->password = addslashes($new);
+			$lcUser->update();
+			$lcUser->updateMailServer();
+			$lcObj->templateName="prof2";
+		}
+
+
+	}
+
+	/****
+	 * Removed so students or users cannot change their password
+	 ****
+
+	function emailpostRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
+		$lcUser->email = $lcObj->postvars["values"]["email"];
+		$email = $lcObj->postvars["values"]["email"];
+		$lcUser->update();
+
+		$lcObj->templateName="prof2";
+	}
+	*****/
+
+
+
+
+
+
+}
+?>

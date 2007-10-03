@@ -1,0 +1,40 @@
+<?php
+	$perc_current = ceil(($t['placement'] * 100) / $t['total_classes']);
+	
+	if ($perc_current >= 100)	 // being safe >=
+	{	$perc_current = 100;
+	} else
+	{
+	}
+?>
+
+<table cellpadding="1" cellspacing="1" border="0" style="border: 1px solid black;" width="100%">
+<tr>
+	<td>
+	
+<table cellpadding="1" cellspacing="0" border="0" width="<?=$perc_current;?>%">
+<tr>
+	<td width="100%" bgcolor="red" align="center"
+	><?php
+		if ($t['placement'] > $t['total_classes'])
+		{	echo '<font color="white"><b>Done!</b></font>';
+		} else
+		{	
+			if ($t['total_classes'] != null && $t['placement'] == $t['total_classes'])
+			{	echo '<b style="color: white;"><blink>Cleaning up...</blink></b>';
+			} else
+			{	echo '<b>&nbsp;</b>';
+			}
+			
+		}
+	?></td>
+</tr>
+</table>
+
+	</td>
+</tr>
+</table>
+
+<center>
+	<small><?=$t['semesterlabel'];?> Backup in progress ( <i> <?=$perc_current;?>% completed </i> )</small>
+</center>

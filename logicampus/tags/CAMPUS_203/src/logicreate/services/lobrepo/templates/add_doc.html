@@ -1,0 +1,43 @@
+<h4>Content File</h4>
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+
+
+	<form action="<?=appurl('lobrepo/edit/event=save');?>" method="POST" enctype="multipart/form-data">
+<table width="100%" border="0" cellspacing="2" cellpadding="2">
+	<tr><td valign="top" class="">*Enter content title.</td>
+		<td valign="top" class=""><input type="text" id="txTitle" name="txTitle" value="<?=htmlentities($t['lob']->get('lobTitle'));?>" size="50" maxlength="255"></td>
+	</tr>
+
+	<tr><td valign="top" class="">*Enter subject.</td><td valign="top" class=""><input type="text" id="md_subj" name="md_subj" value="<?=htmlentities($t['lob']->getMeta('subject'));?>" size="25" maxlength="255"></td></tr>
+
+	<tr><td valign="top" class="">*Enter sub-discipline.</td><td valign="top" class=""><input type="text" id="md_subdisc" name="md_subdisc" value="<?=htmlentities($t['lob']->getMeta('subdisc'));?>" size="25" maxlength="255"></td></tr>
+	<tr><td valign="top" class="">*Upload Your File</td><td valign="top" class="">
+	<input type="file" id="document" name="document" value="" size="">
+	</td></tr>
+	<tr><td valign="top" class="">Enter a Description</td><td valign="top" class="">
+			<textarea name="description" cols="80" rows="10"><?=htmlentities($t['lob']->get('lobDescription'));?></textarea>
+	</td></tr>
+	<tr><td valign="top" class="">MIME type</td><td valign="top" class="">
+			<?=$t['mimetype'];?>
+	</td></tr>
+
+	<tr><td colspan="2" valign="top" class="">&nbsp;</td></tr>
+	<tr><td valign="top" class=""></td><td valign="top" class=""><input type="submit" id="submit" name="submit" value="Save Content"></td></tr>
+</table>
+
+<input type="hidden" name="event" value="save">
+<input type="hidden" name="mimetype" value="<?=$t['mimetype'];?>">
+<input type="hidden" name="lob_type" value="content">
+<input type="hidden" name="lob_sub_type" value="document">
+<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobRepoEntryId');?>">
+
+</form>

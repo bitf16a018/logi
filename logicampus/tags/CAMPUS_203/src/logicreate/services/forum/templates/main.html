@@ -1,0 +1,89 @@
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0">
+<tr>
+	<td align="left">
+		<h3>Forums</h3>
+	</td>
+</tr>
+</table>
+
+<table width="100%" cellpadding="1" cellspacing="0" class="grayoutline">
+	<tr><td>
+
+		<table width="100%" cellpadding="2" cellspacing="2" border="0">
+		<tr>
+			<td class="bartitle" nowrap><b>Forum</b></td>
+			<td class="bartitle" width="9%" nowrap><b>Threads</b></td>
+			<td class="bartitle" width="9%" nowrap><b>Total Posts</b></td>
+		</tr>
+
+
+<?php
+
+	if ($t['sectionList']) {
+		while(list($k,$v) = each($t['sectionList'])) {
+		if (!is_array($t['forumList'][$k])) { continue; }
+		?>
+			
+			<tr>
+				<td colspan="3">
+					<div class="colorbar"><?=$v->lcForumSectionName;?></div>
+				</td>
+			</tr>
+			<?php
+			while(list($key,$val) = each($t['forumList'][$k])) {
+			?>
+				<tr>
+					<td valign='top'>
+				<a href="<?=appurl("forum/view/".$val->lcForumId);?>"><?=$val->lcForumName;?></a>
+				<br/>
+						<?=$val->lcForumDescription;?>
+					</td>	
+					<td valign='top' width='9%'>
+						<?=$val->lcForumThreadCount;?>
+					</td>
+					<td valign='top' width='9%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan='3'>
+					</td>
+				</tr>
+				<?  if ($t['forumChildren'][$val->lcForumId]) { ?>
+				<tr>
+					<td colspan='3'>
+						&nbsp;+ Sub-forums: 
+						<?while(list($a,$b) = each($t['forumChildren'][$val->lcForumId])) { ?>
+						<a href="<?=appurl("forum/view/".$b->lcForumId);?>"><?=$b->lcForumName;?></a>
+						<? } ?>
+					</td>
+				</tr>
+				<? } ?>
+			
+
+			<? } ?>
+		<?
+		}
+
+	} else {?> 
+		<tr><td colspan="3">
+			There are no forums for you to view at this time.  
+			<BR><BR>
+			</td>
+		</tr>
+
+<? if ($obj->user->username=="anonymous" || $obj->user->username=="") { ?>
+		<tr><td colspan="3">
+			You may need to <a href="<?=APP_URL?>login">register / sign-in</a> before you can use the forums.
+			</td>
+		</tr>
+<? } ?>
+<? } ?>
+
+	</table>
+	
+</td></tr>
+</table>
+
+

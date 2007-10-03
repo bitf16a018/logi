@@ -1,0 +1,308 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *  Statuses:  new=1,pending=2,approved=3,waiting on instructor=5
+ */
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'SeminarClassesDates.php');
+
+class seminars extends BasicAuth {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'ITV Seminar Scheduling';
+	var $navlinks = array(
+		'List Seminar Schedule'=>'seminars/',
+		'List Orientation Schedule'=>'orientations/'
+		);
+	var $applinks = array(
+		'Seminar Calendar'=>'seminarcal/'
+		
+	);
+	var $inactivelinks = array(
+	);
+
+	var $authorizer = 'basicAuth';
+
+	# Constructor
+	function seminars()
+	{
+		global $lcObj;
+//auto-comment		$lcObj->templateStyle = 'private';
+	}
+
+	function Run($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'seminars_main';
+		$dg = new SearchGrid($this->module,$this->serviceName);
+		$dg->table = 'seminar_classes_dates';
+		$dg->headerClass = 'classheader';
+		$dg->class = 'datagrid';
+		$dg->column = 'a.id_classes, a.num_seminar, a.id_seminar_classes_dates, a.entry_status, b.*, d.courseName, concat(c.lastname, ", ", c.firstname
+		) AS Faculty';
+		$dg->joins = 'as a RIGHT JOIN classes AS b ON a.id_classes =
+		b.id_classes INNER JOIN profile as c ON b.facultyId =
+		c.username INNER JOIN courses as d ON
+		b.id_courses=d.id_courses';
+		$dg->where =
+		"b.id_semesters='".$u->sessionvars['semester']."' AND
+		b.classType='ITV'";
+		$dg->ignore = array('id_classes', 'id_courses', 'id_semesters',
+		'priority', 'courseFamilyNumber', 'stylesheet', 'noexam',
+		'id_class_resource', 'facultyId', 'sectionNumbers',
+		'classType', 'id_seminar_classes_dates');
+		$dg->sortColumns = array('num_seminar', 'entry_status', 'courseName',
+		'sectionNumbers', 'courseFamily', 'courseNumber', 'Faculty',
+		'classType');
+		$dg->headers = array(
+			'num_seminar' => 'Seminar #',
+			'entry_status' => 'Status',
+			'courseName' => 'Class Title',
+			'courseFamily' => 'Course Family',
+			'courseNumber' => 'Course #',
+			'Faculty' => 'Faculty',
+			'classType' => 'Class Type',
+			'end'=>'Actions');
+		$dg->postpendColumn('<a href="<?=modurl("seminars/event=view/id=$id_classes");?>">View</a>','end');
+		$dg->overrideColumn('<?=getStatus($entry_status);?>', 'entry_status');
+		$dg->overrideColumn('<? if ($num_seminar != "") { echo  "Seminar $num_seminar"; } else { echo "None";}?>', 'num_seminar');
+		$dg->overrideColumn('<?
+			if ($id_seminar_classes_dates) { echo 
+				"<a href=\"".APP_URL."seminarorientation/seminars/event=edit/id=$id_seminar_classes_dates\">Edit</a>";}?>',
+		'end');
+		$dg->overrideColumn('<?
+			echo "<a
+			href=\"".APP_URL."seminarorientation/seminars/event=view/id=$id_classes\">$courseName</a>";?>',
+			'courseName');
+
+		$dg->add4StatusSelectFilter('Status', 'a.entry_status');
+		$dg->add4SeminarSelectFilter('Seminar', 'a.num_seminar');
+		$dg->addInstructorSelectFilter('Instructor', 'a.facultyId');
+
+		$dg->addInputFilter('Class ID', 'a.id_classes', true);
+		$dg->addInputFilter('Class Title', 'd.courseName');
+
+		$t['table'] =	$dg->toHTML();
+					
+	}
+
+	function addRun(&$db,&$u,&$lc,&$t) 
+	{
+		$sql = "SELECT count(*) as count FROM seminar_classes_dates
+		WHERE id_classes='".$lc->getvars['id_classes']."'";
+		$db->queryOne($sql);
+		# update the count on the seminar
+		
+		if ($obj->numSeminar == 5)
+		{
+			$t['message'] =  "You cannot add more than 4
+			Seminars to your class.";
+			$lc->templateName = 'seminars_error';
+			return;
+		}
+
+		if ($lc->getvars['id_classes'] == '')
+		{
+			$lc->templateName = 'seminars_error';
+			$t['message'] = '<h3>Error</h3>No Class ID was found.';
+			return;
+		}
+		
+		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id_classes']."'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$this->sectionTitle = 'Adding Seminar ';
+		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+
+		$t['courseName'] = $db->Record['courseName'];
+		$t['courseFamNum'] =
+		$db->Record['courseFamily'].$db->Record['courseNumber'];
+		$t['facultyId'] = $db->Record['facultyId'];
+
+		$lc->templateName = 'seminars_edit';
+		$f = new SiteForm($u->groups);
+		$f->fieldPermissions = true;
+		$f->getForm('seminar');
+		$t['form'] = $f->ToHTML();
+	}
+	
+	function viewRun($db, &$u, &$lc, &$t)
+	{
+		$lc->templateName = 'seminars_view';	
+		$t['data'] =
+		SeminarClassesDatesPeer::doSelect("id_classes='".$lc->getvars['id']."' ORDER BY num_seminar ASC");
+		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id']."'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+
+		$t['id_classes'] = $lc->getvars['id'];
+	}
+
+	function editRun($db, &$u, &$lc, &$t)
+	{
+		if (!$lc->getvars['id'])
+		{
+			$t['message'] = 'There was no ID passed.  Please start
+			over.';
+			$lc->templateName = 'seminars_error';
+			return;
+		}
+	
+		$t['entry'] = SeminarClassesDates::load($lc->getvars['id']);
+		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$t['entry']->idClasses."'";
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		$t['courseName'] = $db->Record['courseName'];
+		$t['courseFamNum'] =
+		$db->Record['courseFamily'].$db->Record['courseNumber'];
+		$t['facultyId'] = $db->Record['facultyId'];
+
+		$lc->templateName = 'seminars_edit';
+		$f = new SiteForm();
+		$f->getForm('seminar', $t['entry']);
+		
+		$t['form'] = $f->ToHTML();
+	}
+
+	function updateRun($db, &$u, &$lc, &$t)
+	{
+
+		if ($lc->getvars['event'] == 'add')
+		{
+			$obj = new SeminarClassesDates();
+			$sql = "SELECT count(*) as count FROM seminar_classes_dates
+				WHERE id_classes='".$lc->getvars['id_classes']."'";
+			$db->queryOne($sql);
+			# update the count on the seminar
+			$obj->numSeminar = $db->Record['count'] + 1;
+			$obj->idClasses = $lc->getvars['id_classes'];
+			if ($obj->numSeminar == 5)
+			{
+				$t['message'] =  "You cannot add more than 4
+				Seminars to your class.";
+				$lc->templateName = 'seminars_error';
+				return;
+			}
+		}	
+		if ($lc->getvars['event'] == 'edit')
+		{		
+			$obj = SeminarClassesDates::load($lc->getvars['id']);		
+		}
+		
+		$obj->entryStatus = $data['entryStatus'];
+		
+		# Notify instructor of change if needed
+			
+		if ($lc->postvars['entryStatus'] != $obj->entryStatus)
+		{
+			$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$obj->idClasses."'";
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			include_once(SERVICE_PATH."pm/privmess.php");
+			$mess = new privMess();
+			$mess->subject = 'Seminar '.$obj->numSeminar.' Updated To: '.getStatus($obj->entryStatus);
+			$mess->message = 'Your Seminar '.$obj->numSeminar.'</a> status changed on your '.$db->Record['courseName'].' - '.$db->Record['courseFamily'].$db->Record['courseNumber'].' class.';
+			$mess->message .="\n\nThe following note was appeneded:\n\n".$obj->note;
+	
+			$mess->sentTime = time();
+	
+			$mess->messageFrom = $u->username;
+			
+			$mess->messageTo = $db->Record['facultyId'];
+			$mess->add();
+			
+			$db_temp = $db->Record;
+			
+			include_once(LIB_PATH.'eventsObj.php');
+			
+			// If entry status has been modified to be APPROVED we add it to the calendar!
+			if ($lc->postvars['entryStatus'] == 3)
+			{
+				$dates_to_use = array(1=>'northwestDate', 2=>'northeastDate', 3=>'southDate', 4=>'southeastDate');
+				$campus_array = array(1=>'Northwest', 2=>'Northeast', 3=>'South', 4=>'Southeast');				
+				$tmp_data = $this->formatPostvars($lc->postvars, $obj->__attributes);	
+				
+				// 4 times!
+				for ($i=1; $i <= 4; ++$i)
+				{
+					$addevent = new seminarscheduling();
+					$addevent->set_id_class($obj->idClasses);
+					$addevent->set_id_item($obj->idSeminarClassesDates);
+					$addevent->set_id_item_sub($i);
+					$addevent->dbLoad(); // if it exists, it'll be loaded up
+
+					$addevent->set_owner($db_temp['facultyId']);
+					$addevent->set_title($campus_array[$i]. ' ['.$db_temp['courseFamily'].$db_temp['courseNumber'].'] '.$db_temp['courseName']);
+					$addevent->set_description(addslashes(stripslashes($o->instructions)));
+					
+					$addevent->set_date_start($tmp_data[$dates_to_use[$i]]);
+					$addevent->set_date_end($tmp_data[$dates_to_use[$i]]);
+					
+				// this is our subitem key
+				// northwest = 1
+				// northeast = 2
+				// south = 3
+				// southeast = 4
+					$addevent->save(); // this updates/adds all by it's lonesome.. no need to wrroy about it here
+				
+					unset($addevent); // cleanup!
+				}
+			} else 
+			{
+				// ugh i dont want to do this but it seems necessary
+				// 4 times!
+				for ($i=1; $i <= 4; ++$i)
+				{
+					$addevent = new seminarscheduling();
+					$addevent->set_id_class($obj->idClasses);
+					$addevent->set_id_item($obj->idSeminarClassesDates);
+					$addevent->set_id_item_sub($i);
+					$addevent->dbLoad(); // if it exists, it'll be loaded up
+					$addevent->delete();
+					unset($addevent); // cleanup!
+				}
+				
+			}
+			
+		}
+		
+		# Update the entry
+		$data = $this->formatPostvars($lc->postvars, $obj->__attributes);	
+		$obj->setArray($data);
+
+		if ($obj->entryStatus == '') $obj->entryStatus = '';
+		if ($obj->note == '') $obj->note = '';
+		
+		
+
+		$obj->save();		
+		$t['url'] =
+		APP_URL.'seminarorientation/seminars/event=view/id='.$obj->idClasses;
+		$this->presentor = 'redirectPresentation';
+	}
+
+	# Takes post vars and formats the date fields
+	# so we can load them onto the object
+	function formatPostvars($vars, $attribs)
+	{
+		foreach ($attribs AS $k=>$type)
+		{
+			if ($type == 'datetime')
+			{
+				$arr[$k] = dateArray2DBDateTime($vars[$k]);	
+				continue;
+			}
+
+			if ($type == 'time')
+			{
+				$arr[$k] = dateArray2DBTime($vars[$k]);
+				continue;
+			}
+
+			$arr[$k] = $vars[$k];
+		}
+		return $arr;
+	}
+}
+?>

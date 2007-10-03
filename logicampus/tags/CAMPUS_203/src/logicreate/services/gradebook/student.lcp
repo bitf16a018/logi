@@ -1,0 +1,74 @@
+<?
+
+/*
+ * This service handles the displaying/editing of one
+ * particular student's grades.
+ */
+
+
+/*
+ *
+ * Shows all grades for a student.  Provides a link to each of
+ * the students assessments or entries.
+ * 
+ * Input data: course ID, student ID
+ * Output data: 
+ *
+ */
+
+include_once(LIB_PATH.'gradeBookObj.php');
+
+class student extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+
+	// links
+	var $sectionTitle = 'Gradebook';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => 'jack',
+	);
+	var $inactivelinks = array( 'Assessments' );
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'Gradebook Setup' => 'main/event=controlPanel/'
+	);
+
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'student_main';
+
+		// FIXME: make sure the student is taking the activeClassTaught
+		$user = $lc->getvars['username'];
+		if (!$user) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "Missing username";
+			return;
+		}
+
+		// get the user info
+		$guy = $u->getUserByUsername($lc->getvars['username']);
+		$t['user'] = $guy;
+		$this->sectionTitle = $guy->profile->values['lastname'].', '.$guy->profile->values['firstname'];
+
+		$temp = GBVal::getAllByUsername($lc->getvars['username'], $u->activeClassTaught->id_classes);
+		$t['gbval'] = $temp;
+
+		// calculate total points
+		$t['totalpoints'] = 0;
+		while (list(,$entry) = @each($t['gbval'])) {
+			$t['totalpoints'] += $entry->entry->total_points;
+		}
+
+	}
+
+	// id= the id
+	//function gradeRun(&$
+
+}
+?>

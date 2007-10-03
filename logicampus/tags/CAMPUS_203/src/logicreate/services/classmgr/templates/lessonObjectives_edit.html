@@ -1,0 +1,44 @@
+<? if ($t['obj']->id_class_objectives) {
+	$btn = "Modify Objective";
+} else {
+	$btn = "Add Objective";
+} ?>
+
+<?=$t['sectionheader'];?>
+<p>Enter the new class objective below. You will then be able to incorporate it into a lesson in the lesson page.</p>
+<?if($t['error']){?><span style="color:red"><?=$t['error']?></span><?}?>
+<?if($t['msg']){?><span style="color:blue"><?=$t['msg']?></span><?}?>
+<form action="<?=modurl('lessonObjectives/event=edit/');?>" method="post">
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td colspan=2>
+		<textarea name="objective" rows=5 cols=50 maxlength=255><?=$t['obj']->objective;?></textarea>
+	</td>
+</tr>
+<tr>
+	<td>Hide objectives from students: </td>
+	<td>
+	<select name="f_hide">
+		<option value="0"<?=(($t['obj']->f_hide) ? ' selected' : '')?>>No</option>
+		<option value="1"<?=(($t['obj']->f_hide) ? ' selected' : '')?>>Yes</option>
+	</select>
+	</td>
+</tr>
+<tr>
+	<td>
+		Sort objective on lesson
+	</td>
+	<td>
+		<input type="text" maxlength="9" name="i_sort" value="<?=$t['obj']->i_sort;?>" size="9">
+	</td>
+</tr>
+<tr>
+	<td><input type="submit" name="submit" value="<?=$btn;?>"/></td>
+	<td><input type="submit" name="submit" value="<?=$btn;?> and Add Another"/></td>
+</tr>
+</table>
+<input type="hidden" name="oid" value="<?=$t['obj']->id_class_objectives;?>" />
+</form>
+<script language="javascript">
+document.forms[0].elements[0].focus();
+</script>
