@@ -1,0 +1,73 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * Service will act as a gateway into the rest of the
+ * application.
+ *
+ */
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+ 
+class display extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+/*
+ *
+ * Event will present a list of all available activities in the
+ * classmgr app.
+ *
+ * Input data: id_classes
+ * Output data: main class page
+ *
+ */
+	function run(&$db,&$u,&$lc,&$t) 
+	{
+		$t['classObj'] = $u->activeClassTaught;
+		$this->inactivelinks[] = 'Classroom Manager';
+
+		$lc->templateName = 'display_main';
+
+		/*****
+		* MOTD
+		****/
+		$t['motd'] = LcSettings::getSystemMotd();
+
+
+		if (strlen($t['motd']) == 0)
+		{
+			unset($t['motd']);
+		}
+		if ($u->activeClassTaught->classType == 'ITV')
+		{
+			$t['ITVClass'] = true;
+		}
+		
+		if ($u->activeClassTaught->classType == 'Internet')
+		{
+			$t['Internet'] = true;
+		}
+		
+	}
+}
+
+?>
+

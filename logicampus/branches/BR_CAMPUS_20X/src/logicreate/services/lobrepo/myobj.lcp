@@ -1,0 +1,133 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobClassLink.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_lob_class.php');
+include_once(SERVICE_PATH.'lobrepo/lob_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class Myobj extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $applinks = array (
+		'All Learning Objects'=>'',
+		'Import Learning Objects'=>'import',
+		'My Learning Objects'=>'myobj',
+		'Add Learning Objects'=>'add',
+		);
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='myobj_main';
+
+		//$lobs = LobContentPeer::doSelect();
+
+
+		$lobItems = array();
+		$idx=0;
+		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject, B.subdisc
+		       	FROM lob_repo_entry as A
+			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id
+			LEFT JOIN lob_user_link as C on A.lob_repo_entry_id = C.lob_repo_entry_id
+			WHERE C.user_id = '.$u->userId.'
+			');
+
+
+		while($db->nextRecord()) {
+		//foreach ($lobs as $lobObj) {
+			$lobRec = $db->record;
+			$lobItems[$idx]['name'] = '<a href="'.appurl('lobrepo/edit/c='.$lobRec['lob_repo_entry_id'].'').'">'.$lobRec['lob_title'].'</a>';
+			$lobItems[$idx]['subject'] = $lobRec['subject'];
+			$lobItems[$idx]['type'] = ucfirst($lobRec['lob_sub_type']);
+			$lobItems[$idx]['author'] = $lobRec['author'];
+			$lobItems[$idx]['description'] = $lobRec['lob_description'];
+			$lobItems[$idx]['mimetype'] = $lobRec['lob_mime'];
+			$lobItems[$idx]['lobRepoEntryId'] = $lobRec['lob_repo_entry_id'];
+			$lobItems[$idx]['subdisc'] = $lobRec['subdisc'];
+			$idx++;
+		}
+
+		$dm = new LC_Table_ItemModel($lobItems);
+		$dm->ignoreColumn('description');
+		$dm->ignoreColumn('mimetype');
+		$dm->ignoreColumn('subdisc');
+		$dm->ignoreColumn('lobRepoEntryId');
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col = &$columnModel->getColumnAt(0);
+		$col->justify = 'left';
+	
+		$col_b = &$columnModel->getColumnAt(2);
+		$col_b->justify = 'left';
+	
+		$col_c = &$columnModel->getColumnAt(1);
+		$col_c->width="100%";
+		$col_c->justify = 'left';
+
+		$t['lobTable'] = new Lob_Table_Renderer($table);
+
+
+		//find the links between classes and learning objects
+		$idsTaught = array();
+		foreach ($u->classesTaught as $class) {
+			$idsTaught[] = $class->id_classes;
+		}
+
+		if ( count($idsTaught)) {
+			$classLinkObjs = LobClassRepoPeer::doSelect(' class_id IN ('.implode(',',$idsTaught).')');
+		}
+
+		//organize the link IDs into nice arrays for the table renderer
+		$linkIds = array(0);
+		foreach ($classLinkObjs as $linkObj) {
+			$linkIds[$linkObj->lobId][] = $linkObj->classId;
+		}
+		$t['lobTable']->classLinkIds = $linkIds;
+//		print_r($t['lobTable']);
+	}
+
+
+	function classRun(&$db,&$u,&$lc,&$t) {
+		//FIXME needs security check.
+		//FIXME needs private lob check
+
+		$c = (int)$lc->getvars['c'];
+		$l = (int)$lc->getvars['l'];
+
+		$lob = new Lc_Lob($l);
+		$lob->useInClass($c, 'notify');
+//debug($lob,1);
+
+/*
+		$sql = "SELECT lob_repo_entry_id
+			FROM lob_user_link
+			WHERE lob_repo_entry_id = ".$l."
+			AND user_id = ".$u->userId;
+		$db->query($sql);
+		//FIXME check for db errors
+		$db->nextRecord();
+		$lobId = $db->record['lob_repo_entry_id'];
+
+		$lobClass = new LobClassRepo();
+		$lobClass->set('lobRepoEntryId'   ,$lobId);
+		$lobClass->set('classId' ,$c);
+		$lobClass->save();
+*/
+		$u->addSessionMessage('Object linked to your class.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj');
+	}
+}
+
+?>

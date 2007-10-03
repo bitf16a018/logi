@@ -1,0 +1,45 @@
+<?php
+
+/* Create by Keith Elder
+ * Last Modified:  11/12/03
+ * Description:  Allows a registered user to change their password.
+ */
+
+class changePass extends RegAuth {
+
+	var $presentor = "htmlPresentation";
+
+	# Constructor to set private template
+    function changePass()
+	    {
+			global $lcObj;
+//auto-comment			$lcObj->templateStyle = 'private';
+		}
+
+	function run (&$db,&$u,&$arg,&$t) {
+	if ($u->username != "") {
+		$t[event] = "UpdatePass";
+		$arg->templateName = "changePass";
+	} else {
+		$t[error] = '<h2 align="center" class="error">Please login before visiting this page.</h2>';
+		$arg->templateName = "changepass";
+	}
+	
+	}
+
+	# Update the password in the database.
+	function UpdatePassrun (&$db,&$u,&$arg,&$t) {
+		extract($arg->postvars);
+		if ($u->username != "" AND $password == $password2 ) {
+			$username = $u->username;
+			$db->query("update lcUsers set password='$password' where username='$username'");
+			redirect($db, APP_URL."users/editProfile");
+		} else {
+			$t[error] = '<h2 align="center" class="error">Please re-enter your passwords as they did not match.<h2>';
+			$t[event] = "UpdatePass";
+			$arg->templateName = "changePass";
+		}	
+	}
+}
+
+?>

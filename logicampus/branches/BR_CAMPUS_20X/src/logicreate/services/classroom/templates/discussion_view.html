@@ -1,0 +1,136 @@
+<?=$t['sectionheader'];?>
+<? if ($t['search']) {?>
+<center>
+<h3>Search results for: <?=$t['search'];?></h3>
+</center>
+<? } ?>
+<table width='100%'>
+<tr><td width='30%'>&nbsp;</td>
+			<td align="left" width='70%' valign='top'>
+<form method='post' action='<?=appurl("classroom/discussion_search/".$t['forum']->lcForumId);?>'>
+Search for: <input type='text' name='search' maxlength='20'><input type='submit'></form>
+			</td>
+			</tr></table>
+ 
+<center>
+	<table width="98%">
+<tr><td>
+				<h3><?=$t['forum']->lcForumName;?></h3>
+	<?
+	if ($t['forumParent']) { 
+	?>
+		<div class='colorbar'>Parent forums</div>
+		<?
+		while(list($k,$val) = each($t['forumParent'])) {
+		?>
+			<table width='100%'>
+				<tr>
+					<td valign='top' width='70%'>
+						<a href="<?=appurl("classroom/discussion/forum_id=".$val->lcForumId);?>"><?=$val->lcForumName;?></a>
+					</td>	
+					<!--
+					<td valign='top' width='6%'>
+						<?=$val->lcRecentPoster;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumThreadCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					-->
+				</tr>
+				<tr>
+					<td colspan='4'>
+						<?=$val->lcForumDescription;?>
+					</td>
+				</tr>
+				<?  if ($t['forumChildren2'][$val->lcForumId]) { ?>
+				<tr>
+					<td colspan='4'>
+						Sub-forums: 
+						<?while(list($a,$b) = each($t['forumChildren2'][$val->lcForumId])) { ?>
+						<a href="<?=appurl("classroom/discussion_view/".$b->lcForumId);?>"><?=$b->lcForumName;?></a>
+						<? } ?>
+					</td>
+				</tr>
+				<? } ?>
+			</table>
+
+
+
+			<? } ?>
+
+		<?
+
+		} ?>
+
+
+	<?
+	if ($t['forumChildren']) { 
+	?>
+		<div class='colorbar'>Sub forums</div>
+		<?
+		while(list($k,$val) = each($t['forumChildren'])) {
+		?>
+			<table width='100%'>
+				<tr>
+					<td valign='top' width='70%'>
+						<a href="<?=appurl("classroom/discussion/forum_id=".$val->lcForumId);?>"><?=$val->lcForumName;?></a>
+					</td>	
+					<!--
+					<td valign='top' width='6%'>
+						<?=$val->lcRecentPoster;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumThreadCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='6%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					-->
+				</tr>
+				<tr>
+					<td colspan='4'>
+						<?=$val->lcForumDescription;?>
+					</td>
+				</tr>
+				<?  if ($t['forumChildren2'][$val->lcForumId]) { ?>
+				<tr>
+					<td colspan='4'>
+						Sub-forums: 
+						<?while(list($a,$b) = each($t['forumChildren2'][$val->lcForumId])) { ?>
+						<a href="<?=appurl("classroom/discussion_view/".$b->lcForumId);?>"><?=$b->lcForumName;?></a>
+						<? } ?>
+					</td>
+				</tr>
+				<? } ?>
+			</table>
+
+
+
+			<? } ?>
+
+		<?
+
+		} ?>
+
+		<?
+		// done with sub forums
+		?>
+		<?=$t['table'];?>
+
+
+</td></tr></table>

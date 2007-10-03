@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!-- MySQL does not support foreign keys. This means   -->
+<!-- that this XML file will not reflect foreign key   -->
+<!-- relationships. You will have to do that yourself. -->
+<database name="logicampus">
+  <table  name="chat">
+    <column name="pkey"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="chat_id"
+            required="true"
+            size="50"
+            type="VARCHAR"/>
+    <column name="username"
+            required="true"
+            size="25"
+            type="VARCHAR"/>
+    <column name="userpkey"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="usertype"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="timeint"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="timedate"
+            required="true"
+            default="0000-00-00"
+            size=""
+            type="DATE"/>
+    <column name="message"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+    <column name="entry_type"
+            required="false"
+            size="11"
+            type="INTEGER"/>
+  </table>
+  <table  name="chat_queue">
+    <column name="pkey"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="username"
+            required="true"
+            size="25"
+            type="VARCHAR"/>
+    <column name="userpkey"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="usertype"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="timeint"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="timedate"
+            required="true"
+            default="0000-00-00"
+            size=""
+            type="DATE"/>
+    <column name="message"
+            required="true"
+            size=""
+            type="LONGVARCHAR"/>
+  </table>
+</database>
+<!-- END OF MYSQL2TURBINE DUMP -->

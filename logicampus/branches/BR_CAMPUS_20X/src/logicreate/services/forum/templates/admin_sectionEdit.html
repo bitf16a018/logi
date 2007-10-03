@@ -1,0 +1,25 @@
+<h2>Forum administration</h2>
+<h3>Section management</h3>
+Section are top-level areas to help organize your forums.  You can create as many sections 
+as you need.  If no forums are available to a user in a section, the section will not display 
+to the user.
+<form method='post'>
+<input type='hidden' name='event' value='sectionUpdate'>
+<input type='hidden' name='section[lc_forum_section_id]' value='<?=$t['section']->lcForumSectionId;?>'>
+	<table>
+		<tr>
+			<td>Section name</td>
+			<td><input type='text' name='section[lc_forum_section_name]' value='<?=$t['section']->lcForumSectionName;?>'></td>
+		</tr>
+		<tr>
+			<td>Forums in this section</td>
+			<td>
+				<select name='list[]' multiple size='9'>
+					<?=$t['list'];?>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<input type='submit' value='Submit'>
+</form>
+

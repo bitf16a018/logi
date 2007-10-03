@@ -1,0 +1,208 @@
+<?
+
+/**
+ * tabbed julep service
+ *
+ * contains many features that are necassary to have
+ * a consistent tabbed interface
+ */
+class TabbedService extends HercAuth {
+
+	/**
+	 * handle commanalities between tab changes,
+	 * call module pseudo-event (tab name)
+	 */
+	function changeTabRun(&$db,&$u,&$arg,&$t) {
+
+		//save form data in sessionvars
+		//name data after module + old tab name
+		$tabName = $arg->getvars['selectedTab'];
+		$oldTab = $arg->getvars['prevTab'];
+
+		$t['saved'] = $u->sessionvars['tabbedUpdate'];
+
+		//hack for fixing sharing select boxes
+		if ( $tabName=='addSharing' || $oldTab == 'addSharing' ) {
+			$u->sessionvars['tabbedUpdate']['groups'] = array('');
+			$u->sessionvars['tabbedUpdate']['notgroups'] = array('');
+		}
+
+
+		while ( list ($k,$v) = @each($arg->postvars['_save_']) ) {
+			if ( is_array($v) ) {
+				$u->sessionvars['tabbedUpdate'][sprintf("%s",$k)] = array();
+				while ( list($kk,$vv) = @each($v) ) {
+					if (! is_array($vv) )
+					$u->sessionvars['tabbedUpdate'][sprintf("%s",$k)][$kk] = stripslashes($vv);
+					else 
+					$u->sessionvars['tabbedUpdate'][sprintf("%s",$k)][$kk] = $vv;
+				}
+			} else {
+				$u->sessionvars['tabbedUpdate'][$k] = stripslashes($v);
+			}
+		}
+		$u->saveSession();
+		//call module pseudo-event
+		if ( strtolower($arg->postvars['button']) == 'save' ) {
+			$pseudo = '$this->saveTabs(&$db,&$u,&$arg,&$t);';
+			eval($pseudo);
+		} else
+		if (method_exists($this,$arg->getvars['selectedTab']."Run")) {
+			$pseudo = '$this->'.$arg->getvars['selectedTab'].'Run(&$db,&$u,&$arg,&$t);';
+			eval($pseudo);
+		} else {
+			$t['message'] = "The function <i>".$arg->getvars['selectedTab']."</i> does not exist.";
+			$this->presentor = '_errorMessage';
+			return;
+		}
+
+	}
+
+
+
+
+	/**
+	 * print the $tabStack as an html table
+	 */
+	function preTemplate(&$obj,&$t) {
+		if( $obj->getvars['selectedTab'] == '' ) {
+			list($obj->getvars['selectedTab']) = @each($this->tabStack);reset($this->tabStack);
+			list($curTab) = @each($this->tabStack);reset($this->tabStack);
+			
+		} else {
+			$curTab = $obj->getvars['selectedTab'];
+		}
+
+                while ( list($k,$v) = @each($this->tabStack) ) {
+
+
+                        if ($curTab == $k) {
+                        $t['tabTable'] .= '
+                                <li><a href="'.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'/event=changeTab" onclick="changeTab(\''.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'\');return false;" class="here">'.$v.'</a></li>
+';
+                        } else {
+                        $t['tabTable'] .= '
+                                <li><a href="'.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'/event=changeTab" onclick="changeTab(\''.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'\');return false;">'.$v.'</a></li>
+';
+                        }
+                }
+                //tied to the graphic
+                $t['tabTableWidth'] = count($this->tabStack) * 137;
+        }
+}
+
+
+include_once(LIB_PATH."LC_sql.php");
+include_once(INSTALLED_SERVICE_PATH."html/contentObj.php");
+
+
+
+
+
+
+class edit extends TabbedService {
+
+	var $presentor = "MyPlainPresentation";
+	var $tabStack = array ('addPage'=>'Body','addSharing'=>'Sharing','addMisc'=>'Misc');
+
+
+
+
+	/**
+	 * show the form for entering sharing data about an object
+	 */
+	function addSharingRun( &$db, &$u, &$arg, &$t) {
+		$db->query("select * from lcGroups");
+		while ( $db->next_record() ) {
+			$gs[$db->Record['gid']] = $db->Record['groupName'];
+		}
+		$t['groupOpts'] = makeOptions($gs,$t['saved']['groups']);
+		reset($gs);
+		$t['notGroupOpts'] = makeOptions($gs,$t['saved']['notgroups']);
+
+		$arg->templateName = "content_updateSharing";
+	}
+
+
+
+
+	function addMiscRun( &$db, &$u, &$arg, &$t) {
+		$arg->templateName = "content_updateMisc";
+       	}
+
+
+
+
+	function saveTabs( &$db, &$u, &$arg, &$t) {
+		$tab = $u->sessionvars['tabbedUpdate'];
+		while ( list ($i,$j) = @each ($tab) ) {
+			if ( !is_array($j) )
+				$att[$i] = stripslashes($j);
+			else 
+				$att[$i] = $j;
+		}
+		$att['file'] = str_replace(IMAGES_URL,'<?=IMAGES_URL?>',$att['file']);
+
+		$att['filename'] = str_replace("'","_",$att['filename']);
+		$att['filename'] = str_replace("/","_",$att['filename']);
+		$att['filename'] = str_replace("\\","_",$att['filename']);
+
+		$newpage = PersistantObject::createFromArray("lcHtml",$att);
+		$newpage->pkey = $att['pkey'];
+		$newpage->_update();
+
+		//clean up session
+		reset($this->tabStack);
+		unset($u->sessionvars['tabbedUpdate']);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = MOD_URL."main";
+		return;
+	}
+
+/*
+
+
+	function doUpdatePageRun (&$db, &$u, &$arg, &$t) {
+		$att = $arg->postvars['page'];
+		$att['file'] = str_replace(IMAGES_URL,'<?=IMAGES_URL?>',$att['file']);
+
+		exit();
+		$newpage = PersistantObject::createFromArray("lcHtml",$att);
+		$newpage->_update();
+
+		header("Location: ".MOD_URL."contentSearch/event=listPages");
+		exit();
+	}
+
+*/
+
+
+	function addPageRun (&$db, &$u, &$arg, &$t) {
+
+		if ( ! $t['saved'] ) {
+			unset($u->sessionvars['tabbedUpdate']);
+			$newpage = lcHtml::_load($arg->getvars['pkey']);
+			$newpage->file = str_replace('&lt;?=IMAGES_URL?>',IMAGES_URL,$newpage->file);
+			$newpage->groups = @explode("|",$newpage->groups);
+			$newpage->notgroups = @explode("|",$newpage->notgroups);
+			$members = get_object_vars($newpage);
+			while ( list ($k,$v) = @each ($members) ) {
+				$u->sessionvars['tabbedUpdate'][sprintf("%s",$k)] = $v;
+				$t['saved'][sprintf("%s",$k)] = $v;
+			}
+		$u->saveSession();
+		}
+
+		$arg->templateName = "content_updatePage";
+	}
+
+
+
+
+}
+
+function myPlainPresentation (&$obj, &$t) {
+	include(MOD_PATH."admin/templates/".$obj->templateName.".html");
+}
+?>
