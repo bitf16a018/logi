@@ -1,0 +1,150 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+include_once(LIB_PATH.'SiteForms.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_lob_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class add extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $applinks = array (
+		'All Learning Objects'=>'',
+		'Import Learning Objects'=>'import',
+		'My Learning Objects'=>'myobj',
+		'Add Learning Objects'=>'add',
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'add_main';
+
+		$t['lob'] = new LC_Lob();
+
+		$ext = addslashes($lc->getvars['m']);
+		$mimetype = Lc_Lob::getMimeForSubtype($lc->getvars['t'],$ext);
+		//$lc->getvars['ext'] = 'jpeg';
+		switch($lc->getvars['t']) {
+			case 'html':
+				$lc->templateName = 'add_html';
+				break;
+
+			case 'image':
+				$lc->templateName = 'add_image';
+				break;
+
+			case 'audio':
+			case 'doc':
+				$lc->templateName = 'add_doc';
+				break;
+
+		}
+
+		$t['mimetype'] = $mimetype;
+	}
+
+
+	function uploadToLob(&$lob,&$lc,$upName) {
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+
+		$lob->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
+		$lob->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobSubType',$lc->postvars['lob_sub_type']);
+		$n =& $lc->uploads[$upName]['name'];
+
+		$ext = substr (
+			$n, 
+		       (strrpos($n, '.')  - strlen($n) +1)
+			);
+
+		$ext = strtolower($ext);
+		$m = Lc_Lob::getMimeForSubtype($lc->postvars['lob_sub_type'],$ext);
+		$lob->set('lobMime', $m);
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'),$ext)
+		);
+	}
+
+
+	function textToLob(&$lob,&$lc) {
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobSubType','text');
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+		$lob->set('lobMime', $lc->postvars['mime']);
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'))
+		);
+
+	}
+
+
+	/**
+	 * Save a content obj to the db
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$guid = lcUuid();
+
+		$lob = new LobContent();
+		$lobMetaObj = new LobMetadata();
+		$lobUserObj = new LobUserLink();
+//debug($lc,1);
+
+		$lob->set('lobType','content');
+		$lob->set('lobGuid',$guid);
+
+
+		if (@$lc->uploads['content']) {
+			$lob->updateAsFile($lc->postvars, 'content');
+		} else if (@$lc->uploads['document']) {
+			$lob->updateAsFile($lc->postvars, 'document');
+		} else {
+			$lob->updateAsText($lc->postvars);
+		}
+
+
+//		debug($lob,1);
+//		debug($lc->postvars['txTitle'],1);
+		$lob->save();
+
+		$lobMetaObj->set('lobId',$lob->getPrimaryKey());
+		$lobMetaObj->set('lobKind','content');
+		$lobMetaObj->set('author', $lc->postvars['md_author']);
+		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
+		$lobMetaObj->set('license', $lc->postvars['md_license']);
+		$lobMetaObj->set('subject', $lc->postvars['md_subj']);
+		$lobMetaObj->set('subdisc', $lc->postvars['md_subdisc']);
+		$lobMetaObj->save();
+
+		$lobUserObj->set('lobId',$lob->getPrimaryKey());
+		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->set('lobKind','content');
+		$lobUserObj->save();
+
+		$u->addSessionMessage('Successfully added content.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj');
+	}
+}
+
+?>

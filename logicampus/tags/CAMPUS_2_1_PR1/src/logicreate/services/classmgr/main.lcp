@@ -1,0 +1,95 @@
+<?
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_class.php');
+ 
+/**
+ * Service acts as a gateway into the managing all aspects
+ * of a classroom.
+ */
+class classmgr extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 * Event will present a list of all available activities in the
+	 * classmgr app.
+	 *
+	 * Input data:
+	 * Output data:
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='main_main';
+		$this->authorizer = 'facultyGroupCheck';
+		if ((int)$lc->postvars['semester'] > 0) {
+			$u->sessionvars['classmgr']['currentsemester'] = (int)$lc->postvars['semester'];	
+		} else {
+//*
+               	}
+//*/
+
+		$id_semesters = (int)$u->sessionvars['classmgr']['currentsemester'];
+		if ($id_semesters > 0 ) {
+			$semesterObj = semesterObj::_getFromDB($id_semesters, 'id_semesters');	
+		}
+		if (LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')) {
+			$t['semesterDisplay'] = ' &endash; '.$semesterObj->semesterTerm. ' '. $semesterObj->semesterYear;
+		}
+		
+		
+		$f = new SiteForm();
+		$f->getForm('semestersfaculty', array('semester'=>$u->sessionvars['classmgr']['currentsemester']));
+		$f->action = modurl('main/');
+		$t['form'] = $f->ToHTML();
+
+
+		$t['classes'] = LcClass::getActiveClassesForFaculty($u->username);
+
+		foreach ($t['classes'] as $classObj) {
+			$db->query('
+				SELECT count(class_enrollment_id) as total_enrollment
+				FROM class_enrollment
+				WHERE
+					class_id='.$classObj->id_classes);
+			$db->nextRecord();
+			$t['classEnrollmentStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_enrollment']);
+
+			$db->query('
+				SELECT count(id_class_gradebook_entries) as total_entries
+				FROM class_gradebook_entries
+				WHERE
+					id_classes='.$classObj->id_classes);
+			$db->nextRecord();
+			$t['classEntriesStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_entries']);
+
+
+			$db->query('
+				SELECT count(assessment_id) as total_assessments
+				FROM assessment
+				WHERE
+					class_id='.$classObj->id_classes.'
+					AND date_available >= '.(time()+86400*5));
+			$db->nextRecord();
+			$t['classAssessmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assessments']);
+
+			$db->query('
+				SELECT count(id_class_assignments) as total_assignments
+				FROM class_assignments
+				WHERE
+					id_classes='.$classObj->id_classes.'
+					AND activeDate >= '.(time()+86400*5));
+			$db->nextRecord();
+			$t['classAssignmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assignments']);
+
+		}
+	}
+}
+
+?>

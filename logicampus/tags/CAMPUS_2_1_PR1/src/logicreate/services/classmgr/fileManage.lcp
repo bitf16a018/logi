@@ -1,0 +1,88 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * Allow instructors to add/edit/delete files
+ * specific to them.  Files can be linked to
+ * publicly - this is not a 'protected' file
+ * manager.
+ *
+ * wrong - this service will deal with protected files
+ * webfilesManage will deal with public files
+ *
+ */
+
+class fileManage extends FacultyService {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Take the contents of a multipart form (file upload) and
+ * store in the instructor's file area.  Put confirmation
+ * message in template array and redirect to main area.
+ * 
+ * Input data: uploaded file info
+ * Output data: confirmation
+ *
+ */
+		function addFileRun(&$db,&$u,&$lc,&$t) {
+			//$t['url']=appurl("classmgr/fileManage/event=");
+			//$this->presentor='redirect';
+			//return;
+//auto-comment			$lc->templateStyle = 'private';
+			$lc->templateName='fileManage_addFile';
+
+		}
+
+/*
+ *
+ * File ID passed in from initial event to the delete event. 
+ * Delete the file then put a confirmation message in the
+ * template and redirect back to initial event.
+ * 
+ * Input data: fileID
+ * Output data: confirmation message
+ *
+ */
+		function deleteFileRun(&$db,&$u,&$lc,&$t) {
+			//$t['url']=appurl("classmgr/fileManage/event=");
+			//$this->presentor='redirect';
+			//return;
+//auto-comment			$lc->templateStyle = 'private';
+			$lc->templateName='fileManage_deleteFile';
+
+		}
+
+/*
+ *
+ * Display a list of current files in the instructor's file
+ * area.  Show any messages in the template array
+ * (confirmation, etc)
+ * 
+ * Input data: 
+ * Output data: list of files
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='fileManage_main';
+//auto-comment			$lc->templateStyle = 'private';
+		}
+
+
+
+}
+
+?>

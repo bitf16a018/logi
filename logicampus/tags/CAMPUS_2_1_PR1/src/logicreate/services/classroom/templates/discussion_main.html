@@ -1,0 +1,80 @@
+<?=$t['sectionheader'];?>
+
+<table>
+<tr><td width='30%'>&nbsp;</td>
+			<td align="left" width='70%' valign='top'>
+<form method='post' action='<?=appurl("forum/search/".$t['forum']->lcForumId);?>'>
+Search for: <input type='text' name='search' maxlength='20'><input type='submit'></form>
+			</td>
+			</tr></table>
+ 
+<table>
+<tr><td>
+	<?
+	if ($t['sectionList']) { 
+		while(list($k,$v) = each($t['sectionList'])) {
+		if (!is_array($t['forumList'][$k])) { continue; }
+		?>
+		<div class='colorbar'><?=$v->lcForumSectionName;?></div>
+			<br>
+			<table width='100%'>
+				<tr>
+					<td width='50%'>Forum</td>
+					<td width='9%'>Threads</td>
+					<td width='9%'>Total posts</td>
+					<td width='9%'>Recent poster</td>
+					<td width='9%'>Recent post</td>
+				</tr>
+
+			<?
+			while(list($key,$val) = each($t['forumList'][$k])) {
+			?>
+				<tr>
+					<td valign='top' width='50%'>
+				<a href="<?=appurl("classroom/discussion_view/".$val->lcForumId);?>"><?=$val->lcForumName;?></a>
+					</td>	
+					<td valign='top' width='9%'>
+						<?=$val->lcForumThreadCount;?>
+					</td>
+					<td valign='top' width='9%'>
+						<?=$val->lcForumPostCount;?>
+					</td>
+					<td valign='top' width='9%'>
+						<?=$val->lcForumRecentPoster;?>
+					</td>
+					<td valign='top' width='9%'>
+						<?=date("m/d/Y h:i A",$val->lcForumRecentPostTimedate);?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan='4'>
+						<?=$val->lcForumDescription;?>
+					</td>
+				</tr>
+				<?  if ($t['forumChildren'][$val->lcForumId]) { ?>
+				<tr>
+					<td colspan='4'>
+						Sub-forums: 
+						<?while(list($a,$b) = each($t['forumChildren'][$val->lcForumId])) { ?>
+						<a href="<?=appurl("classroom/discussion_view/".$b->lcForumId);?>"><?=$b->lcForumName;?></a>
+						<? } ?>
+					</td>
+				</tr>
+				<? } ?>
+			</table>
+
+
+
+			<? } ?>
+
+		<?
+		}
+
+	} else {?> 
+There are no forums for you to view at this time.  
+<BR><BR>
+<? if ($obj->user->username=="anonymous" || $obj->user->username=="") { ?>
+You may need to <a href="<?=APP_URL?>login">register / sign-in</a> before you can use the forums.
+<? } ?>
+<? } ?>
+

@@ -1,0 +1,92 @@
+<?=$t['sectionheader'];?>
+<a href="<?=modurl("viewestimates/event=view/print=y/key=".$t['key']);?>">Printer friendly version</a>
+
+<?php
+if ($t['msg'])
+{	echo '<h4 align="center">'.$t['msg'].'</h4>';
+}
+if (is_array($t['books']))
+{
+if (in_array("tbadmin",$obj->user->groups) or in_array("admin",$obj->user->groups)) { 
+$x = "<td bgcolor='silver'>&nbsp;</td>";
+}
+	echo '
+	<table cellpadding="1" cellspacing="1" border="0" width="100%">
+	<tr>
+	'.$x.'
+		<td bgcolor="silver"><B>REQ?</B></td>
+		<td bgcolor="silver"><B>CFAM</B></td>
+		<td bgcolor="silver"><B>CNUM</B></td>
+		<td bgcolor="silver"><B>ISBN</B></td>
+		<td bgcolor="silver"><B>ED.</B></td>
+		<td bgcolor="silver"><B>TITLE</B></td>
+		<td bgcolor="silver"><B>AUTHOR</B></td>
+		<td bgcolor="silver"><B>TYPE</B></td>
+		<td bgcolor="silver"><B>FACULTY</B></td>
+		<td bgcolor="silver"><B>BUNDLED</b></td>
+		<td bgcolor="silver"><B>SE</B></td>
+		<td bgcolor="silver"><B>SO</B></td>
+		<td bgcolor="silver"><B>NE</B></td>
+		<td bgcolor="silver"><B>NW</B></td>
+	</tr>';
+	
+	foreach($t['books'] as $key=>$book)
+	{
+	//if (++$ii == 5) debug($book);
+
+		$se = $book['se'];
+		$so = $book['so']; 
+		$ne = $book['ne'];
+		$nw = $book['nw'];
+		
+		if ($null == 27)
+		{	//debug($book);
+		}
+		
+if (in_array("tbadmin",$obj->user->groups) or in_array("admin",$obj->user->groups)) { 
+$x = "<td bgcolor='silver'><a href='".modurl("viewestimates/event=edit/key=$key")."'>edit</a>
+
+<a href='".modurl("viewestimates/event=removeBookEstimate/datakey=$key/key=".$obj->getvars['key'])."' onclick='if (confirm(\"You sure you want to remove this book estimation?\")) { return true; } else { return false; }'>del</a>
+
+	</td>";
+} else { $x=''; }
+		echo '<tr>';
+		echo $x;
+		echo '<td valign="top">';
+		if ($book['required']) { 
+	echo "YES"; 
+		} else { 
+	echo "NO"; 
+		}
+		echo '</td>';
+		echo '<td valign="top">'.$book['courseFamily'].'</td>';
+		echo '<td valign="top">'.$book['courseNumber'].'</td>';
+		echo '<td valign="top">'.$book['isbn'].'</td>';
+		echo '<td valign="top">'.$book['edition'].'</td>';
+		echo '<td valign="top">'.$book['title'].'</td>';
+		echo '<td valign="top">'.$book['author'].'</td>';
+		echo '<td valign="top" width="25">'.$book['type'].'</td>';
+		echo '<td valign="top" width="25">'.ucwords(str_replace("."," ",$book['instructor'])).'</td>';
+		echo '<td valign="top" width="25">'.(($book['bundled']) ? 'Yes' : 'No').'</td>';
+	
+		echo '<td valign="top" width="25">'.$se.'</td>';
+		echo '<td valign="top" width="25">'.$so.'</td>';
+		echo '<td valign="top" width="25">'.$ne.'</td>';
+		echo '<td valign="top" width="25">'.$nw.'</td>';
+		echo '</tr>';
+		echo "<tr><td colspan='14'>SECTION NUMBERS:".@implode(explode("\n",$book['sectionNumbers']), ', ')."</td></tr>";
+
+		if ($book['bundled_items']) { 
+		echo "<tr><td colspan='14'>BUNDLED ITEMS:<BR>".$book['bundled_items']."</td></tr>";
+		}
+		
+		if ($book['note']) { 
+		echo "<tr><td colspan='14'>NOTE:<BR>".$book['note']."<hr></td></tr>";
+		} else { 
+
+		echo "<tr><td colspan='14'><hr></td></tr>";
+		}
+	}
+	echo '</table>';
+}
+?>

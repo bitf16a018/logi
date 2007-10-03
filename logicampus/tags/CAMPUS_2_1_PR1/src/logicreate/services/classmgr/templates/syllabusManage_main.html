@@ -1,0 +1,56 @@
+<?=$t['sectionheader'];?>
+<? if ($t['error']) { ?><span style="color:red"><?=$t['error'];?></span><? } ?>
+<? if ($t['msg']) { ?><span style="color:blue"><?=$t['msg'];?></span><? } ?>
+
+<p>Here, you can build your syllabus section by section.  Choose a section and type in your syllabus description then click "save".  As you add sections, you can see a preview of your syllabus and edit each section below the form.</p>
+
+
+<ul>
+<?php
+foreach($t['syllabi'] as $id => $title) {
+echo "<li><a href=\"#sec-".$id."\">".$title."</a></li>\n";
+}
+?>
+</ul>
+<br/>
+
+
+<form method="POST">
+	<select name="title">
+		<option>Assignments</option>
+		<option>Attendance Policy</option>
+		<option>Course Objectives</option>
+		<option>Course Requirements</option>
+		<option>Course Schedule</option>
+		<option>E-mail Policy</option>
+		<option>Exam Policy</option>
+		<option>Grading Policy</option>
+		<option>Grading Scale</option>
+		<option>Method of Instruction</option>
+		<option>Point Allocation of Grades</option>
+		<option>Office Hours</option>
+		<option>Other Information</option>
+	</select>
+	<br/>
+	<?php if ($t['editId']) {  ?>
+	<textarea cols="80" rows="15" name="content"><?= $t['content'][$t['editId']];?></textarea>
+	<input type="hidden" name="editId" value="<?=$t['editId'];?>"/>
+	<?php } else { ?>
+	<textarea cols="80" rows="15" name="content"></textarea>
+	<?php } ?>
+	<input type="hidden" name="event" value="update"/>
+	<br/>
+	<input type="submit" value="save"/>
+</form>
+
+<h3>Syllabus Preview</h3>
+<br/>
+<p>
+<?php
+foreach($t['syllabi'] as $id => $title) {
+echo "<a name=\"sec-".$id."\"/>\n";
+echo "<h4>".$title."&nbsp;<a href=\"".modurl('syllabusManage/event=edit/id='.$id)."\">[edit]</a>&nbsp;&nbsp;<a href=\"".modurl('syllabusManage/event=del/id='.$id)."\">[delete]</a></h4>\n";
+echo "<p>".$t['content'][$id]."</p>\n";
+}
+?>
+</p>

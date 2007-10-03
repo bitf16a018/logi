@@ -1,0 +1,93 @@
+<h4>Content Page</h4>
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+
+<form action="<?= appurl('lobrepo/edit/event=save');?>" method="POST" enctype="application/x-www-form-urlencoded">
+<table width="100%" border="0" cellspacing="2" cellpadding="2">
+	<tr>
+		<td valign="top" class="">*Enter content title.</td>
+		<td valign="top" class=""><input type="text" id="txTitle" name="txTitle" value="<?=$t['lob']->get('lobTitle');?>" size="50" maxlength="255"></td>
+	</tr>
+	<tr>
+		<td valign="top" class="" valign="top">*Page content</td>
+		<td valign="top" class="">
+			<table cellpadding="0" cellspacing="0" border="0">
+				<tr><td><textarea name="txText" cols="80" rows="30" id="txText"><?=htmlentities($t['lob']->get('lobContent'));?></textarea></td></tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" valign="top" class="">&nbsp;</td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Subject</td>
+		<td valign="top" class=""><input type="text" id="md_subj" name="md_subj" value="<?=htmlentities($t['lob']->getMeta('subj'));?>" size="" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Sub-Discipline</td>
+		<td valign="top" class=""><input type="text" id="md_subdisc" name="md_subdisc" value="<?=htmlentities($t['lob']->getMeta('subdisc'));?>" size="" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Author</td>
+		<td valign="top" class=""><input type="text" id="md_author" name="md_author" value="<?=htmlentities($t['lob']->getMeta('author'));?>" size="" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Copyright Year</td>
+		<td valign="top" class=""><input type="text" id="md_copyright" name="md_copyright" value="<?=htmlentities($t['lob']->getMeta('copyright'));?>" size="" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">License</td>
+		<td valign="top" class=""><input type="text" id="md_license" name="md_license" value="<?=htmlentities($t['lob']->getMeta('license'));?>" size="" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class=""></td>
+		<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Save Content"></td>
+	</tr>
+	</table>
+
+	<input type="hidden" name="mime" value="<?=$t['mimetype'];?>">
+	<input type="hidden" name="event" value="save">
+	<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobContentId');?>">
+</form>
+<div style="font-size: 85%">*denotes a required field</div>
+
+
+<script type="text/javascript" src="<?=appurl('js');?>"></script>
+
+<script>
+var fullyloaded = false;
+function WYStxText()
+{
+
+/** Wysiwyg loader */
+document.getElementById('txText').disabled = false;
+xtxText = new HTMLArea("txText");
+xtxText.config.editorURL = "<?= BASE_URL;?>htmlarea/";
+
+xtxText.config.registerButton("insertdoclibimage", "Web Images", "doclib.gif", false, function(e) { e.execCommand("insertdoclibimage"); }); 
+xtxText.config.toolbar.push(["separator", "insertdoclibimage"]);
+
+xtxText.config.registerButton("insertdoclibcontentlinks", "Classroom Documents", "doccontentlib.gif", false, function(e) { e.execCommand("insertdoclibcontentlinks"); }); 
+xtxText.config.toolbar.push(["separator", "insertdoclibcontentlinks"]);
+
+xtxText.config.registerButton("insertcontentlinks", "Content Pages", "content.gif", false, function(e) { e.execCommand("insertcontentlinks"); }); 
+xtxText.config.toolbar.push(["separator", "insertcontentlinks"]);
+
+xtxText.config.registerButton("insertswf", "Insert .SWF", "flash.gif", false, function(e) { e.execCommand("insertswf"); }); 
+xtxText.config.toolbar.push(["separator", "insertswf"]);
+
+xtxText.generate();
+fullyloaded=true;
+}
+
+document.getElementById('txText').disabled= true;
+setTimeout('WYStxText()', 2200);
+</script>

@@ -1,0 +1,165 @@
+<?
+
+include_once(LIB_PATH.'classLessonContentObj.php');
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
+//include_once(LIB_PATH.'datagrid.php');
+
+//include(LIB_PATH.'lc_table.php');
+//include(LIB_PATH.'lc_table_renderer.php');
+
+include_once(LIB_PATH."documentLibraryLib.php");
+
+/**
+ * handles displaying online lessons
+ *
+ */
+class content extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Classroom Lessons';
+	var $inactivelinks = array(
+		'Lessons',
+	);
+
+
+	/**
+	 * Default event
+	 * 
+	 * Input data:  $u->activeClassTaken->id_classes
+	 * Output data: show all lessons for this class
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$ut = time();						
+		//print_r($lc->getvars);
+		$uniqCode = $lc->getvars[1];
+		$filename = addslashes(trim(urlencode($lc->getvars[2])));
+		$lc->templateName = 'viewer_main';
+		
+		$viewerAuth = false;
+		$classId=-1;
+		$lesson_id=-1;
+		$lesson_id = $u->sessionvars['activeLesson']['id_class_lessons'];
+		foreach ($u->classesTaken as $classObj) {
+			$code = lcClass::makeUniqueCode($classObj);
+			if ($uniqCode == $code) {
+				$viewerAuth = true;
+				$classId = $classObj->id_classes;
+				break;
+			}
+		}
+
+		if (!$viewerAuth) {
+			$t['error'] = "You are not authorized to view this content.";
+			return;
+		}
+
+		/*
+		$db->query("SELECT * FROM classdoclib_Files as A 
+			LEFT JOIN classdoclib_Folders as B on A.folder = B.pkey
+			WHERE file='".$filename."'
+			AND B.class_id = ".$classId);
+		if ($db->nextRecord()) {
+			$file = $db->record;
+			$fullpath = LC_DiskRepository::getFullPath($file['diskName']);
+			if ($file['mime'] == 'image/jpeg') {
+				header('Content-type: image/jpeg');
+			} else {
+				header('Content-type: '.$file['mime']);
+			}
+
+			$fd = fopen($fullpath,"r");
+			fpassthru($fd);
+			exit();
+		}
+		//else it's not a download file, but an HTML page
+		// we need to show HTML content pages in here so embedded images
+		// will get the correct HTTP headers and no template around their binary data.
+		// This is because most LMS's content objects do not distinguish between html and non-html content
+		$db->query("SELECT * FROM class_lesson_content as A 
+			WHERE txTitle='".$filename."'
+			AND A.id_classes = ".$classId);
+		if ($db->nextRecord()) {
+			$t['file']['title'] = $db->record['txTitle'];
+			$t['file']['content'] = $db->record['txText'];
+			$t['file']['mime'] = 'text/html';
+		}
+		 */
+
+		/*
+		$db->query("SELECT * FROM lob_content as A 
+			LEFT JOIN class_lesson_sequence AS B on A.lob_content_id = B.lob_id
+			WHERE B.link_text='".$filename."'
+			AND B.lesson_id = ".$lesson_id."
+			AND B.class_id = ".$classId);
+		 */
+
+
+		//SEQUENCE ITEMS
+		$uniqcode = lcClass::makeUniqueCode($u->activeClassTaken);
+
+		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lesson_id . ' ORDER BY rank');
+		//find the array index of the current page
+		$curIdx = -1;
+
+		foreach ($t['seqItems'] as $idx => $seqObj) {
+			if ($seqObj->linkText == $filename) {
+				$curIdx = $idx;
+				break;
+			}
+		}
+		$nextIdx = $curIdx+1;
+		$prevIdx = $curIdx-1;
+		if ($prevIdx < 0 ) { $prevIdx = 0; }
+
+		//choose a start URL, viewer or content
+		if ($t['seqItems'][$nextIdx]->lobMime == 'text/html') {
+			$t['nextUrl'] = appurl('classroom/content/'.$uniqcode.'/'.$t['seqItems'][$nextIdx]->linkText);
+		} else {
+			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqcode.'/'.$t['seqItems'][$nextIdx]->linkText);
+		}
+
+
+//		debug($t['seqItems'][$curIdx],1);
+
+		//cannot find content in the sequence, might be a linked image
+		// try to find it just linked up to this class
+		if ($curIdx == -1) {
+			$db->query("SELECT * FROM lob_content as A 
+				LEFT JOIN lob_class_link AS B on A.lob_content_id = B.lob_id
+				WHERE A.lob_urltitle = '".$filename."'
+				AND B.class_id = ".$classId);
+
+		} else {
+			$db->query("SELECT * FROM lob_content as A 
+				LEFT JOIN lob_class_link AS B on A.lob_content_id = B.lob_id
+				WHERE A.lob_content_id = ".$t['seqItems'][$curIdx]->lobId."
+				AND B.class_id = ".$classId);
+		}
+		if ($db->nextRecord()) {
+			$t['file']['title'] = $db->record['lob_title'];
+			$t['file']['content'] = $db->record['lob_content'];
+			$t['file']['mime'] = 'text/html';
+		}
+		if ( strstr($db->record['lob_mime'] , 'image') ) {
+			header('Content-type: '.$db->record['lob_mime']);
+			echo $db->record['lob_binary'];
+			exit();
+		}
+
+		if ( strstr($db->record['lob_sub_type'] , 'document') ) {
+			header('Content-type: '.$db->record['lob_mime']);
+			header('Content-disposition: attachment;filename='.$db->record['lob_filename']);
+			echo $db->record['lob_binary'];
+			exit();
+		}
+
+		//load the next learning object sequence
+		$lc->templateName = 'viewer_main';
+		$t['uniqcode'] = $uniqCode;
+	}
+}
+
+?>

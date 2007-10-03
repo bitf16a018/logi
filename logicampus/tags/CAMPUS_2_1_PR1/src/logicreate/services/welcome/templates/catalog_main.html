@@ -1,0 +1,9 @@
+<h3>Browse classes in: </h3>
+<?php
+
+foreach ($t['courses'] as $abbrv => $name) {
+
+	echo '&nbsp;&nbsp;<a href="'.appurl('welcome/catalog/event=course/c='.$abbrv).'">'.$name.'</a><br/>';
+	echo "\n";
+}
+?>

@@ -1,0 +1,17 @@
+<style type="text/css">
+	.calendar_controls{
+		font-size:120%;
+		font-weight:bold;
+	}
+</style>
+<?=$t['sectionheader'];?>
+
+<div class="calendar_controls" id="calendar_controls">
+	<?=$t['calendarRenderer']->controlsToHTML();?>
+
+</div>
+
+<div class="calendar" id="calendar">
+	<?=$t['calendarRenderer']->toHTML();?>
+
+</div>

@@ -1,0 +1,68 @@
+	/**
+	 *	Calendar Styles
+	 **/
+ 	#calendar table {
+		background-color:#F2F2F2;
+		border: 1px solid silver;
+	}
+	
+	#calendar table.monthtable
+	{
+		/*background-color:#FFCE7B; */
+	}
+
+	#calendar table.monthtitletable
+	{	border-bottom: 0px;
+		padding: 3px;
+		background-color: #EEEEEE;
+		font-weight: bold;
+	}
+	
+	/* weekday (lit) bar **/
+	#calendar table tr.row2
+	{
+		background-color: #003062;
+		text-align: right;
+		font-family: arial;
+		color: white;
+		font-weight: bold;
+	}
+	
+	#calendar table tr.row2 td
+	{	padding-right: 4px;
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+	
+	.monthCall
+	{	background: #FFEBEB; 
+		padding-bottom: 20px;
+	}
+	
+	.calHasEvent
+	{	background-color: #9C0000;
+	}
+	
+	.calHasEvent a
+	{	color: white;
+		font-weight: normal;
+	}
+	
+	.weekendDay
+
+
+
+	.cal_event_day {
+		background-color:#C0FFC0;
+		border: 1px dashed black;
+	}
+
+	.cal_weekday_odd {
+		background-color:#F0EEEE;
+	}
+
+	.cal_weekday_even {
+		background-color:#FFEEEE;
+	}
+
+

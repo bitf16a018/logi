@@ -1,0 +1,93 @@
+<?=$t['sectionheader'];?>
+
+<?php
+if ( strlen($t['error']) > 0 ) { ?>
+	<?= lcMessageBox($t['error'],'e');?>
+<?php } ?>
+
+	<div align="right" style="text-align:right;">
+		<!-- <a href="<?= appurl('classroom/viewer/'.$t['uniqcode'].'/43013-Manarola - 2004.jpg');?>" style="font-size:90%;">Next</a> -->
+		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next</a>
+	</div>
+
+<?php
+
+if ($t['file']['mime'] == 'image/jpeg') {
+
+//debug($t['file']);
+
+	echo '<h3>'.$t['file']['title'].'</h3>';
+	echo ''.$t['file']['description'].'';
+	echo "<br/>\n";
+	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['linkText'].'"/>';
+}
+?>
+
+<?php
+if ($t['file']['mime'] == 'text/html') {
+
+	echo '<h3>'.$t['file']['title'].'</h3>';
+	echo "<br/>\n";
+	echo $t['file']['content'];
+}
+?>
+
+<?php
+//debug($t['lob']);
+//needs to be handled internall by the LMS.  Items such as tests and assignments and forums
+if ($t['lob']['lob_mime'] == 'X-LMS/assignment') {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+	<?php
+	echo '<h3>Assignment</h3>';
+	echo 'Name: '.$t['activity']['title'];
+	echo "<br/>\n";
+	echo 'Instructions: ';
+	echo $t['activity']['instructions'];
+	echo "<br/>\n";
+	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['activity']['id_class_assignments']).'">Start the test.</a>';
+	?>
+</fieldset>
+</div>
+<?php
+
+}
+
+if ($t['lob']['lob_mime'] == 'X-LMS/assessment') {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+<?php
+	echo '<h3>Test:&nbsp; '.$t['activity']['display_name'].'</h3>';
+	echo 'Time limit: '. $t['activity']['minute_limit'].' minutes';
+	echo "<br/>\n";
+	echo 'Retries: '. $t['activity']['num_retries'].' time(s)';
+	echo "<br/>\n";
+	echo 'Instructions: ';
+	echo $t['activity']['instructions'];
+	echo "<br/>\n";
+	echo '<a href="'.appurl('test/take/event=start/id='.$t['activity']['assessment_id']).'">Start the test.</a>';
+	?>
+</fieldset>
+</div>
+<?php
+}
+
+//debug($t['file']);
+if ( strstr($t['file']['mime'] , 'application/') ) {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+	<h3><?=$t['file']['title']?></h3>
+	size: <?=$t['file']['bytesize'];?> bytes
+	<br/>
+	<a href="<?=appurl('classroom/content/'.$t['uniqcode'].'/'.$t['file']['linkText']);?>">Click to download.</a>
+</fieldset>
+</div>
+<?php
+}
+?>

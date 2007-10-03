@@ -1,0 +1,153 @@
+<h2>Textbook Request FOrm</h2>
+<br>
+<b>FORM: #002A54</b><br>
+Class: 04GE1<br>
+Semester: SP2002<br>
+Instructor: George Nobody<br>
+Mod of Instruction: Internet<br>
+<br>
+
+<b>STATUS: Filling out</b><br>
+
+
+<center>
+	<input type="submit" value="Finalize this request for textbooks order (reword)">
+</center>
+<br>
+<br>
+<fieldset>
+<LEGEND>Developers Note</legend>
+<b>higher authority</b> - will see this form the same as an instructor but will have an extra
+dropdown to approve this "order" or "requisition" for books. Will also have the ability to
+edit each book, where "remove from this request" link is, there will be an "edit textbook request" link 
+, when clicked the information will be loaded in the form below (that you normally use to add, the page will center the form 
+on the screen so it's obvious and change the wording to be UPDATE instead of ADD, ect. giving the abilty to update
+a textbook entry for the request (one at a time).
+<br>
+<br>
+<b>status</b> when instructor selects the button above (Finalize this request for tex...) the status will change
+to "waiting for approval" thus notifing the higher authority to approve this request.
+<br>
+
+</fieldset>
+
+<br><br>
+<table bgcolor="tan" style="font-size: 11px; font-family: verdana;" cellpadding="2" border="0" cellspacing="1" width="100%">
+<tr>
+	<td colspan="2" align="center"><b>Books you are requesting for this form</b></td>
+</tr>
+<tr bgcolor="#FFF6E6">
+	<td valign="top">
+	Request: #1<br>
+	Required Material<br>
+	Bundle: No<br>
+	<br>
+	<a href="<?=modurl('form/id_form=/event=remove/isbn=');?>">remove from this request</a>
+	</td>
+	<td valign="top">
+	ISBN: 100523402034<br>
+	Publisher: Alfred E. Newman<br>
+	Author(s): Mr. Newman<br>
+	Title: Gritty Jokes<br>
+	Edition: 5th Edition<br>
+	Copyright: 2001
+	</td>
+</tr>
+</table>
+
+
+list of books you've requested for this class, this list will grow as you add them with the form below
+
+<br><br>
+<form action="<?=modurl('form/id_form='. $obj->getvars['id_form']);?>" method="post">
+
+<table cellpadding="2" cellspacing="1" border="0" bgcolor="tan" width="100%">
+<tr>
+	<td bgcolor="#FFF6E6">
+	
+<table style="font-size: 11px; font-family: verdana;" cellpadding="2" cellspacing="1" border="0" width="100%">
+<tr>
+	<td bgcolor="tan" colspan="2" align="center"> 
+	BOOK REQUEST FORM
+	</td>
+</tr>
+<tr>
+	<td>Material:</td>
+	<td>
+		<select name="material">
+			<option value="1">Textbook</option>
+			<option value="2">Study Guide/Telecourse</option>
+			<option value="3">Software</option>
+			<option value="4">Other</option>
+		</select>
+	</td>
+</tr>
+
+<tr>
+	<td>Is this required:</td>
+	<td>
+		<select name="required">
+			<option value="1">Required</option>
+			<option value="0">Optional</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td bgcolor="tan" colspan="2"> 
+	Part of a bundle
+	</td>
+</tr>
+<tr>
+	<td>Is part of a bundle:</td>
+	<td>
+		<select name="bundle">
+			<option value="No">No</option>
+			<option value="Yes">Yes</option>
+		</select>
+	</td>
+</tr>
+
+<tr>
+	<td>&nbsp;</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ISBN:</td>
+	<td><input type="text" name="isbn" size="40"></td>
+</tr><tr>
+	<td>Publisher:</td>
+	<td><input type="text" name="publisher" size="40"></td>
+</tr>
+<tr>
+	<td>Author(s):</td>
+	<td><input type="text" name="authors" size="40"></td>
+</tr><tr>
+	<td>Title:</td>
+	<td><input type="text" name="title" size="40"></td>
+</tr><tr>
+	<td>Edition:</td>
+	<td><input type="text" name="edition"></td>
+</tr><tr>
+	<td>Copyright:</td>
+	<td><input type="text" name="copyright"></td>
+</tr>
+
+<tr>
+	<td colspan="2"></td>
+</tr>
+
+<tr>
+	<td colspan="2" align="center"><input type="submit" value="Request this book"></td>
+</tr>
+
+</table>
+
+	</td>
+</tr>
+</table>
+<input type="hidden" name="event" value="addbook">
+</form>
+
+
+
+
