@@ -303,10 +303,10 @@ class PBDO_ParsedIndex {
 
 	function toSQL() {
 		if ($this->isUnique() ) {
-			return "CREATE UNIQUE INDEX ".$this->name." ON ".$this->table." (".$this->columns[0].");";
+			return "CREATE UNIQUE INDEX `".$this->name."` ON `".$this->table."` (`".$this->columns[0]."`);";
 		}
 
-		return "CREATE INDEX ".$this->name." ON ".$this->table." (".$this->columns[0].");";
+		return "CREATE INDEX `".$this->name."` ON `".$this->table."` (`".$this->columns[0]."`);";
 	}
 
 
