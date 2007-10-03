@@ -22,18 +22,18 @@ class mysql extends DB {
 	 * Connect to the DB server
 	 *
 	 * Uses the classes internal host,user,password, and database variables
-	 * @return void
+	 * @return boolean
 	 */
-	function connect() {
+	function connect($force = false) {
 
-		if ( $this->driverID == 0 ) {
+		if ( $this->driverID == 0 || $force) {
                 if ($this->persistent=='y') {
-			$this->driverID=mysql_pconnect($this->host, $this->user,$this->password);
+			$this->driverID=@mysql_pconnect($this->host, $this->user,$this->password, $force);
                 } else {
-			$this->driverID=mysql_connect($this->host, $this->user,$this->password);
+			$this->driverID=@mysql_connect($this->host, $this->user,$this->password, $force);
                 }
 			if (!$this->driverID) {
-				$this->halt();
+				//$this->halt();
 			}
 		}
 
@@ -43,6 +43,16 @@ class mysql extends DB {
 		}
 		return true;
 	}
+
+	/**
+	 * Force a reconnect to the DB server
+	 *
+	 * @return boolean
+	 */
+	function reconnect() {
+		return $this->connect(true);
+	}
+
 
 
 	/**
@@ -59,6 +69,38 @@ class mysql extends DB {
 		if ($this->driverID == 0 ) {$this->connect();}
 
 		$resSet = mysql_query($queryString,$this->driverID);
+		$this->row = 0;
+		if ( !$resSet ) {
+			$this->errorNumber = mysql_errno($this->driverID);
+			$this->errorMessage = mysql_error($this->driverID);
+			if (!strstr($this->queryString, 'lcUsers')) {
+				//print_r($this);
+				//die($this->queryString);
+			}
+			lcError::throwError(9,$this->errorMessage);
+			return false;
+		}
+		if (is_resource($resSet)) {
+			$this->resultSet[] = $resSet;
+		}
+		return true;
+	}
+
+
+	/**
+	 * Send query to the DB
+	 *
+	 * Results are stored in $this->resultSet;
+	 * @return 	void
+	 * @param 	string	$queryString	SQL command to send
+	 */
+	function unbuffered_query($queryString,$log=true) {
+		global $debugmode,$REMOTE_ADDR;
+		$this->queryString = $queryString;
+
+		if ($this->driverID == 0 ) {$this->connect();}
+
+		$resSet = mysql_unbuffered_query($queryString,$this->driverID);
 		$this->row = 0;
 		if ( !$resSet ) {
 			$this->errorNumber = mysql_errno($this->driverID);
@@ -105,8 +147,8 @@ class mysql extends DB {
 		$ret = is_array($this->Record);
 		if ( ! $ret ) {
 			if( is_resource($this->resultSet[$resID]) ) {
-				mysql_free_result($this->resultSet[$resID]);
-				array_pop($this->resultSet);
+				$stuff = array_pop($this->resultSet);
+				mysql_free_result($stuff);
 			}
 		}
 		return $ret;
@@ -121,14 +163,22 @@ class mysql extends DB {
 
 
 	/**
+	 * Release the most recent result ID
+	 */
+	function freeResult() {
+		$stuff = array_pop($this->resultSet);
+		mysql_free_result($stuff);
+	}
+
+	/**
 	 * Short hand for query() and next_record().
 	 *
 	 * @param string $sql SQL Command
 	 */
 	function queryOne($sql) {
 		$this->query($sql);
-		$ret = $this->next_record();
-		array_pop($this->resultSet);
+		$ret = $this->nextRecord();
+		$this->freeResult();
 		return $ret;
 	}
 
@@ -260,7 +310,7 @@ class mysql extends DB {
  	 *
  	 */
 	function disconnect() {
-		mysql_close();
+		mysql_close($this->driverID);
 	}
 
 
