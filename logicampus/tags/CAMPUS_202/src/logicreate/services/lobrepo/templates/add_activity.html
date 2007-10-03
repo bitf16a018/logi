@@ -1,0 +1,92 @@
+<h4>Student Activity</h4>
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+
+
+<form action="<?=appurl('lobrepo').'/edit/event=saveAct';?>" method="POST" enctype="application/x-www-form-urlencoded">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+	<tr>
+		<td valign="top" class="row1">*Title</td>
+		<td valign="top" class=""><input type="text" id="title" name="title" value="" size="40" maxlength="50"></td>
+	</tr>
+
+	<tr>
+		<td valign="top" class="row1" valign="top">*Instructions for students</td>
+		<td valign="top" class="">
+			<textarea name="instructions" cols="40" rows="5" id="instructions"></textarea>
+		</td>
+	</tr>
+
+	<tr>
+		<td valign="top" class="row1" valign="top">Notes (only for faculty)</td>
+		<td valign="top" class="">
+			<textarea name="notes" cols="40" rows="5" id="notes"></textarea>
+		</td>
+	</tr>
+
+
+	<tr>
+		<td valign="top" class="row1">Type of response</td>
+		<td valign="top" class="">
+				<input type="radio" name="responseType" value="5" checked="CHECKED">None<br/>
+				<input type="radio" name="responseType" value="1">Upload a File<br/>
+				<input type="radio" name="responseType" value="2">Text Response<br/>
+				<input type="radio" name="responseType" value="3">Upload and Text<br/>
+				<input type="radio" name="responseType" value="4">Forum Post<br/>
+				<input type="radio" name="responseType" value="6">Audio Response<br/>
+			<div style="font-size=80%;">(If you have another type of response select &quot;None&quot; and be sure to include appropriate instructions.)</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" valign="top" class="">&nbsp;</td>
+	</tr>
+	<tr>
+		<td valign="top" class="row1"></td>
+		<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Add Assignment"></td>
+	</tr>
+</table>
+
+</form>
+<div style="font-size: 85%">*denotes a required field</div>
+
+
+<script>
+
+
+	function noduedate() {
+		var obj_responsetype = document.getElementById("responseType");
+		obj_responsetype.selectedIndex = 4;
+		return false;
+	}
+
+	function lookatchange()
+	{	
+		var obj_noduedate = document.getElementById("noDueDate");
+		var obj_responsetype = document.getElementById("responseType");
+		
+		if (obj_noduedate.checked)
+		{	
+			obj_responsetype.readonly = true;
+			obj_responsetype.disabled = true;
+			obj_responsetype.selectedIndex = 4;
+			obj_responsetype.onchange = noduedate;
+			
+		} else
+		{	
+			obj_responsetype.onfocus = '';
+		}
+		
+	}
+	
+	
+	
+</script>

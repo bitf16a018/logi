@@ -1,0 +1,145 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * Syllabus will pull standard information from a
+ * database - that info will be administered by CDL
+ * staff (orientation requirements, textbook info,
+ * number of on-campus exams, etc).  Faculty using
+ * this service will be able to put in one generic
+ * textarea per course they are teaching.  If there
+ * is to be a different setup (distinct fields for a
+ * syllabus) we need to know.
+ *
+ */
+
+//include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'PBDO/ClassSyllabus.php');
+
+class syllabusManage extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Syllabus Manager';
+	var $navlinks = array(
+		'Classroom Manager' => 'display/',
+		'Calendar' => 'cal/'
+	);
+	var $inactivelinks = array( 'Syllabus' );
+
+	/**
+	 * Show the main class syllabus.
+	 * 
+	 * Input data: classID
+	 * Output data: syllabus
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='syllabusManage_main';
+		$classId = (int)$u->activeClassTaught->id_classes;
+
+		$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId);
+		foreach($syllabus as $sylObj) {
+			$id      = $sylObj->get('classSyllabusId');
+			$title   = $sylObj->get('sectionTitle');
+			$content = $sylObj->get('sectionContent');
+			$t['syllabi'][$id] = nl2br($title);
+			$t['content'][$id] = nl2br($content);
+		}
+	}
+
+
+	function editRun(&$db,&$u,&$lc,&$t) {
+		//load up the syllabus
+		$this->run($db,$u,$lc,$t);
+		$sectionId = (int)$lc->getvars['id'];
+		$t['editId'] = $sectionId;
+	}
+
+
+	function delRun(&$db,&$u,&$lc,&$t) {
+		//load up the syllabus
+		$classId = (int)$u->activeClassTaught->id_classes;
+		$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId);
+		$sectionId = (int)$lc->getvars['id'];
+		foreach($syllabus as $sylObj) {
+			$id      = $sylObj->get('classSyllabusId');
+			//this matches the given section id submitted to the site.
+			if ($id == $sectionId) {
+				$sylObj->delete();
+				$u->addSessionMessage('Successfully deleted syllabus section.');
+			}
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/syllabusManage/');
+	}
+
+
+	/**
+	 * Update the syllabus info in the database.
+	 * 
+	 * Input data: updated syllabus info
+	 * Output data: confirmation message
+	 *
+	 */
+	function updateRun(&$db,&$u,&$lc,&$t) {
+
+		$classId = (int)$u->activeClassTaught->id_classes;
+		$title = trim(htmlentities($lc->postvars['title']));
+		$section = htmlentities($lc->postvars['content']);
+
+		//if editing
+		$editId = (int)$lc->postvars['editId'];
+		if ($editId > 0 ) {
+			//load up this syllabus with security check 
+			$classId = (int)$u->activeClassTaught->id_classes;
+			$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId." and class_syllabus_id = ".$editId);
+			$syllabusObj = $syllabus[0];
+
+			if (! is_object($syllabusObj) ) {
+				$u->addSessionMessage('The system could not find the requested syllabus section for editing.','e');
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = appurl('classmgr/syllabusManage/');
+			}
+			//change it and save it
+			
+			$syllabusObj->set('sectionContent',$section);
+			$syllabusObj->set('sectionTitle',$title);
+
+			$syllabusObj->save();
+			$u->addSessionMessage('Successfully updated syllabus section.');
+			//can't do return value checking with PBDOs, use fake try/catch
+/*
+			if ($syllabusObj->save() ) {
+				$u->addSessionMessage('Successfully updated syllabus section.');
+			} else {
+				$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
+			}
+*/
+			 
+		} else {
+			$syllabus = new ClassSyllabus();
+			$syllabus->set('classId',$classId);
+			$syllabus->set('sectionTitle',$title);
+			$syllabus->set('sectionContent',$section);
+			$syllabus->save();
+			$u->addSessionMessage('Added a new section to your syllabus with the title <i>'.$lc->postvars['title'].'</i>');
+//			$u->addSessionMessage('There was some sort of problem with saving the syllabus section.');
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/syllabusManage/');
+	}
+}
+
+?>

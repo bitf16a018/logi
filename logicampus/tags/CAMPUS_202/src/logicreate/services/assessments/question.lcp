@@ -1,0 +1,516 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
+
+class question extends FacultyService {
+
+
+	var $presentor = 'HTMLPresentation';
+	var $data = array();  # cleaned form data
+	var $sectionTitle = 'Class Assessments';
+	var $applinks = array (
+		'List Assessments'=>'main',
+		'Add Assessment' => 'add'
+		);
+	var $navlinks = array(
+		'Calendar' => 'cal',
+		'Grade book' => '%gradebook'
+	);
+
+	var $inactivelinks = array (
+		'Add Assessment' => 'add'
+	);
+
+
+	/**
+	 * show form for question
+	 */
+	function questionRun($db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'question_main';
+	
+	}
+
+
+	/**
+	 * show form for question
+	 */
+	function deleteRun($db,&$u,&$lc,&$t) {
+
+		$qid= (int)$lc->getvars['qid'];
+		$q = AssessmentQuestion::load($qid,$u->activeClassTaught->id_classes); 
+	
+		if (!$q) {
+			//__FIXME__ make this error better
+			die('no permission to remove question '.$qid);
+		}
+
+		AssessmentQuestionPeer::doDelete($q);
+
+		# Delete all of the answers for students
+		$sql = "delete from assessment_answer where assessment_question_id='$qid'";
+		$db->query($sql);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('main/event=view/id='.$lc->getvars['id']);
+	}
+
+
+
+	/**
+	 * sort the question to the proper place
+	 * qid = the id of the question to sort
+	 * id = the assessment
+	 * order = the new order
+	 * method = get
+	 * DEPRECATED, look in main.lcp
+	 */
+	function sortRun($db,&$u,&$lc,&$t) {
+		$qid= (int)$lc->getvars['qid'];
+		$id= (int)$lc->getvars['id'];
+
+
+		//handle all the select boxes being submitted at once
+		while ( list($k,$v) = @each($lc->getvars['order']) ) {
+			if ($k != ($v+1) ) {
+				$order= $v-1;
+			}
+		}
+		debug($lc->getvars,1);
+
+		$ast = Assessment::load($id,$u->activeClassTaught->id_classes);
+		//__FIXME__ add security
+
+		$questions = $ast->getAssessmentQuestions();
+
+		// find whether the move is up or down
+		foreach ($questions as $k=>$q ) {
+			if ($q->assessmentQuestionId == $qid) {
+				$updown = ($k > $order)? true:false;
+				$question = $q;
+				$key = $k;
+
+				//don't allow move onto self
+				if  ($k == $order) {
+					$t['url']  = modurl('main/event=view/id='.$id);
+					$this->presentor = 'redirectPresentation';
+					return;
+				}
+
+			}
+		}
+
+		reset($questions);
+		// perform up and down sorts seperately
+		if ($updown) {
+			//new file moves up
+			$start = $order;
+			$end = $key;
+			$current = $start;
+			$last = $question;
+			$questions[$end] = $questions[$end+1];
+			do {
+				$tmp = $questions[$current];
+				$questions[$current] = $last;
+				$last = $tmp;
+			} while (++$current <= $end);
+		} else {
+			//new file moves down
+			$start = $order;
+			$end = $key;
+			$current = $start;
+			$last = $question;
+			do {
+				$tmp = $questions[$current];
+				$questions[$current] = $last;
+				$last = $tmp;
+			} while (--$current >= $end);
+		}
+
+
+		reset($questions);
+		foreach ($questions as $k=>$q ) {
+			if ($k != $q->questionSort ) {
+				$q->questionSort = $k;
+				$q->save();
+			}
+		}
+
+		$t['url']  = modurl('main/event=view/id='.$id);
+		$this->presentor = 'redirectPresentation';
+	}
+
+
+	/**
+	 * show a form for adding a type of question
+	 * question specifics are dealt with in the
+	 * template
+	 */
+	 function addRun(&$db,&$u,&$lc,&$t) {
+		$t['questionType'] = urlencode($lc->getvars['type']);
+		$t['id'] = $lc->getvars['id'];
+		switch($lc->getvars['type']) {
+			case 'Multiple Choice':
+				$lc->templateName = 'question_mchoice';
+				if ( !$t['q'] ) $t['q'] = new AssessmentQuestionMChoice();
+				$this->sectionTitle = 'Multiple Choice Question';
+				break;
+			case 'Multiple Answer':
+				$lc->templateName = 'question_manswer';
+				if ( !$t['q'] ) $t['q'] = new AssessmentQuestionMAnswer();
+				$this->sectionTitle = 'Multiple Answer Question';
+				break;
+			case 'Matching Question':
+				$lc->templateName = 'question_matching';
+				if ( !$t['q'] ) $t['q'] = new AssessmentQuestionMatching();
+				$this->sectionTitle = 'Matching Question';
+				break;
+			case 'True/False':
+				$lc->templateName = 'question_truefalse';
+				if ( !$t['q'] ) $t['q'] = new AssessmentQuestionTrueFalse();
+				$this->sectionTitle = 'True / False Question';
+				break;
+			case 'Essay':
+				$lc->templateName = 'question_essay';
+				if ( !$t['q'] ) $t['q'] = new AssessmentQuestionEssay();
+				$this->sectionTitle = 'Essay Question';
+				break;
+			case 'Fill in the Blank':
+				$lc->templateName = 'question_fillinblank';
+				$this->sectionTitle = 'Fill In The Blank Question';
+				if ( !$t['q'] ) $t['q'] = new AssessmentQuestionFill();
+				break;
+			default:
+				$lc->templateName = 'question_error';
+				$t['message']  = 'The question type chosen has not been defined in the system.';
+		}
+
+		$this->getImages( $t, $u->activeClassTaught->id_classes );
+	 }
+
+
+	function saveMatchingRun($db, &$u, &$lc, &$t) {
+		stripLC($lc);
+		if ($lc->getvars['qid']) {
+			$q = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
+		} else { 
+			$q = new AssessmentQuestionMatching();
+		}
+		
+		$q->questionText = $lc->postvars['questionText'];
+		// randomize the answers to confuse students
+		/*
+			[0] = apple
+			[1] = orange
+			[2] = foo
+
+			will end up as
+			[0][2] = foo
+			[1][0] = apple
+			[2][1] = orange
+
+		*/
+
+		foreach ( $lc->postvars['labels'] as $key => $question) {
+			if ( trim(strip_tags($question)) == '' ) continue;
+			// store this for later use in the template
+			$t['questions'][$key] = $question;
+
+			// update object
+			$q->questionChoices[$key]->label = $question;
+		}
+
+		foreach ( $lc->postvars['correct'] as $key => $answer) {
+			++$newkey;
+			if ( trim($answer) == '' ) continue;
+			// store this for later use in the template
+			$t['randomAnswers'][$newkey][$key] = $answer;
+
+			$q->questionChoices[$key]->correct =  $answer;
+		}
+
+		shuffle( $t['randomAnswers']);
+	
+		$q->questionChoices['randomAnswers'] = $t['randomAnswers'];
+
+
+		// Error checking
+		$t['error'] = $q->validate();
+		$t['q'] = $q;
+		if ($t['error']) {
+			if($lc->getvars['qid']) {
+				$this->editRun($db, $u, $lc, $t);	
+				return;
+			} else {
+				$this->addRun($db, $u, $lc, $t);
+				return;
+			}
+		} else {
+			$q->assessmentId = $lc->getvars['id'];
+			$q->fileHash = $lc->postvars['fileHash'];
+			if ($q->questionSort == '') {
+				$q->questionSort = 9999;
+			}
+			$q->save();
+		}
+
+		// show the teacher their question so they can preview it
+		$lc->templateName = 'question_savematching';
+		$this->sectionTitle .= ' - Matching Question Preview';
+		$t['id'] = $lc->getvars['id'];
+	}
+
+	/**
+	 * show a form for editing a type of question
+	 * question specifics are dealt with in the
+	 * template
+	 */
+	 function editRun(&$db,&$u,&$lc,&$t) {
+	 	if (!$t['q']) {
+			$t['q'] = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
+		}
+		# Load the assessment and check the log
+		$id = $lc->getvars['id'];
+		$asmt = Assessment::load($id, $u->activeClassTaught->id_classes);
+
+		//assessments must be modifiable after students start taking them, only, we must
+		// limit the modifications to which answer is correct.
+		// MAK 10-09-2003 per conversation with Kevin, et. al.
+
+		$t['limitModifications'] = false;
+		if ($asmt->isTaken() ) {
+			$t['limitModifications'] = true;
+			$t['disableFlag'] = 'DISABLED';
+			$t['error'] .= "<br/>You will only be able to change which is the correct answer for this question since students have already started taking this exam.<br/>";
+		}
+
+		switch($t['q']->questionType) {
+			case QUESTION_TRUEFALSE:
+				$lc->templateName = 'question_truefalse';
+				break;
+			case QUESTION_MCHOICE:
+				$lc->templateName = 'question_mchoice';
+				break;
+			case QUESTION_MANSWER:
+				$lc->templateName = 'question_manswer';
+				break;
+			case QUESTION_MATCHING:
+				$lc->templateName = 'question_matching';
+				break;
+			case QUESTION_FILLINBLANK:
+				$lc->templateName = 'question_fillinblank';
+				break;
+			case QUESTION_ESSAY:
+				$lc->templateName = 'question_essay';
+				break;
+		}
+
+		$this->getImages( $t, $u->activeClassTaught->id_classes );
+
+	 }
+
+
+	/**
+	 * save the data from the form before, if qid is passed
+	 * load that question
+	 */
+	 function saveRun(&$db,&$u,&$lc,&$t) {
+		stripLC($lc);
+		if (!$lc->getvars['qid']) {
+			switch($lc->getvars['type'])  {
+
+				case 'Multiple Choice':
+					$x = 'MChoice';
+					$this->sectionTitle = 'Multiple Choice Question';
+					break;
+				case 'Matching Question':
+					$x = 'Matching';
+					$this->sectionTitle = 'Matching Question';
+					break;
+				case 'True/False':
+					$x = 'TrueFalse';
+					$this->sectionTitle = 'True / False Question';
+					break;
+				case 'Essay':
+					$x = 'Essay';
+					$this->sectionTitle = 'Essay Question';
+					break;
+				case 'Fill in the Blank':
+					$x = 'Fill';
+					$this->sectionTitle = 'Fill in the blank';
+					break;
+				case 'Multiple Answer':
+					$x = 'MAnswer';
+					$this->sectionTitle = 'Multiple Answer Question';
+					break;
+				default:
+					$lc->templateName = 'question_error';
+					$t['message'] = 'Error:  The question you are modifying is not defined.';
+					return;
+			}
+		}
+
+		if ($lc->getvars['qid']) {
+			$q = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
+			//MAK 10-09-2003 in order to edit in-process tests we must only change the correct answer
+			// so get the parent assessment of this question, if isTaken() only change the correct 
+			// answer then redirect to view of this assessment
+			$assemnt = $q->getAssessment();
+		} else { 
+			$func = 'AssessmentQuestion'.$x;
+			$q = new $func();
+		}
+		
+
+//__FIXME__ add nice error messages if ! is obj $q
+
+		reset($lc->postvars['labels']);
+
+		//need to deligate finding which is the correct answer to subclasses
+
+		// see if the above loaded parent assessment (conditionally)
+		// is being taken by students right now, if so just save and exit, don't set
+		// any other properties because the form fields are disabled
+		if ( is_object($assemnt) && $assemnt->isTaken() ) {
+			//just change correct flag
+			$q->setCorrectChoice($lc->postvars);
+		} else {
+			//reset the labels and the questions
+			$q->setQuestionText($lc->postvars['questionText']);
+			$q->fileHash = $lc->postvars['fileHash'];
+			$q->resetLabels($lc->postvars);
+		}
+
+		/*
+			Need error checking for the form
+		*/
+		$t['error'] = $q->validate();
+		if ($t['error']) {
+			$t['q'] = $q;
+			if($lc->getvars['qid']) {
+				$this->editRun($db, $u, $lc, $t);	
+				return;
+			} else {
+				$this->addRun($db, $u, $lc, $t);
+				return;
+			}
+		} else {
+			if ($q->questionSort == '') {
+				$q->questionSort = 9999;
+			}
+			if ($q->assessmentId == '') {
+				$q->assessmentId = $lc->getvars['id'];
+			}
+			$q->save();
+		} 		
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('main/event=view/id='.(int)$lc->getvars['id']);
+
+	 }
+	 
+	 function moveRun($db, &$u, &$lc, &$t) {
+	 		$t['list'] = AssessmentPeer::doSelect("class_id='".$u->activeClassTaught->id_classes."' AND assessment_id != '".$lc->getvars['id']."'");
+	 		$q = AssessmentQuestion::load($lc->getvars['qid'], $u->activeClassTaught->id_classes);
+	 		$t['question'] = $q->questionText;
+	 		$t['qid'] = $lc->getvars['qid'];
+	 		#debug($t['list']);
+	 }
+
+ 	 function processMoveRun($db, &$u, &$lc, &$t) {
+	 		$q = AssessmentQuestion::load( intval($lc->getvars['qid']), $u->activeClassTaught->id_classes );
+	 		$q->assessmentId = $lc->getvars['id'];
+	 		$q->save();
+	 		$t['url'] = APP_URL.'assessments/main/event=view/id='.$lc->getvars['id'];
+	 		$this->presentor = 'redirectPresentation';
+	 }
+
+	 function copyRun($db, &$u, &$lc, &$t) {
+	 		$t['list'] = AssessmentPeer::doSelect("class_id='".$u->activeClassTaught->id_classes."' AND assessment_id != '".$lc->getvars['id']."'");
+	 		$t['qid'] = $lc->getvars['qid'];
+	 		$q = AssessmentQuestion::load($lc->getvars['qid'], $u->activeClassTaught->id_classes);
+	 		$t['question'] = $q->questionText;
+	 }
+
+	 function processCopyRun($db, &$u, &$lc, &$t) {
+	 		$q = AssessmentQuestion::load($lc->getvars['qid'], $u->activeClassTaught->id_classes);
+	 		$q->_new = true;
+	 		$q->assessmentId = $lc->getvars['id'];
+	 		$q->assessmentQuestionId = '';
+	 		$q->save();
+	 		$t['url'] = APP_URL.'assessments/main/event=view/id='.$lc->getvars['id'];
+	 		$this->presentor = 'redirectPresentation';	 		
+	  }
+
+
+	function getImages( &$t, $classid ) {
+	
+		$db = DB::getHandle();
+
+		$sql = 'SELECT DISTINCT b.daHasha, b.displayname 
+		FROM classdoclib_Folders as a
+		INNER JOIN classdoclib_Files as b
+			ON a.pkey=b.folder		
+		WHERE a.folderType=1 
+		AND a.name=\'Web Images\'
+		AND a.class_id='.$classid.'
+		AND (b.trashed !=\'y\' AND a.trashed !=\'y\')
+		';
+		$db->query($sql);
+		$t['images'] = array(); // casting var
+		while ($db->next_record())
+		{
+			$t['images'][] = $db->Record; // seeding
+		}
+	}
+	 
+}
+function stripLC(&$lc) {
+		if (!ini_get('magic_quotes_gpc') ) {
+			return false;
+		}
+		foreach($lc->postvars as $k=>$p) {
+			if (!is_array($p)) 
+			$lc->postvars[$k] = stripslashes($p);
+			else
+			$lc->postvars[$k] = recurse_array($p);
+		}
+		foreach($lc->getvars as $k=>$g) {
+			if (!is_array($g))
+			$lc->getvars[$k] = trim(stripslashes($g));
+			else
+			$lc->getvars[$k] = recurse_array($g);
+		}
+		return true;
+}
+
+
+function recurse_array($arr) {
+	while ( list($k,$v) = @each($arr) ) {
+		if ( is_array($v) ) { recurse_array($v); continue; }
+		$arr[$k] = $v;
+	}
+	return $arr;
+}
+?>

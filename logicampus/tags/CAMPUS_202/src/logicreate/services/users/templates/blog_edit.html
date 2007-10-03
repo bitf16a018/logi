@@ -1,0 +1,76 @@
+<style>
+	.blogTitle {
+		font-size: 180%;
+	}
+
+	.blogReplyTitle {
+		font-size: 120%;
+	}
+
+	.blogReplyTimedate {
+		font-size: 90%;
+	}
+
+	.blogReplyBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+	.blogEntryTitle {
+		font-size: 120%;
+	}
+
+	.blogEntryTimedate {
+		font-size: 90%;
+	}
+
+	.blogEntryBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+</style>
+
+<div class='blogTitle'><?=$t['blog']->blogDescription;?></div>
+
+<table width='100%'>
+
+	<tr>
+		<td style='vertical-align: top'>
+			<h3>Edit a posting</h3>
+			<?=$t['form'];?>
+
+			<!--
+			<form method='post' action='<?=modurl("blog/event=editpost");?>'>
+				<input type='hidden' name='blogEntryId' value='<?=$t['entry']->blogEntryId;?>'>
+				<table width='100%'>
+					<tr>
+						<td>Comment title</td>
+						<td><input type='text' name='blogEntryTitle' value='<?=htmlspecialchars($t['entry']->blogEntryTitle);?>'></td>
+					</tr>
+					<? if ($t['entry']->blogParentId==0) { // only parent posts have description/intros?>
+					<tr>
+						<td colspan='2'>
+							Short intro: 
+							<br/>
+							<textarea name='blogEntryDescription' rows='10' cols='50'><?=htmlspecialchars($t['entry']->blogEntryDescription);?></textarea>
+						</td>
+					</tr>
+					<? } ?>
+					<tr>
+						<td colspan='2'>
+							Comment: 
+							<br/>
+							<textarea name='blogEntryText' rows='10' cols='50'><?=htmlspecialchars($t['entry']->blogEntryText);?></textarea>
+						</td>
+					</tr>
+				</table>
+				<input type='submit' value='Update posting'>
+			</form>
+			-->				
+
+		</td>
+	</tr>
+</table>

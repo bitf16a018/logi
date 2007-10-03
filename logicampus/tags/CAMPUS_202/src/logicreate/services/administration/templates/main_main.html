@@ -1,0 +1,171 @@
+<h1>Administration</h1>
+<hr noshade color="#98AA99" id="line">
+<table width="100%" border="0" cellspacing="1" cellpadding="1">
+
+
+  <tr> 
+    <td colspan="3" valign="top" class="coursemaintitle">Dashboard</td>
+      </h4></td>
+      
+  </tr>
+  <tr> 
+    <td colspan="3" valign="top" class="coursemainbody">
+		<table border="0" cellspacing="3" cellpadding="4" width="100%">
+		<tr>
+			<th width="25%" align="right">Site Operating Mode:</th>
+			<td><?= $t['currentMode'];?></td>
+
+			<th width="25%" align="right">Courses / Classes:</th>
+			<td width="25%"><?=$t['courseCount'];?> / <?=$t['classCount'];?></td>
+		</tr>
+		<tr>
+			<th width="25%" align="right">Site Template:</th>
+			<td><?= $t['currentTemplate'];?></td>
+			<th width="25%" align="right">Students / Enrollment:</th>
+			<td width="25%"><?= $t['studentCount'];?> / <?= $t['enrollmentCount'];?></td>
+		</tr>
+		</table>
+    </td>
+  </tr>
+
+
+  <tr> 
+    <td width="38%" valign="top" class="coursemaintitle"> <h4>Manage Courses &amp; Classes</h4></td>
+    <td width="6%">&nbsp;</td>
+    
+    <td width="36%" valign="top" class="coursemaintitle"> <h4>Manage Semesters<br>
+      </h4></td>
+      
+  </tr>
+  <tr> 
+    <td valign="top" class="coursemainbody">
+		<a href="<?=APP_URL?>administration/courses/event=addCourse">Add a Course</a> | 
+		<a href="<?=APP_URL?>administration/courses/main">List Courses</a>
+
+		<br/>
+		<a href="<?=APP_URL?>administration/classes/event=add">Add a Class</a> | 
+		<a href="<?=APP_URL?>administration/classes/main">List Classes</a> | 
+		<a href="<?=APP_URL?>administration/classrestore">Restore Class</a> | 
+
+		<a href="<?=APP_URL?>administration/classes_extra">Manage Extra Faculty</a> 
+
+	
+	</td>
+	
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemainbody">
+		<a href="<?=APP_URL?>administration/semesters/event=add">Add Semester</a> 
+		| <a href="<?=APP_URL?>administration/semesters/main">List Semesters</a>  | 
+		<a href="<?=APP_URL?>administration/courses/event=semesterInfo">Course Semester Information</a>
+	</td>
+	
+    
+  </tr>
+  
+  <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
+    
+   <tr> 
+    <td valign="top" class="coursemaintitle"><h4>Site Content and Tools</h4></td>
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemaintitle"><h4>Manage Accounts</h4></td>
+  </tr>
+  <tr> 
+    <td valign="top" class="coursemainbody">
+	<a href="<?=MOD_URL?>mod/">Message of the day</a> | 
+	<a href="<?=MOD_URL?>cal/">Calendar</a> |
+	<a href="<?=APP_URL?>docs/">Documents</a> | 
+	<a href="<?=APP_URL?>forum/admin/">Forums</a> |
+	<a href="<?=MOD_URL?>formmgr">Form Manager</a> |
+	<a href="<?=MOD_URL?>menu">Menus</a>
+    </td>
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemainbody">
+	<a href="<?=APP_URL?>administration/users">List Users</a> | 
+	<a href="<?=APP_URL?>administration/users/event=new">Create User</a> | 
+	<a href="<?=APP_URL?>administration/groups">List Groups</a> | 
+	<a href="<?=APP_URL?>administration/users/event=syncStudents">Sync Students</a> |
+	<a href="<?=APP_URL?>administration/servicePermissions">Modify Application Permissions</a>   |
+	<a href="<?=APP_URL?>administration/facultylist/">Faculty List</a> 
+
+	</td>
+  </tr>
+
+
+  <tr><td colspan="3" style="font-size: 6px;">&nbsp;</td></tr>
+ 
+   <tr> 
+    <td id="td_newsTitle" valign="top" class="coursemaintitle"><h4>Loading News...</h4></td>
+    <td>&nbsp;</td>
+    <td valign="top" class="coursemaintitle">
+    <h4>Distance Learning Applications</h4>
+    </td>
+  </tr>
+  <tr> 
+    <td valign="top" class="coursemainbody">
+	    <ul id="ul_newsItems">
+	    <?php
+		foreach ($t['rssItems'] as $item ) {
+
+			$title = $item->get_title();
+			$url   = $item->get_permalink();
+			echo "<li><a href=\"$url\">$title</a><br/>";
+			echo substr($item->get_description(),0,100)."..."; 
+			echo "<br/><br/></li>";
+		}
+	    ?>
+	    </ul>
+    </td>
+	<td>&nbsp;</td>
+	<td valign="top" class="coursemainbody">
+	<a href="<?=APP_URL?>examschedule">Exam Scheduling</a> | 
+	<a href="<?=APP_URL?>seminarorientation/">Seminar and Orientation Scheduling</a>  |
+	<a href="<?=APP_URL?>textbookmgr">Textbook Manager</a> | 
+	<a href="<?=APP_URL?>remotetest">Remote Test Administration</a>
+	</td>
+  </tr>
+
+
+</table>
+
+
+<script language="javascript">
+var t;
+var alreadyRun=false
+function setRssNews() {
+	if (alreadyRun) { return true;}
+	alreadyRun=true;
+	var template=t;
+
+	var titleObj = document.getElementById('td_newsTitle');
+	var ulObj = document.getElementById('ul_newsItems');
+	titleObj.innerHTML = '<h4>'+template.rssChannelTitle+'</h4>';
+	for (i = 0; i <= template.rssItems.length-1; i++) {
+		var list = document.createElement('li');
+		var anch = document.createElement('a');
+		var br = document.createElement('br');
+		var txt = document.createTextNode(template.rssItems[i].data.description);
+		anch.innerHTML = template.rssItems[i].data.title;
+		anch.setAttribute('href',template.rssItems[i].data.link.alternate[0]);
+		list.appendChild(anch);
+		list.appendChild(br);
+		list.appendChild(txt);
+		ulObj.appendChild(list);
+	}
+}
+
+function getRssNews() {
+	var script_filename = '<?=appurl('administration/main/event=news');?>';
+	var js = document.createElement('script');
+	js.setAttribute('language', 'javascript');
+	js.setAttribute('type', 'text/javascript');
+	js.setAttribute('src', script_filename);
+	//html_doc.appendChild(js);
+	if (!document.getElementsByTagName('head')[0].appendChild(js)) {
+	}
+	js.onload = function () {setRssNews();}
+	js.onreadystatechange = function () {setRssNews();}
+	window.setTimeout(js.onload,5000);
+//	return false;
+}
+getRssNews();
+</script>

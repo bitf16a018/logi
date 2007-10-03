@@ -1,0 +1,14 @@
+<h2>Private Messaging</h2>
+
+<a href="<?=APP_URL?>pm">Message Center</a>&nbsp;&bull;&nbsp;<a href="<?=APP_URL?>pm/main/event=compose">Compose New Message</a>
+
+<hr/>
+
+If you need help with this part of the website, contact the 
+<a href="<?=appurl("pm/main/event=compose/sendto=davidm01");?>">
+System Administrator</a>
+
+
+<?php
+echo lcMessageBox('You do not have permission to view this message','e');
+?>

@@ -1,0 +1,42 @@
+<?
+/*
+ * MODULENAME
+ * created MODULEDATE
+ *
+ */
+ 
+ 
+class mod extends AdminService 
+{
+
+	var $presentor = "htmlPresentation";
+	var $authorizer = 'ServiceMapAuth';
+	var $sectionTitle = 'Message of the Day';
+	var $navlinks = array( 'Administration Home' => '' );
+	
+	function Run($db,&$u,&$lc,&$t)
+	{
+		
+		$lc->templateName = 'mod_main';
+//auto-comment		$lc->templateStyle = 'private';
+		
+		$t['mod'] =  @implode(file(CONTENT_PATH.'__messageoftheday__'), '');
+	}
+	
+	function updateRun(&$db, &$u, &$lc, &$t)
+	{
+		$fs = @fopen(CONTENT_PATH.'__messageoftheday__' , 'wb');
+	
+	    if (is_resource($fs))
+	    {
+	        fwrite($fs, trim(stripslashes($lc->postvars['mod'])), strlen(trim(stripslashes($lc->postvars['mod']))));
+	        fclose($fs);
+	    } else {
+		trigger_error("No permission to open file. Could not save your message.  Go back and copy your text for safe keeping.");
+	    }
+	    unset($fs);
+
+	    $this->run($db, $u, $lc, $t);
+	}
+	
+}

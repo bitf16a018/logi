@@ -1,0 +1,91 @@
+<? 
+
+/******
+* helpdesk module for tccd
+* 8/3/03
+*
+******/
+ 
+include_once (LIB_PATH."LC_html.php"); 
+include_once (LIB_PATH."datagrid.php"); 
+include_once (LIB_PATH."SiteForms.php"); 
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskComments.php");
+ 
+ 
+class history extends RegAuth { 
+ 
+	var $presentor = "htmlPresentation"; 
+ 
+	var $sectionTitle = 'Help Desk';
+	var $navlinks = array(
+		
+	);
+	var $applinks = array(
+		'List Tickets' => '',
+		'Submit new ticket' => 'helpdeskSubmit'
+		
+	);
+	var $inactivelinks = array(
+	);
+	 
+	function history() { 
+		global $lcObj;
+//auto-comment		$lcObj->templateStyle = 'private';
+	}
+
+	/** 
+	 * show a history of helpdesk tickets for a user passed in URL
+	 */ 
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$userid = (string)trim($lc->getvars['username']);
+
+		$t['incidents'] = HelpdeskIncident::loadHistoryForUsername($lc->getvars['username']);
+/*
+		if ( ! is_array($t['incidents']) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'No helpdesk history for user <b><i>'.$lc->getvars['username'].'</i></b>';
+			$t['details'] = 'This user might not have submitted any helpdesk inquiries in the past
+			or the username is bad.';
+			return;
+		}
+*/
+		$t['comment'] = HelpdeskComments::load(array('userid'=>$userid));
+
+		$t['username'] = $t['incidents'][0]->userid;
+
+// get the login attempt stuff - would have been nicer with PBDO version
+		$db->query("select * from lc_users_login_attempt where username='".$lc->getvars['username']."'");
+		while($db->next_record()) {
+			$t['history'][] = $db->Record;
+		}
+
+		$lc->templateName = 'history_main';
+	}
+
+
+	/** 
+	 * update the staff comments blob with text from the previous textarea
+	 */ 
+	function updateCommentsRun(&$db,&$u,&$lc,&$t) {
+
+		$userid = (string)trim($lc->postvars['userid']);
+		$comments = (string)trim(stripslashes($lc->postvars['helpdesk_comments']));
+
+		$comment = HelpdeskComments::load(array('userid'=>$userid));
+
+		if ( ! is_object($comment) ) {
+			$comment = new HelpdeskComments();
+			$comment->userid = $userid;
+		}
+
+		$comment->comment =  $comments;
+		$comment->save();
+
+
+		$this->run($db,$u,$lc,$t);
+	}
+}
+?>

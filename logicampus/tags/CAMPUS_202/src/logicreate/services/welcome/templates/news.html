@@ -1,0 +1,58 @@
+<? include(CONTENT_PATH.$t["file"]);?>
+
+
+
+<table border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<td class="header">News</td>
+		<td width="5">&nbsp;</td>
+		<td class="header2">Articles</td>
+	</tr>
+<tr>
+	<td valign="top" width="50%">
+		<? $v = $t["news"][0]; ?>
+		<div style="font-size:80%;"><a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view"><?=$v->title?></a>
+		<BR><?=$v->introtext?>
+		<br>
+		<? if ($v->introtext) { ?>
+		<a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view">Read more...</a>
+		<? } ?>
+		</div>
+	</td>
+		<td width="5">&nbsp;</td>
+	<td valign="top" width="50%">
+		<? $v = $t["articles"][0]; ?>
+		<div style="font-size:80%;"><a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view"><?=$v->title?></a>
+		<BR><?=$v->introtext?>
+		<br>
+		<? if ($v->introtext) { ?>
+		<a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view">Read more...</a>
+		<? } ?>
+		</div>
+	</td>
+</tr>
+<tr><td colspan="3"><hr align="center" width="95%"></td></tr>
+<tr>
+	<td valign="top" width="50%">
+		<? $v = $t["news"][1]; ?>
+		<div style="font-size:80%;"><a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view"><?=$v->title?></a>
+		<BR><?=$v->introtext?>
+		<br>
+		<? if ($v->introtext) { ?>
+		<a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view">Read more...</a>
+		<? } ?>
+		</div>
+	</td>
+		<td width="5">&nbsp;</td>
+	<td valign="top" width="50%">
+		<? $v = $t["articles"][1]; ?>
+		<div style="font-size:80%;"><a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view"><?=$v->title?></a>
+		<BR><?=$v->introtext?>
+		<br>
+		<? if ($v->introtext) { ?>
+		<a href="<?=APP_URL?>news/main/<?=$v->pkey?>/event=view">Read more...</a>
+		<? } ?>
+		</div>
+	</td>
+</tr>
+</table>

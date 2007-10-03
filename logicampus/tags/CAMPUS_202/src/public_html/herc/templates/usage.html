@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+
+
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+<BODY bgcolor="#ada592">
+
+
+
+<? hercBox("Usage"); ?>
+
+<form method="post">
+<BR>
+View stats STARTING from:
+<BR>
+Month <input type="text" name="time[month]" value="<?=$t["month"];?>" size="2">
+Day <input type="text" name="time[day]" value="<?=$t["day"];?>" size="2">
+Year <input type="text" name="time[year]" value="<?=$t["year"];?>" size="4">
+Hour <input type="text" name="time[hour]" value="<?=$t["hour"];?>" size="2">
+Minute <input type="text" name="time[min]" value="<?=$t["min"];?>" size="2"">
+
+<p>
+And ENDING on:<BR>
+Month <input type="text" name="time[emonth]" value="<?=$t["emonth"];?>" size="2">
+Day <input type="text" name="time[eday]" value="<?=$t["eday"];?>" size="2">
+Year <input type="text" name="time[eyear]" value="<?=$t["eyear"];?>" size="4">
+Hour <input type="text" name="time[ehour]" value="<?=$t["ehour"];?>" size="2">
+Minute <input type="text" name="time[emin]" value="<?=$t["emin"];?>" size="2"">
+
+<p>
+Select up to 9 services to check<BR>
+<?=$t["options"];?>
+
+<p>
+<input type="submit" value="Get Stats">
+<input type="hidden" name="event" value="user">
+</form>
+
+
+<? endHercBox(); ?>
+
+	<p>
+
+	<center><div class="message" width="500"><?= $t["message"]; ?></div></center>
+
+
+<? if ($t["pageviews"]) { ?>
+<img src="<?= _APP_URL;?>usage/<?= rand();?>/event=drawChart/">
+<p>
+
+<table width="650" border="0" cellpadding="0"> <tr><td>
+
+		<table border="1" bgcolor="#FFFFFF" width="350">
+		<tr><td colspan="2" class="tab">Session/hits stats</td></tr>
+		<tr><td>Total page views</td><td><?=$t["pageviews"];?></td></tr>
+		<tr><td>Unique user sessions</td><td><?=$t["sessions"];?></td></tr>
+		<tr><td>Shortest user session</td><td><?=$t["mindiff"];?></td></tr>
+		<tr><td>Longest user session</td><td><?=$t["maxdiff"];?></td></tr>
+		<tr><td>Average user session</td><td><?=$t["avgdiff"];?></td></tr>
+		</table>
+</td><td>
+		<table border="1" bgcolor="#FFFFFF" width="200">
+		<tr><td colspan="2" class="tab">Page view breakdown by module</td></tr>
+		<?=$t["uc"];?>
+		</table>
+</td></tr>
+</table>
+
+<!-- no html report just yet
+<table>
+<?=$t["htmlreport"];?>
+</table>
+-->
+
+<? } ?>
+
+</body>
+</html>

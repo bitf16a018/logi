@@ -1,0 +1,58 @@
+<?=$t['sectionheader'];?>
+<form method="POST">
+<input type="hidden" value="search" name="event">
+<input type="text" name="searchable" value=""><input type="submit" value="Search" name="submit">
+</form>
+<?php
+	$a_display_question = array();
+	
+	if ($t['fl_searching'])
+	{
+		// we have submitted a search, lets show the results
+		echo 'Found '. count($t['a_results']). ' results...<br><br>';	
+		
+		/**
+		 *	@todo	show which categories these are in
+		 */
+		
+		$show_category = '';
+		
+		
+		// if count is greater than 0
+		
+		echo '<ul type="square">';
+		
+		foreach($t['a_results'] as $question)
+		{
+			if ($question['tx_category'] != $show_category)
+			{	$show_category = $question['tx_category'];
+				echo '</ul>';
+				echo '<h4>'.$show_category.'</h4>';
+				echo '<ul type="square">';
+			}
+			
+			echo '<li><a href="'.
+				modurl('faq/event=showanswer/'.$question['id_faq']).'">'.
+				$question['tx_question'].'</a></li>';
+				
+			/*
+			$a_display_question[] = '<a href="'.
+				modurl('faq/event=showanswer/'.$question['id_faq']).'">'.
+				$question['tx_question'].'</a>';
+			*/
+		}
+		
+		echo '</ul>';
+		
+		/*
+		echo '<ul type="square">';
+
+		foreach($a_display_question as $q)
+		{	echo '<li>'.$q.'</li>';
+		}
+		
+		echo '</ul>';
+		*/
+	}
+?>
+<br>&nbsp;
