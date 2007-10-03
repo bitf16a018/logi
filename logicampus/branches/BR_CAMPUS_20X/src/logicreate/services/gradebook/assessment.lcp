@@ -1,0 +1,247 @@
+<?
+/*
+ *
+ * Processes assessments.
+ *
+ */
+
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
+
+class assessment extends FacultyOnlyService {
+
+	var $presentor='htmlPresentation';
+
+	// link
+	var $sectionTitle = 'Gradebook Assessments';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Gradebook' => '',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => 'jack',
+	);
+	var $inactivelinks = array( 'Assessments' );
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'Gradebook Setup' => 'main/event=controlPanel/'
+	);
+
+/*
+ *
+ * Pulls in an assessment that has been taken and allows the
+ * teacher to overide or enter the appropiate grades for each
+ * question.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function editAsmtRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='assessment_editAsmt';
+
+			$t['entry'] = ClassGradebookEntries::load( array(
+				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+			if ( !is_object($t['entry']) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You don't have permission to view this assessment.";
+				$t['details'] = (int)$lc->getvars['id']. " ".$u->activeClassTaught->id_classes;
+				return;
+			}
+
+			$this->sectionTitle = 'Gradebook Edit Assessment';
+
+			$t['vals'] = ClassGradebookVal::getValsByEntry((int)$lc->getvars['id']);
+
+			// create select for curving student points (mass)
+			/*
+				-1 -(80%) of total assessment points
+				+1 -(80%) of total assessment points
+ 			*/
+		}
+
+/*
+ *
+ * Displays all pending assessments that have not been
+ * published.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='assessment_main';
+
+		}
+
+/*
+ *
+ * Process information from editAsmt and updates the table
+ * gradebook table with the new calculated score.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function updateAsmtRun(&$db,&$u,&$lc,&$t) {
+			$lc->postvars['entryid'] = (int)$lc->postvars['entryid'];
+			$securityArray = array('id_class_gradebook_entries'=>$lc->postvars['entryid'],'id_classes'=>$u->activeClassTaught->id_classes);
+			$ent = ClassGradebookEntries::load( $securityArray );
+
+			if ( !is_object($ent) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'That entry does not exist! Please contact the helpdesk for assistance.';
+				return;
+			}
+
+			//SECURITY CHECK
+			$db->query('SELECT id_class_gradebook_entries FROM class_gradebook_entries
+			WHERE id_classes = '.$u->activeClassTaught->id_classes.'
+			AND id_class_gradebook_entries = '.$lc->postvars['entryid']);
+			if( !$db->next_record() ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You don't own this gradebook entry.";
+				return;
+			}
+
+			$postnotes = stripslashes($lc->postvars['notes']);
+			if ( $ent->notes != $postnotes ) {
+				$ent->set( 'notes', $postnotes );
+				$ent->save();
+			}
+
+			while ( list($username, $comment) = @each($lc->postvars['comments']) ) {
+				//MAK 10-06-2003 Clean input 
+				$lc->postvars['comments'][$username] = addslashes(stripslashes($lc->postvars['comments'][$username]));
+				if ( ($lc->postvars['score'][$username]) != '' && $lc->postvars['score'][$username] != 0 ) {
+					$lc->postvars['score'][$username] = (float)($lc->postvars['score'][$username]);
+				}
+
+				$lc->postvars['entryid'] = (int)$lc->postvars['entryid'];
+				$username = trim(addslashes(stripslashes($username)));
+
+
+				$val = ClassGradebookVal::load( array(
+					'username' => $username,
+					'id_class_gradebook_entries' => $lc->postvars['entryid'],
+					'id_classes' => $u->activeClassTaught->id_classes
+				) );
+
+				if ( !is_object($val) ) {
+					$val = new ClassGradebookVal();
+					$val->set( 'idClassGradebookEntries', (int)$lc->postvars['entryid'] );
+					$val->set( 'username', $username );
+					$val->set( 'idClasses', $u->activeClassTaught->id_classes );
+				}
+
+				$flag = false;  // do an update?
+
+/*
+	09/17/03 Assessment scores are never updated through this method, only comments.
+	09/22/03 Removed the extra check in the if statement for $ent->assessmentId, becuase this doesn't much matter
+*/	
+				if (isset($lc->postvars['score'][$username]) && $val->score !== $lc->postvars['score'][$username] ) {
+					$val->score = $lc->postvars['score'][$username]; // $score; <-- where's this coming from?
+					$flag = true;
+				}
+
+				if ( $val->comments != $lc->postvars['comments'][$username] ) {
+					$val->comments = $lc->postvars['comments'][$username];
+					$flag = true;
+				}
+				if ($lc->postvars['curve']) {
+					$val->score += $lc->postvars['curve'];
+					$flag = true;
+				}
+
+				if ( $flag == true ) {
+					$val->save();
+					$t['message'] = 'Your changes have been saved.';
+
+					//MAK 10-06-2003
+					//push assignment grades back into assignment, else
+					// two db tables will get out of synch
+					if( $ent->assignmentId != 0 ) {
+						$db->query("UPDATE class_assignments_grades
+						SET comments = '".$lc->postvars['comments'][$username]."',
+						grade = ".sprintf('%.2f',$lc->postvars['score'][$username])."
+						WHERE id_class_assignments = ".$ent->assignmentId."
+						and id_student = '".$username."'");
+
+						if (! $db->getNumRows() ) {
+						$db->query("INSERT INTO class_assignments_grades
+						(comments,grade,id_class_assignments,id_student)
+						VALUES ('".$lc->postvars['comments'][$username]."',
+							".$lc->postvars['score'][$username].",
+							".$ent->assignmentId.",
+							id_student = '".$username."')");
+						}
+		
+					}
+				}
+
+			}
+
+			$u->sessionvars['message'] = $t['message'];
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = modurl('');
+
+		}
+
+/*
+ *
+ * Displays all asseessments that haven't been published so
+ * students can view them.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function viewNonPublishedRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='assessment_viewNonPublished';
+
+		}
+
+
+
+
+
+	/**
+	 * changes the publishFlag to on or off
+	 */
+
+	function visibilityRun(&$db,&$u,&$lc,&$t) {
+
+		$ent = ClassGradebookEntries::load( array('id_class_gradebook_entries'=>$lc->getvars['id'],'id_classes'=>$u->activeClassTaught->id_classes) );
+
+		if ( !is_object($ent) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to view this assessment.';
+			return;
+		}
+
+
+		//what do we change to ?, lc postvars change
+		switch($lc->postvars['change']) {
+			case 'hidden':
+				$ent->publishFlag = 0;
+				break;
+			case 'visible':
+				$ent->publishFlag = 1;
+				break;
+		}
+		$ent->save();
+
+
+		$this->editAsmtRun($db,$u,$lc,$t);
+	}
+}
+
+?>

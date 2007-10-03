@@ -1,0 +1,34 @@
+<?
+define(SM_PATH,"/var/tccd/public_html/sqm/");
+include_once(SM_PATH."config/config.php");
+
+class webmail extends RegAuth {
+	var $presentor = "htmlPresentation";
+
+	function run (&$db, &$u, &$obj, &$t)
+		{
+		global $login_username, $secretkey;
+		$login_username = $u->username."@dl.tccd.edu";
+		$secretkey = $u->password;
+		$_GLOBALS['login_username'] = $login_username;
+		$_GLOBALS['secretkey'] = $secretkey;
+#		$login_username = 'demo@dl.tccd.edu';
+#		$secretkey = 'demo';
+		
+		
+		$f = file(SM_PATH."config/config.php");
+		while(list($k,$v) = each($f)) {
+			if (substr($v,0,1)=='$') {
+				list($var,$junk) = split(" ",$v);
+				@eval("global $var;");
+#				$_GLOBALS[$var] = $$var;
+			}
+		}
+		include(SM_PATH."src/redirect.php");
+		header("Location:  http://dl.tccd.edu/sqm/src/$redirect_url");
+		exit();
+			
+		}
+
+}
+?>

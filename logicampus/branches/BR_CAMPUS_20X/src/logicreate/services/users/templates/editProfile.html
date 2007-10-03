@@ -1,0 +1,63 @@
+<h4 align="center"><?=$t[message]?></h4>
+<br><br>
+<table width="100%" cellspacing="0" cellpadding="4" border="1">
+	<tr>
+			<td colspan="2" class="header2" width="30%" align="center" valign="middle">
+
+					<h2 class="header2" width="30%">Edit Profile</h2>
+
+		</td>
+	</tr>
+	<tr>
+			<td colspan="2" class="row1" align="center" valign="middle">
+					<a class="black" href="<?=APP_URL?>users/editProfile">Edit Profile</a> |  
+					<a class="black" href="<?=APP_URL?>login/out">Logout</a> | 
+			<a class="black"
+					href="<?=APP_URL?>users/prof">Change Password</a>  	
+ 					 | <a class="black" href="<?=APP_URL?>users/view/<?=$obj->user->username?>">View Your Profile</a> 
+					 <? if (UPDATE_MAILSERVER_DB) { ?>
+ 					 | <a class="black" href="<?=APP_URL?>users/email/">Forward your Other e-mail</a> 
+					 <? } ?>
+
+	</td>
+	</tr>
+
+</table>
+<br><br>
+Please fill in your profile information below.  The information entered below will not be sold nor re-distributed.  It is only viewable by other registered members of the site.  If you do not wish to share certain portions of your information, be sure to check "No" in the display information section.
+
+
+<? if ($t['error']) { ?>
+
+<span style="color: red"><?=$t['error']?></span>
+<?  } ?>
+
+<?=$t['form']?>
+
+<? 
+
+/**********
+ *  The following section is reserved in case users are allowed to choose which groups 
+ *  they belong to.  In certain sitautions this applies so we left it in.  Note:  only those groups which are
+ *  passed from editProfile.lcp are displayed.
+ **********
+<br><br>
+
+<table width="100%" cellspacing="1" cellpadding="4" border="0">
+	<tr>
+		<td class="header2" width="30%">
+			Select your user type.  You can select multiple user types by pressing the Ctrl key on your keyboard while you select different options.
+		</td>
+		<td valign="top" class="grey">
+			<form method="post">
+			<select name="groups[]" size="4" multiple>
+			<?=$t[userType]?>
+			</select><br>
+			<input type="hidden" name="event" value="changeUserType">
+			<input type="submit" value="Update User Type">
+			</form>
+
+		</td>
+	</tr>
+</table>
+*/ ?>

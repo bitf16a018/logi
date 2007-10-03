@@ -1,0 +1,102 @@
+<style>
+	.blogTitle {
+		font-size: 180%;
+	}
+
+	.blogReplyTitle {
+		font-size: 120%;
+	}
+
+	.blogReplyTimedate {
+		font-size: 90%;
+	}
+
+	.blogReplyBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+	.blogEntryTitle {
+		font-size: 120%;
+	}
+
+	.blogEntryTimedate {
+		font-size: 90%;
+	}
+
+	.blogEntryBody {
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		font-size: 100%;
+	}
+
+	.blogMessage{
+		padding-bottom: 1em; 
+		padding-top: 1em;
+		color: #f00;
+		text-align: center;
+		font-size: 120%;
+	}
+
+</style>
+
+
+<div class='blogTitle'><?=$t['blog']->blogName;?></div>
+<?=$t['blog']->blogDescription;?>
+
+<table width='100%'>
+
+	<tr>
+		<td width='80%' style='vertical-align: top'>
+<? 
+while(list($k, $v) = @each($t['entries'])) { 
+$entryCount++;
+?>
+<table width='100%' style='border-bottom: 1px solid #000; padding-bottom: 10px; padding-top: 10px'>
+	<tr>
+		<td><h3><?=$v->blogEntryTitle;?></h3></td>
+	</tr>
+	<tr>
+		<td><?=$v->blogEntryDescription;?></td>
+	</tr>
+	<tr>
+		<td>Posted: <?=date("m/d/Y h:i A", $v->blogEntryTimedate);?> | 
+			<a href="<?=modurl("blog/".$t['username'].'/'.$v->blogEntryId."/event=read");?>">Read more 
+			<? if ($t['posting']) { ?>
+			 / Comment 
+			<? } ?>
+		</a>
+		</td>
+	</tr>
+</table>
+<?
+	if ($entryCount==0) { ?>
+	No entries for this month
+	<? } ?>
+<? } ?>
+
+		</td>
+		<td width='20%' style='vertical-align: top'>
+			<h3>Archives</h3>
+			<? while(list($k,$v) = @each($t['blogEntryMonths'])) { 
+				++$monthCount;	
+				?>
+				<a href="<?=modurl("blog/".$t['username']."/month=".$k);?>"><?=$v;?></a><BR/>
+			<? } ?>
+			<? if ($monthCount==0) { ?>
+				No previous archives
+			<? } ?>
+
+
+
+			<hr>
+			<? if ($t['isOwner']) { ?>
+			<h3>Administration</h3>
+			<a href="<?=modurl("blog/".$t['username']."/event=setup");?>">Web log setup</a>
+			<br/>
+			<a href="<?=modurl("blog/".$t['username']."/event=mypost");?>">Add an entry</a>
+			<? } ?>
+		</td>
+	</tr>
+</table>

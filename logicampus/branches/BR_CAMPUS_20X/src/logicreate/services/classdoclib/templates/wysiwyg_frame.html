@@ -1,0 +1,161 @@
+<html style="width: 500; height: 400">
+
+
+<head>
+  <title>Classroom Web Images</title>
+  
+	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/popups/popup.js"></script>
+	
+	<script type="text/javascript">
+		
+		function Init() {
+		  __dlg_init();
+		};
+		
+		function onCancel() {
+		  __dlg_close(null);
+		  return false;
+		};
+		
+		function onOK() {
+		
+		  	var param = new Object();
+		   	var el = document.getElementById('previewfile'); // incase i want more attribs at a later time.
+		   	param["f_url"] = el.src;
+		    param["f_alt"] = el.alt;
+		    param["f_align"] = document.getElementById('f_align').value;
+		    
+		  	__dlg_close(param);
+
+		  	return false;
+		};
+
+		
+		function updateimage(image)
+		{
+			document.getElementById('imagelabel').value = image.height+' x '+image.width;
+			/*
+			if (image.height > 100)
+			{	image.height=100;
+			} else
+			{	
+			}
+			if (image.width > 100)
+			{	image.width = 100;
+			}
+			*/
+			
+		}
+		
+	</script>
+	
+	<style type="text/css">
+		html, body {
+		  background: ButtonFace;
+		  color: ButtonText;
+		  font: 11px Tahoma,Verdana,sans-serif;
+		  margin: 0px;
+		  padding: 0px;
+		}
+		body { padding: 5px; }
+		table {
+		  font: 11px Tahoma,Verdana,sans-serif;
+		}
+		form p {
+		  margin-top: 5px;
+		  margin-bottom: 5px;
+		}
+		.fl { width: 9em; float: left; padding: 2px 5px; text-align: right; }
+		.fr { width: 6em; float: left; padding: 2px 5px; text-align: right; }
+		fieldset { padding: 0px 10px 5px 5px; }
+		select, input, button { font: 11px Tahoma,Verdana,sans-serif; }
+		button { width: 70px; }
+		.space { padding: 2px; }
+		
+		.title { background: #ddf; color: #000; font-weight: bold; font-size: 120%; padding: 3px 10px; margin-bottom: 10px;
+		border-bottom: 1px solid black; letter-spacing: 2px;
+		}
+		form { padding: 0px; margin: 0px; }
+		
+		div.over {
+		overflow: scroll;
+		height: 220px;
+		width: 240px;
+		}
+
+	</style>
+
+</head>
+	
+	<body onload="Init()">
+	
+	<div class="title">Classroom Web Images</div>
+
+	<form action="" method="get">
+	
+	<table width="100%" border="0" cellpading="4" style="padding: 0px; margin: 0px">
+	<tbody>
+	
+	<tr>
+		<td width="5">&nbsp;</td>
+		<td><IFRAME name="files" src="<?=modurl('wysiwygimages/'.$obj->user->activeClassTaught->id_classes);?>/2" height="350" width="200"></IFRAME></td>
+		<td width="5">&nbsp;</td>
+		
+		<td width="50%">
+		
+			<FIELDSET valign="middle" style="width: 235px; height: 245px; padding: 2px;">
+			
+			<div class="over" align="center" valign="middle">
+			<table cellpadding="2" cellspacing="0" border="0" width="100%" height="100%">
+			<tr>
+				
+				<td valign="middle" align="center" height="100%" width="100%">
+				
+				
+					<img alt="" onclick="updateimage(this);" src="<?=IMAGES_PATH;?>spacer.gif" id="previewfile">
+							
+					
+				</td>
+			</tr>
+			</table>
+			</div>
+			
+			<table align="center">
+			<tr><td bgcolor="Gray" align="center"><input type="text" style="text-align: center; width: 230px;" readonly id="imagelabel" size="25" /></td></tr>
+			</table>
+			
+			</FIELDSET>
+			
+			<br>
+			
+			<center>
+			Align Image:
+			<select size="1" name="align" id="f_align"
+  title="Positioning of this image">
+  <option value="" selected="1"                >Not set</option>
+  <option value="left"                         >Left</option>
+  <option value="right"                        >Right</option>
+  <option value="bottom"                       >Bottom</option>
+  <option value="middle"                       >Middle</option>
+  <option value="top"                          >Top</option>
+</select><br>
+<br>
+				<nobr>
+					<input type="button" onclick="return onCancel();" name="cancel" value="CANCEL"> &nbsp;
+					<input type="button" onclick="return onOK();" name="ok" value="ADD IMAGE">
+				</nobr>
+				
+			</center>
+			
+		</td>
+		<td width="5">&nbsp;</td>
+	</tr>
+	
+	</tbody>	
+	</table>
+			
+
+	
+	</body>
+
+</html>

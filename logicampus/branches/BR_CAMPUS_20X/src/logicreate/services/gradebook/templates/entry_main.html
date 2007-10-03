@@ -1,0 +1,35 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+
+<?
+$tbl = "<table border=0 cellpadding=3 cellspacing=0>\n";
+$flag = false;
+$category = ''; // current category id
+while (list(,$entry) = @each($t['gbe'])) {
+
+	// handle header
+	if ($category != $entry->idClassGradebookCategories) {
+		if ($category) $tbl .= "<tr><td colspan=3>&nbsp;</td></tr>\n";
+		if ($t['cats'][$entry->idClassGradebookCategories]=='') { 
+			$t['cats'][$entry->idClassGradebookCategories]='<span style="color: red">UNCATEGORIZED</span>';
+		}
+		$tbl .= '<tr><td colspan=3><b>'.$t['cats'][$entry->idClassGradebookCategories]."</b></td></tr>\n";
+		$category = $entry->idClassGradebookCategories;
+	}
+
+	$title = $entry->title ? $entry->title : '<i>untitled</i>';
+	$id = $entry->idClassGradebookEntries;
+	$tbl .= "<tr>\n\t<td><a href=\"".modurl('entry')."/event=edit/id=$id\">$title</a></td>\n\t<td width=30>&nbsp;</td>\n\t<td><a href=\"".modurl('entry')."/event=delete/id=$id\" onclick=\"if(confirm('Are you sure you want to remove this entry and all your students\' grades for it?')) { return true; } else { return false; }\">delete</a></td>\n</tr>\n";
+
+	$flag = true;
+
+}
+$tbl .= "</table>\n";
+
+if ( !$category ) {
+	print "<p style='margin-left:20px;'><i>There are no gradebook entries for this class.</i></p>";
+} else {
+	print $tbl;
+}
+?>

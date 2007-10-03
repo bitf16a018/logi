@@ -1,0 +1,358 @@
+<?=$t['sectionheader'];?>
+
+<?php if ( !$t['print'] ) { ?>
+<div style="text-align:right;margin:3px;width:auto;">
+	Click <a href="<?=modurl('syllabus/print=yes/');?>">here</a> for a printer friendly version.
+</div>
+<?php } ?>
+
+<?php if ( $t['profile']['photo'] && is_file(IMAGES_PATH.'photos/'.$t['profile']['photo']) ) { ?>
+<div align="center" style="float:right;margin:10px;">
+	<img src="<?=IMAGES_URL.'photos/'.$t['profile']['photo'];?>" alt="<?=$t['profile']['firstname'].' '.$t['profile']['lastname'];?>" border=1 /></div>
+<?php } ?>
+<h2 border="1px solid black;"><?=$t['course']['courseFamily'].' '.$t['course']['courseNumber'];?>:&nbsp; 
+<?=$t['course']['courseName'];?></h2>
+
+<h3>Faculty Information</h3>
+<div class="contentchunk">
+	<?=$t['profile']['title'].' '.$t['profile']['firstname'].' '.$t['profile']['lastname'];?><br/>
+	<?
+	if ($t['campusLocation']) print 'Location: '.$t['campusLocation'].'<br/>';
+	if ($t['profile']['officeLocation']) print 'Office: '.$t['profile']['officeLocation'];
+	?><br/>
+	Phone: <?=$t['profile']['officePhone'];?><br/>
+	<? if ($t['profile']['faxPhone'] && $t['profile']['faxPhone'] != '--' )
+		echo 'Fax: '.$t['profile']['faxPhone'].'<br/>'; ?>
+	E-mail: <a href="mailto:<?=$t['email'];?>"><?=$t['email'];?></a><br/>
+	<p><?=addressByLocation($t['profile']['campusLocation']);?></p>
+</div>
+
+<hr size=1 />
+
+<h3>Class Description</h3>
+<div class="contentchunk">
+	<p><?=$t['course']['courseDescription'];?></p>
+</div>
+
+<hr size=1 />
+
+<? if ($t['courseObjectives'] ) { ?>
+<h3>Course Objectives</h3>
+<div class="contentchunk">
+	<p>The student will:</p>
+	<ul>
+		<?=$t['courseObjectives'];?>
+	</ul>
+</div>
+
+<hr size=1 />
+<? } ?>
+
+<? if ( count($t['textbook_classes']) ) { ?>
+<h3>Required Course Materials</h3>
+<div class="contentchunk">
+	<p>Below is a listing of the books recommended for this class. Be sure to note which ones are required.</p>
+	<div class="contentchunk">
+	<? foreach ( $t['textbook_classes'] as $useless => $book ) { ?>
+		<table border=0 cellpadding=0 cellspacing=0 style="margin-bottom:10px;">
+		<tr>
+			<td><b>Title:</b></td>
+			<td><?=$book->title;?>
+			<? if ($book->edition) { ?> (edition: <?=$book->edition;?>)<? } ?>
+			<?=($book->required ? ' <b>REQUIRED</b>' : ' <b>optional</b>');?></td>
+		</tr>
+		<tr>
+			<td><b>Author:</b></td>
+			<td><?=$book->author;?></td>
+		</td>
+		<tr>
+			<td><b>Publisher:</b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td><?=$book->publisher;?></td>
+		</tr>
+		<tr>
+			<td colspan=2><small><i><? if ($book->copywright) { ?>&copy; <?=$book->copywright;?>;<? } ?>
+			<? if ($book->isbn) { ?>ISBN <?=$book->isbn;?><? } ?></i></small></td>
+		</tr>
+		</table>
+	<? } ?>
+	</div>
+	<p><?=$t['semester_course_info']['textbooks'];?></p>
+</div>
+
+<hr size=1 />
+<? } ?>
+
+<?php 
+	foreach ( $t['syllabi'] as $id => $title ) { ?>
+		<h3><?= $title;?></h3>
+		<div class="contentchunk">
+			<p><?=$t['content'][$id];?></p>
+		</div>
+	<?php }
+?>
+
+<? if ($t['classes']['noexam'] == false && count($t['exam_schedule_classes_dates']) ) { ?>
+<h3>Exam Information</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['examInfo'];?></p>
+	<?
+	if ( $t['exam_schedule_classes']->oncampusExam ) {
+		if ( $t['exam_schedule_classes']->southCampus )     $spots[] = 'South';
+		if ( $t['exam_schedule_classes']->southeastCampus ) $spots[] = 'Southeast';
+		if ( $t['exam_schedule_classes']->northeastCampus ) $spots[] = 'Northeast';
+		if ( $t['exam_schedule_classes']->northwestCampus ) $spots[] = 'Northwest';
+		print 'Exams will be given on ';
+		if ( count($spots) == 1 ) {
+			print $spots[0].' campus.';
+		} else if ( count($spots) == 2 ) {
+			print $spots[0].' and '.$spots[1].' campuses.';
+		} else {
+			print preg_replace('/, ([^,]+)$/', ', and $1', implode(', ', $spots)).' campuses.'; // yeah, baby
+		}
+	} else {
+#		print ' Exams will not be given on campus.';
+	}
+	?>
+	
+	<div class="contentchunk">
+		<? foreach ( $t['exam_schedule_classes_dates'] as $useless => $exam ) { ?>
+			<p>
+			<b><?=$exam->title;?></b><br />
+			<?=$exam->instructions;?><br />
+			The test will be given on <?=date('M j ', strtotime($exam->dateStart));?> 
+			<? 
+			# check if on same day, if so, don't print the and
+			if (date('j', strtotime($exam->dateEnd)) != date('j', strtotime($exam->dateStart) ) )
+			{ ?>
+			and <?=date('M j ', strtotime($exam->dateEnd));?>
+			<? } ?>
+			</p>
+		<? } ?>
+	</div>
+	<hr size=1 color="#cccccc" />
+
+	<h4>Testing Center Locations and Hours</h4>
+	<div class="contentchunk">
+		<h5>Locations</h5>
+		<div class="contentchunk">
+		<?
+$j = $t['semester_course_info']['testingLocations'];
+$j = split("\n",$j);
+while(list($k,$v) = each($j)) {
+	list($a,$b) = split(":",$v);
+	$z[$a] = $v;
+}
+if ($t['examinfo']->southCampus==1) { echo $z['South Campus']."<BR>"; }
+if ($t['examinfo']->southeastCampus==1) { echo $z['Southeast Campus']."<BR>"; }
+if ($t['examinfo']->northeastCampus==1) { echo $z['Northeast Campus']."<BR>"; }
+if ($t['examinfo']->northwestCampus==1) { echo $z['Northwest Campus']."<BR>"; }
+
+		?>
+		</div>
+		<h5>Hours</h5>
+		<div class="contentchunk">
+			<?=$t['semester_course_info']['testHours'];?>
+		</div>
+	</div>
+</div>
+
+<hr size=1 />
+<? 	} else
+	{ 
+		if ($t['classes']['noexam'] && strlen(trim($t['syllabus']['noExam'])))
+		{	?>
+			<h3>Exam Information</h3>
+			<div class="contentchunk">
+				<?=$t['syllabus']['noExam'];?>
+			</div>
+			<?php
+		}
+		?>
+	 
+<?php
+	}
+?>
+
+<? if ( $t['gradebook']->calculationType ) { //if the calculation type is not set, none of this info will be available ?>
+<h3>Grade Information</h3>
+<div class="contentchunk">
+	<table style="margin-bottom:10px;" width="100%" border=1 cellpadding=3 cellspacing=0>
+<? if ($t['gradebook']->calculationType==1)  { ?>
+	<tr>
+		<td colspan=3><b>Percentage Allocations</b></td>
+	</tr>
+	<tr>
+		<td><b>Activity</b></td>
+		<td><b>Percentage</b></td>
+	</tr>
+<? while (list(,$v) = @each($t['gradingScale'])) { ?>
+	<tr>
+		<td><?=$v[0];?></td>
+		<td><?=$v[1];?>%</td>
+	</tr>
+<? } ?>
+
+<? } ?>
+<? if ($t['gradebook']->calculationType==2)  { ?>
+	<tr>
+		<td colspan=3><b>Point Allocations</b></td>
+	</tr>
+	<tr>
+		<td><b>Activity</b></td>
+		<td><b>Points</b></td>
+		<td><b>Total Points</b></td>
+	</tr>
+<? while (list(,$v) = @each($t['gradingScale'])) { ?>
+	<tr>
+		<td><?=$v[0];?></td>
+		<td><?=$v[1];?></td>
+		<td><?=$v[2];?></td>
+	</tr>
+<? } ?>
+
+<? } ?>
+	</table>
+
+<? if ($t['gradebook']->calculationType==1)  { ?>
+	<table width="100%" border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<td colspan=2><b>Grade Distribution</b></td>
+	</tr>
+	<tr>
+		<td><b>Grade</b></td>
+		<td><b>Percentage Required</b></td>
+	</tr>
+	<tr>
+		<td>A</td>
+		<td><?=$t['gradebook']->aLower;?>% - 100%</td>
+	</tr>
+	<tr>
+		<td>B</td>
+		<td><?=$t['gradebook']->bLower ;?>% - <?=$t['gradebook']->aLower-.01;?>%</td>
+	</tr>
+	<tr>
+		<td>C</td>
+		<td><?=$t['gradebook']->cLower;?>% - <?=$t['gradebook']->bLower-.01;?>%</td>
+	</tr>
+	<tr>
+		<td>D</td>
+		<td><?=$t['gradebook']->dLower;?>% - <?=$t['gradebook']->cLower-.01;?>%</td>
+	</tr>
+	<tr>
+		<td>F</td>
+		<td>0% - <?=$t['gradebook']->dLower - .01;?>%</td>
+	</tr>
+	</table>
+<? }  ?>
+
+<? if ($t['gradebook']->calculationType==2)  { ?>
+	<table width="100%" border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<td colspan=2><b>Grade Distribution</b></td>
+	</tr>
+	<tr>
+		<td><b>Grade</b></td>
+		<td><b>Points Required</b></td>
+	</tr>
+	<tr>
+		<td>A</td>
+		<td>
+		<?=$mygrizadeA = (($t['gradebook']->aLower * .01)*$t['gradebook']->totalPoints);?> points and over</td>
+	</tr>
+	<tr>
+		<td>B</td>
+		<td>
+		<?=$mygrizadeB = (($t['gradebook']->bLower * .01)*$t['gradebook']->totalPoints);?> points - <?=$mygrizadeA-1;?> points</td>
+	</tr>
+	<tr>
+		<td>C</td>
+		<td>
+		<?=$mygrizadeC = (($t['gradebook']->cLower * .01)*$t['gradebook']->totalPoints);?> points - <?=$mygrizadeB-1;?> points
+		</td>
+	</tr>
+	<tr>
+		<td>D</td>
+		<td>
+			<?=$mygrizadeD = (($t['gradebook']->dLower * .01)*$t['gradebook']->totalPoints);?> points - <?=$mygrizadeC-1;?> points
+
+		</td>
+	</tr>
+	<tr>
+		<td>F</td>
+		<td>0 points - <?=$mygrizadeD-1?> 
+		</td>
+	</tr>
+	</table>
+<? }  ?>
+
+</div>
+
+<? } ?>
+
+
+<?php
+//in simple mode, we probably won't have all this info
+if (LcSettings::isModuleOn('LC_SIMPLE_MODE') ) {
+?>
+<h3>Accessing the Class Site</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['accessClassSite'];?></p>
+</div>
+
+<hr size=1 />
+
+<h3>E-mail</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['emailGuidelines'];?></p>
+</div>
+
+<hr size=1 />
+
+
+<h3>Withdrawals</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['withdrawalPolicy'];?></p>
+</div>
+
+<hr size=1 />
+
+<h3>Help Desk</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['helpdesk'];?></p>
+</div>
+
+<hr size=1 />
+
+<? if (trim($t['semester_course_info']['specialInfo'])!='') { ?>
+<h3>Special Accommodations</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['specialInfo'];?></p>
+</div>
+
+<hr size=1 />
+<? } ?>
+
+<h3>Student Conduct</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['studentConduct'];?></p>
+</div>
+
+<hr size=1 />
+
+<h3>Children on Campus</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['noChildren'];?></p>
+</div>
+
+<hr size=1 />
+
+<h3>Campus Closings</h3>
+<div class="contentchunk">
+	<p><?=$t['semester_course_info']['campusClosings'];?></p>
+</div>
+
+<hr size=1 />
+
+<p align="center"><?=$t['semester_course_info']['syllabusDisclaimer'];?></p>
+
+<?php } ?>

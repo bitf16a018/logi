@@ -1,0 +1,56 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(LIB_PATH."datagrid.php");
+
+class forum extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+
+	function run($db,&$u,&$lc,&$t) {	
+		$key = (int)$lc->getvars['id'];
+		if($key) { 
+			$forumsections = lcforumSectionPeer::doSelect(" lc_forum_section_parent_id=$key");
+		} else {
+			$forumsections = lcforumSectionPeer::doSelect();
+		}
+/*
+		foreach $sections
+			$forums[] = LcForumPerm::secureLoadBySection($u,$s);
+			$forum = LcForumPerm::secureLoadForum($u,$fid);
+*/
+
+		while(list($k,$sec) = each($forumsections)) {
+			$sectionList[$sec->lcForumSectionId] = $sec;
+			$forumList[$sec->lcForumSectionId] = LcForumPerm::secureLoadBySection($u,$sec);
+		}
+		while(list($sec,$forums) = each($forumList)) {
+			while(list($section,$o) = each($forums)) {
+				$forumChildren[$o->lcForumId] = $o->getLcForums();
+			}
+		}
+		reset($forumList);
+		$t['forumList'] = $forumList;
+		$t['forumChildren'] = $forumChildren;
+		$t['sectionList'] = $sectionList;
+		$lc->templateName = 'main';
+		return;
+
+	}
+
+
+}
+?>
