@@ -147,12 +147,38 @@ class lessons extends StudentService {
 			LEFT JOIN class_lesson_sequence as A
 				ON A.lob_class_repo_id = B.lob_class_repo_id
 
+			RIGHT JOIN class_assignments_turnin as C
+				ON C.id_class_assignments = A.class_lesson_sequence_id
+
 			WHERE A.class_id='".$u->activeClassTaken->id_classes."'
 			AND A.class_lesson_sequence_id IS NOT NULL
 			AND A.lesson_id = ".$lesson_id."
+			AND C.dateTurnin > 0
+			AND C.id_student = '".$u->username."'
 			ORDER BY A.due_offset ASC";
 
-		//__TODO__ add "turned in" status
+		$query = "SELECT 
+				A.lob_class_repo_id
+				, A.class_lesson_sequence_id
+				, A.lob_title
+				, A.due_offset
+				, B.response_type_id
+				, C.dateTurnin
+
+			FROM lob_class_activity as B
+			LEFT JOIN class_lesson_sequence as A
+				ON A.lob_class_repo_id = B.lob_class_repo_id
+
+			LEFT JOIN class_assignments_turnin as C
+				ON C.id_class_assignments = A.class_lesson_sequence_id
+
+			WHERE A.class_id='".$u->activeClassTaken->id_classes."'
+			AND A.class_lesson_sequence_id IS NOT NULL
+			AND A.lesson_id = ".$lesson_id."
+			AND C.dateTurnin > 0
+			AND C.id_student = '".$u->username."'
+			GROUP BY A.lob_class_repo_id
+			ORDER BY A.due_offset ASC";
 
 		$dataModel = new  MyAssignmentModel($query,$db);
 //debug(date('m d Y', $classObj->lessons[$lesson_id]->getStartDate()),1);

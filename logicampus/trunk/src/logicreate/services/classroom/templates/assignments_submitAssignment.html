@@ -1,3 +1,8 @@
-<h1>If you are seeing this page, there was a problem with uploading your assignment.</h1>
+<?php
+$errorList = array(
+	'Your assignment was not saved.',
+	'E-mail your assignment to your teacher and contact the help desk.'
+	);
+echo lcMessageBox($errorList, $type='e', 'There was a problem uploading your assignment.') ;
+?>
 
-Email your assignment to your teacher and contact the help desk.

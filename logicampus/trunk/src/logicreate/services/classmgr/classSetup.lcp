@@ -29,18 +29,6 @@ class classSetup extends FacultyService {
         var $presentor='htmlPresentation';
 	var $cleanedArray = array();
 
-/*
-	var $navlinks = array (
-		'Classroom Manager' => 'display',
-		'Lessons' => 'lessonManager/',
-		'Webliography' => 'lessonWebliography/',
-		'FAQ' => 'faq/',
-		'Assignments' => 'assignmentManage/',
-		'Content' => 'lessonContent/',
-		'Presentations' => 'studentPresentation',
-		'Objectives' => 'lessonObjectives/'
-	);
-*/
 //	var $inactivelinks = array( 'Select Classroom Style' );
 	var $sectionTitle = 'Select Classroom Style';
 	
@@ -80,6 +68,8 @@ class classSetup extends FacultyService {
 		$t['classresourceoptions'] = makeOptions($options, $current_id_class_resource);	
 		@reset($options);
 		$t['classorientationoptions'] = makeOptions($options, $current_id_class_orientation);	
+
+		$this->inactivelinks = array( 'Classroom Manager' );
 	}
 
 	function saveClassResourceRun(&$db, &$u, &$lc, &$t)
