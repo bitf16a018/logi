@@ -36,12 +36,18 @@ $execution_time=get_microtime();
 	srand ((double) microtime() * 1000000);
 
 	if (!@include('defines.php')) {
-		include('install.php');
+		//directory exists
+		if (file_exists('install')) {
+			header('Location: install/');
+		}
 		exit();
 	}
 	if (!@include('settings.php')) {
 		if (!@include('settings.simple.php')){
-			include('install.php');
+			//directory exists
+			if (file_exists('install')) {
+				header('Location: install/');
+			}
 			exit();
 		}
 	}
@@ -77,14 +83,22 @@ $execution_time=get_microtime();
 @include_once(LIB_PATH."LC_html.php");
 @include_once(LIB_PATH."inputValidation.php");
 
-
 	//start the error system
 	$lcObj = new lcSystem();
 
 	//first time
-	if (file_exists('first_time.php') ) {
-		include('first_time.php');
+	//the db settings aren't correct, and we have the file
+	//  "first_time.php" present
+	if ( ! is_resource($gdb->driverID)
+		|| (strstr( $gdb->errorMessage, 'Can\'t select DB') !== false)
+	) {
+		if (file_exists('install')) {
+			header('Location: '.BASE_URL.'install/');
+			exit();
+		}
 	}
+
+
 
 // ************* I18N ******************************
 //if get vars, switchlocale, then set a cookie
@@ -115,9 +129,9 @@ define('HERC',false);
 		//for others to use via the lcObj
 		//
 
-if ($QUERY_STRING!="") {
-	$QUERY_STRING = ereg_replace("&","/",$QUERY_STRING);
-	$PATH_INFO .= "/$QUERY_STRING";
+if (isset($_SERVER['QUERY_STRING'])) {
+	$_SERVER['QUERY_STRING'] = ereg_replace("&","/",$_SERVER['QUERY_STRING']);
+	$_SERVER['PATH_INFO'] .= "/".$_SERVER['QUERY_STRING'];
 }
 
 
@@ -130,7 +144,7 @@ if ($QUERY_STRING!="") {
 		 *	index.php/foo/bar/lunix	=>	module=foo, service=bar, getvars[0]=lunix
 		 */
 	$url = $_SERVER['PATH_INFO'];
-	if (!$url) { $url = $HTTP_SERVER_VARS['PATH_INFO']; }
+	if (!$url) { $url = $_SERVER['PATH_INFO']; }
 	$name = explode("/",$url);
 	/*
 	 * move to default service if none is specified
@@ -150,7 +164,8 @@ if ($QUERY_STRING!="") {
 	if ($className == "main") { $className = $name[1]; }
 	if ($serviceName == "") { $serviceName = "main"; $className = $moduleName;}
 	$gdb->query("select * from lcRegistry where moduleName ='$moduleName'",false);
-	$gdb->next_record();
+	$gdb->nextRecord();
+	$gdb->freeResult();
 	$module = $gdb->Record;
 
 		/*
@@ -161,7 +176,7 @@ if ($QUERY_STRING!="") {
 		 * x=4 if you want a random string in each URL
 		 */
 
-$lcObj->getvars = $HTTP_GET_VARS;
+$lcObj->getvars = $_GET;
 $lcObj->moduleName = $moduleName;
 $lcObj->serviceName = $serviceName;
 
@@ -268,9 +283,9 @@ $service->className = $className;
 $service->module = $moduleName;
 $service->templateName = $serviceName;
 
-DEFINE(MOD_URL,APP_URL.$moduleName."/");
-DEFINE(SECURE_MOD_URL,SECURE_APP_URL.$moduleName."/");
-DEFINE(MOD_PATH,SERVICE_PATH.$moduleName."/");
+DEFINE('MOD_URL',APP_URL.$moduleName."/");
+DEFINE('SECURE_MOD_URL',SECURE_APP_URL.$moduleName."/");
+DEFINE('MOD_PATH',SERVICE_PATH.$moduleName."/");
 
 
 
@@ -312,7 +327,7 @@ if($event != '' ) {
 			$service->$event_full($_db,$lcUser,$lcObj,$lcTemplate);
 			
 		} else { 
-			$lcTemplate[message] = "The function <i>$event</i> does not exist.";
+			$lcTemplate['message'] = "The function <i>$event</i> does not exist.";
 			lcSystem::systemPreTemplate($lcObj,$lcTemplate);
 			$service->errorMessage($lcObj, $lcTemplate);
 			closepage();

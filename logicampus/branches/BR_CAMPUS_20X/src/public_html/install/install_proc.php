@@ -79,7 +79,7 @@ if (!$results['connect']) {
 		}
 
 		$gdb->disconnect();
-		$results['connect'] = $gdb->connect();
+		$results['connect'] = $gdb->reconnect();
 	}
 }
 
