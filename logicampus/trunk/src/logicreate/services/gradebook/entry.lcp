@@ -1,16 +1,19 @@
 <?
-/*
- *
- * Handles adding and editing entries.
- *
- */
-
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'gradeBookObj.php');
 include_once(LIB_PATH.'ClassGradebookVal.php');
 include_once(LIB_PATH.'ClassGradebookEntries.php');
 include_once(LIB_PATH.'ClassGradebookCategories.php');
 
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+include(LIB_PATH.'lc_lob.php');
+
+
+/**
+ * Handles adding and editing entries.
+ *
+ */
 class entry extends FacultyService {
 
 	var $presentor='htmlPresentation';
@@ -27,14 +30,7 @@ class entry extends FacultyService {
 					  message consistently, please contact the site administrator.';
 
 	// links
-	var $sectionTitle = 'Entry';
-	var $navlinks = array (
-		'Classroom Manager' => '%classmgr/display/',
-		'Calendar' => '%classmgr/cal/',
-		'Assignments' => '%classmgr/assignmentManage/',
-		'Contact Students' => '%classmgr/contactStudents/',
-		'Assessments' => '%assessments',
-	);
+	var $sectionTitle = 'Gradebook Entries';
 
 	var $applinks = array(
 		'Gradebook Home' => '',
@@ -49,25 +45,72 @@ class entry extends FacultyService {
 	# Holds cleaned postvar data
 	var $data = array();
 
-		function run(&$db,&$u,&$lc,&$t) {
+	function run(&$db,&$u,&$lc,&$t) {
 
-			$this->inactivelinks[] = 'List Entries';
-			$lc->templateName='entry_main';
-//auto-comment			$lc->templateStyle = 'private';
-			$this->sectionTitle = 'Gradebook Entries';
+		$this->inactivelinks[] = 'List Entries';
+		$lc->templateName='entry_main';
 
-			$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_categories, title');
+		$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_categories, title');
 
-			// Get the categories
-			$db->query("select id_class_gradebook_categories, label from class_gradebook_categories
-				where id_classes='".$u->activeClassTaught->id_classes."'");
-			$t['cats'] = array();
-			while ($db->next_record()) {
-				$t['cats'][$db->Record['id_class_gradebook_categories']] = 
-					$db->Record['label'];
-			}
+		$dm = new LC_Table_ObjectModel($t['gbe']);
 
+		$dm->ignoreColumn('_new');
+		$dm->ignoreColumn('_modified');
+		$dm->ignoreColumn('_version');
+		$dm->ignoreColumn('__attributes');
+		$dm->ignoreColumn('__nulls');
+		$dm->ignoreColumn('_entityVersion');
+		$dm->ignoreColumn('idClassGradebookEntries');
+		$dm->ignoreColumn('idClasses');
+//		$dm->ignoreColumn('idClassGradebookCategories');
+		$dm->ignoreColumn('publishFlag');
+		$dm->ignoreColumn('dateDue');
+		$dm->ignoreColumn('assessmentId');
+		$dm->ignoreColumn('assignmentId');
+	
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+
+		$colA = &$columnModel->getColumnAt(0);
+		$colA->justify='left';
+		$colA->maxWidth='64';
+		$colA->cellRenderer = new LC_Table_CategoryNameRenderer();
+		$colA->name='Category';
+/*
+	$tbl .= "<tr>\n\t<td><a href=\"".modurl('entry')."/event=edit/id=$id\">$title</a></td>\n\t<td width=30>&nbsp;</td>\n\t<td><a href=\"".modurl('entry')."/event=delete/id=$id\" onclick=\"if(confirm('Are you sure you want to remove this entry and all your students\' grades for it?')) { return true; } else { return false; }\">delete</a></td>\n</tr>\n";
+*/
+
+		$colB = &$columnModel->getColumnAt(1);
+		$colB->justify='left';
+
+
+		$colC = &$columnModel->getColumnAt(1);
+		$colC->name='Name';
+
+		$colD = &$columnModel->getColumnAt(2);
+		$colD->maxWidth='64';
+		$colD->name='Code';
+
+
+		$colE = &$columnModel->getColumnAt(4);
+		$colE->justify='left';
+
+
+		$t['datagrid'] = new LC_TableRenderer($table);
+
+
+		// Get the categories
+		$db->query("SELECT 
+			id_class_gradebook_categories, label 
+			FROM class_gradebook_categories
+			WHERE id_classes='".$u->activeClassTaught->id_classes."'");
+
+		while ($db->nextRecord()) {
+			$colA->cellRenderer->categories[$db->record['id_class_gradebook_categories']] = 
+				$db->record['label'];
 		}
+	}
 
 		function addRun(&$db,&$u,&$lc,&$t) {
 
@@ -405,4 +448,12 @@ class entry extends FacultyService {
 
 	}	
 
+class LC_Table_CategoryNameRenderer extends LC_TableCellRenderer {
+
+	var $categories = array();
+
+	function getRenderedValue() {
+		return $this->categories[$this->value];
+	}
+}
 ?>
