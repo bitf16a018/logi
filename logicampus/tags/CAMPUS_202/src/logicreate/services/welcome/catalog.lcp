@@ -1,0 +1,139 @@
+<?
+
+class Catalog extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,&$lc,&$t) {
+		$t['courses'] = $this->getCourseNames();
+		$lc->templateName = 'catalog_main';
+	}
+
+
+	function courseRun($db,&$u,&$lc,&$t) {
+		$courses = $this->getCourseNames();
+		$c = trim($lc->getvars['c']);
+		$t['courses'] = array();
+
+		if (! in_array($c, array_keys($courses)) ) {
+			return;
+		}
+		$t['courseName'] = $courses[$c];
+		$t['courseFamily'] = $c;
+
+		$db->query("SELECT * FROM  courses
+			WHERE courseFamily = '".$c."'");
+
+		while ($db->nextRecord() ) {
+			$t['courses'][] = $db->record;
+		}
+			
+	}
+
+
+	function getCourseNames() {
+		$courses = array (
+		"ACC"=>'Accounting',
+		"AMS"=>'American Studies',
+		"AN"=>'Anthropology',
+		"ALS"=>'Applied Language Studies',
+		"APM"=>'Applied Mathematical Analysis',
+		"MUA"=>'Applied Music',
+		"ATB"=>'Applied Tech In Business',
+		"ARB"=>'Arabic',
+		"AED"=>'Art Education',
+		"AH"=>'Art History',
+		"BCM"=>'Biochemistry',
+		"BIO"=>'Biological Sciences',
+		"CHM"=>'Chemistry',
+		"CHE"=>'Chinese',
+		"CIN"=>'Cinema Studies',
+
+		"COM"=>'Communication',
+		"CIT"=>'Computer Info Technology',
+		"CSE"=>'Computer Science & Engineering',
+		"CNS"=>'Counseling',
+		"CT"=>'Cytotechnology',
+		"DAN"=>'Dance',
+		"EC"=>'Early Childhood',
+		"ECN"=>'Economics',
+		"ED"=>'Education',
+		"EA"=>'Education Specialist: Sch Admn',
+		"EL"=>'Educational Leadership',
+		"EST"=>'Educational Studies - Teaching',
+		"EE"=>'Electrical Engineering',
+		"ECE"=>'Electrical/Computer Engineerng',
+		"EED"=>'Elementary Education',
+		"EGR"=>'Engineering',
+		"ENG"=>'English',
+		"ESL"=>'English As A Second Language',
+		"ENT"=>'Entrepreneurship',
+		"ENV"=>'Environmental Studies',
+		"EXS"=>'Exercise Science',
+		"FIN"=>'Finance',
+		"FE"=>'Foundations of Education',
+		"FRH"=>'French',
+		"GEO"=>'Geography',
+		"GRM"=>'German',
+		"HS"=>'Health Sciences',
+		"HST"=>'History',
+		"HC"=>'Honors College',
+		"HRD"=>'Human Resources Development',
+		"ISE"=>'Industrial/Systems Engineering',
+		"IST"=>'Instructional Systems Technlgy',
+		"IS"=>'International Studies',
+		"IT"=>'Italian',
+		"JPN"=>'Japanese',
+		"JRN"=>'Journalism',
+		"LBS"=>'Liberal Studies',
+		"LIN"=>'Linguistics',
+		"LIT"=>'Literatures In Translation',
+		"MGT"=>'Management',
+		"MIS"=>'Management Information Systems',
+		"MKT"=>'Marketing',
+		"MTE"=>'Math Education - Elementary',
+		"MTS"=>'Math Education - Secondary',
+		"MOR"=>'Math In Operations Research',
+		"MTH"=>'Mathematics',
+		"ME"=>'Mechanical Engineering',
+		"MLS"=>'Medical Laboratory Science',
+		"ML"=>'Modern Language',
+		"MUE"=>'Music Ensembles',
+		"MUT"=>'Music Theory & Composition',
+		"MTD"=>'Music, Theatre And Dance',
+		"MUS"=>'Musicology & Music Education',
+		"NMT"=>'Nuclear Medical Technology',
+		"NRS"=>'Nursing',
+		"NH"=>'Nutrition and Health',
+		"OSH"=>'Occupational Safety & Health',
+		"ORG"=>'Organizational Behavior',
+		"PHL"=>'Philosophy',
+		"PT"=>'Physical Therapy',
+		"PHY"=>'Physics',
+		"PS"=>'Political Science',
+		"POM"=>'Production And Operations Mang',
+		"PSY"=>'Psychology',
+		"PA"=>'Public Administration',
+		"QMM"=>'Quantitative Methods Managemt',
+		"RT"=>'Radiation Therapy',
+		"RDG"=>'Reading And Language Arts',
+		"REL"=>'Religious Studies',
+		"RHT"=>'Rhetoric',
+		"SCI"=>'Science',
+		"SCS"=>'Science Studies/Elementary',
+		"SED"=>'Secondary Education',
+		"SW"=>'Social Work',
+		"SOC"=>'Sociology',
+		"SPN"=>'Spanish',
+		"SE"=>'Special Education',
+		"STA"=>'Statistics',
+		"SA"=>'Studio Art',
+		"SYS"=>'Systems Engineering',
+		"THA"=>'Theatre Arts',
+		"WHP"=>'Wellness Hlth Prom Inj Prevent',
+		"WS"=>'Women\'s Studies',
+		);
+		return $courses;
+	}
+}
+?>

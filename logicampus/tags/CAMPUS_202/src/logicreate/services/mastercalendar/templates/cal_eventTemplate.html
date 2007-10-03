@@ -1,0 +1,263 @@
+<?php
+
+if ($t['event']->repeatType==0) {
+$type0=" CHECKED";
+ $type0Data = $t['event']->repeatData;
+ $type0Count = $t['event']->repeatCount;
+}
+if ($t['event']->repeatType==1) {
+ $type1=" CHECKED";
+ $type1Data = $t['event']->repeatData;
+ $type1Count = $t['event']->repeatCount;
+ }
+ 
+if ($t['event']->repeatType ==2) {
+$type2=" CHECKED";
+ $type2Data = $t['event']->repeatData;
+ $type2Count = $t['event']->repeatCount;
+}
+if ($t['event']->repeatType==4) {
+ $type4=" CHECKED";
+ $type4Data = $t['event']->repeatData;
+ $type4Count = $t['event']->repeatCount;
+ }
+if ($t['event']->repeatType==6) {
+ $type6=" CHECKED";
+ $type6Data = $t['event']->repeatData;
+ $type6Count = $t['event']->repeatCount;
+ }
+if ($t['event']->repeatType==7) {
+ $type7=" CHECKED";
+ $type7Data = $t['event']->repeatData;
+ $type7Count = $t['event']->repeatCount;
+ }
+?>
+
+<style>
+
+	.highlightcolor
+	{	background-color: #DEEEEE;
+		padding: 7px;
+	}
+	.nohighlightcolor
+	{	background-color: #FFF6E6;
+		padding: 7px;
+	}
+</style>
+
+<script>
+	
+	function isFormReady()
+	{
+		// event name exist?
+		if (document.scheduling.title.value.length < 2)
+		{	document.scheduling.title.focus();
+			alert("Please fill in the event title");
+			return false;
+		}
+		
+		if (document.scheduling.description.value.length < 2)
+		{	document.scheduling.description.focus();
+			alert("Please fill in the event description");
+			
+			return false;
+		}
+		if (document.scheduling.description.value.length > 750)
+		{	alert("Your event description contains "+document.scheduling.description.value.length+" characters, you must not exceed 750 characters.");
+			return false;
+		}
+		
+	return true;
+	}
+	
+	
+	function checkRepeatDay()
+	{	
+		if (document.scheduling.repeatCount1.length == 0 || document.scheduling.repeatCount1.value <= 0)
+		{	document.scheduling.repeatCount1.value = 1;
+		}
+		
+	}
+	function checkRepeatWeek()
+	{	
+		if (document.scheduling.repeatCount2.length == 0 || document.scheduling.repeatCount2.value <= 0)
+		{	document.scheduling.repeatCount2.value = 1;
+		}
+		
+	}
+</script>
+
+	<fieldset class="nohighlightcolor" id="f1">
+	<legend>Basic information</legend>
+	
+		<table border="0" cellpadding="4" cellspacing="2" width="100%">
+		<tr>
+			<td class="cal_leftside">Event Name:</td>
+			<td class="cal_rightside">
+				<input type="text" name="title" value="<?=$t['event']->title?>">
+			</td>
+		</tr>
+		<tr>
+			<td class="cal_leftside" valign="top">Description:<br><font size="1"<?php
+		        if ($t['problemfound'])
+		        {   echo ' color="maroon"';
+		        }
+				?>>(750 character limit)</font></td>
+			<td class="cal_rightside">
+				<textarea style="width: 400px;" name="description" cols="45" rows="7"><?=$t['event']->description?></textarea>
+			</td>
+		</tr>
+	</table>
+	
+	
+	
+	
+	
+	</fieldset>
+	
+	<br>
+
+	<fieldset class="nohighlightcolor" id="f2"">
+	<legend>Date Information</legend>
+	
+		<table border="0" cellpadding="4" cellspacing="2" width="100%">
+		<tr>
+			<td class="cal_leftside">Date:</td>
+			<td class="cal_rightside">
+				<?=$t['startDate'];?>
+			</td>
+		</tr>
+		<tr>
+			<td class="cal_leftside" valign="top">Time:</td>
+			<td class="cal_rightside">
+				<table width="100%">
+				<tr>
+					<td width="20%"><strong>Start Time:</strong></td>
+					<td>
+					<SELECT name="start[hour]">
+					<?=makeOptions($t['hour'],date("H",$t['event']->startdate));?>
+					</SELECT>
+					:
+					<SELECT name="start[minute]">
+					<?=$minarray = array("0"=>"00","15"=>"15","30"=>"30","45"=>"45");?>
+					<?=makeOptions($minarray,date("i",$t['event']->startdate));?>
+					</SELECT>
+					</td>
+				</tr>
+				<tr>
+					<td><strong>End Time:</strong></td>
+					<td>
+					<SELECT name="start[endhour]">
+					<?=makeOptions($t['hour'],date("H",$t['event']->enddate));?>
+					</SELECT>
+					:
+					<SELECT name="start[endminute]">
+					<?=makeOptions($minarray,date("i",$t['event']->enddate));?>
+					</SELECT>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		
+		<br>
+		
+		<fieldset  class="nohighlightcolor" id="f3">
+		<legend>Date Repeating</legend>
+		
+			<table border="0" cellpadding="4" cellspacing="2" width="100%">
+			<tr>
+				<td colspan='2' class="cal_leftside">
+				
+				<input type="radio" name="repeatType" value="0"<?=$type0;?>>Do Not Repeat<br><br>
+				
+				<input type="radio" name="repeatType" onclick="checkRepeatDay();" value="1"<?=$type1;?>>Repeat every
+				<input type='text' size='3' maxlength="3" onblur="checkRepeatDay();" name='repeatCount1' value='<?=$type1Count;?>'>
+				day(s)<br><br>
+				
+				<fieldset class="nohighlightcolor" id="f5">
+				
+				<input type="radio" name="repeatType" onclick="checkRepeatWeek();" value="2"<?=$type2;?>>Repeat every
+				<input type='text' size='3' maxlength="3" onblur="checkRepeatWeek();" name='repeatCount2' value='<?=$type2Count;?>'>
+				week(s)
+					<br>		
+				<fieldset class="nohighlightcolor" id="f5">
+				<legend align="center"><I>On which days?</I></legend>
+				
+				<?
+				$days = array(1=>'Sunday',2=>'Monday',3=>'Tuesday',4=>'Wednesday',5=>'Thursday',6=>'Friday',7=>'Saturday');
+				$tempcount = 1;
+				while($tempcount<8) {
+				if ( pow(2,$tempcount-1) & $type2Data) {
+				$checked = ' CHECKED'; } else { $checked = ''; }
+				?>
+				<input id="<?=$days[$tempcount];?>" type='checkbox' name='repeatday2[<?=pow(2,$tempcount-1);?>]'<?=$checked;?>><label for="<?=$days[$tempcount];?>"><?=$days[$tempcount];?></label> &nbsp;
+				
+				<? ++$tempcount;
+				} ?>
+				</fieldset>
+				</fieldset>
+				
+				<br><br>
+				
+				<fieldset class="nohighlightcolor" id="f4">
+				
+				
+				<?
+				if ($t['event']->repeatUntil<1) { $repeatForever=' CHECKED'; } else {  $repeatUntil=' CHECKED'; } ?>
+						<input type="radio" name="repeatForever" value="-1"<?=$repeatForever;?>>
+						Repeat forever
+						<br><br>
+						<input type="radio" name="repeatForever" value="1"<?=$repeatUntil;?>>
+						Repeat until: &nbsp;&nbsp;&nbsp;
+						
+						<?=$t['untilDate'];?>
+					
+				<br><br>
+				&nbsp;&nbsp;Exclude dates:
+				<table cellpadding="4" cellspacing="2" width="100%">
+				<tr>
+					<td class="cal_leftside" valign="top">
+					Exclude<BR>(mm/dd/yyyy)<BR>one per line
+					</td>
+					<td class="cal_rightside">
+					<textarea name='repeatExclude' rows='5' cols='20' style="width: 375px;"><?=$t['event']->repeatExclude;?></textarea>
+					</td>
+				</tr>
+				</table>
+
+				<br>
+
+				</fieldset>
+				
+				</td>
+			</tr>
+			</table>
+			
+			<br>
+			
+		
+		</fieldset>
+		
+		<br>
+		
+	</fieldset>
+
+	<br>
+	
+	<table cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td class="cal_rightside">
+			<? if ($t['event']->pkey) { ?>
+			<input type="submit" name='button' value="Update" onclick="return isFormReady();">&nbsp;&nbsp;
+			<input type="submit" name='button' value="Delete">
+			<? } else { ?>
+			<input type="submit" name='button' value="Save" onclick="return isFormReady();">
+			<? } ?>
+			<input type="hidden" name="pkey" value="<?=$t['event']->pkey;?>">
+			<input type="hidden" name="event" value="insert">
+		</td>
+	</tr>
+	</table>
+

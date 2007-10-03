@@ -1,0 +1,18 @@
+<?=$t['sectionheader'];?>
+
+Curious as to which of your classmates are currently logged into the site?  You are in the right place!  The following classmates are currently logged into the site browsing various pages:
+
+
+<br><br>
+
+Total Users Logged In: [<?=(int)$t['loggedin']?>]
+<ul>
+<?
+
+while (list($k, $v) = @each($t['users']))
+	{ ?>
+	<li><a href="<?=APP_URL?>users/view/<?=$v['username']?>"><?=$v['username']?></a> 
+		<a href="<?=APP_URL?>pm/main/event=compose/sendto=<?=$v[username]?>">[send a message]</a>
+	<?	} ?>
+</ul>
+

@@ -1,0 +1,70 @@
+<?=$t['sectionheader'];?>
+
+<h3>Ticket Information</h3>
+<table cellspacing="0" cellpadding="2" width="100%">
+	<tr>
+		<td width="18%" class="row2"><B>Summary:</B></td>
+		<td><?=stripslashes($t['hd']['summary']);?></td>
+	</tr>
+	<tr>
+		<td width="18%"><nobr><B>Categorized As:</B></nobr></td>
+		<td><i><?=$t['categories'][$t['hd']['category']];?></i></td>
+	</tr>
+	<tr>
+		<td width="18%"><nobr><B>Current Status:</B></nobr></td>
+		<td><i><?=$t['hd']['helpdesk_status_label'];?></i></td>
+	</tr>
+	<tr>
+		<td width="18%"><nobr><B>Ticket No.:</B></nobr></td>
+		<td><?=$t['hd']['helpdesk_id'];?></td>
+	</tr>
+
+	<tr>
+		<td width="18%"><nobr><B>Submitted On:</B></nobr></td>
+		<td><?=date("F jS, Y g:i A",$t['hd']['timedate_open']);?></td>
+	</tr>
+	<tr>
+		<td width="18%"><B>By:</B></td>
+		<td><?=$t['hd']['userid'];?></td>
+	</tr>	
+</table>
+
+<h4>Communication Log</h4>
+<table cellpadding="2" cellspacing="0" width="100%" style="border: 1px solid silver;">
+	<tr class="bartitle">
+		<td><B>Date Logged</B></td>
+		<td><B>By</B></td>
+		<td><B>Action</B></td>
+		<td><B>Details</B></td>
+	</tr>
+	<? while(list($k,$v) = each($t['log'])) { $i++; ?>
+	<tr>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" width="150" valign='top'><?=date("M j, Y g:i A",$v['timedate']);?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" width="65" valign='top'><?=$v['userid'];?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" width="100" valign='top'><?=$v['action'];?></td>
+		<td bgcolor="<?=(($i%2) ? '#eeeeee':'#cccccc');?>" valign='top'><?=stripslashes(nl2br($v['comment']));?></td>
+	</tr>
+	<? } ?>
+
+</table>
+
+<h5>Submit more detailed information</h5>
+
+	<form method='post' action='<?=appurl("helpdesk/helpdeskSubmit/event=addDetail");?>'>
+	
+	<textarea name='details' rows='7' cols='60'></textarea><br><br>
+	
+<? if ($t['techs']) { // do we have a list of techs to reassign to? ?>
+Reassign to: <select name='reassign'><option value=''>Do not reassign</option>
+<?=$t['techs'];?>
+</select><BR>
+<? } ?>
+	<? if ($t['hd']['status']==3) { // closed ?>
+		<input type='submit' name='button' value='Send details and reopen incident'>
+	<? } else { ?>
+		<input type='submit' name='button' value='Send details'>
+		<input type='submit' name='button' value='Send details and close incident' onclick="if (confirm('You are about to set this tickets status to *CLOSED*, are you sure?')) { return true; } else { return false; }">
+	<? } ?>
+</form>
+<br>
+

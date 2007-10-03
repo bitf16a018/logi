@@ -1,0 +1,206 @@
+<?
+ 
+// test
+include_once(LIB_PATH. 'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'classFaqs.php');
+
+
+class faq extends FacultyService 
+{
+
+	var $presentor = "htmlPresentation";
+
+	var $cleanedArray = array();
+	
+	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display/',
+		'Announcements'=>'announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'FAQ' => 'faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => 'lessonManager/',
+		'Objectives' => 'lessonObjectives/',
+		'Webliography' => 'lessonWebliography/'
+	);
+	// links
+	var $applinks = array(
+		'List FAQs' => 'faq/',
+		'Add FAQ' => 'faq/event=add'
+	);
+	var $inactivelinks = array( 'FAQ' );
+	var $sectionTitle = 'FAQ';
+	
+	
+	function editRun(&$db,&$lcUser,&$lc,&$t) {
+		
+		$this->sectionTitle = 'Edit FAQ';
+		$f = new siteform($lcUser->groups);
+		
+		if ($lc->postvars['submit'] == 'Update FAQ')
+		{
+			$t['error'] = $f->validateForm('classfaq', $lc->postvars);
+
+			if ($f->hasErrors() == false)
+			{	// has no errors, time to update
+				if (is_null($faqs = classFaqs::_getFromDB($f->cleanedArray['id_class_faqs'], 'id_class_faqs')) == false)
+				{	
+					$faqs->question = $f->cleanedArray['question'];
+					$faqs->answer = $f->cleanedArray['answer'];
+					
+					$faqs->category = $f->cleanedArray['category'];
+					if ($f->cleanedArray['categoryNew'])
+					{	$faqs->category = $f->cleanedArray['categoryNew'];
+					} 
+					
+					$faqs->_saveToDB();
+					
+					$t['error'] = 'FAQ updated...';
+					
+					$this->Run($db, $lcUser, $lc, $t);
+					return;
+					
+				} else
+				{	$t['error'] = 'Could not load up faq for editing.. try again.';
+				
+				}
+			
+			} else
+			{	// has errors .. do something
+				$t['error'] = 'Errors, please make sure all required information is filled in.';
+			}
+			
+		} else
+		{
+			
+			if (is_object($faqs = classFaqs::_getFromDB($lc->getvars['id'], 'id_class_faqs','id_classes='.$lcUser->activeClassTaught->id_classes)) == false)
+			{	$t['error'] = 'could not load faq for editing';
+				// maybe load up run()?
+			} else
+			{
+				$f->cleanedArray = object2array($faqs);
+				
+			}
+						
+			// seed form with values!
+		}
+		
+		$f->getForm('classfaq', $f->cleanedArray);
+		$f->modFormValue('id_class_faqs', (int)$f->cleanedArray['id_class_faqs']);
+		
+		
+		
+		$t['form'] = $f->ToHTML();
+		$t['classObj'] = $lcUser->activeClassTaught;
+		
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName="faq_edit";
+		
+	}
+
+	function addRun(&$db,&$lcUser,&$lc,&$t) {
+
+		//echo $lcUser->activeClassTaught->id_classes;
+		
+		$f = new siteform($lcUser->groups);
+		$this->sectionTitle = 'Add Faq';
+		$this->inactivelinks[] = 'Add Faq';
+		
+		if ($lc->postvars['submit'] == 'Add FAQ')
+		{
+			$t['error'] = $f->validateForm('classfaq', $lc->postvars);
+			
+			// make sure they are assigning to a category
+			if ( !$f->cleanedArray['category'] && !$f->cleanedArray['categoryNew'] )
+				$t['error'] = '<br/>You must assign your FAQ to a category!';
+			
+			if (!$t['error'])
+			{
+				$faq = new classFaqs();
+				$faq->question = $f->cleanedArray['question'];
+				$faq->answer = $f->cleanedArray['answer'];
+				$faq->id_classes = $lcUser->activeClassTaught->id_classes;
+				// if nothing chosen for selectCategory
+				$faq->category = $f->cleanedArray['category'];
+				if ($f->cleanedArray['categoryNew'])
+				{	$faq->category = $f->cleanedArray['categoryNew'];
+				} 
+				$faq->_saveToDB();
+				
+				$this->Run($db, $lcUser, $lc, $t);
+				return;
+				
+			}
+			
+		}
+				
+		$f->getForm('classfaq', $lc->postvars);
+		
+		$f->modFormValue('submit', 'Add FAQ');
+		$f->modFormValue('event', 'add');
+
+		$t['form'] = $f->ToHTML();
+		$t['classObj'] = $lcUser->activeClassTaught;
+
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName="faq_edit";
+	}
+
+
+	function deleteRun($db,&$lcUser,&$lc,&$t) {
+
+		if (is_null($faqs = classFaqs::_getFromDB($lc->getvars['id'], 'id_class_faqs', 'id_classes='.$lcUser->activeClassTaught->id_classes)))
+		{	// failed to find faq
+			$t['error'] = 'Failed to delete requested faq, please try again';
+			
+		} else
+		{
+			$faqs->_deleteToDB();
+			//$db->query('delete from class_faqs where id_class_faqs='.$faqs->id_class_faqs);
+		}
+
+		$this->run($db,$lcUser,$lc,$t);
+
+	}
+
+
+	function run($db,&$lcUser,&$lc,&$t) {
+
+		$lc->templateName='faq_main';
+		$this->sectionTitle = 'FAQ Listing';
+		$this->inactivelinks[] ='List Faqs';
+		
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		$datagrid->table = 'class_faqs';
+		$datagrid->column = 'id_class_faqs, question, category, clicks, id_classes';
+		$datagrid->headerClass = 'classheader';
+		$datagrid->ignore = array('id_class_faqs', 'id_classes');
+		$datagrid->where = ' id_classes='.$lcUser->activeClassTaught->id_classes;
+		
+		$datagrid->setCellWidth('category', '20%');
+		$datagrid->setCellWidth('clicks', '7%');
+		$datagrid->setCellAlign('clicks', 'center');
+		$datagrid->setCellWidth('end', '75');
+		$datagrid->setCellAlign('end', 'center');
+		
+		
+		
+		$datagrid->sortColumns = array( 'question', "category",'clicks');
+		
+		$datagrid->headers = array('question'=>'Question','category'=>'Category',"clicks"=>"Clicks", 'end'=>' ');
+		
+		$datagrid->postpendColumn('<a href="<?=modurl("faq/event=edit/id=$id_class_faqs");?>">edit</a> | <a onclick="if(confirm(\'Are you sure you want to remove this faq?\')) { return true; } else { return false; }" href="<?=modurl("faq/event=delete/id=$id_class_faqs");?>">delete</a>','end');
+
+		$datagrid->class = 'datagrid';
+		
+		$t['table'] = $datagrid->toHTML();
+		$t['classObj'] = $lcUser->activeClassTaught;
+
+	}
+
+}
+?>

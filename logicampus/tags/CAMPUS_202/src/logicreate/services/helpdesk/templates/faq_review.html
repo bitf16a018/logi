@@ -1,0 +1,98 @@
+<?=$t['sectionheader'];?>
+<?php
+	$a_approved = array('0'=>'Not approved', '1'=>'Approved');
+?>
+
+<p>
+<u>Reviewing a FAQ</u><br><br>
+
+	You may modify anything about this FAQ. You may remove this faq entirely
+	from the system by selecting <u>Remove</u> below.
+	
+</p>
+<br><br>
+
+<form action="<?=modurl('faq/event=reviewquestion/'.$t['faq']['id_faq']);?>" method="POST">
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+
+<tr>
+	<td width="10%" valign="top">Submitted By:</td>
+	<td> &nbsp;<a target="_blank" href="<?=appurl('users/view/'.$t['faq']['tx_username']);?>"><?=$t['faq']['tx_username'];?></a></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+
+<tr>
+	<td width="10%" valign="top">Submitted On:</td>
+	<td> &nbsp;<i><?=date('F dS, Y g:i A', strtotime($t['faq']['dt_submitted']));?></i></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+
+<tr>
+	<td width="10%" valign="top">Times Viewed:</td>
+	<td> &nbsp;<?=$t['faq']['ic_viewed'];?></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+<?php
+if (LC_FAQ_USE_COMMUNITY_VOTING)
+{
+?>
+	<tr>
+		<td width="10%" valign="top">Voting Status:</td>
+		<td> &nbsp;<i>Total Votes:</i> <?=(((int)$t['faq']['votes_total'] == 0) ? 'N/A' : $t['faq']['votes_total'])?><br>
+			 &nbsp;<i>Average Rating:</i> <?=(((int)$t['faq']['votes_average'] == 0) ? 'N/A' : $t['faq']['votes_average'].'/5')?>
+		</td>
+	</tr>
+	
+	<tr><td colspan="2"> &nbsp; </td></tr>
+<?php
+}
+?>
+<tr>
+	<td width="10%" valign="top">Approval Status:</td>
+	<td> &nbsp;<select name="fl_approved"><?=makeOptions($a_approved, $t['faq']['fl_approved']);?></select></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+<?php
+if (LC_FAQ_USE_CATEGORIES)
+{
+?>
+	<tr>
+		<td width="10%" valign="top">Categorized:</td>
+		<td> &nbsp;<select name="id_faq_category"><?=makeOptions($t['categories'], $t['faq']['id_faq_category']);?></select></td>
+	</tr>
+	
+	<tr><td colspan="2"> &nbsp; </td></tr>
+<?php
+}
+?>
+<tr>
+	<td width="10%" valign="top"><nobr>Question:<br><small style="font-size: 8px;"><i>(255 chars.max)</i></small></nobr></td>
+	<td> &nbsp;<input type="text" maxlength="255" size="45" name="tx_question" value="<?=trim(htmlentities(stripslashes($t['faq']['tx_question']), ENT_QUOTES));?>"></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+
+<tr>
+	<td width="10%" valign="top">Answer:</td>
+	<td> &nbsp;<textarea name="tx_answer" rows="10" cols="60"><?=stripslashes($t['faq']['tx_answer']);?></textarea></td>
+</tr>
+
+<tr><td colspan="2"> &nbsp; </td></tr>
+
+</table>
+
+	<input type="submit" name="submit" value="Update Question">
+	
+	<input type="submit" name="submit" value="Remove Question"
+			onClick="if (confirm('Are you sure you want to remove this FAQ from the system?')) { return true; } else { return false; }"
+			>
+	
+	<input type="hidden" value="reviewquestion" name="event">
+	<input type="hidden" value="<?=$t['faq']['id_faq'];?>" name="id_faq">
+
+</form>

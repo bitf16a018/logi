@@ -1,0 +1,295 @@
+<?
+
+/**
+ * tabbed julep service
+ *
+ * contains many features that are necassary to have
+ * a consistent tabbed interface
+ */
+class TabbedService extends HercAuth {
+
+	/**
+	 * handle commanalities between tab changes,
+	 * call module pseudo-event (tab name)
+	 */
+	function changeTabRun(&$db,&$u,&$arg,&$t) {
+
+		//save form data in sessionvars
+		//name data after module + old tab name
+		$tabName = $arg->getvars['selectedTab'];
+		$oldTab = $arg->getvars['prevTab'];
+		$t['saved'] = $u->sessionvars['tabbed'][sprintf("%s",$tabName)];
+
+		while ( list ($k,$v) = @each($arg->postvars['_save_']) ) {
+			if ( is_array($v) ) {
+				$u->sessionvars['tabbed'][sprintf("%s",$oldTab)][sprintf("%s",$k)] = array();
+				while ( list($kk,$vv) = @each($v) ) {
+					if (! is_array($vv) )
+					$u->sessionvars['tabbed'][sprintf("%s",$oldTab)][sprintf("%s",$k)][$kk] = stripslashes($vv);
+					else 
+					$u->sessionvars['tabbed'][sprintf("%s",$oldTab)][sprintf("%s",$k)][$kk] = $vv;
+				}
+			} else {
+				$u->sessionvars['tabbed'][sprintf("%s",$oldTab)][$k] = stripslashes($v);
+			}
+		}
+		$u->saveSession();
+
+		//call module pseudo-event
+		if ( strtolower($arg->postvars['button']) == 'save' ) {
+			$pseudo = '$this->saveTabs(&$db,&$u,&$arg,&$t);';
+			eval($pseudo);
+		} else
+		if (method_exists($this,$arg->getvars['selectedTab']."Run")) {
+			$pseudo = '$this->'.$arg->getvars['selectedTab'].'Run(&$db,&$u,&$arg,&$t);';
+			eval($pseudo);
+		} else {
+			$t['message'] = "The function <i>".$arg->getvars['selectedTab']."</i> does not exist.";
+			$this->presentor = '_errorMessage';
+			return;
+		}
+
+	}
+
+
+
+
+	/**
+	 * print the $tabStack as an html table
+	 */
+	function preTemplate(&$obj,&$t) {
+		if( $obj->getvars['selectedTab'] == '' ) {
+			list($obj->getvars['selectedTab']) = @each($this->tabStack);reset($this->tabStack);
+			list($curTab) = @each($this->tabStack);reset($this->tabStack);
+			
+		} else {
+			$curTab = $obj->getvars['selectedTab'];
+		}
+
+		$t['tabTable'] = '<ul>';
+                while ( list($k,$v) = @each($this->tabStack) ) {
+                        if ($curTab == $k) {
+                        $t['tabTable'] .= '
+                                <li><a href="'.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'/event=changeTab" onclick="changeTab(\''.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'\');return false;" class="here">'.$v.'</a></li>
+';
+                        } else {
+                        $t['tabTable'] .= '
+                                <li><a href="'.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'/event=changeTab" onclick="changeTab(\''.MOD_URL.$obj->serviceName.'/prevTab='.$curTab.'/selectedTab='.$k.'\');return false;">'.$v.'</a></li>
+';
+                        }
+                }
+		$t['tabTable'] .= '/<ul>';
+        }
+}
+
+
+include_once(LIB_PATH."LC_sql.php");
+include_once(INSTALLED_SERVICE_PATH."html/contentObj.php");
+
+
+
+
+
+
+class html extends TabbedService {
+
+	var $presentor = "MyPlainPresentation";
+	var $tabStack = array ('addPage'=>'Body','addSharing'=>'Sharing','addMisc'=>'Misc');
+
+
+
+	/**
+	 * show the form to add the basics of a page
+	 * works with tabbed interface to save multi-page form data
+	 */
+	function addPageRun( &$db, &$u, &$arg, &$t) {
+		$arg->templateName = "content_addPage";
+
+		$g = new lcGroup($db);
+		$g->getList();
+		$t["groups"] = $g->optionList;
+		$t["notgroups"] = $g->optionList;
+
+
+		if ( ! is_array($t['saved']) ) { 
+			$db->query("select count(pkey) from lcHtml");
+			$db->next_record();
+			$t['saved']['filename'] = 'document_'.(sprintf("%d",$db->Record[0])+1).'.html'; 
+			$t['saved']['title'] = 'New Document '.(sprintf("%d",$db->Record[0])+1); 
+
+			if ($arg->getvars['template'] != '' ) {
+				$t['template'] = file (SERVICE_PATH.'html/admin/templates/template-'.$arg->getvars['template'].'.html');
+				$t['template'] = implode('',$t['template']);
+			}
+		}
+	}
+
+
+	/**
+	 * show the form for entering sharing data about an object
+	 */
+	function addSharingRun( &$db, &$u, &$arg, &$t) {
+		$db->query("select * from lcGroups");
+		while ( $db->next_record() ) {
+			$gs[$db->Record['gid']] = $db->Record['groupName'];
+		}
+		$t['groupOpts'] = makeOptions($gs,$t['saved']['groups']);
+		reset($gs);
+		$t['notGroupOpts'] = makeOptions($gs,$t['saved']['notgroups']);
+
+		$arg->templateName = "content_addSharing";
+	}
+
+
+
+
+	function addMiscRun( &$db, &$u, &$arg, &$t) {
+		$arg->templateName = "content_addMisc";
+       	}
+
+
+
+
+	function saveTabs( &$db, &$u, &$arg, &$t) {
+		while ( list ($k,$v) = @each ($this->tabStack) ) {
+			$tab = $u->sessionvars['tabbed'][sprintf("%s",$k)];
+			while ( list ($i,$j) = @each ($tab) ) {
+				if (! is_array($j) )
+					$att[$i] = stripslashes($j);
+				else 
+					$att[$i] = $j;
+			}
+		}
+		$att['file'] = str_replace(IMAGES_URL,'<?=IMAGES_URL?>',$att['file']);
+		$att['filename'] = str_replace("'","_",$att['filename']);
+		$att['filename'] = str_replace(" ","_",$att['filename']);
+		$att['filename'] = str_replace("/","_",$att['filename']);
+		$att['filename'] = str_replace("\\","_",$att['filename']);
+
+		$newpage = PersistantObject::createFromArray("lcHtml",$att);
+		$newpage->_save();
+
+		//clean up session
+		reset($this->tabStack);
+		while ( list ($k,$v) = @each ($this->tabStack) ) {
+			unset($u->sessionvars['tabbed'][sprintf("%s",$k)]);
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = MOD_URL."main";
+		return;
+	}
+
+
+
+
+
+	function wysiwygRun (&$db,&$u,&$arg,&$t) {
+		$arg->templateName = "content_wysiwyg";
+	}
+
+
+
+	function deleteRun (&$db, &$u, &$arg, &$t) {
+		$id = $arg->getvars[pkey];
+		lcHtml::_delete($id);
+	header("Location: ".MOD_URL);
+	exit();
+	}
+
+
+
+
+	function showRun($db,&$u,&$arg,&$t) {
+		$file = $arg->getvars["file"];
+		if ($file) { 
+			include(HTML_PATH.$file);
+		}
+		exit();
+	}
+
+
+	/**
+	 * remove an image from IMAGES_PATH
+	 */
+	function delImageRun($db,&$u,&$lcObj,&$t) {
+		$x = $lcObj->getvars["image"];
+		$x = str_replace("/","",$x);
+		unlink(IMAGES_PATH.$x);
+
+			$t["message"] = "File deleted";
+		$this->imagesRun($db,$u,$lcObj,$t);
+	
+	}
+
+
+	function uploadImageRun($db,&$u,&$lcObj,&$t) {
+		$up = $lcObj->uploads["in"];
+		if (@$up["name"]["file"]!="") { 
+			$filename = $up["name"]["file"];
+			$size = $up["size"]["file"];
+			$mime = $up["type"]["file"];
+			$filenamereal = str_replace(" ","",$filename);
+			$location = $up["tmp_name"]["file"];
+			copy($location,IMAGES_PATH.$filenamereal);
+			unlink($location);
+		chmod (IMAGES_PATH.$filenamereal, 0777);
+			$t["message"] = "File added";
+		}
+	$this->presentor='redirectPresentation';
+	$t['url'] = MOD_URL.'contentSearch/event=listImages';
+	}
+
+
+
+	function imagesRun($db,&$u,&$arg,&$t) {
+
+		$this->presentor = "myplainPresentation";
+			$dir = IMAGES_PATH;
+			$d = dir($dir);
+			while ($entry = $d->read()) {
+		if (!is_dir(IMAGES_PATH."/".$entry) ) { 
+			$t[files][] = $entry;
+		}
+			}
+			$d->close();
+
+		$arg->templateName = "contentsearch_image";
+	}
+
+
+
+
+
+	function upRun($db,&$u,&$arg,&$t) {
+		$oldfile = $arg->postvars["oldfile"];
+		$newfile = $arg->postvars["newfile"];
+		$title = $arg->postvars["title"];
+		$groups = $arg->postvars["groups"];
+		$notgroups = $arg->postvars["notgroups"];
+		$filepkey = $arg->postvars["pkey"];
+
+		$h = new lcHtml($db);
+		$h->title = $title;
+		$h->filename = $newfile;
+		$h->groups = $groups;
+		$h->notgroups = $notgroups;
+		$h->pkey = $filepkey;
+		if ($filepkey=="") { $h->add(); } else { $h->update(); }
+
+		$file = stripslashes($arg->postvars["file"]);
+		$dir = HTML_PATH."../templates/";
+		$f = fopen($dir."$newfile","w+");
+		$s = fwrite($f,$file,50000000);
+		fclose($f);
+		$t["message"] = "$newfile added/updated";
+		$this->run($db,$u,$arg,$t);
+	}
+
+
+}
+
+function myPlainPresentation (&$obj, &$t) {
+	include(MOD_PATH."admin/templates/".$obj->templateName.".html");
+}
+?>

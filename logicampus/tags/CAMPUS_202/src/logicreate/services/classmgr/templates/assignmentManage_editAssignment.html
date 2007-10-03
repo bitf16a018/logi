@@ -1,0 +1,39 @@
+<?=$t['sectionheader'];?>
+<?if($t['msg']){ ?><span style="color:blue"><?=$t['msg'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+<?=$t['form'];?>
+
+
+<script>
+
+
+	function noduedate() {
+		var obj_responsetype = document.getElementById("responseType");
+		obj_responsetype.selectedIndex = 4;
+		return false;
+	}
+
+	function lookatchange()
+	{	
+		var obj_noduedate = document.getElementById("noDueDate");
+		var obj_responsetype = document.getElementById("responseType");
+		
+		if (obj_noduedate.checked)
+		{	
+			obj_responsetype.readonly = true;
+			obj_responsetype.disabled = true;
+			obj_responsetype.selectedIndex = 4;
+			obj_responsetype.onchange = noduedate;
+			
+		} else
+		{	
+			obj_responsetype.onfocus = '';
+		}
+		
+	}
+	
+	
+	document.getElementById("noDueDate").onchange=lookatchange;
+//	lookatchange();
+	
+</script>

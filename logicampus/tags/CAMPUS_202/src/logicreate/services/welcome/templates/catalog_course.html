@@ -1,0 +1,8 @@
+
+<h4>Classes for: <?php echo $t['courseName'] . ' ['.$t['courseFamily'].']';?></h4>
+<b><a href="<?php echo appurl('welcome/catalog/');?>">Back to full course list</a></b>
+<hr/>
+	<?php foreach ($t['courses'] as $courseStruct) { ?>
+	<h3><?php echo $courseStruct['courseName']. ' &emdash; '.$t['courseFamily'].' '.sprintf('%d',$courseStruct['courseNumber']) .'</h3> 
+	&nbsp;&nbsp; '. $courseStruct['courseDescription']?>
+	<?php } ?>

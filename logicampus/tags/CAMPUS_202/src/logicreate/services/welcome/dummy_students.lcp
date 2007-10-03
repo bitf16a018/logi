@@ -1,0 +1,37 @@
+<?
+/*
+
+needed a way to populate test student accounts for a particular semester
+each section will have a student account
+Section 16500 will have student s_16500 with password 16500
+
+*/
+
+class dummy_students extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+
+	/* remove this function as soon as it is run. Then,
+		1. update the other assignment related files
+		2. remove the id_class_lessons field from the
+		   class_assignments table
+	function rebuildAssignmentLinksRun(&$db,&$u,&$lc,&$t) {
+		if ( $u->username != 'adam' ) return;
+
+		$db2 = DB::getHandle();
+
+		$sql = 'select * from class_assignments';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+
+		while ( $db->next_record() ) {
+			$sql = "insert into class_assignments_link
+				set id_class_assignments='{$db->Record['id_class_assignments']}',
+				id_class_lessons='{$db->Record['id_class_lessons']}'";
+			$db2->query($sql);
+		}
+	}
+	*/
+}
+?>

@@ -1,0 +1,242 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+/**
+ * Learning Object Repository
+ */
+class Import extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='import_main';
+	}
+
+
+	function handleUploadRun(&$db,&$u,&$lc,&$t) {
+		if ($lc->uploads['lobxml']['error']) {
+			die('upload error');
+		}
+
+		debug($lc->uploads);
+
+		$tempdir = $this->tempdir('/tmp', 'campus');
+		$this->tempdir = $tempdir;
+		debug($tempdir);
+
+		//$za = zip_open($lc->uploads['lobxml']['tmp_name']);
+		//debug($za);
+
+		exec('unzip -d '. $tempdir.' '.$lc->uploads['lobxml']['tmp_name'] );
+
+//		exit();
+
+		$doc = domxml_open_file($tempdir.'/learningobjects.xml');
+
+		$root = $doc->child_nodes();
+		$collectionNode = $root[0];
+		$lobNodes = $collectionNode->child_nodes();
+		foreach ($lobNodes as $node) {
+			if ($node->node_type() == XML_TEXT_NODE) {
+				continue;
+			}
+			$lobObj = $this->processLobNode($node);
+			$lobMetaObj = $this->processLobMeta($node);
+			$lobUserObj = new LobUserLink();
+
+			$lobObj->save();
+
+			$lobMetaObj->set('lobKind','content');
+			$lobMetaObj->set('lobId',$lobObj->getPrimaryKey());
+			$lobMetaObj->save();
+
+			$lobUserObj->set('lobId',$lobObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->save();
+
+//			debug($lobObj);
+		}
+
+
+		$u->addSessionMessage('Successfully added content.');
+
+//		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
+
+
+		unlink($tempdir.'/learningobjects.xml');
+		rmdir($tempdir.'/interactions');
+		rmdir($tempdir.'/tests');
+		rmdir($tempdir);
+	}
+
+
+	/**
+	 * return a lob object
+	 */
+	function processLobNode($n) {
+		$result = $n->get_elements_by_tagname('type');
+		$type = $result[0];
+		/*
+		print_r($type);
+		echo "new lob: <br/>";
+//		debug($type);
+		echo $type->node_value();
+		echo "name lob: <br/>";
+		echo $type->tagname;
+		echo "<br/>";
+		 */
+		$children = $type->child_nodes();
+		$content = trim($children[0]->node_value());
+		$guid = $n->get_attribute('guid');
+		$dbid = $n->get_attribute('dbid');
+
+		$lob = null;
+		switch ($content) {
+			case 'content':
+				$lob = new LobContent();
+				$lob->set('lobType','content');
+				$lob->set('lobGuid',$guid);
+				break;
+
+		}
+
+
+		$result = $n->get_elements_by_tagname('lobtitle');
+		$node = $result[0];
+		$children = $node->child_nodes();
+		$lob->set('lobTitle', trim($children[0]->node_value()) );
+
+		$result = $n->get_elements_by_tagname('lobcontent');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobContent', trim($children[0]->node_value()) );
+		}
+
+		$result = $n->get_elements_by_tagname('lobfilename');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobFilename', trim($children[0]->node_value()) );
+			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
+			$lob->set('lobBinary', file_get_contents($this->tempdir.'/content/'.trim($children[0]->node_value())) );
+		} else {
+			$urltitle = $lob->get('lobTitle');
+			$urltitle = str_replace(' ', '_', $urltitle);
+			$urltitle = urlencode($urltitle);
+			$lob->set('lobUrltitle', $urltitle );
+		}
+
+		$result = $n->get_elements_by_tagname('lobdescription');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobDescription', trim($children[0]->node_value()) );
+		}
+
+
+		$result = $n->get_elements_by_tagname('subtype');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobSubType', trim($children[0]->node_value()) );
+		}
+
+
+		return $lob;
+//		debug($children);
+	}
+
+
+	/**
+	 * return a lob metadata object
+	 */
+	function processLobMeta($n) {
+		$result = $n->get_elements_by_tagname('metadata');
+		$meta = $result[0];
+		$children = $meta->child_nodes();
+
+
+		$lob = null;
+		$lob = new LobMetadata();
+
+		foreach($children as $childNode) {
+			if ($childNode->node_type() == XML_TEXT_NODE) {
+				continue;
+			}
+
+			$tag = $childNode->tagName();
+			$subchild = $childNode->child_nodes();
+			$lob->set($tag, trim($subchild[0]->node_value()) );
+		}
+/*
+
+		$result = $n->get_elements_by_tagname('lobtitle');
+		$node = $result[0];
+		$children = $node->child_nodes();
+		$lob->set('lobTitle', trim($children[0]->node_value()) );
+
+		$result = $n->get_elements_by_tagname('lobcontent');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobContent', trim($children[0]->node_value()) );
+		}
+
+		$result = $n->get_elements_by_tagname('lobfilename');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobFilename', trim($children[0]->node_value()) );
+			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
+		} else {
+			$urltitle = $lob->get('lobTitle');
+			$urltitle = str_replace(' ', '_', $urltitle);
+			$urltitle = urlencode($urltitle);
+			$lob->set('lobUrltitle', $urltitle );
+		}
+
+		$result = $n->get_elements_by_tagname('lobdescription');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobDescription', trim($children[0]->node_value()) );
+		}
+
+
+		$result = $n->get_elements_by_tagname('subtype');
+		$node = $result[0];
+		if (is_object($node) ){
+			$children = $node->child_nodes();
+			$lob->set('lobSubType', trim($children[0]->node_value()) );
+		}
+
+ */
+
+		return $lob;
+//		debug($children);
+	}
+
+
+	function tempdir($dir, $prefix='', $mode=0700) {
+		if (substr($dir, -1) != '/') $dir .= '/';
+
+		do {
+			$path = $dir.$prefix.mt_rand(0, 9999999);
+		} while (!mkdir($path, $mode));
+
+		return $path;
+	}
+}
+?>
