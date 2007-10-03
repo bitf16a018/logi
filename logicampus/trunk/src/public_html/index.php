@@ -36,12 +36,18 @@ $execution_time=get_microtime();
 	srand ((double) microtime() * 1000000);
 
 	if (!@include('defines.php')) {
-		include('install.php');
+		//directory exists
+		if (file_exists('install')) {
+			header('Location: install/');
+		}
 		exit();
 	}
 	if (!@include('settings.php')) {
 		if (!@include('settings.simple.php')){
-			include('install.php');
+			//directory exists
+			if (file_exists('install')) {
+				header('Location: install/');
+			}
 			exit();
 		}
 	}

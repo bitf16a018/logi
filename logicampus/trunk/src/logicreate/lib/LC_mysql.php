@@ -22,15 +22,15 @@ class mysql extends DB {
 	 * Connect to the DB server
 	 *
 	 * Uses the classes internal host,user,password, and database variables
-	 * @return void
+	 * @return boolean
 	 */
-	function connect() {
+	function connect($force = false) {
 
-		if ( $this->driverID == 0 ) {
+		if ( $this->driverID == 0 || $force) {
                 if ($this->persistent=='y') {
-			$this->driverID=@mysql_pconnect($this->host, $this->user,$this->password);
+			$this->driverID=@mysql_pconnect($this->host, $this->user,$this->password, $force);
                 } else {
-			$this->driverID=@mysql_connect($this->host, $this->user,$this->password);
+			$this->driverID=@mysql_connect($this->host, $this->user,$this->password, $force);
                 }
 			if (!$this->driverID) {
 				//$this->halt();
@@ -43,6 +43,16 @@ class mysql extends DB {
 		}
 		return true;
 	}
+
+	/**
+	 * Force a reconnect to the DB server
+	 *
+	 * @return boolean
+	 */
+	function reconnect() {
+		return $this->connect(true);
+	}
+
 
 
 	/**
