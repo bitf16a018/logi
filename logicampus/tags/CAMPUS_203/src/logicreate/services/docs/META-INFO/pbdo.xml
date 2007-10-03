@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!-- MySQL does not support foreign keys. This means   -->
+<!-- that this XML file will not reflect foreign key   -->
+<!-- relationships. You will have to do that yourself. -->
+<database name="logicampus">
+  <table  name="docs_directories">
+    <column name="directoryID"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="parentID"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="username"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="name"
+            required="true"
+            size="100"
+            type="VARCHAR"/>
+    <column name="posted"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <index>
+      <index-column name="parentID"/>
+      <index-column name="username"/>
+      <index-column name="name"/>
+      <index-column name="posted"/>
+    </index>
+  </table>
+  <table  name="docs_directories_files">
+    <column name="directoryID"
+            required="true"
+            default="0"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="fileID"
+            required="true"
+            default="0"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+  </table>
+  <table  name="docs_directories_groups">
+    <column name="directoryID"
+            required="true"
+            default="0"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="gid"
+            required="true"
+            primaryKey="true"
+            size="10"
+            type="VARCHAR"/>
+  </table>
+  <table  name="docs_files">
+    <column name="fileID"
+            required="true"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="username"
+            required="true"
+            size="32"
+            type="VARCHAR"/>
+    <column name="name"
+            required="true"
+            size="100"
+            type="VARCHAR"/>
+    <column name="TYPE"
+            required="true"
+            size="4"
+            type="VARCHAR"/>
+    <column name="mime"
+            required="true"
+            size="50"
+            type="VARCHAR"/>
+    <column name="title"
+            required="true"
+            size="100"
+            type="VARCHAR"/>
+    <column name="abstract"
+            required="true"
+            size="255"
+            type="VARCHAR"/>
+    <column name="posted"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <column name="hits"
+            required="true"
+            default="0"
+            size="11"
+            type="INTEGER"/>
+    <index>
+      <index-column name="username"/>
+      <index-column name="name"/>
+      <index-column name="TYPE"/>
+      <index-column name="title"/>
+      <index-column name="posted"/>
+    </index>
+  </table>
+  <table  name="docs_files_groups">
+    <column name="fileID"
+            required="true"
+            default="0"
+            primaryKey="true"
+            size="11"
+            type="INTEGER"/>
+    <column name="gid"
+            required="true"
+            primaryKey="true"
+            size="10"
+            type="VARCHAR"/>
+  </table>
+  <table  name="docs_filetypes">
+    <column name="TYPE"
+            required="true"
+            primaryKey="true"
+            size="4"
+            type="CHAR"/>
+    <column name="icon"
+            required="true"
+            size="50"
+            type="CHAR"/>
+  </table>
+</database>
+<!-- END OF MYSQL2TURBINE DUMP -->

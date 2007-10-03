@@ -1,0 +1,383 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * Provides the students with a means to take online
+ * assessments published by the teacher.
+ *
+ */
+
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'AssessmentLog.php');
+include_once(LIB_PATH.'datagrid.php');
+
+class take extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Assessments';
+	var $inactivelinks = array(
+		'Assessments'
+		);
+
+        // these are the same for all pages
+        var     $navlinks = array(
+                'Classroom Home' => '%classroom/details/',
+                'Announcements' => '%classroom/announcements/',
+                'Assessments' => '%classroom/assessments',
+                'Assignments' => '%classroom/assignments/',
+                'Calendar' => '%classroom/classCalendar/',
+                'Chat' => '%classroom/chat/',
+                'Classmates' => '%classroom/classmates/',
+                'Contact Classmates' => '%classroom/contactStudents/',
+                'Discussion Board' => '%classroom/discussion/',
+                'FAQs' => '%classroom/faq/',
+                'Faculty Profile' => '%classroom/facultyProfile/',
+                'Gradebook' => '%classroom/gradebook/',
+                'Lessons' => '%classroom/lessons/',
+                'Presentations' => '%classroom/presentations/',
+                'Syllabus' => '%classroom/syllabus/',
+                'Who\'s Online' => '%classroom/online/',
+                'Webliography' => '%classroom/webliography/',
+                'Dictionary / Thesaurus' =>'%classroom/details/event=showtools'
+        );
+
+
+/*
+ *
+ * Default event
+ * 
+ * Input data:  active class taken
+ * Output data:  datagrid of assessments
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			include_once(LIB_PATH.'ClassGradebookEntries.php');
+			include_once(LIB_PATH.'ClassGradebookVal.php');
+			$lc->templateName='take_main';
+			$t['asmt'] = Assessment::loadAll($u->activeClassTaken->id_classes);
+			$count = count($t['asmt']);
+			for ($i=0; $i<$count; $i++) {
+				$log = $t['asmt'][$i]->getLastLogEntry($u->username);
+				if (is_object($log)) {
+					$log->updateTotalCount();
+				}
+				$t['asmt'][$i]->log = $log;
+	      		# Update the gradebook entry total number of points
+		        $entry =
+				  ClassGradebookEntriesPeer::doSelect("assessment_id='".$t['asmt'][$i]->assessmentId." '
+					AND id_classes='".$u->activeClassTaken->id_classes."'");
+				$entry = $entry[0];
+	
+				$val = ClassGradebookValPeer::doSelect("username='".$u->username."' AND 
+						id_classes='".$u->activeClassTaken->id_classes."' AND
+						id_class_gradebook_entries='".$entry->idClassGradebookEntries."'");
+				$val = $val[0];
+				$t['asmt'][$i]->score = $val->score;
+			}
+			
+		}
+
+
+		function startRun($db, &$u, &$lc, &$t) {
+			# Updates students session with current time
+			# if they don't have one
+			if (!$u->sessionvars['test_date_start']) {
+				$u->sessionvars['test_date_start'] = time();
+			}
+
+			$id = (int)$lc->getvars['id'];
+
+			if (!$u->sessionvars['testObj']) {
+				# load assessment
+				$test = Assessment::load($id, $u->activeClassTaken->id_classes);
+				$u->sessionvars['testObj'] = $test;
+			} else if ($u->sessionvars['testObj']->assessmentId != $id) {
+				$test = Assessment::load($id, $u->activeClassTaken->id_classes);
+				$u->sessionvars['testObj'] = $test;
+			}
+
+			# Save some typing and pull the assessment obj out of sessionvars
+			$test = $u->sessionvars['testObj'];
+			$t['instructions'] = $test->instructions;
+			$t['description'] = $test->description;
+			
+			if (!$test) {
+				$lc->templateName = 'take_error';
+				$t['message'] = '<h3>Error</h3>The test you are trying to reach cannot be loaded.';
+				$this->resetSessionInfo($u);
+				return;
+			}
+
+			# Test if the user can even take the exam
+			if (!$test->canTake($u->sessionvars['test_date_start'])) {
+				$lc->templateName = 'take_error';
+				$t['message'] = '<h3>Error</h3>This test is not active or is no longer available.';
+				$this->resetSessionInfo($u);
+				return;
+			}
+
+			if (!$test->log) {
+				$allTestLogs = AssessmentLog::loadAll($test->assessmentId, $u->username, $u->activeClassTaken->id_classes);
+				//check number of attempts
+				if ($test->numRetries <= count($allTestLogs)) {
+					$lc->templateName = 'take_error';
+					$t['message'] = '<h3>Error</h3>This test is not active or is no longer available.';
+					$this->resetSessionInfo($u);
+					return;
+				}
+			
+				# If we do not have a previous log entry the
+				# student is not taking this test, so let's 
+				# create a new log entry for them
+				$newLog = new AssessmentLog();
+				$newLog->idStudent = $u->username;
+				$newLog->startDate = time();
+				$newLog->endDate = time()+ ($test->minuteLimit*60);
+				$newLog->idClasses = $u->activeClassTaken->id_classes;
+				$newLog->assessmentId = $test->assessmentId;
+				$newLog->save();
+	
+				# store the current log with the assessment object
+				$u->sessionvars['testObj']->log = $newLog;
+		
+			} else {
+				//push this back into the database, session problem
+# commenting this out per mark - 2/10/04
+#				$test->log->_new = true;
+#				$test->log->save();
+			}
+
+			# If there is no assessment object, there was a problem somewhere
+			if (!$test->assessmentId) {
+				$lc->templateName = 'take_error';
+				$t['message'] = '<h3>Error loading assessment</h3>There was a problem loading the assessment.  Please try again.  If you continue to get this error, please contact the help desk.';
+				$this->resetSessionInfo($u);
+				return;
+			}
+			
+
+			# Can the student take the assessment still?
+
+			# Load up all answers and questions
+			$t['questions'] = $test->getQuestionsAndAnswers($u->username, $u->activeClassTaken->id_classes);
+
+			# Store the question Order in session for later use
+			//if (!is_array($u->sessionvars['questionOrder']))
+			//{
+			# MAK, store it everytime
+			$questionCount = count($t['questions']);
+			$u->sessionvars['questionOrder'] = array();	// mgk - clear it out - 7/4/04
+			for($i=0; $i<$questionCount; $i++) {
+				$u->sessionvars['questionOrder'][] = $t['questions'][$i]->assessmentQuestionId;
+			}
+//			}
+			# MAK, store it everytime
+
+			$lc->templateName = 'take_start';
+
+			$this->sectionTitle .= ' - '.$u->sessionvars['testObj']->displayName;
+
+			# Print time stuff into template
+			$end = $u->sessionvars['testObj']->dateUnavailable;
+			$t['starttime'] = date('m-d-y h:i A', $u->sessionvars['test_date_start']);
+			$t['minute_limit'] = $u->sessionvars['testObj']->minuteLimit;
+			$t['endtime'] =  date('m-d-y h:i A', $u->sessionvars['testObj']->dateUnavailable);
+			$totalseconds = $t['minute_limit'] * 60;
+			$start = $u->sessionvars['test_date_start'];
+			$time = time();
+			if ( ($end - $start) > $totalseconds ) {
+				$calc = $t['minute_limit'] - ( ($time - $start) / 60);
+				$t['minutes_remaining'] = ($calc);
+				if ($t['minutes_remaining'] < 0) {
+					$t['minutes_remaining'] = 0;
+				}
+			} else {
+				$t['minutes_remaining'] = (($end - $time) / 60); 
+			}
+			# convert decimal time to seconds
+			$min = floor($t['minutes_remaining']);
+			$sec = $t['minutes_remaining'] - $min;
+			$sec = floor($sec * 60);
+			$t['minutes_remaining'] =  "$min:".sprintf('%02d',$sec);
+	 
+	}
+
+
+	/**
+	 * Allows a student to view an assessment if it is set to 
+	 * show correct and incorrect answers after a student finishes
+	 */
+	function viewRun($db, &$u, &$lc, &$t) {
+		$id = (int)$lc->getvars['id'];
+		# load assessment
+		$t['assessment'] = Assessment::load($id, $u->activeClassTaken->id_classes);
+
+		if (! is_object($t['assessment']) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You are trying to access a test with an id of $id.  You do not have permission to access this test.";
+			return;
+		}
+
+		# Can the student view the results?
+		if ($t['assessment']->showResultType != 2) {
+			$lc->templateName = 'take_error';
+			$t['message'] = '<h3>Error</h3> The instructor has not enabled detailed
+			feedback on this assessment yet. ';
+			return;
+		}
+
+		//figure out which log file to use, if they are currently taking a test,
+		// use session saved log, else look up a historic log
+		$log = $u->sessionvars['testObj']->log;
+		if (!$log ) {
+			$log = $t['assessment']->getLastLogEntry($u->username);
+		}
+
+		if (!$log || $log->endDate > time() ) {
+			$lc->templateName = 'take_error';
+			$t['message'] = '
+			<h3>Error</h3>
+			Our records indicate the assessment you are trying to view was never taken.  Please contact the
+			help desk if you feel this is in error.';
+			return;
+		}	
+
+		include_once(LIB_PATH.'LC_html.php');
+		include_once(LIB_PATH.'ClassGradebook.php');
+		$gb = ClassGradebook::load(array("id_classes"=>$u->activeClassTaken->id_classes));
+		$lc->templateName = 'take_view';
+
+		$t['questions'] = $t['assessment']->getQuestionsAndAnswers($u->username, $u->activeClassTaken->id_classes);
+		$this->sectionTitle .= ' - '.$t['assessment']->displayName;
+		$t['questions_total'] = 0;
+		$t['questions_total_points'] = 0;
+
+	
+		foreach($t['questions'] as $k=>$v)  {
+			$t['questions_total_points'] += $v->questionPoints;
+				if ($v->answer->pointsGiven) {
+				$t['total_points_earned'] += $v->answer->pointsGiven;
+			} else {
+				$t['total_points_earned'] += $v->answer->pointsEarned;
+
+			}
+			$t['questions_total']++;
+		}
+
+		$t['percentage'] = number_format($t['total_points_earned'] / $t['questions_total_points'], 4) * 100;
+		$t['letter_grade'] = $gb->getLetterGrade($t['percentage']);
+
+		reset ($t['questions']);
+
+	}
+
+	function stopRun($db, &$u, &$lc, &$t) {
+		$log = $u->sessionvars['testObj']->log;
+debug($log);
+		if (!$log) {
+			# there was a serious problem
+			$t['message'] = 'There was a problem grading your test. We were unable to locate the log entry for your test.
+			Please contact your teacher about this error or try starting the test again.';
+			$lc->templateName = 'take_error';
+			$this->resetSessionInfo($u);
+			return;
+		}
+
+		$log->endDate = time();
+		$log->save();
+
+		$test = $u->sessionvars['testObj'];
+		# Load up all answers AND questions
+		$qst = $test->getQuestionsAndAnswers($u->username, $u->activeClassTaken->id_classes);
+
+		# Now we are going to update their grade in the gradebook
+		# We first need to make sure all questions have an answer, even
+		# if it is a blank one
+		$questionCount = count($qst);
+		for($i=0; $i< $questionCount; $i++) {
+			$answer = $qst[$i]->answer; 	{
+				if (is_object($answer) ) {
+					continue;
+				} else {
+					# what if there was never an answer entered?
+					# we create a blank answer, this is needed so the 
+					# instructor can give points if they want to
+					$answer = new AssessmentAnswer();
+					$answer->assessmentQuestionId = $qst[$i]->assessmentQuestionId;
+					$answer->studentId = $u->username;
+					$answer->idClasses = $u->activeClassTaken->id_classes;
+					$answer->assessmentId = $test->assessmentId;
+					$answer->pointsEarned = 0;
+					$answer->save();
+				}
+			}
+			
+		}
+
+		# Update their gradebook entry
+		$score = $test->updateGradebookScore($u->username, $u->activeClassTaken->id_classes);
+
+		# Send email to teacher if it is checked for this assessment
+		if ($test->mailResponses) {
+			# Email the teacher a copy of the test with answers and totals
+			# $qst is an array of question objects with the answer object added
+			$test->emailTeacher($qst, $u, $log);
+		}
+
+		# Other clean up before we redirect the user
+		$this->resetSessionInfo($u);
+
+		# Let's figure out which result to show them
+
+		# Student cannot see any results
+		if ($test->showResultType == 3) {
+			$lc->templateName = 'take_stop';
+			return;
+		}
+
+		# Student is allowed only to see their grade
+		if ($test->showResultType == 0) {
+			$lc->templateName = 'take_stop_showgrade';
+			$t['grade'] = $score;
+			$t['possiblePoints']  = $test->possiblePoints;
+			$t['percentGrade'] = sprintf('%.2f%%', ( $t['grade']/$t['possiblePoints'])*100 );
+		}
+
+		# Student is allowed to see detailed results
+		if ($test->showResultType == 2) {
+			$t['url'] = APP_URL.'test/take/event=view/id='.$test->assessmentId;
+			$this->presentor = 'redirectPresentation';
+			return;
+		}
+
+	}
+
+// mark's notes -  we should also remove the log in a perfect world
+	function resetSessionInfo(&$u) {
+		unset($u->sessionvars['test_date_start']);
+		$u->sessionvars['test_date_start'] = '';
+		unset($u->sessionvars['testObj']);
+		$u->sessionvars['testObj'] = '';
+		unset($u->sessionvars['questionOrder']);
+		$u->sessionvars['questionOrder'] = '';
+	}
+
+}
+
+?>

@@ -1,0 +1,18 @@
+<?php echo $t['sectionheader'];?>
+
+
+Move the selected thread and all replies to one of the following forums:
+
+<form method="POST" action="<?=modurl('forumAdmin/event=postMoveThread');?>">
+<?php
+		echo $t['table']->toHTML();
+?>
+
+	<p style="margin:1px;">&nbsp;</p>
+
+	<input type="submit" id="submit_forum" value="Move Thread"/>
+	<input type="hidden" name="post_id" value="<?=$t['postId'];?>"/>
+</form>
+
+<p style="margin:1px;">&nbsp;</p>
+

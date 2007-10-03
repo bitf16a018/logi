@@ -1,0 +1,87 @@
+<style type="text/css">
+	
+	TD 
+	{	font: 12px Verdana, Helvetica, sans-serif;
+	}
+	TD.delete 
+	{	font: italic 10pt Helvetica, sans-serif; 
+	}
+	TD.bytes
+	{	font-size: 10pt;
+		font-family: Helvetica, sans-serif;
+	}
+
+</style>
+
+
+<br>
+
+<table cellpadding="0" cellspacing="1" border="0" width="80%" bgcolor="black" align="center">
+<tr>
+	<td colspan="2">
+	
+		<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="white" align="center">
+		<tr>
+			<td bgcolor="silver">
+				<form method="post" action="<?=modurl('/images/path='. urlencode(base64_encode($t['current_directory'])).'/event=upload');?>" enctype="multipart/form-data">
+				<nobr>
+					<b>UPLOAD IMAGE INTO CURRENT PATH:</b> &nbsp;&nbsp; <input type="file" name="in[file]">
+					<input type="submit" value="Put File">
+				</nobr>
+				</form>
+			</td>
+		</tr>
+		</table>
+
+	</td>
+</tr>
+<tr>
+	<td colspan="2">
+	
+		<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="white" align="center">
+		<tr>
+			<td bgcolor="silver">
+				<form method="post" action="<?=modurl('/images/path='. urlencode(base64_encode($t['current_directory'])).'/event=create');?>">
+				<nobr>
+				<b>CREATE FOLDER WITHIN CURRENT PATH: </b> &nbsp;&nbsp; 
+					<input type="text" name="directory"> <input type="submit" value="CREATE">
+				</nobr>
+				</form>
+			</td>
+		</tr>
+		</table>
+
+	</td>
+</tr>
+<tr>
+	<td width="50%" valign="bottom">&nbsp;<font color="white">Status: <?=(($t['status']) ? $t['status'] : 'Ready');?> </font></td>
+	<td align="right"  width="50%" valign="bottom"><font color="white">Total Files: <?=$t['file_count'];?></font>&nbsp;</td>
+</tr>
+<tr>
+	<td colspan="2">
+	
+	<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="white" align="center">
+	<tr>
+		<td><b>CURRENT PATH: <?=$t['current_directory'];?></b></td>
+	</tr>
+	</table>
+
+	</td>
+</tr>
+<tr>
+	<td colspan="2">
+	
+	<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="white" align="center">
+	<tr>
+		<td><?=$t['html'];?></td>
+	</tr>
+	</table>
+
+	</td>
+</tr>
+<tr>
+	<td width="50%" valign="bottom">&nbsp;<font color="white">Status: <?=(($t['status']) ? $t['status'] : 'Ready');?> </font></td>
+	<td align="right"  width="50%" valign="bottom"><font color="white">Total Files: <?=$t['file_count'];?></font>&nbsp;</td>
+</tr>
+
+</table>

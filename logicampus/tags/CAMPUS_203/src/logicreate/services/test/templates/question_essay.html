@@ -1,0 +1,55 @@
+<?=$t['sectionheader'];?>
+<?=$t['error'];?>
+<FIELDSET>
+<LEGEND><b>Test Information</b></LEGEND>
+<b>Question</b>: <?=$t['questionNumber']?> of <?=$t['questionCount'];?> 
+<b>Minutes Remaining</b>: <?=$t['minutes_remaining'];?> &nbsp; <b>Start Time</b>: <?=$t['starttime']?> &nbsp;
+<b>Test Time Limit</b>: <?=$t['minute_limit']?> minutes
+</FIELDSET>
+<br>
+
+<form method="POST" ACTION="<?=APP_URL?>test/question/event=answer">
+<input type='hidden' name='questionID' value='<?=$t['q']->assessmentQuestionId;?>'>
+
+	<table border="0" width="600">
+		<tr>
+			<td valign="top">
+				<b>Question/Instructions</b>
+			</td>
+			<td valign="top">
+				<?=$t['q']->questionText;?>
+				<br><br>
+				<? if ($t['q']->fileHash)
+				{ ?>
+				<img src="<?=APP_URL?>test/viewContent/fhash=<?=$t['q']->fileHash?>"
+				border="0" alt="question image" align="center">
+				<? } ?>
+				<br/>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top">
+				<b>*Answer</b>
+			</td>
+			<td>
+				<textarea cols="40" rows="15" name="answer"><?=$t['answer']->assessmentAnswerValues?></textarea>
+			</td>
+		</tr>
+
+	</table>
+	<table border="0" width="100%">
+		<tr>
+			<td valign="top">
+				<input type="submit" name="prev" value="&lt;-Save and Go back">
+			</td>
+			<td valign="top" align="center">
+				<input type="submit" name="start" value="View All Questions">
+			</td>
+			<td valign="top" align="right">
+				<input type="submit" name="next" value="Save and Continue-&gt;">
+				<input type="hidden" name="assessmentAnswerId" value="<?=$t['answer']->assessmentAnswerId?>">
+				</form>
+			</td>
+		</tr>
+	</table>
+
