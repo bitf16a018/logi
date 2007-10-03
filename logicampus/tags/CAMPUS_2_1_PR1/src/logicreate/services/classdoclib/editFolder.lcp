@@ -1,0 +1,329 @@
+<?
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+
+/**
+ * file management 
+ *
+ * edit the properties of one folder and/or any of
+ * its contianed files.
+ */
+
+class editFolder extends classdoclibService {
+
+
+	function authenticate($u,$lc) {
+		if ( ! @in_array('manager',$u->perms)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+
+
+
+	/**
+	 * Put a folder ID in the user's session under ['classdoclib']['cut']
+	 */
+	function cutRun(&$db,&$u,&$lc,&$t) {
+		$this->presentor = '';
+		$folder = LC_folder::load($lc->getvars['id'],$u->activeClassTaught->id_classes);
+		if ($folder == null || $folder->folderType == 0 || $folder->folderType == 1) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to cut this folder';
+			return;
+		}
+
+		$u->sessionvars['classdoclib']['cut'][$lc->getvars['id']] = $folder;
+
+
+		$t['url'] = $_SERVER['HTTP_REFERER'];
+		if ( $t['url'] == '' )
+			$t['url'] = APP_URL.'classdoclib/main';
+		$this->presentor = 'redirectPresentation';
+	}
+
+
+
+	/**
+	 * Put a folder ID in the user's session under ['classdoclib']['coy']
+	 */
+	function copyRun(&$db,&$u,&$lc,&$t) {
+		$this->presentor = '';
+		$folder = LC_folder::load($lc->getvars['id'],$u->activeClassTaught->id_classes);
+		
+		if ($folder == null || $folder->folderType == 0 || $folder->folderType == 1) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to copy this folder';
+			return;
+		}
+
+		$u->sessionvars['classdoclib']['copy'][$lc->getvars['id']] = $folder;
+
+
+
+		$t['url'] = $_SERVER['HTTP_REFERER'];
+		if ( $t['url'] == '' )
+			$t['url'] = APP_URL.'classdoclib/main';
+		$this->presentor = 'redirectPresentation';
+	}
+
+
+
+	/**
+	 * Put contents of clipboard in the submitted  folder ID 
+	 */
+	function pasteRun(&$db,&$u,&$lc,&$t) {
+		while ( list(,$v) = @each($u->sessionvars['classdoclib']['copy']) ) {
+			if (is_object($v) ) {
+				$v->class = $u->activeClassTaught->id_classes;
+				$v->copyFolder($lc->getvars['id']);
+			}
+		}
+
+		while ( list(,$v) = @each($u->sessionvars['classdoclib']['cut']) ) {
+			if (is_object($v) )
+			$v->moveFolder($lc->getvars['id']);
+		}
+		unset($u->sessionvars['classdoclib']['copy']);
+		unset($u->sessionvars['classdoclib']['cut']);
+
+
+		$t['url'] = $_SERVER['HTTP_REFERER'];
+		if ( $t['url'] == '' )
+			$t['url'] = APP_URL.'classdoclib/main';
+		$this->presentor = 'redirectPresentation';
+	}
+
+
+
+	/** 
+	 * show the folder and all of it's contents.
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$t['folder'] = LC_folder::load($lc->getvars['fid'],$u->activeClassTaught->id_classes,$u->activeClassTaught->id_classes);
+		if ($t['folder'] == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder';
+			return;
+		}
+		$t['folder']->getContents();
+		$t['folder']->loadSharing();
+
+
+		// get file categories (folders)
+		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught);
+		$view = new FileMGTView($cat);
+		$t["catOpts"] = $view->renderAsOptions($categoryLevel);
+	}
+
+
+
+
+
+
+	/**
+	 * save all the shares and name of this folder
+	 */
+	function updateFolderRun (&$db,&$u,&$lc,&$t) {
+	// mgk 06/21/03 - added 'cancel' function
+		if (strtolower($lc->postvars['_button'])=='cancel') {
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = modurl('main/'.$lc->postvars['fid']);
+			$t['message'] = 'Action cancelled';
+			return;
+		}
+		$folder = LC_folder::load($lc->postvars['fid'],$u->activeClassTaught->id_classes,$u->activeClassTaught->id_classes);
+
+		if ($folder == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder nor its contents.';
+			return;
+		}
+
+
+
+		// update filenames and descriptions
+
+
+		// update folder name and notes
+
+
+
+		//folder
+		
+		$folder->name = addslashes(stripslashes($lc->postvars['name']));
+		$folder->notes = addslashes(stripslashes($lc->postvars['notes']));
+		$folder->_save('classdoclib_Folders');
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('main/'.$lc->postvars['fid']);
+	}
+
+
+
+	/**
+	 * function to create a new folder 
+	 * with a parent specified.
+	 * Use the parent's permissions to prepopulate the new folder
+	 */
+	function newFolderRun($db,&$u,&$lc,&$t) {
+		//new permission
+		if ( ! @in_array('manager',$u->perms)) {
+			$t['message' ] = "Permission Denied";
+			$t['details'] = "You do not have permission to create folders.";
+			$this->presentor = "errorMessage";
+			return;
+		}
+
+		$cat = new category();
+
+		$cat->system = "files";
+		$cat->name = trim($lc->postvars["newfolder"]);
+		if ($cat->name == '') { 
+			$this->presentor = 'errorMessage';
+			$t[message] = 'You did not insert a name for this folder.';
+			return;
+		}
+
+		$parentFolder = LC_folder::load($lc->getvars['fid'],$u->activeClassTaught->id_classes);
+
+		if ($parentFolder == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder.';
+			return;
+		}
+
+		$cat->parentKey = intval($parentFolder->pkey);
+		$cat->folderType = 2;
+		$cat->_save('classdoclib_Folders');
+		$cat->pkey = $db->getInsertID();
+
+		//set newfolder permissions to those of its parent
+		$db->query("select action,gid from classdoclib_Sharing where folderKey = ".$parentFolder->pkey);
+		$query = 'insert into classdoclib_Sharing (folderKey, action, exclude, gid) VALUES (%d, %d, %d, "%s")';
+
+		while ( $db->next_record() ) {
+			$db->query( sprintf($query,$cat->pkey,$db->Record['action'],$db->Record['exclude'],$db->Record['gid']) );
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = APP_URL.'classdoclib/main/';
+	}
+
+
+// trash a folder
+	function trashRun($db,&$u, &$lc, &$t) {
+		
+		$trash = LC_folder::load($lc->getvars['fid'],$u->activeClassTaught->id_classes);
+		if ($trash == null  || $trash->folderType == 1 || $trash->folderType == 0) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to trash this folder.';
+			return;
+		}
+
+		// selecting trash can (to move the requested folder too)
+		$db->queryOne("select pkey from classdoclib_Folders where folderType=0 and class_id=".$u->activeClassTaught->id_classes);
+		$trashFolder = $db->Record['pkey'];
+
+		$db->query("update classdoclib_Folders set trashed='y', origparent= parentKey, parentKey=$trashFolder where (owner='".$u->username."' and pkey=".$trash->pkey. ")");
+		folderloop($trash->pkey, $u->activeClassTaught->id_classes,'y');
+		
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classdoclib/main/".$trashFolder);
+	}
+
+
+
+// untrash a folder
+	function untrashRun($db,&$u, &$lc, &$t) {
+		
+		$trash = LC_folder::load($lc->getvars['id'],$u->activeClassTaught->id_classes);
+		if ($trash == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder.';
+			return;
+		}
+		
+		// updating a folder to 'not trashed' state
+		$db->query("update classdoclib_Folders set trashed='n', parentKey = 0, origparent= 0 where pkey=".$trash->pkey);
+		
+		folderloop($trash->pkey ,$u->activeClassTaught->id_classes, 'n');
+		
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classdoclib/main/".$lc->getvars['id']);
+	}
+
+
+
+// empty trash folder
+	function emptyTrashRun($db,&$u, &$lc, &$t) {
+
+		$trash = LC_folder::load($lc->getvars['id'],$u->activeClassTaught->id_classes);
+		if ($trash == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder.';
+			return;
+		}
+
+		// Finding our trash folder
+		$db->queryOne("select pkey from classdoclib_Folders where folderType=0 and class_id=".$u->activeClassTaught->id_classes);
+		$trashFolder = $db->Record['pkey'];
+		
+		if ((int)$trashFolder == 0)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to trash this information.';
+			return;
+		}
+		// Removing all files set to TRASH (orphaned files) moved to trash on there own
+		$db->query("delete from classdoclib_Files where folder=$trashFolder");
+
+		// selecting folders that were marked for trashing at an earlier time
+		$db->query("select pkey from classdoclib_Folders where trashed='y' and folderType=2 and class_id = ".$u->activeClassTaught->id_classes);
+		while($db->next_record()) {
+			$folders[] = $db->Record['pkey'];
+		}
+		
+		// going through the selected (above) and removing
+		while(list($k,$v) = each($folders)) {
+			$db->query("delete from classdoclib_Files where folder=$v");
+			$db->query("delete from classdoclib_Folders where pkey=$v and folderType=2 and class_id = ". $u->activeClassTaught->id_classes);
+		}
+		
+		// Away we go.. we're done
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classdoclib/main/$trashFolder");
+		
+	}
+
+}
+
+
+function folderloop($id, $cid, $status='y') {
+
+	if ($id == 0 || intval($id) == 0 ) {
+		return false;
+	}
+
+	$db = db::GetHandle();
+	$db->query("select pkey from classdoclib_Folders where parentKey = $id and class_id = $cid");
+	$loop = array();
+	
+	while($db->next_record()) {
+		$loop[] = $db->Record['pkey'];
+	}
+	
+	while(list($k,$parent) = each($loop)) {
+		$db->query("update classdoclib_Folders set trashed='$status' where pkey=$parent and class_id = $cid");
+		folderloop($parent, $cid, $status);
+	}
+	
+return;
+}
+
+
+
+?>

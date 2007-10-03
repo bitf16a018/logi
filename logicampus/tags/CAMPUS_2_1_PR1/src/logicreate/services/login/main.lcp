@@ -1,0 +1,191 @@
+<?
+
+/**
+ * login
+ * 
+ * Handles logins for site.  Also emails
+ * lost passwords to users.
+ */
+
+include_once(INSTALLED_SERVICE_PATH."/login/phpSniff.core.php");
+include_once(INSTALLED_SERVICE_PATH."/login/phpSniff.class.php");
+
+class login extends NoAuth {
+
+var $presentor = "htmlPresentation";
+
+	/**
+	 * email lost password to user
+	 */
+	function lostRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
+		$email = trim($lcObj->postvars["email"]);
+		if (USE_MD5_PASSWORDS==TRUE) { 
+			$seed = "abchefghjkmnpqrstuvwxyz0123456789"; 
+			while ($i <= 7) { 
+			     $num = rand() % 33; 
+			     $pass = $pass . substr($seed,$num,1);
+			     $i++; 
+			} 
+			$db->query("update lcUsers set password=md5('$password') where email = '$email'");
+
+			$db->query("select * from lcUsers where email = '$email'");		
+		} 
+
+		$db->query("select * from lcUsers where email = '$email'");		
+		if ($db->next_record()) {
+			if (USE_MD5_PASSWORDS!=TRUE) { 
+				$pass = $db->Record['password'];
+			}
+			$message = "You have requested your account information:\n\nUsername: ".$db->Record['username']."\nPassword: $pass\n-----\n";
+			$message .= "If you require more indepth help, please email ".WEBMASTER_EMAIL."\n\n";
+			$message .= " \n\nPlease visit ".DEFAULT_URL." to log in.";
+
+			mail($email,"Your account information for ".SITE_NAME,$message,"From: ".WEBMASTER_EMAIL);
+			$lcTemplate["status"] = "Your password has been sent to $email.";
+		} else {
+			$lcTemplate["status"] = "We have no account on file with the email address $email.";
+		}
+
+
+		$lcObj->templateName="loginlost";
+		$lcTemplate["title"] = "Lost password";
+
+	}
+
+	/**
+	 * check for correct username & password pair
+	 * assign username to session on good
+	 */
+	function loginRun($db,&$lcUser,&$lcObj,&$lcTemplate) {
+		
+		$username = $lcObj->postvars["username"];
+		$password = $lcObj->postvars["password"];
+		$redir = $lcObj->postvars["redir"];
+		$newUser = lcUser::getUserByUsername($username);
+
+		/*
+		if (!$lcUser->isAnonymous() ) {
+			$oldUsername = $lcUser->username;
+		} else {
+			$oldUsername = '';
+		}
+		 */
+
+		/*
+		$lcUser->username = $username;
+		$lcUser->password = $password;
+		 */
+		$newUser->password = $password;
+
+		$agent = new phpSniff($_SERVER['HTTP_USER_AGENT']);
+
+		if (!$newUser->validateLogin($db)) {
+			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",2,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
+			$newUser->username="anonymous";
+			$lcTemplate['message'] ="There was an error with your username or password.  Please try again.";
+			$this->presentor = "errorMessage";
+			return;
+		} else {
+			//if a logged in user attempts to login as someone else
+			// create a brand new user (userType and sub-classes)
+			// if the logged in user was anonymous, copy the session
+			if ($lcUser->isAnonymous() ) {
+				$newUser->sessionvars = $lcUser->sessionvars;
+			}
+			$newUser->_sessionKey = $lcUser->_sessionKey;
+			$lcUser = $newUser;
+
+
+			$db->query("insert into lc_users_login_attempt (username,login_attempt,login_status, os, browser,version) values ('".addslashes(stripslashes($username))."',".time().",1,'".$agent->_browser_info['os']."','".$agent->_browser_info['browser']."','".$agent->_browser_info['version']."')");
+			$lcUser->bindSession();
+			$lcUser->loadProfile();
+
+// mgk 9/2/03 - get last login time
+			$db->queryOne("select last_login from lc_users_last_login where username='".$lcUser->username."'");
+			if ($db->Record[0]==0) { 
+				$lcUser->sessionvars['first_login'] = true;
+
+			}
+			$db->query("replace into lc_users_last_login (username,last_login) values ('".$lcUser->username."',".time().")");
+			
+			//set permanent login cookie
+			if ( $lcObj->postvars['permanent'] != '' ) {
+				global $tail;
+				setcookie('LC_LOGIN',$username,time()+7200,$tail,COOKIE_HOST);
+			} else {
+//				global $tail;
+//				setcookie("LC_LOGIN",'',0,$tail,COOKIE_HOST);
+			}
+		}
+
+		if ($lcUser->sessionvars['loginredir'] != '') {
+			$this->presentor='redirectPresentation';
+			$lcTemplate['url'] = $lcUser->sessionvars['loginredir'];
+		} else if ($lcObj->getvars['loginredir'] != '' ) {
+			$this->presentor='redirectPresentation';
+			$lcTemplate['url'] = $lcObj->getvars['loginredir'];
+		} else {
+			$this->presentor='redirectPresentation';
+			#$lcTemplate['url'] = DEFAULT_URL;
+			// do a test on if we're faculty/student/visitingguest/admin whoever
+			// MAK 10-20-2003, if the above conditions don't match, then we do this
+			// almost like custom DEFAULT_URLs
+
+
+			if ($lcUser->isAdmin()) {
+				$lcTemplate['url'] = appurl('administration/');
+			} else if ($lcUser->isFaculty()) {
+				if ($lcUser->sessionvars['first_login']) { 
+//  remove profile nag screen - mgk
+					#$lcTemplate['url'] = appurl('users/editProfile/');
+					$lcTemplate['url'] = appurl('classmgr/');
+				} else { 
+					$lcTemplate['url'] = appurl('classmgr/');
+				}
+				#$lcTemplate['url'] = appurl('classmgr/');
+			} else  if ($lcUser->isStudent()) {
+				if ($lcUser->sessionvars['first_login']) { 
+//  remove profile nag screen - mgk
+					#$lcTemplate['url'] = appurl('users/editProfile/');
+					$lcTemplate['url'] = appurl('classroom/');
+				} else { 
+					$lcTemplate['url'] = appurl('classroom/');
+				}
+			} else {
+				$lcTemplate['url'] = appurl('classmgr/');
+			}
+		}
+	}
+
+
+	/**
+	 * show login box
+	 */
+	function Run($db,&$lcUser,&$lcObj,&$t) {	
+		global $HTTP_REFERER;
+
+		//permanent login cookie
+		$t['username'] = $_COOKIE['LC_LOGIN'];
+
+		if ($lcObj->getvars['clear'] == 'y') {
+			$t['username'] = '';
+			$_COOKIE['LC_LOGIN'] = '';
+			setcookie("LC_LOGIN","");
+		}
+
+		$t['canregister'] = $this->_allowRegister;
+		
+		if ($lcObj->getvars['loginredir'] != '') {
+			$t['redir'] = $lcObj->getvars['loginredir'];
+		} else {
+			$t['redir'] = $_SERVER['HTTP_REFERER'];
+			$t['redir'] = $HTTP_REFERER;
+		}
+		
+		$t["title"] = "Log in";
+		$t["message"] = $lcObj->getvars[1];
+	}
+
+
+}
+?>

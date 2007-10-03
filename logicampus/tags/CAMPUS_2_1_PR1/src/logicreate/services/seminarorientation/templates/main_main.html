@@ -1,0 +1,14 @@
+<?=$t['sectionhead'];?>
+
+<?=$t['message'];?>
+<?=$t['form'];?>
+<?
+if ($obj->user->sessionvars['semester']) { ?>
+Select the application you would like to use below.<br>
+<ul>
+<li><a href="<?=APP_URL?>seminarorientation/orientations/">ORIENTATIONS</a></li>
+<li><a href="<?=APP_URL?>seminarorientation/seminars">SEMINARS</a></li>
+</ul>
+<? } ?>
+
+

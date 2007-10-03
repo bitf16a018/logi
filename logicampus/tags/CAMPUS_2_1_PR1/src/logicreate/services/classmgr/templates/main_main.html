@@ -1,0 +1,103 @@
+
+<h3><?=lct('Classroom Overview')?> <?=$t['semesterDisplay'];?></h3>
+
+<br/>
+
+<? if( LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE') ){ ?>
+<?=lct('The following is a list of classes you are teaching. To select
+another semester, select the semester you wish to view in the drop
+down and press "Go".')?>
+
+
+	<?=$t['form'];?>
+
+<? } ?>
+
+<? if( LcSettings::isModuleOn('MODULE_SELF_ENROLLMENT') ){ ?>
+
+<h4>Class Management</h4>
+<a href="<?= BASE_URL.'index.php/classmgr/teacherclass/event=newClass' ?>">Add New Class</a>&bull;
+<a href="<?= BASE_URL.'index.php/classmgr/teacherclass/' ?>">Delete a Class</a>
+
+<br/>
+<br/>
+<? } ?>
+
+
+<h4>Learning Objects</h4>
+<a href="<?= appurl('lobrepo/myobj');?>">My Learning Objects</a> 
+&bull;
+<a href="<?= appurl('lobrepo/');?>">All Learning Objects</a>
+
+<br/>
+<br/>
+
+
+	<?php
+		
+		if (count($t['classes']) == 0) {
+			echo lcMessageBox('No classes available yet.');
+		} else
+		{
+		
+			echo '<table border="0" cellpadding="0" cellspacing="0" width="100%">';
+			foreach($t['classes'] as $null=>$class_record)
+			{
+				// the only reason this would be an object is if we hit this page for the first time!
+				// and we are going through the userTaught array
+				if (is_object($class_record))
+				{	$class_record = object2array($class_record);
+				}
+				
+				?>
+				<tr class="bartitle">
+					<td>&nbsp;<a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>"><?=$class_record['courseName'];?></a></td>
+					<td align="right"><a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>"><?=lct('classroom manager')?></a>&nbsp;</td>
+					<td width="19"><a href="<?=APP_URL?>classmgr/display/id_classes=<?=$class_record['id_classes'];?>">&raquo;</a></td>
+				</tr>
+				<tr>
+					<td valign="top">
+						Overview
+						<ul>
+							<li>Enrollment: <?= $t['classEnrollmentStats'][$class_record['id_classes']];?> students</li>
+							<li>Gradebook: <?= $t['classEntriesStats'][$class_record['id_classes']];?> entries</li>
+						</ul>
+					</td>
+					<td colspan="2" valign="top">
+						Upcoming in the next 5 days
+						<ul>
+							<li>Tests: <?= $t['classAssessmentsStats'][$class_record['id_classes']];?> tests</li>
+							<li>Assignments: <?= $t['classAssignmentsStats'][$class_record['id_classes']];?> assignments</li>
+						</ul>
+					</td>
+				</tr>
+<!--
+				<tr>
+					<td valign="top">
+						<ul>
+							<li><a href="<?=appurl("gradebook/main");?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Gradebook')?></a></li>
+							<li><a href="<?=appurl("assessments/main");?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Assessment Manager')?></a></li>
+							<li><a href="<?=appurl("classdoclib/main");?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('File Manager')?></a></li>
+						</ul>
+					</td>
+					<td colspan="2" valign="top">
+						<ul>
+							<li><a href="<?=MOD_URL?>lessonManager/id_classes=<?=$class_record['id_classes'];?>/"><?=lct('Lesson Manager')?></a></li>
+							<li><a href="<?=modurl('cal');?>/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Calendar')?></a></li>
+							<li><a href="<?=APP_URL?>classmgr/assignmentManage/id_classes=<?=$class_record['id_classes'];?>"><?=lct('Assignments')?></a></li>
+			
+						</ul>
+					</td>
+				</tr>
+				-->
+				<?php
+				
+			}//end foreach
+			echo '</table>';
+			
+		}//end if is array
+		
+	
+			?>
+
+

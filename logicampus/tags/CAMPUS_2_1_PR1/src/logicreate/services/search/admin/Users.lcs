@@ -1,0 +1,54 @@
+<?
+
+ /*
+  * Created by Keith Elder
+  * Last Modified 9/16/02
+  * Desription:  Search plugin for the users module.  
+  *     	 This plugin indexes all values stored in the profile.
+  */
+
+class UsersSearchTool extends searchTool {
+
+	function UsersSearchTool() {
+		$this->moduleName =  'Users';
+		$this->tableName  =  'profile';
+		$this->keyName    =  'username';
+		$this->mid	  =  'users';
+		$this->filename	  =  'Users';
+		$this->getCountSQL = 'Select count(username) from profile';
+	}
+
+	function initQuery() {
+		$this->db = DB::getHandle();
+		$this->db->query('select * from '.$this->tableName);
+		$this->db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		
+	}
+
+	function nextItem() {
+		$tmp = new SearchEntry();
+		if (!$this->db->next_record() ) {
+			return false;
+		}
+		foreach ($this->db->Record as $k => $v) {
+		#	print_r($this->db->Record);
+		 $tmp->searchdata .= $v.' ';
+		}
+
+		$tmp->searchdata = searchTool::stripNoiseWords($tmp->searchdata);
+
+#		print_r($tmp->searchdata);
+#		echo '<hr>';
+
+		$tmp->title = "Profile for User ".$this->db->Record[username];
+		$tmp->type = 'User Profile';
+		$tmp->link = 'users/view/'.$this->db->Record[username];
+		$tmp->modID = $this->mid;
+		$tmp->mkey = RAND(1, time());
+		$tmp->groups = "|reg|";
+		$tmp->notgroups = "";
+		return $tmp;
+	}
+}
+?>

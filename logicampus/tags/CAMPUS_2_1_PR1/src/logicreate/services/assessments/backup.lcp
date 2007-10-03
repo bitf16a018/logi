@@ -1,0 +1,55 @@
+<?
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class backup extends FacultyService {
+
+
+	var $presentor = 'HTMLPresentation';
+	var $data = array();  # cleaned form data
+	var $sectionTitle = 'Class Assessments';
+	var $applinks = array (
+		'Add Assessment' => 'add'
+		);
+	var $navlinks = array(
+		'Calendar' => 'cal',
+		'Grade book' => '%gradebook'
+	);
+
+
+	/**
+	 * show form to insert a new assessment
+	 * take down name, description, instructions,
+	 */
+	function run($db,&$u,&$lc,&$t) {
+	
+		$id = (int)$lc->getvars['id'];
+
+		$assessment = Assessment::load($id,$u->activeClassTaught->id_classes);
+		if (!$assessment) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to access this test.";
+			return;
+		}
+
+		$assessment->questions = $assessment->getQuestionsAndAnswers();
+		ob_start();
+		print serialize($assessment);
+		$buffer = ob_get_contents();
+		ob_end_clean();
+
+		header("Content-type: application/octet-steam");
+		header("Content-disposition: attatchment;filename=test_backup_".$id.".bin");
+		print gzcompress($buffer);
+		exit();
+	}
+
+}
+?>

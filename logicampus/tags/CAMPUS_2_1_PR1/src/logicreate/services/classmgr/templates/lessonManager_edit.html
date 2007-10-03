@@ -1,0 +1,207 @@
+<?php 
+print $t['sectionheader'];
+?>
+
+<?php
+if ( is_array($t['errors']) ) {
+echo '<div class="error_message">Some errors occurred when processing your request:<ul>';
+	foreach($t['errors'] as $blank=>$error) {
+		echo '<li>'.$error.'</li>';
+	}
+	echo '</div></ul>';
+}
+?>
+<form action="" method="POST" enctype="application/x-www-form-urlencoded">
+	<table width="" border="0" cellspacing="3" cellpadding="0">
+		<tr>
+			<td valign="top" class="">*Title</td>
+			<td valign="top" class=""><input type="text" id="title" name="title" value="<?=$t['title'];?>" size="65" maxlength="255"/></td>
+		</tr>
+		<tr>
+			<td valign="top" class="" valign="top">*Description</td>
+			<td valign="top" class="">
+				<textarea name="description" cols="62" rows="7" id="description"><?= $t['description'];?></textarea>
+			</td>
+		</tr>
+	</table>
+
+	<fieldset>
+		<legend>Dates</legend>
+	<table width="" border="0" cellspacing="3" cellpadding="0">
+		<tr>
+			<?php
+			echo Form::dateDropDownToHTML($t['activeOnStruct']);
+			?>
+		</tr>
+		<tr>
+			<?php
+			echo Form::dateDropDownToHTML($t['inactiveOnStruct']);
+			?>
+		</tr>
+	</table>
+	</fieldset>
+
+		<br/>
+		<div style="text-align:center;">
+			<input type="submit" id="submit" name="submit" value="Save Changes">
+			<input type="hidden" name="event" value="update">
+		</div>
+
+
+		<div style="font-size:85%">* denotes a required field</div>
+
+
+		<div style="font-size:85%;">** Make sure you save changes to the above items before changes items below this line.</div>
+
+</form>
+	<hr/>
+	<div style="padding-top:.5em;width:48%;float:right;">
+		<fieldset>
+			<legend>Lesson Sequence</legend>
+			<a href="<?= appurl('classmgr/lessonSequence/id='.$t['lessonId']);?>">Change Lesson Sequence</a>
+			<?php
+			if ( ! is_array($t['seqItems']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Sequence Yet!</span>
+			<?php } ?>
+			<ol>
+				<?php
+				foreach ($t['seqItems'] as $k=>$obj) {
+				?>
+				<li><?= $obj->lobTitle;?></li>
+				<?php } ?>
+			</ol>
+
+		</fieldset>
+	</div>
+
+	<div style="padding-top:.5em;width:48%;align:left;">
+		<fieldset>
+			<legend>Lesson Content</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkContent/id='.$t['lessonId']);?>">Change Content</a>
+			<?php
+			if ( ! is_array($t['contentItems']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Content</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['contentItems'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	<div style="width:48%;align:left;">
+		<fieldset>
+			<legend>Lesson Objectives</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lessonId']);?>">Change Objectives</a>
+			<?php
+			if ( ! is_array($t['objectives']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Objectives</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['objectives'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+
+
+	<div style="width:48%;align:left">
+		<fieldset>
+			<legend>Lesson Check List</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lessonId']);?>">Change Check List</a>
+			<?php
+			if ( ! is_array($t['checkList']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Check List</span>
+			<?php } ?>
+
+			<ol>
+				<?php
+				foreach ($t['checkList'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ol>
+		</fieldset>
+	</div>
+
+
+
+	<div style="width:48%;align:left;">
+		<fieldset>
+			<legend>Web Links</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkWeb/id='.$t['lessonId']);?>">Change Web Links</a>
+			<?php
+			if ( ! is_array($t['web']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Web Links</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['web'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	
+
+	<div style="width:48%;align:left;">
+		<fieldset>
+			<legend>Assignments</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lessonId']);?>">Change Assignments</a>
+			<?php
+			if ( ! is_array($t['assignments']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Assignments</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['assignments'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	
+<!--	<p style="clear:both;">&nbsp;</p>
+-->
+
+	<div style="width:48%;align:left;">
+		<fieldset>
+			<legend>Assessments</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssessments/id='.$t['lessonId']);?>">Change Assessments</a>
+			<?php
+			if ( ! is_array($t['assessments']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Assessments</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['assessments'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	
+
+	<p style="clear:both;">&nbsp;</p>

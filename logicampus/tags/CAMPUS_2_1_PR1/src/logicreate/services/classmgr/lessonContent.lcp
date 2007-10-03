@@ -1,0 +1,441 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'classLessonContentObj.php');
+
+include_once(LIB_PATH.'lc_lob_renderer.php');
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+Class LessonContent extends FacultyService 
+{
+	## form stuff
+	var $cleanedArray = array();
+	
+	var $presentor = 'HTMLPresentation';
+
+	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $applinks = array (
+		'List Content' => 'lessonContent/',
+		'Add Content' => 'lessonContent/event=add'
+	);
+	var $inactivelinks = array( 'Content' );
+	var $sectionTitle = 'Lesson Content';
+
+	function LessonContent() {
+		//run parent to get style info
+		parent::FacultyService();
+		if (HAS_TIDY) { 
+			$this->applinks['Import Content'] = 'lessonContent/event=import';	
+
+			$this->applinks['Import Content - NO TIDY'] = 'lessonContent/event=import';	
+		}
+		$this->applinks['Add a Lesson'] = 'lessonNew/event=add/';
+
+	}
+
+	/**
+	 * Show the main page of the lesson manager
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonContent';
+		$this->sectionTitle = 'Lesson Content';
+		
+		//default sort
+		if ( strlen($lc->getvars['dgorder']) < 1 ) {
+			$lc->getvars['dgorder'] = 'dateCreated';
+		}
+
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+
+		$datagrid->joins = ' LEFT JOIN classes as l ON t.id_classes=l.id_classes LEFT JOIN courses as o ON l.id_courses=o.id_courses LEFT JOIN class_lessons as e on e.id_class_lessons=t.id_class_lessons';
+		
+		$datagrid->column = 't.dateCreated,t.id_class_lesson_content,t.txTitle,e.title as etitle,t.id_class_lessons';
+		$datagrid->headerClass = 'classheader';
+		$datagrid->class = 'datagrid';
+		$datagrid->table = 'class_lesson_content as t';
+		$datagrid->rowsPerPage = 100;
+		$datagrid->where = 't.id_classes='.$u->activeClassTaught->id_classes;
+		//$this->column = '';
+		$datagrid->usePageDropdown(true);
+		$datagrid->setCellWidth('end', '10%');
+		$datagrid->setCellAlign('end', 'left');
+		//$datagrid->setCellWidth('end', '75');
+
+		$datagrid->setCellWidth('dateCreated', '10%');
+		$datagrid->setCellAlign('dateCreated', 'center');
+		
+		$datagrid->ignore = array('id_class_lesson_content', 'id_class_lessons', 'id_classes', 'txText');
+		$datagrid->sortColumns = array('txTitle', 'dateCreated', 'courseName', 'etitle');
+		$datagrid->headers = array(
+			'txTitle' => 'Content Title',
+			'etitle' =>'Lesson Title',
+			'dateCreated'=>'Date Created',
+			'end'=>' ');
+		$datagrid->setCellWidth('end', '150');
+
+		$datagrid->overrideColumn('<?=date("m-d-Y", strtotime($dateCreated));?>', 'dateCreated');
+		$datagrid->overrideColumn('<?=($etitle ? "<a href=\"'.MOD_URL.'lessonManager/event=edit/id=$id_class_lessons\">$etitle</a>" : "<i>no lesson assigned</i>");?>', 'etitle');
+		
+
+		$datagrid->postpendCallbackColumn('DG_classmgr_contentActions', 'end');
+
+		$t['datagrid'] = $datagrid->toHTML();
+		
+	}
+
+	
+	/**
+	 *  Duplicate the content
+	 *  step 1, create a duplicate record with a different pkey
+	 *  step 2, have them edit it.
+	 */
+	function duplicateRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->getvars['id'] = addslashes(stripslashes($lc->getvars['id']));
+		$db->queryOne("select txText from class_lesson_content
+			where id_class_lesson_content='{$lc->getvars['id']}'
+			and id_classes='{$u->activeClassTaught->id_classes}'");
+		if ( !$db->Record['txText'] ) {
+			$t['error'] = 'Content not available.';
+			$this->Run($db,$u,$lc,$t);
+			return;
+		}
+
+		$lc->postvars['NOTPOSTVARtxText'] = $db->Record['txText'];
+		
+		$this->processRun($db,$u,$lc,$t);
+	}
+
+
+	/**
+	 * Show a page to allow choice of content to add
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonContent_add';
+	}
+	 */
+
+
+	/**
+	 * Save a content obj to the db
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$guid = lcUuid();
+		$lob = new LobContent();
+		$lobMetaObj = new LobMetadata();
+		$lobUserObj = new LobUserLink();
+
+		$lob->set('lobType','content');
+		$lob->set('lobSubType','text');
+		$lob->set('lobGuid',$guid);
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+		$lob->set('lobUrlTitle', urlencode($lc->postvars['txTitle']));
+//		debug($lob,1);
+//		debug($lc->postvars['txTitle'],1);
+		$lob->save();
+
+		$lobMetaObj->set('lobId',$lob->getPrimaryKey());
+		$lobMetaObj->set('lobKind','content');
+		$lobMetaObj->set('author', $lc->postvars['md_author']);
+		$lobMetaObj->set('copyright', $lc->postvars['md_copyright']);
+		$lobMetaObj->set('license', $lc->postvars['md_license']);
+		$lobMetaObj->save();
+
+		$lobUserObj->set('lobId',$lob->getPrimaryKey());
+		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->save();
+
+		$u->addSessionMessage('Successfully added content.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonContent/');
+	}
+
+
+	/**
+	 * Show page to allow choice of content 
+	 */
+	function addRun(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonContent_add';
+		switch($lc->getvars['t']) {
+			case 'html':
+				$lc->templateName = 'lessonContent_html';
+				$formObj = new SiteForm();
+				$formObj->getForm('classcontentlesson');
+				$formObj->data[2][0]['cols'] = 80;
+				//debug($formObj->data);
+				//update the event.  why do this in code?
+				// so we don't have to update the DB with update statements
+				$formObj->data[6][0]['defaultValue'] = 'save';
+
+				$metafields = LC_Lob_Renderer::getMetadataForm();
+				//move the button and hidden fields to the end of the form
+				// to make room for the new fields
+				$formObj->data[9] = $formObj->data[6];
+				$formObj->data[8] = $formObj->data[5];
+				$formObj->data[7] = $formObj->data[4];
+
+				$formObj->data[4] = $metafields[0];
+				$formObj->data[5] = $metafields[1];
+				$formObj->data[6] = $metafields[2];
+
+				$formObj->action = modurl('lessonContent'); // i should do this in the manager/form itself
+				$t['form'] = $formObj->ToHTML();
+				break;
+
+		}
+	}
+
+
+	/**
+>>>>>>> 1.11
+	 *	One function to find them
+	 *	One function to bind them
+	 *	One function to rule them all
+	 */
+	function processRun(&$db,&$u,&$lc,&$t) {
+		if ($t['form'] == false) {
+			$formObj = new SiteForm();
+			$formObj->getForm('classcontentlesson');
+			$formObj->action = modurl('lessonContent'); // i should do this in the manager/form itself
+			$t['form'] = $formObj->ToHTML();
+		}
+		
+		$lc->templateName = 'lessonContent_process';
+		$saved = false;
+
+		if ($lc->postvars['id_class_lesson_content']
+			&& !$this->checkAuth($lc->postvars['id_class_lesson_content'],$db,$u,$t))
+		{	return;
+		}
+		
+		$formObj = new SiteForm();
+		
+		if ((int)$lc->postvars['id_class_lesson_content'] > 0)
+		{	// we are editing (we have submitted updated data .. lets retrieve the original to compare later
+			$objLesson = classLessonContentObj::_getFromDB((int)$lc->postvars['id_class_lesson_content'], 'id_class_lesson_content', 'id_classes='.$u->activeClassTaught->id_classes);
+			
+		} else
+		{
+			// check to see if we are asking to pull up a lessoncontent to edit
+			if ((int)$lc->getvars['id'] > 0 && !$lc->postvars['NOTPOSTVARtxText'])
+			{	// the initial load (first request (edit/delete))
+				$objLesson = classLessonContentObj::_getFromDB((int)$lc->getvars['id'], 'id_class_lesson_content', 'id_classes='.$u->activeClassTaught->id_classes);
+				
+				if ($lc->getvars['subev'] == 'delete' && $objLesson->id_class_lesson_content != '')
+				{	
+					$objLesson->_deleteFromDB();
+					$this->run($db, $u, $lc, $t);
+					return;
+				}
+				
+			}
+			
+		}
+		// the above determines if we are trying to edit or are editing a record
+
+		// Are we due for some processing? if not lets just display what we need
+		if ($lc->postvars['submit'])
+		{	
+			$t['error'] = $formObj->validateForm('classcontentlesson', $lc->postvars);
+
+			if (!$t['error']) {
+			
+				// HTML Tidy
+				$tmpfname = tempnam("/tmp", "tidy");
+				$handle = fopen($tmpfname, "w");
+				$lc->postvars['txText'] = stripslashes($lc->postvars['txText']);
+				fwrite($handle, $lc->postvars['txText']);
+				fclose($handle);
+
+				$tidied = shell_exec( "cat {$tmpfname} | "
+					.DOCUMENT_ROOT."/../logicreate/bin/tidy" );
+	
+				unlink($tmpfname);
+
+				// strip the body tags and everything outside of them
+				$tidied = preg_replace('/^.*?<\s*body[^>]*>/is', '', $tidied);
+				$lc->postvars['txText'] = preg_replace('/<\/body.*$/is', '', $tidied);
+
+				## if we have an object (it's from editing) so lets update the object and save (edit)
+				if (is_object($objLesson))
+				{	$date_created = $objLesson->dateCreated; // i need to offload this until after loadA
+					$objLesson->_loadArray($formObj->cleanedArray);
+					$objLesson->id_classes= $u->activeClassTaught->id_classes;
+					$objLesson->dateCreated = $date_created;
+				} else
+				{	$objLesson = new classLessonContentObj();
+					$objLesson->_loadArray($formObj->cleanedArray);
+					$objLesson->id_classes= $u->activeClassTaught->id_classes;
+					$objLesson->dateCreated = date('Y-m-d');
+				}
+				
+				$objLesson->_saveToDB();
+				
+				$saved = true; // not needed since we moved things to other pages
+				$this->run($db,$u,$lc,$t);
+				
+			}
+			
+		} else
+		{
+			if (is_object($objLesson))
+			{	// this preloads a reqeusted record (for editing)
+				$__cloned_objLesson = $objLesson;
+				$formObj->validateForm('classcontentlesson', $__cloned_objLesson);
+
+			}
+			
+		}
+		
+		// if we have saved (above) i dont want a form filled with old values, 
+		// i want a fresh one so i let run() do it for me
+		if ($saved == false)
+		{
+			$formObj->getForm('classcontentlesson', 
+				($lc->postvars['NOTPOSTVARtxText']
+				? array( 'txText' => $lc->postvars['NOTPOSTVARtxText'] )
+				: $formObj->cleanedArray) );
+			
+			$t['title_action'] = 'Adding ';
+			
+			if (is_object($objLesson)) 
+			{	$t['title_action'] = 'Editing ';
+				$formObj->modFormValue('submit', 'Update Content');
+				$formObj->modFormValue('id_class_lesson_content', $objLesson->id_class_lesson_content);
+			}	
+			$formObj->action = modurl('lessonContent');
+			
+			$t['form'] = $formObj->ToHTML();
+		}
+		
+		// we love run.. you should to!
+		//$this->run($db, $u, $lc, $t);
+	}
+
+
+	/***
+	 *  Display them the form to upload a content file
+	 **/
+	function importRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'lessonContent_import';
+		$this->sectionTitle = 'Content Upload';
+		$this->inactivelinks[] = 'Upload Content';
+		if (!HAS_TIDY)
+		{
+		#	$lc->templateName = 'lessonContent_notidy';
+			$t['notidy'] = true;
+		}
+
+	}
+
+	/***
+	 *  Process the uploaded file. That means stripping the body tags and everything
+	 *  outside of them and committing it all to the database.
+	 **/
+	function uploadProcessRun(&$db,&$u,&$lc,&$t) {
+		$lc->postvars['title'] = addslashes(stripslashes($lc->postvars['title']));
+
+		if ( strlen($lc->postvars['title']) < 1 || strlen($lc->postvars['title']) > 255 ) {
+			$t['error'] = 'The Title must be between 1 and 255 characters.';
+			$this->importRun($db,$u,$lc,$t);
+			return;
+		}
+
+		if ( !$lc->uploads['thefile']['tmp_name'] ) {
+			$t['error'] = 'You must upload a file in order to submit content.';
+			$this->importRun($db,$u,$lc,$t);
+			return;
+		}
+
+		// HTML Tidy
+define('HAS_TIDY',false);
+		if (HAS_TIDY) { 
+			$tidied = shell_exec( "cat {$lc->uploads['thefile']['tmp_name']} | "
+			.DOCUMENT_ROOT."/../logicreate/bin/tidy" );
+		} else { 
+			$tidied = file_get_contents($lc->uploads['thefile']['tmp_name']);
+		}
+
+		// strip the body tags and everything outside of them
+		$tidied = preg_replace('/^.*?<\s*body[^>]*>/is', '', $tidied);
+		$tidied = preg_replace('/<\/body.*$/is', '', $tidied);
+
+		// make sure there's some content left
+		if ( !$tidied ) {
+			$t['error'] = 'The file you uploaded has no content!';
+			$this->importRun($db,$u,$lc,$t);
+			return;
+		}
+
+		$tidied = addslashes($tidied);
+
+		// commit to the database
+		$db->query( "insert into class_lesson_content set
+			id_classes='{$u->activeClassTaught->id_classes}',
+			id_class_lessons=NULL,
+			txTitle='{$lc->postvars['title']}',
+			txText='{$tidied}',
+			dateCreated=".DB::getFuncName('NOW()')."" );
+
+		$t['msg'] = 'Content uploaded successfully.';
+		$this->Run($db,$u,$lc,$t);
+
+	}
+
+	// Do they have authority for this content? Yes, return true. No, give them an error
+	// and return false. (The caller need only return.)
+	function checkAuth($contentid,&$db,&$u,&$t) {
+		$db->queryOne("select count(id_class_lesson_content) as cnt from class_lesson_content
+			where id_classes='{$u->activeClassTaught->id_classes}'
+			and id_class_lesson_content='{$contentid}'");
+		if (!$db->Record['cnt']) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to modify that content.";
+			return false;
+		} else return true;
+	}
+}
+
+
+
+/**
+ * works with datagrid to generate data for column action links
+ */
+function DG_classmgr_contentActions($row, &$ret) {
+	$ret = '
+		<ul style="margin:0px;padding-left:15px">
+		<li><a href="'.modurl("lessonContent/event=process/id=".$row['id_class_lesson_content']).'">Edit</a></li>
+		<li><a href="'.modurl("lessonContent/event=duplicate/id=".$row['id_class_lesson_content']).'">Duplicate</a></li>
+		<li><a onclick="if (confirm(\'Warning you are about to remove lesson content, please be absolutely sure before continuing. Click [ OK ] to remove this content item.\')) { return true; } else { return false; }" href="'.modurl("lessonContent/event=process/subev=delete/id=".$row['id_class_lesson_content']).'">Delete</a></li>
+		</ul>';
+}
+
+?>

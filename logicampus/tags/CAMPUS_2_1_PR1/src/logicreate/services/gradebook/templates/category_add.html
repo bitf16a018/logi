@@ -1,0 +1,11 @@
+<?=$t['sectionheader'];?>
+
+<p>Enter the name for your category below.
+<? if ($t['showWeight']) { ?>
+Next, enter the weight percentage that gradebook entries belonging to this category should be weighed relative to other categories. You must also <b>make sure</b> that all your categories' weights add up to 100%.
+<? } ?>
+</p>
+<div style="color: maroon;"><?=$t['error'];?></div>
+<br>
+
+<?= $t['form']; ?>

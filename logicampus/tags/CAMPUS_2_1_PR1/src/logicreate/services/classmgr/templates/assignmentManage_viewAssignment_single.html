@@ -1,0 +1,209 @@
+<?=$t['sectionheader'];?>
+<?php
+//debug($t['asmt']);
+?>
+<br>
+
+<style>
+	td.title
+	{	font-weight: bold;
+	}
+</style>
+
+<TABLE>
+<tr>
+	<td class="title">Student:</td>
+	<td><?=ucwords($obj->getvars['student']);?></td>
+</tr>
+
+<tr>
+	<td class="title">Title:</td>
+	<td><?=$t['asmt']->title;?></td>
+</tr>
+<tr>
+	<td class="title">Belongs to Lesson:</td>
+	<td><?=$t['asmt']->lessonTitle ? $t['asmt']->lessonTitle : '<i>None assigned</i>';?></td>
+</tr>
+<tr>
+	<td class="title">Became active on:</td><td><?=date('l dS of F Y', $t['asmt']->activeDate);?></td>
+<tr>
+	<td class="title">Due on:</td><td><?=date('l dS of F Y \a\t H:i A', $t['asmt']->dueDate);?></td>
+</tr>
+<tr>
+	<td class="title" colspan="2">Instructions:</td>
+</tr>
+<tr>
+	<td colspan="2"><?=$t['asmt']->instructions;?></td>
+</tr>
+
+</table>
+
+<br>
+
+<table width="100%">
+<tr>
+
+	<td> 
+	<form method="POST" action="<?=appurl('classmgr/assignmentManage/event=gradeStudent/id_class_assignments='.$t['id_class_assignments'].'/student='.$t['student']);?>">
+	<fieldset style="padding: 5px;">
+	<legend><b style="font-size: 110%">Teacher Grading<b></legend>
+	<br>
+	<center>	<input type="text" size="5" name="grade" value="<?=$t['student_grade_info']['grade'];?>">
+			</center>
+
+	<br>&nbsp;
+	</fieldset>
+	
+	<br>
+	
+<?php
+if ($obj->user->isFaculty())
+{	
+
+	?>
+	
+	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/htmlarea.js"></script>
+	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/htmlarea-lang-en.js"></script>
+	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/dialog.js"></script>
+	<script type="text/javascript" src="<?=BASE_URL;?>htmlarea/popupwin.js"></script>
+	<style type="text/css">
+		@import url(<?=BASE_URL;?>htmlarea/htmlarea.css);
+	</style>
+	<script type="text/javascript" src="<?=appurl('js/');?>"></script>
+
+	<?php
+
+	$v['fieldName'] = 'teachercomments';
+	
+		$HTML .= '
+		<script>
+		
+		function WYS'.$v['fieldName'].'()
+		{
+		'.$resize_script.'
+		/** Wysiwyg loader */
+		x'. $v['fieldName'].' = new HTMLArea("'.$v['fieldName'].'");
+		x'.$v['fieldName'].'.config.editorURL = "'. BASE_URL.'htmlarea/";
+		
+		x'. $v['fieldName'].'.config.registerButton("insertdoclibimage", "Web Images", "doclib.gif", false, function(e) { e.execCommand("insertdoclibimage"); }); 
+		x'. $v['fieldName'].'.config.toolbar.push(["separator", "insertdoclibimage"]);
+		
+		x'. $v['fieldName'].'.config.registerButton("insertdoclibcontentlinks", "Classroom Documents", "doccontentlib.gif", false, function(e) { e.execCommand("insertdoclibcontentlinks"); }); 
+		x'. $v['fieldName'].'.config.toolbar.push(["separator", "insertdoclibcontentlinks"]);
+					
+		x'. $v['fieldName'].'.config.registerButton("insertcontentlinks", "Classroom Content Links", "content.gif", false, function(e) { e.execCommand("insertcontentlinks"); }); 
+		x'. $v['fieldName'].'.config.toolbar.push(["separator", "insertcontentlinks"]);
+				
+		x'.$v['fieldName'].'.generate();
+		}
+				
+		setTimeout(\'WYS'.$v['fieldName'].'()\', 1500);
+		
+		</script>';
+
+//echo $HTML;
+	
+}
+?>
+<fieldset style="padding: 5px;">
+	<legend><b style="font-size: 110%">Teacher Comments<b></legend>
+<br>
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+		
+		<tr>
+			<td align="center">
+			<table><tr><td>
+			<textarea id="teachercomments" name="teachercomments" cols="60" rows="6"><?=$t['student_grade_info']['comments'];?></textarea></td></tr></table>
+						
+			</td>
+			
+		</tr>
+		
+	</table>
+	</fieldset>
+	
+	<br><br>
+	<center><input type="submit" value="Update" name="submit"></center>
+	</form>
+	
+
+<Br><br>
+	<fieldset style="padding: 5px;">
+	<legend><b style="">Student Assignment</b></legend>
+	<br>
+	<h4><?=$t['asmt']->title;?></h4>
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+		
+	<?php
+		if (count($t['attachments']) > 0)
+		{
+	?>
+		<tr>
+	<td valign="top"><b> Attachment(s): </b>
+		</td>
+		<td style="color: blue">
+		<? while (list(,$a) = @each($t['attachments'])) { ?>
+		<?=$a['assign_file_name'];?> (<a target="_blank" href="<?=modurl('assignmentManage/event=getFile/id_class_assignments='.$obj->getvars['id_class_assignments'].'/student='.$obj->getvars['student'].'/turnin='.$a['id_class_assignments_turnin']."/".$obj->getvars['student']."_".$a['id_class_assignments_turnin']."_".$a['assign_file_name'])?>">Click to Download</a>)<br/>
+		<? } ?>
+		</td>
+		</tr>
+	<?php
+		}
+	?>
+
+
+	<?php
+		if (count($t['hasAudio'])) {
+		$a = $t['audioFiles'][0];
+	?>
+		<tr>
+	<td valign="top"><b> Attachment(s): </b>
+		</td>
+		<td style="color: blue">
+			<APPLET 
+			codebase="<?= BASE_URL;?>commentrec/"
+			archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentPlayApplet.class WIDTH=380 HEIGHT=112 id="commentrec">
+			<PARAM name="MAYSCRIPT" value="true"/>
+			</APPLET>
+			<input type="hidden" name="audioData" id="audioData" value="<?=$t['audioData'];?>"/>
+			<script language="javascript">
+				function insertDataIntoApplet() {
+				var appletObj = document.getElementById('commentrec');
+//				alert(appletObj);
+				var soundObj = document.getElementById('audioData');
+//				alert(soundObj.value);
+				appletObj.setSoundUrl("<?=modurl('assignmentManage/event=getFile/id_class_assignments='.$obj->getvars['id_class_assignments'].'/student='.$obj->getvars['student'].'/turnin='.$a['id_class_assignments_turnin']."/".$obj->getvars['student']."_".$a['id_class_assignments_turnin']."_".$a['assign_file_name'])?>","");
+				}
+//				window.setTimeout('insertDataIntoApplet()',5000);
+			</script>
+			<input type="button" value="Download Assignment to Applet" onclick="insertDataIntoApplet();"/>
+		</td>
+		</tr>
+	<?php
+		}
+	?>
+
+		<tr>
+		<td colspan="2">
+			
+			<hr>	
+			<h3>By <?=ucwords($obj->getvars['student']);?></h3>
+			<?=nl2br($t['turnin']['assign_text']);?>
+
+		</td>
+		</tr>
+	</table>
+
+	<br>
+	</fieldset>
+	
+	
+</td>
+
+		</tr>
+
+	</td>
+</tr>
+
+</table>
+
