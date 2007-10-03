@@ -35,7 +35,7 @@ class content extends StudentService {
 		$ut = time();						
 		//print_r($lc->getvars);
 		$uniqCode = $lc->getvars[1];
-		$filename = addslashes(trim(urlencode($lc->getvars[2])));
+		$filename = addslashes(trim(urldecode($lc->getvars[2])));
 		$lc->templateName = 'viewer_main';
 		
 		$viewerAuth = false;
@@ -108,7 +108,7 @@ class content extends StudentService {
 		if ($curIdx == -1) {
 			$db->query("SELECT * FROM lob_content as A 
 				LEFT JOIN lob_class_repo AS B on A.lob_content_id = B.lob_class_repo_id
-				WHERE A.lob_urltitle = '".$filename."'
+				WHERE B.lob_urltitle = '".$filename."'
 				AND B.class_id = ".$classId);
 
 		} else {
