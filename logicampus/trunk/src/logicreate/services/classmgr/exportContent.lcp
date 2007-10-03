@@ -313,12 +313,16 @@ class ExportContent extends FacultyService {
 	function get_content_nodes() {
 		$xml_child_nodes = array();
 		$sql = '
-		SELECT B.*, C.* 
-		FROM lob_class_link A
-		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
-		LEFT JOIN lob_metadata AS C ON B.lob_content_id = C.lob_id
-		WHERE class_id='.$this->classId.'
-		AND lob_sub_type = "text"
+		SELECT A.*, B.*, C.*
+		FROM lob_class_repo A
+		LEFT JOIN lob_class_content AS B 
+			ON A.lob_class_repo_id = B.lob_class_repo_id
+		LEFT JOIN lob_class_metadata AS C 
+			ON B.lob_class_repo_id = C.lob_repo_entry_id
+		WHERE A.class_id='.$this->classId.'
+		AND A.lob_type = "content"
+		AND A.lob_sub_type != "document"
+		AND A.lob_sub_type != "image"
 		'; 
 
 		$db = DB::getHandle();
@@ -331,7 +335,7 @@ class ExportContent extends FacultyService {
 			$sub_type_node = new xml_node('lob:subtype',null,null,$db->record['lob_sub_type']);
 			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
-			$lob_content_node = new xml_node('lob:content',null,null,$db->record['lob_content']);
+			$lob_content_node = new xml_node('lob:content',null,null,$db->record['lob_text']);
 			$lob_content_node->cdata = true;
 
 			$xml_child_nodes = array();

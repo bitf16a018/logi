@@ -137,7 +137,6 @@ class assignments extends StudentService {
 
 
 		//load the assignment
-		//$lobClassId    = intval($lc->getvars['id']);
 		$classSeqId    = intval($lc->getvars['id']);
 		$classId  = $u->activeClassTaken->id_classes;
 		$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
@@ -158,6 +157,8 @@ class assignments extends StudentService {
 		$t['startDate'] = $lessonSequence->getStartDate($lesson, $classSeqId);
 		$t['dueDate'] = $lessonSequence->getDueDate($lesson, $classSeqId);
 		$t['noDueDate'] = $sequence->dueOffset > 0;
+
+		$responseTypeId        = $activityLob->lobSub->responseTypeId;
 
 		if ($lc->getvars['print']) {
 			$this->presentor = 'printPresentation';
@@ -181,7 +182,8 @@ class assignments extends StudentService {
 		$t['f_showform_file'] = false;
 		$t['f_showform_text'] = false;
 		
-		if ((strtotime($db->Record['dateNoAccept'])+0) > time())
+		//__TODO__ grace period
+		if ($t['dueDate'] < time())
 		{
 			$t['f_showform'] = true;
 			// we can show the forms for uploading
@@ -195,12 +197,11 @@ class assignments extends StudentService {
 			
 			// 4 forum post --- holding on this
 			// 5 none
-			switch ($db->Record['responseType'])
+			switch ($responseTypeId)
 			{
 				case 3: $t['f_showform_file'] = true; $t['f_showform_text'] = true; break;
-				case 1:	$t['f_showform_file'] = true; if ($db->Record['responseType'] != 3) break;
+				case 1:	$t['f_showform_file'] = true; if ($responseTypeId != 3) break;
 				case 2:	
-/*
 					$db2 = DB::getHandle();
 					$sql = 'SELECT a.assign_text
 					FROM  class_assignments_turnin as a
@@ -216,7 +217,6 @@ class assignments extends StudentService {
 					$db2->queryOne($sql);
 					$t['assigntext'] = $db2->Record['assign_text'];
 					$t['f_showform_text'] = true; 
-*/
 				
 					break;
 				
@@ -277,38 +277,40 @@ class assignments extends StudentService {
  		 */
 		function submitAssignmentRun(&$db,&$u,&$lc,&$t) {
 			$todays_epoch_date = mktime(23,59,59,date('m'),date('d'),date('y'));
-		//	$activeDate = "and activeDate <= $todays_epoch_date";
 
 
 			$lc->templateName='assignments_submitAssignment';
-			//
-			//load up assignment, determine what type of submission i'm getting and deal with it accordingly
-			
-			// @@@@ i have to make sure i'm a student! faculty can not upload
-			
-			// @@@ this below ( 2 blocks ) are redundant to viewRun().. gotta be a better way
-			// i'm making sure i can do this stuff!
-			
-		//	$todays_epoch_date = mktime(0,0,0,date('m'),date('d'),date('y'));
-			
-			$db->queryOne("select * from class_assignments
-				where id_classes='{$u->activeClassTaken->id_classes}'
-				and activeDate <= $todays_epoch_date
-				and id_class_assignments='{$lc->getvars['id']}'");
 
-			if (!$db->Record['id_class_assignments']) {
+			//load up assignment, determine what type of submission 
+			// we're dealing with and handle it accordingly
+			
+			//load the assignment
+			$classSeqId    = intval($lc->getvars['id']);
+			$classId  = $u->activeClassTaken->id_classes;
+			$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
+
+			$lessonSequence = new LC_LessonSequence($lessonId,$classId);
+			$lessonSequence->loadItems();
+			$lesson = new LC_Lesson($lessonId);
+			$activityLob = $lessonSequence->fetchObject($classSeqId);
+
+			if (!is_object($activityLob)) {
 				$this->presentor = 'errorMessage';
 				$t['message'] = "You don't have permission to view this assignment.";
 				return;
 			}
-			$tx_assignment_information = $db->Record;
+			$responseTypeId = $activityLob->lobSub->responseTypeId;
+
+
 			// is this assignment still accepting data?
-			if ((strtotime($db->Record['dateNoAccept'])+0) > time())
-			{
-				switch ($db->Record['responseType'])
+			if ( !$lessonSequence->isPastDueDate($lesson, $classSeqId)) {
+
+				switch ($responseTypeId)
 				{
 					case 3:
-					case 1:		// file
+					case 1:
+
+						// file
 						// multiple files
 						// upload files?
 						
@@ -333,37 +335,25 @@ class assignments extends StudentService {
 						}
 
 						$file = $lc->uploads['uploadassignment'];
-						$newfilename = $u->username."_".time();
-						$copy = copy($file['tmp_name'],CONTENT_PATH."/uploads/$newfilename");
-						if ( !$copy ) {
-							trigger_error('couldnt copy file');
+						$actContents = file_get_contents($file['tmp_name']);
+						if ( strlen($actContents) < 1 ) {
+							trigger_error('Couldn\'t copy file.');
 							return;
 						}
-
 						$sql = '
 						INSERT INTO class_assignments_turnin
 						SET 
 						dateTurnin='.DB::getFuncName('NOW()').',
 						id_class_assignments='. (int)$lc->getvars['id'].', 
 						id_student=\''. $u->username.'\',
-						assign_type=1,';
-// mgk added this line 1/27/05
-// issue brought up that type 'upload and text' wasn't storing text
-// emailed from wissore
-#$sql .='						assign_text=\''. str_replace("'", '\'\'', stripslashes($lc->postvars['assigntext'])).'\'';
-
-$sql.='
-						assign_file_size='. $file['size']. ',
-						assign_file_name=\''. str_replace("'", '\'\'', stripslashes($file['name'])). '\',
-						assign_file_mime=\''. $file['type']. '\',
-						assign_file_blob=\''.$newfilename.'\'
-						';
+						assign_type='.$responseTypeId.',
+						assign_file_size='. strlen($actContents) . ',
+						assign_file_name=\''. addslashes($file['name']).'\',
+						assign_file_mime=\''.addslashes($file['type']).'\',
+						assign_file_blob=\''.addslashes($actContents).'\'';
 						$db->query($sql);
+						break;
 
-						if ($tx_assignment_information['responseType'] != 3) {
-							break;
-						}
-					
 					case 2:		// text
 						
 						$sql = 'SELECT a.id_class_assignments_turnin, b.id_classes
@@ -420,7 +410,7 @@ $sql.='
 					//audio files
 						$audioData = base64_decode($lc->postvars['audio_data']);
 						$newfilename = $u->username."_".time();
-						$fileh = fopen(CONTENT_PATH."/uploads/$newfilename","wb");
+						$fileh = @fopen(CONTENT_PATH."/uploads/$newfilename","wb");
 						if ( !$fileh ) {
 							trigger_error('couldnt copy file');
 							return;
