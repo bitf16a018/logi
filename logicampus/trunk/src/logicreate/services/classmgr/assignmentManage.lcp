@@ -701,9 +701,10 @@ class assignmentManage extends FacultyService {
 
 		//load the assignment
 		$classSeqId  = intval($lc->getvars['id']);
-		$classId  = $u->activeClassTaken->id_classes;
+		$classId  = $u->activeClassTaught->id_classes;
 		//get the lesson ID from the class_lesson_sequence object
 		$seqItem = ClassLessonSequence::load( intval($lc->getvars['id']) );
+		$t['sequenceId']  = intval($lc->getvars['id']);
 		$lessonId = $seqItem->lessonId;
 
 		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
@@ -726,7 +727,7 @@ class assignmentManage extends FacultyService {
 
 		// load up a GBE to see if it has a gradebook entry, if not we need to instruct the teacher to
 		// publish one last time, then it will save the relationship
-		$entryObj = ClassGradebookEntries::load( array('assignment_id'=>$assignment->id_class_assignments) );
+		$entryObj = ClassGradebookEntries::load( array('class_lesson_sequence_id'=>$assignment->id_class_assignments) );
 
 		if ( is_object($entryObj) ) {
 			$t['entryCode'] = $entryObj->gradebookCode;
@@ -784,16 +785,19 @@ class assignmentManage extends FacultyService {
 			// get current attachments for this assignment for this student (FILES ONLY)
 		
 
+			$studentId = addslashes($lc->getvars['student']);
+			$t['studentId'] = $studentId;
+
 			$t['attachments'] = $this->getAssignmentsByType(1,
-					$lc->getvars['student'],
+					$studentId,
 					$u->activeClassTaught->id_classes,
-					$lc->getvars['id_class_assignments']
+					$t['sequenceId']
 					);
 
 			$t['audioFiles'] = $this->getAssignmentsByType(6,
-					$lc->getvars['student'],
+					$studentId,
 					$u->activeClassTaught->id_classes,
-					$lc->getvars['id_class_assignments']
+					$t['sequenceId']
 					);
 			if (count($t['audioFiles']) > 0 ) {
 				$t['hasAudio'] = true;
@@ -951,16 +955,16 @@ class assignmentManage extends FacultyService {
 		class_assignments_turnin.assign_file_blob
 		FROM class_assignments_turnin
 
-		INNER JOIN class_assignments
-			ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
+		INNER JOIN class_lesson_sequence AS B
+			ON class_assignments_turnin.id_class_assignments=B.class_lesson_sequence_id
 
 		WHERE  1=1
 		
 		AND class_assignments_turnin.id_class_assignments_turnin='.(int)$lc->getvars['turnin'].'
 		AND id_student=\''. $lc->getvars['student'].'\'
 		AND (assign_type=1 OR assign_type=6)
-		AND class_assignments.id_classes='. $u->activeClassTaught->id_classes. '
-		AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id_class_assignments'].'
+		AND B.class_id='. $u->activeClassTaught->id_classes. '
+		AND class_assignments_turnin.id_class_assignments='. $lc->getvars['id'].'
 		';
 
 		$db->RESULT_TYPE = MYSQL_ASSOC;
@@ -970,12 +974,15 @@ class assignmentManage extends FacultyService {
 		header("Cache-control: private");
 		header("Content-type: ".trim($db->Record['assign_file_mime']));
 		header("Content-Disposition: attachment; filename=".trim($lc->getvars['student'].'_'.$u->activeClassTaught->courseFamilyNumber.'_'.$db->Record['assign_file_name']));
+		$data = $db->Record['assign_file_blob'];
+/*
 		if ( strlen($db->Record['assign_file_blob']) > 80) { 
 			$data = base64_decode($db->Record['assign_file_blob']);
 		} else {
 			$data = implode("",file(CONTENT_PATH."/uploads/".$db->Record['assign_file_blob']));
 		}
-		header("Content-length: ".strlen($data)+1);
+*/
+		header("Content-length: ".strlen($data));
 		echo $data;
 		exit();
 	}
@@ -994,12 +1001,12 @@ class assignmentManage extends FacultyService {
 
 		FROM class_assignments_turnin
 
-		INNER JOIN class_assignments
-			ON class_assignments_turnin.id_class_assignments=class_assignments.id_class_assignments
+		INNER JOIN class_lesson_sequence AS B
+			ON class_assignments_turnin.id_class_assignments=B.class_lesson_sequence_id
 
 		WHERE id_student=\''. $username.'\'
 		AND assign_type='.$typeId.'
-		AND class_assignments.id_classes='. $classId. '
+		AND B.class_id='. $classId. '
 		AND class_assignments_turnin.id_class_assignments='. $assignmentId.'
 		';
 		$db->RESULT_TYPE = MYSQL_ASSOC;

@@ -141,9 +141,9 @@ if ($obj->user->isFaculty())
 		<tr>
 	<td valign="top"><b> Attachment(s): </b>
 		</td>
-		<td style="color: blue">
+		<td>
 		<? while (list(,$a) = @each($t['attachments'])) { ?>
-		<?=$a['assign_file_name'];?> (<a target="_blank" href="<?=modurl('assignmentManage/event=getFile/id_class_assignments='.$obj->getvars['id_class_assignments'].'/student='.$obj->getvars['student'].'/turnin='.$a['id_class_assignments_turnin']."/".$obj->getvars['student']."_".$a['id_class_assignments_turnin']."_".$a['assign_file_name'])?>">Click to Download</a>)<br/>
+		<?=$a['assign_file_name'];?> (<a href="<?=modurl('assignmentManage/event=getFile/id='.$t['sequenceId'].'/student='.$t['studentId'].'/turnin='.$a['id_class_assignments_turnin']."/".$obj->getvars['student']."_".$a['id_class_assignments_turnin']."_".$a['assign_file_name'])?>">Click to Download</a>)<br/>
 		<? } ?>
 		</td>
 		</tr>

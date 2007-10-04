@@ -54,20 +54,20 @@ if ($t['file']['mime'] == 'text/html') {
 
 <?php
 //debug($t['lob']);
-//needs to be handled internall by the LMS.  Items such as tests and assignments and forums
-if ($t['lob']['lob_mime'] == 'X-LMS/assignment') {
+//needs to be handled internal by the LMS.  Items such as tests and assignments and forums
+if ($t['lob']['lob_mime'] == 'X-LMS/activity') {
 ?>
 <div align="left" style="margin:auto;width:50%;">
 <fieldset>
 	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
 	<?php
 	echo '<h3>Activity</h3>';
-	echo 'Name: '.$t['activity']['title'];
+	echo 'Name: '.$t['lob']['lob_title'];
 	echo "<br/>\n";
 	echo 'Instructions: ';
-	echo $t['activity']['instructions'];
+	echo $t['lob']['lob_description'];
 	echo "<br/>\n";
-	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['lob']['lob_class_repo_id']).'">Start the activity.</a>';
+	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['seqObj']->classLessonSequenceId).'">Start the activity.</a>';
 	?>
 </fieldset>
 </div>

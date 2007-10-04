@@ -13,10 +13,8 @@ class ClassGradebookEntriesBase {
 	var $gradebookCode;
 	var $totalPoints;
 	var $publishFlag;
-	var $dateDue;
 	var $notes;
-	var $assessmentId;
-	var $assignmentId;
+	var $classLessonSequenceId;
 
 	var $__attributes = array( 
 	'idClassGradebookEntries'=>'integer',
@@ -26,10 +24,8 @@ class ClassGradebookEntriesBase {
 	'gradebookCode'=>'varchar',
 	'totalPoints'=>'float',
 	'publishFlag'=>'tinyint',
-	'dateDue'=>'integer',
 	'notes'=>'longvarchar',
-	'assessmentId'=>'integer',
-	'assignmentId'=>'integer');
+	'classLessonSequenceId'=>'integer');
 
 	var $__nulls = array( 
 	'notes'=>'notes');
@@ -56,6 +52,7 @@ class ClassGradebookEntriesBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -128,10 +125,8 @@ class ClassGradebookEntriesPeerBase {
 		$st->fields['gradebook_code'] = 'gradebook_code';
 		$st->fields['total_points'] = 'total_points';
 		$st->fields['publish_flag'] = 'publish_flag';
-		$st->fields['date_due'] = 'date_due';
 		$st->fields['notes'] = 'notes';
-		$st->fields['assessment_id'] = 'assessment_id';
-		$st->fields['assignment_id'] = 'assignment_id';
+		$st->fields['class_lesson_sequence_id'] = 'class_lesson_sequence_id';
 
 
 		$array = array();
@@ -153,10 +148,8 @@ class ClassGradebookEntriesPeerBase {
 		$st->fields['gradebook_code'] = $this->gradebookCode;
 		$st->fields['total_points'] = $this->totalPoints;
 		$st->fields['publish_flag'] = $this->publishFlag;
-		$st->fields['date_due'] = $this->dateDue;
 		$st->fields['notes'] = $this->notes;
-		$st->fields['assessment_id'] = $this->assessmentId;
-		$st->fields['assignment_id'] = $this->assignmentId;
+		$st->fields['class_lesson_sequence_id'] = $this->classLessonSequenceId;
 
 		$st->nulls['notes'] = 'notes';
 
@@ -181,10 +174,8 @@ class ClassGradebookEntriesPeerBase {
 		$st->fields['gradebook_code'] = $obj->gradebookCode;
 		$st->fields['total_points'] = $obj->totalPoints;
 		$st->fields['publish_flag'] = $obj->publishFlag;
-		$st->fields['date_due'] = $obj->dateDue;
 		$st->fields['notes'] = $obj->notes;
-		$st->fields['assessment_id'] = $obj->assessmentId;
-		$st->fields['assignment_id'] = $obj->assignmentId;
+		$st->fields['class_lesson_sequence_id'] = $obj->classLessonSequenceId;
 
 		$st->nulls['notes'] = 'notes';
 
@@ -251,10 +242,8 @@ class ClassGradebookEntriesPeerBase {
 		$x->gradebookCode = $row['gradebook_code'];
 		$x->totalPoints = $row['total_points'];
 		$x->publishFlag = $row['publish_flag'];
-		$x->dateDue = $row['date_due'];
 		$x->notes = $row['notes'];
-		$x->assessmentId = $row['assessment_id'];
-		$x->assignmentId = $row['assignment_id'];
+		$x->classLessonSequenceId = $row['class_lesson_sequence_id'];
 
 		$x->_new = false;
 		return $x;
@@ -301,6 +290,8 @@ class ClassGradebookEntries extends ClassGradebookEntriesBase {
 
 		return true;
 	}
+
+
 }
 
 

@@ -67,18 +67,22 @@ class viewer extends StudentService {
 		$t['lesson'] = $db->record;
 
 
-		$db->query("SELECT * FROM class_lesson_sequence as A 
-			WHERE link_text='".$filename."'
+		$db->query("SELECT B.* 
+			FROM class_lesson_sequence as A 
+			LEFT JOIN lob_class_repo AS B
+				ON A.lob_class_repo_id = B.lob_class_repo_id
+			WHERE A.link_text='".$filename."'
 			AND A.class_id = ".$classId);
 		$db->nextRecord();
 		$t['lob'] = $db->record;
 		$db->freeResult();
 
-		if ($t['lob']['lob_type'] == 'assignment') {
+		if ($t['lob']['lob_type'] == 'activity') {
 			$db->query("SELECT * FROM lob_class_activity as A 
 				WHERE lob_class_repo_id='".$t['lob']['lob_class_repo_id']."'");
 			$db->nextRecord();
 			$t['activity'] = $db->record;
+			$db->freeResult();
 		}
 
 		if ($t['lob']['lob_type'] == 'assessment') {
@@ -86,6 +90,7 @@ class viewer extends StudentService {
 				WHERE assessment_id ='".$t['lob']['lob_class_repo_id']."'");
 			$db->nextRecord();
 			$t['activity'] = $db->record;
+			$db->freeResult();
 		}
 
 		/*
@@ -135,6 +140,7 @@ class viewer extends StudentService {
 		foreach ($t['seqItems'] as $idx => $seqObj) {
 			if ($seqObj->linkText == $filename) {
 				$curIdx = $idx;
+				$t['seqObj'] = $seqObj;
 				break;
 			}
 		}
@@ -159,7 +165,7 @@ class viewer extends StudentService {
 		}
 
 //print_r($u);
-		$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob_Util::getMimeIcon($t['lob']['lob_mime']);
+		$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob_Util::getMimeIcon($t['seq']['lob_mime']);
 	}
 }
 
