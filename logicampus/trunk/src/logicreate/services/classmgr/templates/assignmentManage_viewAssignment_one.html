@@ -20,7 +20,15 @@
 <tr>
 	<td class="title">Active on:</td><td><?=date('l jS \o\f F Y', $t['startDate']);?></td>
 <tr>
-	<td class="title">Due on:</td><td><?=date('l jS \o\f F Y \a\t h:i A', $t['dueDate']);?></td>
+	<td class="title">Due on:</td>
+	<td><?php
+		if ($t['dueDate'] > 0 ) {
+			echo date('l jS \o\f F Y \a\t h:i A', $t['dueDate']);
+		} else {
+			echo lct("No Due Date");
+		}
+		?>
+	</td>
 </tr>
 <tr>
 	<td class="title">Gradebook Code:</td><td><?=$t['entryCode'];?></td>
