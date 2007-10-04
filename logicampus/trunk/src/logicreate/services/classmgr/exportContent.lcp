@@ -180,7 +180,7 @@ class ExportContent extends FacultyService {
 
 		$xmlchars = fread($fh, $file_size);
 		fclose($fh);
-		echo "<pre>\n".htmlspecialchars($xmlchars)."\n</pre>\n";exit();
+//		echo "<pre>\n".htmlspecialchars($xmlchars, ENT_QUOTES, 'UTF-8')."\n</pre>\n";exit();
        
 
 		$this->obj_zip->add_file($xmlchars,'learningobjects.xml');
@@ -216,9 +216,9 @@ class ExportContent extends FacultyService {
 		$lob_nodes = array();
 		$sql = '
 		SELECT B.*,C.*
-		FROM lob_class_link as A
-		LEFT JOIN lob_content AS B ON A.lob_id = B.lob_content_id
-		LEFT JOIN lob_metadata AS C ON C.lob_id = B.lob_content_id
+		FROM lob_class_repo as A
+		LEFT JOIN lob_class_content AS B ON A.lob_class_repo_id = B.lob_class_repo_id
+		LEFT JOIN lob_class_metadata AS C ON C.lob_class_repo_id = A.lob_class_repo_id
 		WHERE A.class_id='.$this->classId.'
 		AND (lob_sub_type = "document" OR lob_sub_type = "image") ';
 
@@ -318,7 +318,7 @@ class ExportContent extends FacultyService {
 		LEFT JOIN lob_class_content AS B 
 			ON A.lob_class_repo_id = B.lob_class_repo_id
 		LEFT JOIN lob_class_metadata AS C 
-			ON B.lob_class_repo_id = C.lob_repo_entry_id
+			ON B.lob_class_repo_id = C.lob_class_repo_id
 		WHERE A.class_id='.$this->classId.'
 		AND A.lob_type = "content"
 		AND A.lob_sub_type != "document"
@@ -387,10 +387,14 @@ class ExportContent extends FacultyService {
 	function get_homework_nodes() {
 		$lob_nodes = array();
 		$sql = '
-		SELECT B.*
-		FROM class_assignments_link as A
-		LEFT JOIN class_assignments AS B ON A.id_class_assignments = B.id_class_assignments
-		WHERE A.id_class_assignments='.$this->classId;
+		SELECT A.*, B.*, C.*
+		FROM lob_class_repo as A
+		LEFT JOIN lob_class_activity AS B 
+			ON A.lob_class_repo_id = B.lob_class_repo_id
+		LEFT JOIN lob_class_metadata AS C 
+			ON A.lob_class_repo_id = C.lob_class_repo_id
+		WHERE A.class_id='.$this->classId.'
+		AND lob_type ="activity"';
 
 		$db = DB::getHandle();
 		$db->query($sql);
@@ -419,7 +423,7 @@ class ExportContent extends FacultyService {
 			5=>"None",
 			 */
 
-			switch ($db->record['responseType']) {
+			switch ($db->record['response_type_id']) {
 				case 1:
 				case 2:
 				case 3:
@@ -436,7 +440,7 @@ class ExportContent extends FacultyService {
 				break;
 			}
 
-			switch ($db->record['responseType']) {
+			switch ($db->record['response_type_id']) {
 				case 1:
 					$resp_node->value = 'upload';
 					break;
@@ -457,12 +461,11 @@ class ExportContent extends FacultyService {
 					break;
 			}
 
-			$lob_title_node = new xml_node('lob:title',null,null,$db->record['title']);
+			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
 
-			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['instructions']);
+			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['lob_description']);
 			$lob_desc_node->cdata = true;
-
 
 			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
@@ -498,11 +501,11 @@ class ExportContent extends FacultyService {
 //			$meta_node->children[] = $author_node;
 //			$xml_child_nodes[] = $meta_node;
 
-			$guid = lcUuid();
-			$this->activityGuid[ $db->record['id_class_assignments'] ] = $guid;
+			$guid = $db->record['lob_guid'];
+			$this->activityGuid[ $db->record['lob_class_repo_id'] ] = $guid;
 
 			$lob_nodes[] = new xml_node('lob:obj', 
-				array('guid'=>$guid, 'dbid'=>$db->record['id_class_assignments']), 
+				array('guid'=>$guid, 'dbid'=>$db->record['lob_class_repo_id']), 
 				$xml_child_nodes
 			);
 		}
@@ -915,6 +918,7 @@ class ExportContent extends FacultyService {
 			class_assignments_link
 			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
 			
+die('lskdjfas');
 			$db2->query($sql2);
 			while ($db2->next_record())
 			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->Record['id_class_assignments']);
