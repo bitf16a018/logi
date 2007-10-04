@@ -51,42 +51,10 @@
 	</tr>
 	<tr>
 		<td valign="top" class="row1"></td>
-		<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Add Assignment"></td>
+		<td valign="top" class=""><input type="submit" id="sbmt_button" name="sbmt_button" value="Add Activity"></td>
 	</tr>
 </table>
 
 </form>
 <div style="font-size: 85%">*denotes a required field</div>
 
-
-<script>
-
-
-	function noduedate() {
-		var obj_responsetype = document.getElementById("responseType");
-		obj_responsetype.selectedIndex = 4;
-		return false;
-	}
-
-	function lookatchange()
-	{	
-		var obj_noduedate = document.getElementById("noDueDate");
-		var obj_responsetype = document.getElementById("responseType");
-		
-		if (obj_noduedate.checked)
-		{	
-			obj_responsetype.readonly = true;
-			obj_responsetype.disabled = true;
-			obj_responsetype.selectedIndex = 4;
-			obj_responsetype.onchange = noduedate;
-			
-		} else
-		{	
-			obj_responsetype.onfocus = '';
-		}
-		
-	}
-	
-	
-	
-</script>
