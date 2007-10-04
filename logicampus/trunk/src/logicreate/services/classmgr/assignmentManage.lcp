@@ -35,7 +35,7 @@ class assignmentManage extends FacultyService {
 
 	var $inactivelinks = array( 'Activities' );
 	var $applinks = array();
-
+	var $sectionTitle = "Acivity Manager";
 
         function wipeClassAssignmentsRun($db,&$u,&$lc,&$t) {
                 $class_id = $u->activeClassTaught->id_classes;
@@ -688,7 +688,6 @@ class assignmentManage extends FacultyService {
 		$t['table'] = $datagrid->toHTML();
 //*/
 
-		$this->sectionTitle = "Assignment Manager";
 		$this->inactivelinks[] = 'List Activities';
 		$lc->templateName='assignmentManage_main';
 	}
@@ -894,10 +893,6 @@ class assignmentManage extends FacultyService {
 		$t['turnin'] = $db2->Record;
 
 */
-
-		$this->sectionTitle = "Assignment Manager";
-
-
 		}
 
 
