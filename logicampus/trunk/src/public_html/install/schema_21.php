@@ -1,119 +1,260 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-CREATE TABLE menu (
-  pkey int(11) NOT NULL auto_increment,
-  title varchar(60) NOT NULL default '',
-  layout varchar(15) NOT NULL default '0',
-  rank int(11) NOT NULL default '0',
-  groups text NOT NULL,
-  notgroups text NOT NULL,
-  menuid varchar(50) NOT NULL default '',
-  PRIMARY KEY  (pkey),
-  KEY menuid (menuid)
+CREATE TABLE class_announcements (
+  id_class_announcements int(10) unsigned NOT NULL auto_increment,
+  id_classes int(10) unsigned NOT NULL default '0',
+  dt_display datetime NOT NULL default '0000-00-00 00:00:00',
+  tx_title varchar(255) NOT NULL default '',
+  tx_description text NOT NULL,
+  id_faculty_createdby varchar(50) NOT NULL default '0',
+  dt_created datetime NOT NULL default '0000-00-00 00:00:00',
+  dt_hide datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (id_class_announcements),
+  KEY class_date (id_classes,dt_created)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menu VALUES (1, 'Main Menu', 'vertical', 2, '|public|reg|', '||', 'main')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menu VALUES (5, 'Administration', 'vertical', 0, '|admin|', '||', 'administration')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menu VALUES (4, 'Member Services', 'vertical', 0, '|reg|', '||', 'memberservices')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE menuCache (
-  pkey int(11) NOT NULL default '0',
-  menuObj text NOT NULL,
-  menuid varchar(20) NOT NULL default '',
-  rank int(11) NOT NULL default '0',
-  groups text NOT NULL,
-  notgroups text NOT NULL,
-  PRIMARY KEY  (pkey),
-  KEY menuid (menuid)
+CREATE TABLE class_assignments_grades (
+  id_class_assignments_grades int(10) unsigned NOT NULL auto_increment,
+  lob_class_repo_id int(11) unsigned NOT NULL default '0',
+  id_student varchar(32) NOT NULL default '',
+  comments text NOT NULL,
+  grade float(10,2) default NULL,
+  PRIMARY KEY  (id_class_assignments_grades)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menuCache VALUES (1, 'O:7:"menuobj":12:{s:5:"title";s:9:"Main Menu";s:6:"menuid";s:4:"main";s:6:"layout";s:8:"vertical";s:8:"VERTICAL";i:0;s:10:"HORIZONTAL";i:1;s:6:"CUSTOM";i:2;s:8:"treeList";O:8:"treelist":8:{s:13:"p_CurrentNode";O:12:"treelistnode":5:{s:7:"sibling";i:0;s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";s:6:"_blank";}s:5:"stack";a:0:{}s:6:"indent";N;s:8:"rootNode";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";i:0;s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:3:"faq";s:8:"linkText";s:4:"FAQs";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"1";s:6:"menuid";s:4:"main";s:5:"title";s:9:"Main Menu";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:12:"|public|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"2";s:4:"pkey";s:1:"3";s:6:"menuID";s:1:"1";s:4:"rank";s:1:"3";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:0:"";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:6:"search";s:8:"linkText";s:6:"Search";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"1";s:6:"menuid";s:4:"main";s:5:"title";s:9:"Main Menu";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:12:"|public|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"2";s:4:"pkey";s:2:"28";s:6:"menuID";s:1:"1";s:4:"rank";s:1:"0";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:0:"";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:7:"welcome";s:8:"linkText";s:4:"Home";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"1";s:6:"menuid";s:4:"main";s:5:"title";s:9:"Main Menu";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:12:"|public|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"2";s:4:"pkey";s:2:"26";s:6:"menuID";s:1:"1";s:4:"rank";s:1:"0";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:0:"";}s:4:"root";i:1;}s:15:"defaultExpanded";b:1;s:5:"count";i:2;s:7:"keyName";s:4:"pkey";s:13:"keyParentName";s:9:"parentKey";}s:4:"pkey";s:1:"1";s:9:"linkCount";i:3;s:4:"rank";s:1:"2";s:6:"groups";a:2:{i:0;s:6:"public";i:1;s:3:"reg";}s:9:"notgroups";a:1:{i:0;s:0:"";}}', 'main', 2, '|public|reg|', '||')
+CREATE TABLE class_assignments_turnin (
+  id_class_assignments_turnin int(10) unsigned NOT NULL auto_increment,
+  lob_class_repo_id int(10) unsigned NOT NULL default '0',
+  id_student varchar(32) NOT NULL default '',
+  dateTurnin datetime NOT NULL default '0000-00-00 00:00:00',
+  assign_type int(10) unsigned NOT NULL default '0',
+  assign_text longtext NOT NULL,
+  assign_file_mime varchar(32) NOT NULL default '',
+  assign_file_name varchar(50) NOT NULL default '',
+  assign_file_size int(11) NOT NULL default '0',
+  assign_file_blob longblob NOT NULL,
+  PRIMARY KEY  (id_class_assignments_turnin),
+  KEY `lob_class_repo_idx` (`lob_class_repo_id`)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menuCache VALUES (5, 'O:7:"menuobj":12:{s:5:"title";s:14:"Administration";s:6:"menuid";s:14:"administration";s:6:"layout";s:8:"vertical";s:8:"VERTICAL";i:0;s:10:"HORIZONTAL";i:1;s:6:"CUSTOM";i:2;s:8:"treeList";O:8:"treelist":8:{s:13:"p_CurrentNode";O:12:"treelistnode":5:{s:7:"sibling";i:0;s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";s:6:"_blank";}s:5:"stack";a:0:{}s:6:"indent";N;s:8:"rootNode";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";i:0;s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:14:"administration";s:8:"linkText";s:12:"Manage Users";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"5";s:6:"menuid";s:14:"administration";s:5:"title";s:14:"Administration";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:7:"|admin|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"51";s:6:"menuID";s:1:"5";s:4:"rank";s:1:"2";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:5:"users";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:14:"administration";s:8:"linkText";s:14:"Manage Classes";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"5";s:6:"menuid";s:14:"administration";s:5:"title";s:14:"Administration";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:7:"|admin|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"50";s:6:"menuID";s:1:"5";s:4:"rank";s:1:"1";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:7:"classes";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:14:"administration";s:8:"linkText";s:14:"Manage Courses";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"5";s:6:"menuid";s:14:"administration";s:5:"title";s:14:"Administration";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:7:"|admin|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"49";s:6:"menuID";s:1:"5";s:4:"rank";s:1:"0";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:7:"courses";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:14:"administration";s:8:"linkText";s:13:"Control Panel";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"5";s:6:"menuid";s:14:"administration";s:5:"title";s:14:"Administration";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:7:"|admin|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"48";s:6:"menuID";s:1:"5";s:4:"rank";s:1:"0";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:0:"";}s:4:"root";i:1;}s:15:"defaultExpanded";b:1;s:5:"count";i:3;s:7:"keyName";s:4:"pkey";s:13:"keyParentName";s:9:"parentKey";}s:4:"pkey";s:1:"5";s:9:"linkCount";i:4;s:4:"rank";s:1:"0";s:6:"groups";a:1:{i:0;s:5:"admin";}s:9:"notgroups";a:1:{i:0;s:0:"";}}', 'administration', 0, '|admin|', '||')
+CREATE TABLE class_faqs (
+  id_class_faqs int(11) unsigned NOT NULL auto_increment,
+  id_classes int(10) unsigned NOT NULL default '0',
+  category varchar(50) NOT NULL default '',
+  question varchar(200) NOT NULL default '',
+  answer text NOT NULL,
+  clicks int(11) NOT NULL default '0',
+  groups text NOT NULL,
+  PRIMARY KEY  (id_class_faqs),
+  KEY id_class (id_classes)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menuCache VALUES (4, 'O:7:"menuobj":12:{s:5:"title";s:15:"Member Services";s:6:"menuid";s:14:"memberservices";s:6:"layout";s:8:"vertical";s:8:"VERTICAL";i:0;s:10:"HORIZONTAL";i:1;s:6:"CUSTOM";i:2;s:8:"treeList";O:8:"treelist":8:{s:13:"p_CurrentNode";O:12:"treelistnode":5:{s:7:"sibling";i:0;s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";s:6:"_blank";}s:5:"stack";a:0:{}s:6:"indent";N;s:8:"rootNode";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";O:12:"treelistnode":6:{s:7:"sibling";i:0;s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:5:"users";s:8:"linkText";s:12:"Who\'s Online";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"4";s:6:"menuid";s:14:"memberservices";s:5:"title";s:15:"Member Services";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:5:"|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"43";s:6:"menuID";s:1:"4";s:4:"rank";s:1:"3";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:6:"online";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:2:"pm";s:8:"linkText";s:16:"Private Messages";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"4";s:6:"menuid";s:14:"memberservices";s:5:"title";s:15:"Member Services";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:5:"|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"47";s:6:"menuID";s:1:"4";s:4:"rank";s:1:"2";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:0:"";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:5:"users";s:8:"linkText";s:11:"Online Chat";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"4";s:6:"menuid";s:14:"memberservices";s:5:"title";s:15:"Member Services";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:5:"|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"53";s:6:"menuID";s:1:"4";s:4:"rank";s:1:"2";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:4:"chat";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:5:"forum";s:8:"linkText";s:17:"Discussion Forums";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"4";s:6:"menuid";s:14:"memberservices";s:5:"title";s:15:"Member Services";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:5:"|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"46";s:6:"menuID";s:1:"4";s:4:"rank";s:1:"1";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:0:"";}s:6:"indent";N;}s:5:"child";i:0;s:6:"parent";N;s:8:"expanded";N;s:8:"contents";O:11:"appmenuitem":19:{s:4:"type";s:3:"app";s:8:"location";s:5:"users";s:8:"linkText";s:12:"Edit Profile";s:8:"editPage";s:14:"itemEditor_app";s:5:"mpkey";s:1:"4";s:6:"menuid";s:14:"memberservices";s:5:"title";s:15:"Member Services";s:6:"layout";s:8:"vertical";s:7:"mgroups";s:5:"|reg|";s:10:"mnotgroups";s:2:"||";s:5:"mrank";s:1:"0";s:4:"pkey";s:2:"52";s:6:"menuID";s:1:"4";s:4:"rank";s:1:"0";s:5:"imgOn";s:0:"";s:6:"imgOff";s:0:"";s:8:"parentID";s:1:"0";s:6:"groups";s:0:"";s:9:"appOption";s:11:"editProfile";}s:4:"root";i:1;}s:15:"defaultExpanded";b:1;s:5:"count";i:4;s:7:"keyName";s:4:"pkey";s:13:"keyParentName";s:9:"parentKey";}s:4:"pkey";s:1:"4";s:9:"linkCount";i:5;s:4:"rank";s:1:"0";s:6:"groups";a:1:{i:0;s:3:"reg";}s:9:"notgroups";a:1:{i:0;s:0:"";}}', 'memberservices', 0, '|reg|', '||')
+CREATE TABLE class_lesson_content (
+  id_class_lesson_content int(10) unsigned NOT NULL auto_increment,
+  id_classes int(10) unsigned NOT NULL default '0',
+  id_class_lessons int(10) unsigned default NULL,
+  txTitle varchar(255) NOT NULL default '',
+  txText longtext NOT NULL,
+  dateCreated date NOT NULL default '0000-00-00',
+  PRIMARY KEY  (id_class_lesson_content),
+  KEY id_class_lessons (id_class_lessons),
+  KEY id_classes (id_classes)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE menuItems (
+CREATE TABLE class_lesson_links (
+  id_class_lessons int(11) default NULL,
+  id_class_links int(11) default NULL,
+  KEY id_class_lessons (id_class_lessons),
+  KEY id_class_links (id_class_links)
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE class_lesson_objectives (
+  id_class_objectives int(11) NOT NULL default '0',
+  id_class_lesson int(11) NOT NULL default '0',
+  KEY id_class_lesson (id_class_lesson),
+  KEY ic_class_objectives (id_class_objectives)
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE `class_lessons` (
+        `id_class_lessons` integer (11) NOT NULL auto_increment,  --
+        `id_classes` integer (10),  --
+        `createdOn` integer (11),  --
+        `title` varchar (255),  --
+        `description` TEXT,  --
+        `activeOn` integer (11),  --
+        `inactiveOn` integer (11),  --
+        `checkList` TEXT,  --
+        PRIMARY KEY (id_class_lessons)
+)TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE INDEX id_classes ON class_lessons (id_classes)
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE class_links (
+  id_class_links int(11) unsigned NOT NULL auto_increment,
+  id_classes int(11) unsigned NOT NULL default '0',
+  id_class_links_categories int(11) unsigned NOT NULL default '0',
+  title varchar(100) NOT NULL default '',
+  url varchar(100) NOT NULL default '',
+  description text NOT NULL,
+  dateCreated datetime default NULL,
+  createdby varchar(32) NOT NULL default '',
+  hits int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (id_class_links),
+  KEY id_classes (id_classes),
+  KEY id_class_links_categories (id_class_links_categories)
+) TYPE=MyISAM PACK_KEYS=0
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE class_links_categories (
+  id_class_links_categories int(11) unsigned NOT NULL auto_increment,
+  id_class_links_categories_parent int(11) unsigned NOT NULL default '0',
+  id_classes int(10) unsigned NOT NULL default '0',
+  txTitle varchar(50) NOT NULL default '',
+  sortOrder int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (id_class_links_categories),
+  KEY parentKey (id_class_links_categories_parent)
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE class_objectives (
+  id_class_objectives int(11) unsigned NOT NULL auto_increment,
+  id_classes int(10) unsigned NOT NULL default '0',
+  objective text NOT NULL,
+  f_hide int(10) unsigned NOT NULL default '0',
+  i_sort int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (id_class_objectives),
+  KEY f_hide (f_hide),
+  KEY id_classes (id_classes)
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE class_presentations (
+  id_presentations int(11) NOT NULL auto_increment,
+  id_classes int(11) default NULL,
+  title varchar(255) default NULL,
+  lesson int(11) default NULL,
+  status tinyint(1) default NULL,
+  author varchar(32) default NULL,
+  createdOn datetime default NULL,
+  approvedOn datetime default NULL,
+  content text,
+  PRIMARY KEY  (id_presentations),
+  KEY id_classes (id_classes)
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE class_syllabuses (
+  id_class_syllabuses int(11) unsigned NOT NULL auto_increment,
+  id_classes int(11) NOT NULL default '0',
+  other text NOT NULL,
+  courseObjectives text NOT NULL,
+  courseReqs text NOT NULL,
+  gradingScale text NOT NULL,
+  instructionMethods text NOT NULL,
+  emailPolicy text NOT NULL,
+  noExam text NOT NULL,
+  PRIMARY KEY  (id_class_syllabuses),
+  UNIQUE KEY id_classes (id_classes)
+) TYPE=MyISAM PACK_KEYS=0
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE classdoclib_Files (
   pkey int(11) NOT NULL auto_increment,
-  menuID int(11) NOT NULL default '0',
-  rank tinyint(4) NOT NULL default '0',
-  linkText varchar(120) NOT NULL default '',
-  imgOn varchar(75) NOT NULL default '',
-  imgOff varchar(75) NOT NULL default '',
-  location varchar(120) NOT NULL default '',
-  type char(3) NOT NULL default '',
-  parentID int(11) NOT NULL default '0',
-  groups tinytext NOT NULL,
-  appOption varchar(50) NOT NULL default '',
+  daHasha varchar(32) NOT NULL default '',
+  file varchar(100) NOT NULL default '',
+  displayname varchar(255) NOT NULL default '',
+  description varchar(255) NOT NULL default '',
+  mime varchar(100) NOT NULL default '',
+  folder int(10) unsigned NOT NULL default '0',
+  owner varchar(32) NOT NULL default '',
+  filedate datetime NOT NULL default '0000-00-00 00:00:00',
+  size int(11) NOT NULL default '0',
+  diskName varchar(32) NOT NULL default '',
+  trashed char(1) NOT NULL default '',
+  origfolder int(11) NOT NULL default '0',
   PRIMARY KEY  (pkey)
+) TYPE=MyISAM AUTO_INCREMENT=13807
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE classdoclib_Folders (
+  pkey int(10) unsigned NOT NULL auto_increment,
+  name varchar(255) NOT NULL default '',
+  parentKey int(10) unsigned NOT NULL default '0',
+  owner varchar(32) NOT NULL default '',
+  class_id int(10) unsigned NOT NULL default '0',
+  notes text NOT NULL,
+  trashed char(1) NOT NULL default '',
+  origparent int(11) NOT NULL default '0',
+  folderType int(11) NOT NULL default '0',
+  PRIMARY KEY  (pkey),
+  KEY class_id (class_id,owner)
+) TYPE=MyISAM AUTO_INCREMENT=2526
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE classdoclib_Sharing (
+  folderKey int(10) unsigned NOT NULL default '0',
+  action int(10) unsigned NOT NULL default '0',
+  exclude int(10) unsigned NOT NULL default '0',
+  gid varchar(15) NOT NULL default '',
+  PRIMARY KEY  (folderKey,action,exclude,gid)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (3, 1, 3, 'FAQs', '', '', 'faq', 'app', 0, '', '')
+CREATE TABLE classdoclib_Trash (
+  pkey int(11) NOT NULL default '0',
+  owner varchar(32) NOT NULL default '',
+  class_id int(11) NOT NULL default '0',
+  name varchar(255) NOT NULL default '',
+  data blob NOT NULL,
+  KEY owner (owner),
+  KEY class_id (class_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (48, 5, 0, 'Control Panel', '', '', 'administration', 'app', 0, '', '')
+CREATE TABLE `class_group` (
+  `class_group_id` int(10) unsigned NOT NULL auto_increment,
+  `class_group_name` varchar(100) NOT NULL default '',
+  `class_id` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`class_group_id`),
+  KEY class_id (class_id)
+) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (26, 1, 0, 'Home', '', '', 'welcome', 'app', 0, '', '')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (28, 1, 0, 'Search', '', '', 'search', 'app', 0, '', '')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (51, 5, 2, 'Manage Users', '', '', 'administration', 'app', 0, '', 'users')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (50, 5, 1, 'Manage Classes', '', '', 'administration', 'app', 0, '', 'classes')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (49, 5, 0, 'Manage Courses', '', '', 'administration', 'app', 0, '', 'courses')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (43, 4, 3, 'Who\'s Online', '', '', 'users', 'app', 0, '', 'online')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (53, 4, 2, 'Online Chat', '', '', 'users', 'app', 0, '', 'chat')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (46, 4, 1, 'Discussion Forums', '', '', 'forum', 'app', 0, '', '')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (47, 4, 2, 'Private Messages', '', '', 'pm', 'app', 0, '', '')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO menuItems VALUES (52, 4, 0, 'Edit Profile', '', '', 'users', 'app', 0, '', 'editProfile');
+CREATE TABLE `class_group_member` (
+  `class_group_member_id` int(10) unsigned NOT NULL auto_increment,
+  `class_group_id` int(11) NOT NULL default '0',
+  `student_id` varchar(32) NOT NULL default '0',
+  PRIMARY KEY  (`class_group_member_id`)
+) TYPE=MyISAM;
 campusdelimeter;
 $installTableSchemas[] = $table;
 
