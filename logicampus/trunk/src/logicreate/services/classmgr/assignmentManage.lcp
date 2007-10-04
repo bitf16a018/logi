@@ -35,7 +35,7 @@ class assignmentManage extends FacultyService {
 
 	var $inactivelinks = array( 'Activities' );
 	var $applinks = array();
-	var $sectionTitle = "Acivity Manager";
+	var $sectionTitle = "Activity Manager";
 
         function wipeClassAssignmentsRun($db,&$u,&$lc,&$t) {
                 $class_id = $u->activeClassTaught->id_classes;
@@ -693,7 +693,6 @@ class assignmentManage extends FacultyService {
 	}
 
 
-	
 	function viewAssignmentRun(&$db,&$u,&$lc,&$t) {
 
 		include_once(LIB_PATH.'ClassGradebookEntries.php');
@@ -726,7 +725,7 @@ class assignmentManage extends FacultyService {
 
 		// load up a GBE to see if it has a gradebook entry, if not we need to instruct the teacher to
 		// publish one last time, then it will save the relationship
-		$entryObj = ClassGradebookEntries::load( array('class_lesson_sequence_id'=>$assignment->id_class_assignments) );
+		$entryObj = ClassGradebookEntries::load( array('class_lesson_sequence_id'=>$classSeqId) );
 
 		if ( is_object($entryObj) ) {
 			$t['entryCode'] = $entryObj->gradebookCode;
@@ -740,137 +739,72 @@ class assignmentManage extends FacultyService {
 		$lc->templateName='assignmentManage_viewAssignment_one';
 
 
-		// second view will be showing students' assignment
-		if ($lc->getvars['student'] != '')
-		{
-			//if the student is in the URL, set the template and pass some important flags
-			$lc->templateName = 'assignmentManage_viewAssignment_single';
-			$t['id_class_assignments'] = $lc->getvars['id_class_assignments'];
-			$t['student'] = $lc->getvars['student'];
+		// give me a class list
+		$sql = '
+		SELECT A.student_id, C.firstname, C.lastname, C.username
+		FROM class_enrollment AS A
 
-
-			// find student information (verification kinda thing, plus.. i need there info!)
-			$sql = '
-				SELECT id_class_assignments_grades, grade, comments
-				FROM class_assignments_grades
-				WHERE (id_class_assignments='.(int)$lc->getvars['id_class_assignments'].'
-				AND id_student=\''.$lc->getvars['student'].'\')
-				';
-				
-			$db->query($sql);
-			$db->next_record();
-			//cleanup bad data, assume two duplicate records, combine highest score
-			// with longest comment.  Should fix the data problems that we have
-			if ( $db->getNumRows() > 1){
-				$record1 = $db->Record;
-				$db->next_record();
-				$record2 = $db->Record;
-				if ( strlen($record1['coments']) > strlen($record2['comments']) ) {
-					$db->Record['comments'] = $record1['comments'];
-				} else {
-					$db->Record['comments'] = $record2['comments'];
-				}
-				if ( $record1['grade'] > $record2['grade'] ) {
-					$db->Record['grade'] = $record1['grade'];
-				} else {
-					$db->Record['grade'] = $record2['grade'];
-				}
-			}
-
-			// original code before this data fixing patch
-			$t['student_grade_info'] = $db->Record;	
-
-
-			// get current attachments for this assignment for this student (FILES ONLY)
+		INNER JOIN lcUsers AS B 
+			ON A.student_id = B.pkey
+		INNER JOIN profile AS C 
+			ON B.username = C.username
+		WHERE 
+			A.class_id='.$u->activeClassTaught->id_classes.' AND 
+			A.active=1
+		ORDER BY C.lastname ASC
+		';
+		
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$a_student_list[$db->record['student_id']] = $db->record;
+//				$a_student_list[] = $db->record;
+		}
 		
 
-			$studentId = addslashes($lc->getvars['student']);
-			$t['studentId'] = $studentId;
+		// I hate to do this but damn... This is soooooo inefficent.. but how often is something going to use this?
 
-			$t['attachments'] = $this->getAssignmentsByType(1,
-					$studentId,
-					$u->activeClassTaught->id_classes,
-					$t['sequenceId']
-					);
-
-			$t['audioFiles'] = $this->getAssignmentsByType(6,
-					$studentId,
-					$u->activeClassTaught->id_classes,
-					$t['sequenceId']
-					);
-			if (count($t['audioFiles']) > 0 ) {
-				$t['hasAudio'] = true;
-				$t['audioData'] = base64_encode(file_get_contents(CONTENT_PATH.'uploads/'.$audioFiles[0]['assign_file_name']));
-			
-			}
-		} else {
-			// give me a class list
-			$sql = '
-			SELECT A.student_id, C.firstname, C.lastname, C.username
-			FROM class_enrollment AS A
-
-			INNER JOIN lcUsers AS B 
-				ON A.student_id = B.pkey
-			INNER JOIN profile AS C 
-				ON B.username = C.username
-			WHERE 
-				A.class_id='.$u->activeClassTaught->id_classes.' AND 
-				A.active=1
-			ORDER BY C.lastname ASC
-			';
-			
-			$db->query($sql);
-			while ($db->nextRecord()) {
-				$a_student_list[$db->record['student_id']] = $db->record;
-//				$a_student_list[] = $db->record;
-			}
-			
-
-			// I hate to do this but damn... This is soooooo inefficent.. but how often is something going to use this?
-
-			foreach($a_student_list as $k=>$student) {
-				// getting grade
+		foreach($a_student_list as $k=>$student) {
+			// getting grade
 //don't need this, i added it to the join up above
 
-				$sql = '
-				SELECT A.*
-				FROM class_assignments_grades as A
-				LEFT JOIN lcUsers AS B on B.username = A.id_student
-				WHERE 
-				B.pkey=\''.$student['student_id'].'\' AND
-				A.id_class_assignments='.$classSeqId.'
-				';
+			$sql = '
+			SELECT A.*
+			FROM class_assignments_grades as A
+			LEFT JOIN lcUsers AS B on B.username = A.id_student
+			WHERE 
+			B.pkey=\''.$student['student_id'].'\' AND
+			A.id_class_assignments='.$classSeqId.'
+			';
 
-				$db->queryOne($sql);
+			$db->queryOne($sql);
 //*/
-				$a_student_list[$k]['grade'] = $db->record['grade'];
+			$a_student_list[$k]['grade'] = $db->record['grade'];
 
-				$sql = 'SELECT COUNT(id_class_assignments) as completed, dateTurnin
-				FROM class_assignments_turnin AS A
-				LEFT JOIN lcUsers AS B 
-					on B.username = A.id_student
-				WHERE id_class_assignments = '.$classSeqId.' 
-					AND B.pkey=\''.$student['student_id'].'\'
-				GROUP BY id_class_assignments';
-				$db->queryOne($sql);
+			$sql = 'SELECT COUNT(id_class_assignments) as completed, dateTurnin
+			FROM class_assignments_turnin AS A
+			LEFT JOIN lcUsers AS B 
+				on B.username = A.id_student
+			WHERE id_class_assignments = '.$classSeqId.' 
+				AND B.pkey=\''.$student['student_id'].'\'
+			GROUP BY id_class_assignments';
+			$db->queryOne($sql);
 
-				$a_student_list[$k]['datecompleted'] = (($db->record['dateTurnin'] != null) ? date('F j Y g:i a',strtotime($db->record['dateTurnin'])) : '');
-				$a_student_list[$k]['completed'] = $db->record['completed'];
-				++$c;
-			}
-			
-			$t['student_list'] = $a_student_list;
-
-			//debug($t['student_list']);
-			
-			// get a class list and status applied to assignment
-			// grab assign
-			// connect assign to class
-			// connect classs_section with classid (sectionNubmer=sectionNumber to class_section
-			// then class_section.studentid to profile for names
-					
-			
+			$a_student_list[$k]['datecompleted'] = (($db->record['dateTurnin'] != null) ? date('F j Y g:i a',strtotime($db->record['dateTurnin'])) : '');
+			$a_student_list[$k]['completed'] = $db->record['completed'];
+			++$c;
 		}
+		
+		$t['student_list'] = $a_student_list;
+
+		//debug($t['student_list']);
+		
+		// get a class list and status applied to assignment
+		// grab assign
+		// connect assign to class
+		// connect classs_section with classid (sectionNubmer=sectionNumber to class_section
+		// then class_section.studentid to profile for names
+				
+			
 		
 		// get assignment text
 		$db2 = DB::getHandle();
@@ -893,50 +827,143 @@ class assignmentManage extends FacultyService {
 		$t['turnin'] = $db2->Record;
 
 */
+	}
+
+
+	function viewSubmitRun(&$db,&$u,&$lc,&$t) {
+
+		include_once(LIB_PATH.'ClassGradebookEntries.php');
+
+		//load the assignment
+		$classSeqId  = intval($lc->getvars['id']);
+		$classId  = $u->activeClassTaught->id_classes;
+		//get the lesson ID from the class_lesson_sequence object
+		$seqItem = ClassLessonSequence::load( intval($lc->getvars['id']) );
+		$t['sequenceId']  = intval($lc->getvars['id']);
+		$lessonId = $seqItem->lessonId;
+
+		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
+		$lessonSequence->loadItems();
+		$lesson = new LC_Lesson($lessonId);
+
+		$activityLob = $lessonSequence->fetchObject($classSeqId);
+
+		$t['startDate'] = $lessonSequence->getStartDate($lesson,$classSeqId);
+		$t['dueDate']   = $lessonSequence->getDueDate($lesson,$classSeqId);
+		$t['activity']  = $activityLob;
+
+
+		// load up a GBE to see if it has a gradebook entry, if not we need to instruct the teacher to
+		// publish one last time, then it will save the relationship
+		$entryObj = ClassGradebookEntries::load( array('class_lesson_sequence_id'=>$classSeqId) );
+
+		if ( is_object($entryObj) ) {
+			$t['entryCode'] = $entryObj->gradebookCode;
+			$t['entryLinked'] = true;
+		} else {
+			$t['entryCode'] = '<i>Not linked to a gradebook entry yet</i>';
+			$t['entryLinked'] = false;
 		}
 
+		$lc->templateName = 'assignmentManage_viewSubmit';
 
 
-/*
- *
- * Show confirmation message, with a
- * link back to the listAssignments area. Links to
- * deleteAssignmentConfirm is "yes" is pressed.
- * 
- * Input data: assignment id
- * Output data: confirmation page
- *
- */
-		function deleteAssignmentRun(&$db,&$u,&$lc,&$t) {
+		$t['id_class_assignments'] = $lc->getvars['id_class_assignments'];
+		$t['student'] = $lc->getvars['student'];
 
-			$aid = $lc->getvars['id_class_assignments'];
 
-				include_once(LIB_PATH.'eventsObj.php');
-				
-				$event = new classroomAssignments();
-				$event->set_id_class($u->activeClassTaught->id_classes);
-				$event->set_id_item($aid);
-				
-				if ($event->dbLoad())
-				{	$event->delete();
-				}
-				
-			$objKeys = array(
-				'id_class_assignments' => $aid,
-				'id_classes' => $u->activeClassTaught->id_classes
-			);
-			$assignment = classAssignmentObj::_getFromDB($objKeys);
-
-			if ( is_object($assignment) ) {
-				$assignment->_deleteFromDB();
-				$db->query("delete from class_assignments_link where id_class_assignments='{$aid}'");
-				$t['msg'] = 'Assignment deleted.';
+		// find student information (verification kinda thing, plus.. i need there info!)
+		$sql = '
+			SELECT id_class_assignments_grades, grade, comments
+			FROM class_assignments_grades
+			WHERE (id_class_assignments='.(int)$lc->getvars['id_class_assignments'].'
+			AND id_student=\''.$lc->getvars['student'].'\')
+			';
+			
+		$db->query($sql);
+		$db->next_record();
+		//cleanup bad data, assume two duplicate records, combine highest score
+		// with longest comment.  Should fix the data problems that we have
+		if ( $db->getNumRows() > 1){
+			$record1 = $db->Record;
+			$db->next_record();
+			$record2 = $db->Record;
+			if ( strlen($record1['coments']) > strlen($record2['comments']) ) {
+				$db->Record['comments'] = $record1['comments'];
 			} else {
-				$t['error'] = 'Failed to delete assignment.';
+				$db->Record['comments'] = $record2['comments'];
+			}
+			if ( $record1['grade'] > $record2['grade'] ) {
+				$db->Record['grade'] = $record1['grade'];
+			} else {
+				$db->Record['grade'] = $record2['grade'];
+			}
+		}
+
+		// original code before this data fixing patch
+		$t['student_grade_info'] = $db->Record;	
+
+
+		// get current attachments for this assignment for this student (FILES ONLY)
+	
+
+		$studentId = addslashes($lc->getvars['student']);
+		$t['studentId'] = $studentId;
+
+		$t['attachments'] = $this->getAssignmentsByType(1,
+				$studentId,
+				$u->activeClassTaught->id_classes,
+				$t['sequenceId']
+				);
+
+		$t['audioFiles'] = $this->getAssignmentsByType(6,
+				$studentId,
+				$u->activeClassTaught->id_classes,
+				$t['sequenceId']
+				);
+		if (count($t['audioFiles']) > 0 ) {
+			$t['hasAudio'] = true;
+			$t['audioData'] = base64_encode(file_get_contents(CONTENT_PATH.'uploads/'.$audioFiles[0]['assign_file_name']));
+		
+		}
+	}
+
+	/**
+	 * Show confirmation message, with a link back to the listAssignments area. 
+	 * Links to deleteAssignmentConfirm is "yes" is pressed.
+	 * 
+	 * Input data: assignment id
+	 * Output data: confirmation page
+	 */
+	function deleteAssignmentRun(&$db,&$u,&$lc,&$t) {
+		$aid = $lc->getvars['id_class_assignments'];
+
+			include_once(LIB_PATH.'eventsObj.php');
+			
+			$event = new classroomAssignments();
+			$event->set_id_class($u->activeClassTaught->id_classes);
+			$event->set_id_item($aid);
+			
+			if ($event->dbLoad())
+			{	$event->delete();
 			}
 			
-			$this->run($db,$u,$lc,$t);
+		$objKeys = array(
+			'id_class_assignments' => $aid,
+			'id_classes' => $u->activeClassTaught->id_classes
+		);
+		$assignment = classAssignmentObj::_getFromDB($objKeys);
+
+		if ( is_object($assignment) ) {
+			$assignment->_deleteFromDB();
+			$db->query("delete from class_assignments_link where id_class_assignments='{$aid}'");
+			$t['msg'] = 'Assignment deleted.';
+		} else {
+			$t['error'] = 'Failed to delete assignment.';
 		}
+		
+		$this->run($db,$u,$lc,$t);
+	}
 
 
 	function getFileRun($db,&$u,&$lc,&$t)

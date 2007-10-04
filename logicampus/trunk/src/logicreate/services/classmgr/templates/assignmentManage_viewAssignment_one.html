@@ -1,8 +1,15 @@
 <?=$t['sectionheader'];?>
+
+
+<?php
+if ( !$t['entryLinked'] ) { 
+	echo lcMessageBox('In order to grade this activity you must create a gradebook entry.','i', 'No Gradebook Entry');
+}
+?>
+
 <?php
 //debug($t['activity']);
 ?>
-<br>
 <style>
 	td.title
 	{	font-weight: bold;
@@ -44,24 +51,17 @@
 
 <br>
 
-<? if ($t['entryLinked'] ) { ?>
+<?php
+if ($t['entryLinked'] ) { ?>
 <fieldset>
 	<legend>Congratulations</legend>
 	<center>This assignment is linked to a gradebook entry already. (<?=$t['entryCode'];?>)  
 		You do not need to publish anymore, once you update a student's points the changes will reflect
 		in the gradebook immediately under gradebook code <?= $t['entryCode'];?>.</center>
 </fieldset>
-<? } else { ?>
-<fieldset>
-	<legend>Commit this assignment to the gradebook</legend>
-	<center>In order to see these grades in the gradebook you must publish them to a gradebook entry.<br/>
-		Use this link to publish the grades on this page to a gradebook entry.  Any grades that are not 
-		turned in will be reflected as a zero (0) only if the assignment's due date is past.
-		<br/>
-		<a href="<?=appurl('classmgr/assignmentManage/event=showEntriesList/id='.$t['sequenceId']);?>">Publish your grades to the  Gradebook</a>
-</center>
-</fieldset>
-<? } ?>
+<?php
+} 
+?>
 
 <br>
 <br>
@@ -74,7 +74,8 @@
 		<th valign="top">Student Name</th>
 		<th valign="top">Status</th>
 		<th valign="top">Grade</th>
-		<th colspan="2" valign="top" align="left">Date Completed</th>
+		<th valign="top" align="left">Date Completed</th>
+		<th valign="top" align="left">&nbsp;</th>
 	</tr>
 	
 <?php
@@ -88,7 +89,7 @@ if (is_array($t['student_list']) && count($t['student_list'])) {
 			<?=(($v['completed']) ? '<td style="color: green; font-weight: bold;">Turned In</td>' : '<td style="color: red; font-weight: bold;">Incomplete</td>') ?>
 			<td><?=(($v['grade'] != null) ? $v['grade'] : 'N/A')?></td>
 			<td><?=$v['datecompleted'];?></td>
-			<td><a href="<?=appurl('classmgr/assignmentManage/event=viewAssignment/id='. $t['sequenceId'].'/student='. $v['username']);?>">Grade</a></td>
+			<td><a href="<?=appurl('classmgr/assignmentManage/event=viewSubmit/id='. $t['sequenceId'].'/student='. $v['username']);?>">Grade</a></td>
 		</tr>
 		<?php
 	}
