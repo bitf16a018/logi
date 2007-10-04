@@ -144,6 +144,11 @@ class LessonNew extends FacultyService {
 
 		$lesson->save();
 		$lesson_id = $lesson->getPrimaryKey();
+		$t['lessonId'] = $lesson_id;
+		return;
+
+	//all this stuff is deprecated
+	
 
 		//link the content page
 		$sql = 'UPDATE class_lesson_content
@@ -289,9 +294,10 @@ class LessonNew extends FacultyService {
 		$u->sessionvars['newLesson']['object'] = $lesson;
 		$u->sessionvars['newLesson']['content_id'] = $content_id;
 
+		$this->saveRun($db, $u, $lc, $t);
+
 		$this->presentor = 'redirectPresentation';
-//		$t['url'] = appurl('classmgr/lessonManager/event=add/step=2/id='.$lesson->getPrimaryKey());
-		$t['url'] = appurl('classmgr/lessonNew/event=next/step=2');
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$t['lessonId']);
 	}
 
 

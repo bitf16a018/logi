@@ -114,7 +114,7 @@ if ($lessonObj->isFinished() ) {
 
 	
 	<tr class="<?=$class;?>"><td class="<?=$class;?>">
-			<?= ($idx + 1);?>.&nbsp; <a href="<?= appurl('classmgr').'/lessonManager/event=edit/id='.$lessonObj->getId();?>"><?= $lessonObj->getTitle();?></a>
+			<?= ($idx + 1);?>.&nbsp; <a href="<?= appurl('classmgr').'/lessonManager/event=show/id='.$lessonObj->getId();?>"><?= $lessonObj->getTitle();?></a>
 	</td>
 	<td class="<?=$class;?>">
 		Starts in: <?= $lessonObj->daysTilStart();?> day(s)
