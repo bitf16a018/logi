@@ -621,6 +621,7 @@ class assignmentManage extends FacultyService {
 				LEFT JOIN class_lessons AS C
 				  ON B.lesson_id = C.id_class_lessons
 				WHERE A.class_id = '.$u->activeClassTaught->id_classes.'
+				AND A.lob_type = "activity"
 				ORDER BY B.due_offset ASC';
 
 		$datagrid->countsql = '
@@ -630,7 +631,8 @@ class assignmentManage extends FacultyService {
 					ON A.lob_class_repo_id = B.lob_class_repo_id
 				LEFT JOIN class_lessons AS C
 				  ON B.lesson_id = C.id_class_lessons
-				WHERE A.class_id = '.$u->activeClassTaught->id_classes;
+				WHERE A.class_id = '.$u->activeClassTaught->id_classes.'
+				AND A.lob_type = "activity"';
 
 		$datagrid->ignore = array('lob_class_repo_id', 'lob_guid', 'class_lesson_sequence_id');
 		$datagrid->headers = array(

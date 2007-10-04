@@ -53,6 +53,7 @@ class LC_LessonSequence {
 	function getDueDate(&$lessonObj, $sequenceId) {
 		foreach ($this->items as $seqItem) {
 			if ($seqItem->classLessonSequenceId == $sequenceId) {
+				if ($seqItem->dueOffset == 0) { return 0;}
 				return $lessonObj->getStartDate() + $seqItem->dueOffset;
 			}
 		}
