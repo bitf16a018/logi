@@ -88,9 +88,9 @@ class Myobj extends FacultyService {
 		}
 
 		//organize the link IDs into nice arrays for the table renderer
-		$linkIds = array(0);
+		$linkIds = array();
 		foreach ($classLinkObjs as $linkObj) {
-			$linkIds[$linkObj->lobId][] = $linkObj->classId;
+			$linkIds[$linkObj->lobClassRepoId][] = $linkObj->classId;
 		}
 		$t['lobTable']->classLinkIds = $linkIds;
 //		print_r($t['lobTable']);
