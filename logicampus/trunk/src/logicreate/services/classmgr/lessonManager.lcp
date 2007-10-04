@@ -38,24 +38,9 @@ class LessonManager extends FacultyService {
 		$this->inactivelinks[] = 'List Lessons';
 		$this->sectionTitle = 'List Lessons';
 
-		$dg = new DataGrid($this->module,$this->serviceName);
-		$dg->table = 'class_lessons';
-		$dg->column = 'createdOn,activeOn,title,description,id_class_lessons';
-		$dg->class = 'datagrid';
-		$dg->ignore = array('id_classes', 'checkList', 'id_class_lessons', 'inactiveOn' );
-		$dg->overrideColumn('<?=date("M j h:i A", $createdOn);?>', 'createdOn');
-		$dg->overrideColumn('<?=date("M j h:i A", $activeOn);?>', 'activeOn');
-		$dg->where = "id_classes='{$u->activeClassTaught->id_classes}'";
-		$dg->headers = array(
-			'createdOn' => 'Created',
-			'activeOn' => 'Active On',
-			'title' => 'Title',
-			'description' => 'Description',
-			'links' => ' '
-		);
-		if ($lc->getvars['gdorder']=='') {
-			$lc->getvars['dgorder'] = 'activeOn';
-		}
+		$classId = $u->activeClassTaught->id_classes;
+
+/*
 		$dg->sortColumns = array( 'activeOn', 'title' );
 		$dg->postpendColumn('
 			<ul style="margin:0px;padding-left:15px">
@@ -69,6 +54,78 @@ class LessonManager extends FacultyService {
 		$dg->setCellAlign('links','left');
 
 		$t['content'] = $dg->toHTML();
+*/
+
+		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
+		$t['lessonDataGridList'] = array();
+
+		foreach ($t['lessonList'] as $idx => $lessonObj) {
+
+			//display sequence grid of all components
+
+			$lessonId = (int) $lessonObj->getId();
+
+			$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lessonId.' ORDER BY rank');
+
+			foreach ($sequences as $objIdx => $obj) {
+
+				//change the "type" field into an image representing the mime.
+				//no reason why i'm changing lobType instead of lobMime
+				$sequences[$objIdx]->lobType = '<img width="24" height="24" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+
+				//change unix timestamp offset into days
+				$sequences[$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+				$sequences[$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+
+			}
+
+			$dm = new LC_Table_ObjectModel($sequences);
+			$dm->ignoreColumn('_new');
+			$dm->ignoreColumn('_modified');
+			$dm->ignoreColumn('_version');
+			$dm->ignoreColumn('_entityVersion');
+			$dm->ignoreColumn('__attributes');
+			$dm->ignoreColumn('__nulls');
+
+			$dm->ignoreColumn('classLessonSequenceId');
+			$dm->ignoreColumn('lessonId');
+			$dm->ignoreColumn('classId');
+			$dm->ignoreColumn('lobClassRepoId');
+			$dm->ignoreColumn('lobSubType');
+			$dm->ignoreColumn('lobMime');
+			$dm->ignoreColumn('linkText');
+			$dm->ignoreColumn('notBeforeSeqId');
+			$dm->ignoreColumn('endOffset');
+			$dm->ignoreColumn('gracePeriodDays');
+			$dm->ignoreColumn('hideUntilStart');
+			$dm->ignoreColumn('hideAfterEnd');
+			$dm->ignoreColumn('rank');
+
+
+			$table = new LC_Table($dm);
+
+			$columnModel = &$table->getColumnModel();
+			$columnModel->tableColumns[0]->name  =' ';
+			$columnModel->tableColumns[1]->name  ='Title';
+
+			$colA = &$columnModel->getColumnAt(0);
+			$colA->maxWidth=64;
+
+			$colD = &$columnModel->getColumnAt(1);
+			$colD->justify='left';
+
+
+			$colB = &$columnModel->getColumnAt(2);
+			$colB->maxWidth=64;
+			$colB->name = 'Start';
+
+			$colC = &$columnModel->getColumnAt(3);
+			$colC->maxWidth=64;
+			$colC->name = 'Due';
+
+			$t['lessonDataGridList'][$lessonId] = new LC_TableRenderer($table);
+		}
+
 	}
 
 

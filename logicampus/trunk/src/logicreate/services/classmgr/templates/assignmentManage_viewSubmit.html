@@ -1,8 +1,11 @@
 <?=$t['sectionheader'];?>
+
 <?php
-//debug($t['asmt']);
+if ( !$t['entryLinked'] ) { 
+	echo lcMessageBox('In order to grade this activity you must create a gradebook entry.','i', 'No Gradebook Entry');
+}
 ?>
-<br>
+
 
 <style type="text/css">
 	td.title
@@ -26,7 +29,7 @@
 	<td><?=$t['lessonTitle'] ? $t['lessonTitle'] : '<i>None assigned</i>';?></td>
 </tr>
 <tr>
-	<td class="title">Became active on:</td><td><?=date('l dS of F Y', $t['startDate']);?></td>
+	<td class="title">Active on:</td><td><?=date('l dS of F Y', $t['startDate']);?></td>
 <tr>
 	<td class="title">Due on:</td>
 	<td><?php
@@ -37,6 +40,9 @@
 		}
 		?>
 	</td>
+</tr>
+<tr>
+	<td class="title">Gradebook Code:</td><td><?=$t['entryCode'];?></td>
 </tr>
 <tr>
 	<td class="title" colspan="2">Instructions:</td>
@@ -110,7 +116,9 @@
 
 
 
-
+	<?php
+	if ($t['entryLinked']) {
+	?>
 	<fieldset style="padding: 5px;">
 	<legend><b>Teacher Grading<b></legend>
 	<form method="POST" action="<?=appurl('classmgr/assignmentManage/event=gradeStudent/id_class_assignments='.$t['id_class_assignments'].'/student='.$t['student']);?>">
@@ -131,7 +139,9 @@
 	</p>
 	</form>
 	</fieldset>
-	
+	<?php
+	}
+	?>
 
 	
 </td>

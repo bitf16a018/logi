@@ -12,18 +12,16 @@
  * http://www.tapinternet.com/
  ***************************************************/
 
-/*
- *
- * Service will act as a gateway into the rest of the
- * application.
- *
- */
-
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'semesterObj.php');
 include_once(LIB_PATH.'lc_lesson.php');
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
- 
+
+
+/**
+ * Provide a good overview of the chosen class.
+ *
+ */
 class display extends FacultyService {
 
 	var $presentor='htmlPresentation';
@@ -80,6 +78,7 @@ class display extends FacultyService {
 			$t['activityCount'][$idx] = $lessonObj->getObjectCountByType('activity');
 			$t['assessmentCount'][$idx] = $lessonObj->getObjectCountByType('assessment');
 		}
+
 	}
 }
 
