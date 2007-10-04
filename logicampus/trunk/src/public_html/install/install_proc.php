@@ -98,6 +98,7 @@ if ($results['connect'] ) {
 		$e = ErrorStack:: pullError();
 		$results['createtables'] = tryToMakeTables($gdb);
 		if (!$results['createtables']) {
+			debug($gdb,1);
 			$errorIds[] = 4;
 			redirBack();
 		} else {
@@ -115,7 +116,7 @@ if ($results['connect'] ) {
 
 function tryToMakeTables(&$gdb) {
 
-	for ($x=1; $x <= 26; $x++) {
+	for ($x=1; $x <= 34; $x++) {
 		$installTableSchemas = array();
 		include('./schema_'.sprintf('%02d',$x).'.php');
 		if (! is_array($installTableSchemas) ) {

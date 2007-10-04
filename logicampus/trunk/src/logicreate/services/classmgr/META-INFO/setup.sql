@@ -18,8 +18,7 @@ CREATE TABLE class_assignments_grades (
   id_student varchar(32) NOT NULL default '',
   comments text NOT NULL,
   grade float(10,2) default NULL,
-  PRIMARY KEY  (id_class_assignments_grades),
-  KEY id_class_assignments (id_class_assignments)
+  PRIMARY KEY  (id_class_assignments_grades)
 ) TYPE=MyISAM;
 
 CREATE TABLE class_assignments_turnin (

@@ -1,33 +1,28 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-CREATE TABLE chat (
-  pkey int(11) NOT NULL auto_increment,
-  chat_id varchar(50) NOT NULL default '',
-  username varchar(25) NOT NULL default '',
-  userpkey int(11) NOT NULL default '0',
-  usertype int(11) NOT NULL default '0',
-  timeint int(11) NOT NULL default '0',
-  timedate date NOT NULL default '0000-00-00',
-  message text NOT NULL,
-  entry_type int(11) default NULL,
-  PRIMARY KEY  (pkey),
-  KEY pkey (pkey)
-) TYPE=MyISAM
+DROP TABLE IF EXISTS `lob_repo_entry`
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE chat_queue (
-  pkey int(11) NOT NULL auto_increment,
-  username varchar(25) NOT NULL default '',
-  userpkey int(11) NOT NULL default '0',
-  usertype int(11) NOT NULL default '0',
-  timeint int(11) NOT NULL default '0',
-  timedate date NOT NULL default '0000-00-00',
-  message text NOT NULL,
-  PRIMARY KEY  (pkey),
-  KEY pkey (pkey)
-) TYPE=MyISAM;
+CREATE TABLE `lob_repo_entry` (
+	`lob_repo_entry_id` integer (11) NOT NULL auto_increment, 
+	`lob_guid` varchar (255) NOT NULL, 
+	`lob_title` varchar (255) NOT NULL, 
+	`lob_type` varchar (100) NOT NULL, 
+	`lob_sub_type` varchar (100) NOT NULL, 
+	`lob_mime` varchar (100) NOT NULL, 
+	`lob_description` text, 
+	`lob_notes` text, 
+	`lob_urltitle` varchar (255) NOT NULL, 
+	`lob_version` integer (11) NOT NULL, 
+	`lob_bytes` integer (11) NOT NULL,
+	PRIMARY KEY (lob_repo_entry_id) 
+)
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE INDEX lob_guid_idx ON lob_repo_entry (lob_guid);
 campusdelimeter;
 $installTableSchemas[] = $table;
 

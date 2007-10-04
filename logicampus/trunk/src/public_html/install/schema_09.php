@@ -1,29 +1,23 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-DROP TABLE IF EXISTS `lob_class_link`
+DROP TABLE IF EXISTS `lob_class_content`
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE `lob_class_link` (
-	`lob_class_link_id` integer (11) NOT NULL auto_increment, 
-	`lob_id` integer (11) NOT NULL, 
-	`lob_kind` varchar (255) NOT NULL, 
-	`class_id` integer (11) NOT NULL,
-	PRIMARY KEY (lob_class_link_id) 
+CREATE TABLE `lob_class_content` (
+	`lob_class_content_id` integer (11) NOT NULL auto_increment, 
+	`lob_class_repo_id` integer (11) NOT NULL, 
+	`lob_text` text, 
+	`lob_binary` longblob, 
+	`lob_filename` varchar (255) NOT NULL, 
+	`lob_caption` varchar (255) NOT NULL,
+	PRIMARY KEY (lob_class_content_id) 
 )
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX lob_idx ON lob_class_link (lob_id)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX lob_kind_idx ON lob_class_link (lob_kind)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE INDEX class_idx ON lob_class_link (class_id);
+CREATE INDEX lob_class_repo_idx ON lob_class_content (lob_class_repo_id);
 campusdelimeter;
 $installTableSchemas[] = $table;
 

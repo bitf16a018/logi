@@ -223,18 +223,18 @@ class DataGrid {
 		
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while($db->next_record()) {
-			$this->datarows[] = $db->Record;
+		while($db->nextRecord()) {
+			$this->datarows[] = $db->record;
 		}
 		
 		$this->rowsset=true;
 		$sql = $this->countsql;
 		if ($sql) {
 			$db->queryOne($sql);
-			$this->_totalRows = $db->Record['totalcount'];
+			$this->_totalRows = $db->record['totalcount'];
 		} else {
 			$db->queryOne("select count(*) as totalcount from {$this->table} {$this->joins} {$this->where}");
-			$this->_totalRows = $db->Record['totalcount'];
+			$this->_totalRows = $db->record['totalcount'];
 		}
 
 		$this->_totalPages = ceil((int)$this->_totalRows / (int)$this->rowsPerPage) - 1;

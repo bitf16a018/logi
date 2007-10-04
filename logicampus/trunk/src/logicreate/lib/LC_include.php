@@ -69,7 +69,11 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 
 	}
 
-	/*
+	/**
+	 * Deprecated
+	 * 
+	 * @deprecated
+	 */
 	function updateSessionVars(&$db, &$u) {
 		include_once(LIB_PATH.'lc_class.php');
 
@@ -109,7 +113,6 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 
 		}
 	}
-	 */
 
 	
 /**

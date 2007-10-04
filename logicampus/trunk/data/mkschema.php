@@ -43,6 +43,12 @@ $data['groups'] = explode(";\n",$setupFile);
 $setupFile = trim(file_get_contents('../data/lob_activity.mysql.sql'));
 $schemas['lob_activity'] = explode(";\n",$setupFile);
 
+$setupFile = trim(file_get_contents('../data/lob_class_test.mysql.sql'));
+$schemas['lob_class_test'] = explode(";\n",$setupFile);
+
+$setupFile = trim(file_get_contents('../data/lob_class_activity.mysql.sql'));
+$schemas['lob_class_activity'] = explode(";\n",$setupFile);
+
 $setupFile = trim(file_get_contents('../data/lob_class_content.mysql.sql'));
 $schemas['lob_class_content'] = explode(";\n",$setupFile);
 

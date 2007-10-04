@@ -1,39 +1,33 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-DROP TABLE IF EXISTS privateMessages
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE privateMessages (
+CREATE TABLE chat (
   pkey int(11) NOT NULL auto_increment,
-  messageFrom varchar(25) NOT NULL default '',
-  messageTo varchar(25) NOT NULL default '',
+  chat_id varchar(50) NOT NULL default '',
+  username varchar(25) NOT NULL default '',
+  userpkey int(11) NOT NULL default '0',
+  usertype int(11) NOT NULL default '0',
+  timeint int(11) NOT NULL default '0',
+  timedate date NOT NULL default '0000-00-00',
   message text NOT NULL,
-  sentTime int(11) NOT NULL default '0',
-  receivedTime int(11) NOT NULL default '0',
-  subject varchar(75) NOT NULL default '',
-  repliedTime int(11) NOT NULL default '0',
-  sentReceived int(11) NOT NULL default '0',
-  emailNotify VARCHAR(5) NOT NULL,
-  PRIMARY KEY  (pkey)
+  entry_type int(11) default NULL,
+  PRIMARY KEY  (pkey),
+  KEY pkey (pkey)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-INSERT INTO lcConfig VALUES ('pm', '_displayPerPage', '10', 'text','')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO lcRegistry VALUES ('pm', 'pm', 'Private Messaging', 'MGK', '2002', '||', ".DB::getFuncName('NOW()')." , 1)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO lcConfig VALUES ('pm', '_SystemAdmin', 'zorka', 'text', '')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO lcPerms VALUES ('reg', 'pm', 'access');
+CREATE TABLE chat_queue (
+  pkey int(11) NOT NULL auto_increment,
+  username varchar(25) NOT NULL default '',
+  userpkey int(11) NOT NULL default '0',
+  usertype int(11) NOT NULL default '0',
+  timeint int(11) NOT NULL default '0',
+  timedate date NOT NULL default '0000-00-00',
+  message text NOT NULL,
+  PRIMARY KEY  (pkey),
+  KEY pkey (pkey)
+) TYPE=MyISAM;
 campusdelimeter;
 $installTableSchemas[] = $table;
 

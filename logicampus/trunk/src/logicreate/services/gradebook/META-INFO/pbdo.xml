@@ -123,31 +123,24 @@
             default="0"
             size="1"
             type="TINYINT"/>
-    <column name="date_due"
-            required="true"
-            default="0"
-            size="10"
-            type="INTEGER"/>
     <column name="notes"
             required="false"
             size=""
             type="LONGVARCHAR"/>
-    <column name="assessment_id"
+    <column name="class_lesson_sequence_id"
             required="true"
             default="0"
             size="11"
             type="INTEGER"/>
-    <column name="assignment_id"
-            required="true"
-            default="0"
-            size="10"
-            type="INTEGER"/>
-    <index>
-      <index-column name="id_classes"/>
-      <index-column name="id_class_gradebook_categories"/>
-      <index-column name="date_due"/>
-      <index-column name="assignment_id"/>
-    </index>
+	<key
+			attribute="class_lesson_sequence_id"
+			name="class_lesson_sequence_idx"/>
+	<key
+			attribute="id_classes"
+			name="id_classes_idx"/>
+	<key
+			attribute="id_class_gradebook_categories"
+			name="id_class_gradebook_categories_idx"/>
   </table>
   <table  name="class_gradebook_val">
     <column name="id_class_gradebook_val"
@@ -165,10 +158,14 @@
             default="0"
             size="10"
             type="INTEGER"/>
-    <column name="username"
+    <column name="student_id"
             required="true"
-            size="30"
-            type="VARCHAR"/>
+            size="11"
+            type="INTEGER"/>
+    <column name="absent"
+            required="true"
+            size="2"
+            type="TINYINT"/>
     <column name="score"
             required="false"
             size=""
@@ -187,12 +184,15 @@
             default="0"
             size="10"
             type="INTEGER"/>
-    <index>
-      <index-column name="id_class_gradebook_entries"/>
-      <index-column name="id_classes"/>
-      <index-column name="username"/>
-      <index-column name="date_modified"/>
-    </index>
+	<key
+			attribute="id_class_gradebook_entries"
+			name="id_class_gradebook_entries_idx"/>
+	<key
+			attribute="id_classes"
+			name="id_classes_idx"/>
+	<key
+			attribute="student_id"
+			name="student_idx"/>
   </table>
 </database>
 <!-- END OF MYSQL2TURBINE DUMP -->

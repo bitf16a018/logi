@@ -1,114 +1,129 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-CREATE TABLE helpdesk_categories (
-  helpdesk_category_id int(11) NOT NULL auto_increment,
-  helpdesk_category_label varchar(30) NOT NULL default '',
-  PRIMARY KEY  (helpdesk_category_id)
+CREATE TABLE class_sections (
+  sectionNumber int(11) NOT NULL default '0',
+  id_classes int(11) NOT NULL default '0',
+  KEY sectionNumber (sectionNumber),
+  KEY id_classes (id_classes)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE helpdesk_comments (
-  helpdesk_comments_id int(11) NOT NULL auto_increment,
-  userid varchar(32) NOT NULL default '',
-  comment text NOT NULL,
-  PRIMARY KEY  (helpdesk_comments_id)
+CREATE TABLE class_extra_faculty (
+  pkey int(11) NOT NULL auto_increment,
+  id_classes int(11) default NULL,
+  facultyId varchar(30) default NULL,
+  facultyType char(1) default 'e',
+  PRIMARY KEY  (pkey)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE helpdesk_status (
-  helpdesk_status_id int(11) NOT NULL auto_increment,
-  helpdesk_status_label varchar(30) NOT NULL default '',
-  helpdesk_status_sort int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (helpdesk_status_id)
+CREATE TABLE classes (
+  id_classes int(10) unsigned NOT NULL auto_increment,
+  id_courses int(10) unsigned NOT NULL default '0',
+  id_semesters int(10) unsigned NOT NULL default '0',
+  sectionNumbers text NOT NULL,
+  classType varchar(25) NOT NULL default '',
+  facultyId varchar(32) NOT NULL default '',
+  courseFamily varchar(25) NOT NULL default '',
+  courseNumber int(4) unsigned zerofill NOT NULL default '0000',
+  courseFamilyNumber varchar(50) NOT NULL default '',
+  stylesheet varchar(25) NOT NULL default '',
+  id_class_resource int(10) unsigned NOT NULL default '0',
+  noexam tinyint(4) default '0',
+  PRIMARY KEY  (id_classes)
+) TYPE=MyISAM PACK_KEYS=0
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE courses (
+  id_courses int(10) unsigned NOT NULL auto_increment,
+  courseFamily varchar(25) NOT NULL default '',
+  courseNumber int(4) unsigned zerofill NOT NULL default '0000',
+  courseName varchar(100) NOT NULL default '',
+  courseDescription text NOT NULL,
+  preReq1 varchar(100) NOT NULL default '',
+  preReq2 varchar(100) NOT NULL default '',
+  preReq3 varchar(100) NOT NULL default '',
+  preReq4 varchar(100) NOT NULL default '',
+  coReq1 varchar(100) NOT NULL default '',
+  coReq2 varchar(100) NOT NULL default '',
+  coReq3 varchar(100) NOT NULL default '',
+  coReq4 varchar(100) NOT NULL default '',
+  PRIMARY KEY  (id_courses)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE helpdesk_incident (
-  helpdesk_id int(11) NOT NULL auto_increment,
-  timedate_open int(11) NOT NULL default '0',
-  timedate_close int(11) NOT NULL default '0',
-  timedate_reply int(11) NOT NULL default '0',
-  timedate_update int(11) NOT NULL default '0',
-  status int(11) NOT NULL default '0',
-  summary text NOT NULL,
-  userid varchar(32) NOT NULL default '',
-  category int(11) NOT NULL default '0',
-  assigned_to varchar(32) NOT NULL default '',
-  PRIMARY KEY  (helpdesk_id)
+CREATE TABLE remote_test_files (
+  pkey int(11) NOT NULL auto_increment,
+  email varchar(60) NOT NULL default '',
+  hash varchar(32) NOT NULL default '',
+  FILE varchar(100) NOT NULL default '',
+  displayname varchar(255) NOT NULL default '',
+  description varchar(255) NOT NULL default '',
+  mime varchar(100) NOT NULL default '',
+  filedate datetime NOT NULL default '0000-00-00 00:00:00',
+  size int(11) NOT NULL default '0',
+  clicks int(11) NOT NULL default '0',
+  PRIMARY KEY  (pkey)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE helpdesk_incident_log (
-  helpdesk_incident_log_id int(11) NOT NULL auto_increment,
-  helpdesk_id int(11) NOT NULL default '0',
-  action varchar(15) NOT NULL default '',
-  timedate int(11) NOT NULL default '0',
-  comment text NOT NULL,
-  userid varchar(32) NOT NULL default '',
-  PRIMARY KEY  (helpdesk_incident_log_id)
+CREATE TABLE semesters (
+  id_semesters int(10) unsigned NOT NULL auto_increment,
+  semesterId varchar(6) NOT NULL default '',
+  semesterTerm varchar(255) NOT NULL default '',
+  dateCensus date NOT NULL default '0000-00-00',
+  dateFinalDrop datetime NOT NULL default '0000-00-00 00:00:00',
+  dateDeactivation date NOT NULL default '0000-00-00',
+  dateStart date NOT NULL default '0000-00-00',
+  dateEnd date NOT NULL default '0000-00-00',
+  dateRegistrationStart date NOT NULL default '0000-00-00',
+  dateRegistrationEnd date NOT NULL default '0000-00-00',
+  dateAccountActivation datetime NOT NULL default '0000-00-00 00:00:00',
+  dateStudentActivation datetime NOT NULL default '0000-00-00 00:00:00',
+  semesterYear int(10) unsigned NOT NULL default '0',
+  dateStartITVseminar datetime NOT NULL default '0000-00-00 00:00:00',
+  dateEndITVseminar datetime NOT NULL default '0000-00-00 00:00:00',
+  dateStartOrientation datetime NOT NULL default '0000-00-00 00:00:00',
+  dateEndOrientation datetime NOT NULL default '0000-00-00 00:00:00',
+  dateStartTextbook datetime NOT NULL default '0000-00-00 00:00:00',
+  dateEndTextbook datetime NOT NULL default '0000-00-00 00:00:00',
+  dateStartExam datetime NOT NULL default '0000-00-00 00:00:00',
+  dateEndExam datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (id_semesters)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE helpdesk_faq (
-  id_faq int(10) unsigned NOT NULL auto_increment,
-  id_faq_category int(10) unsigned NOT NULL default '0',
-  tx_username varchar(32) NOT NULL default '',
-  tx_question varchar(255) NOT NULL default '',
-  tx_answer text NOT NULL,
-  dt_submitted datetime NOT NULL default '0000-00-00 00:00:00',
-  fl_approved int(11) NOT NULL default '0',
-  ic_viewed int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (id_faq),
-  KEY id_faq_category (id_faq_category)
-) TYPE=MyISAM
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE helpdesk_faq_category (
-  id_faq_category int(10) unsigned NOT NULL auto_increment,
-  tx_category varchar(100) NOT NULL default '',
-  PRIMARY KEY  (id_faq_category)
-) TYPE=MyISAM
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-CREATE TABLE helpdesk_faq_vote (
-  username varchar(32) NOT NULL default '',
-  id_faq int(10) unsigned NOT NULL default '0',
-  ii_vote int(11) NOT NULL default '0',
-  KEY username (username),
-  KEY id_faq (id_faq)
-) TYPE=MyISAM COMMENT='tracks users to their votes.'
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO helpdesk_status VALUES (1,'New', 1)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO helpdesk_status VALUES (2,'In progress', 3)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO helpdesk_status VALUES (3,'Closed', 4)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO helpdesk_status VALUES (4,'Replied', 2)
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO helpdesk_categories (helpdesk_category_id, helpdesk_category_label) VALUES (1, 'General Help')
-campusdelimeter;
-$installTableSchemas[] = $table;
-$table = <<<campusdelimeter
-INSERT INTO helpdesk_categories (helpdesk_category_id, helpdesk_category_label) VALUES (2, 'E-mail');
+CREATE TABLE semesters_course_info (
+  id_semesters int(10) unsigned NOT NULL default '0',
+  campusClosings text,
+  lateGuidelines text,
+  noChildren text,
+  withdrawalPolicy text,
+  gradeVerify text,
+  examInfo text,
+  gradeChallenge text,
+  leaseKit text,
+  campusViewing text,
+  testingLocations text,
+  itvGrades text,
+  cable text,
+  textbooks text,
+  helpdesk text,
+  syllabusDisclaimer text,
+  specialInfo text,
+  testHours text,
+  accessClassSite text,
+  emailGuidelines text,
+  studentConduct text,
+  PRIMARY KEY  (id_semesters)
+) TYPE=MyISAM;
 campusdelimeter;
 $installTableSchemas[] = $table;
 
