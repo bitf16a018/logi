@@ -163,7 +163,6 @@ class enrollment extends RegAuth {
 	}
 
 
-
 	/**
 	 *
 	 */

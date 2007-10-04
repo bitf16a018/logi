@@ -21,14 +21,19 @@ class LC_LessonSequence {
 
 	function fetchObject($sequenceId) {
 		$type = 'content';
+		$repoId = -1;
+
 		foreach ($this->items as $seqItem) {
 			if ($seqItem->classLessonSequenceId == $sequenceId) {
 				$type = $seqItem->lobType;
+				$repoId = $seqItem->lobClassRepoId;
 			}
 		}
+		if ($repoId == -1) { return null; }
+
 		switch($type) {
 			case 'activity':
-				$activityLob = new Lc_Lob_ClassActivity($seqItem->lobClassRepoId);
+				$activityLob = new Lc_Lob_ClassActivity($repoId);
 				return $activityLob;
 				break;
 		}
