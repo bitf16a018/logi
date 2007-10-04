@@ -72,17 +72,24 @@ class classmgr extends FacultyService {
 			$t['classEntriesStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_entries']);
 
 
+			$offSets = lcClass::calcOffsetForStudent($u, $classObj->id_classes, $classObj->semesterID);
+			//__TODO__ remove this calculation for rolling enrollment classes
 			$db->query('
-				SELECT count(assessment_id) as total_assessments
-				FROM assessment
+				SELECT count(lob_class_test_id) as total_assessments
+				FROM lob_class_test AS A
+				LEFT JOIN lob_class_repo AS B
+					ON A.lob_class_repo_id = B.lob_class_repo_id
+				LEFT JOIN class_lesson_sequence AS C
+					ON B.lob_class_repo_id = C.lob_class_repo_id
 				WHERE
-					class_id='.$classObj->id_classes.'
-					AND date_available >= '.(time()+86400*5));
+					B.class_id='.$classObj->id_classes.'
+					AND C.start_offset - '.$offSets['start'].' <= '.(86400*5));
 			$db->nextRecord();
 			$db->freeResult();
 			$t['classAssessmentsStats'][$classObj->id_classes] = sprintf('%d',$db->record['total_assessments']);
 
-			$offSets = lcClass::calcOffsetForStudent($u, $classObj->id_classes, $classObj->semesterID);
+
+			//__TODO__ remove this calculation for rolling enrollment classes
 			$db->query('
 				SELECT count(lob_class_activity_id) as total_assignments
 				FROM lob_class_activity AS A
