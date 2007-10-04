@@ -85,8 +85,10 @@ class LessonSequence extends FacultyService {
 		$db->query($sql3);
 
 		//redirect
+		//go back to the main overview page, all the controls that used to be in this lessonSequence
+		// service are now in there too.
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonSequence/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 
 	}
 

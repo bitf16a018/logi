@@ -535,7 +535,7 @@ class LessonManager extends FacultyService {
 		$lessonSequence->updateContent($itemArray,$lobRecord);
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 	}
 
 
@@ -596,7 +596,7 @@ class LessonManager extends FacultyService {
 		}
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 	}
 
 
@@ -647,7 +647,7 @@ class LessonManager extends FacultyService {
 		}
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 	}
 
 
@@ -696,7 +696,7 @@ class LessonManager extends FacultyService {
 		$lessonSequence->updateAssignments($itemArray,$lobRecord);
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 	}
 
 
@@ -716,44 +716,6 @@ class LessonManager extends FacultyService {
 
 		DEFINE(LESSON_ID, $lesson_id); // for the custom fields
 
-
-		// get the content pages
-		/*
-		$sql = "SELECT A.id_class_lesson_content, A.txTitle
-			FROM class_lesson_content AS A
-			WHERE A.id_classes='{$class_id}'";
-		$db->query($sql);
-		while ( $db->next_record() )
-			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
-
-		// get the content field
-		$sql = "select id_class_lesson_content from class_lesson_content
-			where id_class_lessons='{$lesson_id}'";
-		$db->queryOne($sql);
-		$t['content'] = $db->Record['id_class_lesson_content'];
-		 */
-
-		// get the objectives
-		$sql = "SELECT A.objective 
-			FROM class_objectives AS A
-			LEFT JOIN class_lesson_objectives AS B
-			  ON A.id_class_objectives=B.id_class_objectives
-			WHERE B.id_class_lesson='{$lesson_id}'
-			AND A.id_classes = '{$class_id}'";
-		$db->query($sql);
-		while ( $db->nextRecord() )
-			$t['objectives'][] = $db->record['objective'];
-
-		// get the content
-		$sql = "SELECT A.lob_title
-			FROM class_lesson_sequence AS A
-			WHERE A.lesson_id='{$lesson_id}'
-			AND A.class_id = '{$class_id}'
-			AND lob_type = 'content'
-			ORDER BY rank";
-		$db->query($sql);
-		while ( $db->nextRecord() )
-			$t['contentItems'][] = $db->record['lob_title'];
 
 
 
@@ -780,13 +742,98 @@ class LessonManager extends FacultyService {
 		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
 		$t['inactiveOnStruct']['dateTimeBit'] = 7;
 
+	}
+
+
+	/**
+	 * This page will show a detailed overview of the entire lesson.
+	 */
+	function showRun(&$db,&$u,&$lc,&$t) {
+
+		$this->sectionTitle = 'Lesson Overview';
+		$lc->templateName = 'lessonManager_show';
+		$defaults = array();
+		$lessonId = intval($lc->getvars['id']);
+		$classId = $u->activeClassTaught->id_classes;
+		$t['lessonId'] = $lessonId;
+
+		$t['lessonObj'] = new LC_Lesson($lessonId);
+
+		if (!$this->checkAuth($lessonId,$db,$u,$t)) return;
+
+		DEFINE(LESSON_ID, $lessonId); // for the custom fields
+
+
+		// get the content pages
+		/*
+		$sql = "SELECT A.id_class_lesson_content, A.txTitle
+			FROM class_lesson_content AS A
+			WHERE A.id_classes='{$classId}'";
+		$db->query($sql);
+		while ( $db->next_record() )
+			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
+
+		// get the content field
+		$sql = "select id_class_lesson_content from class_lesson_content
+			where id_class_lessons='{$lessonId}'";
+		$db->queryOne($sql);
+		$t['content'] = $db->Record['id_class_lesson_content'];
+		 */
+
+		// get the objectives
+		$sql = "SELECT A.objective 
+			FROM class_objectives AS A
+			LEFT JOIN class_lesson_objectives AS B
+			  ON A.id_class_objectives=B.id_class_objectives
+			WHERE B.id_class_lesson='{$lessonId}'
+			AND A.id_classes = '{$classId}'";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['objectives'][] = $db->record['objective'];
+
+		// get the content
+		$sql = "SELECT A.lob_title
+			FROM class_lesson_sequence AS A
+			WHERE A.lesson_id='{$lessonId}'
+			AND A.class_id = '{$classId}'
+			AND lob_type = 'content'
+			ORDER BY rank";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['contentItems'][] = $db->record['lob_title'];
+
+
+
+		// Get the basic info about the lesson
+		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
+			from class_lessons
+			where id_class_lessons='{$lessonId}'";
+		$db->queryOne($sql);
+		$t['title'] = $db->Record['title'];
+		$t['description'] = $db->Record['description'];
+		$t['createdOn'] = $db->Record['createdOn'];
+		$t['activeOn'] = $db->Record['activeOn'];
+		$t['inactiveOn'] = $db->Record['inactiveOn'];
+		if ( strlen( trim( $db->Record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->Record['checkList']) );
+
+		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+		$t['activeOnStruct']['fieldName'] = 'activeOn';
+		$t['activeOnStruct']['displayName'] = 'Active On';
+		$t['activeOnStruct']['dateTimeBit'] = 63;
+
+		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
+		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
+		$t['inactiveOnStruct']['dateTimeBit'] = 7;
+
 		// get the web links
 		$sql = "SELECT A.id_class_links, A.title
 			FROM class_links AS A
 			LEFT JOIN class_lesson_links  AS B
 			  ON A.id_class_links=B.id_class_links
-			WHERE B.id_class_lessons='{$lesson_id}'
-			AND A.id_classes = '{$class_id}'";
+			WHERE B.id_class_lessons='{$lessonId}'
+			AND A.id_classes = '{$classId}'";
 		$db->query($sql);
 		while ( $db->next_record() )
 			$t['web'][] = $db->Record['title'];
@@ -797,27 +844,115 @@ class LessonManager extends FacultyService {
 			FROM lob_class_repo AS A
 			LEFT JOIN class_lesson_sequence  AS B
 			  ON A.lob_class_repo_id=B.lob_class_repo_id
-			WHERE B.lesson_id='{$lesson_id}'
-			AND A.class_id = '{$class_id}'
+			WHERE B.lesson_id='{$lessonId}'
+			AND A.class_id = '{$classId}'
 			AND A.lob_type = 'activity'";
 		$db->query($sql);
 		while ( $db->nextRecord() )
 			$t['assignments'][] = $db->record['lob_title'];
 
 		// get the ssessments
+/*
 		$sql = "SELECT A.assessment_id, A.display_name
 			FROM assessment AS A
 			LEFT JOIN assessment_lesson_link  AS B
 			  ON A.assessment_id=B.assessment_id
-			WHERE B.lesson_id='{$lesson_id}'
-			AND A.class_id = '{$class_id}'";
+			WHERE B.lesson_id='{$lessonId}'
+			AND A.class_id = '{$classId}'";
 		$db->query($sql);
 		while ( $db->next_record() )
 			$t['assessments'][] = $db->Record['display_name'];
+*/
 
 
-		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id.' ORDER BY rank');
+		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lessonId.' ORDER BY rank');
+
+
+		foreach ($t['seqItems'] as $objIdx => $obj) {
+
+			//change the "type" field into an image representing the mime.
+			//no reason why i'm changing lobType instead of lobMime
+			$t['seqItems'][$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+
+			//change unix timestamp offset into days
+			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+
+		}
+
+		$dm = new LC_Table_ObjectModel($t['seqItems']);
+		$dm->ignoreColumn('_new');
+		$dm->ignoreColumn('_modified');
+		$dm->ignoreColumn('_version');
+		$dm->ignoreColumn('_entityVersion');
+		$dm->ignoreColumn('__attributes');
+		$dm->ignoreColumn('__nulls');
+
+		$dm->ignoreColumn('classLessonSequenceId');
+		$dm->ignoreColumn('lessonId');
+		$dm->ignoreColumn('classId');
+		$dm->ignoreColumn('lobClassRepoId');
+		$dm->ignoreColumn('lobSubType');
+		$dm->ignoreColumn('lobMime');
+		$dm->ignoreColumn('linkText');
+		$dm->ignoreColumn('notBeforeSeqId');
+		$dm->ignoreColumn('endOffset');
+		$dm->ignoreColumn('gracePeriodDays');
+		$dm->ignoreColumn('hideUntilStart');
+		$dm->ignoreColumn('hideAfterEnd');
+
+
+		$table = new LC_Table($dm);
+
+		$columnModel = &$table->getColumnModel();
+		$columnModel->tableColumns[0]->name  =' ';
+		$columnModel->tableColumns[1]->name  ='Title';
+
+		$colA = &$columnModel->getColumnAt(0);
+		$colA->maxWidth=64;
+
+		$colD = &$columnModel->getColumnAt(1);
+		$colD->justify='left';
+
+		$col = &$columnModel->getColumnAt(4);
+		$col->maxWidth=64;
+		$col->name = 'Rank';
+		$col->cellRenderer = new LC_Table_SequenceRenderer();
+		$col->cellRenderer->id = $lessonId;
+
+
+		$colB = &$columnModel->getColumnAt(2);
+		$colB->maxWidth=64;
+		$colB->name = 'Start';
+		$colB->cellRenderer = new LC_TableSelectRenderer();
+		$colB->cellRenderer->idName = 'startOffset';
+		$colB->cellRenderer->fieldName = 'startOffset';
+		$colB->cellRenderer->options = array(0=>'0');
+		for ($qq=1; $qq< 21; $qq++) { 
+			$colB->cellRenderer->options[] = $qq;
+		}
+
+		$colC = &$columnModel->getColumnAt(3);
+		$colC->maxWidth=64;
+		$colC->name = 'Due';
+		$colC->cellRenderer = new LC_TableSelectRenderer();
+		$colC->cellRenderer->idName = 'dueOffset';
+		$colC->cellRenderer->fieldName = 'dueOffset';
+		$colC->cellRenderer->options = array(0=>'Never');
+		for ($qq=1; $qq< 21; $qq++) { 
+			$colC->cellRenderer->options[] = $qq;
+		}
+
+
+
+		$t['table'] = new LC_TableRenderer($table);
+		$t['id'] = $lesson_id;
+
+
+
+
 	}
+
 
 
 	/**
@@ -884,7 +1019,7 @@ class LessonManager extends FacultyService {
 
 		$u->addSessionMessage('Lesson changes saved.');
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lessonId);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lessonId);
 
 	}
 
@@ -980,7 +1115,7 @@ class LessonManager extends FacultyService {
 			);
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 	}
 
 
@@ -1054,7 +1189,7 @@ class LessonManager extends FacultyService {
 
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonManager/event=edit/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 	}
 
 
@@ -1077,5 +1212,18 @@ class LessonManager extends FacultyService {
 	}
 
 }
+
+
+class LC_Table_SequenceRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+//		debug($this->value);
+		return '<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=up">Up</a> <br/>
+			<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=dn">Down</a>
+			';
+	}
+}
+
+
 
 ?>
