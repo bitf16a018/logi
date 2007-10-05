@@ -69,14 +69,11 @@ class mysql extends DB {
 		if ($this->driverID == 0 ) {$this->connect();}
 
 		$resSet = mysql_query($queryString,$this->driverID);
+		$this->record = array();
 		$this->row = 0;
-		if ( !$resSet ) {
+		if ( $resSet === false ) {
 			$this->errorNumber = mysql_errno($this->driverID);
 			$this->errorMessage = mysql_error($this->driverID);
-			if (!strstr($this->queryString, 'lcUsers')) {
-				//print_r($this);
-				//die($this->queryString);
-			}
 			lcError::throwError(9,$this->errorMessage);
 			return false;
 		}
@@ -101,14 +98,11 @@ class mysql extends DB {
 		if ($this->driverID == 0 ) {$this->connect();}
 
 		$resSet = mysql_unbuffered_query($queryString,$this->driverID);
+		$this->record = array();
 		$this->row = 0;
-		if ( !$resSet ) {
+		if ( $resSet === false ) {
 			$this->errorNumber = mysql_errno($this->driverID);
 			$this->errorMessage = mysql_error($this->driverID);
-			if (!strstr($this->queryString, 'lcUsers')) {
-				//print_r($this);
-				//die($this->queryString);
-			}
 			lcError::throwError(9,$this->errorMessage);
 			return false;
 		}
@@ -137,14 +131,14 @@ class mysql extends DB {
 	 * @return boolean
 	 * @param  int	$resID	Specific resultSet, default is last query
 	 */
-	function next_record($resID=false) {
+	function nextRecord($resID=false) {
 		if ( ! $resID ) { $resID = count($this->resultSet) -1; }
 
-		$this->Record = mysql_fetch_array($this->resultSet[$resID],$this->RESULT_TYPE);
+		$this->record = mysql_fetch_array($this->resultSet[$resID],$this->RESULT_TYPE);
 		$this->row += 1;
 
 		//no more records in the result set?
-		$ret = is_array($this->Record);
+		$ret = is_array($this->record);
 		if ( ! $ret ) {
 			if( is_resource($this->resultSet[$resID]) ) {
 				$stuff = array_pop($this->resultSet);
@@ -155,9 +149,9 @@ class mysql extends DB {
 	}
 
 
-	function nextRecord($resID=false) {
-		$ret = $this->next_record($resID);
-		$this->record =& $this->Record;
+	function next_record($resID=false) {
+		$ret = $this->nextRecord($resID);
+		$this->Record =& $this->record;
 		return $ret;
 	}
 
