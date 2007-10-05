@@ -9,14 +9,16 @@
     <meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management, LMS, CMS, classroom, grade book, online" />
 
     <!-- Navigational metadata for large websites (an accessibility feature): -->
-    <link rel="top"      href="./index.html" title="Homepage" />
-    <link rel="up"       href="./index.html" title="Up" />
-    <link rel="first"    href="./index.html" title="First page" />
-    <link rel="previous" href="./index.html" title="Previous page" />
-    <link rel="next"     href="./index.html" title="Next page" />
-    <link rel="last"     href="./index.html" title="Last page" />
-    <link rel="toc"      href="./index.html" title="Table of contents" />
+<!--
+    <link rel="top"      href="./top.html" title="Homepage" />
+    <link rel="up"       href="./up.html" title="Up" />
+    <link rel="first"    href="./first.html" title="First page" />
+    <link rel="previous" href="./previous.html" title="Previous page" />
+    <link rel="next"     href="./next.html" title="Next page" />
+    <link rel="last"     href="./last.html" title="Last page" />
+    <link rel="toc"      href="./toc.html" title="Table of contents" />
     <link rel="index"    href="./index.html" title="Site map" />
+-->
 
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
     <link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>calendar.css"  media="screen" title="Sinorca (screen)" />
