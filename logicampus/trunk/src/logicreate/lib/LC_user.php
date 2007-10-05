@@ -23,6 +23,7 @@ class lcUser {
 	var $profile;
 	var $loggedIn = false;
 	var $userId = 0;
+	var $_origChecksum = '';
 
 
 
@@ -89,7 +90,6 @@ class lcUser {
 			$db->freeResult();
 		}
 
-
 		if (function_exists("gzuncompress")) { 
 			$temp2 = unserialize(gzuncompress(base64_decode($db->record['sessdata'])));
 		} else {
@@ -102,6 +102,7 @@ class lcUser {
 		if ($temp2['_userobj']->username!='anonymous') { 
 			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
 		}
+
 		if ($j) {
 			$sessArr = $temp2;
 			/*
@@ -114,18 +115,18 @@ class lcUser {
 			$origSession = crc32($db->record['sessdata']);
 			if ( is_object($sessArr['_userobj']) && $sessArr['_userobj']->userType > 0) {
 				$temp = $sessArr['_userobj'];
-//				$temp = lcUser::getUserByUsername($sessArr['_userobj']->username);
+				$temp = lcUser::getUserByUsername($sessArr['_userobj']->username);
 				unset($sessArr['_userobj']);
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
-				$temp->_origSessionData = $origSession;
+				$temp->_origChecksum = $origSession;
 				$temp->loggedIn = true;
 			} else
 			if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
-				$temp->_origSessionData = $origSession;
+				$temp->_origChecksum = $origSession;
 				$temp->loggedIn = true;
 				$temp->loadProfile();
 			}
@@ -133,7 +134,7 @@ class lcUser {
 				$temp = new lcUser();
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
-				$temp->_origSessionData = $origSession;
+				$temp->_origChecksum = $origSession;
 				$temp->loadProfile();
 			}
 		//added for mail server compat.
@@ -366,7 +367,6 @@ class lcUser {
 		
 		$pkey = $db->getInsertID();
 		$this->bindSession();
-		$this->_origSessionData = '';
 		return $pkey;
 	}
 
@@ -400,19 +400,23 @@ class lcUser {
 			$val = serialize($sessBlob);
 		}
 
-#		if ( crc32($val) == $this->_origSessionData) { return; }
+		if ( crc32($val) == $this->_origChecksum) { return; }
 		$db = DB::getHandle();
 		$sessid = $this->_sessionKey;
-		$oval = $val;
 		$val=base64_encode($val);
-		$s="replace into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
-		$origs="replace into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$oval','$sessid')";
+		$s="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		if ($this->username == "anonymous" ) { 
-			$s="replace into lcSessions (sessdata,sesskey) values ('$val','$sessid')";
-			$origs="replace into lcSessions (sessdata,sesskey) values ('$oval','$sessid')";
+			$s="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		}
-
-		$db->query($s,true);
+		if (!$db->query($s)) {
+			die('no update');
+			//no update record, try insert
+			$s="INSERT into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
+			if ($this->username == "anonymous" ) { 
+				$s="INSERT into lcSessions (sessdata,sesskey) values ('$val','$sessid')";
+			}
+			$db->query($s);
+		}
 		//sess_close(DB::getHandle(),$this->uid,serialize($this->session));
 		$sessBlob['_userobj'] = '';
 		$this->sessionvars = $sessBlob;
@@ -442,7 +446,7 @@ class lcUser {
 			$val = base64_encode((serialize($this->sessionvars)));
 
 		}
-		$this->_origSessionData = crc32($val);
+		$this->_origChecksum = crc32($val);
 		$sessid = $this->_sessionKey;
 
 		$s="replace into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
