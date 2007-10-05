@@ -97,7 +97,7 @@ class MenuObj extends PersistantObject {
 
 		while ($db->nextRecord() ) {
 			$menuItems[] = MenuItem::create($db->record);
-			$lastrec = $db->Record;
+			$lastrec = $db->record;
 		}
 		$tree->loadObjects($menuItems);
 
@@ -127,8 +127,8 @@ class MenuObj extends PersistantObject {
 		$db = DB::getHandle();
 		$sql = "select menuObj from menuCache where pkey = $key";
 		$db->query($sql,false);
-		$db->next_record();
-		$menu = unserialize($db->Record[0]);
+		$db->nextRecord();
+		$menu = unserialize($db->record[0]);
 	return $menu;
 	}
 
@@ -137,8 +137,7 @@ class MenuObj extends PersistantObject {
         $groups = createGroupCheck($groups, "groups");
         $db = DB::getHandle();
         $sql = "select menuObj from menuCache where (menuid= '$key' and (($groups) and not ($notgroups)))"; 
-		$db->query($sql,false);
-        $db->nextRecord();
+		$db->queryOne($sql,false);
         $menu = unserialize($db->record['menuObj']);
         if (is_object($menu) )
         {
@@ -175,8 +174,8 @@ class MenuObj extends PersistantObject {
 		$sql = "select pkey from menu order by rank";
 		$db->query($sql,false);
 		$db->RESULT_TYPE= MYSQL_BOTH;
-		while ($db->next_record()) {
-			$ids[] = $db->Record[0];
+		while ($db->nextRecord()) {
+			$ids[] = $db->record[0];
 		}
 		$db = null;
 		while ( list ($k,$v) = @each ($ids) ) {
@@ -406,16 +405,16 @@ class MenuItem extends PersistantObject {
 		$db = DB::getHandle();
 		$db->query("select * from menuItems where pkey = $id",false);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		$db->next_record();
+		$db->nextRecord();
 
-		switch ($db->Record[type]) {
+		switch ($db->record['type']) {
 			case "htm": $name = "HTMLMenuItem";break;
 			case "app": $name = "APPMenuItem";break;
 			case "ext": $name = "URLMenuItem";break;
 			case "hr": $name = "BreakMenuItem";break;
 		}
 
-		$x = PersistantObject::createFromArray($name,$db->Record);
+		$x = PersistantObject::createFromArray($name,$db->record);
 //print_r($x);exit();
 		$x->groups = substr($x->groups,1,-1);
 		$x->groups = @explode("|",$x->groups);
