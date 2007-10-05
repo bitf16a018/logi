@@ -36,17 +36,54 @@ class Lc_Lob_Test extends Lc_Lob {
 		$this->repoObj->set('lobNotes', $n);
 	}
 
-	function addQuestion($qtext, $type = 'QUESTION_ESSAY', $choices = '', $answers = '') {
-
-		$q = new LobTestQst();
-		$q->qstText =  $qtext;
-		if ( is_array($choices) ) {
+	function setQuestion($qidx, $qtext, $type = 'QUESTION_ESSAY', $choices = '', $answers = '') {
+		$q = $this->_makeQuestion($qtext, $type, $choices, $answers);
+		if ($qidx > -1) {
+			$this->questionObjs[$qidx] = $q;
+		} else {
+			$this->questionObjs[] = $q;
 		}
+	}
+
+	function addQuestion($qtext, $type = 'QUESTION_ESSAY', $choices = '', $answers = '') {
+		$q = $this->_makeQuestion($qtext, $type, $choices, $answers);
 		$this->questionObjs[] = $q;
 	}
 
 	function getQuestionCount() {
 		return count($this->questionObjs);
+	}
+
+	function _makeQuestion($qtext, $type, $choices, $answers='') {
+		$q = new LobTestQst();
+		$q->qstChoices = array();
+		$q->qstText =  $qtext;
+		$q->questionTypeId = constant($type);
+		if ( is_array($choices) ) {
+		}
+		return $q;
+	}
+
+
+	/**
+	 *
+	 * @return bool successfully added the choice
+	 */
+	function addLabel($l, $correct, $qidx=-1) {
+		if ($qidx == -1) {
+			$qidx = $this->getQuestionCount()-1;
+		}
+		if ($qidx == -1) {
+			return false;
+		}
+		$lidx = count($this->questionObjs[$qidx]->qstChoices);
+		if ($lidx == -1) {
+			$lidx = 0;
+		}
+	
+		$this->questionObjs[$qidx]->qstChoices[$lidx]['label'] = $l;
+		$this->questionObjs[$qidx]->qstChoices[$lidx]['correct'] = $correct;
+		return true;
 	}
 }
 ?>

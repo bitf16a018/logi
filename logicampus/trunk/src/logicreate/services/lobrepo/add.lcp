@@ -58,6 +58,11 @@ class add extends FacultyService {
 			case 'activity':
 				$lc->templateName = 'add_activity';
 				break;
+
+			case 'test':
+				$lc->templateName = 'add_test';
+				break;
+
 		}
 		$t['mimetype'] = $mimetype;
 	}
@@ -89,6 +94,7 @@ class add extends FacultyService {
 	}
 
 
+/*
 	function textToLob(&$lob,&$lc) {
 		$lob->set('lobContent', $lc->postvars['txText']);
 		LC_Lob::getSubType($lc->postvars['mime']);
@@ -102,6 +108,8 @@ class add extends FacultyService {
 		);
 
 	}
+*/
+
 }
 
 ?>
