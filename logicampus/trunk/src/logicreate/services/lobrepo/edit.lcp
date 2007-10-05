@@ -5,6 +5,7 @@ include_once(LIB_PATH.'PBDO/LobMetadata.php');
 include_once(LIB_PATH.'PBDO/LobUserLink.php');
 
 include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_lob_test.php');
 include_once(LIB_PATH.'lc_table.php');
 include_once(LIB_PATH.'lc_table_renderer.php');
 
@@ -24,8 +25,6 @@ class Edit extends FacultyService {
 	 *
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
-		$lc->templateName='edit_main';
-
 		$lobId = addslashes(trim($lc->getvars['c']));
 
 		$lob = new Lc_Lob_Content($lobId);

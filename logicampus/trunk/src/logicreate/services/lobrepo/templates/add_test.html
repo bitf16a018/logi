@@ -1,4 +1,4 @@
-<h4>Student Activity</h4>
+<h4>Student Test</h4>
 <a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
 &bull;  
 <a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
@@ -11,7 +11,7 @@
 
 
 
-<form action="<?=appurl('lobrepo').'/edit/event=saveAct';?>" method="POST" enctype="application/x-www-form-urlencoded">
+<form action="<?=appurl('lobrepo').'/exam/';?>" method="POST" enctype="application/x-www-form-urlencoded">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
 	<tr>
@@ -33,19 +33,6 @@
 		</td>
 	</tr>
 
-
-	<tr>
-		<td valign="top" class="row1">Type of response</td>
-		<td valign="top" class="">
-				<input type="radio" name="responseType" value="5" checked="CHECKED">None<br/>
-				<input type="radio" name="responseType" value="1">Upload a File<br/>
-				<input type="radio" name="responseType" value="2">Text Response<br/>
-				<input type="radio" name="responseType" value="3">Upload and Text<br/>
-				<input type="radio" name="responseType" value="4">Forum Post<br/>
-				<input type="radio" name="responseType" value="6">Audio Response<br/>
-			<div style="font-size=80%;">(If you have another type of response select &quot;None&quot; and be sure to include appropriate instructions.)</div>
-		</td>
-	</tr>
 	<tr>
 		<td colspan="2" valign="top" class="">&nbsp;</td>
 	</tr>
@@ -53,7 +40,7 @@
 		<td valign="top" class="row1">
 			<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobRepoEntryId');?>">
 		</td>
-		<td valign="top" class=""><input type="submit" id="sbmt_button" name="sbmt_button" value="Add Activity"></td>
+		<td valign="top" class=""><input type="submit" id="sbmt_button" name="sbmt_button" value="Add Questions"></td>
 	</tr>
 </table>
 
