@@ -93,6 +93,10 @@ class DB {
 		//return by value (copy) to make sure
 		// nothing has access to old query results
 		// keeps the same connection ID though
+		if (version_compare(phpversion(), "5.0.0", ">=")) {
+			$copy = clone($x);
+			return $copy;
+		}
 		return $x;
 	}
 
