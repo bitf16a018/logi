@@ -118,9 +118,9 @@ class xml_node
 		if (strlen($nValue) > 0)
 		{	
 			if ($base64_check && @$nAttrs['BASE64']) {
-				$this->value = utf8_decode(html_entity_decode(base64_decode($nValue))); // i'm not sure i need to do this.. (html_entity_decode())
+				$this->value = base64_decode($nValue);
 			} else {
-				$this->value = utf8_decode(html_entity_decode($nValue));
+				$this->value = $nValue;
 			}
 			
 		}
@@ -134,7 +134,7 @@ class xml_node
 		$attr_str = '';
 		if (is_array($this->attrs))
 		foreach($this->attrs as $key => $val)
-		{	$attrs[] = $key . '="'. utf8_encode(htmlspecialchars($val)). '"'; // encode this
+		{	$attrs[] = $key . '="'. htmlspecialchars($val, ENT_QUOTES, 'UTF-8'). '"'; // encode this
 		}
 		
 		if ($attrs) 
