@@ -61,6 +61,14 @@ class Lc_Lob_Class extends Lc_Lob {
 				break;
 
 			case 'test':
+				if ($this->repoObj->getPrimaryKey() > 0) {
+					$results = $this->repoObj->getLobClassTestsByLobClassRepoId();
+					$this->lobSub = $results[0];
+				}
+				if (! is_object($this->lobSub)) {
+					$this->lobSub = new LobClassTest();
+				}
+
 				/*
 				$results  = $this->getLobTestsByLobRepoEntryId();
 				if (! count($results) ) {
@@ -70,9 +78,8 @@ class Lc_Lob_Class extends Lc_Lob {
 				$subLob  = $results[0];
 				include_once(LIB_PATH.'lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassTest();
-				*/
-
 				trigger_error('un-implemented');
+				*/
 				break;
 		}
 	}

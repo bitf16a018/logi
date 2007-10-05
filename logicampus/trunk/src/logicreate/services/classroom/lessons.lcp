@@ -42,7 +42,7 @@ class lessons extends StudentService {
 			ORDER BY createdOn';
 
 		$db->query($sql);
-		while ($db->next_record()) $lessons[] = $db->Record;
+		while ($db->next_record()){ $lessons[] = $db->Record; }
 
 
 /*
@@ -131,7 +131,9 @@ class lessons extends StudentService {
 				class_lesson_objectives.id_class_objectives = class_objectives.id_class_objectives
 			WHERE class_lesson_objectives.id_class_lesson='".$lesson_id."' 
 			AND f_hide=0 ORDER BY i_sort ASC");
-		while ($db->next_record()) $t['objectives'][] = $db->Record;
+		while ($db->next_record()) {
+			$t['objectives'][] = $db->Record;
+		}
 
 
 		$activities = array();
@@ -297,7 +299,7 @@ class lessons extends StudentService {
 		$sql = "SELECT $contentLabel FROM $table WHERE 
 				$tablePkeyLabel ='$contentPkey'";
 		$db->queryOne($sql);
-		if ($activeClassTaken == $db->Record[$contentLabel])
+		if ($activeClassTaken == $db->record[$contentLabel])
 		{
 			return true;
 		}

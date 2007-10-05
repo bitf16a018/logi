@@ -21,8 +21,8 @@
 			</td>
 			<td NOWRAP>
 				<? $x <= 1 ? '*' : ''; ?>
-				<input name="labels[<?=$x;?>]" type="text" value="<?=$qc->label;?>" size="50" <?= $t['disableFlag'];?>>
-				<input name="correct" value="<?=$x;?>" type="radio" <?= $qc->correct ? 'CHECKED':'';?>>
+				<input name="labels[<?=$x;?>]" type="text" value="<?=$qc['label'];?>" size="50" <?= $t['disableFlag'];?>>
+				<input name="correct" value="<?=$x;?>" type="radio" <?= $qc['correct'] ? 'CHECKED':'';?>>
 			</td>
 		</tr>
 		<? } ?>

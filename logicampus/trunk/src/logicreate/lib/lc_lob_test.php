@@ -14,6 +14,9 @@ class Lc_Lob_Test extends Lc_Lob {
 	function Lc_Lob_Test($id = 0) {
 		if ($id < 1) {
 			$this->repoObj    = new LobRepoEntry();
+			$this->repoObj->lobMime = $this->mime;
+			$this->repoObj->lobType = $this->type;
+			$this->repoObj->lobSubType = $this->type;
 			$this->lobSub     = new LobTest();
 			$this->lobMetaObj = new LobMetadata();
 			$this->lobMetaObj->createdOn = time();

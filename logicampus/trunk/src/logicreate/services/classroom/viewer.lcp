@@ -85,9 +85,9 @@ class viewer extends StudentService {
 			$db->freeResult();
 		}
 
-		if ($t['lob']['lob_type'] == 'assessment') {
-			$db->query("SELECT * FROM assessment as A 
-				WHERE assessment_id ='".$t['lob']['lob_class_repo_id']."'");
+		if ($t['lob']['lob_type'] == 'test') {
+			$db->query("SELECT * FROM lob_class_test as A 
+				WHERE lob_class_repo_id ='".$t['lob']['lob_class_repo_id']."'");
 			$db->nextRecord();
 			$t['activity'] = $db->record;
 			$db->freeResult();
