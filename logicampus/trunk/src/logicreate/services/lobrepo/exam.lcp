@@ -63,6 +63,7 @@ class Exam extends FacultyService {
 			$t['questionObj'] = new LobTestQst();
 			$t['qidx'] = -1;
 		}
+		$t['q'] = $t['questionObj'];
 
 //debug($test,1);
 	}
@@ -88,12 +89,12 @@ class Exam extends FacultyService {
 		$qidx = intval($lc->postvars['qidx']);
 		$u->sessionvars['test_obj']->setQuestion($qidx,$lc->postvars['questionText'], $type);
 		foreach ($lc->postvars['labels'] as $lidx => $label) {
-			$isCorrect = $lc->postvars['correct'] === $lidx;
+			if ($label == '') { continue; }
+			$isCorrect = $lc->postvars['correct'] == $lidx;
 			if (!$u->sessionvars['test_obj']->addLabel($label, $isCorrect, $qidx)) {
 				die('failed label.  label = '.$label);
 			}
 		}
-
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('lobrepo/exam/');
@@ -113,6 +114,25 @@ class Exam extends FacultyService {
 		$t['url'] = appurl('lobrepo/exam/');
 	}
 
+
+	/**
+	 * Commit the test in the session to the database
+	 */
+	function saveTestRun(&$db, &$u, &$lc, &$t) {
+//		debug($u->sessionvars['test_obj'],1);
+		$u->sessionvars['test_obj']->save();
+
+		$lobUserObj = new LobUserLink();
+		$lobUserObj->set('lobRepoEntryId',$u->sessionvars['test_obj']->repoObj->getPrimaryKey());
+		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->set('lobKind','content');
+		$lobUserObj->save();
+
+		unset($u->sessionvars['test_obj']);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj/');
+	}
 }
 
 ?>

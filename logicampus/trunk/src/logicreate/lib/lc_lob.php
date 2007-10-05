@@ -3,6 +3,8 @@
 include_once(LIB_PATH.'PBDO/LobRepoEntry.php');
 include_once(LIB_PATH.'PBDO/LobMetadata.php');
 include_once(LIB_PATH.'PBDO/LobContent.php');
+//sub types
+include_once(LIB_PATH.'PBDO/LobTest.php');
 include_once(LIB_PATH.'PBDO/LobActivity.php');
 
 /**
@@ -297,13 +299,15 @@ class Lc_Lob {
 				break;
 
 			case 'test':
-				$results  = $rep->getLobTestsByLobRepoEntryId();
+				include_once(LIB_PATH.'lc_lob_test.php');
+				$results  = $repo->getLobTestsByLobRepoEntryId();
 				if (! count($results) ) {
 					trigger_error('learning object missing internal data.');
 					return null;
 				}
 				$subLob  = $results[0];
 				include_once(LIB_PATH.'lc_lob_class.php');
+				include_once(LIB_PATH.'lc_lob_class_test.php');
 				$classLob = new Lc_Lob_ClassTest();
 				break;
 		}
