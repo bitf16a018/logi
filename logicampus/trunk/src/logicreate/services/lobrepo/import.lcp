@@ -1,8 +1,13 @@
 <?
 
-include_once(LIB_PATH.'PBDO/LobContent.php');
+
+include_once(LIB_PATH.'PBDO/LobRepoEntry.php');
 include_once(LIB_PATH.'PBDO/LobMetadata.php');
 include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobActivity.php');
+include_once(LIB_PATH.'PBDO/LobTest.php');
 
 /**
  * Learning Object Repository
@@ -42,27 +47,40 @@ class Import extends FacultyService {
 
 //		exit();
 
-		$doc = domxml_open_file($tempdir.'/learningobjects.xml');
+		$doc = new DomDocument('1.0', 'UTF-8');
+		$doc->substituteEntities=false;
+		$doc->resolveExternals=false;
+		$doc->preserveWhiteSpace=true;
+		$doc->validateOnParse=false;
+		if (!$doc->load( $tempdir."/learningobjects.xml") ) {
+			echo "can't open xml file.";
+			return false;
+		}
 
-		$root = $doc->child_nodes();
-		$collectionNode = $root[0];
-		$lobNodes = $collectionNode->child_nodes();
-		foreach ($lobNodes as $node) {
-			if ($node->node_type() == XML_TEXT_NODE) {
+		$root = $doc->childNodes;
+		//get the "lobcol" node
+		$collectionNode = $root->item(1);
+
+		$lobNodes = $collectionNode->childNodes;
+		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
+			$node = $lobNodes->item($xidx);
+			if ($node->nodeType == XML_TEXT_NODE) {
 				continue;
 			}
+			if ($node->tagName == 'lesson:lesson') { continue; }
 			$lobObj = $this->processLobNode($node);
 			$lobMetaObj = $this->processLobMeta($node);
 			$lobUserObj = new LobUserLink();
 
+			if ($lobObj === null) { die('null object'); continue; }
 			$lobObj->save();
 
-			$lobMetaObj->set('lobKind','content');
-			$lobMetaObj->set('lobId',$lobObj->getPrimaryKey());
+			$lobMetaObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
 			$lobMetaObj->save();
 
-			$lobUserObj->set('lobId',$lobObj->getPrimaryKey());
+			$lobUserObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
 			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('isOwner','1');
 			$lobUserObj->save();
 
 //			debug($lobObj);
@@ -85,52 +103,67 @@ class Import extends FacultyService {
 	 * return a lob object
 	 */
 	function processLobNode($n) {
-		$result = $n->get_elements_by_tagname('type');
-		$type = $result[0];
+		$result = $n->getElementsByTagname('type');
+		$type = $result->item(0);
 		/*
 		print_r($type);
 		echo "new lob: <br/>";
 //		debug($type);
-		echo $type->node_value();
+		echo $type->nodeValue;
+		echo "\n<br/>";
 		echo "name lob: <br/>";
-		echo $type->tagname;
+		echo $type->tagName;
 		echo "<br/>";
-		 */
-		$children = $type->child_nodes();
-		$content = trim($children[0]->node_value());
-		$guid = $n->get_attribute('guid');
-		$dbid = $n->get_attribute('dbid');
+		// */
+
+		$children = $type->childNodes;
+		if ($children->length) {
+			$content = trim($children->item(0)->nodeValue);
+			$guid = $n->getAttribute('guid');
+			$dbid = $n->getAttribute('dbid');
+		}
+		else {
+			die ('unknown type: '. get_class($type)); 
+			return null;
+		}
 
 		$lob = null;
 		switch ($content) {
 			case 'content':
-				$lob = new LobContent();
+				$lobSub = new LobContent();
+				$lob    = new LobRepoEntry();
 				$lob->set('lobType','content');
 				$lob->set('lobGuid',$guid);
 				break;
+			case 'interaction':
+				$lobSub = new LobActivity();
+				$lob    = new LobRepoEntry();
+				$lob->set('lobType','content');
+				$lob->set('lobGuid',$guid);
+				break;
+		}
+		if ($lob === null) { die ('unknown type '. $content); }
 
+
+		$result = $n->getElementsByTagname('title');
+		$node = $result->item(0);
+		$children = $node->childNodes;
+		$lob->set('lobTitle', trim($children->item(0)->nodeValue) );
+
+		$result = $n->getElementsByTagname('content');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobContent', trim($children->item(0)->nodeValue) );
 		}
 
-
-		$result = $n->get_elements_by_tagname('lobtitle');
-		$node = $result[0];
-		$children = $node->child_nodes();
-		$lob->set('lobTitle', trim($children[0]->node_value()) );
-
-		$result = $n->get_elements_by_tagname('lobcontent');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('filename');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobContent', trim($children[0]->node_value()) );
-		}
-
-		$result = $n->get_elements_by_tagname('lobfilename');
-		$node = $result[0];
-		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobFilename', trim($children[0]->node_value()) );
-			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
-			$lob->set('lobBinary', file_get_contents($this->tempdir.'/content/'.trim($children[0]->node_value())) );
+			$children = $node->childNodes;
+			$lob->set('lobFilename', trim($children->item(0)->nodeValue) );
+			$lob->set('lobUrltitle', urlencode(trim($children->item(0)->nodeValue)) );
+			$lob->set('lobBinary', file_get_contents($this->tempdir.'/content/'.trim($children->item(0)->nodeValue)) );
 		} else {
 			$urltitle = $lob->get('lobTitle');
 			$urltitle = str_replace(' ', '_', $urltitle);
@@ -138,21 +171,27 @@ class Import extends FacultyService {
 			$lob->set('lobUrltitle', $urltitle );
 		}
 
-		$result = $n->get_elements_by_tagname('lobdescription');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('description');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobDescription', trim($children[0]->node_value()) );
+			$children = $node->childNodes;
+			$lob->set('lobDescription', trim($children->item(0)->nodeValue) );
 		}
 
 
-		$result = $n->get_elements_by_tagname('subtype');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('subtype');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobSubType', trim($children[0]->node_value()) );
+			$children = $node->childNodes;
+			$lob->set('lobSubType', trim($children->item(0)->nodeValue) );
 		}
 
+		$result = $n->getElementsByTagname('mime');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobMime', trim($children->item(0)->nodeValue) );
+		}
 
 		return $lob;
 //		debug($children);
@@ -163,43 +202,43 @@ class Import extends FacultyService {
 	 * return a lob metadata object
 	 */
 	function processLobMeta($n) {
-		$result = $n->get_elements_by_tagname('metadata');
-		$meta = $result[0];
-		$children = $meta->child_nodes();
+		$result = $n->getElementsByTagname('metadata');
+		$meta = $result->item(0);
+		$children = $meta->childNodes;
 
 
 		$lob = null;
 		$lob = new LobMetadata();
 
 		foreach($children as $childNode) {
-			if ($childNode->node_type() == XML_TEXT_NODE) {
+			if ($childNode->nodeType == XML_TEXT_NODE) {
 				continue;
 			}
 
-			$tag = $childNode->tagName();
-			$subchild = $childNode->child_nodes();
-			$lob->set($tag, trim($subchild[0]->node_value()) );
+			$tag = $childNode->tagName;
+			$subchild = $childNode->childNodes;
+			$lob->set($tag, trim($subchild->item(0)->nodeValue) );
 		}
 /*
 
-		$result = $n->get_elements_by_tagname('lobtitle');
-		$node = $result[0];
-		$children = $node->child_nodes();
-		$lob->set('lobTitle', trim($children[0]->node_value()) );
+		$result = $n->getElementsByTagname('lobtitle');
+		$node = $result->item(0);
+		$children = $node->childNodes;
+		$lob->set('lobTitle', trim($children->item(0)->nodeValue) );
 
-		$result = $n->get_elements_by_tagname('lobcontent');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('lobcontent');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobContent', trim($children[0]->node_value()) );
+			$children = $node->childNodes;
+			$lob->set('lobContent', trim($children->item(0)->nodeValue) );
 		}
 
-		$result = $n->get_elements_by_tagname('lobfilename');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('lobfilename');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobFilename', trim($children[0]->node_value()) );
-			$lob->set('lobUrltitle', urlencode(trim($children[0]->node_value())) );
+			$children = $node->childNodes;
+			$lob->set('lobFilename', trim($children->item(0)->nodeValue) );
+			$lob->set('lobUrltitle', urlencode(trim($children->item(0)->nodeValue)) );
 		} else {
 			$urltitle = $lob->get('lobTitle');
 			$urltitle = str_replace(' ', '_', $urltitle);
@@ -207,19 +246,19 @@ class Import extends FacultyService {
 			$lob->set('lobUrltitle', $urltitle );
 		}
 
-		$result = $n->get_elements_by_tagname('lobdescription');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('lobdescription');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobDescription', trim($children[0]->node_value()) );
+			$children = $node->childNodes;
+			$lob->set('lobDescription', trim($children->item(0)->nodeValue) );
 		}
 
 
-		$result = $n->get_elements_by_tagname('subtype');
-		$node = $result[0];
+		$result = $n->getElementsByTagname('subtype');
+		$node = $result->item(0);
 		if (is_object($node) ){
-			$children = $node->child_nodes();
-			$lob->set('lobSubType', trim($children[0]->node_value()) );
+			$children = $node->childNodes;
+			$lob->set('lobSubType', trim($children->item(0)->nodeValue) );
 		}
 
  */
