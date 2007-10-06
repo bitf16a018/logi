@@ -90,14 +90,18 @@ class ExportContent extends FacultyService {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$filename = 'classroom_'.$db->Record['courseFamily']. $db->Record['courseNumber'].'_'.$db->Record['semesterId'].'.zip';
+		$filename = 'classroom_'.$db->record['courseFamily']. $db->record['courseNumber'].'_'.$db->record['semesterId'].'.zip';
 
-		$this->courseFamily = $db->Record['courseFamily'];
+		$this->courseFamily = $db->record['courseFamily'];
 
 		$xml_raw_save = '';
 		
 		
-		$xmlObj = new xmlparser('<lobcol xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection.dtd" xmlns:lob="http://logicampus.sourceforge.net/2006/learning_object.dtd"></lobcol>');
+		$xmlObj = new xmlparser('<lobcol 
+xmlns:logicampus="http://logicampus.sourceforge.net/2006/lob_collection" 
+xmlns:lob="http://logicampus.sourceforge.net/2006/learning_object"
+xmlns:class="http://logicampus.sourceforge.net/2006/classroom"
+xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		$xmlObj->doctype = '<!DOCTYPE lobcol PUBLIC "-//LOBCOL//DTD LOBCOL//EN" "http://logicampus.sf.net/learning-objects/lobcol-1.0.dtd">';
 		$root =& $xmlObj->getRoot();
 		
@@ -180,6 +184,8 @@ class ExportContent extends FacultyService {
 
 		$xmlchars = fread($fh, $file_size);
 		fclose($fh);
+//		header ('Content-Type: application/xml');
+//		echo $xmlchars;exit();
 //		echo "<pre>\n".htmlspecialchars($xmlchars, ENT_QUOTES, 'UTF-8')."\n</pre>\n";exit();
        
 
@@ -215,7 +221,7 @@ class ExportContent extends FacultyService {
 	function get_document_files() {
 		$lob_nodes = array();
 		$sql = '
-		SELECT B.*,C.*
+		SELECT A.*,B.*,C.*
 		FROM lob_class_repo as A
 		LEFT JOIN lob_class_content AS B ON A.lob_class_repo_id = B.lob_class_repo_id
 		LEFT JOIN lob_class_metadata AS C ON C.lob_class_repo_id = A.lob_class_repo_id
@@ -249,6 +255,8 @@ class ExportContent extends FacultyService {
 			//subtype
 			list($type,$submime) = explode('/', $db->record['lob_mime']);
 			$sub_type_node = new xml_node('lob:subtype',array('mime'=>$db->record['lob_mime']),null);
+			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
+
 			if ($type == 'image') {
 				$sub_type_node->value = 'image';
 			} else {
@@ -267,6 +275,7 @@ class ExportContent extends FacultyService {
 			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $mim_type_node;
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_file_node;
 			$xml_child_nodes[] = $lob_desc_node;
@@ -301,8 +310,8 @@ class ExportContent extends FacultyService {
 			$guid = lcUuid();
 			$this->contentGuid[ $db->record['lob_content_id'] ] = $guid;
 
-			$lob_nodes[] = new xml_node('lob', 
-				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
+			$lob_nodes[] = new xml_node('lob:obj', 
+				array('guid'=>$guid, 'dbid'=>$db->record['lob_class_repo_id']), 
 				$xml_child_nodes
 			);
 		}
@@ -333,6 +342,7 @@ class ExportContent extends FacultyService {
 		while ($db->nextRecord()) {
 			$type_node = new xml_node('lob:type',null,null,'content');
 			$sub_type_node = new xml_node('lob:subtype',null,null,$db->record['lob_sub_type']);
+			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
 			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
 			$lob_content_node = new xml_node('lob:content',null,null,$db->record['lob_text']);
@@ -341,6 +351,7 @@ class ExportContent extends FacultyService {
 			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $mim_type_node;
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_content_node;
 
@@ -373,7 +384,7 @@ class ExportContent extends FacultyService {
 			$guid = $db->record['lob_guid'];
 			$this->contentGuid[$db->record['lob_content_id']] = $guid;
 			$lob_nodes[] = new xml_node('lob:obj', 
-				array('guid'=>$guid, 'dbid'=>$db->record['lob_content_id']), 
+				array('guid'=>$guid, 'dbid'=>$db->record['lob_class_repo_id']), 
 				$xml_child_nodes
 			);
 		}
@@ -386,15 +397,19 @@ class ExportContent extends FacultyService {
 	 */
 	function get_homework_nodes() {
 		$lob_nodes = array();
+		//if you select C.* and there's no record for the metadata
+		// the lob_repo_id will be overwritten with a blank,
+		// Same thing can happen for table B.
 		$sql = '
-		SELECT A.*, B.*, C.*
+		SELECT A.*, B.*, C.subject, C.subdisc, C.author, C.copyright, C.license, C.user_version
+		,C.status, C.updated_on, C.created_on
 		FROM lob_class_repo as A
 		LEFT JOIN lob_class_activity AS B 
 			ON A.lob_class_repo_id = B.lob_class_repo_id
 		LEFT JOIN lob_class_metadata AS C 
 			ON A.lob_class_repo_id = C.lob_class_repo_id
 		WHERE A.class_id='.$this->classId.'
-		AND lob_type ="activity"';
+		AND A.lob_type ="activity"';
 
 		$db = DB::getHandle();
 		$db->query($sql);
@@ -402,16 +417,17 @@ class ExportContent extends FacultyService {
 
 		/*
 		while ($db->nextRecord()) {
-			echo "debug offset = ". (( $db->record['dueDate'] - $this->semStart ) / 60 / 60/ 24);
+		//	echo "debug offset = ". (( $db->record['dueDate'] - $this->semStart ) / 60 / 60/ 24);
 			debug($db->record);
 		}
 		exit();
-		 */
+		// */
 		while ($db->nextRecord()) {
 			$type_node = new xml_node('lob:type',null,null,'interaction');
 			//subtype
 			list($type,$submime) = explode('/', $db->record['lob_mime']);
 			$sub_type_node = new xml_node('lob:subtype',null,null);
+			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
 			$resp_node = new xml_node('logicampus:response',null,null);
 
 			/*
@@ -470,6 +486,7 @@ class ExportContent extends FacultyService {
 			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $mim_type_node;
 			$xml_child_nodes[] = $resp_node;
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_desc_node;
