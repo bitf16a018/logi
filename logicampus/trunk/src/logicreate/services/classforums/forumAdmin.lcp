@@ -221,7 +221,7 @@ class ForumAdmin extends FacultyService {
 			}
 		} else { 
 			$x = new ClassForum_Forums();
-			$x->setClassId( $u->activeClassTaken->id_classes );
+			$x->setClassId( $u->activeClassTaught->id_classes );
 			//visible by default
 			$x->setVisible( true );
 		}
