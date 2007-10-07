@@ -59,7 +59,7 @@ class Import extends FacultyService {
 
 		$root = $doc->childNodes;
 		//get the "lobcol" node
-		$collectionNode = $root->item(1);
+		$collectionNode = $root->item(0);
 
 		$lobNodes = $collectionNode->childNodes;
 		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
@@ -72,7 +72,9 @@ class Import extends FacultyService {
 			$lobMetaObj = $this->processLobMeta($node);
 			$lobUserObj = new LobUserLink();
 
-			if ($lobObj === null) { die('null object'); continue; }
+			if ($lobObj === null) { continue; /*die('null object'); continue;*/ }
+			echo "saving 1 lob ... <br/>\n";
+			debug($lobObj->lobTitle);
 			$lobObj->save();
 
 			$lobMetaObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
@@ -92,10 +94,10 @@ class Import extends FacultyService {
 //		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
 
 
-		unlink($tempdir.'/learningobjects.xml');
-		rmdir($tempdir.'/interactions');
-		rmdir($tempdir.'/tests');
-		rmdir($tempdir);
+		//unlink($tempdir.'/learningobjects.xml');
+		//rmdir($tempdir.'/interactions');
+		//rmdir($tempdir.'/tests');
+		//rmdir($tempdir);
 	}
 
 
@@ -117,13 +119,14 @@ class Import extends FacultyService {
 		// */
 
 		$children = $type->childNodes;
+		$content = '';
 		if ($children->length) {
 			$content = trim($children->item(0)->nodeValue);
 			$guid = $n->getAttribute('guid');
 			$dbid = $n->getAttribute('dbid');
 		}
 		else {
-			die ('unknown type: '. get_class($type)); 
+			die ('unknown class: '. get_class($type)); 
 			return null;
 		}
 
@@ -142,7 +145,7 @@ class Import extends FacultyService {
 				$lob->set('lobGuid',$guid);
 				break;
 		}
-		if ($lob === null) { die ('unknown type '. $content); }
+		if ($lob === null) { return null; die ('unknown type '. $content); }
 
 
 		$result = $n->getElementsByTagname('title');
