@@ -26,6 +26,7 @@ class Edit extends FacultyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 		$lobId = addslashes(trim($lc->getvars['c']));
+		$lc->templateName = 'edit_main';
 
 		$lob = new Lc_Lob_Content($lobId);
 
