@@ -61,22 +61,36 @@ class Import extends FacultyService {
 		//get the "lobcol" node
 		$collectionNode = $root->item(0);
 
-		$lobNodes = $collectionNode->childNodes;
+		$lobNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/learning_object','obj');
 		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
 			$node = $lobNodes->item($xidx);
 			if ($node->nodeType == XML_TEXT_NODE) {
 				continue;
 			}
-			if ($node->tagName == 'lesson:lesson') { continue; }
-			$lobObj = $this->processLobNode($node);
+			$lobSub = null;
+			$lobObj = $this->makeRepoNode($node);
 			$lobMetaObj = $this->processLobMeta($node);
 			$lobUserObj = new LobUserLink();
 
-			if ($lobObj === null) { continue; /*die('null object'); continue;*/ }
-			echo "saving 1 lob ... <br/>\n";
-			debug($lobObj->lobTitle);
+			if ($lobObj === null) { 
+echo "skipping node .. ".$node->tagName."...<br/>\n";
+				continue; /*die('null object'); continue;*/ 
+			}
+			if ($lobObj->lobType == 'content') {
+				$lobSub = $this->makeContentNode($node);
+			}
+
+			echo "saving ".$xidx." lob ... <br/>\n";
+		//	debug($lobObj->lobTitle);
 			$lobObj->save();
 
+			if ( is_object($lobSub) ) {
+				$lobSub->set('lobRepoEntryId',$lobObj->getPrimaryKey());
+				$lobSub->save();
+				echo $xidx." is a *CONTENT* lob ... <br/>\n";
+//				echo substr($lobSub->lobText,0,1000)."<br/>\n";
+			}
+//*
 			$lobMetaObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
 			$lobMetaObj->save();
 
@@ -84,8 +98,8 @@ class Import extends FacultyService {
 			$lobUserObj->set('userId',$u->userId);
 			$lobUserObj->set('isOwner','1');
 			$lobUserObj->save();
+//*/
 
-//			debug($lobObj);
 		}
 
 
@@ -94,17 +108,28 @@ class Import extends FacultyService {
 //		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
 
 
-		//unlink($tempdir.'/learningobjects.xml');
-		//rmdir($tempdir.'/interactions');
-		//rmdir($tempdir.'/tests');
-		//rmdir($tempdir);
+		unlink($tempdir.'/learningobjects.xml');
+		rmdir($tempdir.'/interactions');
+		rmdir($tempdir.'/tests');
+		rmdir($tempdir);
 	}
 
+	/**
+	 * return a lob content sub-object
+	 */
+	function makeContentNode($n) {
+		$result = $n->getElementsByTagname('content');
+		$textContent = $result->item(0);
+		$lobSub = new LobContent();
+		$lobSub->lobText = $textContent->nodeValue;
+		return $lobSub;
+	}
 
+	
 	/**
 	 * return a lob object
 	 */
-	function processLobNode($n) {
+	function makeRepoNode($n) {
 		$result = $n->getElementsByTagname('type');
 		$type = $result->item(0);
 		/*
@@ -131,21 +156,17 @@ class Import extends FacultyService {
 		}
 
 		$lob = null;
+		$lob    = new LobRepoEntry();
+		$lob->set('lobGuid',$guid);
 		switch ($content) {
 			case 'content':
-				$lobSub = new LobContent();
-				$lob    = new LobRepoEntry();
 				$lob->set('lobType','content');
-				$lob->set('lobGuid',$guid);
 				break;
 			case 'interaction':
-				$lobSub = new LobActivity();
-				$lob    = new LobRepoEntry();
-				$lob->set('lobType','content');
-				$lob->set('lobGuid',$guid);
+				$lob->set('lobType','interaction');
 				break;
 		}
-		if ($lob === null) { return null; die ('unknown type '. $content); }
+		if ($lob->lobType == '') { return null; die ('unknown type '. $content); }
 
 
 		$result = $n->getElementsByTagname('title');
