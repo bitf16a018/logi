@@ -182,7 +182,6 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 		$gradebook->setStudentVals();
 
 
-
 		$gradebook->calculateEntryWeights();
 		$gradebook->calculateWeightedAverages();
 		$gradebook->calculatePercentScores();
@@ -259,7 +258,8 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 				// index.php/assessments/grade/event=view/studentid=adam/id=5
 				//use proper decimal places, none for whole integers, one place for fractions
 				if ( isset($stud->vals[$entid]->score) ) {
-					if ( intval($stud->vals[$entid]->score) == $stud->vals[$entid]->score ) {                                                                                                                                                               $stud->vals[$entid]->score = (int)$stud->vals[$entid]->score;
+					if ( intval($stud->vals[$entid]->score) == $stud->vals[$entid]->score ) {
+						$stud->vals[$entid]->score = (int)$stud->vals[$entid]->score;
 					} else {
 						$stud->vals[$entid]->score = sprintf('%.1f',$stud->vals[$entid]->score);
 					}

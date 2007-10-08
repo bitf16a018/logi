@@ -288,7 +288,7 @@ class ClassGradebook extends ClassGradebookBase {
 
 		$db = DB::getHandle();
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.withdrew_on 
+		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.withdrew_on, u.pkey
 			FROM class_enrollment as ss
 			left join lcUsers as u on ss.student_id = u.pkey
 			left join profile as p on u.username=p.username
@@ -310,7 +310,7 @@ class ClassGradebook extends ClassGradebookBase {
 		$db->query($sql);
 		while ($db->nextRecord()) {
 			$db->record['username'] = strtolower($db->record['username']);
-			$this->students[$db->record['username']] = ClassGradeBookStudent::load($db->record);
+			$this->students[$db->record['pkey']] = ClassGradebookStudent::load($db->record);
 		}
 	}
 
@@ -320,7 +320,7 @@ class ClassGradebook extends ClassGradebookBase {
 		$db = DB::getHandle();
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 
-		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.withdrew_on 
+		$sql = 'select p.firstname,p.lastname,p.username,ss.active,ss.withdrew_on, u.pkey
 			FROM class_enrollment as ss
 			left join lcUsers as u on ss.student_id = u.pkey
 			left join profile as p on u.username=p.username
@@ -331,7 +331,7 @@ class ClassGradebook extends ClassGradebookBase {
 
 		$db->queryOne($sql);
 		if ( $db->record['username'] == '' ) return false;
-		$this->students[$db->record['username']] = ClassGradebookStudent::load($db->record);
+		$this->students[$db->record['pkey']] = ClassGradebookStudent::load($db->record);
 		return true;
 	}
 
@@ -508,8 +508,7 @@ class ClassGradebook extends ClassGradebookBase {
 		foreach($this->vals as $valId=>$valObj) {
 
 			$entry = $this->entries[$valObj->idClassGradebookEntries];
-			$j = strtolower($valObj->username);
-#			$j = $valObj->username;
+			$j = $valObj->studentId;
 			$student = $this->students[$j];
 			if ( strtolower(get_class($student)) != 'classgradebookstudent' ){
 				continue;
@@ -957,6 +956,7 @@ class ClassGradebookStudent {
 		$x->lastname = $array['lastname'];
 		$x->username = $array['username'];
 		$x->active = $array['active'];
+		$x->userId = $array['pkey'];
 		$x->dateWithdrawn = $array['dateWithdrawn'];
 		return $x;
 	}
