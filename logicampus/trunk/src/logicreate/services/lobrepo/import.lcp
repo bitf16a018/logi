@@ -81,6 +81,10 @@ echo "skipping node .. ".$node->tagName."...<br/>\n";
 			if ($lobObj->lobType == 'content') {
 				$lobSub = $this->makeContentNode($node);
 			}
+			if ($lobObj->lobType == 'interaction') {
+				$lobSub = $this->makeActivityNode($node);
+			}
+
 
 			echo "saving ".$xidx." lob ... <br/>\n";
 		//	debug($lobObj->lobTitle);
@@ -127,6 +131,39 @@ echo "skipping node .. ".$node->tagName."...<br/>\n";
 		return $lobSub;
 	}
 
+	/**
+	 * return a lob activity sub-object
+	 */
+	function makeActivityNode($n) {
+		$result = $n->getElementsByTagname('response');
+		$responseNode = $result->item(0);
+		$lobSub = new LobActivity();
+		switch($resposneNode->nodeValue) {
+			case 'upload':
+				$lobSub->responseTypeId = 1;
+				break;
+			case 'text':
+				$lobSub->responseTypeId = 2;
+				break;
+			case 'uploadandtext':
+				$lobSub->responseTypeId = 3;
+				break;
+			case 'forum':
+				$lobSub->responseTypeId = 4;
+				break;
+			case 'none':
+				$lobSub->responseTypeId = 5;
+				break;
+			case 'audio':
+				$lobSub->responseTypeId = 6;
+				break;
+
+			default:
+				$lobSub->responseTypeId = 5;
+		}
+		return $lobSub;
+	}
+
 	
 	/**
 	 * return a lob object
@@ -166,6 +203,9 @@ echo "skipping node .. ".$node->tagName."...<br/>\n";
 				break;
 			case 'interaction':
 				$lob->set('lobType','interaction');
+				break;
+			case 'activity':
+				$lob->set('lobType','activity');
 				break;
 		}
 		if ($lob->lobType == '') { return null; die ('unknown type '. $content); }
@@ -290,7 +330,6 @@ echo "skipping node .. ".$node->tagName."...<br/>\n";
  */
 
 		return $lob;
-//		debug($children);
 	}
 
 

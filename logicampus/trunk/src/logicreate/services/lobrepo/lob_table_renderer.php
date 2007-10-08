@@ -3,8 +3,11 @@
 /**
  * Custom renderer for Learning Objects
  */
-class Lob_Table_Renderer extends LC_TableRenderer {
+class Lob_Table_Renderer extends LC_TableRendererPaged {
 
+
+	var $style="clear:right; border:0px; background-color:white;";
+//	var $cssClass = 'datatable';
 
 	/**
 	 * Shows the table as HTML
@@ -30,7 +33,8 @@ class Lob_Table_Renderer extends LC_TableRenderer {
 
 
 	function startTable() {
-		$this->html .='<table border="0" width="100%" class="datatable" style="background-color:white;border:0px">';
+		parent::startTable();
+//		$this->html .='<table border="0" width="100%" class="datatable" style="background-color:white;border:0px">';
 	}
 
 
