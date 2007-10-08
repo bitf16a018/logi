@@ -51,6 +51,11 @@ class entry extends FacultyService {
 		$lc->templateName='entry_main';
 
 		$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_categories, title');
+		//customize data for the table
+		foreach ($t['gbe'] as $idx => $gbe) {
+			$gbe->title = 
+				'<a href="'.modurl('entry').'/event=edit/id='.$gbe->idClassGradebookEntries.'">'.$gbe->title.'</a>';
+		}
 
 		$dm = new LC_Table_ObjectModel($t['gbe']);
 
@@ -95,10 +100,9 @@ class entry extends FacultyService {
 
 		$colE = &$columnModel->getColumnAt(4);
 		$colE->justify='left';
-
+		$colE->maxWidth='256';
 
 		$t['datagrid'] = new LC_TableRenderer($table);
-
 
 		// Get the categories
 		$db->query("SELECT 
@@ -153,6 +157,8 @@ class entry extends FacultyService {
 				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
 				'id_classes' => $u->activeClassTaught->id_classes
 			) );
+			$t['gbeObj'] = $gbEntry;
+
 			if(!$gbEntry->idClassGradebookEntries)
 			{
 				# we didn't get an object back
@@ -163,22 +169,6 @@ class entry extends FacultyService {
 				$t['msg'] = $this->permissionError;
 				return;
 			}
-			$f = new SiteForm();
-			$gbEntry->set( 'category', $gbEntry->idClassGradebookCategories );
-			if ( !$gbEntry->publishFlag ) unset($gbEntry->publishFlag);
-			$f->getForm('gbaddentry', $gbEntry);
-			if ($lc->getvars['id']) $f->modFormValue('submit', 'Modify Entry');
-
-			# handle assessments a little differently
-			if ($gbEntry->assessmentId)
-			{
-				$f->removeFormField('totalPoints');
-				$f->addHidden('totalPoints', $gbEntry->totalPoints);
-				$t['assessment'] = TRUE;
-				$t['assessmentId'] = $gbEntry->assessmentId;
-			}
-			$t['form'] = $f->ToHTML();
-
 		}
 
 		function updateRun(&$db, &$u, &$lc, &$t)
@@ -187,11 +177,12 @@ class entry extends FacultyService {
 			# who ever is posting information
 			# to the server has access to update this pkey
 			# information to the server
-			if ($lc->getvars['id'])
+			if (isset($lc->getvars['id']))
 			{
+				$gbeId = intval($lc->getvars['id']);
 				// it's an edit
 				$gbEntry = ClassGradebookEntries::load( array(
-					'id_class_gradebook_entries' => (int)$lc->getvars['id'],
+					'id_class_gradebook_entries' => $gbeId,
 					'id_classes' => $u->activeClassTaught->id_classes
 				) );
 				if (!$gbEntry->idClassGradebookEntries)
@@ -208,26 +199,14 @@ class entry extends FacultyService {
 			} else {
 				// it's an add
 				$gbEntry = new ClassGradebookEntries();
-				$gbEntry->idClassGradebookCategories = $lc->postvars['category'];
+				$gbEntry->idClassGradebookCategories = intval($lc->postvars['category']);
 				$gbEntry->idClasses = $u->activeClassTaught->id_classes;
 
 				$t['message'] = 'Gradebook entry added successfully';
 			}
 
-			$f = new SiteForm();
-			$t['error'] = $f->validateForm('gbaddentry', $lc->postvars);
-			if ($t['error'])
-			{
-				$this->data = $f->cleanedArray;
-				if ($lc->getvars['id']) {
-					$this->editRun($db, $u, $lc, $t);
-					return;
-				} else {
-					$this->addRun($db, $u, $lc, $t);
-					return;
-				}
-			} 
 
+			$gbEntry->set('classLessonSequenceId', intval($lc->postvars['seqId']));
 			$gbEntry->set('title', inputCleanString($lc->postvars['title']));
 			$gbEntry->set('gradebookCode',inputCleanString($lc->postvars['gradebookCode']));
 
@@ -240,7 +219,7 @@ class entry extends FacultyService {
 			{
 				$u->sessionvars['message'] = $t['message'];
 				$this->presentor = 'redirectPresentation';
-				$t['url'] = MOD_URL;
+				$t['url'] = appurl('gradebook').'/entry';
 			} else {
 				$lc->templateName = 'entry_error';
 				$t['msg'] = $e;
@@ -257,7 +236,7 @@ class entry extends FacultyService {
 			$this->sectionTitle = 'Grades for '
 				.$t['user']->profile->values['lastname'].', '.$t['user']->profile->values['firstname'];
 
-			$t['vals'] = ClassGradebookVal::getValsByStudent($lc->getvars['user']);
+			$t['vals'] = ClassGradebookVal::getValsByStudentId($t['user']->userId);
 			$count = count($t['vals']);
 			for($i=0; $i<$count; $i++)
 			{

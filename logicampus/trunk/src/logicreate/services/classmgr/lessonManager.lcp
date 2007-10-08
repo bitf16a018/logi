@@ -114,7 +114,6 @@ class LessonManager extends FacultyService {
 			$colD = &$columnModel->getColumnAt(1);
 			$colD->justify='left';
 
-
 			$colB = &$columnModel->getColumnAt(2);
 			$colB->maxWidth=64;
 			$colB->name = 'Start';
@@ -878,7 +877,6 @@ class LessonManager extends FacultyService {
 			//change unix timestamp offset into days
 			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
 			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
-
 		}
 
 		$dm = new LC_Table_ObjectModel($t['seqItems']);
@@ -915,14 +913,15 @@ class LessonManager extends FacultyService {
 		$colD = &$columnModel->getColumnAt(1);
 		$colD->justify='left';
 
-		$col = &$columnModel->getColumnAt(4);
-		$col->maxWidth=64;
-		$col->name = 'Rank';
-		$col->cellRenderer = new LC_Table_SequenceRenderer();
-		$col->cellRenderer->id = $lessonId;
+		//create a gradebook entry column
+		$column = new LC_TableColumn();
+		$column->setName( "Gradebook" );
+		$column->cellRenderer = new LC_TableStaticRenderer();
+		$column->cellRenderer->values = array(2=>'no entry');
+		$column->maxWidth=128;
+		$table->addColumnAt(2,$column);
 
-
-		$colB = &$columnModel->getColumnAt(2);
+		$colB = &$columnModel->getColumnAt(3);
 		$colB->maxWidth=64;
 		$colB->name = 'Start';
 		$colB->cellRenderer = new LC_TableSelectRenderer();
@@ -933,7 +932,7 @@ class LessonManager extends FacultyService {
 			$colB->cellRenderer->options[] = $qq;
 		}
 
-		$colC = &$columnModel->getColumnAt(3);
+		$colC = &$columnModel->getColumnAt(4);
 		$colC->maxWidth=64;
 		$colC->name = 'Due';
 		$colC->cellRenderer = new LC_TableSelectRenderer();
@@ -944,13 +943,15 @@ class LessonManager extends FacultyService {
 			$colC->cellRenderer->options[] = $qq;
 		}
 
+		$col = &$columnModel->getColumnAt(5);
+		$col->maxWidth=64;
+		$col->name = 'Rank';
+		$col->cellRenderer = new LC_Table_SequenceRenderer();
+		$col->cellRenderer->id = $lessonId;
 
 
 		$t['table'] = new LC_TableRenderer($table);
 		$t['id'] = $lesson_id;
-
-
-
 
 	}
 
@@ -1202,7 +1203,5 @@ class LC_Table_SequenceRenderer extends LC_TableCellRenderer {
 			';
 	}
 }
-
-
 
 ?>

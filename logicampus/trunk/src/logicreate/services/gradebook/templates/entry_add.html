@@ -15,9 +15,64 @@ if ($t['assessment'])
 <?
 }
 ?>
-<p>Enter the data for your entry below. The <i>Gradebook Code</i> is simply the text that will be displayed at the top of the column in your gradebook.</p>
 <div style="color: maroon;"><?=$t['error'];?></div>
-<br>
 
-<?=$t['form']; 
+<form action="" method="POST" enctype="application/x-www-form-urlencoded">
+	<p style="margin-bottom:1em;">
+	If you select an activity or a test this entry will be linked to that item.
+  	</p>
+	<ul style="margin-top:0px;">
+		<li>
+		A <u>linked</u> entry will synchronize its value to the specific item to which it is linked.
+		</li>
+		<li>
+		A <u>free</u> entry is not linked to any classroom content.  You are free to record any type of grade in these entries.
+		</li>
+	</ul>
+	<p>
+	<select name="seqId">
+		<option value="-1">Free grade book entry</option>
+		<option value="6">complete intro: Operating Systems - Test</option>
+		<option value="6">complete intro: Operating Systems - Test</option>
+		<option value="6">complete intro: Operating Systems - Test</option>
+		<option value="6">complete intro: Operating Systems - Test</option>
+		<option value="6">complete intro: Operating Systems - Test</option>
+	</select>
+	</p>
 
+	<p>Enter the data for your entry below. The <i>Gradebook Code</i> is simply the text that will be displayed at the top of the column in your gradebook.</p>
+
+	<table width="95%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td valign="top" class="">*Entry Title</td>
+			<td valign="top" class=""><input type="text" id="title" name="title" value="<?=$t['gbeObj']->title;?>" size="15" maxlength="25"></td>
+		</tr>
+		<tr>
+			<td valign="top" class="">*Gradebook Code</td>
+			<td valign="top" class=""><input type="text" id="gradebookCode" name="gradebookCode" value="<?=$t['gbeObj']->gradebookCode;?>" size="10" maxlength="10"></td></tr>
+		<tr>
+			<td valign="top" class="">*Total Possible Points</td>
+			<td valign="top" class=""><input type="text" id="totalPoints" name="totalPoints" value="<?=$t['gbeObj']->totalPoints;?>" size="10" maxlength="10"><div style="font-size=80%;">(numbers only)</div></td></tr>
+		<tr>
+			<td valign="top" class="">*Category</td>
+			<td valign="top" class="">
+				<select id="category" name="category"  size="1">
+					<option value="" >Select Category</option>
+					<option value="1" SELECTED >sadfsdaf</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class="">Published?</td>
+			<td valign="top" class="">
+				<input type="checkbox" id="publishFlag" name="publishFlag"  >
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class=""></td>
+			<td valign="top" class=""><input type="submit" id="submit" name="submit" value="Modify Entry"></td>
+		</tr>
+	</table>
+	<input type="hidden" name="event" value="update">
+</form>
+<div style="font-size: 85%">*denotes a required field</div>
