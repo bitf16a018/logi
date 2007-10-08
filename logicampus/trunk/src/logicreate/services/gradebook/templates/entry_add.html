@@ -32,11 +32,9 @@ if ($t['assessment'])
 	<p>
 	<select name="seqId">
 		<option value="-1">Free grade book entry</option>
-		<option value="6">complete intro: Operating Systems - Test</option>
-		<option value="6">complete intro: Operating Systems - Test</option>
-		<option value="6">complete intro: Operating Systems - Test</option>
-		<option value="6">complete intro: Operating Systems - Test</option>
-		<option value="6">complete intro: Operating Systems - Test</option>
+		<?php
+		echo makeOptions($t['optionList'], $t['selectedSeqId']);
+		?>
 	</select>
 	</p>
 
