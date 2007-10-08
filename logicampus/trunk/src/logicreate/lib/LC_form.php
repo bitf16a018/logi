@@ -1076,18 +1076,18 @@
 						
 			$sql = "select pkey from lcFormInfo where formCode='$code'";
 			$db->queryOne($sql);
-			$pkey = $db->Record['pkey'];
+			$pkey = $db->record['pkey'];
 			
 			$sql = "select * from lcForms where formId='$pkey'";
 			
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->query($sql);
-			while ($db->next_record())
+			while ($db->nextRecord())
 			{
-				$tmp[$db->Record['fieldName']] = $db->Record;
+				$tmp[$db->record['fieldName']] = $db->record;
 				# take the groups and unserialize them
 				# so we don't have to later on
-				$tmp[$db->Record['fieldName']]['groups'] = unserialize($db->Record['groups']);
+				$tmp[$db->record['fieldName']]['groups'] = unserialize($db->record['groups']);
 			}
 
 			// making sure we are passing an array (just incase we pass an object for prepopulation
@@ -1424,7 +1424,7 @@
 			$db = DB::gethandle();
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$formInfo = $db->Record;
+			$formInfo = $db->record;
 			#debug($formInfo);
 			#Fill in all of the form properties
 			#from the DB
@@ -1445,7 +1445,7 @@
 			$db->query($sql);
 			
 			$n = 0;
-			while($db->next_record())
+			while($db->nextRecord())
 			{
 				++$formRow;	
 				
@@ -1456,16 +1456,16 @@
 				# was sent to us and use that as the default value.
 				# Fields such as event or submit should not be
 				# overwritten.
-				#debug($db->Record);
+				#debug($db->record);
 				
 				if (is_array($vars) )
 				{
-					#debug($db->Record['type']);
-					if ( !( ($db->Record['type'] == 'hidden') || ($db->Record['type'] == 'submit') || ($db->Record['type'] == 'row')  || ($db->Record['type'] == 'checkbox') || ($db->Record['type'] == 'radio')))
+					#debug($db->record['type']);
+					if ( !( ($db->record['type'] == 'hidden') || ($db->record['type'] == 'submit') || ($db->record['type'] == 'row')  || ($db->record['type'] == 'checkbox') || ($db->record['type'] == 'radio')))
 					{
-						#debug($db->Record);
+						#debug($db->record);
 						
-						$db->Record['defaultValue'] = $vars[$db->Record['fieldName']];	
+						$db->record['defaultValue'] = $vars[$db->record['fieldName']];	
 						
 					}
 
@@ -1475,16 +1475,16 @@
 					# if the var even exists
 					# if it doesn't we know the person didn't check
 					# the checkbox or unchecked it.
-					if ($db->Record['type'] == 'checkbox') 
+					if ($db->record['type'] == 'checkbox') 
 					{
-						$db->Record['checked'] = 'Y';
-						if ( !isset($vars[$db->Record['fieldName']]) )
+						$db->record['checked'] = 'Y';
+						if ( !isset($vars[$db->record['fieldName']]) )
 						{ 
-							$db->Record['checked'] = 'N';
+							$db->record['checked'] = 'N';
 						} else {
-							if ( $vars[$db->Record['fieldName']] == false) {
+							if ( $vars[$db->record['fieldName']] == false) {
 
-								$db->Record['checked'] = 'N';
+								$db->record['checked'] = 'N';
 							}
 						}
 					} 
@@ -1494,25 +1494,25 @@
 					# if so use it.  Otherwise, use the default
 					# value.  If we didn't do this, radio buttons
 					# would not have anything selected by default.
-					if ($db->Record['type'] == 'radio') 
+					if ($db->record['type'] == 'radio') 
 					{
-						if ( $vars[$db->Record['fieldName']] != '' )
+						if ( $vars[$db->record['fieldName']] != '' )
 						{ 
-							$db->Record['defaultValue'] =
-							$vars[$db->Record['fieldName']];
+							$db->record['defaultValue'] =
+							$vars[$db->record['fieldName']];
 						}
 					} 
 				} 
 				
 				
-				# echo $db->Record['fieldName'] .'='.$db->Record['defaultValue'].'<br>';
+				# echo $db->record['fieldName'] .'='.$db->record['defaultValue'].'<br>';
 				# Build up the groups for each form field
-				$db->Record['groups'] = unserialize($db->Record['groups']);
+				$db->record['groups'] = unserialize($db->record['groups']);
 				
 				# Figure out if the 
-				#$row = $db->Record['row'];
-				#debug($db->Record);
-				$this->data[$formRow][] = $db->Record;
+				#$row = $db->record['row'];
+				#debug($db->record);
+				$this->data[$formRow][] = $db->record;
 			}
 			
 			#print_r($this);
@@ -1529,9 +1529,9 @@
 			#print_r($ar);
 			#$db = DB::getHandle();
 			#$db->query("select * from lcForms where formId='$formId'");
-			#while($db->next_record())
+			#while($db->nextRecord())
 			#{
-			#		$tmp[$db->Record['fieldName']] = $db->Record;
+			#		$tmp[$db->record['fieldName']] = $db->record;
 			#}
 			
 			//while (list ($k, $v) = @each($ar))
@@ -1544,7 +1544,7 @@
 					continue;
 				}
 				#echo $ar[$k].'----->ar<br>';
-				#echo $db->Record['fieldName'].'------->Record<br>';
+				#echo $db->record['fieldName'].'------->record<br>';
 				if (is_array($ar[$k]))
 				{
 					continue;
@@ -1580,7 +1580,7 @@
 			$db = DB::gethandle();
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$formInfo = $db->Record;
+			$formInfo = $db->record;
 			
 			#Fill in all of the form properties
 			#from the DB
@@ -1604,24 +1604,24 @@
 			
 			$db->query($sql);
 			$db->RESULT_TYPE = MYSQL_ASSOC;
-			#print_r($db->Record);
+			#print_r($db->record);
 
-			while($db->next_record())
+			while($db->nextRecord())
 			{
 
 				
-				if  ($req[$db->Record['fieldName']] != '') {
-					$db->Record['defaultValue'] = $req[$db->Record['fieldName']];
+				if  ($req[$db->record['fieldName']] != '') {
+					$db->record['defaultValue'] = $req[$db->record['fieldName']];
 				}
 				
-				if  ($opt[$db->Record['fieldName']] != '') {
-					$db->Record['defaultValue'] = $opt[$db->Record['fieldName']];
+				if  ($opt[$db->record['fieldName']] != '') {
+					$db->record['defaultValue'] = $opt[$db->record['fieldName']];
 				}
 				
 				# Build up the groups for each form field
-				$db->Record['groups'] = explode("|", $db->Record['groups']);
-				$db->Record['notgroups'] = explode("|", $db->Record['notgroups']);
-				$this->data[] = $db->Record;
+				$db->record['groups'] = explode("|", $db->record['groups']);
+				$db->record['notgroups'] = explode("|", $db->record['notgroups']);
+				$this->data[] = $db->record;
 			}
 			
 			#print_r($this);
@@ -1687,7 +1687,7 @@
 			$db = DB::getHandle();
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			return $db->Record;
+			return $db->record;
 		}
 		
 		

@@ -51,8 +51,8 @@ class classdoclibService extends FacultyService {
 		// doclib stuff should be teacher-based, not class-based.
 		$db->query('select count(class_id) from classdoclib_Trash where owner = \''.$obj->user->username.'\'
 		and class_id = '.$obj->user->activeClassTaught->id_classes);
-		$db->next_record();
-		$t['trashcount'] = sprintf('%d',$db->Record[0]);
+		$db->nextRecord();
+		$t['trashcount'] = sprintf('%d',$db->record[0]);
 
 			if ( in_array('manager',$obj->user->perms) ) {
 				$t['sectionheader'] =' 
@@ -103,8 +103,8 @@ class LC_file extends PersistantObject{
 
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
-		while($db->next_record()) {
-			$x = PersistantObject::createFromArray('LC_file',$db->Record);
+		while($db->nextRecord()) {
+			$x = PersistantObject::createFromArray('LC_file',$db->record);
 			$ret[$x->pkey] = $x;
 		}
 		return $ret;
@@ -120,8 +120,8 @@ class LC_file extends PersistantObject{
 			$sql .= "order by $order";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
-		while($db->next_record()) { 
-			$x = PersistantObject::createFromArray('LC_file',$db->Record);
+		while($db->nextRecord()) { 
+			$x = PersistantObject::createFromArray('LC_file',$db->record);
 			$ret[$x->pkey] = $x;
 		}
 
@@ -149,9 +149,9 @@ WHERE
 
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		if (is_array($db->Record)) {
-			unset($db->Record['total']);
-			$x = PersistantObject::createFromArray('LC_file',$db->Record);
+		if (is_array($db->record)) {
+			unset($db->record['total']);
+			$x = PersistantObject::createFromArray('LC_file',$db->record);
 			return $x;
 		} else {
 			// xxx new ErrorStack
@@ -195,7 +195,7 @@ WHERE
 		$sql = "select * from classdoclib_Files where owner='".$this->owner."'";
 		$sql .= " and pkey=".$this->pkey;
 		$db->queryOne($sql);
-		$filename = $db->Record["filename"];
+		$filename = $db->record["filename"];
 		@unlink(FILES_PATH.$filename);
 		$db->query("delete from classdoclib_Files where owner='".$this->owner."' and pkey=".$this->pkey);
 	}
@@ -279,10 +279,10 @@ SELECT
 		$db = DB::getHandle();
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
-		if (!$db->next_record()) 
+		if (!$db->nextRecord()) 
 			return null;
 
-		$x = PersistantObject::createFromArray('LC_folder',$db->Record);
+		$x = PersistantObject::createFromArray('LC_folder',$db->record);
 		unset($x->total);
 		return $x;
 	}
@@ -311,10 +311,10 @@ SELECT
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
 
-		while($db->next_record()) {
-			$temp = $db->Record['folderType'];
+		while($db->nextRecord()) {
+			$temp = $db->record['folderType'];
 			if ($temp==0) { $temp=99; }
-			$x[$temp][] = $db->Record;
+			$x[$temp][] = $db->record;
 		}
 		ksort($x);
 		while(list($k,$v) = each($x)) {
@@ -386,8 +386,8 @@ SELECT
 
 		$db->query("select * from classdoclib_Sharing where folderKey = ".$this->pkey);
 		$sql = 'insert into classdoclib_Sharing (folderKey,action,exclude,gid) VALUES ('.$newFolderID.',%d,%d,\'%s\')';
-		while ( $db->next_record() ) {
-			$db->query(sprintf($sql,$db->Record['action'],$db->Record['exclude'],$db->Record['gid']) );
+		while ( $db->nextRecord() ) {
+			$db->query(sprintf($sql,$db->record['action'],$db->record['exclude'],$db->record['gid']) );
 		}
 
 	}
@@ -417,8 +417,8 @@ SELECT
 				'. $this->pkey.'
 				and action = 1');
 
-		while ($db->next_record() ){
-			$this->sharedGroups[$db->Record[1]] = $db->Record[0];
+		while ($db->nextRecord() ){
+			$this->sharedGroups[$db->record[1]] = $db->record[0];
 		}
 
 		$db->query('select groupName,lcGroups.gid from lcGroups,
@@ -429,8 +429,8 @@ SELECT
 				'. $this->pkey.'
 				and action = 2');
 
-		while ($db->next_record() ){
-			$this->managerGroups[$db->Record[1]] = $db->Record[0];
+		while ($db->nextRecord() ){
+			$this->managerGroups[$db->record[1]] = $db->record[0];
 		}
 	}
 
@@ -714,7 +714,7 @@ class FileMGTView extends ListView{
 				// get a count of files in this pkey
 				$db = db::getHandle();
 				$db->queryOne("select count(pkey) as filecount from classdoclib_Files where folder=".$this->tree->p_CurrentNode->contents['pkey']);
-				$ret .= "<td>".$db->Record['filecount']."</td>";
+				$ret .= "<td>".$db->record['filecount']."</td>";
 
 
 				//print one cell of icons or not

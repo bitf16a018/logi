@@ -52,8 +52,8 @@ class online extends StudentService {
 
 			$db->query($query);
 			$db->RESULT_TYPE = MYSQL_ASSOC;
-			while($db->next_record()) {
-				$t['users'][]= $db->Record;
+			while($db->nextRecord()) {
+				$t['users'][]= $db->record;
 			}
 			$t['loggedin'] = count($t['users']);
 		}

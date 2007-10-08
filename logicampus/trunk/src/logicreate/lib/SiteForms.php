@@ -67,9 +67,9 @@
 		{
 			$sql = "select distinct({$this->courseFamily}) from {$this->courses_table}";
 			$this->db->query($sql);
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[$this->db->Record["{$this->courseFamily}"]] = $this->db->Record["{$this->courseFamily}"].'='.$this->db->Record["{$this->courseFamily}"];
+				$arr[$this->db->record["{$this->courseFamily}"]] = $this->db->record["{$this->courseFamily}"].'='.$this->db->record["{$this->courseFamily}"];
 			}
 			#debug($arr, 1);
 			$v['selectOptions'] = @implode($arr, ",");
@@ -85,9 +85,9 @@
 		{
 			$sql = "select distinct({$this->courseNumber}) from {$this->courses_table}";
 			$this->db->query($sql);
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[$this->db->Record["{$this->courseNumber}"]] = $this->db->Record["{$this->courseNumber}"].'='.$this->db->Record["{$this->courseNumber}"];
+				$arr[$this->db->record["{$this->courseNumber}"]] = $this->db->record["{$this->courseNumber}"].'='.$this->db->record["{$this->courseNumber}"];
 			}
 			
 			$v['selectOptions'] = @implode($arr, ",");
@@ -100,9 +100,9 @@
 		{
 			$sql = "select id_courses, {$this->courseNumber}, {$this->courseFamily} from {$this->courses_table}";
 			$this->db->query($sql);
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[$this->db->Record['id_courses']] = $this->db->Record['id_courses'].'='.$this->db->Record["{$this->courseFamily}"].$this->db->Record["{$this->courseNumber}"];
+				$arr[$this->db->record['id_courses']] = $this->db->record['id_courses'].'='.$this->db->record["{$this->courseFamily}"].$this->db->record["{$this->courseNumber}"];
 			}
 			
 			$v['selectOptions'] = @implode($arr, ",");
@@ -116,9 +116,9 @@
 		{
 			$sql = "select id_courses, courseName, courseDescription, {$this->courseNumber}, {$this->courseFamily} from {$this->courses_table} ORDER BY courseFamily ASC";
 			$this->db->query($sql);
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[$this->db->Record['id_courses']] = $this->db->Record['id_courses'].'='. $this->db->Record["{$this->courseFamily}"].$this->db->Record["{$this->courseNumber}"].' ('.$this->db->Record['courseName'].')';
+				$arr[$this->db->record['id_courses']] = $this->db->record['id_courses'].'='. $this->db->record["{$this->courseFamily}"].$this->db->record["{$this->courseNumber}"].' ('.$this->db->record['courseName'].')';
 			}
 			
 			$v['selectOptions'] = @implode($arr, ",");
@@ -132,9 +132,9 @@
 		{
 			$sql = "select id_courses, courseDescription, {$this->courseNumber}, {$this->courseFamily} from {$this->courses_table}";
 			$this->db->query($sql);
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[$this->db->Record['id_courses']] = $this->db->Record['id_courses'].'='.$this->db->Record['courseDescription'].' ('.$this->db->Record["{$this->courseFamily}"].$this->db->Record["{$this->courseNumber}"].')';
+				$arr[$this->db->record['id_courses']] = $this->db->record['id_courses'].'='.$this->db->record['courseDescription'].' ('.$this->db->record["{$this->courseFamily}"].$this->db->record["{$this->courseNumber}"].')';
 			}
 			
 			$v['selectOptions'] = @implode($arr, ",");
@@ -154,9 +154,9 @@
 			$this->db->query($sql);
 			$this->db->RESULT_TYPE = MYSQL_ASSOC;
 			$arr = array();
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[] = $this->db->Record;
+				$arr[] = $this->db->record;
 			}
 			
 			if ($v['message'] != '')
@@ -201,9 +201,9 @@
 			$this->db->query($sql);
 			$this->db->RESULT_TYPE = MYSQL_ASSOC;
 			$arr = array();
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[] = $this->db->Record;
+				$arr[] = $this->db->record;
 			}
 			
 			if ($v['message'] != '')
@@ -246,16 +246,16 @@
 			$a_semester = array('Fall'=>'Fall', 'Winter'=>'Winter', 'Spring'=>'Spring', 'Summer'=>'Summer', 'Summer Mini'=>'Summer Mini', 'Summer I'=>'Summer I', 'Summer II'=>'Summer II', 'Spring Mini'=>'Spring Mini', 'Fall Mini'=>'Fall Mini', 'Winter Mini'=>'Winter Mini');
 			$sql = "select id_semesters, semesterTerm, semesterId, semesterYear from semesters order by semesterYear DESC";
 			$this->db->query($sql);
-			while($this->db->next_record() ) {
-				if ( in_array($this->db->Record['semesterTerm'],$a_semester) ) {
-					$arr[$this->db->Record['id_semesters']] = 
-						$this->db->Record['id_semesters'].'='.
-						$a_semester[$this->db->Record['semesterTerm']].' '.
-						$this->db->Record['semesterYear'];
+			while($this->db->nextRecord() ) {
+				if ( in_array($this->db->record['semesterTerm'],$a_semester) ) {
+					$arr[$this->db->record['id_semesters']] = 
+						$this->db->record['id_semesters'].'='.
+						$a_semester[$this->db->record['semesterTerm']].' '.
+						$this->db->record['semesterYear'];
 				} else {
-					$arr[$this->db->Record['id_semesters']] = 
-						$this->db->Record['id_semesters'].'='.
-						$this->db->Record['courseFamilyNumber'];
+					$arr[$this->db->record['id_semesters']] = 
+						$this->db->record['id_semesters'].'='.
+						$this->db->record['courseFamilyNumber'];
 				}
 			}
 
@@ -291,18 +291,18 @@
 			
 			// @@@ Now i need to know if we are to show semesters that have been deactivated?
 			$this->db->query($sql);
-			while($this->db->next_record() ) {
-				if ( in_array($this->db->Record['semesterTerm'],$a_semester) ) {
-					$arr[$this->db->Record['id_semesters']] = 
-						$this->db->Record['id_semesters'].'='.
-						'[ '. $this->db->Record['count_classes']. ' ] '. 
-						$a_semester[$this->db->Record['semesterTerm']].' '.
-						$this->db->Record['semesterYear'];
+			while($this->db->nextRecord() ) {
+				if ( in_array($this->db->record['semesterTerm'],$a_semester) ) {
+					$arr[$this->db->record['id_semesters']] = 
+						$this->db->record['id_semesters'].'='.
+						'[ '. $this->db->record['count_classes']. ' ] '. 
+						$a_semester[$this->db->record['semesterTerm']].' '.
+						$this->db->record['semesterYear'];
 				} else {
-					$arr[$this->db->Record['id_semesters']] = 
-						$this->db->Record['id_semesters'].'='.
-						'[ '. $this->db->Record['count_classes']. ' ] '. 
-						$this->db->Record['courseFamilyNumber'];
+					$arr[$this->db->record['id_semesters']] = 
+						$this->db->record['id_semesters'].'='.
+						'[ '. $this->db->record['count_classes']. ' ] '. 
+						$this->db->record['courseFamilyNumber'];
 				}
 			}
 
@@ -335,8 +335,8 @@
 					AND class_lesson_objectives.id_class_lesson='".LESSON_ID."')";
 
 				$this->db->query($sql);
-				while ($this->db->next_record()) {
-					$selected[] = $this->db->Record['id_class_objectives'];
+				while ($this->db->nextRecord()) {
+					$selected[] = $this->db->record['id_class_objectives'];
 				}
 			
 			}
@@ -353,23 +353,23 @@
 
 			$this->db->query($sql);
 			$starred = array();
-			while ($this->db->next_record()) {
-				$starred[] = $this->db->Record['id_class_objectives'];
+			while ($this->db->nextRecord()) {
+				$starred[] = $this->db->record['id_class_objectives'];
 			}
 
 			// Get ALL objectives for the active class
 			$sql = "select id_class_objectives, objective from class_objectives
 				where id_classes='{$lcUser->activeClassTaught->id_classes}'";
 			$this->db->query($sql);
-			while ($this->db->next_record()) {
-				if (strlen($this->db->Record['objective']) > 75) {
-					$this->db->Record['objective'] = htmlentities(substr($this->db->Record['objective'],0,75), ENT_QUOTES) . '...';
-					$this->db->Record[1] = htmlentities(substr($this->db->Record[1],0,75), ENT_QUOTES);
+			while ($this->db->nextRecord()) {
+				if (strlen($this->db->record['objective']) > 75) {
+					$this->db->record['objective'] = htmlentities(substr($this->db->record['objective'],0,75), ENT_QUOTES) . '...';
+					$this->db->record[1] = htmlentities(substr($this->db->record[1],0,75), ENT_QUOTES);
 				}
-				$arr[$this->db->Record['id_class_objectives']] =
-					 $this->db->Record['id_class_objectives'].'='
-					.(@in_array($this->db->Record['id_class_objectives'], $starred) ? '**' : '')
-					.str_replace(',', '&#44;', $this->db->Record['objective']);
+				$arr[$this->db->record['id_class_objectives']] =
+					 $this->db->record['id_class_objectives'].'='
+					.(@in_array($this->db->record['id_class_objectives'], $starred) ? '**' : '')
+					.str_replace(',', '&#44;', $this->db->record['objective']);
 			}
 			
 			$v['selectOptions'] = @implode($arr, ',');
@@ -392,8 +392,8 @@
 					where l.id_class_lessons='".LESSON_ID."'
 					and a.id_classes='{$lcUser->activeClassTaught->id_classes}'";
 				$this->db->query($sql);
-				while ($this->db->next_record()) {
-					$selected[] = $this->db->Record['id_class_assignments'];
+				while ($this->db->nextRecord()) {
+					$selected[] = $this->db->record['id_class_assignments'];
 				}
 
 			}
@@ -404,11 +404,11 @@
 				where id_classes='{$lcUser->activeClassTaught->id_classes}'";
 			$this->db->query($sql);
 			$arr[0] = '0=None';
-			while ($this->db->next_record())
+			while ($this->db->nextRecord())
 			{
-				$arr[$this->db->Record['id_class_assignments']] =
-					$this->db->Record['id_class_assignments']
-					.'='.$this->db->Record['title'];
+				$arr[$this->db->record['id_class_assignments']] =
+					$this->db->record['id_class_assignments']
+					.'='.$this->db->record['title'];
 			}
 
 			// If there aren't any selected options, make 'None' selected
@@ -428,9 +428,9 @@
 				where id_classes='{$lcUser->activeClassTaught->id_classes}'
 				and (id_class_lessons is null or id_class_lessons='".LESSON_ID."')";
 			$this->db->query($sql);
-			while ($this->db->next_record()) {
-				$arr[$this->db->Record['id_class_lesson_content']] =
-					$this->db->Record['id_class_lesson_content'].'='.$this->db->Record['txTitle'];
+			while ($this->db->nextRecord()) {
+				$arr[$this->db->record['id_class_lesson_content']] =
+					$this->db->record['id_class_lesson_content'].'='.$this->db->record['txTitle'];
 			}
 			$v['selectOptions'] = @implode($arr, ',');
 			return $this->selectToHTML($v);
@@ -445,9 +445,9 @@
 				where id_classes='{$lcUser->activeClassTaught->id_classes}'";
 			$this->db->query($sql);
 			$arr = array();
-			while ($this->db->next_record()) {
-				$arr[$this->db->Record['id_class_links']]
-					= $this->db->Record['id_class_links'].'='.$this->db->Record['title'];
+			while ($this->db->nextRecord()) {
+				$arr[$this->db->record['id_class_links']]
+					= $this->db->record['id_class_links'].'='.$this->db->record['title'];
 			}
 			$v['selectOptions'] = @implode($arr, ',');
 			return $this->selectToHTML($v);
@@ -464,7 +464,7 @@
 				$sql = 'SELECT courseFamily FROM courses WHERE id_courses='. substr($v['defaultValue'], 12);
 				$this->db->queryOne($sql);
 				
-				$CFAM = $this->db->Record['courseFamily'];
+				$CFAM = $this->db->record['courseFamily'];
 				
 				if ($CFAM == '')
 				{	// back to the old sql statement.. this got messed up somehow.. lets show all faculty
@@ -482,9 +482,9 @@
 			if ((int)@$this->db->getNumRows()== 0)
 			{	$arr[0] = '0=No Teachers Available';
 			}
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr[$this->db->Record['username']] = $this->db->Record['username']. '='.$this->db->Record['lastname']. '&#44; '.$this->db->Record['firstname'] ;
+				$arr[$this->db->record['username']] = $this->db->record['username']. '='.$this->db->record['lastname']. '&#44; '.$this->db->record['firstname'] ;
 			}
 
 			$v['selectOptions'] = @implode($arr, ",");
@@ -499,8 +499,8 @@
 		{
 					//groups
 			$this->db->query("select * from lcGroups");
-			while ($this->db->next_record() ) {
-				$arr .= $this->db->Record[gid].'='.$this->db->Record[groupName].',';
+			while ($this->db->nextRecord() ) {
+				$arr .= $this->db->record[gid].'='.$this->db->record[groupName].',';
 			}
 			$v['selectOptions'] = substr($arr, 0, -1);
 			$HTML = $this->selectToHTML($v);			
@@ -514,9 +514,9 @@
 			$sql = "select distinct(category) from class_faqs WHERE id_classes=". $lcUser->activeClassTaught->id_classes;
 			$this->db->query($sql);
 			$arr = "General=General,";
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr .= $this->db->Record['category'].'='.$this->db->Record['category'].',';
+				$arr .= $this->db->record['category'].'='.$this->db->record['category'].',';
 			}
 			$v['selectOptions'] = substr($arr, 0, -1);
 			$HTML = $this->selectToHTML($v);			
@@ -527,8 +527,8 @@
 		function helpdeskCategoriesToHTML($v)
 		{
 			$this->db->query("select * from helpdesk_categories ORDER BY helpdesk_category_label");
-			while($this->db->next_record()) {
-				$arr .= $this->db->Record[0]."=".$this->db->Record['helpdesk_category_label'].',';
+			while($this->db->nextRecord()) {
+				$arr .= $this->db->record[0]."=".$this->db->record['helpdesk_category_label'].',';
 			}
 			
 			$v['selectOptions'] = substr($arr, 0, -1);
@@ -539,8 +539,8 @@
 		function hdCategoriesToHTML($v)
 		{
 			$this->db->query("select * from hd_categories ORDER BY helpdesk_category_label");
-			while($this->db->next_record()) {
-				$arr .= $this->db->Record[0]."=".$this->db->Record['helpdesk_category_label'].',';
+			while($this->db->nextRecord()) {
+				$arr .= $this->db->record[0]."=".$this->db->record['helpdesk_category_label'].',';
 			}
 			
 			$v['selectOptions'] = substr($arr, 0, -1);
@@ -573,9 +573,9 @@
 			$sql = 'select * from orientation_dates WHERE id_semesters='. $lcUser->sessionvars['semester']. ' order by date DESC';
 			$this->db->query($sql);
 			
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr .= $this->db->Record['id_orientation_dates'].'='.date('F j Y', strtotime($this->db->Record['date'])).' ('.date('g:i A', strtotime('2003-02-03 '.$this->db->Record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$this->db->Record['time_end'])).'),';
+				$arr .= $this->db->record['id_orientation_dates'].'='.date('F j Y', strtotime($this->db->record['date'])).' ('.date('g:i A', strtotime('2003-02-03 '.$this->db->record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$this->db->record['time_end'])).'),';
 			}
 			
 			$v['selectOptions'] = substr($arr, 0, -1);
@@ -654,10 +654,10 @@
 			SELECT * 
 			FROM textbook_estimates';
 			$this->db->query($sql);
-			while ($this->db->next_record())
+			while ($this->db->nextRecord())
 			{
-				$arr .= $this->db->Record['textbook_estimates_key'].'='.
-					$this->db->Record['textbook_estimates_name'].',';
+				$arr .= $this->db->record['textbook_estimates_key'].'='.
+					$this->db->record['textbook_estimates_name'].',';
 
 			}
 
@@ -675,9 +675,9 @@
 					id_classes='".$lcUser->activeClassTaught->id_classes."'";
 			$this->db->query($sql);
 			$arr = '=Select Category,';
-			while($this->db->next_record() )
+			while($this->db->nextRecord() )
 			{
-				$arr .= $this->db->Record['id_class_gradebook_categories'].'='.$this->db->Record['label'].',';
+				$arr .= $this->db->record['id_class_gradebook_categories'].'='.$this->db->record['label'].',';
 			}
 			$v['selectOptions'] = substr($arr, 0, -1);
 			$HTML = $this->selectToHTML($v);			

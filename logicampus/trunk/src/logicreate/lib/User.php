@@ -221,8 +221,8 @@
 		function getAll() {
 			$db = DB::getHandle();
 			$db->query("select *, lc.username as lc_username from lcUsers as lc LEFT JOIN profile_student on lc.username = profile_student.username order by lc.username LIMIT ".$t['start'].",".$this->PAGE_SIZE);
-			while ($db->next_record()) {
-			$ret[] = $db->Record;
+			while ($db->nextRecord()) {
+			$ret[] = $db->record;
 			}
 			return $ret;
 		}

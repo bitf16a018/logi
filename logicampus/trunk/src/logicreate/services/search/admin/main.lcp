@@ -36,10 +36,10 @@ class search extends HercAuth {
 			$x['name'] = $plugin->moduleName;
 			$x['mid'] = $plugin->filename;
 			$db->queryOne($plugin->getCountSQL);
-			$x['rec'] = $db->Record[0];
+			$x['rec'] = $db->record[0];
 
 			$db->queryOne("select count(mkey) from lcSearch where modID = '".$plugin->mid."'");
-			$x['irec'] = $db->Record[0];
+			$x['irec'] = $db->record[0];
 		$t[modlist][] = $x;
 		} 	
 
@@ -50,9 +50,9 @@ class search extends HercAuth {
 		$t[numResults] = $this->_CacheResults;
 
 		$db->query("select text, count(*) as count from searchCache group by text order by count desc limit ".$this->_CacheResults."");
-		while($db->next_record())
+		while($db->nextRecord())
 			{
-				$t[cacheResults][] = "<li><b>".$db->Record[text]."</b> (".$db->Record[count].")";
+				$t[cacheResults][] = "<li><b>".$db->record[text]."</b> (".$db->record[count].")";
 			}
 
 	 }

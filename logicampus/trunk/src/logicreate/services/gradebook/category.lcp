@@ -176,15 +176,15 @@ class category extends FacultyService {
 			// Make sure they aren't over 100% (if they're grading based on weight)
 			$db->queryOne('select calculation_type from class_gradebook
 				where id_classes="'.$u->activeClassTaught->id_classes.'"');
-			if ($db->Record['calculation_type'] == 1) { // weighted
+			if ($db->record['calculation_type'] == 1) { // weighted
 
 				$sql = "SELECT SUM(weight) as sumweight FROM class_gradebook_categories
 					WHERE id_classes='".$u->activeClassTaught->id_classes."' AND
 					id_class_gradebook_categories !='".(int)$lc->getvars['id']."'";
 				$db->queryOne($sql);
 
-				if ( ($db->Record['sumweight'] + $gbCat->weight) > 100 ) {
-					$t['error'] = 'Your current total of percentages is <b>'.$db->Record['sumweight'].'%</b>.  If we add another <b>'.$gbCat->weight.'%</b> as you requested, the total of these weights will be greater than 100%.  Please double check your calculation, or adjust another category.';
+				if ( ($db->record['sumweight'] + $gbCat->weight) > 100 ) {
+					$t['error'] = 'Your current total of percentages is <b>'.$db->record['sumweight'].'%</b>.  If we add another <b>'.$gbCat->weight.'%</b> as you requested, the total of these weights will be greater than 100%.  Please double check your calculation, or adjust another category.';
 					if ( $lc->getvars['event'] == 'edit' ) $this->editRun($db,$u,$lc,$t);
 					else $this->addRun($db,$u,$lc,$t);
 					return;

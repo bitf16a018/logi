@@ -23,12 +23,12 @@ class maillist extends RegAuth {
 	/*  display all maillist to users */
 	function Run (&$db, &$u, &$arg, &$t) {
 		$db->query("select gid, groupName from lcGroups where gid like 'ml_%'");
-		while($db->next_record())
+		while($db->nextRecord())
 		  {
-			$t['maillist'][$db->Record['gid']] = $db->Record;
-			if (in_array($db->Record['gid'], $u->groups))
+			$t['maillist'][$db->record['gid']] = $db->record;
+			if (in_array($db->record['gid'], $u->groups))
 			{
-				$t['maillist'][$db->Record['gid']][checked] = 'yes';
+				$t['maillist'][$db->record['gid']][checked] = 'yes';
 			}
 					
 		  }
@@ -69,10 +69,10 @@ class maillist extends RegAuth {
 		 $sql = "select gid, groupName from lcGroups where $sql";
 		 
 		 $db->query($sql);
-		 while($db->next_record())
+		 while($db->nextRecord())
 		 {
-		 	if (in_array($db->Record['gid'], $list)) {
-		 		$t['list'][] = $db->Record['groupName'];
+		 	if (in_array($db->record['gid'], $list)) {
+		 		$t['list'][] = $db->record['groupName'];
 		 	}
 		 }
 		 } # close is_array($list)

@@ -22,15 +22,15 @@ var $presentor = "htmlViewer";
 
 		$db->queryOne("select * from lcHtml where filename='$file'  $where");
 
-		if ($db->Record["filename"]) {
+		if ($db->record["filename"]) {
 
-			$t["title"] = $db->Record["title"];
-			$t["_author"] = $db->Record["author"];
-			$t["_description"] = $db->Record["description"];
-                        $t["_keywords"] = $db->Record["keywords"];
-                        $t["_other"] = $db->Record["other"];
+			$t["title"] = $db->record["title"];
+			$t["_author"] = $db->record["author"];
+			$t["_description"] = $db->record["description"];
+                        $t["_keywords"] = $db->record["keywords"];
+                        $t["_other"] = $db->record["other"];
 
-			$lcObj->templateName = $db->Record[filename];
+			$lcObj->templateName = $db->record[filename];
 		} else {
 			$this->presentor = "errorMessage";
 			$t[message] = "Document unavailable";

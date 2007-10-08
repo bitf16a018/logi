@@ -207,8 +207,8 @@ class faq extends RegAuth
 			$db->query($sql);
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			
-			while ($db->next_record())
-			{	$a_faq[] = $db->Record;
+			while ($db->nextRecord())
+			{	$a_faq[] = $db->record;
 			}
 		}
 		
@@ -231,8 +231,8 @@ class faq extends RegAuth
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
-		{	$a_faq_categoryless[] = $db->Record;
+		while ($db->nextRecord())
+		{	$a_faq_categoryless[] = $db->record;
 		}
 		
 		/**
@@ -254,8 +254,8 @@ class faq extends RegAuth
 			$db->query($sql);
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			
-			while ($db->next_record())
-			{	$a_faq_notapproved[] = $db->Record;
+			while ($db->nextRecord())
+			{	$a_faq_notapproved[] = $db->record;
 			}
 			
 		}
@@ -302,8 +302,8 @@ class faq extends RegAuth
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
-		{	$a_question[] = $db->Record;
+		while ($db->nextRecord())
+		{	$a_question[] = $db->record;
 		}
 		
 		$t['a_question'] = $a_question;
@@ -366,9 +366,9 @@ class faq extends RegAuth
 		/**
 		 *	Determining if we found a faq or not
 		 */	
-		if ((int)$db->Record['id_faq'] > 0)
+		if ((int)$db->record['id_faq'] > 0)
 		{
-			$t['a_answer'] = $db->Record;
+			$t['a_answer'] = $db->record;
 		
 			/**
 			 *	Has this user voted before? we'll find out!
@@ -382,7 +382,7 @@ class faq extends RegAuth
 			
 			$db->queryOne($sql);
 			
-			$t['a_answer']['has_user_voted'] = $db->Record['has_user_voted'];
+			$t['a_answer']['has_user_voted'] = $db->record['has_user_voted'];
 			
 			// see if we should show a rating (this may be converted to allow anyone to see the rating)
 			if ($this->fl_management)
@@ -397,8 +397,8 @@ class faq extends RegAuth
 				
 				$db->RESULT_TYPE = MYSQL_ASSOC;
 				$db->queryOne($sql);
-				$t['a_answer']['users_voted'] = $db->Record['users_voted'];
-				$t['a_answer']['user_vote_average'] = ceil($db->Record['user_vote_average']);
+				$t['a_answer']['users_voted'] = $db->record['users_voted'];
+				$t['a_answer']['user_vote_average'] = ceil($db->record['user_vote_average']);
 
 			} else 
 			{
@@ -465,7 +465,7 @@ class faq extends RegAuth
 		
 		$db->queryOne($sql);
 		
-		if ($db->Record['has_user_voted'])
+		if ($db->record['has_user_voted'])
 		{	
 			echo 'You\'ve voted before!';
 		
@@ -485,7 +485,7 @@ class faq extends RegAuth
 				';
 				$db->queryOne($sql);
 				
-				if ($db->Record['fl_approved'])
+				if ($db->record['fl_approved'])
 				{
 					// Submitting the vote
 					$sql = '
@@ -606,7 +606,7 @@ class faq extends RegAuth
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$faq = $db->Record;
+		$faq = $db->record;
 						
 		// check if we found the thing
 		// then react, push into a template var
@@ -620,8 +620,8 @@ class faq extends RegAuth
 			
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$faq['votes_total'] = $db->Record['votes_total'];
-			$faq['votes_average'] = ceil($db->Record['votes_average']);
+			$faq['votes_total'] = $db->record['votes_total'];
+			$faq['votes_average'] = ceil($db->record['votes_average']);
 
 		
 		/**
@@ -639,8 +639,8 @@ class faq extends RegAuth
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{	$a_category[$db->Record['id_faq_category']] = $db->Record['tx_category'];
+		while ($db->nextRecord())
+		{	$a_category[$db->record['id_faq_category']] = $db->record['tx_category'];
 		}
 
 		/** 
@@ -855,9 +855,9 @@ class faq extends RegAuth
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{	$a_category[$db->Record['id_faq_category']] = $db->Record['tx_category'];
-			$t['category_faq_count'][$db->Record['id_faq_category']] = $db->Record['faq_count'];
+		while ($db->nextRecord())
+		{	$a_category[$db->record['id_faq_category']] = $db->record['tx_category'];
+			$t['category_faq_count'][$db->record['id_faq_category']] = $db->record['faq_count'];
 		}
 		
 		// output will always stay here.
@@ -904,8 +904,8 @@ class faq extends RegAuth
 				$db->query($sql);
 				$db->RESULT_TYPE = MYSQL_ASSOC;
 				
-				while ($db->next_record())
-				{	$a_results[] = $db->Record;
+				while ($db->nextRecord())
+				{	$a_results[] = $db->record;
 				}
 				
 			} else

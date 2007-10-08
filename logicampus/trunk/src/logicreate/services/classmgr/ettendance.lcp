@@ -57,26 +57,26 @@ class ettendance extends FacultyService
 		$id_class = (int)$lc->getvars['id_classes'];
 		$db->queryOne("select sectionNumbers from classes where id_classes = '$id_class' and facultyId='".$u->username."'");
 
-		if ($db->Record[0]=='') { // we have nothing
+		if ($db->record[0]=='') { // we have nothing
 						// might not be our class, or bad data
 			$this->presentor='errorMessage';
 			$t['message'] = 'Failed attempt - you have no access to retrieve this data';
 			return;
 		}
 
-		$numbers = explode("\n",$db->Record[0]);
+		$numbers = explode("\n",$db->record[0]);
 		$id_semester = $u->activeClassTaught->id_semesters;
 
 		$sql = 'select * from class_student_sections where semester_id= '.$id_semester.' and sectionNumber='.implode(" or sectionNumber=",$numbers);
 
 		$db->query($sql);
-		while($db->next_record()) { 
-			$student[$db->Record['id_student']] = $db->Record['dateWithdrawn'];
+		while($db->nextRecord()) { 
+			$student[$db->record['id_student']] = $db->record['dateWithdrawn'];
 		}	
 
 		$db->queryOne("Select * from semesters where id_semesters='$id_semester'");
-		$start = strtotime($db->Record['dateStart']);
-		$end = strtotime($db->Record['dateEnd']);
+		$start = strtotime($db->record['dateStart']);
+		$end = strtotime($db->record['dateEnd']);
 
 // we'll only show logins this semester, not how
 // many times someone has come into a particular class area
@@ -84,7 +84,7 @@ class ettendance extends FacultyService
 		while(list($k,$v) = each($student)) {
 // select count of good logins this semester
 			$db->queryOne("select count(*) from lc_users_login_attempt where login_attempt>=$start and login_attempt<=$end and username='$k' and login_status=1");
-			$studentCount[$k] = $db->Record[0];
+			$studentCount[$k] = $db->record[0];
 		}
 
 // sort the student list

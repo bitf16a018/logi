@@ -18,14 +18,14 @@ class pm extends HercAuth {
 		$with = createGroupCheck($arg->postvars['groups']);
 		$without = createGroupCheck($arg->postvars['notgroups']);
 		$db->query("select username from lcUsers where  ( ($with) and not ($without) )");
-		while($db->next_record()) {
+		while($db->nextRecord()) {
 	                $mess = new privMess();
 	                $mess->subject = $arg->postvars['subject'];
 	               if (!trim($mess->subject)) { $mess->subject = "No subject"; }
 	              $mess->message = $arg->postvars['message'];
 		          $mess->sentTime = time();
 	                 $mess->messageFrom =  "SYSTEM ADMIN";
-	               $mess->messageTo = $db->Record['username'];
+	               $mess->messageTo = $db->record['username'];
                       $mess->add();
 		}
              $t['message'] = "Message sent";

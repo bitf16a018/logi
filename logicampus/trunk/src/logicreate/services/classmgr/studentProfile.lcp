@@ -53,16 +53,16 @@ class studentProfile  extends FacultyService {
 
 		$tbl = array();
 
-		while ($db->next_record()) {
+		while ($db->nextRecord()) {
 
-			$photo = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
-				? 'photos/'.$db->Record['photo']
+			$photo = is_file(IMAGES_PATH.'photos/'.$db->record['photo'])
+				? 'photos/'.$db->record['photo']
 				: 'noimage.png';
 
-			$tbl[] = '<a href="'.appurl('users/view/'.$db->Record['username']).'">'
+			$tbl[] = '<a href="'.appurl('users/view/'.$db->record['username']).'">'
 				.'<img border="0" src="'.IMAGES_URL.$photo.'" alt="'
-				.$db->Record['lastname'].', '.$db->Record['firstname'].'" /><br/>'
-				.$db->Record['lastname'].', '.$db->Record['firstname'].'</a>';
+				.$db->record['lastname'].', '.$db->record['firstname'].'" /><br/>'
+				.$db->record['lastname'].', '.$db->record['firstname'].'</a>';
 		}
 
 		if (count($tbl))

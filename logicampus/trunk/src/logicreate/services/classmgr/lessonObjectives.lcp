@@ -84,8 +84,8 @@ class LessonObjectives extends FacultyService {
 		global $classmgr_itemsToTitles;
 		$classmgr_itemsToTitles = array();
 
-		while ($db->next_record()) {
-			$classmgr_itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
+		while ($db->nextRecord()) {
+			$classmgr_itemsToTitles[$db->record['id_class_objectives']][] = $db->record['title'];
 		}
 		//collapse the double array into one string
 		//Also, N'JECT data into the datagrid's internal memory so that it
@@ -182,7 +182,7 @@ class LessonObjectives extends FacultyService {
 			from class_objectives
 			where id_classes='{$u->activeClassTaught->id_classes}'
 			and id_class_objectives='{$objectiveid}'");
-		if (!$db->Record['cnt']) {
+		if (!$db->record['cnt']) {
 			$this->presentor = 'errorMessage';
 			$t['message'] = "You don't have permission to modify that objective.";
 			return false;

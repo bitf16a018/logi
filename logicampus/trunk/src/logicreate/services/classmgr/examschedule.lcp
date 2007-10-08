@@ -114,8 +114,8 @@ class examschedule extends FacultyService {
 		
 		$db->query($sql);
 		$emailTo = '';
-		while($db->next_record() )
-		{	$emailTo .= $db->Record['email'].',';	
+		while($db->nextRecord() )
+		{	$emailTo .= $db->record['email'].',';	
 		}
 	
 // use this to debug/send email through $emailTo = 'david.wissore@dl.tccd.edu,';
@@ -196,9 +196,9 @@ class examschedule extends FacultyService {
 			WHERE id_classes='.$u->activeClassTaught->id_classes;
 			
 			$db->queryOne($sql);
-			if (is_array($db->Record))
+			if (is_array($db->record))
 			{	
-				$t['tx_noexam'] = $db->Record['noExam'];
+				$t['tx_noexam'] = $db->record['noExam'];
 				
 			} else
 			{	echo 'Error: please report this to an administrator immediately, you have no syllabus installed.';
@@ -277,7 +277,7 @@ class examschedule extends FacultyService {
 			$db->queryOne('select id_classes from classes
 				where facultyId="'.$u->username.'"
 				and id_classes="'.(int)$lc->getvars['id'].'"');
-			if ( !$db->Record['id_classes'] ) {
+			if ( !$db->record['id_classes'] ) {
 				$this->presentation = 'errorMessage';
 				$t['message'] = 'We\'re sorry, but access was denied to that class. '
 					.'If you feel you have reached this message in error, please contact the help desk.';
@@ -406,8 +406,8 @@ $db->query("update classes set noexam=0 where id_classes=".$esc->idClasses);
 
 		$time = time();
 
-		if ( $time > strtotime($db->Record['dateStartExam'])
-		  && $time < strtotime($db->Record['dateEndExam']) )
+		if ( $time > strtotime($db->record['dateStartExam'])
+		  && $time < strtotime($db->record['dateEndExam']) )
 				return true;
 				
 		return false;

@@ -259,9 +259,9 @@ class ExamScheduleDates extends ExamScheduleDatesBase {
 		$sql = "SELECT email FROM lcUsers where groups LIKE
 		'%|exammgr|%'";
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$emailTo .= $db->Record['email'].',';	
+			$emailTo .= $db->record['email'].',';	
 		}
 		$emailTo = substr($emailTo, 0, -1);
 		mail($emailTo, "Exam Date Added / Modified".$subject, $msg, "From: ".WEBMASTER_EMAIL."\r\n");

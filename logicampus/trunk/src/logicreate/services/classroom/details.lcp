@@ -66,7 +66,7 @@ class details extends StudentService {
 			AND activeOn <= $ut and inactiveOn >= $ut";
 
 		$db->queryOne($sql);
-		$t['lessoncount'] = $db->Record['count'];
+		$t['lessoncount'] = $db->record['count'];
 		if ($t['lessoncount'] <= $this->_PortalNumOfLessons)
 		{
 			$t['_PortalNumOfLessons'] = $t['lessoncount'];
@@ -97,11 +97,11 @@ class details extends StudentService {
 		 if ($db->getNumRows())
 		 {
 			$t['lessons'] = '<ul>';
-			while ($db->next_record() )
+			while ($db->nextRecord() )
 			{
 				$t['lessons'] .= '<li><a href="'.modurl('lessons/event=view').
-				'/id='.$db->Record['id_class_lessons'].'">'.$db->Record['title'].'</a></li>';
-				//('.date("m-d h:i A", $db->Record['activeOn']).')</a></li>';
+				'/id='.$db->record['id_class_lessons'].'">'.$db->record['title'].'</a></li>';
+				//('.date("m-d h:i A", $db->record['activeOn']).')</a></li>';
 			}
 			$t['lessons'] .= '</ul>';
 		 } else {
@@ -200,9 +200,9 @@ class details extends StudentService {
 		 if ($db->getNumRows())
 		 {
 			$t['announcements'] = '<ul>';
-			if($db->next_record() )
+			if($db->nextRecord() )
 			{
-				$t['announcements'] .= '<li><a href="'.modurl('announcements').'/event=view/id='.$db->Record['id_class_announcements'].'">'.truncateText($db->Record['tx_description']).'</a></li>';
+				$t['announcements'] .= '<li><a href="'.modurl('announcements').'/event=view/id='.$db->record['id_class_announcements'].'">'.truncateText($db->record['tx_description']).'</a></li>';
 			}
 			$t['announcements'] .= '</ul>';
 		 } else {
@@ -233,12 +233,12 @@ class details extends StudentService {
 		$sql = "SELECT id_class_resource FROM classes WHERE 
 				id_classes = '".$u->activeClassTaken->id_classes."'";
 		$db->queryOne($sql);
-		$id_content = $db->Record['id_class_resource'];
+		$id_content = $db->record['id_class_resource'];
 
 		$sql = "SELECT txText from class_lesson_content WHERE 
 		id_class_lesson_content = '$id_content'";
 		$db->queryOne($sql);
-		$t['classresource'] = $db->Record['txText'];
+		$t['classresource'] = $db->record['txText'];
 
 
 		// stupid hack to get a feedback message

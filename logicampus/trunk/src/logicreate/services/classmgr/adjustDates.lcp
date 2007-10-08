@@ -264,10 +264,10 @@ class AdjustDates extends FacultyService {
 				$lc->postvars['deactiveOn'][$row]['day'],
 				$lc->postvars['deactiveOn'][$row]['year']);
 
-			if ( $activeOnStamp != $db->Record['date_available'] 
-				|| $deactiveOnStamp != $db->Record['date_unavailable'] ) {
-				$updates[$db->Record['id_class_lessons']]['date_available'] = $activeOnStamp;
-				$updates[$db->Record['id_class_lessons']]['date_unavailable'] = $deactiveOnStamp;
+			if ( $activeOnStamp != $db->record['date_available'] 
+				|| $deactiveOnStamp != $db->record['date_unavailable'] ) {
+				$updates[$db->record['id_class_lessons']]['date_available'] = $activeOnStamp;
+				$updates[$db->record['id_class_lessons']]['date_unavailable'] = $deactiveOnStamp;
 			}
 			++$row;
 		}
@@ -335,10 +335,10 @@ class AdjustDates extends FacultyService {
 				$lc->postvars['deactiveOn'][$row]['day'],
 				$lc->postvars['deactiveOn'][$row]['year']);
 
-			if ( $activeOnStamp != $db->Record['date_available'] 
-				|| $deactiveOnStamp != $db->Record['date_unavailable'] ) {
-				$updates[$db->Record['assessment_id']]['date_available'] = $activeOnStamp;
-				$updates[$db->Record['assessment_id']]['date_unavailable'] = $deactiveOnStamp;
+			if ( $activeOnStamp != $db->record['date_available'] 
+				|| $deactiveOnStamp != $db->record['date_unavailable'] ) {
+				$updates[$db->record['assessment_id']]['date_available'] = $activeOnStamp;
+				$updates[$db->record['assessment_id']]['date_unavailable'] = $deactiveOnStamp;
 			}
 			++$row;
 		}
@@ -442,12 +442,12 @@ class AdjustDates extends FacultyService {
 		
 
 
-			if ( $activeStamp != $db->Record['activeDate'] 
-				|| $dueDateStamp != $db->Record['dueDate'] 
-				|| $dateNoAcceptStamp != $db->Record['dateNoAccept'] ) {
-				$updates[$db->Record['id_class_assignments']]['activeDate'] = $activeStamp;
-				$updates[$db->Record['id_class_assignments']]['dueDate'] = $dueDateStamp;
-				$updates[$db->Record['id_class_assignments']]['dateNoAccept'] = $dateNoAcceptStamp;
+			if ( $activeStamp != $db->record['activeDate'] 
+				|| $dueDateStamp != $db->record['dueDate'] 
+				|| $dateNoAcceptStamp != $db->record['dateNoAccept'] ) {
+				$updates[$db->record['id_class_assignments']]['activeDate'] = $activeStamp;
+				$updates[$db->record['id_class_assignments']]['dueDate'] = $dueDateStamp;
+				$updates[$db->record['id_class_assignments']]['dateNoAccept'] = $dateNoAcceptStamp;
 			}
 			++$row;
 		}
@@ -522,10 +522,10 @@ class AdjustDates extends FacultyService {
 				$lc->postvars['dt_hide'][$row]['day'],
 				$lc->postvars['dt_hide'][$row]['year']));
 
-			if ( $dtDisplayStamp != $db->Record['dt_display'] 
-				|| $dtHideStamp != $db->Record['dt_hide'] ) {
-				$updates[$db->Record['id_class_announcements']]['dt_display'] = $dtDisplayStamp;
-				$updates[$db->Record['id_class_announcements']]['dt_hide'] = $dtHideStamp;
+			if ( $dtDisplayStamp != $db->record['dt_display'] 
+				|| $dtHideStamp != $db->record['dt_hide'] ) {
+				$updates[$db->record['id_class_announcements']]['dt_display'] = $dtDisplayStamp;
+				$updates[$db->record['id_class_announcements']]['dt_hide'] = $dtHideStamp;
 			}
 			++$row;
 		}
@@ -592,10 +592,10 @@ class AdjustDates extends FacultyService {
 				$lc->postvars['enddate'][$row]['day'],
 				$lc->postvars['enddate'][$row]['year']);
 
-			if ( $startDateStamp != $db->Record['startdate'] 
-				|| $endDateStamp != $db->Record['enddate'] ) {
-				$updates[$db->Record['pkey']]['startdate'] = $startDateStamp;
-				$updates[$db->Record['pkey']]['enddate'] = $endDateStamp;
+			if ( $startDateStamp != $db->record['startdate'] 
+				|| $endDateStamp != $db->record['enddate'] ) {
+				$updates[$db->record['pkey']]['startdate'] = $startDateStamp;
+				$updates[$db->record['pkey']]['enddate'] = $endDateStamp;
 			}
 			++$row;
 		}

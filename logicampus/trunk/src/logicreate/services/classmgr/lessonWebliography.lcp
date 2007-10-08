@@ -50,8 +50,8 @@ class LessonWebliography extends FacultyService {
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
-		{	$cats[] = $db->Record;
+		while ($db->nextRecord())
+		{	$cats[] = $db->record;
 		}
 		
 		$tree->loadData($cats);
@@ -99,8 +99,8 @@ class LessonWebliography extends FacultyService {
 		global $classmgr_itemsToTitles;
 		$classmgr_itemsToTitles = array();
 
-		while ($db->next_record()) {
-			$classmgr_itemsToTitles[$db->Record['id_class_links']][] = $db->Record['title'];
+		while ($db->nextRecord()) {
+			$classmgr_itemsToTitles[$db->record['id_class_links']][] = $db->record['title'];
 		}
 		//collapse the double array into one string
 		//Also, N'JECT data into the datagrid's internal memory so that it

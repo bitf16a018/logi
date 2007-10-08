@@ -20,8 +20,8 @@ class itemEditor extends HercAuth {
 			case "html": $arg->templateName="itemEditor_html";
 				include_once(LIB_PATH."LC_html.php");
 				$db->query("select filename, title from lcHtml");
-				while($db->next_record()) {
-					$t[html][$db->Record[0]] = $db->Record[1];
+				while($db->nextRecord()) {
+					$t[html][$db->record[0]] = $db->record[1];
 				}
 				$t[html] = makeOptions($t[html]);
 			break;
@@ -29,8 +29,8 @@ class itemEditor extends HercAuth {
 			case "app": $arg->templateName="itemEditor_app";
 				include_once(LIB_PATH."LC_html.php");
 				$db->query("select mid, moduleName from lcRegistry");
-				while($db->next_record()) {
-					$t[apps][$db->Record[0]] = $db->Record[1];
+				while($db->nextRecord()) {
+					$t[apps][$db->record[0]] = $db->record[1];
 				}
 				$t[apps] = makeOptions($t[apps]);
 			break;
@@ -42,8 +42,8 @@ class itemEditor extends HercAuth {
 
 		//parent menus
 		$db->query("select pkey, title from menu order by title");
-		while($db->next_record()) {
-			$t[menuOpts] .= '<option value="'.$db->Record[0].'">'.$db->Record[1].'</option>';
+		while($db->nextRecord()) {
+			$t[menuOpts] .= '<option value="'.$db->record[0].'">'.$db->record[1].'</option>';
 		}
 		$t['event'] = "insert";
 		$t['mid'] = $arg->postvars['mid'];
@@ -116,9 +116,9 @@ class itemEditor extends HercAuth {
 		switch($link->type) {
 			case "htm":
 				$db->query("select filename, title from lcHtml");
-				while($db->next_record()) {
-					$t[html][$db->Record['filename']] = $db->Record['title'];
-					if ( $link->location == $db->Record['filename'] ) { $sel = $db->Record['filename']; }
+				while($db->nextRecord()) {
+					$t[html][$db->record['filename']] = $db->record['title'];
+					if ( $link->location == $db->record['filename'] ) { $sel = $db->record['filename']; }
 				}
 				$t[html] = makeOptions($t[html],$sel);
 				break;
@@ -126,9 +126,9 @@ class itemEditor extends HercAuth {
 			case "app": $arg->templateName="itemEditor_app";
 				include_once(LIB_PATH."LC_html.php");
 				$db->query("select mid, moduleName from lcRegistry");
-				while($db->next_record()) {
-					$t[apps][$db->Record['mid']] = $db->Record['moduleName'];
-					if ( $link->location == $db->Record['mid'] ) { $sel = $db->Record['moduleName']; }
+				while($db->nextRecord()) {
+					$t[apps][$db->record['mid']] = $db->record['moduleName'];
+					if ( $link->location == $db->record['mid'] ) { $sel = $db->record['moduleName']; }
 
 				}
 				$t[apps] = makeOptions($t[apps], $sel);
@@ -230,8 +230,8 @@ class itemEditor extends HercAuth {
 
 		$db->query("select pkey,parentID,linkText,type from menuItems where menuID = ".$link->menuID." order by parentID, rank");
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		while ( $db->next_record() ) {
-			$data[] = MenuItem::getMenuItem($db->Record);
+		while ( $db->nextRecord() ) {
+			$data[] = MenuItem::getMenuItem($db->record);
 		}
 
 		$tree = new TreeList();

@@ -36,9 +36,9 @@
                     F.fileID='$fileID'";
 
       $result = $this->db->queryOne($sql);
-      if(is_array($this->db->Record) && count($this->db->Record))
+      if(is_array($this->db->record) && count($this->db->record))
       {
-        $this->setFrom($this->db->Record);
+        $this->setFrom($this->db->record);
         return true;
       }
 

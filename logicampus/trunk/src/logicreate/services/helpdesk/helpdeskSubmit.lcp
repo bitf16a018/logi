@@ -202,7 +202,7 @@ class helpdeskSubmit extends RegAuth {
 				// request to have an email go to the enduser who is the reassignee
 				// should be cleaner code or integrated with something else
 				$db->queryOne("select email from lcUsers where username='".$arg->postvars['reassign']."'");
-				$email = $db->Record[0];
+				$email = $db->record[0];
 				if (trim($email)!='') {
 					mail($email, "Helpdesk task #$id",
 "You have been assigned to helpdesk ticket #$id.  Please visit \n ".appurl("helpdesk/helpdeskView/$id")." \n to learn more about the ticket.", "From: ".WEBMASTER_EMAIL);
@@ -243,7 +243,7 @@ class helpdeskSubmit extends RegAuth {
 		$db->queryOne('select helpdesk_status_label from helpdesk_status
 			where helpdesk_status_id = '.$incident->status);
 
-		$statusLabel = ($db->Record[0]) ? $db->Record[0]:'N/A';
+		$statusLabel = ($db->record[0]) ? $db->record[0]:'N/A';
 
 		$newStatus = $incident->status;
 

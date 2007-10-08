@@ -43,9 +43,9 @@ function getCurrentID()
 
 	$db->queryOne($sql);
 
-	if ($db->Record['id_semesters'])
+	if ($db->record['id_semesters'])
 	{
-		$id_semesters = $db->Record['id_semesters'];
+		$id_semesters = $db->record['id_semesters'];
 	}
 	
 return $id_semesters;	
@@ -58,33 +58,33 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    $db = DB::getHandle($dsn);
    if ($prop=='') { $prop=$this->_pkey; }
    $db->query("select * from semesters where $prop='$pkey' $where $orderBy");
-   if($db->next_record()) {
+   if($db->nextRecord()) {
       $temp = new semesterObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
       
-      $temp->dateStartExam = $db->Record['dateStartExam'];
-      $temp->dateEndExam = $db->Record['dateEndExam'];
-      $temp->dateStartTextbook = $db->Record['dateStartTextbook'];
-      $temp->dateEndTextbook = $db->Record['dateEndTextbook'];
+      $temp->dateStartExam = $db->record['dateStartExam'];
+      $temp->dateEndExam = $db->record['dateEndExam'];
+      $temp->dateStartTextbook = $db->record['dateStartTextbook'];
+      $temp->dateEndTextbook = $db->record['dateEndTextbook'];
       
-      $temp->dateStartOrientation = $db->Record['dateStartOrientation'];
-      $temp->dateEndOrientation = $db->Record['dateEndOrientation'];
-      $temp->dateEndITVseminar = $db->Record['dateEndITVseminar'];
-      $temp->dateStartITVseminar = $db->Record['dateStartITVseminar'];
-      $temp->id_semesters = $db->Record['id_semesters'];
-      $temp->semesterId = $db->Record['semesterId'];
-      $temp->semesterTerm = $db->Record['semesterTerm'];
-      $temp->dateCensus = $db->Record['dateCensus'];
-      $temp->dateFinalDrop = $db->Record['dateFinalDrop'];
-      $temp->dateDeactivation = $db->Record['dateDeactivation'];
-      $temp->dateStart = $db->Record['dateStart'];
-      $temp->dateEnd = $db->Record['dateEnd'];
-      $temp->dateRegistrationStart = $db->Record['dateRegistrationStart'];
-      $temp->dateRegistrationEnd = $db->Record['dateRegistrationEnd'];
-      $temp->dateAccountActivation = $db->Record['dateAccountActivation'];
-      $temp->dateStudentActivation = $db->Record['dateStudentActivation'];
-      $temp->semesterYear = $db->Record['semesterYear'];
+      $temp->dateStartOrientation = $db->record['dateStartOrientation'];
+      $temp->dateEndOrientation = $db->record['dateEndOrientation'];
+      $temp->dateEndITVseminar = $db->record['dateEndITVseminar'];
+      $temp->dateStartITVseminar = $db->record['dateStartITVseminar'];
+      $temp->id_semesters = $db->record['id_semesters'];
+      $temp->semesterId = $db->record['semesterId'];
+      $temp->semesterTerm = $db->record['semesterTerm'];
+      $temp->dateCensus = $db->record['dateCensus'];
+      $temp->dateFinalDrop = $db->record['dateFinalDrop'];
+      $temp->dateDeactivation = $db->record['dateDeactivation'];
+      $temp->dateStart = $db->record['dateStart'];
+      $temp->dateEnd = $db->record['dateEnd'];
+      $temp->dateRegistrationStart = $db->record['dateRegistrationStart'];
+      $temp->dateRegistrationEnd = $db->record['dateRegistrationEnd'];
+      $temp->dateAccountActivation = $db->record['dateAccountActivation'];
+      $temp->dateStudentActivation = $db->record['dateStudentActivation'];
+      $temp->semesterYear = $db->record['semesterYear'];
    }
 if ( !$temp ) { trigger_error("empty persistant object\n".$sql); }
 return $temp;
@@ -97,33 +97,33 @@ function _getAllFromDB($key,$prop='',$where='', $orderBy='',$dsn='default') {
    if ($orderBy) { $orderBy = " order by $orderBy"; }
    if ($where) { $where = " and $where"; }
    $db->query("select * from semesters where $prop='$key' $where $orderBy");
-   while ($db->next_record()) {
+   while ($db->nextRecord()) {
       $temp = new semesterObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_semesters = $db->Record['id_semesters'];
-      $temp->semesterId = $db->Record['semesterId'];
-      $temp->semesterTerm = $db->Record['semesterTerm'];
-      $temp->dateCensus = $db->Record['dateCensus'];
-      $temp->dateFinalDrop = $db->Record['dateFinalDrop'];
-      $temp->dateDeactivation = $db->Record['dateDeactivation'];
-      $temp->dateStart = $db->Record['dateStart'];
-      $temp->dateEnd = $db->Record['dateEnd'];
-      $temp->dateRegistrationStart = $db->Record['dateRegistrationStart'];
-      $temp->dateRegistrationEnd = $db->Record['dateRegistrationEnd'];
-      $temp->dateAccountActivation = $db->Record['dateAccountActivation'];
-      $temp->dateStudentActivation = $db->Record['dateStudentActivation'];
-      $temp->semesterYear = $db->Record['semesterYear'];
+      $temp->id_semesters = $db->record['id_semesters'];
+      $temp->semesterId = $db->record['semesterId'];
+      $temp->semesterTerm = $db->record['semesterTerm'];
+      $temp->dateCensus = $db->record['dateCensus'];
+      $temp->dateFinalDrop = $db->record['dateFinalDrop'];
+      $temp->dateDeactivation = $db->record['dateDeactivation'];
+      $temp->dateStart = $db->record['dateStart'];
+      $temp->dateEnd = $db->record['dateEnd'];
+      $temp->dateRegistrationStart = $db->record['dateRegistrationStart'];
+      $temp->dateRegistrationEnd = $db->record['dateRegistrationEnd'];
+      $temp->dateAccountActivation = $db->record['dateAccountActivation'];
+      $temp->dateStudentActivation = $db->record['dateStudentActivation'];
+      $temp->semesterYear = $db->record['semesterYear'];
       
-      $temp->dateEndITVseminar = $db->Record['dateEndITVseminar'];
-      $temp->dateStartITVseminar = $db->Record['dateStartITVseminar'];
-      $temp->dateStartOrientation = $db->Record['dateStartOrientation'];
-      $temp->dateEndOrientation = $db->Record['dateEndOrientation'];
+      $temp->dateEndITVseminar = $db->record['dateEndITVseminar'];
+      $temp->dateStartITVseminar = $db->record['dateStartITVseminar'];
+      $temp->dateStartOrientation = $db->record['dateStartOrientation'];
+      $temp->dateEndOrientation = $db->record['dateEndOrientation'];
       
-      $temp->dateStartExam = $db->Record['dateStartExam'];
-      $temp->dateEndExam = $db->Record['dateEndExam'];
-      $temp->dateStartTextbook = $db->Record['dateStartTextbook'];
-      $temp->dateEndTextbook = $db->Record['dateEndTextbook'];
+      $temp->dateStartExam = $db->record['dateStartExam'];
+      $temp->dateEndExam = $db->record['dateEndExam'];
+      $temp->dateStartTextbook = $db->record['dateStartTextbook'];
+      $temp->dateEndTextbook = $db->record['dateEndTextbook'];
       
       $objects[] = $temp;
 }

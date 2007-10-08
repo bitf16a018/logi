@@ -464,7 +464,7 @@ class Assessment extends AssessmentBase {
 			$db = DB::getHandle();
 			$sql = "select email from lcUsers where username='".$u->activeClassTaken->facultyId."'";
 			$db->queryOne($sql);
-			$email = $db->Record['email'];
+			$email = $db->record['email'];
 			$subject = $this->displayName." completed by ".$u->profile->values['firstname']." ".$u->profile->values['lastname'];
 
 			if ( mail($email, $subject, $qstans) )

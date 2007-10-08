@@ -18,17 +18,17 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    $db = DB::getHandle($dsn);
    if ($prop=='') { $prop=$this->_pkey;  }
    $db->query("select id_class_announcements,id_classes,dt_display,tx_title,tx_description,id_faculty_createdby,dt_created from class_announcements where $pkey='$prop' $where $orderBy");
-   if($db->next_record()) {
+   if($db->nextRecord()) {
       $temp = new classAnnouncements();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_announcements = $db->Record['id_class_announcements'];
-      $temp->id_classes = $db->Record['id_classes'];
-      $temp->dt_display = $db->Record['dt_display'];
-      $temp->tx_title = $db->Record['tx_title'];
-      $temp->tx_description = $db->Record['tx_description'];
-      $temp->id_faculty_createdby = $db->Record['id_faculty_createdby'];
-      $temp->dt_created = $db->Record['dt_created'];
+      $temp->id_class_announcements = $db->record['id_class_announcements'];
+      $temp->id_classes = $db->record['id_classes'];
+      $temp->dt_display = $db->record['dt_display'];
+      $temp->tx_title = $db->record['tx_title'];
+      $temp->tx_description = $db->record['tx_description'];
+      $temp->id_faculty_createdby = $db->record['id_faculty_createdby'];
+      $temp->dt_created = $db->record['dt_created'];
    }
 if ( !$temp ) { trigger_error('empty persistant object'); }
 return $temp;
@@ -41,17 +41,17 @@ function _getAllFromDB($key,$prop='',$where='', $orderBy='',$dsn='default') {
    if ($orderBy) { $orderBy = " order by $orderBy"; }
    if ($where) { $where = " and $where"; }
    $db->query("select id_class_announcements,id_classes,dt_display,tx_title,tx_description,id_faculty_createdby,dt_created from class_announcements where $prop='$key' $where $orderBy");
-   while ($db->next_record()) {
+   while ($db->nextRecord()) {
       $temp = new classAnnouncements();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_announcements = $db->Record['id_class_announcements'];
-      $temp->id_classes = $db->Record['id_classes'];
-      $temp->dt_display = $db->Record['dt_display'];
-      $temp->tx_title = $db->Record['tx_title'];
-      $temp->tx_description = $db->Record['tx_description'];
-      $temp->id_faculty_createdby = $db->Record['id_faculty_createdby'];
-      $temp->dt_created = $db->Record['dt_created'];
+      $temp->id_class_announcements = $db->record['id_class_announcements'];
+      $temp->id_classes = $db->record['id_classes'];
+      $temp->dt_display = $db->record['dt_display'];
+      $temp->tx_title = $db->record['tx_title'];
+      $temp->tx_description = $db->record['tx_description'];
+      $temp->id_faculty_createdby = $db->record['id_faculty_createdby'];
+      $temp->dt_created = $db->record['dt_created'];
       $objects[] = $temp;
 }
 return $objects;

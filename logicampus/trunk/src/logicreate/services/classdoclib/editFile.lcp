@@ -139,9 +139,9 @@ class editFile extends classdoclibService {
 		if ($trash->pkey) {
 			$db->query("update classdoclib_Files set folder=origfolder, trashed='n' where pkey=".(int)$lc->getvars['file']);
 			$db->queryOne("select folder from classdoclib_Files where pkey=".(int)$lc->getvars['file']);
-			$folder = $db->Record['folder'];
+			$folder = $db->record['folder'];
 			$db->queryOne("select trashed from classdoclib_Folders where pkey=$folder");
-			if ($db->Record['trashed']=='y') { 
+			if ($db->record['trashed']=='y') { 
 			$db->query("update classdoclib_Files set folder=0, trashed='n' where pkey=".(int)$lc->getvars['file']);
 			}
 		}
@@ -159,7 +159,7 @@ class editFile extends classdoclibService {
 
 		$class_id = $u->activeClassTaught->id_classes;
 		$db->queryOne("select pkey from classdoclib_Folders where class_id='$class_id' and folderType=0");
-		$trashPkey = $db->Record['pkey'];
+		$trashPkey = $db->record['pkey'];
 
 		$trash = LC_file::getSingle($lc->getvars['file'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
 		if ($trash->pkey) {

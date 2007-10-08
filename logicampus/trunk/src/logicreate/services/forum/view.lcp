@@ -28,8 +28,8 @@ class view extends NoAuth {
 		$db->query("select distinct lc_forum_perm_action AS action
 			FROM lc_forum_perm 
 			WHERE lc_forum_id=".(int)$key." and $x");
-		while($db->next_record()) {
-			$t['perms'][$db->Record['action']] = true;
+		while($db->nextRecord()) {
+			$t['perms'][$db->record['action']] = true;
 		}
 
 		if (!$t['perms']['read']) { 

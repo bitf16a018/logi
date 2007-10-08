@@ -46,16 +46,16 @@ class contactStudents extends StudentService
 			
 			$db->query($sql);
 			
-			while ($db->next_record()) {
-				$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
+			while ($db->nextRecord()) {
+				$t['students'][$db->record['username']] = '<input type="checkbox" name="student_'.$db->record['username'].'" id="student_'.$db->record['username'].'"><label for="student_'.$db->record['username'].'"> '.$db->record['lastname'].', '.$db->record['firstname']. '</label>';
 
-				$photo = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
-					? 'photos/'.$db->Record['photo']
+				$photo = is_file(IMAGES_PATH.'photos/'.$db->record['photo'])
+					? 'photos/'.$db->record['photo']
 					: 'noimage.png';
 
-				$t['students'][$db->Record['username']] .= '<a href="'.appurl('users/view/'.$db->Record['username']).'">'
+				$t['students'][$db->record['username']] .= '<a href="'.appurl('users/view/'.$db->record['username']).'">'
 				.'<img align="middle" border="0" src="'.IMAGES_URL.$photo.'" alt="'
-				.$db->Record['lastname'].', '.$db->Record['firstname'].'" /></a>';
+				.$db->record['lastname'].', '.$db->record['firstname'].'" /></a>';
 			}
 
 		if (count($tbl))
@@ -105,9 +105,9 @@ class contactStudents extends StudentService
 		
 		$db->query($sql);
 
-		while ($db->next_record())
-		{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
-			$my_students[$db->Record['username']] = $db->Record['email'];
+		while ($db->nextRecord())
+		{	$t['students'][$db->record['username']] = '<input type="checkbox" name="student_'.$db->record['username'].'" id="student_'.$db->record['username'].'"><label for="student_'.$db->record['username'].'"> '.$db->record['lastname'].', '.$db->record['firstname']. '</label>';
+			$my_students[$db->record['username']] = $db->record['email'];
 		}
 		
 		$my_email_to_send = array();

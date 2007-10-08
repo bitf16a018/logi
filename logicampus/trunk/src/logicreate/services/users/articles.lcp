@@ -22,22 +22,22 @@ class articles extends RegAuth {
 		# Grab all returned articles and display them.
 		$sql = "select pkey, title, introtext, maintext, notes from articles where author='".$u->username."' and status='Return'";
 		$db->query($sql);
-		while($db->next_record()) {
-			$t[returned][] = $db->Record;
+		while($db->nextRecord()) {
+			$t[returned][] = $db->record;
 		}
 		# Show all pending articles
 		$sql = "select title from articles where author='".$u->username."' and status='Pending'";
 		$db->query($sql);
-		while($db->next_record()) {
-			$t[pending][] = $db->Record;
+		while($db->nextRecord()) {
+			$t[pending][] = $db->record;
 		}
 	}
 
 	function editReturnRun(&$db,&$u,&$arg,&$t) {
 		$sql = "select pkey, title, introtext, maintext, author from articles where pkey='".$arg->getvars[pkey]."'";
 		$db->queryOne($sql);
-		if ($db->Record[author] == $u->username) { 
-			$t[article] = $db->Record;
+		if ($db->record[author] == $u->username) { 
+			$t[article] = $db->record;
 		} else {
 			$t[error] = "There was an error re-submitting this article.  Please contact the webmaster.";
 		}
@@ -46,7 +46,7 @@ class articles extends RegAuth {
 
 	function editReturnPostRun(&$db,&$u,&$arg,&$t) {
 		$db->queryOne("select author from articles where pkey='".$arg->postvars[pkey]."'");
-		if($u->username != $db->Record[author]) { 
+		if($u->username != $db->record[author]) { 
 			$t[error] = "You are not the owner of this article.";
 			$this->run(&$db,&$u,&$arg,&$t);
 

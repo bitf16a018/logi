@@ -44,13 +44,13 @@ class Category extends PersistantObject {
 		$sql .=" from $table where system = '$system' order by parentKey, sortorder";
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		while ($db->next_record() ) {
+		while ($db->nextRecord() ) {
 
-			$cats[] = $db->Record;
+			$cats[] = $db->record;
 		}
 		
 		$tree->loadData($cats);
-/*			$l = PersistantObject::createFromArray("Category",$db->Record);
+/*			$l = PersistantObject::createFromArray("Category",$db->record);
 			$node = new TreeListNode($l);
 //print "<hr> got this from db:";
 //print_r($l);
@@ -124,8 +124,8 @@ class Category extends PersistantObject {
 		
 		$db = DB::getHandle();
 		$db->query("select * from $table where parentKey = $id");
-		while($db->next_record() ) {
-			$cats[] = PersistantObject::createFromArray("Category",$db->Record);
+		while($db->nextRecord() ) {
+			$cats[] = PersistantObject::createFromArray("Category",$db->record);
 		}
 	return $cats;
 	}
@@ -142,8 +142,8 @@ class Category extends PersistantObject {
 	function getChildrenByName ($name,$system, $table='lcCategories') {
 		$db = DB::getHandle();
 		$db->query("select pkey from $table where name = '$name' and system = '$system'");
-		$db->next_record();
-		$k = $db->Record[0];
+		$db->nextRecord();
+		$k = $db->record[0];
 	return Category::getChildren($k);
 	}
 
@@ -160,8 +160,8 @@ class Category extends PersistantObject {
 		{	$table = $this->table;
 		}
 		$db->query("select distinct(system) from ".$table);
-		while($db->next_record() ) {
-			$sys[$db->Record[0]] = $db->Record[0];
+		while($db->nextRecord() ) {
+			$sys[$db->record[0]] = $db->record[0];
 		}
 	return $sys;
 	}

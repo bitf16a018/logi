@@ -272,8 +272,8 @@ class ClassGradebookVal extends ClassGradebookValBase {
 //			from class_gradebook_entries as e
 //			left join class_gradebook_val as v on e.id_class_gradebook_entries');
 
-		while ($db->next_record()) {
-			$arr[] = ClassGradebookVal::load($db->Record['id_class_gradebook_val']);
+		while ($db->nextRecord()) {
+			$arr[] = ClassGradebookVal::load($db->record['id_class_gradebook_val']);
 		}
 
 		return $arr;
@@ -307,15 +307,15 @@ class ClassGradebookVal extends ClassGradebookValBase {
 		// Get all entries for the class
 		$db->query('select e.title,e.id_class_gradebook_entries from class_gradebook_entries as e
 			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"');
-		while ( $db->next_record() )
-			$entries[$db->Record['id_class_gradebook_entries']] = $db->Record['title'];
+		while ( $db->nextRecord() )
+			$entries[$db->record['id_class_gradebook_entries']] = $db->record['title'];
 
 		// Get all values for the user/class
 		$db->query('select id_class_gradebook_val,id_class_gradebook_entries from class_gradebook_val
 			where id_classes="'.$lcUser->activeClassTaught->id_classes.'"
 			and username="'.$username.'"');
-		while ( $db->next_record() )
-			$vals[$db->Record['id_class_gradebook_entries']] = $db->Record['id_class_gradebook_val'];
+		while ( $db->nextRecord() )
+			$vals[$db->record['id_class_gradebook_entries']] = $db->record['id_class_gradebook_val'];
 
 		// build the array of objects to return. create new val objects if they're missing
 		while ( list($eid,$title) = @each($entries) ) {
@@ -355,7 +355,7 @@ class ClassGradebookVal extends ClassGradebookValBase {
 		$db->queryOne('select title from class_gradebook_entries as e
 			where e.id_classes="'.$lcUser->activeClassTaught->id_classes.'"
 			and id_class_gradebook_entries="'.$entryid.'"');
-		$etitle = $db->Record['title'];
+		$etitle = $db->record['title'];
 
 
 		// Get all the students in the class
@@ -367,10 +367,10 @@ class ClassGradebookVal extends ClassGradebookValBase {
 			AND active=\'1\' 
 			ORDER BY p.lastname';
 		$db->query($sql);
-		while ($db->next_record()) {
-			$students[$db->Record['username']] = array(
-				'firstname' => $db->Record['firstname'],
-				'lastname' => $db->Record['lastname'],
+		while ($db->nextRecord()) {
+			$students[$db->record['username']] = array(
+				'firstname' => $db->record['firstname'],
+				'lastname' => $db->record['lastname'],
 			);
 		}
 
@@ -378,8 +378,8 @@ class ClassGradebookVal extends ClassGradebookValBase {
 		$db->query('select id_class_gradebook_val,id_class_gradebook_entries from class_gradebook_val
 			where id_classes="'.$lcUser->activeClassTaught->id_classes.'"
 			and id_class_gradebook_entries="'.$entryid.'"');
-		while ( $db->next_record() )
-			$vals[$db->Record['id_class_gradebook_entries']] = $db->Record['id_class_gradebook_val'];
+		while ( $db->nextRecord() )
+			$vals[$db->record['id_class_gradebook_entries']] = $db->record['id_class_gradebook_val'];
 
 
 		// build the array of objects to return. create new val objects if they're missing

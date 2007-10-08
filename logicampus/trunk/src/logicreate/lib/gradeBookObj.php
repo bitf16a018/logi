@@ -36,7 +36,7 @@
 			$sql = "SELECT * from class_gradebook where id_classes = '$id_classes'";
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			while(list ($k, $v) = @each($db->Record))
+			while(list ($k, $v) = @each($db->record))
 			{
 				$this->$k = $v;
 			}
@@ -52,9 +52,9 @@
 			$db = DB::getHandle();
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->query($sql);
-			while($db->next_record() ) 
+			while($db->nextRecord() ) 
 			{
-				 $cats[$db->Record['id']] = GBCategory::loadFromArray($db->Record);
+				 $cats[$db->record['id']] = GBCategory::loadFromArray($db->record);
 			}
 			return $cats;
 
@@ -136,7 +136,7 @@
 			$sql = "SELECT class_gradebook.calculation_type, class_gradebook_categories.* from class_gradebook_categories INNER JOIN class_gradebook ON class_gradebook.id_classes=class_gradebook_categories.id_classes where class_gradebook_categories.id_class_gradebook_categories='$id'"; 
 			
 			$db->queryOne($sql);
-			$x = GBCategory::loadFromArray($db->Record);
+			$x = GBCategory::loadFromArray($db->record);
 			if ($x->id_classes == $id_classes)
 			{	
 				return $x;
@@ -187,7 +187,7 @@
 					WHERE id_classes='".$this->id_classes."' AND 
 					id_class_gradebook_categories !='".$this->id."'";
 					$db->queryOne($sql);
-					$sum = $db->Record[0];
+					$sum = $db->record[0];
 					if ( ($sum + $this->weight) > 100)
 					{
 						$this->error = "Your current total of percentages is
@@ -221,7 +221,7 @@
 				id_classes='$this->id_classes'";
 				$db->queryOne($sql);
 				$this->calculation_type =
-				$db->Record['calculation_type'];
+				$db->record['calculation_type'];
 			}
 
 		}
@@ -236,10 +236,10 @@
 
 			$db = DB::getHandle();
 			$db->query($sql);
-			while ($db->next_record() )
+			while ($db->nextRecord() )
 			{
-				$tmp[$db->Record['id_class_gradebook_categories']] =
-				$db->Record['label'];	
+				$tmp[$db->record['id_class_gradebook_categories']] =
+				$db->record['label'];	
 			}
 			return $tmp;
 		}
@@ -271,15 +271,15 @@
 			id_classes='$id_classes'";
 
 			$db->query($sql);
-			while($db->next_record() )
+			while($db->nextRecord() )
 			{
 				$x = new GBEntry();
-				$x->id = $db->Record['id_class_gradebook_entries'];
-				$x->title = $db->Record['title'];
-				$x->gradebook_code = $db->Record['gradebook_code'];
-				$x->total_points = $db->Record['total_points'];
-				$x->id_classes = $db->Record['id_classes'];
-				$temp[$db->Record['id_class_gradebook_entries']] = $x;
+				$x->id = $db->record['id_class_gradebook_entries'];
+				$x->title = $db->record['title'];
+				$x->gradebook_code = $db->record['gradebook_code'];
+				$x->total_points = $db->record['total_points'];
+				$x->id_classes = $db->record['id_classes'];
+				$temp[$db->record['id_class_gradebook_entries']] = $x;
 
 			}
 			return $temp;
@@ -352,7 +352,7 @@
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$sql = "SELECT * FROM class_gradebook_entries where id_class_gradebook_entries='$id' AND id_classes='$id_classes'"; 
 			$db->queryOne($sql);
-			$x = GBEntry::loadFromArray($db->Record);
+			$x = GBEntry::loadFromArray($db->record);
 			if ($x->id_classes == $id_classes)
 			{	
 				return $x;
@@ -372,7 +372,7 @@
 			AND id_classes='".$this->id_classes."'";
 			$db->queryOne($sql);
 
-			if ($db->Record['count'] == 1)
+			if ($db->record['count'] == 1)
 			{
 				return true;
 			}
@@ -428,12 +428,12 @@
 			';
 echo $sql;			
 			$db->query($sql);
-			while($db->next_record() )
+			while($db->nextRecord() )
 			{
-				$gbVal[$db->Record['id_class_gradebook_val']] = GBVal::loadFromArray($db->Record);
-				$gbVal[$db->Record['id_class_gradebook_val']]->entry = GBEntry::loadFromArray($db->Record);
-				$gbVal[$db->Record['id_class_gradebook_val']]->category
-				= GBCategory::loadFromArray($db->Record);
+				$gbVal[$db->record['id_class_gradebook_val']] = GBVal::loadFromArray($db->record);
+				$gbVal[$db->record['id_class_gradebook_val']]->entry = GBEntry::loadFromArray($db->record);
+				$gbVal[$db->record['id_class_gradebook_val']]->category
+				= GBCategory::loadFromArray($db->record);
 			}
 			return $gbVal;
 		}

@@ -23,8 +23,8 @@ class forum extends HercAuth  {
 		$grouplist = $g->displayList;
 
 		$db->query("select * from forums");
-		while($db->next_record()) { 
-			extract($db->Record);
+		while($db->nextRecord()) { 
+			extract($db->record);
 
 // make the action tags (edit/del)
 			$act = "<a href=\"".MOD_URL."main/event=edit/fid=$fid"."\">edit</a> | ";
@@ -51,10 +51,10 @@ $recentpost = date("m/d/Y h:i A",$recentpost); }
 		$db->queryOne("select * from forums where fid='$fid'");
 
 // pull record into vars
-		@extract($db->Record);
+		@extract($db->record);
 		
 // put general data into template
-		$t = $db->Record;
+		$t = $db->record;
 
 // deal with perms
 		$forumperms = array("view","post","moderate");
@@ -66,8 +66,8 @@ $recentpost = date("m/d/Y h:i A",$recentpost); }
 		$p .= "</tr>";
 
 		$db->query("select * from forumPerms where fid='$fid'");
-		while($db->next_record()) {
-			$perm[$db->Record["groups"]][$db->Record["perm"]] = true;
+		while($db->nextRecord()) {
+			$perm[$db->record["groups"]][$db->record["perm"]] = true;
 		}
 		while(list($k,$v) = each($grouplist)) { 
 			$p .= "<tr><td>$v</td>";

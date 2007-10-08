@@ -92,8 +92,8 @@ class discussion_post extends StudentService {
 
 		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
 		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
-		while($db->next_record()) {
-			$t['perms'][$db->Record[0]] = true;
+		while($db->nextRecord()) {
+			$t['perms'][$db->record[0]] = true;
 		}
 		if (!$t['perms']['dele']) { 
 			echo "You can't delete this post"; exit();
@@ -111,8 +111,8 @@ class discussion_post extends StudentService {
 		$key= $lc->getvars[1];
 		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
 		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$key." and $x");
-		while($db->next_record()) {
-			$t['perms'][$db->Record[0]] = true;
+		while($db->nextRecord()) {
+			$t['perms'][$db->record[0]] = true;
 		}
 		if (!$t['perms']['dele']) { 
 			echo "You can't undelete this post"; exit();

@@ -39,12 +39,12 @@ class forum extends FacultyService {
 		$db->queryOne("select count(pkey) AS total 
 			FROM forumPosts 
 			WHERE parent=0 and fid='$fid' and status='y'");
-		$count = $db->Record['total'];
+		$count = $db->record['total'];
 		$db->query("update forums set numthreads=$count where fid='$fid'");
 		$db->queryOne("select count(pkey) AS total
 			FROM forumPosts 
 			WHERE fid='$fid' and status='y'");
-		$count = $db->Record['total'];
+		$count = $db->record['total'];
 		$db->query("update forums set validposts=$count where fid='$fid'");
 	}
 
@@ -58,14 +58,14 @@ class forum extends FacultyService {
 
 		$g = implode("' or groups='",$u->groups);
 		$db->query("select fid from forumPerms where perm='view' and (groups='$g')");
-		while($db->next_record()) {
-			$fids[] = $db->Record[0];
+		while($db->nextRecord()) {
+			$fids[] = $db->record[0];
 		}
 		$fid = @implode(" ' or fid='",$fids);
 
 		$db->query("select * from forums where fid='$fid'");
-		while($db->next_record()) {
-		$list[] = $db->Record;
+		while($db->nextRecord()) {
+		$list[] = $db->record;
 		}
 
 		$t["forumlist"] = $frm->forumList2HTML($list);
@@ -95,7 +95,7 @@ class forum extends FacultyService {
 		if ($nf->hasPerm("view",$u->groups) ) {
 			//allowed to view this forum
 			$db->query("select pref_val from forumPrefs where username = '".$u->username."' and pref_key = 'sendEmail' and pref_val = '".$arg->postvars[fid]."'");
-			if ($db->next_record() ) {
+			if ($db->nextRecord() ) {
 				//has perm, must remove if checkbox is empty
 				if ( $pref != 'on' ) {
 					$db->query("delete from forumPrefs where username = '".$u->username."' and pref_key = 'sendEmail' and pref_val = '".$arg->postvars[fid]."'");
@@ -169,10 +169,10 @@ class forum extends FacultyService {
 			$foruminfo = $nf->_get();
 			$t["forumname"] = $foruminfo["forumname"];
 			$db->queryOne("select count(pkey) from forumPosts where 1=1 and $clause");
-			$threadcount = $db->Record[0];
+			$threadcount = $db->record[0];
 $db->query("select * from forumPosts where 1=1 and $clause order by stamptime DESC limit $start,$limit");
-while($db->next_record()) {
-	$list[] = $db->Record;
+while($db->nextRecord()) {
+	$list[] = $db->record;
 }
 //			$list = $post->_getAll("stamptime DESC",$clause,$start,$limit);
 			$html = $post->messageList2HTML($list,$canModerate);
@@ -380,9 +380,9 @@ while($db->next_record()) {
 
 			//update the forum info
 			$db->queryOne("select count(pkey) from forumPosts where fid='".$post->fid."'");
-			$count = $db->Record[0];		
+			$count = $db->record[0];		
 			$db->queryOne("select max(recentpost) from forumPosts where fid='".$post->fid."'");
-			$time = $db->Record[0];		
+			$time = $db->record[0];		
 			$db->query("update forums set validposts = $count, recentpost=$time where fid='".$post->fid."'");
 
 
@@ -413,8 +413,8 @@ while($db->next_record()) {
 		//send user opt-in emails
 		if ($post->status == 'y') {
 			$db->query("select forumPrefs.username, lcUsers.email from forumPrefs LEFT JOIN lcUsers on lcUsers.username = forumPrefs.username where pref_key = 'sendEmail' and pref_val = '".$forumID."'");
-			while ($db->next_record() ) {
-				mail($db->Record[1],$subject,$body, "From: ".$this->_FromEmail."\nReply-To: ".$this->_ReplyTo."\nReturn-Path: ".$this->_ReturnPath."\n");
+			while ($db->nextRecord() ) {
+				mail($db->record[1],$subject,$body, "From: ".$this->_FromEmail."\nReply-To: ".$this->_ReplyTo."\nReturn-Path: ".$this->_ReturnPath."\n");
 			}
 		}
 
@@ -455,7 +455,7 @@ while($db->next_record()) {
 		****************************/
 
 		$db->queryOne("select parent from forumPosts where pkey=$pkey");
-		$parent = $db->Record[0]; // save for later on
+		$parent = $db->record[0]; // save for later on
 		/*****  End Replies ****/
 
 		// new forum object???
@@ -468,7 +468,7 @@ while($db->next_record()) {
 			if ($parent != 0 ) 
 				{
 					$db->queryOne("select count(pkey) from forumPosts where parent=$pkey");
-					$count = intval($db->Record[0]);
+					$count = intval($db->record[0]);
 					$db->query("update forumPosts set replies = $count where pkey=$parent");
 				}
 		}

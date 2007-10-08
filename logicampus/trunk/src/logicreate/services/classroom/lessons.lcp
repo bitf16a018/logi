@@ -42,7 +42,7 @@ class lessons extends StudentService {
 			ORDER BY createdOn';
 
 		$db->query($sql);
-		while ($db->next_record()){ $lessons[] = $db->Record; }
+		while ($db->nextRecord()){ $lessons[] = $db->record; }
 
 
 /*
@@ -131,8 +131,8 @@ class lessons extends StudentService {
 				class_lesson_objectives.id_class_objectives = class_objectives.id_class_objectives
 			WHERE class_lesson_objectives.id_class_lesson='".$lesson_id."' 
 			AND f_hide=0 ORDER BY i_sort ASC");
-		while ($db->next_record()) {
-			$t['objectives'][] = $db->Record;
+		while ($db->nextRecord()) {
+			$t['objectives'][] = $db->record;
 		}
 
 
@@ -217,7 +217,7 @@ class lessons extends StudentService {
 			  ON l.id_class_links=ll.id_class_links
 			WHERE ll.id_class_lessons='".$lesson_id."'";
 		$db->query($sql);
-		while ($db->next_record()) $t['weblinks'][] = $db->Record;
+		while ($db->nextRecord()) $t['weblinks'][] = $db->record;
 
 
 
@@ -270,7 +270,7 @@ class lessons extends StudentService {
 			WHERE id_classes='{$u->activeClassTaken->id_classes}'
 			and id_class_lesson_content = $content_id";
 		$db->queryOne($sql);
-		$t['content'] = $db->Record;
+		$t['content'] = $db->record;
 		if ($lc->getvars['print']) {
 			$this->presentor = 'printPresentation';
 		}

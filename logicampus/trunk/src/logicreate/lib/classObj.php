@@ -31,22 +31,22 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
 	if ($prop=='') { $prop=$this->_pkey; }
 	//$db->query("select id_classes,id_courses,id_semesters,stylesheet,sectionNumbers,classType,facultyId,courseFamily,courseNumber,courseFamilyNumber,id_class_resource from classes where $prop='$pkey' $where $orderBy");
 	@$db->query("select l.id_classes,l.id_courses,l.id_semesters,l.stylesheet,l.id_class_resource,l.sectionNumbers,l.classType,l.facultyId,l.courseFamily,l.courseNumber,l.courseFamilyNumber,o.courseName from classes as l,courses as o where $prop='$pkey' and l.id_courses=o.id_courses");
-	@$db->next_record();
+	@$db->nextRecord();
 		$temp = new classObj();
 		$temp->_dsn = $dsn;
 		$temp->__loaded = true; 
-		$temp->stylesheet = $db->Record['stylesheet'];
-		$temp->id_class_resource = $db->Record['id_class_resource'];
-		$temp->id_classes = $db->Record['id_classes'];
-		$temp->id_courses = $db->Record['id_courses'];
-		$temp->id_semesters = $db->Record['id_semesters'];
-		$temp->sectionNumbers = $db->Record['sectionNumbers'];
-		$temp->classType = $db->Record['classType'];
-		$temp->facultyId = $db->Record['facultyId'];
-		$temp->courseFamily = $db->Record['courseFamily'];
-		$temp->courseNumber = $db->Record['courseNumber'];
-		$temp->courseFamilyNumber = $db->Record['courseFamilyNumber'];
-		$temp->courseName = $db->Record['courseName']; // added
+		$temp->stylesheet = $db->record['stylesheet'];
+		$temp->id_class_resource = $db->record['id_class_resource'];
+		$temp->id_classes = $db->record['id_classes'];
+		$temp->id_courses = $db->record['id_courses'];
+		$temp->id_semesters = $db->record['id_semesters'];
+		$temp->sectionNumbers = $db->record['sectionNumbers'];
+		$temp->classType = $db->record['classType'];
+		$temp->facultyId = $db->record['facultyId'];
+		$temp->courseFamily = $db->record['courseFamily'];
+		$temp->courseNumber = $db->record['courseNumber'];
+		$temp->courseFamilyNumber = $db->record['courseFamilyNumber'];
+		$temp->courseName = $db->record['courseName']; // added
 	return $temp;
 }
 
@@ -62,22 +62,22 @@ function _getAllFromDB($pkey, $prop='',$where='', $orderBy='',$dsn='default') {
 	$db->query("select l.id_classes,l.id_courses,l.stylesheet,l.id_class_resource,l.id_semesters,l.sectionNumbers,l.classType,l.facultyId,l.courseFamily,l.courseNumber,l.courseFamilyNumber,o.courseName from classes as l,courses as o where $prop='$pkey' and l.id_courses=o.id_courses");
 
 //	$db->query("select l.id_classes,l.id_courses,l.id_semesters,l.sectionNumbers,l.classType,l.facultyId,l.courseFamily,l.courseNumber,l.courseFamilyNumber,courses.courseName from classes as l,courses $where $orderby"); //added
-	while ($db->next_record()) {
+	while ($db->nextRecord()) {
 	$temp = new classObj();
 	$temp->_dsn = $dsn;
 	$temp->__loaded = true; 
-	$temp->stylesheet = $db->Record['stylesheet'];
-	$temp->id_class_resource = $db->Record['id_class_resource'];
-	$temp->id_classes = $db->Record['id_classes'];
-	$temp->id_courses = $db->Record['id_courses'];
-	$temp->id_semesters = $db->Record['id_semesters'];
-	$temp->sectionNumbers = $db->Record['sectionNumbers'];
-	$temp->classType = $db->Record['classType'];
-	$temp->facultyId = $db->Record['facultyId'];
-	$temp->courseFamily = $db->Record['courseFamily'];
-	$temp->courseNumber = $db->Record['courseNumber'];
-	$temp->courseFamilyNumber = $db->Record['courseFamilyNumber'];
-	$temp->courseName = $db->Record['courseName']; //added
+	$temp->stylesheet = $db->record['stylesheet'];
+	$temp->id_class_resource = $db->record['id_class_resource'];
+	$temp->id_classes = $db->record['id_classes'];
+	$temp->id_courses = $db->record['id_courses'];
+	$temp->id_semesters = $db->record['id_semesters'];
+	$temp->sectionNumbers = $db->record['sectionNumbers'];
+	$temp->classType = $db->record['classType'];
+	$temp->facultyId = $db->record['facultyId'];
+	$temp->courseFamily = $db->record['courseFamily'];
+	$temp->courseNumber = $db->record['courseNumber'];
+	$temp->courseFamilyNumber = $db->record['courseFamilyNumber'];
+	$temp->courseName = $db->record['courseName']; //added
 	$objects[] = $temp;
 	}
  return $objects;
@@ -193,8 +193,8 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 /**
 	* __FIXME__ Deprecated
 		foreach ($ret as $classObj) {
-			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
-			$temp = PersistantObject::createFromArray('classObj',$db->Record);
+			$db->record['facultyName'] = $db->record['profile_faculty.title'] . $db->record['profile.firstname'] . $db->record['profile.lastname'];
+			$temp = PersistantObject::createFromArray('classObj',$db->record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
@@ -232,9 +232,9 @@ AND semesters.dateDeactivation > ".DB::getFuncName('NOW()')."
 
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
-		while ($db->next_record() ) {
-			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
-			$temp = PersistantObject::createFromArray('classObj',$db->Record);
+		while ($db->nextRecord() ) {
+			$db->record['facultyName'] = $db->record['profile_faculty.title'] . $db->record['profile.firstname'] . $db->record['profile.lastname'];
+			$temp = PersistantObject::createFromArray('classObj',$db->record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
@@ -272,8 +272,8 @@ WHERE css.id_student = '$uname'
 
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
-		while ($db->next_record() ) {
-			$temp = PersistantObject::createFromArray('classObj',$db->Record);
+		while ($db->nextRecord() ) {
+			$temp = PersistantObject::createFromArray('classObj',$db->record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;
@@ -318,9 +318,9 @@ CONCAT(profile_faculty.title, ' ', profile.firstname, ' ', profile.lastname) as 
 		";
 		$db->query($sql);
 		$db->RESULT_TYPE=MYSQL_ASSOC;
-		while ($db->next_record() ) {
-			$db->Record['facultyName'] = $db->Record['profile_faculty.title'] . $db->Record['profile.firstname'] . $db->Record['profile.lastname'];
-			$temp = PersistantObject::createFromArray('classObj',$db->Record);
+		while ($db->nextRecord() ) {
+			$db->record['facultyName'] = $db->record['profile_faculty.title'] . $db->record['profile.firstname'] . $db->record['profile.lastname'];
+			$temp = PersistantObject::createFromArray('classObj',$db->record);
 			$temp->_dsn = $dsn;
 			$temp->__loaded = true; 
 			$ret[] = $temp;

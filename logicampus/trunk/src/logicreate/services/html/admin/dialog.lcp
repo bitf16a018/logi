@@ -11,14 +11,14 @@ class dialog extends HercAuth {
 
 
 		$db->query("select filename,pkey from lcHtml order by filename");
-		while($db->next_record()) {
+		while($db->nextRecord()) {
 
 
-		if ( strlen($db->Record['filename']) > 15) {
-			$db->Record['filename'] = substr($db->Record['filename'],0,14). '...';
+		if ( strlen($db->record['filename']) > 15) {
+			$db->record['filename'] = substr($db->record['filename'],0,14). '...';
 		}
 
-		$t[files][] = $db->Record;
+		$t[files][] = $db->record;
 		}
 		$t['showDelete'] = $arg->getvars['d'];
 		$t['icon'] = 'filenew.gif';

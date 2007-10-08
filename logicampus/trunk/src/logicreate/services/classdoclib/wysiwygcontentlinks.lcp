@@ -49,7 +49,7 @@ class wysiwygcontentlinks extends classdoclibService {
 #			$openFolder=$u->sessionvars["openFolder"]; 
 			if ($openFolder=='') {
 				$db->queryOne("select pkey from classdoclib_Folders order by pkey ASC");
-				$openFolder = $db->Record[0]; 
+				$openFolder = $db->record[0]; 
 			}
 		}
 		

@@ -296,8 +296,8 @@ repeat types
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 
-		while($db->next_record()) {
-			extract($db->Record);
+		while($db->nextRecord()) {
+			extract($db->record);
 			$exclude = explode("|",$repeatExclude);
 			$eventPkey =$pkey;
 			
@@ -330,9 +330,9 @@ repeat types
 // single event
 				case "0":
 					$loopVar = strtotime(date("m/d/Y 00:00:00",$eventStart));
-					$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
+					$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->record);
 					$loopEnd = strtotime(date("m/d/Y 00:00:00",$eventEnd));
-					$edateObj->events[$loopEnd][$eventPkey] = edate::_load($db->Record);
+					$edateObj->events[$loopEnd][$eventPkey] = edate::_load($db->record);
 				break;
 
 // repeat every X days
@@ -356,7 +356,7 @@ repeat types
 					}
 					
 					if (is_array($exclude) == false || (is_array($exclude) && in_array(date("n/d/Y",$loopVar), $exclude) == false))  
-					{	$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
+					{	$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->record);
 					}
 
 					$loopVar = strtotime('+'.$repeatCount.' days', $loopVar);  // repeat every X days
@@ -416,12 +416,12 @@ repeat types
 					if ($j & $repeatData)  
 					{	
 						if (is_array($exclude) == false) 
-						{	$edateObj->events[$loopVar][$eventPkey] =edate::_load($db->Record);
+						{	$edateObj->events[$loopVar][$eventPkey] =edate::_load($db->record);
 						} else 
 						{
 							reset($exclude);
 							if (in_array(date("n/d/Y",$loopVar), $exclude) == false)  
-							{	$edateObj->events[$loopVar][$eventPkey] =edate::_load($db->Record);;
+							{	$edateObj->events[$loopVar][$eventPkey] =edate::_load($db->record);;
 							} 
 							
 						}
@@ -480,7 +480,7 @@ repeat types
 					$nexttime = strtotime("$nextMonth/$thisDate/$nextYear");
 					if ( ($nexttime>=$loopVar) && ($nexttime<=$loopEnd)) {
 						if (!in_array(date("m/d/Y",$loopVar), $exclude))  {
-							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
+							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->record);
 						}
 					}
 					$nextMonth = $thisMonth+$repeatData;
@@ -514,7 +514,7 @@ repeat types
 					$nexttime = strtotime("$nextMonth/$thisDate/$nextYear");
 					if ( ($nexttime>=$loopVar) && ($nexttime<=$loopEnd)) {
 						if (!in_array(date("m/d/Y",$loopVar), $exclude))  {
-							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
+							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->record);
 						}
 					}
 					$nextYear = $thisYear+$repeatData;
@@ -561,10 +561,10 @@ $dayText = array(1=>'Sunday', 2=>'Monday', 4=>'Tuesday', 8=>'Wednesday', 16=>'Th
 					$j = pow(2,date("w",$loopVar));
 					if ( $j  & $day)  {
 						if (!is_array($exclude)) {
-							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
+							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->record);
 						}
 						if (!in_array(date("n/d/Y",$loopVar), $exclude))  {
-							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->Record);
+							$edateObj->events[$loopVar][$eventPkey] = edate::_load($db->record);
 						}
 //print_r($this->events[$loopVar]); echo "<HR>";
 					}
@@ -1307,9 +1307,9 @@ class eventItem
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		if (is_array($db->Record))
+		if (is_array($db->record))
 		{
-			foreach($db->Record as $variable => $variable_value)
+			foreach($db->record as $variable => $variable_value)
 			{	$this->{$variable} = $variable_value;
 				$i++;
 			}
@@ -1551,7 +1551,7 @@ class classroomAssignments extends eventItem
 			$db = DB::getHandle();
 			$db->queryOne($sql);
 
-			$s = '('.$db->Record['semesterId'].') '.$db->Record['courseFamilyNumber'].' '.$s;
+			$s = '('.$db->record['semesterId'].') '.$db->record['courseFamilyNumber'].' '.$s;
 		} else
 		{	
 			if ($requested_date == $mystartdate)
@@ -1914,10 +1914,10 @@ class assessmentscheduling extends eventItem
 			$db = DB::getHandle();
 			$db->queryOne($sql);
 
-			//$s = '('.$db->Record['semesterId'].') '.$db->Record['courseFamilyNumber'].' '.$s;
+			//$s = '('.$db->record['semesterId'].') '.$db->record['courseFamilyNumber'].' '.$s;
 			// I've decided to leave off the (avail./unavail) stuff when this block is hit
 			// as this block currently is only hit when you're in the master calendar
-			$s = '('.$db->Record['semesterId'].') '.$db->Record['courseFamilyNumber'].' ';
+			$s = '('.$db->record['semesterId'].') '.$db->record['courseFamilyNumber'].' ';
 		}
 		
 		if ($requested_date == $mystartdate) {
@@ -2004,7 +2004,7 @@ class dlstaffscheduling extends eventItem
 		';
 		$db->queryOne($sql);
 		
-		return '- '. date('g:i A', $this->enddate).' <br><B>'.$db->Record['firstname']. ' '. $db->Record['lastname']. ' (DL Staff)</B>: '. $this->title. '<br><i>'.$this->description. '</i>';
+		return '- '. date('g:i A', $this->enddate).' <br><B>'.$db->record['firstname']. ' '. $db->record['lastname']. ' (DL Staff)</B>: '. $this->title. '<br><i>'.$this->description. '</i>';
 		
 	}
 	

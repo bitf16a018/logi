@@ -28,27 +28,27 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    $db = DB::getHandle($dsn);
    if ($prop=='') { $prop=$this->_pkey; }
    $db->query("select username,emergencyContact,emergencyPhone,title,degree,jobtitle,officeLocation,relevantExp,photo,faxPhone,officePhone,homepage,offHrsMonday,offHrsTuesday,offHrsWednesday,offHrsThursday,offHrsFriday from profile_faculty where $prop='$pkey' $where $orderBy");
-   if($db->next_record()) {
+   if($db->nextRecord()) {
       $temp = new profileFacultyObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->username = $db->Record['username'];
-      $temp->emergencyContact = $db->Record['emergencyContact'];
-      $temp->emergencyPhone = $db->Record['emergencyPhone'];
-      $temp->title = $db->Record['title'];
-      $temp->degree = $db->Record['degree'];
-      $temp->jobtitle = $db->Record['jobtitle'];
-      $temp->officeLocation = $db->Record['officeLocation'];
-      $temp->relevantExp = $db->Record['relevantExp'];
-      $temp->photo = $db->Record['photo'];
-      $temp->faxPhone = $db->Record['faxPhone'];
-      $temp->officePhone = $db->Record['officePhone'];
-      $temp->homepage = $db->Record['homepage'];
-      $temp->offHrsMonday = $db->Record['offHrsMonday'];
-      $temp->offHrsTuesday = $db->Record['offHrsTuesday'];
-      $temp->offHrsWednesday = $db->Record['offHrsWednesday'];
-      $temp->offHrsThursday = $db->Record['offHrsThursday'];
-      $temp->offHrsFriday = $db->Record['offHrsFriday'];
+      $temp->username = $db->record['username'];
+      $temp->emergencyContact = $db->record['emergencyContact'];
+      $temp->emergencyPhone = $db->record['emergencyPhone'];
+      $temp->title = $db->record['title'];
+      $temp->degree = $db->record['degree'];
+      $temp->jobtitle = $db->record['jobtitle'];
+      $temp->officeLocation = $db->record['officeLocation'];
+      $temp->relevantExp = $db->record['relevantExp'];
+      $temp->photo = $db->record['photo'];
+      $temp->faxPhone = $db->record['faxPhone'];
+      $temp->officePhone = $db->record['officePhone'];
+      $temp->homepage = $db->record['homepage'];
+      $temp->offHrsMonday = $db->record['offHrsMonday'];
+      $temp->offHrsTuesday = $db->record['offHrsTuesday'];
+      $temp->offHrsWednesday = $db->record['offHrsWednesday'];
+      $temp->offHrsThursday = $db->record['offHrsThursday'];
+      $temp->offHrsFriday = $db->record['offHrsFriday'];
    }
 if ( !$temp ) { trigger_error('empty persistant object'); }
 return $temp;
@@ -61,27 +61,27 @@ function _getAllFromDB($key,$prop='',$where='', $orderBy='',$dsn='default') {
    if ($orderBy) { $orderBy = " order by $orderBy"; }
    if ($where) { $where = " and $where"; }
    $db->query("select username,emergencyContact,emergencyPhone,title,degree,jobtitle,officeLocation,relevantExp,photo,faxPhone,officePhone,homepage,offHrsMonday,offHrsTuesday,offHrsWednesday,offHrsThursday,offHrsFriday from profile_faculty where $prop='$key' $where $orderBy");
-   while ($db->next_record()) {
+   while ($db->nextRecord()) {
       $temp = new profileFacultyObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->username = $db->Record['username'];
-      $temp->emergencyContact = $db->Record['emergencyContact'];
-      $temp->emergencyPhone = $db->Record['emergencyPhone'];
-      $temp->title = $db->Record['title'];
-      $temp->degree = $db->Record['degree'];
-      $temp->jobtitle = $db->Record['jobtitle'];
-      $temp->officeLocation = $db->Record['officeLocation'];
-      $temp->relevantExp = $db->Record['relevantExp'];
-      $temp->photo = $db->Record['photo'];
-      $temp->faxPhone = $db->Record['faxPhone'];
-      $temp->officePhone = $db->Record['officePhone'];
-      $temp->homepage = $db->Record['homepage'];
-      $temp->offHrsMonday = $db->Record['offHrsMonday'];
-      $temp->offHrsTuesday = $db->Record['offHrsTuesday'];
-      $temp->offHrsWednesday = $db->Record['offHrsWednesday'];
-      $temp->offHrsThursday = $db->Record['offHrsThursday'];
-      $temp->offHrsFriday = $db->Record['offHrsFriday'];
+      $temp->username = $db->record['username'];
+      $temp->emergencyContact = $db->record['emergencyContact'];
+      $temp->emergencyPhone = $db->record['emergencyPhone'];
+      $temp->title = $db->record['title'];
+      $temp->degree = $db->record['degree'];
+      $temp->jobtitle = $db->record['jobtitle'];
+      $temp->officeLocation = $db->record['officeLocation'];
+      $temp->relevantExp = $db->record['relevantExp'];
+      $temp->photo = $db->record['photo'];
+      $temp->faxPhone = $db->record['faxPhone'];
+      $temp->officePhone = $db->record['officePhone'];
+      $temp->homepage = $db->record['homepage'];
+      $temp->offHrsMonday = $db->record['offHrsMonday'];
+      $temp->offHrsTuesday = $db->record['offHrsTuesday'];
+      $temp->offHrsWednesday = $db->record['offHrsWednesday'];
+      $temp->offHrsThursday = $db->record['offHrsThursday'];
+      $temp->offHrsFriday = $db->record['offHrsFriday'];
       $objects[] = $temp;
 }
 return $objects;

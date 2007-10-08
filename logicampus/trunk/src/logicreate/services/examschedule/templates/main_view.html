@@ -18,9 +18,9 @@ if ($t['esc']->idClasses)
 	';
 	$db->queryOne($sql);
 	
-	echo '<b><a href="'.APP_URL.'administration/facultylist/'.$db->Record['facultyId'].'" title="Click to view profile!" target="_blank">'.$db->Record['firstname']. ' '. $db->Record['lastname']. '</a>';
+	echo '<b><a href="'.APP_URL.'administration/facultylist/'.$db->record['facultyId'].'" title="Click to view profile!" target="_blank">'.$db->record['firstname']. ' '. $db->record['lastname']. '</a>';
 	echo '<br>';
-	echo $db->Record['courseFamilyNumber']. ' - '.$db->Record['courseName'].' ('.$db->Record['semesterTerm'].' '.$db->Record['semesterYear'].')';
+	echo $db->record['courseFamilyNumber']. ' - '.$db->record['courseName'].' ('.$db->record['semesterTerm'].' '.$db->record['semesterYear'].')';
 	echo '</b>';
 	
 }

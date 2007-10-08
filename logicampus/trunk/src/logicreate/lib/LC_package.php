@@ -129,7 +129,7 @@ class LC_package {
 		$db->queryOne("select * from lcRegistry where mid='$module'");
 		echo("select * from lcRegistry where mid='$module'");
 		$xml .= "<info>\n";
-		$array = $db->Record;
+		$array = $db->record;
 		while(list($k,$v) = each($array)) {
 			if ($k=='mid') { continue; }
 			if ($k=='moduleName') { $k='name'; }
@@ -138,14 +138,14 @@ class LC_package {
 		$xml .= "</info>\n";
 		$xml .= "<configs>\n";
 		$db->query("select * from lcConfig where mid='$module'");
-		while($db->next_record()){ 
+		while($db->nextRecord()){ 
 			$xml .= "<config>\n";
-			$xml .= "<key>".$db->Record['k']."</key>\n";
-			$xml .= "<type>".$db->Record['type']."</type>\n";
-			$xml .= "<default>".$db->Record['value']."</default>\n";
-			if ($db->Record['type']=='options') { 
+			$xml .= "<key>".$db->record['k']."</key>\n";
+			$xml .= "<type>".$db->record['type']."</type>\n";
+			$xml .= "<default>".$db->record['value']."</default>\n";
+			if ($db->record['type']=='options') { 
 				$xml .= "<options>\n";
-				$xml .= "<option>".implode("</option>\n<option>",$db->Record['extra'])."</option>\n";
+				$xml .= "<option>".implode("</option>\n<option>",$db->record['extra'])."</option>\n";
 				$xml .= "</options>\n";
 			}
 			$xml .= "</config>\n";
@@ -381,9 +381,9 @@ while(list($k,$dbtable) = @each($tablelist)) {
 		if ($storeData) { 
 			$db->query("select * from $dbtable");
 			$db->RESULT_TYPE = MYSQL_ASSOC;
-			while($db->next_record()) { 
-			print_r($db->Record);
-				$j = $db->Record;
+			while($db->nextRecord()) { 
+			print_r($db->record);
+				$j = $db->record;
 				$colData .="<row>\n";
 				while(list($k,$v) = each($j)) { 
 					$colData .= "<$k>$v</$k>\n";

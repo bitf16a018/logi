@@ -39,10 +39,10 @@ class view extends RegAuth {
 		where u.username='$name'";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-	    $t['user'] = $db->Record;
+	    $t['user'] = $db->record;
 
-		$t['photo'] = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
-			? IMAGES_URL.'photos/'.$db->Record['photo']
+		$t['photo'] = is_file(IMAGES_PATH.'photos/'.$db->record['photo'])
+			? IMAGES_URL.'photos/'.$db->record['photo']
 			: IMAGES_URL.'noimage.png';
 
 		$t['admin'] = @in_array('admin', $u->groups);

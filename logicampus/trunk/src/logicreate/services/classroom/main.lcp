@@ -53,9 +53,9 @@ function run(&$db,&$u,&$lc,&$t) {
 				LIMIT 1";
 
 			$db->queryOne($sql);
-			if (is_array($db->Record))
+			if (is_array($db->record))
 			{
-				$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><ahref="'.APP_URL.'classroom/assignments/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->Record['id_class_assignments'].'">Assignment: '.$db->Record['title'].'</a></li>';
+				$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><ahref="'.APP_URL.'classroom/assignments/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->record['id_class_assignments'].'">Assignment: '.$db->record['title'].'</a></li>';
 			} else {
 				$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li>Assignment: none</li>';
 			}
@@ -69,9 +69,9 @@ function run(&$db,&$u,&$lc,&$t) {
 				ORDER BY  activeOn DESC LIMIT 1";
 
 			$db->queryOne($sql);
-			if (is_array($db->Record))
+			if (is_array($db->record))
 			{
-				$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><ahref="'.APP_URL.'classroom/lessons/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->Record['id_class_lessons'].'">Lesson: '.$db->Record['title'].'</a></li>';
+				$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li><ahref="'.APP_URL.'classroom/lessons/id_classes='.$u->classesTaken[$x]->id_classes.'/event=view/id='.$db->record['id_class_lessons'].'">Lesson: '.$db->record['title'].'</a></li>';
 			} else {
 				$t['classdata'][$u->classesTaken[$x]->id_classes] .= '<li>Lesson: none</li>';
 			}
@@ -104,10 +104,10 @@ function run(&$db,&$u,&$lc,&$t) {
 			if ($db->getNumRows() >= 1)
 			{
 					$t['lessons'] = '<ul>';
-					while ($db->next_record() )
+					while ($db->nextRecord() )
 					{
 						$t['lessons'] .= '<li>
-					<a href="'.APP_URL.'classroom/lessons/event=view/id_classes='.$db->Record['id_classes'].'/id='.$db->Record['id_class_lessons'].'">'.$db->Record['title'].'</a>&nbsp;-&nbsp;'.$db->Record['courseFamilyNumber'].'</li>';
+					<a href="'.APP_URL.'classroom/lessons/event=view/id_classes='.$db->record['id_classes'].'/id='.$db->record['id_class_lessons'].'">'.$db->record['title'].'</a>&nbsp;-&nbsp;'.$db->record['courseFamilyNumber'].'</li>';
 					}
 					$t['lessons'] .= '</ul>';
 			} else {
@@ -133,11 +133,11 @@ function run(&$db,&$u,&$lc,&$t) {
 			{
 
 				$t['assignments'] = '<ul>';
-				while ($db->next_record() )
+				while ($db->nextRecord() )
 				{
 					$t['assignments'] .= '<li>
-	<a href="'.APP_URL.'classroom/assignments/event=view/id_classes='.$db->Record['id_classes'].'/id='.$db->Record['id_class_assignments'].'">
-	'.$db->Record['title'].'</a>&nbsp;-&nbsp;'.$db->Record['courseFamilyNumber'].'</li>';
+	<a href="'.APP_URL.'classroom/assignments/event=view/id_classes='.$db->record['id_classes'].'/id='.$db->record['id_class_assignments'].'">
+	'.$db->record['title'].'</a>&nbsp;-&nbsp;'.$db->record['courseFamilyNumber'].'</li>';
 				}
 		
 				$t['assignments'] .= '</ul>';

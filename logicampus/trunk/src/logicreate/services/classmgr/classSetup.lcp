@@ -50,8 +50,8 @@ class classSetup extends FacultyService {
 		$sql = "SELECT id_class_resource, id_class_orientation FROM classes WHERE
 		id_classes='".$u->activeClassTaught->id_classes."'";
 		$db->queryOne($sql);
-		$current_id_class_resource = $db->Record['id_class_resource'];
-		$current_id_class_orientation= $db->Record['id_class_orientation'];
+		$current_id_class_resource = $db->record['id_class_resource'];
+		$current_id_class_orientation= $db->record['id_class_orientation'];
 */
 
 		# GRAB ALL CONTENT FOR THE CLASS
@@ -60,9 +60,9 @@ class classSetup extends FacultyService {
 				id_classes='".$u->activeClassTaught->id_classes."' ORDER
 				BY txTitle";
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$options[$db->Record['id_class_lesson_content']] = $db->Record['txTitle']; 	
+			$options[$db->record['id_class_lesson_content']] = $db->record['txTitle']; 	
 		}
 
 		$t['classresourceoptions'] = makeOptions($options, $current_id_class_resource);	

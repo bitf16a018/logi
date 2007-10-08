@@ -101,8 +101,8 @@ class examschedule extends BasicAuth {
 		ORDER BY X.courseFamilyNumber
 		';
 		$db->query($sql);
-		while($db->next_record()) 
-		{	$info[] = $db->Record;
+		while($db->nextRecord()) 
+		{	$info[] = $db->record;
 		}
 /*
 
@@ -115,13 +115,13 @@ class examschedule extends BasicAuth {
 	-RS
 
 		$db->query("select A.*,B.*,C.* from exam_schedule_classes A, exam_schedule_classes_dates B, exam_schedule_dates C where A.status=3 and A.id_semester=$semid and A.id_classes = B.id_classes and B.id_exam_schedule_dates = C.id_exam_schedule_dates");
-		while($db->next_record()) {
-			$info[] = $db->Record;
+		while($db->nextRecord()) {
+			$info[] = $db->record;
 		}
 
 		while(list($k,$v) = each($info)) {
 			$db->queryOne("select A.*,B.* from classes A,courses B where A.id_classes=".$v['id_classes']." and A.id_courses = B.id_courses");
-			$info[$k] = array_merge($v,$db->Record);
+			$info[$k] = array_merge($v,$db->record);
 		}
 #print_r($info);
 		reset($info);
@@ -318,9 +318,9 @@ class examschedule extends BasicAuth {
 			left join profile_faculty as f on f.username=l.facultyId
 			where l.id_classes="'.$classid.'"';
 		$db->queryOne($sql);
-		$t['courseName'] = $db->Record['courseName'];
-		$t['facultyName'] = $db->Record['title'].' '.$db->Record['firstname'].' '.$db->Record['lastname'];
-		$t['noexam'] = $db->Record['noexam'];
+		$t['courseName'] = $db->record['courseName'];
+		$t['facultyName'] = $db->record['title'].' '.$db->record['firstname'].' '.$db->record['lastname'];
+		$t['noexam'] = $db->record['noexam'];
 		
 	}
 	
@@ -342,7 +342,7 @@ class examschedule extends BasicAuth {
 			$db->queryOne('select id_classes from classes
 				where facultyId="'.$u->username.'"
 				and id_classes="'.(int)$lc->getvars['id'].'"');
-			if ( !$db->Record['id_classes'] ) {
+			if ( !$db->record['id_classes'] ) {
 				$this->presentation = 'errorMessage';
 				$t['message'] = 'We\'re sorry, but access was denied to that class. '
 					.'If you feel you have reached this message in error, please contact the help desk.';
@@ -446,8 +446,8 @@ class examschedule extends BasicAuth {
 					//$addevent->set_id_item_sub();
 					$addevent->dbLoad(); // if it exists, it'll be loaded up.
 
-					$addevent->set_owner($dbb->Record['facultyId']);
-					$addevent->set_title('['.$dbb->Record['courseFamily'].$dbb->Record['courseNumber'].'] '.addslashes(stripslashes($escd->title)));
+					$addevent->set_owner($dbb->record['facultyId']);
+					$addevent->set_title('['.$dbb->record['courseFamily'].$dbb->record['courseNumber'].'] '.addslashes(stripslashes($escd->title)));
 					$addevent->set_description(addslashes(stripslashes($escd->instructions)));
 					
 					$addevent->set_date_start($tmp_examdates->dateStart);
@@ -498,10 +498,10 @@ class examschedule extends BasicAuth {
 
 
 			$mess = new privMess();
-			$mess->subject = '['.$db->Record['courseFamily'].$db->Record['courseNumber']
+			$mess->subject = '['.$db->record['courseFamily'].$db->record['courseNumber']
 				.'] Your exam schedule has been updated.';
-			$mess->message = 'There was a change to your exam schedule *status* on: '.$db->Record['courseName']
-				.' - '.$db->Record['courseFamily'].$db->Record['courseNumber'].' class.';
+			$mess->message = 'There was a change to your exam schedule *status* on: '.$db->record['courseName']
+				.' - '.$db->record['courseFamily'].$db->record['courseNumber'].' class.';
 
 			foreach($a_statuschange_description as $null=>$prvmsg)
 			{	$mess->message .= $prvmsg;
@@ -510,7 +510,7 @@ class examschedule extends BasicAuth {
 			$mess->sentTime = time();
 			$mess->messageFrom = $u->username;
 
-			$mess->messageTo = $db->Record['facultyId'];
+			$mess->messageTo = $db->record['facultyId'];
 			$mess->add();
 		}
 
@@ -597,6 +597,6 @@ function getSemesterLabel($id) {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		return $db->Record['semesterTerm'].' '.$db->Record['semesterYear'];
+		return $db->record['semesterTerm'].' '.$db->record['semesterYear'];
 }
 ?>

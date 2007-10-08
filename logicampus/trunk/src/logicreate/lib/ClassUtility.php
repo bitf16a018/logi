@@ -262,9 +262,9 @@ class ClassUtility {
 		$sql = "select * from class_lesson_content where id_classes=$dest_class_id";
 		$db->query($sql);
 		$db2 = db::GetHandle();
-		while($db->next_record()) {
-			$temp = $db->Record['txText'];
-			$tempid = $db->Record['id_class_lesson_content'];
+		while($db->nextRecord()) {
+			$temp = $db->record['txText'];
+			$tempid = $db->record['id_class_lesson_content'];
 			reset($idswap);
 			foreach($idswap as $old=>$new) { 
 	 $temp = str_replace("/lessons/event=viewcontent/id=$old\"","/lessons/event=viewcontent/id=$new\"",$temp);

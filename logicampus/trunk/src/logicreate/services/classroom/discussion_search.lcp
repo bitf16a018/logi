@@ -42,11 +42,11 @@ class discussion_search extends StudentService {
 		$t['forum'] = new LcForum();
 		$t['forum']->lcForumId;
 		$db->query("select lc_forum_post_id, lc_forum_post_thread_id from lc_forum_post where lc_forum_id=$key and (lc_forum_post_message like '%$term%' or lc_forum_post_title like '%$term%' or lc_forum_post_username like '%$term%')");
-		while($db->next_record()) {
-			if ($db->Record[1]==0) { 
-				$db->Record[1] = $db->Record[0];
+		while($db->nextRecord()) {
+			if ($db->record[1]==0) { 
+				$db->record[1] = $db->record[0];
 			}
-			$xposts[$db->Record[0]] = lcForumPost::load($db->Record[1]);
+			$xposts[$db->record[0]] = lcForumPost::load($db->record[1]);
 		}
 
 

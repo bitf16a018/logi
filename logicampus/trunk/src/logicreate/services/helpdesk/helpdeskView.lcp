@@ -49,8 +49,8 @@ class helpdeskView extends RegAuth {
 
 			// get a list of technicians
 			$db->query("select * from lcUsers where groups like '%hdstaff%' or groups like '%|admin|%' or groups like '%|hdadmin|%'");
-			while($db->next_record()) {
-				$list[$db->Record['username']] = $db->Record['username'];
+			while($db->nextRecord()) {
+				$list[$db->record['username']] = $db->record['username'];
 			}
 			$t['techs'] = makeOptions($list);
 
@@ -68,7 +68,7 @@ class helpdeskView extends RegAuth {
 			left join helpdesk_status on helpdesk_status.helpdesk_status_id = helpdesk_incident.status
 			where helpdesk_id=$id and userid='".$u->profile->get('username'). '\'');
 		}
-		$t['hd'] = $db->Record;
+		$t['hd'] = $db->record;
 		
 		$j = HelpdeskCategory::loadAll();
 		
@@ -84,11 +84,11 @@ class helpdeskView extends RegAuth {
 
 
 		// if we got a record back then we had permission to view it.
-		if ($db->Record) { 
+		if ($db->record) { 
 			$u->sessionvars['helpdesk_id'] = $id;
 			$db->query("select * from helpdesk_incident_log where helpdesk_id=$id");
-			while($db->next_record()) {
-				$t['log'][] = $db->Record;
+			while($db->nextRecord()) {
+				$t['log'][] = $db->record;
 			}
 		}
 		$arg->templateName = "helpdeskView_main";

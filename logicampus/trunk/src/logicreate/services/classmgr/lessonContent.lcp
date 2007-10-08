@@ -121,13 +121,13 @@ Class LessonContent extends FacultyService
 		$db->queryOne("select txText from class_lesson_content
 			where id_class_lesson_content='{$lc->getvars['id']}'
 			and id_classes='{$u->activeClassTaught->id_classes}'");
-		if ( !$db->Record['txText'] ) {
+		if ( !$db->record['txText'] ) {
 			$t['error'] = 'Content not available.';
 			$this->Run($db,$u,$lc,$t);
 			return;
 		}
 
-		$lc->postvars['NOTPOSTVARtxText'] = $db->Record['txText'];
+		$lc->postvars['NOTPOSTVARtxText'] = $db->record['txText'];
 		
 		$this->processRun($db,$u,$lc,$t);
 	}
@@ -416,7 +416,7 @@ define('HAS_TIDY',false);
 		$db->queryOne("select count(id_class_lesson_content) as cnt from class_lesson_content
 			where id_classes='{$u->activeClassTaught->id_classes}'
 			and id_class_lesson_content='{$contentid}'");
-		if (!$db->Record['cnt']) {
+		if (!$db->record['cnt']) {
 			$this->presentor = 'errorMessage';
 			$t['message'] = "You don't have permission to modify that content.";
 			return false;

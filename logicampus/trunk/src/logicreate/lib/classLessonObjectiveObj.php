@@ -16,16 +16,16 @@ if ($where) { $where = ' and $where'; }
 $db = DB::getHandle($dsn);
  if ($prop=='') { $prop=$this->_pkey; }
 $db->query("select i_sort,f_hide,id_class_objectives,id_classes,objective from class_objectives where $prop='$pkey' $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new classLessonObjectiveObj();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->i_sort = $db->Record['i_sort'];
-$temp->f_hide = $db->Record['f_hide'];
-$temp->id_class_objectives = $db->Record['id_class_objectives'];
-$temp->id_class_lessons = $db->Record['id_class_lessons'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->objective = $db->Record['objective'];
+$temp->i_sort = $db->record['i_sort'];
+$temp->f_hide = $db->record['f_hide'];
+$temp->id_class_objectives = $db->record['id_class_objectives'];
+$temp->id_class_lessons = $db->record['id_class_lessons'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->objective = $db->record['objective'];
 $objects[] = $temp;
 }
 if (count($objects)>1) {
@@ -39,16 +39,16 @@ $db = DB::getHandle($dsn);
 if ($orderBy) { $orderBy = ' order by $orderBy '; }
 if ($where) { $where = ' and $where'; }
 $db->query("select i_sort,f_hide,id_class_objectives,id_class_lessons,id_classes,objective from class_objectives $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new classLessonObjectiveObj();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->i_sort = $db->Record['i_sort'];
-$temp->f_hide = $db->Record['f_hide'];
-$temp->id_class_objectives = $db->Record['id_class_objectives'];
-$temp->id_class_lessons = $db->Record['id_class_lessons'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->objective = $db->Record['objective'];
+$temp->i_sort = $db->record['i_sort'];
+$temp->f_hide = $db->record['f_hide'];
+$temp->id_class_objectives = $db->record['id_class_objectives'];
+$temp->id_class_lessons = $db->record['id_class_lessons'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->objective = $db->record['objective'];
 $objects[] = $temp;
 }
  return $objects;

@@ -22,9 +22,9 @@ var $presentor = "htmlPresentation";
 	function fixRun($db,&$u,&$arg,&$t) {
 		$db2 = db::GetHandle();
 		$db->query("select pkey,messageTo from privateMessages where sentReceived = 0 and messageTo like '%_%'");
-		while($db->next_record()) {
-			$pkey = $db->Record['pkey'];
-			$messageTo = $db->Record['messageTo'];
+		while($db->nextRecord()) {
+			$pkey = $db->record['pkey'];
+			$messageTo = $db->record['messageTo'];
 			$messageTo = str_replace("_",".",$messageTo);
 			$db2->query("update privateMessages set messageTo='$messageTo' where pkey=$pkey");
 			echo ++$c."<BR>";
@@ -68,7 +68,7 @@ var $presentor = "htmlPresentation";
 			FROM privateMessages 
 			WHERE sentReceived='$viewing' 
 			AND messageTo='".$u->username."'"); 
-		$count = $db->Record['total'];
+		$count = $db->record['total'];
 		if ( ( ($max+$start) < $count)  && ($start<$count)) { 
 
 			$t['next'] =  true;
@@ -83,8 +83,8 @@ var $presentor = "htmlPresentation";
 		else{
 			$db->query("select pkey from privateMessages where sentReceived='$viewing' and messageFrom='".$u->username."' order by sentTime DESC limit $start,$max");
 		}
-		while($db->next_record()) {
-			$x = privMess::load($db->Record['pkey']);
+		while($db->nextRecord()) {
+			$x = privMess::load($db->record['pkey']);
 			$user = lcUser::getUserByUsername($x->messageFrom);
 			$x->userFrom = $user->username;
 
@@ -166,11 +166,11 @@ var $presentor = "htmlPresentation";
 	/*
 		$db2 = DB::getHandle();
 		$db->query("select gid, groupName from lcGroups where gid like 'r_%' order by groupName");
-		while($db->next_record()) { 
-			extract($db->Record);
+		while($db->nextRecord()) { 
+			extract($db->record);
 			$db2->query("select username from lcUsers where groups like '%$gid%'");
-			while($db2->next_record()) {
-				$username = $db2->Record['username'];
+			while($db2->nextRecord()) {
+				$username = $db2->record['username'];
 				$x = lcUser::getUserByUsername($username);
 				$list[$username] = $x->username;
 			}
@@ -218,7 +218,7 @@ var $presentor = "htmlPresentation";
 		';
 		
 		$db->queryOne($sql);
-		$user_exists = $db->Record['user_exists'];
+		$user_exists = $db->record['user_exists'];
 
 		$mess = new privMess();
 		$mess->subject = $arg->postvars['subject'];

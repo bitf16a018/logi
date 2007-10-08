@@ -210,7 +210,7 @@ class orientations extends BasicAuth
 		
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$db_temp = $db->Record;
+			$db_temp = $db->record;
 			
 			if ($o->idOrientationClasses)
 			{
@@ -279,7 +279,7 @@ class orientations extends BasicAuth
 		
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].') '.$db->Record['Faculty'];
+		$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].') '.$db->record['Faculty'];
 		
 		$t['form'] = ''; // cleaned
 		
@@ -486,8 +486,8 @@ class orientations extends BasicAuth
 		
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].') '.$db->Record['Faculty'];
-		$db_temp = $db->Record;
+		$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].') '.$db->record['Faculty'];
+		$db_temp = $db->record;
 		
 		$formObj = new SiteForm();
 		$orientationClass->firstPreferredTime = '2003-04-27 '. $orientationClass->firstPreferredTime;
@@ -523,13 +523,13 @@ class orientations extends BasicAuth
 					include_once(SERVICE_PATH."pm/privmess.php");
 					
 					$mess = new privMess();
-					$mess->subject = '['.$db->Record['courseFamily'].$db->Record['courseNumber'].'] Your scheduled orientation has been updated to: '.$this->getStatus($lc->postvars['status']);
-					$mess->message = 'There was a change to your orientation schedule *status* on: '.$db->Record['courseName'].' - '.$db->Record['courseFamily'].$db->Record['courseNumber'].' class.';
+					$mess->subject = '['.$db->record['courseFamily'].$db->record['courseNumber'].'] Your scheduled orientation has been updated to: '.$this->getStatus($lc->postvars['status']);
+					$mess->message = 'There was a change to your orientation schedule *status* on: '.$db->record['courseName'].' - '.$db->record['courseFamily'].$db->record['courseNumber'].' class.';
 					
 					$mess->sentTime = time();
 					$mess->messageFrom = $u->username;
 					
-					$mess->messageTo = $db->Record['facultyId'];
+					$mess->messageTo = $db->record['facultyId'];
 					$mess->add();
 				
 				}
@@ -713,8 +713,8 @@ class orientations extends BasicAuth
 			$db->queryOne($sql);
 			
 			// making sure we have a friggin record..
-			if ($db->Record != false)
-			{	$return_date = date('F j Y', strtotime($db->Record['date'])).' '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_end'])).'';
+			if ($db->record != false)
+			{	$return_date = date('F j Y', strtotime($db->record['date'])).' '.date('g:i A', strtotime('2003-02-03 '.$db->record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$db->record['time_end'])).'';
 			}
 			
 		} 

@@ -56,7 +56,7 @@ class report extends FacultyOnlyService {
 		$c = $u->activeClassTaught->id_classes;
 		$sql = "select sectionNumbers from classes where id_classes=$c";
 		$db->queryOne($sql);
-		$s = explode("\n",$db->Record['sectionNumbers']);
+		$s = explode("\n",$db->record['sectionNumbers']);
 		$t['sections'] = $s;
 	}
 

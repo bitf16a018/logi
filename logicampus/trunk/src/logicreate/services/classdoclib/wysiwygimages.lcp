@@ -71,7 +71,7 @@ class wysiwygimages extends classdoclibService {
 	function get_webimages_folder_id($facultyId) {
 		$db = DB::getHandle();
 		$db->queryOne("select pkey from classdoclib_Folders where (owner='$facultyId' and name like 'Web Images%') order by pkey ASC");
-		return $db->Record['pkey'];
+		return $db->record['pkey'];
 		
 	}
 	
@@ -90,7 +90,7 @@ class wysiwygimages extends classdoclibService {
 			$openFolder=$u->sessionvars["openFolder"]; 
 			if ($openFolder=='') {
 				$db->queryOne("select pkey from classdoclib_Folders  order by pkey ASC");
-				$openFolder = $db->Record[0]; 
+				$openFolder = $db->record[0]; 
 			}
 		}
 		

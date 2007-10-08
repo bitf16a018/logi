@@ -308,9 +308,9 @@ class ClassGradebook extends ClassGradebookBase {
 		$sql .= ' order by p.lastname, p.firstname';
 
 		$db->query($sql);
-		while ($db->next_record()) {
-			$db->Record['username'] = strtolower($db->Record['username']);
-			$this->students[$db->Record['username']] = ClassGradeBookStudent::load($db->Record);
+		while ($db->nextRecord()) {
+			$db->record['username'] = strtolower($db->record['username']);
+			$this->students[$db->record['username']] = ClassGradeBookStudent::load($db->record);
 		}
 	}
 
@@ -330,8 +330,8 @@ class ClassGradebook extends ClassGradebookBase {
 			and p.username="'.$username.'" ';
 
 		$db->queryOne($sql);
-		if ( $db->Record['username'] == '' ) return false;
-		$this->students[$db->Record['username']] = ClassGradebookStudent::load($db->Record);
+		if ( $db->record['username'] == '' ) return false;
+		$this->students[$db->record['username']] = ClassGradebookStudent::load($db->record);
 		return true;
 	}
 
@@ -448,12 +448,12 @@ class ClassGradebook extends ClassGradebookBase {
 			GROUP BY B.id_class_gradebook_categories';
 
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$this->categoryWeights[$db->Record['id_class_gradebook_categories']] = $db->Record;
-			$this->categories[$db->Record['id_class_gradebook_categories']] = ClassGradebookCategoriesPeer::row2Obj($db->Record);
-			$totalWeights += $db->Record['weight'];
-			$this->hasDropCount |= ($db->Record['drop_count'] > 0);
+			$this->categoryWeights[$db->record['id_class_gradebook_categories']] = $db->record;
+			$this->categories[$db->record['id_class_gradebook_categories']] = ClassGradebookCategoriesPeer::row2Obj($db->record);
+			$totalWeights += $db->record['weight'];
+			$this->hasDropCount |= ($db->record['drop_count'] > 0);
 		}
 		//we don't need this for the other type of calculations anymore
 		// kevin said we shouldn't adjust each cat wieght based on the total weights
@@ -479,8 +479,8 @@ class ClassGradebook extends ClassGradebookBase {
 		$db->query($sql);
 
 		$cats = array();
-		while($db->next_record() ) {
-			$cats[$db->Record['id']] = $db->Record['label'];
+		while($db->nextRecord() ) {
+			$cats[$db->record['id']] = $db->record['label'];
 		}
 		return $cats;
 	}
@@ -998,13 +998,13 @@ class ClassGradebookStudent {
 			if (intval($dateDue)>0) { 
 				$db = db::GetHandle();
 				$db->queryOne("select id_semesters, sectionNumbers from classes where id_classes=$idClasses");
-				$j = $db->Record[1];
+				$j = $db->record[1];
 				$temp = explode("\n",$j);
 				$x = "sectionNumber=".implode(" or sectionNumber=", $temp);
-				$sql = "select dateWithdrawn from class_student_sections where id_student='".$this->username."' and semester_id='".$db->Record['id_semesters']."' and ($x)";
+				$sql = "select dateWithdrawn from class_student_sections where id_student='".$this->username."' and semester_id='".$db->record['id_semesters']."' and ($x)";
 				$db->queryOne($sql);
 				$date = '';
-				$dateWithdrawn = $db->Record[0];
+				$dateWithdrawn = $db->record[0];
 // FIXME - not done yet
 			#	echo $this->username." withdrew on $dateWithdrawn<BR>";
 

@@ -298,20 +298,20 @@ class LcForumPost extends LcForumPostBase {
 			FROM lc_forum_post 
 			WHERE (lc_forum_post_thread_id=".$this->lcForumPostId . ") 
 			AND (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
-                $this->lcForumReplyCount= $db->Record[0];
+                $this->lcForumReplyCount= $db->record[0];
 
                 $db->queryOne("select max(lc_forum_post_id) as foo 
 			FROM lc_forum_post 
 			WHERE (lc_forum_post_id=".$this->lcForumPostId." or lc_forum_post_thread_id=".$this->lcForumPostId.") 
 			AND (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
-                $max = sprintf('%d',$db->Record['foo']);
+                $max = sprintf('%d',$db->record['foo']);
 
                 $db->queryOne("select * 
 			FROM lc_forum_post 
 			WHERE lc_forum_post_id=$max 
 			AND (lc_forum_post_status=0 or lc_forum_post_status IS NULL)");
-                $this->lcForumRecentPostTimedate= $db->Record['lc_forum_post_timedate'];
-                $this->lcForumRecentPoster = $db->Record['lc_forum_post_username'];
+                $this->lcForumRecentPostTimedate= $db->record['lc_forum_post_timedate'];
+                $this->lcForumRecentPoster = $db->record['lc_forum_post_username'];
                 $this->lcForumRecentPostId = $max;
                 $this->save();  
         }

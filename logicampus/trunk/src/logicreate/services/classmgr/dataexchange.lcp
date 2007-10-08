@@ -75,7 +75,7 @@ class dataexchange extends FacultyService
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 
-		$t['filename'] = 'classroom_'.$db->Record['courseFamily']. $db->Record['courseNumber'].'_'.$db->Record['semesterId'].'.zip';
+		$t['filename'] = 'classroom_'.$db->record['courseFamily']. $db->record['courseNumber'].'_'.$db->record['semesterId'].'.zip';
 
 		$this->presentor = 'htmlPresentation';
 		$lc->templateName='dataexchange_main';
@@ -135,7 +135,7 @@ class dataexchange extends FacultyService
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$filename = 'classroom_'.$db->Record['courseFamily']. $db->Record['courseNumber'].'_'.$db->Record['semesterId'].'.zip';
+		$filename = 'classroom_'.$db->record['courseFamily']. $db->record['courseNumber'].'_'.$db->record['semesterId'].'.zip';
 
 
 		$xml_raw_save = '';
@@ -145,33 +145,33 @@ class dataexchange extends FacultyService
 		$root =& $xmlObj->getRoot();
 		
 		$classroom_node[] = new xml_node('CLASSROOM', 
-						array(	'ID'=>$db->Record['id_classes'], 
-								'CLASSTYPE'=>$db->Record['classType'],
-								'ID_SEMESTERS'=>$db->Record['id_semesters'],
-								'STYLESHEET'=>$db->Record['stylesheet'], 
-								'FACULTYID'=>$db->Record['facultyId'],
-								'SECTIONNUMBERS'=>$db->Record['sectionNumbers'],
-								'NOEXAM'=>$db->Record['noexam']
+						array(	'ID'=>$db->record['id_classes'], 
+								'CLASSTYPE'=>$db->record['classType'],
+								'ID_SEMESTERS'=>$db->record['id_semesters'],
+								'STYLESHEET'=>$db->record['stylesheet'], 
+								'FACULTYID'=>$db->record['facultyId'],
+								'SECTIONNUMBERS'=>$db->record['sectionNumbers'],
+								'NOEXAM'=>$db->record['noexam']
 							 )
 						);
 
 		$root->children =& $classroom_node;
 		
 		
-		$course_attr[] = new xml_node('courseName', array('BASE64'=>'1'), null, $db->Record['courseName']);								
-		$course_attr[] = new xml_node('courseDescription', array('BASE64'=>'1'), null, $db->Record['courseDescription']);
-		$course_attr[] = new xml_node('courseFamily', null, null, $db->Record['courseFamily']);
-		$course_attr[] = new xml_node('courseNumber', null, null, $db->Record['courseNumber']);
-		$course_attr[] = new xml_node('coReq1', null, null, $db->Record['coReq1']);
-		$course_attr[] = new xml_node('coReq2', null, null, $db->Record['coReq2']);
-		$course_attr[] = new xml_node('coReq3', null, null, $db->Record['coReq3']);
-		$course_attr[] = new xml_node('coReq4', null, null, $db->Record['coReq4']);
-		$course_attr[] = new xml_node('preReq1', null, null, $db->Record['preReq1']);
-		$course_attr[] = new xml_node('preReq2', null, null, $db->Record['preReq2']);
-		$course_attr[] = new xml_node('preReq3', null, null, $db->Record['preReq3']);
-		$course_attr[] = new xml_node('preReq4', null, null, $db->Record['preReq4']);
+		$course_attr[] = new xml_node('courseName', array('BASE64'=>'1'), null, $db->record['courseName']);								
+		$course_attr[] = new xml_node('courseDescription', array('BASE64'=>'1'), null, $db->record['courseDescription']);
+		$course_attr[] = new xml_node('courseFamily', null, null, $db->record['courseFamily']);
+		$course_attr[] = new xml_node('courseNumber', null, null, $db->record['courseNumber']);
+		$course_attr[] = new xml_node('coReq1', null, null, $db->record['coReq1']);
+		$course_attr[] = new xml_node('coReq2', null, null, $db->record['coReq2']);
+		$course_attr[] = new xml_node('coReq3', null, null, $db->record['coReq3']);
+		$course_attr[] = new xml_node('coReq4', null, null, $db->record['coReq4']);
+		$course_attr[] = new xml_node('preReq1', null, null, $db->record['preReq1']);
+		$course_attr[] = new xml_node('preReq2', null, null, $db->record['preReq2']);
+		$course_attr[] = new xml_node('preReq3', null, null, $db->record['preReq3']);
+		$course_attr[] = new xml_node('preReq4', null, null, $db->record['preReq4']);
 		
-		$classroom_child_node[] = new xml_node('COURSE', array('ID'=>$db->Record['id_courses']), $course_attr);
+		$classroom_child_node[] = new xml_node('COURSE', array('ID'=>$db->record['id_courses']), $course_attr);
 		
 		$application_nodes[] = $this->get_faq_nodes();
 		$application_nodes[] = $this->get_syllabus_nodes();
@@ -260,28 +260,28 @@ class dataexchange extends FacultyService
 		
 		$xml_child_node = array();
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('display_name',array('BASE64'=>1), null, $db->Record['display_name']);
-			$xml_sub_child[] = new xml_node('date_available',null, null, $db->Record['date_available']);
-			$xml_sub_child[] = new xml_node('date_unavailable',null, null, $db->Record['date_unavailable']);
-			$xml_sub_child[] = new xml_node('mail_responses', null, null, $db->Record['mail_responses']);
-			$xml_sub_child[] = new xml_node('auto_publish', null, null, $db->Record['auto_publish']);
-			$xml_sub_child[] = new xml_node('num_retries', null, null, $db->Record['num_retries']);
-			$xml_sub_child[] = new xml_node('minute_limit', null, null, $db->Record['minute_limit']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>1), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>1), null, $db->Record['instructions']);
-			$xml_sub_child[] = new xml_node('show_result_type', null, null, $db->Record['show_result_type']);
-			$xml_sub_child[] = new xml_node('possible_points', null, null, $db->Record['possible_points']);
+			$xml_sub_child[] = new xml_node('display_name',array('BASE64'=>1), null, $db->record['display_name']);
+			$xml_sub_child[] = new xml_node('date_available',null, null, $db->record['date_available']);
+			$xml_sub_child[] = new xml_node('date_unavailable',null, null, $db->record['date_unavailable']);
+			$xml_sub_child[] = new xml_node('mail_responses', null, null, $db->record['mail_responses']);
+			$xml_sub_child[] = new xml_node('auto_publish', null, null, $db->record['auto_publish']);
+			$xml_sub_child[] = new xml_node('num_retries', null, null, $db->record['num_retries']);
+			$xml_sub_child[] = new xml_node('minute_limit', null, null, $db->record['minute_limit']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>1), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>1), null, $db->record['instructions']);
+			$xml_sub_child[] = new xml_node('show_result_type', null, null, $db->record['show_result_type']);
+			$xml_sub_child[] = new xml_node('possible_points', null, null, $db->record['possible_points']);
 			
-			$xml_sub_child[] = new xml_node('QUESTIONS', null, $this->get_assessments_questions($db->Record['assessment_id']));	
+			$xml_sub_child[] = new xml_node('QUESTIONS', null, $this->get_assessments_questions($db->record['assessment_id']));	
 			//error_log('questions');
-			$xml_sub_child[] = new xml_node('ANSWERS', null, $this->get_assessments_answers_nodes($db->Record['assessment_id']));
+			$xml_sub_child[] = new xml_node('ANSWERS', null, $this->get_assessments_answers_nodes($db->record['assessment_id']));
 			//error_log('answer');
-			$xml_sub_child[] = new xml_node('LOG', null, $this->get_assessments_log($db->Record['assessment_id']));
+			$xml_sub_child[] = new xml_node('LOG', null, $this->get_assessments_log($db->record['assessment_id']));
 			//error_log('log');
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'assessment_id'=>$db->Record['assessment_id']
+									array(	'assessment_id'=>$db->record['assessment_id']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -303,19 +303,19 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('asessment_id',null, null, $db->Record['assessment_id']);
-			$xml_sub_child[] = new xml_node('assessment_question_id',null, null, $db->Record['assessment_question_id']);
-			$xml_sub_child[] = new xml_node('student_id', null, null, $db->Record['student_id']);
-			$xml_sub_child[] = new xml_node('points_earned', null, null, $db->Record['points_earned']);
-			$xml_sub_child[] = new xml_node('points_given', null, null, $db->Record['points_given']);
-			$xml_sub_child[] = new xml_node('assessment_question_values', array('BASE64'=>1), null, $db->Record['assessment_question_values']);
+			$xml_sub_child[] = new xml_node('asessment_id',null, null, $db->record['assessment_id']);
+			$xml_sub_child[] = new xml_node('assessment_question_id',null, null, $db->record['assessment_question_id']);
+			$xml_sub_child[] = new xml_node('student_id', null, null, $db->record['student_id']);
+			$xml_sub_child[] = new xml_node('points_earned', null, null, $db->record['points_earned']);
+			$xml_sub_child[] = new xml_node('points_given', null, null, $db->record['points_given']);
+			$xml_sub_child[] = new xml_node('assessment_question_values', array('BASE64'=>1), null, $db->record['assessment_question_values']);
 			
 			#$xml_sub_child[] = new xml_node('INQUIRIES', null, $this->get_textbookinquiries_nodes());
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'assessment_answer_id'=>$db->Record['assessment_answer_id']
+									array(	'assessment_answer_id'=>$db->record['assessment_answer_id']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -343,19 +343,19 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('question_type', null, null, $db->Record['question_type']);
-			$xml_sub_child[] = new xml_node('question_sort', null, null, $db->Record['question_sort']);
-			$xml_sub_child[] = new xml_node('question_points', null, null, $db->Record['question_points']);
-			$xml_sub_child[] = new xml_node('question_display', array('BASE64'=>1), null, $db->Record['question_display']);
-			$xml_sub_child[] = new xml_node('question_text', array('BASE64'=>1), null, $db->Record['question_text']);
-			$xml_sub_child[] = new xml_node('question_choices', array('BASE64'=>1), null, $db->Record['question_choices']);
-			$xml_sub_child[] = new xml_node('question_input', array('BASE64'=>1), null, $db->Record['question_input']);
-			$xml_sub_child[] = new xml_node('file_hash', array('BASE64'=>1), null, $db->Record['file_hash']);
+			$xml_sub_child[] = new xml_node('question_type', null, null, $db->record['question_type']);
+			$xml_sub_child[] = new xml_node('question_sort', null, null, $db->record['question_sort']);
+			$xml_sub_child[] = new xml_node('question_points', null, null, $db->record['question_points']);
+			$xml_sub_child[] = new xml_node('question_display', array('BASE64'=>1), null, $db->record['question_display']);
+			$xml_sub_child[] = new xml_node('question_text', array('BASE64'=>1), null, $db->record['question_text']);
+			$xml_sub_child[] = new xml_node('question_choices', array('BASE64'=>1), null, $db->record['question_choices']);
+			$xml_sub_child[] = new xml_node('question_input', array('BASE64'=>1), null, $db->record['question_input']);
+			$xml_sub_child[] = new xml_node('file_hash', array('BASE64'=>1), null, $db->record['file_hash']);
 								
 			$xml_child_node[] =new xml_node('ITEM', 
-								array(	'assessment_question_id'=>$db->Record['assessment_question_id']
+								array(	'assessment_question_id'=>$db->record['assessment_question_id']
 									 	 ), $xml_sub_child
 								);
 		}
@@ -384,14 +384,14 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('id_student', null, null, $db->Record['id_student']);
-			$xml_sub_child[] = new xml_node('start_date', null, null, $db->Record['start_date']);
-			$xml_sub_child[] = new xml_node('end_date', null, null, $db->Record['end_date']);
+			$xml_sub_child[] = new xml_node('id_student', null, null, $db->record['id_student']);
+			$xml_sub_child[] = new xml_node('start_date', null, null, $db->record['start_date']);
+			$xml_sub_child[] = new xml_node('end_date', null, null, $db->record['end_date']);
 								
 			$xml_child_node[] =new xml_node('ITEM', 
-								array(	'id_assignment_log'=>$db->Record['id_assessment_log']
+								array(	'id_assignment_log'=>$db->record['id_assessment_log']
 									 	 ), $xml_sub_child
 								);
 		}
@@ -415,17 +415,17 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('south_campus',null, null, $db->Record['south_campus']);
-			$xml_sub_child[] = new xml_node('southeast_campus',null, null, $db->Record['southeast_campus']);
-			$xml_sub_child[] = new xml_node('northeast_campus',null, null, $db->Record['northeast_campus']);
-			$xml_sub_child[] = new xml_node('northwest_campus', null, null, $db->Record['northwest_campus']);
-			$xml_sub_child[] = new xml_node('noTextbooks', null, null, $db->Record['noTextbooks']);
+			$xml_sub_child[] = new xml_node('south_campus',null, null, $db->record['south_campus']);
+			$xml_sub_child[] = new xml_node('southeast_campus',null, null, $db->record['southeast_campus']);
+			$xml_sub_child[] = new xml_node('northeast_campus',null, null, $db->record['northeast_campus']);
+			$xml_sub_child[] = new xml_node('northwest_campus', null, null, $db->record['northwest_campus']);
+			$xml_sub_child[] = new xml_node('noTextbooks', null, null, $db->record['noTextbooks']);
 			$xml_sub_child[] = new xml_node('INQUIRIES', null, $this->get_textbookinquiries_nodes());
 			 
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_textbook'=>$db->Record['id_textbook']
+									array(	'id_textbook'=>$db->record['id_textbook']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -446,24 +446,24 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('author',array('BASE64'=>'1'), null, $db->Record['author']);
-			$xml_sub_child[] = new xml_node('title',array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('publisher', array('BASE64'=>'1'), null, $db->Record['publisher']);
-			$xml_sub_child[] = new xml_node('edition', null, null, $db->Record['edition']);
-			$xml_sub_child[] = new xml_node('copyright', null, null, $db->Record['copyright']);
-			$xml_sub_child[] = new xml_node('isbn', null, null, $db->Record['isbn']);
-			$xml_sub_child[] = new xml_node('required', null, null, $db->Record['required']);
-			$xml_sub_child[] = new xml_node('bundled', null, null, $db->Record['bundled']);
-			$xml_sub_child[] = new xml_node('bundled_items', array('BASE64'=>'1'), null, $db->Record['bundled_items']);
-			##$xml_sub_child[] = new xml_node('last_item', null, null, $db->Record['last_item']);
-			$xml_sub_child[] = new xml_node('type', null, null, $db->Record['type']);
-			$xml_sub_child[] = new xml_node('status', null, null, $db->Record['status']);
-			$xml_sub_child[] = new xml_node('note', null, null, $db->Record['note']); // is this sensitive information? should i be giving this to a teacher?
+			$xml_sub_child[] = new xml_node('author',array('BASE64'=>'1'), null, $db->record['author']);
+			$xml_sub_child[] = new xml_node('title',array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('publisher', array('BASE64'=>'1'), null, $db->record['publisher']);
+			$xml_sub_child[] = new xml_node('edition', null, null, $db->record['edition']);
+			$xml_sub_child[] = new xml_node('copyright', null, null, $db->record['copyright']);
+			$xml_sub_child[] = new xml_node('isbn', null, null, $db->record['isbn']);
+			$xml_sub_child[] = new xml_node('required', null, null, $db->record['required']);
+			$xml_sub_child[] = new xml_node('bundled', null, null, $db->record['bundled']);
+			$xml_sub_child[] = new xml_node('bundled_items', array('BASE64'=>'1'), null, $db->record['bundled_items']);
+			##$xml_sub_child[] = new xml_node('last_item', null, null, $db->record['last_item']);
+			$xml_sub_child[] = new xml_node('type', null, null, $db->record['type']);
+			$xml_sub_child[] = new xml_node('status', null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('note', null, null, $db->record['note']); // is this sensitive information? should i be giving this to a teacher?
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_textbook_classes'=>$db->Record['id_textbook_classes']
+									array(	'id_textbook_classes'=>$db->record['id_textbook_classes']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -485,21 +485,21 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	
 			$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('name',null, null, $db->Record['name']);
-			$xml_sub_child[] = new xml_node('parentKey',null, null, $db->Record['parentKey']);
-			$xml_sub_child[] = new xml_node('owner', null, null, $db->Record['owner']);
-			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->Record['notes']);
-			$xml_sub_child[] = new xml_node('trashed', null, null, $db->Record['trashed']);
-			$xml_sub_child[] = new xml_node('origparent', null, null, $db->Record['origparent']);
-			$xml_sub_child[] = new xml_node('folderType', null, null, $db->Record['folderType']);
+			$xml_sub_child[] = new xml_node('name',null, null, $db->record['name']);
+			$xml_sub_child[] = new xml_node('parentKey',null, null, $db->record['parentKey']);
+			$xml_sub_child[] = new xml_node('owner', null, null, $db->record['owner']);
+			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->record['notes']);
+			$xml_sub_child[] = new xml_node('trashed', null, null, $db->record['trashed']);
+			$xml_sub_child[] = new xml_node('origparent', null, null, $db->record['origparent']);
+			$xml_sub_child[] = new xml_node('folderType', null, null, $db->record['folderType']);
 			
-			$xml_sub_child[] = new xml_node('CLASSDOCLIB_FILES', null, $this->get_document_files($db->Record['pkey']));
+			$xml_sub_child[] = new xml_node('CLASSDOCLIB_FILES', null, $this->get_document_files($db->record['pkey']));
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'pkey'=>$db->Record['pkey']
+									array(	'pkey'=>$db->record['pkey']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -521,41 +521,41 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
 			
-			if (trim($db->Record['diskName']) == '')
+			if (trim($db->record['diskName']) == '')
 				continue;
 				
-			$xml_sub_child[] = new xml_node('daHasha',null, null, $db->Record['daHasha']);
-			$xml_sub_child[] = new xml_node('file', array('BASE64'=>'1'), null, $db->Record['file']);
-			$xml_sub_child[] = new xml_node('displayname', array('BASE64'=>'1'), null, $db->Record['displayname']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('mime', null, null, $db->Record['mime']);
-			//$xml_sub_child[] = new xml_node('folder', null, null, $db->Record['folder']); // not needed at all! but for good measure we'll keep it
-			$xml_sub_child[] = new xml_node('owner', null, null, $db->Record['owner']);
-			$xml_sub_child[] = new xml_node('filedate', null, null, $db->Record['filedate']);
-			$xml_sub_child[] = new xml_node('size', null, null, $db->Record['size']);
-			$xml_sub_child[] = new xml_node('diskName', null, null, $db->Record['diskName']);
-			$xml_sub_child[] = new xml_node('trashed', null, null, $db->Record['trashed']);
-			$xml_sub_child[] = new xml_node('origfolder', null, null, $db->Record['origfolder']); // how to handle in copy!
+			$xml_sub_child[] = new xml_node('daHasha',null, null, $db->record['daHasha']);
+			$xml_sub_child[] = new xml_node('file', array('BASE64'=>'1'), null, $db->record['file']);
+			$xml_sub_child[] = new xml_node('displayname', array('BASE64'=>'1'), null, $db->record['displayname']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('mime', null, null, $db->record['mime']);
+			//$xml_sub_child[] = new xml_node('folder', null, null, $db->record['folder']); // not needed at all! but for good measure we'll keep it
+			$xml_sub_child[] = new xml_node('owner', null, null, $db->record['owner']);
+			$xml_sub_child[] = new xml_node('filedate', null, null, $db->record['filedate']);
+			$xml_sub_child[] = new xml_node('size', null, null, $db->record['size']);
+			$xml_sub_child[] = new xml_node('diskName', null, null, $db->record['diskName']);
+			$xml_sub_child[] = new xml_node('trashed', null, null, $db->record['trashed']);
+			$xml_sub_child[] = new xml_node('origfolder', null, null, $db->record['origfolder']); // how to handle in copy!
 			
 			// instead of encoding the contents of a file into xml
 			// add in an identifier and copy the original file into
 			// the temp directory
 			
 			$this->obj_zip->add_file(
-						file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->Record['diskName'], 0, 2). '/'.substr($db->Record['diskName'],(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName']),
-						$this->current_dir.'library/'.str_replace('/', ' ', strip_tags($db->Record['diskName'])));
+						file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->record['diskName'], 0, 2). '/'.substr($db->record['diskName'],(strlen($db->record['diskName'])-2)).'/'.$db->record['diskName']),
+						$this->current_dir.'library/'.str_replace('/', ' ', strip_tags($db->record['diskName'])));
 		/**
 			$xml_sub_child[] = new xml_node('data', null, null, 
 											base64_encode(
-												file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->Record['diskName'], 0, 2). '/'.substr($db->Record['diskName'],(strlen($db->Record['diskName'])-2)).'/'.$db->Record['diskName'])
+												file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->record['diskName'], 0, 2). '/'.substr($db->record['diskName'],(strlen($db->record['diskName'])-2)).'/'.$db->record['diskName'])
 												)
 											);
 		**/								
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'pkey'=>$db->Record['pkey']
+									array(	'pkey'=>$db->record['pkey']
 									 	 ), $xml_sub_child
 									);
 			
@@ -578,19 +578,19 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('id_class_lessons',null, null, $db->Record['id_class_lessons']);
-			$xml_sub_child[] = new xml_node('txTitle', array('BASE64'=>'1'), null, $db->Record['txTitle']);
+			$xml_sub_child[] = new xml_node('id_class_lessons',null, null, $db->record['id_class_lessons']);
+			$xml_sub_child[] = new xml_node('txTitle', array('BASE64'=>'1'), null, $db->record['txTitle']);
 			//$xml_sub_child[] = new xml_node('txText',  null, null, null);
-			$xml_sub_child[] = new xml_node('dateCreated', null, null, $db->Record['dateCreated']);
+			$xml_sub_child[] = new xml_node('dateCreated', null, null, $db->record['dateCreated']);
 			
 			$this->obj_zip->add_file(
-						$db->Record['txText'],
-						$this->current_dir.'content/'.str_replace('/', ' ', strip_tags($db->Record['txTitle'].'.html')));
+						$db->record['txText'],
+						$this->current_dir.'content/'.str_replace('/', ' ', strip_tags($db->record['txTitle'].'.html')));
 						
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_lesson_content'=>$db->Record['id_class_lesson_content']
+									array(	'id_class_lesson_content'=>$db->record['id_class_lesson_content']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -616,7 +616,7 @@ class dataexchange extends FacultyService
 		$db2 = DB::getHandle();
 		$db2->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
 			$xml_links = null;
 			$xml_objectives = null;
@@ -627,22 +627,22 @@ class dataexchange extends FacultyService
 			$sql2 = '
 			SELECT * FROM 
 			class_lesson_links
-			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
+			WHERE id_class_lessons='. $db->record['id_class_lessons'];
 			
 			$db2->query($sql2);
-			while ($db2->next_record())
-			{	$xml_links[] = new xml_node('id_class_links',null, null, $db2->Record['id_class_links']);
+			while ($db2->nextRecord())
+			{	$xml_links[] = new xml_node('id_class_links',null, null, $db2->record['id_class_links']);
 			}
 			$xml_sub_sub_child[] = new xml_node('LINKS',null, $xml_links);
 			
 			$sql2 = '
 			SELECT * FROM 
 			class_lesson_objectives
-			WHERE id_class_lesson='. $db->Record['id_class_lessons'];
+			WHERE id_class_lesson='. $db->record['id_class_lessons'];
 			
 			$db2->query($sql2);
-			while ($db2->next_record())
-			{	$xml_objectives[] = new xml_node('id_class_objectives',null, null, $db2->Record['id_class_objectives']);
+			while ($db2->nextRecord())
+			{	$xml_objectives[] = new xml_node('id_class_objectives',null, null, $db2->record['id_class_objectives']);
 			}
 			$xml_sub_sub_child[] = new xml_node('OBJECTIVES',null,$xml_objectives);
 
@@ -650,11 +650,11 @@ class dataexchange extends FacultyService
 			$sql2 = '
 			SELECT * FROM 
 			class_assignments_link
-			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
+			WHERE id_class_lessons='. $db->record['id_class_lessons'];
 			
 			$db2->query($sql2);
-			while ($db2->next_record())
-			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->Record['id_class_assignments']);
+			while ($db2->nextRecord())
+			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->record['id_class_assignments']);
 			}
 			$xml_sub_sub_child[] = new xml_node('ASSIGNMENTS',null,$xml_assignments);
 			
@@ -665,15 +665,15 @@ class dataexchange extends FacultyService
 			
 			$xml_sub_child[] = new xml_node('MAPPINGS',null, $xml_sub_sub_child);
 			
-			$xml_sub_child[] = new xml_node('createdOn',null, null, $db->Record['createdOn']);
-			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('activeOn', null, null, $db->Record['activeOn']);
-			$xml_sub_child[] = new xml_node('inactiveOn', null, null, $db->Record['inactiveOn']);
-			$xml_sub_child[] = new xml_node('checkList', array('BASE64'=>'1'), null, $db->Record['checkList']);
+			$xml_sub_child[] = new xml_node('createdOn',null, null, $db->record['createdOn']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('activeOn', null, null, $db->record['activeOn']);
+			$xml_sub_child[] = new xml_node('inactiveOn', null, null, $db->record['inactiveOn']);
+			$xml_sub_child[] = new xml_node('checkList', array('BASE64'=>'1'), null, $db->record['checkList']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_lessons'=>$db->Record['id_class_lessons']
+									array(	'id_class_lessons'=>$db->record['id_class_lessons']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -700,17 +700,17 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('title',null, null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('lesson',null, null, $db->Record['lesson']);
-			$xml_sub_child[] = new xml_node('status', null, null, $db->Record['status']);
-			$xml_sub_child[] = new xml_node('author', null, null, $db->Record['author']);
-			$xml_sub_child[] = new xml_node('createdOn', null, null, $db->Record['createdOn']);
-			$xml_sub_child[] = new xml_node('content', array('BASE64'=>'1'), null, $db->Record['content']);
+			$xml_sub_child[] = new xml_node('title',null, null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('lesson',null, null, $db->record['lesson']);
+			$xml_sub_child[] = new xml_node('status', null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('author', null, null, $db->record['author']);
+			$xml_sub_child[] = new xml_node('createdOn', null, null, $db->record['createdOn']);
+			$xml_sub_child[] = new xml_node('content', array('BASE64'=>'1'), null, $db->record['content']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_presentations'=>$db->Record['id_presentations']
+									array(	'id_presentations'=>$db->record['id_presentations']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -732,14 +732,14 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('objective', array('BASE64'=>'1'), null, $db->Record['objective']);
-			$xml_sub_child[] = new xml_node('f_hide',null, null, $db->Record['f_hide']);
-			$xml_sub_child[] = new xml_node('i_sort', null, null, $db->Record['i_sort']);
+			$xml_sub_child[] = new xml_node('objective', array('BASE64'=>'1'), null, $db->record['objective']);
+			$xml_sub_child[] = new xml_node('f_hide',null, null, $db->record['f_hide']);
+			$xml_sub_child[] = new xml_node('i_sort', null, null, $db->record['i_sort']);
 									
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_objectives'=>$db->Record['id_class_objectives']
+									array(	'id_class_objectives'=>$db->record['id_class_objectives']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -762,14 +762,14 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('id_class_links_categories_parent',null, null, $db->Record['id_class_links_categories_parent']);
-			$xml_sub_child[] = new xml_node('txTitle', array('BASE64'=>'1'), null, $db->Record['txTitle']);
-			$xml_sub_child[] = new xml_node('sortOrder', null, null, $db->Record['sortOrder']);
+			$xml_sub_child[] = new xml_node('id_class_links_categories_parent',null, null, $db->record['id_class_links_categories_parent']);
+			$xml_sub_child[] = new xml_node('txTitle', array('BASE64'=>'1'), null, $db->record['txTitle']);
+			$xml_sub_child[] = new xml_node('sortOrder', null, null, $db->record['sortOrder']);
 									
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_links_categories'=>$db->Record['id_class_links_categories']
+									array(	'id_class_links_categories'=>$db->record['id_class_links_categories']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -792,18 +792,18 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('id_class_links_categories',null, null, $db->Record['id_class_links_categories']);
-			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('url', array('BASE64'=>'1'), null, $db->Record['url']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('dateCreated', null, null, $db->Record['dateCreated']);
-			$xml_sub_child[] = new xml_node('createdby', null, null, $db->Record['createdby']);
-			$xml_sub_child[] = new xml_node('hits', null, null, $db->Record['hits']);
+			$xml_sub_child[] = new xml_node('id_class_links_categories',null, null, $db->record['id_class_links_categories']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('url', array('BASE64'=>'1'), null, $db->record['url']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('dateCreated', null, null, $db->record['dateCreated']);
+			$xml_sub_child[] = new xml_node('createdby', null, null, $db->record['createdby']);
+			$xml_sub_child[] = new xml_node('hits', null, null, $db->record['hits']);
 						
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_links'=>$db->Record['id_class_links']
+									array(	'id_class_links'=>$db->record['id_class_links']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -832,51 +832,51 @@ class dataexchange extends FacultyService
 		
 		$db2 = DB::getHandle();
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
 			$xml_grades_node = null;
 			$xml_turnedin_node = null;
 			
 			$sql2 = '
 			SELECT * FROM  class_assignments_turnin
-			WHERE id_class_assignments='. $db->Record['id_class_assignments'].'
+			WHERE id_class_assignments='. $db->record['id_class_assignments'].'
 			';
 			$db2->query($sql2);
 			$db2->RESULT_TYPE = MYSQL_ASSOC;
-			while ($db2->next_record())
+			while ($db2->nextRecord())
 			{
 				$xml_turnedin_node[] = new xml_node('WORK',
-											array('id_class_assignments_turnin'=>$db2->Record['id_class_assignments_turnin'],
-												  'id_student' => $db2->Record['id_student'],
-												  'dateTurnin' =>$db2->Record['dateTurnin'],
-												  'assign_type' =>$db2->Record['assign_type'], 
-												  'assign_text' =>base64_encode($db2->Record['assign_text']),
-												  'assign_file_mime' =>$db2->Record['assign_file_mime'],
-												  'assign_file_name' =>$db2->Record['assign_file_name'],
-												  'assign_file_size' =>$db2->Record['assign_file_size']												  
+											array('id_class_assignments_turnin'=>$db2->record['id_class_assignments_turnin'],
+												  'id_student' => $db2->record['id_student'],
+												  'dateTurnin' =>$db2->record['dateTurnin'],
+												  'assign_type' =>$db2->record['assign_type'], 
+												  'assign_text' =>base64_encode($db2->record['assign_text']),
+												  'assign_file_mime' =>$db2->record['assign_file_mime'],
+												  'assign_file_name' =>$db2->record['assign_file_name'],
+												  'assign_file_size' =>$db2->record['assign_file_size']												  
 												  )
 											, null, null
 											);
 											
-						if ($db2->Record['assign_file_size'] > 0)										
+						if ($db2->record['assign_file_size'] > 0)										
 						{	
 							//
 							//	I'm backing this up, but it's not needed.
 							///
 							// This is because mikes change to the assignment upload file 
 							// I have to work out both
-							if (strlen($db2->Record['assign_file_blob']) > 80)
+							if (strlen($db2->record['assign_file_blob']) > 80)
 							{
 								$this->obj_zip->add_file(
-								$db2->Record['assign_file_blob'],
-								$this->current_dir.'assignments/'.str_replace('/', ' ', strip_tags($db2->Record['assign_file_name'])));
+								$db2->record['assign_file_blob'],
+								$this->current_dir.'assignments/'.str_replace('/', ' ', strip_tags($db2->record['assign_file_name'])));
 								
 							} else
 							{
-								$data = file_get_contents(CONTENT_PATH.'/uploads/'.$db2->Record['assign_file_blob']);
+								$data = file_get_contents(CONTENT_PATH.'/uploads/'.$db2->record['assign_file_blob']);
 								$this->obj_zip->add_file(
 								$data,
-								$this->current_dir.'assignments/'.$db2->Record['assign_file_name']);
+								$this->current_dir.'assignments/'.$db2->record['assign_file_name']);
 								$data = null;
 								unset($data); // making sure i keep these resources in check
 							}
@@ -887,37 +887,37 @@ class dataexchange extends FacultyService
 			
 			$sql2 = '
 			SELECT * FROM  class_assignments_grades
-			WHERE id_class_assignments='. $db->Record['id_class_assignments'].'
+			WHERE id_class_assignments='. $db->record['id_class_assignments'].'
 			';
 			$db2->query($sql2);
 			$db2->RESULT_TYPE = MYSQL_ASSOC;
-			while ($db2->next_record())
+			while ($db2->nextRecord())
 			{
 				$xml_grades_node[] = new xml_node('GRADE',
-											array('id_class_assignments_grades'=>$db2->Record['id_class_assignments_grades'],
-												  'id_student' => $db2->Record['id_student'],
+											array('id_class_assignments_grades'=>$db2->record['id_class_assignments_grades'],
+												  'id_student' => $db2->record['id_student'],
 												  'BASE64' => 1,
-												  'grade' =>$db2->Record['grade']
+												  'grade' =>$db2->record['grade']
 												  ),
 												  null,
-												  $db2->Record['comments']
+												  $db2->record['comments']
 											);
 			}
 			
 			$xml_sub_child[] = new xml_node('TURNEDIN',null, $xml_turnedin_node);
 			$xml_sub_child[] = new xml_node('GRADES',null, $xml_grades_node);
 			
-			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>'1'), null, $db->Record['instructions']);
-			$xml_sub_child[] = new xml_node('dueDate', null, null, $db->Record['dueDate']);
-			$xml_sub_child[] = new xml_node('noDueDate', null, null, $db->Record['noDueDate']);
-			$xml_sub_child[] = new xml_node('activeDate', null, null, $db->Record['activeDate']);
-			$xml_sub_child[] = new xml_node('responseType', null, null, $db->Record['responseType']);
-			$xml_sub_child[] = new xml_node('dateNoAccept', null, null, $db->Record['dateNoAccept']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>'1'), null, $db->record['instructions']);
+			$xml_sub_child[] = new xml_node('dueDate', null, null, $db->record['dueDate']);
+			$xml_sub_child[] = new xml_node('noDueDate', null, null, $db->record['noDueDate']);
+			$xml_sub_child[] = new xml_node('activeDate', null, null, $db->record['activeDate']);
+			$xml_sub_child[] = new xml_node('responseType', null, null, $db->record['responseType']);
+			$xml_sub_child[] = new xml_node('dateNoAccept', null, null, $db->record['dateNoAccept']);
 			
 							
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_assignments'=>$db->Record['id_class_assignments']
+									array(	'id_class_assignments'=>$db->record['id_class_assignments']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -941,19 +941,19 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('status',null, null, $db->Record['status']);
-			$xml_sub_child[] = new xml_node('received_date',null, null, $db->Record['received_date']);
-			$xml_sub_child[] = new xml_node('oncampus_exam', null, null, $db->Record['oncampus_exam']);
-			$xml_sub_child[] = new xml_node('south_campus', null, null, $db->Record['south_campus']);
-			$xml_sub_child[] = new xml_node('southeast_campus', null, null, $db->Record['southeast_campus']);
-			$xml_sub_child[] = new xml_node('northeast_campus', null, null, $db->Record['northeast_campus']);
-			$xml_sub_child[] = new xml_node('northwest_campus', null, null, $db->Record['northwest_campus']);
-			$xml_sub_child[] = new xml_node('note', array('BASE64'=>'1'), null, $db->Record['note']);
+			$xml_sub_child[] = new xml_node('status',null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('received_date',null, null, $db->record['received_date']);
+			$xml_sub_child[] = new xml_node('oncampus_exam', null, null, $db->record['oncampus_exam']);
+			$xml_sub_child[] = new xml_node('south_campus', null, null, $db->record['south_campus']);
+			$xml_sub_child[] = new xml_node('southeast_campus', null, null, $db->record['southeast_campus']);
+			$xml_sub_child[] = new xml_node('northeast_campus', null, null, $db->record['northeast_campus']);
+			$xml_sub_child[] = new xml_node('northwest_campus', null, null, $db->record['northwest_campus']);
+			$xml_sub_child[] = new xml_node('note', array('BASE64'=>'1'), null, $db->record['note']);
 						
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_exam_schedule_classes'=>$db->Record['id_exam_schedule_classes']
+									array(	'id_exam_schedule_classes'=>$db->record['id_exam_schedule_classes']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -977,26 +977,26 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('num_seminar',null, null, $db->Record['num_seminar']);
-			$xml_sub_child[] = new xml_node('south_date',null, null, $db->Record['south_date']);
-			$xml_sub_child[] = new xml_node('south_time_start',null, null, $db->Record['south_time_start']);
-			$xml_sub_child[] = new xml_node('south_time_end', null, null, $db->Record['south_time_end']);
-			$xml_sub_child[] = new xml_node('northeast_date', null, null, $db->Record['northeast_date']);
-			$xml_sub_child[] = new xml_node('northeast_time_start', null, null, $db->Record['northeast_time_start']);
-			$xml_sub_child[] = new xml_node('northeast_time_end', null, null, $db->Record['northeast_time_end']);
-			$xml_sub_child[] = new xml_node('northwest_date', null, null, $db->Record['northwest_date']);
-			$xml_sub_child[] = new xml_node('northwest_time_start', null, null, $db->Record['northwest_time_start']);
-			$xml_sub_child[] = new xml_node('northwest_time_end', null, null, $db->Record['northwest_time_end']);
-			$xml_sub_child[] = new xml_node('southeast_date', null, null, $db->Record['southeast_date']);
-			$xml_sub_child[] = new xml_node('southeast_time_start', null, null, $db->Record['southeast_time_start']);
-			$xml_sub_child[] = new xml_node('southeast_time_end', null, null, $db->Record['southeast_time_end']);
-			$xml_sub_child[] = new xml_node('entry_status', null, null, $db->Record['entry_status']);
-			$xml_sub_child[] = new xml_node('note', array('BASE64'=>'1'), null, $db->Record['note']);
+			$xml_sub_child[] = new xml_node('num_seminar',null, null, $db->record['num_seminar']);
+			$xml_sub_child[] = new xml_node('south_date',null, null, $db->record['south_date']);
+			$xml_sub_child[] = new xml_node('south_time_start',null, null, $db->record['south_time_start']);
+			$xml_sub_child[] = new xml_node('south_time_end', null, null, $db->record['south_time_end']);
+			$xml_sub_child[] = new xml_node('northeast_date', null, null, $db->record['northeast_date']);
+			$xml_sub_child[] = new xml_node('northeast_time_start', null, null, $db->record['northeast_time_start']);
+			$xml_sub_child[] = new xml_node('northeast_time_end', null, null, $db->record['northeast_time_end']);
+			$xml_sub_child[] = new xml_node('northwest_date', null, null, $db->record['northwest_date']);
+			$xml_sub_child[] = new xml_node('northwest_time_start', null, null, $db->record['northwest_time_start']);
+			$xml_sub_child[] = new xml_node('northwest_time_end', null, null, $db->record['northwest_time_end']);
+			$xml_sub_child[] = new xml_node('southeast_date', null, null, $db->record['southeast_date']);
+			$xml_sub_child[] = new xml_node('southeast_time_start', null, null, $db->record['southeast_time_start']);
+			$xml_sub_child[] = new xml_node('southeast_time_end', null, null, $db->record['southeast_time_end']);
+			$xml_sub_child[] = new xml_node('entry_status', null, null, $db->record['entry_status']);
+			$xml_sub_child[] = new xml_node('note', array('BASE64'=>'1'), null, $db->record['note']);
 						
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_seminar_classes_dates'=>$db->Record['id_seminar_classes_dates']
+									array(	'id_seminar_classes_dates'=>$db->record['id_seminar_classes_dates']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1019,29 +1019,29 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('status',null, null, $db->Record['status']);
-			$xml_sub_child[] = new xml_node('first_date_id',null, null, $db->Record['first_date_id']);
-			$xml_sub_child[] = new xml_node('first_campus_location',null, null, $db->Record['first_campus_location']);
-			$xml_sub_child[] = new xml_node('first_allotted_minutes', null, null, $db->Record['first_allotted_minutes']);
-			$xml_sub_child[] = new xml_node('first_preferred_time', null, null, $db->Record['first_preferred_time']);
-			$xml_sub_child[] = new xml_node('first_time_range_start', null, null, $db->Record['first_time_range_start']);
-			$xml_sub_child[] = new xml_node('first_time_range_end', null, null, $db->Record['first_time_range_end']);
-			$xml_sub_child[] = new xml_node('second_date_id', null, null, $db->Record['second_date_id']);
-			$xml_sub_child[] = new xml_node('second_campus_location', null, null, $db->Record['second_campus_location']);
-			$xml_sub_child[] = new xml_node('second_allotted_minutes', null, null, $db->Record['second_allotted_minutes']);
-			$xml_sub_child[] = new xml_node('second_preferred_time', null, null, $db->Record['second_preferred_time']);
-			$xml_sub_child[] = new xml_node('second_time_range_start', null, null, $db->Record['second_time_range_start']);
-			$xml_sub_child[] = new xml_node('second_time_range_end', null, null, $db->Record['second_time_range_end']);
-			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>'1'), null, $db->Record['instructions']);
-			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->Record['notes']);
-			$xml_sub_child[] = new xml_node('finalDateTime', null, null, $db->Record['finalDateTime']);
-			$xml_sub_child[] = new xml_node('finalSessionLength', null, null, $db->Record['finalSessionLength']);
-			$xml_sub_child[] = new xml_node('finalCampus', null, null, $db->Record['finalCampus']);
+			$xml_sub_child[] = new xml_node('status',null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('first_date_id',null, null, $db->record['first_date_id']);
+			$xml_sub_child[] = new xml_node('first_campus_location',null, null, $db->record['first_campus_location']);
+			$xml_sub_child[] = new xml_node('first_allotted_minutes', null, null, $db->record['first_allotted_minutes']);
+			$xml_sub_child[] = new xml_node('first_preferred_time', null, null, $db->record['first_preferred_time']);
+			$xml_sub_child[] = new xml_node('first_time_range_start', null, null, $db->record['first_time_range_start']);
+			$xml_sub_child[] = new xml_node('first_time_range_end', null, null, $db->record['first_time_range_end']);
+			$xml_sub_child[] = new xml_node('second_date_id', null, null, $db->record['second_date_id']);
+			$xml_sub_child[] = new xml_node('second_campus_location', null, null, $db->record['second_campus_location']);
+			$xml_sub_child[] = new xml_node('second_allotted_minutes', null, null, $db->record['second_allotted_minutes']);
+			$xml_sub_child[] = new xml_node('second_preferred_time', null, null, $db->record['second_preferred_time']);
+			$xml_sub_child[] = new xml_node('second_time_range_start', null, null, $db->record['second_time_range_start']);
+			$xml_sub_child[] = new xml_node('second_time_range_end', null, null, $db->record['second_time_range_end']);
+			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>'1'), null, $db->record['instructions']);
+			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->record['notes']);
+			$xml_sub_child[] = new xml_node('finalDateTime', null, null, $db->record['finalDateTime']);
+			$xml_sub_child[] = new xml_node('finalSessionLength', null, null, $db->record['finalSessionLength']);
+			$xml_sub_child[] = new xml_node('finalCampus', null, null, $db->record['finalCampus']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_orientation_classes'=>$db->Record['id_orientation_classes']
+									array(	'id_orientation_classes'=>$db->record['id_orientation_classes']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1064,29 +1064,29 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('calendarID',null, null, $db->Record['calendarID']);
-			$xml_sub_child[] = new xml_node('calendarType',null, null, $db->Record['calendarType']);
-			$xml_sub_child[] = new xml_node('username',null, null, $db->Record['username']);
-			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('location', array('BASE64'=>'1'), null, $db->Record['location']);
-			$xml_sub_child[] = new xml_node('startdate', null, null, $db->Record['startdate']);
-			$xml_sub_child[] = new xml_node('enddate', null, null, $db->Record['enddate']);
-			$xml_sub_child[] = new xml_node('lastmodified', null, null, $db->Record['lastmodified']);
-			$xml_sub_child[] = new xml_node('repeatType', null, null, $db->Record['repeatType']);
-			$xml_sub_child[] = new xml_node('repeatCount', null, null, $db->Record['repeatCount']);
-			$xml_sub_child[] = new xml_node('repeatData', null, null, $db->Record['repeatData']);
-			$xml_sub_child[] = new xml_node('repeatExclude', null, null, $db->Record['repeatExclude']);
-			$xml_sub_child[] = new xml_node('repeatUntil', null, null, $db->Record['repeatUntil']);
-			$xml_sub_child[] = new xml_node('id_item', null, null, $db->Record['id_item']);
-			$xml_sub_child[] = new xml_node('id_item_sub', null, null, $db->Record['id_item_sub']);
-			$xml_sub_child[] = new xml_node('f_allday', null, null, $db->Record['f_allday']);
-			$xml_sub_child[] = new xml_node('f_showwhenactive', null, null, $db->Record['f_showwhenactive']);
+			$xml_sub_child[] = new xml_node('calendarID',null, null, $db->record['calendarID']);
+			$xml_sub_child[] = new xml_node('calendarType',null, null, $db->record['calendarType']);
+			$xml_sub_child[] = new xml_node('username',null, null, $db->record['username']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('location', array('BASE64'=>'1'), null, $db->record['location']);
+			$xml_sub_child[] = new xml_node('startdate', null, null, $db->record['startdate']);
+			$xml_sub_child[] = new xml_node('enddate', null, null, $db->record['enddate']);
+			$xml_sub_child[] = new xml_node('lastmodified', null, null, $db->record['lastmodified']);
+			$xml_sub_child[] = new xml_node('repeatType', null, null, $db->record['repeatType']);
+			$xml_sub_child[] = new xml_node('repeatCount', null, null, $db->record['repeatCount']);
+			$xml_sub_child[] = new xml_node('repeatData', null, null, $db->record['repeatData']);
+			$xml_sub_child[] = new xml_node('repeatExclude', null, null, $db->record['repeatExclude']);
+			$xml_sub_child[] = new xml_node('repeatUntil', null, null, $db->record['repeatUntil']);
+			$xml_sub_child[] = new xml_node('id_item', null, null, $db->record['id_item']);
+			$xml_sub_child[] = new xml_node('id_item_sub', null, null, $db->record['id_item_sub']);
+			$xml_sub_child[] = new xml_node('f_allday', null, null, $db->record['f_allday']);
+			$xml_sub_child[] = new xml_node('f_showwhenactive', null, null, $db->record['f_showwhenactive']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'pkey'=>$db->Record['pkey']
+									array(	'pkey'=>$db->record['pkey']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1109,17 +1109,17 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('instructionMethods', array('BASE64'=>'1'), null, $db->Record['instructionMethods']);
-			$xml_sub_child[] = new xml_node('gradingScale', array('BASE64'=>'1'), null, $db->Record['gradingScale']);
-			$xml_sub_child[] = new xml_node('courseReqs', array('BASE64'=>'1'), null, $db->Record['courseReqs']);
-			$xml_sub_child[] = new xml_node('courseObjectives',  array('BASE64'=>'1'), null, $db->Record['courseObjectives']);
-			$xml_sub_child[] = new xml_node('emailPolicy', array('BASE64'=>'1'), null, $db->Record['emailPolicy']);
-			$xml_sub_child[] = new xml_node('other', array('BASE64'=>'1'), null, $db->Record['other']);
+			$xml_sub_child[] = new xml_node('instructionMethods', array('BASE64'=>'1'), null, $db->record['instructionMethods']);
+			$xml_sub_child[] = new xml_node('gradingScale', array('BASE64'=>'1'), null, $db->record['gradingScale']);
+			$xml_sub_child[] = new xml_node('courseReqs', array('BASE64'=>'1'), null, $db->record['courseReqs']);
+			$xml_sub_child[] = new xml_node('courseObjectives',  array('BASE64'=>'1'), null, $db->record['courseObjectives']);
+			$xml_sub_child[] = new xml_node('emailPolicy', array('BASE64'=>'1'), null, $db->record['emailPolicy']);
+			$xml_sub_child[] = new xml_node('other', array('BASE64'=>'1'), null, $db->record['other']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_syllabuses'=>$db->Record['id_class_syllabuses']
+									array(	'id_class_syllabuses'=>$db->record['id_class_syllabuses']
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1142,16 +1142,16 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('dt_created',null, null, $db->Record['dt_created']);
-			$xml_sub_child[] = new xml_node('dt_display',null, null, $db->Record['dt_display']);
-			$xml_sub_child[] = new xml_node('tx_title', array('BASE64'=>'1'), null, $db->Record['tx_title']);
-			$xml_sub_child[] = new xml_node('tx_description', array('BASE64'=>'1'), null, $db->Record['tx_description']);
-			$xml_sub_child[] = new xml_node('id_faculty_createdby', null, null, $db->Record['id_faculty_createdby']);
+			$xml_sub_child[] = new xml_node('dt_created',null, null, $db->record['dt_created']);
+			$xml_sub_child[] = new xml_node('dt_display',null, null, $db->record['dt_display']);
+			$xml_sub_child[] = new xml_node('tx_title', array('BASE64'=>'1'), null, $db->record['tx_title']);
+			$xml_sub_child[] = new xml_node('tx_description', array('BASE64'=>'1'), null, $db->record['tx_description']);
+			$xml_sub_child[] = new xml_node('id_faculty_createdby', null, null, $db->record['id_faculty_createdby']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_announcements'=>$db->Record['id_class_announcements'],
+									array(	'id_class_announcements'=>$db->record['id_class_announcements'],
 									
 									 	 ), $xml_sub_child
 									);
@@ -1175,15 +1175,15 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('category', array('BASE64'=>'1'), null, $db->Record['category']);
-			$xml_sub_child[] = new xml_node('answer', array('BASE64'=>'1'), null, $db->Record['answer']);
-			$xml_sub_child[] = new xml_node('question', array('BASE64'=>'1'), null, $db->Record['question']);
-			$xml_sub_child[] = new xml_node('clicks', null, null, $db->Record['clicks']);
+			$xml_sub_child[] = new xml_node('category', array('BASE64'=>'1'), null, $db->record['category']);
+			$xml_sub_child[] = new xml_node('answer', array('BASE64'=>'1'), null, $db->record['answer']);
+			$xml_sub_child[] = new xml_node('question', array('BASE64'=>'1'), null, $db->record['question']);
+			$xml_sub_child[] = new xml_node('clicks', null, null, $db->record['clicks']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_faqs'=>$db->Record['id_class_faqs']											
+									array(	'id_class_faqs'=>$db->record['id_class_faqs']											
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1207,21 +1207,21 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{
 			$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('a_upper', null, null, $db->Record['a_upper']);
-			$xml_sub_child[] = new xml_node('a_lower', null, null, $db->Record['a_lower']);
-			$xml_sub_child[] = new xml_node('b_lower', null, null, $db->Record['b_lower']);
-			$xml_sub_child[] = new xml_node('c_lower', null, null, $db->Record['c_lower']);
-			$xml_sub_child[] = new xml_node('d_lower', null, null, $db->Record['d_lower']);
-			$xml_sub_child[] = new xml_node('calculation_type', null, null, $db->Record['calculation_type']);
-			$xml_sub_child[] = new xml_node('color_missing_grade', array('BASE64'=>'1'), null, $db->Record['color_missing_grade']);
-			$xml_sub_child[] = new xml_node('roundScoresUp', null, null, $db->Record['roundScoresUp']);
-			$xml_sub_child[] = new xml_node('total_points', null, null, $db->Record['total_points']);
+			$xml_sub_child[] = new xml_node('a_upper', null, null, $db->record['a_upper']);
+			$xml_sub_child[] = new xml_node('a_lower', null, null, $db->record['a_lower']);
+			$xml_sub_child[] = new xml_node('b_lower', null, null, $db->record['b_lower']);
+			$xml_sub_child[] = new xml_node('c_lower', null, null, $db->record['c_lower']);
+			$xml_sub_child[] = new xml_node('d_lower', null, null, $db->record['d_lower']);
+			$xml_sub_child[] = new xml_node('calculation_type', null, null, $db->record['calculation_type']);
+			$xml_sub_child[] = new xml_node('color_missing_grade', array('BASE64'=>'1'), null, $db->record['color_missing_grade']);
+			$xml_sub_child[] = new xml_node('roundScoresUp', null, null, $db->record['roundScoresUp']);
+			$xml_sub_child[] = new xml_node('total_points', null, null, $db->record['total_points']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_gradebook'=>$db->Record['id_class_gradebook']											
+									array(	'id_class_gradebook'=>$db->record['id_class_gradebook']											
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1244,14 +1244,14 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{
 			$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('weight', null, null, $db->Record['weight']);
-			$xml_sub_child[] = new xml_node('label', array('BASE64'=>'1'), null, $db->Record['label']);
+			$xml_sub_child[] = new xml_node('weight', null, null, $db->record['weight']);
+			$xml_sub_child[] = new xml_node('label', array('BASE64'=>'1'), null, $db->record['label']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_gradebook_categories'=>$db->Record['id_class_gradebook_categories']											
+									array(	'id_class_gradebook_categories'=>$db->record['id_class_gradebook_categories']											
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1274,26 +1274,26 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{
 			$xml_sub_child = null;
 
-			$xml_sub_child[] = new xml_node('id_class_gradebook_categories', null, null, $db->Record['id_class_gradebook_categories']);
-			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('gradebook_code', array('BASE64'=>'1'), null, $db->Record['gradebook_code']);
+			$xml_sub_child[] = new xml_node('id_class_gradebook_categories', null, null, $db->record['id_class_gradebook_categories']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('gradebook_code', array('BASE64'=>'1'), null, $db->record['gradebook_code']);
 			
-			$xml_sub_child[] = new xml_node('total_points', null, null, $db->Record['total_points']);
-			$xml_sub_child[] = new xml_node('publish_flag', null, null, $db->Record['publish_flag']);
-			$xml_sub_child[] = new xml_node('date_due', null, null, $db->Record['date_due']);
+			$xml_sub_child[] = new xml_node('total_points', null, null, $db->record['total_points']);
+			$xml_sub_child[] = new xml_node('publish_flag', null, null, $db->record['publish_flag']);
+			$xml_sub_child[] = new xml_node('date_due', null, null, $db->record['date_due']);
 			
-			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->Record['notes']);
+			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->record['notes']);
 			
 			// PAY ATTENTION TO THIS
-			$xml_sub_child[] = new xml_node('assessment_id', null, null, $db->Record['assessment_id']);
-			$xml_sub_child[] = new xml_node('assignment_id', null, null, $db->Record['assignment_id']);
+			$xml_sub_child[] = new xml_node('assessment_id', null, null, $db->record['assessment_id']);
+			$xml_sub_child[] = new xml_node('assignment_id', null, null, $db->record['assignment_id']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_gradebook_entries'=>$db->Record['id_class_gradebook_entries']											
+									array(	'id_class_gradebook_entries'=>$db->record['id_class_gradebook_entries']											
 									 	 ), $xml_sub_child
 									);
 		}
@@ -1317,20 +1317,20 @@ class dataexchange extends FacultyService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{
 			$xml_sub_child = null;
-			$xml_sub_child[] = new xml_node('id_class_gradebook_entries', null, null, $db->Record['id_class_gradebook_entries']);
-			$xml_sub_child[] = new xml_node('username', array('BASE64'=>'1'), null, $db->Record['username']);
-			$xml_sub_child[] = new xml_node('score', null, null, (($db->Record['score'] == null) ? 'NULL' : $db->Record['score']));
+			$xml_sub_child[] = new xml_node('id_class_gradebook_entries', null, null, $db->record['id_class_gradebook_entries']);
+			$xml_sub_child[] = new xml_node('username', array('BASE64'=>'1'), null, $db->record['username']);
+			$xml_sub_child[] = new xml_node('score', null, null, (($db->record['score'] == null) ? 'NULL' : $db->record['score']));
 			
-			$xml_sub_child[] = new xml_node('comments', array('BASE64'=>'1'), null, $db->Record['comments']);
+			$xml_sub_child[] = new xml_node('comments', array('BASE64'=>'1'), null, $db->record['comments']);
 			
-			$xml_sub_child[] = new xml_node('date_created', null, null, $db->Record['date_created']);
-			$xml_sub_child[] = new xml_node('date_modified', null, null, $db->Record['date_modified']);
+			$xml_sub_child[] = new xml_node('date_created', null, null, $db->record['date_created']);
+			$xml_sub_child[] = new xml_node('date_modified', null, null, $db->record['date_modified']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_gradebook_val'=>$db->Record['id_class_gradebook_val']											
+									array(	'id_class_gradebook_val'=>$db->record['id_class_gradebook_val']											
 									 	 ), $xml_sub_child
 									);
 		}

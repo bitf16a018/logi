@@ -334,9 +334,9 @@ class LessonNew extends FacultyService {
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_assignments']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_assignments']][] = $db->Record['id_class_lessons'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_assignments']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_assignments']][] = $db->record['id_class_lessons'];
 		}
 
 
@@ -399,9 +399,9 @@ class LessonNew extends FacultyService {
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['assessment_id']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['assessment_id']][] = $db->Record['lesson_id'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['assessment_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['assessment_id']][] = $db->record['lesson_id'];
 		}
 
 		$columnModel = &$table->getColumnModel();
@@ -463,9 +463,9 @@ class LessonNew extends FacultyService {
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_links']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_links']][] = $db->Record['id_class_lessons'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_links']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_links']][] = $db->record['id_class_lessons'];
 		}
 
 		$columnModel = &$table->getColumnModel();
@@ -526,9 +526,9 @@ class LessonNew extends FacultyService {
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_objectives']][] = $db->Record['id_class_lesson'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_objectives']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_objectives']][] = $db->record['id_class_lesson'];
 		}
 
 		$columnModel = &$table->getColumnModel();
@@ -574,8 +574,8 @@ class LessonNew extends FacultyService {
 			FROM class_objectives AS A
 			WHERE A.id_classes = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['id_class_objectives'];
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_objectives'];
 		}
 
 		//clean input array to match allowable items
@@ -621,8 +621,8 @@ class LessonNew extends FacultyService {
 			FROM assessment AS A
 			WHERE A.class_id = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['assessment_id'];
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['assessment_id'];
 		}
 
 		//clean input array to match allowable items
@@ -660,8 +660,8 @@ class LessonNew extends FacultyService {
 			FROM class_links AS A
 			WHERE A.id_classes = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['id_class_links'];
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_links'];
 		}
 
 		//clean input array to match allowable items
@@ -698,8 +698,8 @@ class LessonNew extends FacultyService {
 			FROM class_assignments AS A
 			WHERE A.id_classes = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['id_class_assignments'];
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_assignments'];
 		}
 
 		//clean input array to match allowable items
@@ -766,7 +766,7 @@ class LessonNew extends FacultyService {
 			left join classes as c on l.id_classes=c.id_classes
 			where l.id_classes='{$u->activeClassTaught->id_classes}'
 			and l.id_class_lessons='{$lessonid}'");
-		if (!$db->Record['cnt'] || intval($lessonid) == 0 ) {
+		if (!$db->record['cnt'] || intval($lessonid) == 0 ) {
 			$this->presentor = 'errorMessage';
 			$t['message'] = "You don't have permission to modify that lesson.";
 			return false;

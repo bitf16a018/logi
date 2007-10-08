@@ -148,9 +148,9 @@ if ($t['forum']) {
 		$db->query($sql);
 #die(microtime());
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	
-			$a_perms[$db->Record['lc_forum_perm_action']][$db->Record['lc_forum_perm_id']] = $db->Record['lc_forum_perm_group'];
+			$a_perms[$db->record['lc_forum_perm_action']][$db->record['lc_forum_perm_id']] = $db->record['lc_forum_perm_group'];
 		}
 	return $a_perms;
 	}
@@ -167,8 +167,8 @@ if ($t['forum']) {
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{	$a_group[$db->Record['gid']] = $db->Record['groupName'];
+		while ($db->nextRecord())
+		{	$a_group[$db->record['gid']] = $db->record['groupName'];
 		}
 		
 	return $a_group;		

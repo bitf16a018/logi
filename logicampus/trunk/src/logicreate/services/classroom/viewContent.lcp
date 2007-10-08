@@ -67,7 +67,7 @@ return true;
 			AND A.daHasha=\''.$fhash.'\')
 			';
 			$db->queryOne($sql);
-			if ($db->Record == false)
+			if ($db->record == false)
 			{
 				//no permission to view this file
 				$this->presentor = 'errorMessage';
@@ -75,7 +75,7 @@ return true;
 				return;
 			}
 
-		$pkey = $db->Record['pkey'];			
+		$pkey = $db->record['pkey'];			
 		}
 		// END FHASH
 		
@@ -87,7 +87,7 @@ return true;
 		//failed for both teachers and students, pull the mime type and print an error
 		if ($x == null ) {
 			$db->queryOne('select mime from classdoclib_Files where pkey = '.$pkey);
-			list ($mimeFamily,$mimeType) = explode('/',$db->Record['mime']);
+			list ($mimeFamily,$mimeType) = explode('/',$db->record['mime']);
 			if ($mimeFamily == 'image') {
 				header("Cache-control: public");
 				header("Content-type: ".$file->mime);

@@ -349,9 +349,9 @@ class SeminarClassesDates extends SeminarClassesDatesBase {
 		$sql = "SELECT email FROM lcUsers where groups LIKE
 		'%|semmgr|%'";
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$emailTo .= $db->Record['email'].',';	
+			$emailTo .= $db->record['email'].',';	
 		}
 		
 		$emailTo = substr($emailTo, 0, -1);

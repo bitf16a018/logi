@@ -113,8 +113,8 @@ class edit extends TabbedService {
 	 */
 	function addSharingRun( &$db, &$u, &$arg, &$t) {
 		$db->query("select * from lcGroups");
-		while ( $db->next_record() ) {
-			$gs[$db->Record['gid']] = $db->Record['groupName'];
+		while ( $db->nextRecord() ) {
+			$gs[$db->record['gid']] = $db->record['groupName'];
 		}
 		$t['groupOpts'] = makeOptions($gs,$t['saved']['groups']);
 		reset($gs);
