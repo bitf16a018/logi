@@ -16,20 +16,20 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
 	<tr>
 		<td valign="top" class="row1">*Title</td>
-		<td valign="top" class=""><input type="text" id="title" name="title" value="" size="40" maxlength="50"></td>
+		<td valign="top" class=""><input type="text" id="title" name="title" value="<?= $t['lob']->repoObj->lobTitle;?>" size="40" maxlength="50"></td>
 	</tr>
 
 	<tr>
 		<td valign="top" class="row1" valign="top">*Instructions for students</td>
 		<td valign="top" class="">
-			<textarea name="instructions" cols="40" rows="5" id="instructions"></textarea>
+			<textarea name="instructions" cols="40" rows="5" id="instructions"><?= $t['lob']->repoObj->lobDescription;?></textarea>
 		</td>
 	</tr>
 
 	<tr>
 		<td valign="top" class="row1" valign="top">Notes (only for faculty)</td>
 		<td valign="top" class="">
-			<textarea name="notes" cols="40" rows="5" id="notes"></textarea>
+			<textarea name="notes" cols="40" rows="5" id="notes"><?= $t['lob']->repoObj->lobNotes;?></textarea>
 		</td>
 	</tr>
 

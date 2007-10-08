@@ -98,4 +98,10 @@
 <h4>Notes</h4>
 Enter notes about this object for other faculty members to see.
 <br/>
-<textarea rows="15" cols="80"></textarea>
+
+<form method="POST" action="<?=appurl('lobrepo/edit/event=notes/');?>">
+<textarea rows="15" cols="80" id="lob_notes" name="lob_notes"><?=$lob->repoObj->lobNotes;?></textarea>
+<br/>
+<input type="hidden" name="id" value="<?=$lob->getRepoId();?>"/>
+<input type="submit" id="sbmt_button2" name="sbmt_button2" value="Change the notes."/>
+</form>
