@@ -288,6 +288,7 @@ class Lc_Lob {
 				break;
 
 			case 'activity':
+			case 'interaction':
 				$results  = $repo->getLobActivitysByLobRepoEntryId();
 				if (! count($results) ) {
 					trigger_error('learning object missing internal data.');
