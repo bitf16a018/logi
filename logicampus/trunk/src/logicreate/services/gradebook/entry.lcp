@@ -17,7 +17,8 @@ include(LIB_PATH.'lc_lob.php');
 class entry extends FacultyService {
 
 	var $presentor='htmlPresentation';
-	var $permissionError = '<h3>Permission Error</h3>
+	var $permissionErrorTitle = '<h3>Permission Error</h3>';
+	var $permissionError      = '
 							Either the entry you were trying to access is not 
 							a valid entry or you do not have access to edit that
 							grade book 
@@ -147,12 +148,14 @@ class entry extends FacultyService {
 
 		}
 
-		function editRun(&$db, &$u, &$lc, &$t)
-		{
-
+		/**
+		 * Show a form for editing.
+		 * 
+		 * Load all activities and tests from the chosen class.
+		 */
+		function editRun(&$db, &$u, &$lc, &$t) {
 			$this->sectionTitle = 'Edit Entry';
 			$lc->templateName='entry_add';
-//auto-comment			$lc->templateStyle = 'private';
 			$gbEntry = ClassGradebookEntries::load( array(
 				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
 				'id_classes' => $u->activeClassTaught->id_classes
@@ -166,11 +169,17 @@ class entry extends FacultyService {
 				# to this entry for some reason
 				# let's load up the error page.
 				$lc->templateName = 'entry_error';
-				$t['msg'] = $this->permissionError;
+				$t['error'] = $this->permissionError;
+				$t['errorTitle'] = $this->permissionErrorTitle;
 				return;
 			}
 		}
 
+		/**
+		 * Save changes to the entry.
+		 *
+		 * Allow for redirects to various other parts of the system.
+		 */
 		function updateRun(&$db, &$u, &$lc, &$t)
 		{
 			# Error check to make sure
