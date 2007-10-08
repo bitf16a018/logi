@@ -9,6 +9,8 @@ include_once(LIB_PATH.'PBDO/LobContent.php');
 include_once(LIB_PATH.'PBDO/LobActivity.php');
 include_once(LIB_PATH.'PBDO/LobTest.php');
 
+include_once(LIB_PATH.'lc_lob.php');
+
 /**
  * Learning Object Repository
  */
@@ -186,13 +188,13 @@ echo "skipping node .. ".$node->tagName."...<br/>\n";
 		if (is_object($node) ){
 			$children = $node->childNodes;
 			$lob->set('lobFilename', trim($children->item(0)->nodeValue) );
-			$lob->set('lobUrltitle', urlencode(trim($children->item(0)->nodeValue)) );
+
+			$urlTitle = Lc_Lob_Util::createLinkText(trim($children->item(0)->nodeValue));
+			$lob->set('lobUrltitle', $urlTitle );
 			$lob->set('lobBinary', file_get_contents($this->tempdir.'/content/'.trim($children->item(0)->nodeValue)) );
 		} else {
-			$urltitle = $lob->get('lobTitle');
-			$urltitle = str_replace(' ', '_', $urltitle);
-			$urltitle = urlencode($urltitle);
-			$lob->set('lobUrltitle', $urltitle );
+			$urlTitle = Lc_Lob_Util::createLinkText(trim( $lob->get('lobTitle')) );
+			$lob->set('lobUrltitle', $urlTitle );
 		}
 
 		$result = $n->getElementsByTagname('description');
