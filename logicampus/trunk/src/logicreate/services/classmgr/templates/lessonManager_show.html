@@ -33,10 +33,14 @@ echo '<div class="error_message">Some errors occurred when processing your reque
 	</tr>
 </table>
 
+
+<form name="seq_form" id="seq_form" action="<?=appurl('classmgr');?>/lessonSequence/event=save/id=<?=$t['lessonId'];?>" method="POST">
 <?php
 echo $t['table']->toHtml();
 ?>
 
+<input type="submit" name="save_btn" id="save_btn" value="Save Changes"/>
+</form>
 
 	<div style="float:right;padding-top:.5em;width:48%;align:right;">
 		<fieldset>

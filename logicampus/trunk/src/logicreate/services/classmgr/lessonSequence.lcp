@@ -280,7 +280,7 @@ class LessonSequence extends FacultyService {
 		$u->addSessionMessage('Dates have been saved.');
 
 		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('classmgr/lessonSequence/id='.$lesson_id);
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
 
 	}
 
@@ -293,7 +293,7 @@ class LessonSequence extends FacultyService {
 			left join classes as c on l.id_classes=c.id_classes
 			where l.id_classes='{$u->activeClassTaught->id_classes}'
 			and l.id_class_lessons='{$lessonid}'");
-		if (!$db->Record['cnt'] || intval($lessonid) == 0 ) {
+		if (!$db->record['cnt'] || intval($lessonid) == 0 ) {
 			$this->presentor = 'errorMessage';
 			$t['message'] = "You don't have permission to modify that lesson.";
 			return false;
