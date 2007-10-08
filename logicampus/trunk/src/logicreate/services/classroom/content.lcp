@@ -116,11 +116,10 @@ class content extends StudentService {
 		//cannot find content in the sequence, might be a linked image
 		// try to find it just linked up to this class
 		if ($curIdx == -1) {
-			$db->query("SELECT * FROM lob_content as A 
-				LEFT JOIN lob_class_repo AS B on A.lob_content_id = B.lob_class_repo_id
+			$db->query("SELECT * FROM lob_class_content as A 
+				LEFT JOIN lob_class_repo AS B on A.lob_class_repo_id = B.lob_class_repo_id
 				WHERE B.lob_urltitle = '".$filename."'
 				AND B.class_id = ".$classId);
-
 		} else {
 			$db->query("SELECT A.*, B.lob_mime, B.lob_sub_type 
 				FROM lob_class_content as A 
