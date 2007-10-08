@@ -42,8 +42,8 @@ class dup extends FacultyService {
 
 		$lc->templateName = 'dup_main';
 		$db->query("select * from semesters");
-		while($db->next_record()) { 
-			$s[$db->Record[0]] = $db->Record[2]." - ".$db->Record[1];
+		while($db->nextRecord()) { 
+			$s[$db->record[0]] = $db->record[2]." - ".$db->record[1];
 		}
 		$t['sem'] = makeOptions($s);
 		$sql = 'select l.id_classes, l.courseFamilyNumber, o.courseName, p.firstname, p.lastname
@@ -69,7 +69,7 @@ class dup extends FacultyService {
 			return;
 
 		}
-		$t['fromsemester'] = $db->Record[2]." - ".$db->Record[1];
+		$t['fromsemester'] = $db->record[2]." - ".$db->record[1];
 
 		$db->queryOne("select * from semesters where id_semesters=$to");
 		if ($e = ErrorStack::pullError('db') ) {
@@ -79,7 +79,7 @@ class dup extends FacultyService {
 			return;
 
 		}
-		$t['tosemester'] = $db->Record[2]." - ".$db->Record[1];
+		$t['tosemester'] = $db->record[2]." - ".$db->record[1];
 
 
 		if (strpos($button,"all")>0) { 
@@ -89,38 +89,38 @@ class dup extends FacultyService {
 		}
 		$sql ="select c.*, d.* from classes c, courses d where c.id_courses=d.id_courses and (c.id_semesters=$from) ORDER BY d.courseFamily, d.courseNumber";
 		$db->query($sql);
-		while($db->next_record()){
-			$num = $db->Record['courseFamilyNumber'];
-			$name = $db->Record['courseName'];
-			$first = $db->Record['firstname'];
-			$last= $db->Record['lastname'];
-			$id = $db->Record['facultyId'];
+		while($db->nextRecord()){
+			$num = $db->record['courseFamilyNumber'];
+			$name = $db->record['courseName'];
+			$first = $db->record['firstname'];
+			$last= $db->record['lastname'];
+			$id = $db->record['facultyId'];
 			$id = ucwords(str_replace("."," ",$id));
 			$x = "$num - $name - $id";
-			$arrayfrom[$db->Record['id_classes']] = $x;
+			$arrayfrom[$db->record['id_classes']] = $x;
 		}
 		$sql ="select c.*, d.* from classes c, courses d where c.id_courses=d.id_courses and (c.id_semesters=$to) ORDER BY d.courseFamily, d.courseNumber";
 		$db->query($sql);
 		if (strpos($button,"single")>0) { // copying a single to potential multiples - no restriction
-			while($db->next_record()){
-				$num = $db->Record['courseFamilyNumber'];
-				$name = $db->Record['courseName'];
-				$id = $db->Record['facultyId'];
+			while($db->nextRecord()){
+				$num = $db->record['courseFamilyNumber'];
+				$name = $db->record['courseName'];
+				$id = $db->record['facultyId'];
 				$id = ucwords(str_replace("."," ",$id));
-				$first = $db->Record['firstname'];
-				$last= $db->Record['lastname'];
+				$first = $db->record['firstname'];
+				$last= $db->record['lastname'];
 				$x = "$num - $name - $id";
-				$arrayto[$db->Record['id_classes']] = $x;
+				$arrayto[$db->record['id_classes']] = $x;
 			}
 		} else { // copying 'all' so we should only show classes that are the same both times
-			while($db->next_record()){
-				if ($arrayfrom[$db->Record[1]]!='') {
-					$num = $db->Record['courseFamilyNumber'];
-					$name = $db->Record['courseName'];
-					$first = $db->Record['firstname'];
-					$last= $db->Record['lastname'];
-					$x = $db->Record['id_classes']." "."$num - $name - $first $last";
-					$arrayto[$db->Record['id_classes']] = $x;
+			while($db->nextRecord()){
+				if ($arrayfrom[$db->record[1]]!='') {
+					$num = $db->record['courseFamilyNumber'];
+					$name = $db->record['courseName'];
+					$first = $db->record['firstname'];
+					$last= $db->record['lastname'];
+					$x = $db->record['id_classes']." "."$num - $name - $first $last";
+					$arrayto[$db->record['id_classes']] = $x;
 				}
 			}
 		} // end else

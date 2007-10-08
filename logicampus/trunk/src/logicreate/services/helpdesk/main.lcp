@@ -48,8 +48,8 @@ class helpdesk extends RegAuth {
 		// get a list of categories
 		$t['categories'][0] = '<i>uncategorized</i>';
 		$db->query("select * from helpdesk_categories");
-		while($db->next_record()) {
-			$t['categories'][$db->Record['helpdesk_category_id']] = $db->Record['helpdesk_category_label'];
+		while($db->nextRecord()) {
+			$t['categories'][$db->record['helpdesk_category_id']] = $db->record['helpdesk_category_label'];
 		}
 				
 		// STAFF
@@ -81,8 +81,8 @@ class helpdesk extends RegAuth {
 		ORDER BY a.status DESC";
 		
 		$db->query($sql);
-		while($db->next_record()) 
-		{	$t['open'][] =$db->Record;
+		while($db->nextRecord()) 
+		{	$t['open'][] =$db->record;
 		}
 		
 		$sql = "
@@ -101,8 +101,8 @@ class helpdesk extends RegAuth {
 		ORDER BY a.status DESC";
 		
 		$db->query($sql);
-		while($db->next_record()) 
-		{	$t['closed'][] =$db->Record;
+		while($db->nextRecord()) 
+		{	$t['closed'][] =$db->record;
 		}
 		
 		$arg->templateName = 'main_view';
@@ -125,8 +125,8 @@ class helpdesk extends RegAuth {
 		
 		// get a list of statuses
 		$db->query("select * from helpdesk_status");
-		while($db->next_record()) {
-			$t['status'][$db->Record[0]] = $db->Record['helpdesk_status_label'];
+		while($db->nextRecord()) {
+			$t['status'][$db->record[0]] = $db->record['helpdesk_status_label'];
 		}		
 
 		$arg->templateName = 'main_hdadmin';
@@ -224,14 +224,14 @@ class helpdesk extends RegAuth {
 		$this->inactivelinks[] = 'Modify status and category codes';
 		
 		$db->query("select * from helpdesk_status");
-		while($db->next_record()) {
-			$t['status'][$db->Record[0]] = $db->Record['helpdesk_status_label'];
+		while($db->nextRecord()) {
+			$t['status'][$db->record[0]] = $db->record['helpdesk_status_label'];
 		}	
 		
 		// get a list of categories
 		$db->query("select * from helpdesk_categories");
-		while($db->next_record()) {
-			$t['categories'][$db->Record[0]] = $db->Record['helpdesk_category_label'];
+		while($db->nextRecord()) {
+			$t['categories'][$db->record[0]] = $db->record['helpdesk_category_label'];
 		}
 		
 		$arg->templateName = "main_hdadmin2";

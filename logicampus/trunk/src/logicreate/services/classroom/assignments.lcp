@@ -215,7 +215,7 @@ class assignments extends StudentService {
 					AND a.id_student=\''. $u->username.'\'';
 					
 					$db2->queryOne($sql);
-					$t['assigntext'] = $db2->Record['assign_text'];
+					$t['assigntext'] = $db2->record['assign_text'];
 					$t['f_showform_text'] = true; 
 				
 					break;
@@ -261,9 +261,9 @@ class assignments extends StudentService {
 		$db3 = DB::getHandle();
 		$db3->query($sql);
 
-		while ($db3->next_record()) 
+		while ($db3->nextRecord()) 
 		{
-			$t['attachments'][] = $db3->Record;	
+			$t['attachments'][] = $db3->record;	
 		}
 */
 		
@@ -371,12 +371,12 @@ class assignments extends StudentService {
 						
 						// the only problem i seem to have with below is 
 						// an update could potentially change things
-						if ((int)$db->Record['id_class_assignments_turnin'] > 0)
+						if ((int)$db->record['id_class_assignments_turnin'] > 0)
 						{
 							// we have an assignment, lets update
 							$sql_head = 'UPDATE';
 							$sql_footer = 'WHERE id_class_assignments='.$lc->getvars['id']. '
-							AND id_Class_assignments_turnin='. $db->Record['id_class_assignments_turnin'];
+							AND id_Class_assignments_turnin='. $db->record['id_class_assignments_turnin'];
 							
 						} else
 						{

@@ -113,7 +113,7 @@ class search extends BasicAuth {
 		$query .= "order by score DESC LIMIT 1";
 		
 		$db->queryOne($query);
-		$top_score = number_format($db->Record['score'], 2);
+		$top_score = number_format($db->record['score'], 2);
         
 		$query = " SELECT title,link,type, searchdata, MATCH searchdata AGAINST ";
 		$query .=" ('$term') AS score ";
@@ -124,10 +124,10 @@ class search extends BasicAuth {
 		$t['showing'] =0;
 		
 		$db->query($query);
-		while ($db->next_record() ){
-			$vt = number_format($db->Record['score'],2);
-			$db->Record['score'] = ceil((($vt*100)/$top_score)). '%'; //
-		    $t['results'][] = $db->Record;
+		while ($db->nextRecord() ){
+			$vt = number_format($db->record['score'],2);
+			$db->record['score'] = ceil((($vt*100)/$top_score)). '%'; //
+		    $t['results'][] = $db->record;
 			$t['showing']++;
 		}
 		

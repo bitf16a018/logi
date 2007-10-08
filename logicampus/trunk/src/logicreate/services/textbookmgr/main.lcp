@@ -170,9 +170,9 @@ class textbookmgr extends BasicAuth {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+		$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].')';
 
-		$t['facultyId'] = $db->Record['facultyId'];			
+		$t['facultyId'] = $db->record['facultyId'];			
 
 	}
 
@@ -189,9 +189,9 @@ class textbookmgr extends BasicAuth {
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
 			$this->sectionTitle = 'Adding Class Material ';
-			$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+			$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].')';
 
-			$t['facultyId'] = $db->Record['facultyId'];		
+			$t['facultyId'] = $db->record['facultyId'];		
 		} else {
 			$t['message'] = '<h3>Error</h3>Only text book admins or adminstrators can add books to the system.';
 			$lc->templateName = 'main_error';
@@ -258,20 +258,20 @@ class textbookmgr extends BasicAuth {
 		
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		if (is_array($db->Record))
+		if (is_array($db->record))
 		{
 			$sql = '
 			INSERT INTO textbook_estimates_data
 			SET
 			id_textbook_classes='.$id_textbook_classes.',
 			textbook_estimates_key='.$lc->postvars['estimationlist'].',
-			instructor=\''.$db->Record['facultyId'].'\',
+			instructor=\''.$db->record['facultyId'].'\',
 			bundled=\''.(int)$lc->postvars['bundled'].'\',
 			isbn=\''.$lc->postvars['isbn'].'\',
 			edition=\''.$lc->postvars['edition'].'\',
 			title=\''.addslashes($lc->postvars['title']).'\',
-			courseFamily=\''.$db->Record['courseFamily'].'\',
-			courseNumber=\''.$db->Record['courseNumber'].'\',
+			courseFamily=\''.$db->record['courseFamily'].'\',
+			courseNumber=\''.$db->record['courseNumber'].'\',
 			author=\''.addslashes($lc->postvars['author']).'\',
 			note=\''.addslashes($lc->postvars['note']).'\',
 			type=\''.$lc->postvars['type'].'\'
@@ -299,15 +299,15 @@ class textbookmgr extends BasicAuth {
 			WHERE A.id_classes='.$book->idClasses. ' LIMIT 1';
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$semester_label = $db->Record['semesterLabel'];
+			$semester_label = $db->record['semesterLabel'];
 			
 			$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$book->idClasses."'";
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
 			include_once(SERVICE_PATH."pm/privmess.php");
 			$mess = new privMess();
-			$mess->subject = $semester_label. ': Textbook status changed to '.getStatus($lc->postvars['status']).' on class '.$db->Record['courseFamily'].$db->Record['courseNumber'];
-			$mess->message = $semester_label.': '.$u->profile->get('firstname').' '.$u->profile->get('lastname'). ' has reviewed your submission and the status of the material listed below has changed to "'.getStatus($lc->postvars['status']).'" in your '.$db->Record['courseName'].' - '.$db->Record['courseFamily'].$db->Record['courseNumber'];
+			$mess->subject = $semester_label. ': Textbook status changed to '.getStatus($lc->postvars['status']).' on class '.$db->record['courseFamily'].$db->record['courseNumber'];
+			$mess->message = $semester_label.': '.$u->profile->get('firstname').' '.$u->profile->get('lastname'). ' has reviewed your submission and the status of the material listed below has changed to "'.getStatus($lc->postvars['status']).'" in your '.$db->record['courseName'].' - '.$db->record['courseFamily'].$db->record['courseNumber'];
 			$mess->message .= "\n\nMaterial:\n".$book->title. ' - '. $book->author;
 			
 			// don't tack on this retarded statement if nothing exists.
@@ -319,7 +319,7 @@ class textbookmgr extends BasicAuth {
 	
 			$mess->messageFrom = $u->username;
 			
-			$mess->messageTo = $db->Record['facultyId'];
+			$mess->messageTo = $db->record['facultyId'];
 			$mess->add();
 			
 		}
@@ -354,7 +354,7 @@ class textbookmgr extends BasicAuth {
 		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id']."'";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+		$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].')';
 		$t['id_classes'] = $lc->getvars['id'];
 		if (in_array('tbadmin', $u->groups) || in_array('admin', $u->groups)) 
 		{

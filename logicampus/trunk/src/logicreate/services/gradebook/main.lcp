@@ -87,7 +87,7 @@ class gradebook extends FacultyOnlyService {
 		// get the semester name
 		$db->queryOne('select semesterTerm, semesterYear from semesters
 			where id_semesters='.$u->activeClassTaught->id_semesters);
-		$t['semester'] = $db->Record['semesterTerm'].' '.$db->Record['semesterYear'];
+		$t['semester'] = $db->record['semesterTerm'].' '.$db->record['semesterYear'];
 
 		// stupid hack to get a feedback message
 		if ($u->sessionvars['message']) {

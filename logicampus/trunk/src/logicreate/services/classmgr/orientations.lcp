@@ -394,9 +394,9 @@ Review Submission: ".APP_URL."seminarorientation/orientations/event=view/id_orie
 		$sql = "SELECT email FROM lcUsers where groups LIKE
 		'%|semmgr|%'";
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$emailTo .= $db->Record['email'].',';	
+			$emailTo .= $db->record['email'].',';	
 		}
 		$emailTo = substr($emailTo, 0, -1);
 		mail($emailTo, "Orientation Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");
@@ -418,8 +418,8 @@ Review Submission: ".APP_URL."seminarorientation/orientations/event=view/id_orie
 			$db->queryOne($sql);
 			
 			// making sure we have a friggin record..
-			if ($db->Record != false)
-			{	$return_date = date('F j Y', strtotime($db->Record['date'])).' '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$db->Record['time_end'])).'';
+			if ($db->record != false)
+			{	$return_date = date('F j Y', strtotime($db->record['date'])).' '.date('g:i A', strtotime('2003-02-03 '.$db->record['time_start'])).' - '.date('g:i A', strtotime('2003-02-03 '.$db->record['time_end'])).'';
 			}
 			
 		} 

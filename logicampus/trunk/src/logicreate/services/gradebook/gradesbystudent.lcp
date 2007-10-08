@@ -105,11 +105,11 @@ class gradesbystudent extends FacultyService {
 
 		//assume rank is one, push rank down for each student that has a higher score
 		$t['rank'] = 1;
-		while ($db->next_record() ) {
-			if ($lc->getvars['user'] == $db->Record['username']) {
-				$usersScore = $db->Record['score'];
+		while ($db->nextRecord() ) {
+			if ($lc->getvars['user'] == $db->record['username']) {
+				$usersScore = $db->record['score'];
 			}
-			$scores[$db->Record['username']] = $db->Record['score'];
+			$scores[$db->record['username']] = $db->record['score'];
 		}
 		foreach ($scores as $username => $score) {
 			if ($lc->getvars['user'] == $username) continue;

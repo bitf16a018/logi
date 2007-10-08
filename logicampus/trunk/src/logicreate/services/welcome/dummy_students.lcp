@@ -25,10 +25,10 @@ class dummy_students extends NoAuth {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
 
-		while ( $db->next_record() ) {
+		while ( $db->nextRecord() ) {
 			$sql = "insert into class_assignments_link
-				set id_class_assignments='{$db->Record['id_class_assignments']}',
-				id_class_lessons='{$db->Record['id_class_lessons']}'";
+				set id_class_assignments='{$db->record['id_class_assignments']}',
+				id_class_lessons='{$db->record['id_class_lessons']}'";
 			$db2->query($sql);
 		}
 	}

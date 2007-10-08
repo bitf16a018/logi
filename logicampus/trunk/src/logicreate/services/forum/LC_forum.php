@@ -27,7 +27,7 @@ class newForum {
 		$g = @implode("' or groups='",$groups);
 		$fid = $this->fid;
 		$db->queryOne("select count(fid) AS total from forumPerms where perm='$perm' and fid='$fid' and (groups='$g')");
-		$x = $db->Record['total'];
+		$x = $db->record['total'];
 		unset($db);
 		if ($x>0) { return true; } else { return false; }
 	}
@@ -39,7 +39,7 @@ class newForum {
 		$db = DB::getHandle();
 		$sql = "select * from forumPrefs where username = '$username' and pref_key = 'sendEmail' and pref_val = '".$this->fid."'";
 		$db->query($sql);
-		if ($db->next_record() ) {
+		if ($db->nextRecord() ) {
 			return true;
 		} else {
 			return false;
@@ -51,7 +51,7 @@ class newForum {
 		$db = DB::getHandle();
 		if (!$fid) { $fid = $this->fid; }
 		$db->queryOne("select * from forums where fid='$fid'");
-		$j = $db->Record;
+		$j = $db->record;
 		unset($db);
 		return $j;
 	}
@@ -65,14 +65,14 @@ class forummod extends PersistantObject {
 
 	function getmessage($db,$sql) {
 		$db->query($sql);
-		while ($db->next_record()) {
-			$message = $db->Record["message"];
-			$body = $db->Record["body"];
-			$pkey = $db->Record["pkey"];
-			$timedate = date("m/d/Y h:i:s A",$db->Record["stamptime"]);
-			$parent = $db->Record["parent"];
-			$fid = $db->Record["fid"];
-			$username = $db->Record["username"];
+		while ($db->nextRecord()) {
+			$message = $db->record["message"];
+			$body = $db->record["body"];
+			$pkey = $db->record["pkey"];
+			$timedate = date("m/d/Y h:i:s A",$db->record["stamptime"]);
+			$parent = $db->record["parent"];
+			$fid = $db->record["fid"];
+			$username = $db->record["username"];
 			if (!$username) { $username="Anonymous"; }
 			$messageshow .= "<h2>$message</h2>\n";
 			$messageshow .= "Posted on $timedate by $username<br>\n";
@@ -89,8 +89,8 @@ class forummod extends PersistantObject {
 		if (trim($group) != "") { $where = " where $group"; }
 		$sql = "select forumname,fid,forumdesc from forums $where";
 		$db->query($sql);
-		while ($db->next_record()) {
-			extract($db->Record);
+		while ($db->nextRecord()) {
+			extract($db->record);
 			$this->forumList["forumid"][] = $fid;
 			$this->forumList["forumname"][] = $forumname;
 			$this->forumList["forumdesc"][] = $forumdesc;
@@ -115,19 +115,19 @@ class forummod extends PersistantObject {
 $fid = $this->fid;
 		$sql = "select * from forums where fid = '$fid'";
 		$db->query($sql);
-		while($db->next_record()) {
+		while($db->nextRecord()) {
 			$sql = "select count(pkey) AS total from forumPosts where fid='$fid' and status<>'y'";
 			$db2->query($sql);
-			$db2->next_record();
-			$count = intval($db2->Record['total']);
+			$db2->nextRecord();
+			$count = intval($db2->record['total']);
 			$this->off = $count;
-			$this->forumname = $db->Record["forumname"];
-			$this->forumdesc = $db->Record["forumdesc"];
-			$this->forumemail = $db->Record["email"];
-			$this->uploadmaxk = $db->Record["uploadmaxk"];
-			$this->uploadcount = $db->Record["uploadcount"];
-			$this->defaultstatus = $db->Record["defaultstatus"];
-			$this->groups = explode("|",$db->Record["groups"]);
+			$this->forumname = $db->record["forumname"];
+			$this->forumdesc = $db->record["forumdesc"];
+			$this->forumemail = $db->record["email"];
+			$this->uploadmaxk = $db->record["uploadmaxk"];
+			$this->uploadcount = $db->record["uploadcount"];
+			$this->defaultstatus = $db->record["defaultstatus"];
+			$this->groups = explode("|",$db->record["groups"]);
 		}
 	}
 
@@ -135,8 +135,8 @@ $fid = $this->fid;
 		$db = DB::getHandle();
 		$sql = "select count(fid) AS total from forums where fid='".$this->fid."'";
 		$db->query($sql);
-		$db->next_record();
-		$count = intval($db->Record['total']);
+		$db->nextRecord();
+		$count = intval($db->record['total']);
 		if ($count>0) {
 			return false;
 		} else {
@@ -162,7 +162,7 @@ $fid = $this->fid;
         
         $sql = "select count(fid) existance_count from forums where fid='".$this->fid."'";
 		$db->queryOne($sql);
-        if ((int)$db->Record['existance_count'] > 0)
+        if ((int)$db->record['existance_count'] > 0)
         {
             $sql = '
             UPDATE forums
@@ -206,8 +206,8 @@ $fid = $this->fid;
 			$db->query("update forumPosts set recentpost=$stamp where pkey=".$this->parent);
 		}
 		$db->query("select pkey from forumPosts where stamptime = $stamp and username='".$this->username."' and body='".$this->body."'");
-		$db->next_record();
-		$this->messageid = $db->Record['pkey'];
+		$db->nextRecord();
+		$this->messageid = $db->record['pkey'];
 	}
 
 
@@ -233,9 +233,9 @@ $fid = $this->fid;
 		$db->query($sql);
 		unset($name);
 		unset($desc);
-		while ($db->next_record()) {
-			$name[] = $db->Record["filename"];
-			$desc[] = $db->Record["filedesc"];
+		while ($db->nextRecord()) {
+			$name[] = $db->record["filename"];
+			$desc[] = $db->record["filedesc"];
 		}
 		$this->filename = $name;
 		$this->filedesc = $desc;
@@ -276,10 +276,10 @@ class ForumPost extends baseObject {
 			$st = " and status='y'";
 		}
 		$db->queryOne("select * from forumPosts where pkey=$message and parent=0 and fid='$forumID' $st");
-		$results[] = $db->Record;
+		$results[] = $db->record;
 		$db->query("select * from forumPosts where  parent=$message $st");
-		while($db->next_record()) { 
-			$results[] = $db->Record;
+		while($db->nextRecord()) { 
+			$results[] = $db->record;
 		}
 		return $results;
 	}
@@ -370,8 +370,8 @@ class ForumPost extends baseObject {
 
 			if (intval($count)==0) {
 				$db->query("select count(pkey) AS total from forumPosts where parent=$pkey and status='y'");
-				$db->next_record();
-				$count = intval($db->Record['total']);	
+				$db->nextRecord();
+				$count = intval($db->record['total']);	
 			}
 			
 			$views = $val["views"];
@@ -443,7 +443,7 @@ class forums {
 	function isValid($forumID,$groups) {
 		$db = DB::getHandle();
 		$db->queryOne("select count(fid) AS total from forums where 1=1 and ".createGroupCheck($groups)." and fid='$forumID'");
-		return $db->Record['total'];
+		return $db->record['total'];
 	}
 
 	function addAttach($filename,$location,$filedesc="") {

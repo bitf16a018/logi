@@ -79,7 +79,7 @@ class seminars extends FacultyService {
 			WHERE id_classes='".$u->activeClassTaught->id_classes."'";
 			$db->queryOne($sql);
 			# update the count on the seminar
-			$obj->numSeminar = $db->Record['count'] + 1;
+			$obj->numSeminar = $db->record['count'] + 1;
 			$obj->idClasses = $u->activeClassTaught->id_classes;
 			if ($obj->numSeminar == 5)
 			{
@@ -155,7 +155,7 @@ class seminars extends FacultyService {
 				WHERE id_classes='".$u->activeClassTaught->id_classes."'";
 			$db->queryOne($sql);
 			# update the count on the seminar
-			$obj->numSeminar = $db->Record['count'] + 1;
+			$obj->numSeminar = $db->record['count'] + 1;
 			$obj->idClasses = $u->activeClassTaught->id_classes;
 			if ($obj->numSeminar == 5)
 			{

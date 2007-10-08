@@ -113,9 +113,9 @@ class html extends TabbedService {
 
 		if ( ! is_array($t['saved']) ) { 
 			$db->query("select count(pkey) from lcHtml");
-			$db->next_record();
-			$t['saved']['filename'] = 'document_'.(sprintf("%d",$db->Record[0])+1).'.html'; 
-			$t['saved']['title'] = 'New Document '.(sprintf("%d",$db->Record[0])+1); 
+			$db->nextRecord();
+			$t['saved']['filename'] = 'document_'.(sprintf("%d",$db->record[0])+1).'.html'; 
+			$t['saved']['title'] = 'New Document '.(sprintf("%d",$db->record[0])+1); 
 
 			if ($arg->getvars['template'] != '' ) {
 				$t['template'] = file (SERVICE_PATH.'html/admin/templates/template-'.$arg->getvars['template'].'.html');
@@ -130,8 +130,8 @@ class html extends TabbedService {
 	 */
 	function addSharingRun( &$db, &$u, &$arg, &$t) {
 		$db->query("select * from lcGroups");
-		while ( $db->next_record() ) {
-			$gs[$db->Record['gid']] = $db->Record['groupName'];
+		while ( $db->nextRecord() ) {
+			$gs[$db->record['gid']] = $db->record['groupName'];
 		}
 		$t['groupOpts'] = makeOptions($gs,$t['saved']['groups']);
 		reset($gs);

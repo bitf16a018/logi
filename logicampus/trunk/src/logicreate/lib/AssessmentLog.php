@@ -257,7 +257,7 @@ class AssessmentLog extends AssessmentLogBase {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		 $sql = "select count(*) as count from assessment_log where id_student='".$this->idStudent."' AND assessment_id='".$this->assessmentId."' AND id_classes='".$this->idClasses."'";
 		$db->queryOne($sql);
-		$this->logCount = $db->Record['count'];
+		$this->logCount = $db->record['count'];
 	}
 
 }

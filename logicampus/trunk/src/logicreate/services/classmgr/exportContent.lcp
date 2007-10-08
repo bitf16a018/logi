@@ -109,19 +109,19 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 
 		/*
 		$classroom_node[] = new xml_node('CLASSROOM', 
-						array(	'ID'=>$db->Record['id_classes'], 
-								'CLASSTYPE'=>$db->Record['classType'],
-								'ID_SEMESTERS'=>$db->Record['id_semesters'],
-								'STYLESHEET'=>$db->Record['stylesheet'], 
-								'FACULTYID'=>$db->Record['facultyId'],
-								'SECTIONNUMBERS'=>$db->Record['sectionNumbers'],
-								'NOEXAM'=>$db->Record['noexam']
+						array(	'ID'=>$db->record['id_classes'], 
+								'CLASSTYPE'=>$db->record['classType'],
+								'ID_SEMESTERS'=>$db->record['id_semesters'],
+								'STYLESHEET'=>$db->record['stylesheet'], 
+								'FACULTYID'=>$db->record['facultyId'],
+								'SECTIONNUMBERS'=>$db->record['sectionNumbers'],
+								'NOEXAM'=>$db->record['noexam']
 							 )
 						);
 
 		 */
 		//get the semester start dates
-		$this->semesterId = $db->Record['id_semesters'];
+		$this->semesterId = $db->record['id_semesters'];
 		$db->query("SELECT * FROM semesters WHERE id_semesters = ".$this->semesterId);
 		$db->nextRecord();
 		$db->freeResult();
@@ -899,7 +899,7 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		$db2 = DB::getHandle();
 		$db2->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$xml_sub_child = null;
 			$xml_links = null;
 			$xml_objectives = null;
@@ -910,22 +910,22 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 			$sql2 = '
 			SELECT * FROM 
 			class_lesson_links
-			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
+			WHERE id_class_lessons='. $db->record['id_class_lessons'];
 			
 			$db2->query($sql2);
-			while ($db2->next_record())
-			{	$xml_links[] = new xml_node('id_class_links',null, null, $db2->Record['id_class_links']);
+			while ($db2->nextRecord())
+			{	$xml_links[] = new xml_node('id_class_links',null, null, $db2->record['id_class_links']);
 			}
 			$xml_sub_sub_child[] = new xml_node('LINKS',null, $xml_links);
 			
 			$sql2 = '
 			SELECT * FROM 
 			class_lesson_objectives
-			WHERE id_class_lesson='. $db->Record['id_class_lessons'];
+			WHERE id_class_lesson='. $db->record['id_class_lessons'];
 			
 			$db2->query($sql2);
-			while ($db2->next_record())
-			{	$xml_objectives[] = new xml_node('id_class_objectives',null, null, $db2->Record['id_class_objectives']);
+			while ($db2->nextRecord())
+			{	$xml_objectives[] = new xml_node('id_class_objectives',null, null, $db2->record['id_class_objectives']);
 			}
 			$xml_sub_sub_child[] = new xml_node('OBJECTIVES',null,$xml_objectives);
 
@@ -933,12 +933,12 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 			$sql2 = '
 			SELECT * FROM 
 			class_assignments_link
-			WHERE id_class_lessons='. $db->Record['id_class_lessons'];
+			WHERE id_class_lessons='. $db->record['id_class_lessons'];
 			
 die('lskdjfas');
 			$db2->query($sql2);
-			while ($db2->next_record())
-			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->Record['id_class_assignments']);
+			while ($db2->nextRecord())
+			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->record['id_class_assignments']);
 			}
 			$xml_sub_sub_child[] = new xml_node('ASSIGNMENTS',null,$xml_assignments);
 			
@@ -949,15 +949,15 @@ die('lskdjfas');
 			
 			$xml_sub_child[] = new xml_node('MAPPINGS',null, $xml_sub_sub_child);
 			
-			$xml_sub_child[] = new xml_node('createdOn',null, null, $db->Record['createdOn']);
-			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->Record['title']);
-			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->Record['description']);
-			$xml_sub_child[] = new xml_node('activeOn', null, null, $db->Record['activeOn']);
-			$xml_sub_child[] = new xml_node('inactiveOn', null, null, $db->Record['inactiveOn']);
-			$xml_sub_child[] = new xml_node('checkList', array('BASE64'=>'1'), null, $db->Record['checkList']);
+			$xml_sub_child[] = new xml_node('createdOn',null, null, $db->record['createdOn']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('activeOn', null, null, $db->record['activeOn']);
+			$xml_sub_child[] = new xml_node('inactiveOn', null, null, $db->record['inactiveOn']);
+			$xml_sub_child[] = new xml_node('checkList', array('BASE64'=>'1'), null, $db->record['checkList']);
 			
 			$xml_child_node[] =new xml_node('ITEM', 
-									array(	'id_class_lessons'=>$db->Record['id_class_lessons']
+									array(	'id_class_lessons'=>$db->record['id_class_lessons']
 									 	 ), $xml_sub_child
 									);
 		}

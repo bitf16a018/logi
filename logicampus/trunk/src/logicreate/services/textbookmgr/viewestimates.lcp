@@ -81,7 +81,7 @@ class viewestimates extends FacultyService {
 	}
 	function editRun(&$db,&$u,&$lc,&$t) {
 		$db->queryOne("select * from textbook_estimates_data where textbook_estimates_data_key=".(int)$lc->getvars['key']);
-		$t['books'][] = $db->Record;
+		$t['books'][] = $db->record;
 		$t['key'] = $lc->getvars['key'];
 		$lc->templateName = "viewestimates_edit";
 	}
@@ -103,8 +103,8 @@ class viewestimates extends FacultyService {
 		$db->query($sql);
 		
 		//$db->query("select * from textbook_estimates_data where textbook_estimates_key=".(int)$lc->getvars['key'] ." order by courseFamily, courseNumber");
-		while($db->next_record()) {
-			$t['books'][$db->Record['textbook_estimates_data_key']] = $db->Record;
+		while($db->nextRecord()) {
+			$t['books'][$db->record['textbook_estimates_data_key']] = $db->record;
 		}
 		// oops - mgk - 11/12/03 - forgot 'required' - look it up
 		/**
@@ -135,9 +135,9 @@ class viewestimates extends FacultyService {
 			$db->queryOne("Select A.required, A.bundled_items, B.* from textbook_classes A, classes B left join classes on A.id_classes=classes.id_classes where B.facultyId='".$v['instructor']."'
 			and isbn='".$v['isbn']."' and title='".addslashes($v['title'])."' and 
 			author='".$v['author']."'");
-			$v['required'] = $db->Record[0];
-			$v['sectionNumbers'] = $db->Record['sectionNumbers'];
-			$v['bundled_items'] = $db->Record['bundled_items'];
+			$v['required'] = $db->record[0];
+			$v['sectionNumbers'] = $db->record['sectionNumbers'];
+			$v['bundled_items'] = $db->record['bundled_items'];
 			$t['books'][$k] = $v;
 
 		}

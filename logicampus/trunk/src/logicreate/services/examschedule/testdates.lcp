@@ -146,6 +146,6 @@ function getSemesterLabel($id) {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		return $db->Record['semesterTerm'].' '.$db->Record['semesterYear'];
+		return $db->record['semesterTerm'].' '.$db->record['semesterYear'];
 }
 ?>

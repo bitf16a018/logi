@@ -18,17 +18,17 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    $db = DB::getHandle($dsn);
    if ($prop=='') { $prop=$this->_pkey; }
    $db->query("select id_class_faqs,id_classes,category,question,answer,clicks,groups from class_faqs where $prop='$pkey' $where $orderBy");
-   if($db->next_record()) {
+   if($db->nextRecord()) {
       $temp = new classFaqs();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_faqs = $db->Record['id_class_faqs'];
-      $temp->id_classes = $db->Record['id_classes'];
-      $temp->category = $db->Record['category'];
-      $temp->question = $db->Record['question'];
-      $temp->answer = $db->Record['answer'];
-      $temp->clicks = $db->Record['clicks'];
-      $temp->groups = $db->Record['groups'];
+      $temp->id_class_faqs = $db->record['id_class_faqs'];
+      $temp->id_classes = $db->record['id_classes'];
+      $temp->category = $db->record['category'];
+      $temp->question = $db->record['question'];
+      $temp->answer = $db->record['answer'];
+      $temp->clicks = $db->record['clicks'];
+      $temp->groups = $db->record['groups'];
       
    }
 if ( !$temp ) { trigger_error('empty persistant object'); }
@@ -42,17 +42,17 @@ function _getAllFromDB($key,$prop='',$where='', $orderBy='',$dsn='default') {
    if ($orderBy) { $orderBy = " order by $orderBy"; }
    if ($where) { $where = " and $where"; }
    $db->query("select id_class_faqs,id_classes,category,question,answer,clicks,groups from class_faqs where $prop='$key' $where $orderBy");
-   while ($db->next_record()) {
+   while ($db->nextRecord()) {
       $temp = new classFaqs();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_faqs = $db->Record['id_class_faqs'];
-      $temp->id_classes = $db->Record['id_classes'];
-      $temp->category = $db->Record['category'];
-      $temp->question = $db->Record['question'];
-      $temp->answer = $db->Record['answer'];
-      $temp->clicks = $db->Record['clicks'];
-      $temp->groups = $db->Record['groups'];
+      $temp->id_class_faqs = $db->record['id_class_faqs'];
+      $temp->id_classes = $db->record['id_classes'];
+      $temp->category = $db->record['category'];
+      $temp->question = $db->record['question'];
+      $temp->answer = $db->record['answer'];
+      $temp->clicks = $db->record['clicks'];
+      $temp->groups = $db->record['groups'];
       $objects[] = $temp;
 }
 return $objects;

@@ -58,8 +58,8 @@ class history extends RegAuth {
 
 // get the login attempt stuff - would have been nicer with PBDO version
 		$db->query("select * from lc_users_login_attempt where username='".$lc->getvars['username']."'");
-		while($db->next_record()) {
-			$t['history'][] = $db->Record;
+		while($db->nextRecord()) {
+			$t['history'][] = $db->record;
 		}
 
 		$lc->templateName = 'history_main';

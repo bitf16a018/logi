@@ -32,11 +32,11 @@ var $presentor = "htmlPresentation";
 		} 
 
 		$db->query("select * from lcUsers where email = '$email'");		
-		if ($db->next_record()) {
+		if ($db->nextRecord()) {
 			if (USE_MD5_PASSWORDS!=TRUE) { 
-				$pass = $db->Record['password'];
+				$pass = $db->record['password'];
 			}
-			$message = "You have requested your account information:\n\nUsername: ".$db->Record['username']."\nPassword: $pass\n-----\n";
+			$message = "You have requested your account information:\n\nUsername: ".$db->record['username']."\nPassword: $pass\n-----\n";
 			$message .= "If you require more indepth help, please email ".WEBMASTER_EMAIL."\n\n";
 			$message .= " \n\nPlease visit ".DEFAULT_URL." to log in.";
 
@@ -102,7 +102,7 @@ var $presentor = "htmlPresentation";
 
 // mgk 9/2/03 - get last login time
 			$db->queryOne("select last_login from lc_users_last_login where username='".$lcUser->username."'");
-			if ($db->Record[0]==0) { 
+			if ($db->record[0]==0) { 
 				$lcUser->sessionvars['first_login'] = true;
 
 			}

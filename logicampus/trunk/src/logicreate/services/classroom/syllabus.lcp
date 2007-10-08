@@ -45,31 +45,31 @@ class syllabus extends StudentService {
 		// get data from the classes table and error out if we get back nothing
 		$db->queryOne("select * from classes where id_classes='$classId'");
 
-		if (!$db->Record['id_classes']) {
+		if (!$db->record['id_classes']) {
 			// They didn't get back a record! Error out.
 			$this->presentor = 'errorMessage';
 			$t['message'] = 'Invalid class id.';
 			return;
 		}
 
-		$t['classes'] = $db->Record;
+		$t['classes'] = $db->record;
 
 		// profile_faculty table
 		$db->queryOne("select f.*,p.* from profile_faculty as f
 			left join profile as p on f.username=p.username
 			where p.username='{$t['classes']['facultyId']}'");
-		$t['profile'] = $db->Record;
+		$t['profile'] = $db->record;
 		
 
 		// get course description
 		$db->queryOne("select * from courses
 			where id_courses='{$t['classes']['id_courses']}'");
-		$t['course'] = $db->Record;
+		$t['course'] = $db->record;
 
 		// get semester information
 		$db->queryOne("select * from semesters
 			where id_semesters='{$t['classes']['id_semesters']}'");
-		$t['semester'] = $db->Record;
+		$t['semester'] = $db->record;
 
 		// get syllabus information
 		$syllabus = ClassSyllabusPeer::doSelect(" class_id = ".$classId);
@@ -84,12 +84,12 @@ class syllabus extends StudentService {
 		// get course syllabus information
 		$db->queryOne("select * from semesters_course_info
 			where id_semesters='{$u->activeClassTaken->id_semesters}'");
-		$t['semester_course_info'] = $db->Record;
+		$t['semester_course_info'] = $db->record;
 
 		// get professor email addy
 		$db->queryOne("select email from lcUsers
 			where username='{$t['classes']['facultyId']}'");
-		$t['email'] = $db->Record['email'];
+		$t['email'] = $db->record['email'];
 
 		// get textbook information
 		$t['textbook'] = Textbook::load(

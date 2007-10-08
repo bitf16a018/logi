@@ -193,8 +193,8 @@ class blog extends NoAuth {
 
 		$message = "$x\n\n\nYou asked to be notified of any new postings to the '".$originalEntry->blogEntryTitle."' thread on the '".$blog->blogName."' web log.  Please visit ".modurl("blog/".$blog->blogOwner."/".$originalEntry->blogEntryId."/event=read")." to read new comments made to that thread.";
 
-		while($db->next_record()){ 
-			$mails[$db->Record[0]] = $db->Record[0];
+		while($db->nextRecord()){ 
+			$mails[$db->record[0]] = $db->record[0];
 		}
 		while(list($k,$v) = each($mails)) { 
 			mail($v,"New post added to thread '".$originalEntry->blogEntryTitle."'",$message,"From: ".WEBMASTER_EMAIL);

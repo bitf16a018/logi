@@ -35,21 +35,21 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    }
 
    $db->query("select * from class_assignments where $thewhere $where $orderBy");
-   if($db->next_record()) {
+   if($db->nextRecord()) {
       $temp = new classAssignmentObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_assignments = $db->Record['id_class_assignments'];
-      $temp->title = $db->Record['title'];
-      $temp->instructions = $db->Record['instructions'];
-      $temp->dueDate = $db->Record['dueDate'];
-      $temp->noDueDate = $db->Record['noDueDate'];
-      $temp->activeDate = $db->Record['activeDate'];
-      $temp->responseType = $db->Record['responseType'];
-      $temp->id_classes = $db->Record['id_classes'];
-      $temp->dateNoAccept = $db->Record['dateNoAccept'];
-      $temp->id_forum = $db->Record['id_forum'];
-      $temp->id_forum_thread = $db->Record['id_forum_thread'];
+      $temp->id_class_assignments = $db->record['id_class_assignments'];
+      $temp->title = $db->record['title'];
+      $temp->instructions = $db->record['instructions'];
+      $temp->dueDate = $db->record['dueDate'];
+      $temp->noDueDate = $db->record['noDueDate'];
+      $temp->activeDate = $db->record['activeDate'];
+      $temp->responseType = $db->record['responseType'];
+      $temp->id_classes = $db->record['id_classes'];
+      $temp->dateNoAccept = $db->record['dateNoAccept'];
+      $temp->id_forum = $db->record['id_forum'];
+      $temp->id_forum_thread = $db->record['id_forum_thread'];
       
    }
 return $temp;
@@ -62,21 +62,21 @@ function _getAllFromDB($key, $prop, $where='', $orderBy='',$dsn='default') {
    if ($orderBy) { $orderBy = " order by $orderBy"; }
    if ($where) { $where = " and $where"; }
    $db->query("select * from class_assignments where $prop='$key' $where $orderBy");
-   while ($db->next_record()) {
+   while ($db->nextRecord()) {
       $temp = new classAssignmentObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_assignments = $db->Record['id_class_assignments'];
-      $temp->title = $db->Record['title'];
-      $temp->instructions = $db->Record['instructions'];
-      $temp->dueDate = $db->Record['dueDate'];
-      $temp->noDueDate = $db->Record['noDueDate'];
-      $temp->activeDate = $db->Record['activeDate'];
-      $temp->responseType = $db->Record['responseType'];
-      $temp->id_classes = $db->Record['id_classes'];
-      $temp->dateNoAccept = $db->Record['dateNoAccept'];
-      $temp->id_forum = $db->Record['id_forum'];
-      $temp->id_forum_thread = $db->Record['id_forum_thread'];
+      $temp->id_class_assignments = $db->record['id_class_assignments'];
+      $temp->title = $db->record['title'];
+      $temp->instructions = $db->record['instructions'];
+      $temp->dueDate = $db->record['dueDate'];
+      $temp->noDueDate = $db->record['noDueDate'];
+      $temp->activeDate = $db->record['activeDate'];
+      $temp->responseType = $db->record['responseType'];
+      $temp->id_classes = $db->record['id_classes'];
+      $temp->dateNoAccept = $db->record['dateNoAccept'];
+      $temp->id_forum = $db->record['id_forum'];
+      $temp->id_forum_thread = $db->record['id_forum_thread'];
       
       $objects[] = $temp;
 }

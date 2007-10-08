@@ -78,10 +78,10 @@ include_once(SERVICE_PATH.'menu/menuObj.php');
 		include_once(LIB_PATH.'lc_class.php');
 
 		$db->queryOne("SELECT semesters.id_semesters FROM semesters INNER JOIN classes ON semesters.id_semesters=classes.id_semesters WHERE facultyId='". $u->username ."'");
-		if($db->Record['id_semesters']==null)
+		if($db->record['id_semesters']==null)
 			$u->sessionvars['classmgr']['currentsemester'] = 0;
 		else
-			$u->sessionvars['classmgr']['currentsemester'] = $db->Record['id_semesters'];
+			$u->sessionvars['classmgr']['currentsemester'] = $db->record['id_semesters'];
 
 		if ($id_semesters > 0 ) {
 			$semesterObj = semesterObj::_getFromDB($id_semesters, 'id_semesters');
@@ -318,7 +318,7 @@ class lcSystem {
 		 	$db = DB::getHandle();
 			$db->queryOne("select count(pkey) as count from privateMessages where sentReceived=0 and
 			messageTo='".$obj->user->username."'",false);
-			$t['_privMsgs'] = $db->Record['count'];
+			$t['_privMsgs'] = $db->record['count'];
 			if ( isset($obj->user->sessionvars['_privMsgs']) ) {
 				if ( $t['_privMsgs'] > $obj->user->sessionvars['_privMsgs'] ) {
 					$t['_newPrivMsgs'] = true;
@@ -504,8 +504,8 @@ class lcGroup {
 		$sql = "select * from lcGroups order by groupName";
 		$db->query($sql,false);
 
-		while ($db->next_record()) {
-			$tmp[$db->Record['gid']] = $db->Record['groupName'];
+		while ($db->nextRecord()) {
+			$tmp[$db->record['gid']] = $db->record['groupName'];
 		}
 		$this->optionList = makeOptions($tmp);
 		$this->displayList = $tmp;
@@ -517,8 +517,8 @@ class lcGroup {
 		$db = DB::getHandle();
 		$sql = "select * from lcGroups where gid='".$this->gid."'";
 		$db->query($sql,false);
-		while($db->next_record()) {
-			$this->groupName = $db->Record["groupName"];
+		while($db->nextRecord()) {
+			$this->groupName = $db->record["groupName"];
 		}
 
 	}
@@ -528,8 +528,8 @@ class lcGroup {
 		$db = DB::getHandle();
 		$sql = "select count(gid) from lcGroups where gid='".$this->gid."' or groupName = '".$this->groupName."'";
 		$db->query($sql,false);
-		$db->next_record();
-		$count = $db->Record[0];
+		$db->nextRecord();
+		$count = $db->record[0];
 		if (intval($count)>0) {
 			return false;
 		}
@@ -564,8 +564,8 @@ class lcGroup {
 		if ($where) {
 			$sql = "select DISTINCT A.sid,B.serviceename,A.perm from lcPerms A , lcService B where ($where)";
 			$db->query($sql,false);
-			while ($db->next_record()) {
-				$this->serviceperm[$db->Record[0]] = $db->Record[2];
+			while ($db->nextRecord()) {
+				$this->serviceperm[$db->record[0]] = $db->record[2];
 			}
 		}
 		if ($gid) { $this->getPerm(); }

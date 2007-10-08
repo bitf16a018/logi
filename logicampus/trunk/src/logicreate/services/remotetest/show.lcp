@@ -24,14 +24,14 @@ class show extends NoAuth {
 		function Run(&$db,&$u,&$lc,&$t) {
 			$hash = addslashes($lc->getvars[1]);
 			$db->queryOne("select * from remote_test_files where hash='$hash'");
-			$t['file'] = $db->Record;
+			$t['file'] = $db->record;
 			$lc->templateName='show_main';
 		}
 
 		function dlRun(&$db,&$u,&$lc,&$t) {
 			$hash = addslashes($lc->getvars[1]);
 			$db->queryOne("select * from remote_test_files where hash='$hash'");
-			$x = $db->Record;
+			$x = $db->record;
 			ob_end_clean();
 			header("Content-type: ".$x['mime']); 
 			header("Content-length: ". $x['size']);

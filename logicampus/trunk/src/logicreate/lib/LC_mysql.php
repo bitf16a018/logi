@@ -149,9 +149,9 @@ class mysql extends DB {
 	}
 
 
-	function next_record($resID=false) {
+	function nextRecord($resID=false) {
 		$ret = $this->nextRecord($resID);
-		$this->Record =& $this->record;
+		$this->record =& $this->record;
 		return $ret;
 	}
 
@@ -165,7 +165,7 @@ class mysql extends DB {
 	}
 
 	/**
-	 * Short hand for query() and next_record().
+	 * Short hand for query() and nextRecord().
 	 *
 	 * @param string $sql SQL Command
 	 */
@@ -316,8 +316,8 @@ class mysql extends DB {
 	function getTables() {
 		$this->query("show tables");
 		$j = $this->RESULT_TYPE;
-		while($this->next_record()) {
-			$x[] = $this->Record[0];
+		while($this->nextRecord()) {
+			$x[] = $this->record[0];
 		}
 		$this->RESULT_TYPE = $j;
 		return $x;
@@ -326,8 +326,8 @@ class mysql extends DB {
 
 	function getTableIndexes($table='') {
 		$this->query("show index from $table");
-		while($this->next_record()) {
-			extract($this->Record);
+		while($this->nextRecord()) {
+			extract($this->record);
 			$_idx[$Key_name][$Seq_in_index]['column'] = $Column_name;
 			$_idx[$Key_name][$Seq_in_index]['unique'] = $Non_unique;
 		}
@@ -365,9 +365,9 @@ class mysql extends DB {
 		}
 		}
 		$this->query("describe $table");
-		while($this->next_record()) {
-			$type = $this->Record['Type'];
-			$name = $this->Record['Field'];
+		while($this->nextRecord()) {
+			$type = $this->record['Type'];
+			$name = $this->record['Field'];
 			if (eregi("\(",$type)) {
 				list($type,$junk) = split("\(",$type);
 				if ($type=='enum') { $type.= "(".$junk; }

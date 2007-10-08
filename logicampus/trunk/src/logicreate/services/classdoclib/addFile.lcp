@@ -27,10 +27,10 @@ class addFile extends classdoclibService {
 			exit();
 		}
 		$db->query('select name from classdoclib_Folders where pkey = '.$lcObj->getvars['fid']);
-		$db->next_record();
+		$db->nextRecord();
 
 		$t['max_file_size'] = sprintf("%.2f",ini_get('upload_max_filesize'));
-		$t['folderName' ] = $db->Record['name'];
+		$t['folderName' ] = $db->record['name'];
 		$t['folderID' ] = $lcObj->getvars['fid'];
 
 

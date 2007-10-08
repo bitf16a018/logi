@@ -363,10 +363,10 @@ function deleteRun($db,&$u,&$lc,&$t){
 
 		$sql_string = 'SELECT id_class_assignments FROM class_assignments WHERE id_classes='.$id_classes;
 		$db->query($sql_string);
-		while ($db->next_record()) {
-			$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->Record['id_class_assignments'];
-			$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->Record['id_class_assignments'];
-			$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+		while ($db->nextRecord()) {
+			$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->record['id_class_assignments'];
+			$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->record['id_class_assignments'];
+			$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->record['id_class_assignments'];
 		}
 		$sql[] = 'DELETE FROM class_assignments WHERE id_classes='.$id_classes;
 
@@ -379,9 +379,9 @@ function deleteRun($db,&$u,&$lc,&$t){
 
 		$sql_string = 'SELECT id_class_lessons FROM class_lessons WHERE id_classes='.$id_classes;
 		$db->query($sql_string);
-		while ($db->next_record()) {
-			$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->Record['id_class_lessons'];
-			$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->Record['id_class_lessons'];
+		while ($db->nextRecord()) {
+			$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->record['id_class_lessons'];
+			$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->record['id_class_lessons'];
 		}
 		$sql[] = 'DELETE FROM class_lessons WHERE id_classes='.$id_classes;
 
@@ -414,8 +414,8 @@ function deleteRun($db,&$u,&$lc,&$t){
 
 		$sql_string = 'SELECT assessment_id FROM assessment WHERE class_id='.$id_classes;
 		$db->query($sql_string);
-		while ($db->next_record()) {
-			$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->Record['assessment_id'];
+		while ($db->nextRecord()) {
+			$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->record['assessment_id'];
 		}
 
 		$sql[] = 'DELETE FROM assessment WHERE class_id='.$id_classes;
@@ -432,8 +432,8 @@ function deleteRun($db,&$u,&$lc,&$t){
 		$sql_string = 'SELECT pkey FROM classdoclib_Folders WHERE class_id='.$id_classes;
 		$db->query($sql_string);
 
-		while ($db->next_record()) {
-			$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->Record['pkey'];
+		while ($db->nextRecord()) {
+			$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->record['pkey'];
 		}
 
 		$sql[] = 'DELETE FROM classdoclib_Folders WHERE class_id='.$id_classes;

@@ -18,19 +18,19 @@ if ($where) { $where = " and $where"; }
 $db = DB::getHandle($dsn);
  if ($prop=='') { $prop=$this->_pkey; }
 $db->query("select id_class_links,id_classes,id_class_links_categories,title,url,description,dateCreated,createdby,hits from class_links where $prop='$pkey' $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new classLinks();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_class_links = $db->Record['id_class_links'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->id_class_links_categories = $db->Record['id_class_links_categories'];
-$temp->title = $db->Record['title'];
-$temp->url = $db->Record['url'];
-$temp->description = $db->Record['description'];
-$temp->dateCreated = $db->Record['dateCreated'];
-$temp->createdby = $db->Record['createdby'];
-$temp->hits = $db->Record['hits'];
+$temp->id_class_links = $db->record['id_class_links'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->id_class_links_categories = $db->record['id_class_links_categories'];
+$temp->title = $db->record['title'];
+$temp->url = $db->record['url'];
+$temp->description = $db->record['description'];
+$temp->dateCreated = $db->record['dateCreated'];
+$temp->createdby = $db->record['createdby'];
+$temp->hits = $db->record['hits'];
 $objects[] = $temp;
 }
 if (count($objects)>1) {
@@ -44,19 +44,19 @@ $db = DB::getHandle($dsn);
 if ($orderBy) { $orderBy = ' order by $orderBy '; }
 if ($where) { $where = ' and $where'; }
 $db->query("select id_class_links,id_classes,id_class_links_categories,title,url,description,dateCreated,createdby,hits from class_links $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new classLinks();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_class_links = $db->Record['id_class_links'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->id_class_links_categories = $db->Record['id_class_links_categories'];
-$temp->title = $db->Record['title'];
-$temp->url = $db->Record['url'];
-$temp->description = $db->Record['description'];
-$temp->dateCreated = $db->Record['dateCreated'];
-$temp->createdby = $db->Record['createdby'];
-$temp->hits = $db->Record['hits'];
+$temp->id_class_links = $db->record['id_class_links'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->id_class_links_categories = $db->record['id_class_links_categories'];
+$temp->title = $db->record['title'];
+$temp->url = $db->record['url'];
+$temp->description = $db->record['description'];
+$temp->dateCreated = $db->record['dateCreated'];
+$temp->createdby = $db->record['createdby'];
+$temp->hits = $db->record['hits'];
 $objects[] = $temp;
 }
  return $objects;

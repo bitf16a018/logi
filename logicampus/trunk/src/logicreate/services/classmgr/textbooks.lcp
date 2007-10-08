@@ -86,7 +86,7 @@ class textbooks extends FacultyService {
 			$t['noTextbooks'] = 1;
 		} else {
 			$db->queryOne("select noTextbooks from textbook where id_classes='{$u->activeClassTaught->id_classes}'");
-			$t['noTextbooks'] = $db->Record['noTextbooks'];
+			$t['noTextbooks'] = $db->record['noTextbooks'];
 		}
 		
 		$t['data'] =

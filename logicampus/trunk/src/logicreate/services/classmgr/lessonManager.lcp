@@ -241,9 +241,9 @@ class LessonManager extends FacultyService {
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_links']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_links']][] = $db->Record['id_class_lessons'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_links']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_links']][] = $db->record['id_class_lessons'];
 		}
 
 		$columnModel = &$table->getColumnModel();
@@ -393,9 +393,9 @@ class LessonManager extends FacultyService {
 			WHERE B.id_classes = ".$class_id."
 			ORDER BY B.title";
 		$db->query($sql);
-		while ($db->next_record()) {
-			$itemsToTitles[$db->Record['id_class_objectives']][] = $db->Record['title'];
-			$itemsToLessons[$db->Record['id_class_objectives']][] = $db->Record['id_class_lesson'];
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_objectives']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_objectives']][] = $db->record['id_class_lesson'];
 		}
 
 		$columnModel = &$table->getColumnModel();
@@ -562,8 +562,8 @@ class LessonManager extends FacultyService {
 			FROM class_objectives AS A
 			WHERE A.id_classes = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['id_class_objectives'];
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_objectives'];
 		}
 
 		//clean input array to match allowable items
@@ -622,8 +622,8 @@ class LessonManager extends FacultyService {
 			FROM class_links AS A
 			WHERE A.id_classes = ".$class_id;
 		$db->query($sql);
-		while ($db->next_record()) {
-			$allowableItems[] = $db->Record['id_class_links'];
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_links'];
 		}
 
 		//clean input array to match allowable items
@@ -721,20 +721,18 @@ class LessonManager extends FacultyService {
 		DEFINE(LESSON_ID, $lesson_id); // for the custom fields
 
 
-
-
 		// Get the basic info about the lesson
 		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
 			from class_lessons
 			where id_class_lessons='{$lesson_id}'";
 		$db->queryOne($sql);
-		$t['title'] = $db->Record['title'];
-		$t['description'] = $db->Record['description'];
-		$t['createdOn'] = $db->Record['createdOn'];
-		$t['activeOn'] = $db->Record['activeOn'];
-		$t['inactiveOn'] = $db->Record['inactiveOn'];
-		if ( strlen( trim( $db->Record['checkList'] ) ) > 0 )
-			$t['checkList'] = split("\n", trim($db->Record['checkList']) );
+		$t['title'] = $db->record['title'];
+		$t['description'] = $db->record['description'];
+		$t['createdOn'] = $db->record['createdOn'];
+		$t['activeOn'] = $db->record['activeOn'];
+		$t['inactiveOn'] = $db->record['inactiveOn'];
+		if ( strlen( trim( $db->record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->record['checkList']) );
 
 		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
 		$t['activeOnStruct']['fieldName'] = 'activeOn';
@@ -745,7 +743,6 @@ class LessonManager extends FacultyService {
 		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
 		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
 		$t['inactiveOnStruct']['dateTimeBit'] = 7;
-
 	}
 
 
@@ -774,14 +771,14 @@ class LessonManager extends FacultyService {
 			FROM class_lesson_content AS A
 			WHERE A.id_classes='{$classId}'";
 		$db->query($sql);
-		while ( $db->next_record() )
-			$t['contentPages'][$db->Record['id_class_lesson_content']] = $db->Record['txTitle'];
+		while ( $db->nextRecord() )
+			$t['contentPages'][$db->record['id_class_lesson_content']] = $db->record['txTitle'];
 
 		// get the content field
 		$sql = "select id_class_lesson_content from class_lesson_content
 			where id_class_lessons='{$lessonId}'";
 		$db->queryOne($sql);
-		$t['content'] = $db->Record['id_class_lesson_content'];
+		$t['content'] = $db->record['id_class_lesson_content'];
 		 */
 
 		// get the objectives
@@ -813,13 +810,13 @@ class LessonManager extends FacultyService {
 			from class_lessons
 			where id_class_lessons='{$lessonId}'";
 		$db->queryOne($sql);
-		$t['title'] = $db->Record['title'];
-		$t['description'] = $db->Record['description'];
-		$t['createdOn'] = $db->Record['createdOn'];
-		$t['activeOn'] = $db->Record['activeOn'];
-		$t['inactiveOn'] = $db->Record['inactiveOn'];
-		if ( strlen( trim( $db->Record['checkList'] ) ) > 0 )
-			$t['checkList'] = split("\n", trim($db->Record['checkList']) );
+		$t['title'] = $db->record['title'];
+		$t['description'] = $db->record['description'];
+		$t['createdOn'] = $db->record['createdOn'];
+		$t['activeOn'] = $db->record['activeOn'];
+		$t['inactiveOn'] = $db->record['inactiveOn'];
+		if ( strlen( trim( $db->record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->record['checkList']) );
 
 		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
 		$t['activeOnStruct']['fieldName'] = 'activeOn';
@@ -839,8 +836,8 @@ class LessonManager extends FacultyService {
 			WHERE B.id_class_lessons='{$lessonId}'
 			AND A.id_classes = '{$classId}'";
 		$db->query($sql);
-		while ( $db->next_record() )
-			$t['web'][] = $db->Record['title'];
+		while ( $db->nextRecord() )
+			$t['web'][] = $db->record['title'];
 
 
 		// get the assignments
@@ -864,8 +861,8 @@ class LessonManager extends FacultyService {
 			WHERE B.lesson_id='{$lessonId}'
 			AND A.class_id = '{$classId}'";
 		$db->query($sql);
-		while ( $db->next_record() )
-			$t['assessments'][] = $db->Record['display_name'];
+		while ( $db->nextRecord() )
+			$t['assessments'][] = $db->record['display_name'];
 */
 
 
@@ -1038,7 +1035,7 @@ class LessonManager extends FacultyService {
 		$lessonid = $lc->getvars['id'];
 
 		$db->queryOne( "select title from class_lessons where id_class_lessons='{$lessonid}'");
-		$t['lessonTitle'] = $db->Record['title'];
+		$t['lessonTitle'] = $db->record['title'];
 		$t['id_class_lessons'] = $lessonid;
 		$t['id_classes'] = $u->activeClassTaught->id_classes;
 
@@ -1088,8 +1085,8 @@ class LessonManager extends FacultyService {
 
 		$db->queryOne($sql);
 
-		$t['checkList'] = split("\n", $db->Record['checkList']);
-		$t['title'] = $db->Record['title'];
+		$t['checkList'] = split("\n", $db->record['checkList']);
+		$t['title'] = $db->record['title'];
 		$t['lessonId'] = $lesson_id;
 
 		$lc->templateName = 'lessonManager_checkList';

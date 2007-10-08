@@ -24,8 +24,8 @@ class lcRegistry extends PersistantObject {
 	function getAll() { 
 		$db = DB::getHandle();
 		$db->query("select mid  from lcRegistry order by k",false); 
-		while($db->next_record()) { 
-			$ar[] = lcRegistry::load($db->Record[0]);
+		while($db->nextRecord()) { 
+			$ar[] = lcRegistry::load($db->record[0]);
 		}
 		return $ar;
 	}
@@ -43,10 +43,10 @@ class lcRegistry extends PersistantObject {
 		if ($mid) { 
 			$db = DB::getHandle();
 			$db->query("select k,v,type,extra from lcConfig where mid='".$x->mid."' order by k",false);
-			while($db->next_record()) { 
-				$x->config[$db->Record['k']] = $db->Record['v'];
-				$x->type[$db->Record['k']] = $db->Record['type'];
-				$x->extra[$db->Record['k']] = $db->Record['extra'];
+			while($db->nextRecord()) { 
+				$x->config[$db->record['k']] = $db->record['v'];
+				$x->type[$db->record['k']] = $db->record['type'];
+				$x->extra[$db->record['k']] = $db->record['extra'];
 			}
 
 			lcRegistry::singleton($x);

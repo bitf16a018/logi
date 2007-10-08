@@ -60,8 +60,8 @@ class contactStudents extends FacultyService
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
+		while ($db->nextRecord())
+		{	$t['students'][$db->record['username']] = '<input type="checkbox" name="student_'.$db->record['username'].'" id="student_'.$db->record['username'].'"><label for="student_'.$db->record['username'].'"> '.$db->record['lastname'].', '.$db->record['firstname']. '</label>';
 		}
 
 
@@ -115,9 +115,9 @@ class contactStudents extends FacultyService
 			ORDER BY D.lastname ASC';
 		$db->query($sql);
 
-		while ($db->next_record())
-		{	$t['students'][$db->Record['username']] = '<input type="checkbox" name="student_'.$db->Record['username'].'" id="student_'.$db->Record['username'].'"><label for="student_'.$db->Record['username'].'"> '.$db->Record['lastname'].', '.$db->Record['firstname']. '</label>';
-			$my_students[$db->Record['username']] = $db->Record['email'];
+		while ($db->nextRecord())
+		{	$t['students'][$db->record['username']] = '<input type="checkbox" name="student_'.$db->record['username'].'" id="student_'.$db->record['username'].'"><label for="student_'.$db->record['username'].'"> '.$db->record['lastname'].', '.$db->record['firstname']. '</label>';
+			$my_students[$db->record['username']] = $db->record['email'];
 		}
 		
 		$my_email_to_send = array();

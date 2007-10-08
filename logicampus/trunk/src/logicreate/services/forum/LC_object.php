@@ -21,8 +21,8 @@ class baseObject {
                         $sql = "select * from ".$this->_tableName." where pkey='$pkey'";
                 $db->query($sql);
 
-                while($db->next_record()) {
-                        arrayIntoObject($this,$db->Record);
+                while($db->nextRecord()) {
+                        arrayIntoObject($this,$db->record);
                 }
         }
 
@@ -39,8 +39,8 @@ class baseObject {
                 $db->query($sql);
 
 
-                while($db->next_record()) {
-                        $idarray[] = $db->Record;
+                while($db->nextRecord()) {
+                        $idarray[] = $db->record;
                 }
                 $this->_Array = $idarray;
         }
@@ -50,8 +50,8 @@ class baseObject {
                 if ($orderby) { $o = " order by  ".$this->_tablePrefix."$orderby"; }
                 $sql = "select pkey,".$this->_name." from ".$this->_tableName." where  ".$this->_tablePrefix."username = '$username' $o";
                 $db->query($sql);
-                while($db->next_record()) {
-                        $idarray[$db->Record[0]] = $db->Record[1];
+                while($db->nextRecord()) {
+                        $idarray[$db->record[0]] = $db->record[1];
                 }
                 $this->_Array = $idarray;
         }
@@ -61,8 +61,8 @@ class baseObject {
                 if ($orderby) { $o = " order by  $orderby"; }
                 $sql = "select pkey,".$this->_name." from ".$this->_tableName." where  schoolID = '$schoolID' $o";
                 $db->query($sql);
-                while($db->next_record()) {
-                        $idarray[$db->Record[0]] = $db->Record[1];
+                while($db->nextRecord()) {
+                        $idarray[$db->record[0]] = $db->record[1];
                 }
 
                 $this->_Array = $idarray;
@@ -79,8 +79,8 @@ class baseObject {
                 $sql = $this->_getAllSQL." $where ".$this->_extrawhere." $o";
                 $db->query($sql);
 
-                while($db->next_record()) {
-                        $idarray[] = $db->Record;
+                while($db->nextRecord()) {
+                        $idarray[] = $db->record;
                 }
                 $this->_Array = $idarray;
         }
@@ -96,8 +96,8 @@ class baseObject {
                 if ($orderby) { $o = " order by $orderby"; }
                 $sql = $this->_getAllSQL." $where ".$this->_extrawhere." $o";
                 $db->query($sql);
-                while($db->next_record()) {
-                        $idarray[] = $db->Record;
+                while($db->nextRecord()) {
+                        $idarray[] = $db->record;
                 }
                 $this->_Array = $idarray;
         }

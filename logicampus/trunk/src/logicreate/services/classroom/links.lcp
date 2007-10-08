@@ -27,11 +27,11 @@ class links extends StudentService {
 				$sql = "select url from class_links where id_class_links='".$id."'";
 				$db->queryOne($sql);
 				$this->presentor = 'redirectPresentation';
-				if ( substr($db->Record['url'],0,7) != 'http://' ) {
-					$db->Record['url'] = 'http://'.$db->Record['url'];
+				if ( substr($db->record['url'],0,7) != 'http://' ) {
+					$db->record['url'] = 'http://'.$db->record['url'];
 				}
 
-				$t['url'] = $db->Record['url'];
+				$t['url'] = $db->record['url'];
 				return;
 			}
 
@@ -50,7 +50,7 @@ class links extends StudentService {
 			$sql = "SELECT $contentLabel FROM $table WHERE 
 					$tablePkeyLabel ='$contentPkey'";
 			$db->queryOne($sql);
-			if ($activeClassTaken == $db->Record[$contentLabel])
+			if ($activeClassTaken == $db->record[$contentLabel])
 			{
 				return true;
 			}

@@ -74,7 +74,7 @@ class studentPresentation extends FacultyService {
 		$pres = presentationObj::_getFromDB($lc->getvars['id'], 'id_presentations', 'id_classes='.$u->activeClassTaught->id_classes);
 
 		$db->queryOne("select firstname,lastname from profile where username='{$pres->author}'");
-		$name = $db->Record;
+		$name = $db->record;
 		$t['author'] = $name['firstname'].' '.$name['lastname'];
 		$t['createdOn'] = $pres->createdOn;
 

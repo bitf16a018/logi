@@ -21,8 +21,8 @@ class trash extends classdoclibService {
 		$db->query('select pkey,name,class_id from classdoclib_Trash where owner = \''.$u->username.'\'
 		and class_id = '.$u->activeClassTaught->id_classes);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-		while($db->next_record()) {;
-			$t['trash'][] =$db->Record;
+		while($db->nextRecord()) {;
+			$t['trash'][] =$db->record;
 		}
 	}
 

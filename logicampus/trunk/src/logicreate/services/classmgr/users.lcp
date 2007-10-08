@@ -212,12 +212,12 @@ n']['classes']));
 		$db->query("select classes.*, courses.* from classes, courses 
 				where classes.id_semesters=$semesterId 
 				and classes.id_courses = courses.id_courses order by courses.courseFamily, courses.courseNumber, courseName");
-		while($db->next_record()) {
-			$x = explode("\n",$db->Record['sectionNumbers']);
+		while($db->nextRecord()) {
+			$x = explode("\n",$db->record['sectionNumbers']);
 			foreach($x as $k=>$v) { 
-				$c[$v] = $db->Record['courseFamily']." ".
-				$db->Record['courseNumber']." - ".$db->Record['courseName']." - ".
-				" ($v) - ".$db->Record['facultyId'];
+				$c[$v] = $db->record['courseFamily']." ".
+				$db->record['courseNumber']." - ".$db->record['courseName']." - ".
+				" ($v) - ".$db->record['facultyId'];
 			}
 		}
 		$t['courses'] = makeOptions($c);
@@ -246,7 +246,7 @@ n']['classes']));
 // only dealing with current semester right now
 // 
 		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
-		$semesterId = $db->Record['id_semesters'];
+		$semesterId = $db->record['id_semesters'];
 
 		$name = addslashes(stripslashes($lc->getvars['username']));
 		$sectionNumber = (int)$lc->getvars['id'];
@@ -288,18 +288,18 @@ n']['classes']));
 				}
 		}
 
-		while ($db->next_record() ) {
-			if ( ($db->Record['firstname']== '') and 
-           ($db->Record['lastname'] == '') ) {
+		while ($db->nextRecord() ) {
+			if ( ($db->record['firstname']== '') and 
+           ($db->record['lastname'] == '') ) {
 
-				$db->Record['profiledata'] = "<i>Incomplete profile data</i>";
+				$db->record['profiledata'] = "<i>Incomplete profile data</i>";
 
 			} else {
 
-				$db->Record['profiledata'] = $db->Record['lastname'].", ".$db->Record['firstname'];
+				$db->record['profiledata'] = $db->record['lastname'].", ".$db->record['firstname'];
 
 			}
-			$t['users'][] = $db->Record;
+			$t['users'][] = $db->record;
 		}
 
 		if ($this->sql) { 
@@ -310,35 +310,35 @@ n']['classes']));
 			$db->query("select count(username) as usrcount from ".$this->table." lc where $where");
 		}
 
-		$db->next_record();
-		$t['result_pages'] = ceil( $db->Record['usrcount'] / $this->PAGE_SIZE);
+		$db->nextRecord();
+		$t['result_pages'] = ceil( $db->record['usrcount'] / $this->PAGE_SIZE);
 		$t['current_page'] = ceil( $t[start] / $this->PAGE_SIZE) + 1;
-		$t['max_results'] = $db->Record['usrcount'];
+		$t['max_results'] = $db->record['usrcount'];
 		$t['PAGE_SIZE'] = $this->PAGE_SIZE;
 
 
 		//profile
 		$db->query("describe profile");	//get profile meta data
-		$db->next_record(); 		//drop off pkey
+		$db->nextRecord(); 		//drop off pkey
 		$t['profile_opt'] .= "<option value='_email'>Email</option>\n";
 		$t['profile_opt'] .= "<option value='_username'>Username</option>\n";
 		$db->setResultType('BOTH');
-		while ($db->next_record() ) {
-			$t['profile_opt'] .= "<option value=\"".$db->Record[0]."\">".$db->Record[0]."</option>\n";
+		while ($db->nextRecord() ) {
+			$t['profile_opt'] .= "<option value=\"".$db->record[0]."\">".$db->record[0]."</option>\n";
 		}
 
 		$db->query("select * from courses order by courseFamily, courseNumber, courseName");
 
-		while($db->next_record()) {
+		while($db->nextRecord()) {
 
-			$x[$db->Record['id_courses']] = substr($db->Record['courseFamily']." ".$db->Record['courseNumber']." - ".$db->Record['courseName'], 0, 40);
+			$x[$db->record['id_courses']] = substr($db->record['courseFamily']." ".$db->record['courseNumber']." - ".$db->record['courseName'], 0, 40);
 
 		}
 
 		$t['courses'] = makeOptions($x, (int)$this->course);
 		$db->query("select * from semesters");
-		while($db->next_record()) {
-			$s[$db->Record['id_semesters']] = $db->Record['semesterId'];
+		while($db->nextRecord()) {
+			$s[$db->record['id_semesters']] = $db->record['semesterId'];
 		}
 		$t['semesters'] = makeOptions($s, (int)$this->semester);
 
@@ -487,10 +487,10 @@ n']['classes']));
 		username='".$u->username."'";
 
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$data['courseFamily'][$db->Record['id_profile_faculty_coursefamily']] =
-			$db->Record['id_profile_faculty_coursefamily'];
+			$data['courseFamily'][$db->record['id_profile_faculty_coursefamily']] =
+			$db->record['id_profile_faculty_coursefamily'];
 
 		}
 		
@@ -568,10 +568,10 @@ n']['classes']));
 		where u.username='".$lc->getvars['username']."'";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-	    $t['user'] = $db->Record;
+	    $t['user'] = $db->record;
 
-		$t['photo'] = is_file(IMAGES_PATH.'photos/'.$db->Record['photo'])
-			? IMAGES_URL.'photos/'.$db->Record['photo']
+		$t['photo'] = is_file(IMAGES_PATH.'photos/'.$db->record['photo'])
+			? IMAGES_URL.'photos/'.$db->record['photo']
 			: IMAGES_URL.'noimage.png';
 
 
@@ -593,8 +593,8 @@ n']['classes']));
 			$orclause = @join(" or pkey = ",$lc->postvars['users']);
 			$sql = "select pkey,username from lcUsers where pkey = $orclause";
 			$db->query($sql);
-			while ($db->next_record() ) {
-				$u->sessionvars['user_collection'][$db->Record['pkey']] = $db->Record['username'];
+			while ($db->nextRecord() ) {
+				$u->sessionvars['user_collection'][$db->record['pkey']] = $db->record['username'];
 				$n++;
 			}
 			$u->saveSession();

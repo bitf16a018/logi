@@ -58,11 +58,11 @@ class gradebook extends StudentService {
 
 		//assume rank is one, push rank down for each student that has a higher score
 		$t['rank'] = 1;
-		while ($db->next_record() ) {
-			if ($u->username == $db->Record['username']) {
-				$usersScore = $db->Record['score'];
+		while ($db->nextRecord() ) {
+			if ($u->username == $db->record['username']) {
+				$usersScore = $db->record['score'];
 			}
-			$scores[$db->Record['username']] = $db->Record['score'];
+			$scores[$db->record['username']] = $db->record['score'];
 		}
 
 		foreach ($scores as $username => $score) {

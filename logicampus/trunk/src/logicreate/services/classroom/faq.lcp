@@ -39,8 +39,8 @@ class faq extends StudentService {
 				where id_classes='.$u->activeClassTaken->id_classes.$where.'
 				order by category, clicks desc';
 			$db->query($sql);
-			while ($db->next_record())
-				$t['faqs'][] = $db->Record;
+			while ($db->nextRecord())
+				$t['faqs'][] = $db->record;
 
 			$inactivelinks[] = 'FAQs';
 
@@ -61,7 +61,7 @@ class faq extends StudentService {
 				where id_classes='.$u->activeClassTaken->id_classes.'
 				and id_class_faqs='.(int)$lc->getvars['id'];
 			$db->queryOne($sql);
-			$t['faq'] = $db->Record;
+			$t['faq'] = $db->record;
 
 		}
 

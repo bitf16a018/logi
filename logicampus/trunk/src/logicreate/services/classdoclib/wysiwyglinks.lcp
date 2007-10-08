@@ -51,9 +51,9 @@ class wysiwyglinks extends classdoclibService {
 		
 		$db->query($sql);
 
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{
-			$t['links'][] = "\n\n\n\n".'<a onclick="parent.document.getElementById(\'linklabel\').value = \''.addslashes(stripslashes(htmlentities($db->Record['txTitle']))).'\'; parent.document.getElementById(\'url\').value = \''. appurl('classroom/lessons/event=viewcontent/id='.$db->Record['id_class_lesson_content']).'\'; return false;" href="#">'.htmlentities(stripslashes($db->Record['txTitle']), ENT_QUOTES).'</a>';
+			$t['links'][] = "\n\n\n\n".'<a onclick="parent.document.getElementById(\'linklabel\').value = \''.addslashes(stripslashes(htmlentities($db->record['txTitle']))).'\'; parent.document.getElementById(\'url\').value = \''. appurl('classroom/lessons/event=viewcontent/id='.$db->record['id_class_lesson_content']).'\'; return false;" href="#">'.htmlentities(stripslashes($db->record['txTitle']), ENT_QUOTES).'</a>';
 		
 		}
 	

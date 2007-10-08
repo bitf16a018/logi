@@ -30,8 +30,8 @@ class online extends  RegAuth {
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			
 			$i=1;
-			while($db->next_record()) {
-				$t['users'][$i++]= $db->Record;
+			while($db->nextRecord()) {
+				$t['users'][$i++]= $db->record;
 			}
 			$t['anonymous'] = $x - count($t['users']);
 			$t['total'] = $x;

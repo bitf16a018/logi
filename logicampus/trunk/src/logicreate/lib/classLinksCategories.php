@@ -14,15 +14,15 @@ if ($where) { $where = " and $where"; }
 $db = DB::getHandle($dsn);
  if ($prop=='') { $prop=$this->_pkey; }
 $db->query("select id_class_links_categories,id_class_links_categories_parent,id_classes,txTitle,sortOrder from class_links_categories where $prop='$pkey' $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new classLinksCategories();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_class_links_categories = $db->Record['id_class_links_categories'];
-$temp->id_class_links_categories_parent = $db->Record['id_class_links_categories_parent'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->txTitle = $db->Record['txTitle'];
-$temp->sortOrder = $db->Record['sortOrder'];
+$temp->id_class_links_categories = $db->record['id_class_links_categories'];
+$temp->id_class_links_categories_parent = $db->record['id_class_links_categories_parent'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->txTitle = $db->record['txTitle'];
+$temp->sortOrder = $db->record['sortOrder'];
 $objects[] = $temp;
 }
 if (count($objects)>1) {
@@ -36,15 +36,15 @@ $db = DB::getHandle($dsn);
 if ($orderBy) { $orderBy = ' order by $orderBy '; }
 if ($where) { $where = ' and $where'; }
 $db->query("select id_class_links_categories,id_class_links_categories_parent,id_classes,txTitle,sortOrder from class_links_categories $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new classLinksCategories();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_class_links_categories = $db->Record['id_class_links_categories'];
-$temp->id_class_links_categories_parent = $db->Record['id_class_links_categories_parent'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->txTitle = $db->Record['txTitle'];
-$temp->sortOrder = $db->Record['sortOrder'];
+$temp->id_class_links_categories = $db->record['id_class_links_categories'];
+$temp->id_class_links_categories_parent = $db->record['id_class_links_categories_parent'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->txTitle = $db->record['txTitle'];
+$temp->sortOrder = $db->record['sortOrder'];
 $objects[] = $temp;
 }
  return $objects;

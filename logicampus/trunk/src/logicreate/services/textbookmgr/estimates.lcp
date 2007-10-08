@@ -53,7 +53,7 @@ class estimates extends FacultyService {
 		$name = addslashes(stripslashes($lc->postvars['savename']));
 		$books = $u->sessionvars['textbooks'];
 		$db->queryOne("Select * from textbook_estimates where textbook_estimates_name ='$name'");
-		$key = $db->Record['textbook_estimates_key'];
+		$key = $db->record['textbook_estimates_key'];
 		if ($key) {
 			$db->query("delete from textbook_estimates_data where textbook_estimates_key=$key");
 		} else {
@@ -109,8 +109,8 @@ class estimates extends FacultyService {
 		
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
-		while($db->next_record()){ 
-			$temp[$db->Record['id_semesters']] = $db->Record['semesterTerm']." ".$db->Record['semesterYear'];
+		while($db->nextRecord()){ 
+			$temp[$db->record['id_semesters']] = $db->record['semesterTerm']." ".$db->record['semesterYear'];
 		}
 		$t['semester1'] = makeOptions($temp);
 		$t['semester2'] = makeOptions($temp);
@@ -125,7 +125,7 @@ class estimates extends FacultyService {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$t['semester_label'] = $db->Record['semesterYear'].' '.$db->Record['semesterTerm'];
+		$t['semester_label'] = $db->record['semesterYear'].' '.$db->record['semesterTerm'];
 	
 		$sql = '
 		SELECT semesterTerm, semesterYear
@@ -136,7 +136,7 @@ class estimates extends FacultyService {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$t['semester1_label'] = $db->Record['semesterYear'].' '.$db->Record['semesterTerm'];
+		$t['semester1_label'] = $db->record['semesterYear'].' '.$db->record['semesterTerm'];
 		
 		$sql = '
 		SELECT semesterTerm, semesterYear
@@ -147,7 +147,7 @@ class estimates extends FacultyService {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		
-		$t['semester2_label'] = $db->Record['semesterYear'].' '.$db->Record['semesterTerm'];
+		$t['semester2_label'] = $db->record['semesterYear'].' '.$db->record['semesterTerm'];
 		
 
 	
@@ -203,8 +203,8 @@ GROUP BY B.id_classes
 		
 		$a_books = array();
 		// at most, 1000 records, first semester of this program there are only 200+
-		while($db->next_record())
-		{	$a_books[] = $db->Record;
+		while($db->nextRecord())
+		{	$a_books[] = $db->record;
 		}
 		
 		$total_count = 0;
@@ -235,11 +235,11 @@ GROUP BY B.id_classes
 // get me the faculty id and course info for the class associated with the current book
 
 #			$db->queryOne("select facultyId, courseFamilyNumber from classes where id_classes='".$book['id_classes']."'");
-#			$temp= $db->Record;
+#			$temp= $db->record;
 // now get me the info for that class (matching instructor and class name) for the selected 
 // previous semester
 #			$db->queryOne("select * from classes where facultyId='".$temp['facultyId']."' and courseFamilyNumber='".$temp['courseFamilyNumber']."' and id_semesters='".$sem1."'");
-#			$info = $db->Record;
+#			$info = $db->record;
 
 // now we have a list of section numbers for the same class taught by the same instructor 
 // in the semester chosen by the textbook admin

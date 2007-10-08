@@ -19,8 +19,8 @@ class CM_Services {
 		$where = substr($where,0,-3);
 		$sql = sprintf($sql,$where);
 		$db->query($sql);
-		while ($db->next_record() ) {
-			$ret[] = $db->Record;
+		while ($db->nextRecord() ) {
+			$ret[] = $db->record;
 		}
 
 		return $ret;
@@ -47,8 +47,8 @@ class CM_Interface {
 
 		$db = DB::getHandle();
 		$db->query($sql);
-		while ($db->next_record() ) {
-			$ret[] = $db->Record;
+		while ($db->nextRecord() ) {
+			$ret[] = $db->record;
 		}
 	return $ret;
 	}
@@ -59,8 +59,8 @@ class CM_Interface {
 
 		$sql = "select mid from lcRegistry where moduleName = '$mname'";
 		$db->query($sql);
-		$db->next_record();		//get the moduleID from the registry
-		$mid = $db->Record[0];
+		$db->nextRecord();		//get the moduleID from the registry
+		$mid = $db->record[0];
 		
 		$sql = "select DISTINCT action from lcPerms where moduleID = '$mid' and (%s)";
 		for ($z=0; $z < count($u->groups); ++$z) {
@@ -70,8 +70,8 @@ class CM_Interface {
 
 		$sql = sprintf($sql,$where);
 		$db->query($sql);
-		while ($db->next_record() ) {
-			$ret[] = $db->Record[0];
+		while ($db->nextRecord() ) {
+			$ret[] = $db->record[0];
 		}
 
 		return $ret;

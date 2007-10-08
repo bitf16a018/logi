@@ -307,9 +307,9 @@ class TextbookClasses extends TextbookClassesBase {
 		$sql = "SELECT email FROM lcUsers where groups LIKE
 		'%|tbadmin|%'";
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$emailTo .= $db->Record['email'].',';	
+			$emailTo .= $db->record['email'].',';	
 		}
 		$emailTo = substr($emailTo, 0, -1);
 		mail($emailTo, "Textbook Added / Modifed", $msg, "From: ".WEBMASTER_EMAIL."\r\n");

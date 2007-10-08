@@ -12,10 +12,10 @@
  * of each other. 
  * <i>Example:</i>  
  * 	$db->query("select * from lcUsers");
- *	while ($db->next_record() ) {
- *		$db->query("select * from payments where username = '".$db->Record['username']."'");
- *		while ($db->next_record() ) {
- *			print_r($db->Record);
+ *	while ($db->nextRecord() ) {
+ *		$db->query("select * from payments where username = '".$db->record['username']."'");
+ *		while ($db->nextRecord() ) {
+ *			print_r($db->record);
  *		}
  *	}
  *
@@ -128,8 +128,8 @@ class DB {
 
 	function queryGetAll($sql) {
 		$this->query($sql);
-		while($this->next_record()){  
-			$array[] = $this->Record;
+		while($this->nextRecord()){  
+			$array[] = $this->record;
 		}
 		return $array;
 	}
@@ -165,13 +165,13 @@ class DB {
 	 * @return boolean
 	 * @param  int	$resID	Specific resultSet, default is last query
 	 */
-	function next_record($resID=false) {
+	function nextRecord($resID=false) {
 
 	}
 
 
 	/**
-	 * Short hand for query() and next_record().
+	 * Short hand for query() and nextRecord().
 	 *
 	 * @param string $sql SQL Command
 	 */

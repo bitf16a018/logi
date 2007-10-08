@@ -25,10 +25,10 @@ class viewPhoto extends RegAuth {
 			$pkey = $arg->getvars[1];	
 			$sql = "select * from userPhotos where pkey='$pkey'";
 			$db->queryOne($sql);
-			$t[image] = $db->Record;
+			$t[image] = $db->record;
 
 			$db->queryOne("select username, firstname, lastname from profile where username='".$t[image][username]."'");
-			$t[profile] = $db->Record;
+			$t[profile] = $db->record;
 
 			$db->query("update userPhotos set count=count+1 where pkey='$pkey'");
 			$t[_PHOTO_DIR] = $this->_PHOTO_DIR;

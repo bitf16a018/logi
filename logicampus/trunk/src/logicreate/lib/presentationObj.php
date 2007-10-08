@@ -17,18 +17,18 @@ if ($where) { $where = " and $where"; }
 $db = DB::getHandle($dsn);
  if ($prop=='') { $prop=$this->_pkey; }
 $db->query("select id_presentations,id_classes,title,status,author,createdOn,approvedOn,content from class_presentations where $prop='$pkey' $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new presentationObj();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_presentations = $db->Record['id_presentations'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->title = $db->Record['title'];
-$temp->status = $db->Record['status'];
-$temp->author = $db->Record['author'];
-$temp->createdOn = $db->Record['createdOn'];
-$temp->approvedOn = $db->Record['approvedOn'];
-$temp->content = $db->Record['content'];
+$temp->id_presentations = $db->record['id_presentations'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->title = $db->record['title'];
+$temp->status = $db->record['status'];
+$temp->author = $db->record['author'];
+$temp->createdOn = $db->record['createdOn'];
+$temp->approvedOn = $db->record['approvedOn'];
+$temp->content = $db->record['content'];
 $objects[] = $temp;
 }
 if (count($objects)>1) {
@@ -42,18 +42,18 @@ $db = DB::getHandle($dsn);
 if ($orderBy) { $orderBy = ' order by $orderBy '; }
 if ($where) { $where = ' and $where'; }
 $db->query("select id_presentations,id_classes,title,status,author,createdOn,approvedOn,content from class_presentations $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new presentationObj();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_presentations = $db->Record['id_presentations'];
-$temp->id_classes = $db->Record['id_classes'];
-$temp->title = $db->Record['title'];
-$temp->status = $db->Record['status'];
-$temp->author = $db->Record['author'];
-$temp->createdOn = $db->Record['createdOn'];
-$temp->approvedOn = $db->Record['approvedOn'];
-$temp->content = $db->Record['content'];
+$temp->id_presentations = $db->record['id_presentations'];
+$temp->id_classes = $db->record['id_classes'];
+$temp->title = $db->record['title'];
+$temp->status = $db->record['status'];
+$temp->author = $db->record['author'];
+$temp->createdOn = $db->record['createdOn'];
+$temp->approvedOn = $db->record['approvedOn'];
+$temp->content = $db->record['content'];
 $objects[] = $temp;
 }
  return $objects;

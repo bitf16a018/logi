@@ -25,7 +25,7 @@ class menu extends HercAuth {
 		$arg->templateName = 'main_details';
 
 		$db->queryOne("select * from menuCache where pkey=$menuID");
-		$cachedMenu = unserialize($db->Record['menuObj']);
+		$cachedMenu = unserialize($db->record['menuObj']);
 
 	}
 

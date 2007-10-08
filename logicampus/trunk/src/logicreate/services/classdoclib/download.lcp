@@ -77,7 +77,7 @@ class download extends classdoclibService {
 			AND A.daHasha=\''.$fhash.'\')
 			';
 			$db->queryOne($sql);
-			if ($db->Record == false) {
+			if ($db->record == false) {
 				//no permission to view this file
 				$this->presentor = 'errorMessage';
 				$t['message'] = "You do not have permission to view this content.";
@@ -85,7 +85,7 @@ class download extends classdoclibService {
 				
 			}
 			
-		$pkey = $db->Record['pkey'];			
+		$pkey = $db->record['pkey'];			
 		}
 		// END FHASH
 	

@@ -44,7 +44,7 @@ class hdCategory extends RegAuth {
 	function addrun(&$db,&$u,&$arg,&$t) { 
 		$sql = 'SELECT COUNT(*) category_exists FROM helpdesk_categories WHERE helpdesk_category_label=\''.$arg->postvars['label'].'\'';
 		$db->queryOne($sql);
-		if ($db->Record['category_exists'])
+		if ($db->record['category_exists'])
 		{
 			$this->presentor = "redirectPresentation";
 			$t['url'] = appurl("helpdesk/main/event=admin2/catmsg=dupcat");

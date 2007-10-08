@@ -358,7 +358,7 @@ class AssessmentQuestion extends AssessmentQuestionBase {
 			left join assessment as a on a.assessment_id=q.assessment_id 
 			where a.class_id='$id_classes' AND q.assessment_question_id='$key'";
 		if ($db->queryOne($sql) ) {
-			$superObj = AssessmentQuestionPeer::row2Obj($db->Record);
+			$superObj = AssessmentQuestionPeer::row2Obj($db->record);
 		}
 
 		switch($superObj->questionType) {

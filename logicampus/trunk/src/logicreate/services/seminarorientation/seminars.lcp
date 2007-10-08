@@ -112,12 +112,12 @@ class seminars extends BasicAuth {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
 		$this->sectionTitle = 'Adding Seminar ';
-		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+		$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].')';
 
-		$t['courseName'] = $db->Record['courseName'];
+		$t['courseName'] = $db->record['courseName'];
 		$t['courseFamNum'] =
-		$db->Record['courseFamily'].$db->Record['courseNumber'];
-		$t['facultyId'] = $db->Record['facultyId'];
+		$db->record['courseFamily'].$db->record['courseNumber'];
+		$t['facultyId'] = $db->record['facultyId'];
 
 		$lc->templateName = 'seminars_edit';
 		$f = new SiteForm($u->groups);
@@ -134,7 +134,7 @@ class seminars extends BasicAuth {
 		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$lc->getvars['id']."'";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$this->sectionTitle .= ' - '. $db->Record['courseName'].'('.$db->Record['courseFamily'].$db->Record['courseNumber'].')';
+		$this->sectionTitle .= ' - '. $db->record['courseName'].'('.$db->record['courseFamily'].$db->record['courseNumber'].')';
 
 		$t['id_classes'] = $lc->getvars['id'];
 	}
@@ -153,10 +153,10 @@ class seminars extends BasicAuth {
 		$sql = "SELECT a.courseFamily, a.courseNumber, a.facultyId, b.courseName 				FROM classes AS a INNER JOIN courses as b ON a.id_courses=b.id_courses WHERE a.id_classes='".$t['entry']->idClasses."'";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$t['courseName'] = $db->Record['courseName'];
+		$t['courseName'] = $db->record['courseName'];
 		$t['courseFamNum'] =
-		$db->Record['courseFamily'].$db->Record['courseNumber'];
-		$t['facultyId'] = $db->Record['facultyId'];
+		$db->record['courseFamily'].$db->record['courseNumber'];
+		$t['facultyId'] = $db->record['facultyId'];
 
 		$lc->templateName = 'seminars_edit';
 		$f = new SiteForm();
@@ -175,7 +175,7 @@ class seminars extends BasicAuth {
 				WHERE id_classes='".$lc->getvars['id_classes']."'";
 			$db->queryOne($sql);
 			# update the count on the seminar
-			$obj->numSeminar = $db->Record['count'] + 1;
+			$obj->numSeminar = $db->record['count'] + 1;
 			$obj->idClasses = $lc->getvars['id_classes'];
 			if ($obj->numSeminar == 5)
 			{
@@ -202,17 +202,17 @@ class seminars extends BasicAuth {
 			include_once(SERVICE_PATH."pm/privmess.php");
 			$mess = new privMess();
 			$mess->subject = 'Seminar '.$obj->numSeminar.' Updated To: '.getStatus($obj->entryStatus);
-			$mess->message = 'Your Seminar '.$obj->numSeminar.'</a> status changed on your '.$db->Record['courseName'].' - '.$db->Record['courseFamily'].$db->Record['courseNumber'].' class.';
+			$mess->message = 'Your Seminar '.$obj->numSeminar.'</a> status changed on your '.$db->record['courseName'].' - '.$db->record['courseFamily'].$db->record['courseNumber'].' class.';
 			$mess->message .="\n\nThe following note was appeneded:\n\n".$obj->note;
 	
 			$mess->sentTime = time();
 	
 			$mess->messageFrom = $u->username;
 			
-			$mess->messageTo = $db->Record['facultyId'];
+			$mess->messageTo = $db->record['facultyId'];
 			$mess->add();
 			
-			$db_temp = $db->Record;
+			$db_temp = $db->record;
 			
 			include_once(LIB_PATH.'eventsObj.php');
 			

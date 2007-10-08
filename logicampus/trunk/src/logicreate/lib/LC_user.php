@@ -197,14 +197,14 @@ class lcUser {
 		$db = DB::getHandle();
 		$or = join("  or pkey = ", $keys);
 		$db->query("select * from lcUsers where pkey = $or",false);
-		while ( $db->next_record() ) {
+		while ( $db->nextRecord() ) {
 			unset($temp);
 			$temp =   new lcUser();
-			$temp->username = $db->Record[username];
-			$temp->password = $db->Record[password];
-			$temp->email = $db->Record[email];
-			$temp->groups = explode('|',substr($db->Record[groups],1,-1));
-			$temp->userId = $db->Record['pkey'];
+			$temp->username = $db->record[username];
+			$temp->password = $db->record[password];
+			$temp->email = $db->record[email];
+			$temp->groups = explode('|',substr($db->record[groups],1,-1));
+			$temp->userId = $db->record['pkey'];
 
 			if (! in_array('public',$temp->groups) ) 
 				$temp->groups[] = 'public';
@@ -331,7 +331,7 @@ class lcUser {
 		$sql = "select count(*) as user_exists from lcUsers where username = '".$this->username."' or email='".$this->email."'";
 		$db->queryOne($sql,false);
 		
-		if ($db->Record['user_exists'])
+		if ($db->record['user_exists'])
 		{	return -1;
 		}
 		
@@ -357,8 +357,8 @@ class lcUser {
 	function addUser($db) {
 		$sql = "select count(username) as username, count(email) as email from lcUsers where username = '".$this->username."' or email='".$this->email."'";
 		$db->queryOne($sql);
-		$ucount = $db->Record['username'];
-		$ecount = $db->Record['email'];
+		$ucount = $db->record['username'];
+		$ecount = $db->record['email'];
 		if ( ($ucount != 0) and ($ecount != 0) ) {
 			return false;
 		}
@@ -803,14 +803,14 @@ class UserProfile {
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne("select * from profile where username='".$prof->username."'",false);
 
-		while ( list($k,$v) = @each($db->Record) ) {
+		while ( list($k,$v) = @each($db->record) ) {
 			$prof->values[$k] = $v;
 			$prof->keys[] = $k;
 		}
 
 		if ($type > 1 && strlen($prof->tableName) > 1) {
 			$db->queryOne("select * from ".$prof->tableName." where username='".$prof->username."'",false);
-			while ( list($k,$v) = @each($db->Record) ) {
+			while ( list($k,$v) = @each($db->record) ) {
 				$prof->values[$k] = $v;
 				$prof->keys[] = $k;
 			}

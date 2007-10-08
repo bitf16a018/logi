@@ -161,10 +161,10 @@ class AdjustLessonDates extends FacultyService {
 				$lc->postvars['deactiveOn'][$row]['day'],
 				$lc->postvars['deactiveOn'][$row]['year']);
 
-			if ( $activeOnStamp != $db->Record['date_available'] 
-				|| $deactiveOnStamp != $db->Record['date_unavailable'] ) {
-				$updates[$db->Record['id_class_lessons']]['date_available'] = $activeOnStamp;
-				$updates[$db->Record['id_class_lessons']]['date_unavailable'] = $deactiveOnStamp;
+			if ( $activeOnStamp != $db->record['date_available'] 
+				|| $deactiveOnStamp != $db->record['date_unavailable'] ) {
+				$updates[$db->record['id_class_lessons']]['date_available'] = $activeOnStamp;
+				$updates[$db->record['id_class_lessons']]['date_unavailable'] = $deactiveOnStamp;
 			}
 			++$row;
 		}
@@ -207,10 +207,10 @@ class AdjustLessonDates extends FacultyService {
 				$lc->postvars['dateUnavailable'][$row]['day'],
 				$lc->postvars['dateUnavailable'][$row]['year']);
 
-			if ( $activeOnStamp != $db->Record['date_available'] 
-				|| $deactiveOnStamp != $db->Record['date_unavailable'] ) {
-				$updates[$db->Record['assessment_id']]['date_available'] = $activeOnStamp;
-				$updates[$db->Record['assessment_id']]['date_unavailable'] = $deactiveOnStamp;
+			if ( $activeOnStamp != $db->record['date_available'] 
+				|| $deactiveOnStamp != $db->record['date_unavailable'] ) {
+				$updates[$db->record['assessment_id']]['date_available'] = $activeOnStamp;
+				$updates[$db->record['assessment_id']]['date_unavailable'] = $deactiveOnStamp;
 			}
 			++$row;
 		}
@@ -276,12 +276,12 @@ class AdjustLessonDates extends FacultyService {
 				$lc->postvars['doNotAccept'][$row]['year']));
 		
 
-			if ( $activeStamp != $db->Record['activeDate'] 
-				|| $dueDateStamp != $db->Record['dueDate'] 
-				|| $dateNoAcceptStamp != $db->Record['dateNoAccept'] ) {
-				$updates[$db->Record['id_class_assignments']]['activeDate'] = $activeStamp;
-				$updates[$db->Record['id_class_assignments']]['dueDate'] = $dueDateStamp;
-				$updates[$db->Record['id_class_assignments']]['dateNoAccept'] = $dateNoAcceptStamp;
+			if ( $activeStamp != $db->record['activeDate'] 
+				|| $dueDateStamp != $db->record['dueDate'] 
+				|| $dateNoAcceptStamp != $db->record['dateNoAccept'] ) {
+				$updates[$db->record['id_class_assignments']]['activeDate'] = $activeStamp;
+				$updates[$db->record['id_class_assignments']]['dueDate'] = $dueDateStamp;
+				$updates[$db->record['id_class_assignments']]['dateNoAccept'] = $dateNoAcceptStamp;
 			}
 			++$row;
 		}

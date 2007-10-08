@@ -16,15 +16,15 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    $db = DB::getHandle($dsn);
    if ($prop=='') { $prop=$this->_pkey; }
    $db->query("select checkList,id_class_lessons,createdOn,title,description from class_lessons where $prop='$pkey' $where $orderBy");
-   if($db->next_record()) {
+   if($db->nextRecord()) {
       $temp = new classLessonObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_lessons = $db->Record['id_class_lessons'];
-      $temp->checkList = $db->Record['checkList'];
-      $temp->createdOn = $db->Record['createdOn'];
-      $temp->title = $db->Record['title'];
-      $temp->description = $db->Record['description'];
+      $temp->id_class_lessons = $db->record['id_class_lessons'];
+      $temp->checkList = $db->record['checkList'];
+      $temp->createdOn = $db->record['createdOn'];
+      $temp->title = $db->record['title'];
+      $temp->description = $db->record['description'];
    }
 if ( !$temp ) { trigger_error('empty persistant object'); }
 return $temp;
@@ -37,15 +37,15 @@ function _getAllFromDB($key,$prop='',$where='', $orderBy='',$dsn='default') {
    if ($orderBy) { $orderBy = " order by $orderBy"; }
    if ($where) { $where = " and $where"; }
    $db->query("select checkList,id_class_lessons,createdOn,title,description from class_lessons where $prop='$key' $where $orderBy");
-   while ($db->next_record()) {
+   while ($db->nextRecord()) {
       $temp = new classLessonObj();
       $temp->_dsn = $dsn;
       $temp->__loaded = true; 
-      $temp->id_class_lessons = $db->Record['id_class_lessons'];
-      $temp->createdOn = $db->Record['createdOn'];
-      $temp->checkList = $db->Record['checkList'];
-      $temp->title = $db->Record['title'];
-      $temp->description = $db->Record['description'];
+      $temp->id_class_lessons = $db->record['id_class_lessons'];
+      $temp->createdOn = $db->record['createdOn'];
+      $temp->checkList = $db->record['checkList'];
+      $temp->title = $db->record['title'];
+      $temp->description = $db->record['description'];
       $objects[] = $temp;
 }
 return $objects;

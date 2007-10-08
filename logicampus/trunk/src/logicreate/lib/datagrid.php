@@ -843,8 +843,8 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 			where u.userType='.USERTYPE_FACULTY.'
 			order by p.lastname';
 		$db->query($sql);
-		while( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['username']] = $db->Record['lastname'].', '.$db->Record['firstname'];
+		while( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['username']] = $db->record['lastname'].', '.$db->record['firstname'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -857,8 +857,8 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$sql = 'select distinct concat(courseFamily, courseNumber) as courseFamilyNumber,
 			id_courses from courses order by courseFamily, courseNumber';
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['id_courses']] = $db->Record['courseFamilyNumber'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['id_courses']] = $db->record['courseFamilyNumber'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -870,8 +870,8 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$sql = 'select distinct classType from classes';
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['classType']] = $db->Record['classType'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['classType']] = $db->record['classType'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -883,8 +883,8 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$sql = 'select distinct courseFamily from courses';
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['courseFamily']] = $db->Record['courseFamily'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['courseFamily']] = $db->record['courseFamily'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -930,9 +930,9 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$sql = 'select distinct assigned_to from '.$table.' order by assigned_to';
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['assigned_to']] =
-				$db->Record['assigned_to'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['assigned_to']] =
+				$db->record['assigned_to'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -953,9 +953,9 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$sql = 'select distinct userid from '.$table.' order by userid';
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['userid']] =
-				$db->Record['userid'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['userid']] =
+				$db->record['userid'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -966,8 +966,8 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$sql = 'select helpdesk_status_id, helpdesk_status_label from '.$table;
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['helpdesk_status_id']] = $db->Record['helpdesk_status_label'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['helpdesk_status_id']] = $db->record['helpdesk_status_label'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}
@@ -978,8 +978,8 @@ if ($arr['columnName']=="hdtext") { // helpdesk specific
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$sql = "select * from $table order by helpdesk_category_label ASC";
 		$db->query($sql);
-		while ( $db->next_record() ) {
-			$this->selectFilters[$columnName][$db->Record['helpdesk_category_id']] = $db->Record['helpdesk_category_label'];
+		while ( $db->nextRecord() ) {
+			$this->selectFilters[$columnName][$db->record['helpdesk_category_id']] = $db->record['helpdesk_category_label'];
 		}
 		$this->selectFilters[$columnName]['!displayName'] = $displayName;
 	}

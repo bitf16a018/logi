@@ -35,7 +35,7 @@ class presentations extends StudentService {
 			and author="'.$u->username.'"
 			and status=1';
 		$db->queryOne($sql);
-		$t['inactivePresCount'] = $db->Record['inactivePresCount'];
+		$t['inactivePresCount'] = $db->record['inactivePresCount'];
 
 		$dg = new datagrid( $this->modules, $this->serviceName );
 		$dg->table = 'class_presentations as p';
@@ -64,7 +64,7 @@ class presentations extends StudentService {
 			and id_presentations="'.(int)$arg->getvars['id'].'"';
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$t['pres'] = $db->Record;
+		$t['pres'] = $db->record;
 	}
 
 	function submitRun(&$db,&$u,&$arg,&$t) {

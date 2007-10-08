@@ -22,23 +22,23 @@ if ($where) { $where = ' and $where'; }
 $db = DB::getHandle($dsn);
  if ($prop=='') { $prop=$this->_pkey; }
 $db->query("select id_courses,courseFamily,courseNumber,courseName,courseDescription,preReq1,preReq2,preReq3,preReq4,coReq1,coReq2,coReq3,coReq4 from courses where $prop='$pkey' $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new courseObj();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_courses = $db->Record['id_courses'];
-$temp->courseFamily = $db->Record['courseFamily'];
-$temp->courseNumber = $db->Record['courseNumber'];
-$temp->courseName = $db->Record['courseName'];
-$temp->courseDescription = $db->Record['courseDescription'];
-$temp->preReq1 = $db->Record['preReq1'];
-$temp->preReq2 = $db->Record['preReq2'];
-$temp->preReq3 = $db->Record['preReq3'];
-$temp->preReq4 = $db->Record['preReq4'];
-$temp->coReq1 = $db->Record['coReq1'];
-$temp->coReq2 = $db->Record['coReq2'];
-$temp->coReq3 = $db->Record['coReq3'];
-$temp->coReq4 = $db->Record['coReq4'];
+$temp->id_courses = $db->record['id_courses'];
+$temp->courseFamily = $db->record['courseFamily'];
+$temp->courseNumber = $db->record['courseNumber'];
+$temp->courseName = $db->record['courseName'];
+$temp->courseDescription = $db->record['courseDescription'];
+$temp->preReq1 = $db->record['preReq1'];
+$temp->preReq2 = $db->record['preReq2'];
+$temp->preReq3 = $db->record['preReq3'];
+$temp->preReq4 = $db->record['preReq4'];
+$temp->coReq1 = $db->record['coReq1'];
+$temp->coReq2 = $db->record['coReq2'];
+$temp->coReq3 = $db->record['coReq3'];
+$temp->coReq4 = $db->record['coReq4'];
 $objects[] = $temp;
 }
 if (count($objects)>1) {
@@ -52,23 +52,23 @@ $db = DB::getHandle($dsn);
 if ($orderBy) { $orderBy = ' order by $orderBy '; }
 if ($where) { $where = ' and $where'; }
 $db->query("select id_courses,courseFamily,courseNumber,courseName,courseDescription,preReq1,preReq2,preReq3,preReq4,coReq1,coReq2,coReq3,coReq4 from courses $where $orderBy");
-while ($db->next_record()) {
+while ($db->nextRecord()) {
  $temp = new courseObj();
 $temp->_dsn = $dsn;
 $temp->__loaded = true; 
-$temp->id_courses = $db->Record['id_courses'];
-$temp->courseFamily = $db->Record['courseFamily'];
-$temp->courseNumber = $db->Record['courseNumber'];
-$temp->courseName = $db->Record['courseName'];
-$temp->courseDescription = $db->Record['courseDescription'];
-$temp->preReq1 = $db->Record['preReq1'];
-$temp->preReq2 = $db->Record['preReq2'];
-$temp->preReq3 = $db->Record['preReq3'];
-$temp->preReq4 = $db->Record['preReq4'];
-$temp->coReq1 = $db->Record['coReq1'];
-$temp->coReq2 = $db->Record['coReq2'];
-$temp->coReq3 = $db->Record['coReq3'];
-$temp->coReq4 = $db->Record['coReq4'];
+$temp->id_courses = $db->record['id_courses'];
+$temp->courseFamily = $db->record['courseFamily'];
+$temp->courseNumber = $db->record['courseNumber'];
+$temp->courseName = $db->record['courseName'];
+$temp->courseDescription = $db->record['courseDescription'];
+$temp->preReq1 = $db->record['preReq1'];
+$temp->preReq2 = $db->record['preReq2'];
+$temp->preReq3 = $db->record['preReq3'];
+$temp->preReq4 = $db->record['preReq4'];
+$temp->coReq1 = $db->record['coReq1'];
+$temp->coReq2 = $db->record['coReq2'];
+$temp->coReq3 = $db->record['coReq3'];
+$temp->coReq4 = $db->record['coReq4'];
 $objects[] = $temp;
 }
  return $objects;

@@ -11,17 +11,17 @@ class menuEditor extends HercAuth {
 		$t[menu] = MenuObj::get($arg->getvars[3]);
 
 		$db->query("select gid,groupName from lcGroups order by groupName");
-		while($db->next_record()) {
-			$t[groups] .= '<option value="'.$db->Record[0].'" ';
-			$t[notgroups] .= '<option value="'.$db->Record[0].'" ';
-			if ( in_array($db->Record[0],$t[menu]->groups) ) {
+		while($db->nextRecord()) {
+			$t[groups] .= '<option value="'.$db->record[0].'" ';
+			$t[notgroups] .= '<option value="'.$db->record[0].'" ';
+			if ( in_array($db->record[0],$t[menu]->groups) ) {
 				$t[groups] .= 'SELECTED';
 			}
-			if ( in_array($db->Record[0],$t[menu]->notgroups) ) {
+			if ( in_array($db->record[0],$t[menu]->notgroups) ) {
 				$t[notgroups] .= 'SELECTED';
 			}
-			$t[groups] .= '>'.$db->Record[1].'</option>';
-			$t[notgroups] .= '>'.$db->Record[1].'</option>';
+			$t[groups] .= '>'.$db->record[1].'</option>';
+			$t[notgroups] .= '>'.$db->record[1].'</option>';
 
 		}
 
@@ -68,11 +68,11 @@ class menuEditor extends HercAuth {
 	function addRun (&$db, &$u, &$arg, &$t) {
 
 		$db->query("select gid,groupName from lcGroups order by groupName");
-		while($db->next_record()) {
-			$t[groups] .= '<option value="'.$db->Record[0].'" ';
-			$t[notgroups] .= '<option value="'.$db->Record[0].'" ';
-			$t[groups] .= '>'.$db->Record[1].'</option>';
-			$t[notgroups] .= '>'.$db->Record[1].'</option>';
+		while($db->nextRecord()) {
+			$t[groups] .= '<option value="'.$db->record[0].'" ';
+			$t[notgroups] .= '<option value="'.$db->record[0].'" ';
+			$t[groups] .= '>'.$db->record[1].'</option>';
+			$t[notgroups] .= '>'.$db->record[1].'</option>';
 
 		}
 

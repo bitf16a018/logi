@@ -113,17 +113,17 @@ class chat extends StudentService {
 					<td><B>Message</B></td>
 				</tr>';
 				$i_posting = 0;
-				while ($db->next_record())
+				while ($db->nextRecord())
 				{	
-			$temp = $db->Record;
+			$temp = $db->record;
 			unset($temp['pkey']);
 			$check = md5(serialize($temp));
 			if ($check!=$lastcheck) { 
 				$i_posting ++;
 					$t['output'] .= '<tr style="background-color: '.(($i_posting%2) ? '#e7e7e7': '').'">
-						<td valign="top"><a target="_blank" href="'.appurl('users/view/'.$db->Record['username']).'">'.$db->Record['username'].'</a></td>
-						<td valign="top">'.date('g:i A', $db->Record['timeint']). '</td>
-						<td valign="top">'.stripslashes($db->Record['message']). '</td>
+						<td valign="top"><a target="_blank" href="'.appurl('users/view/'.$db->record['username']).'">'.$db->record['username'].'</a></td>
+						<td valign="top">'.date('g:i A', $db->record['timeint']). '</td>
+						<td valign="top">'.stripslashes($db->record['message']). '</td>
 					</tr>';
 			}
 			$lastcheck = $check;
@@ -167,8 +167,8 @@ class chat extends StudentService {
 		$lcObj->templateName = "chat_main";
 /*
 //		$db->query("select pkey,chatName,chatDesc from chatArchives ORDER BY pkey DESC");
-		while($db->next_record()) {
-			$x[] = $db->Record;
+		while($db->nextRecord()) {
+			$x[] = $db->record;
 		}
 		$t['archiveList'] = $x;
 */
@@ -199,9 +199,9 @@ class chat extends StudentService {
 // and the whole things is hosed anyway
 			$db->query("select * from chat where chat_id=".$this->chat_id." and pkey>$last order by timeint");
 		}
-		while($db->next_record()) { 
-			$t['rows'][] = $db->Record;
-			$max = $db->Record['pkey'];
+		while($db->nextRecord()) { 
+			$t['rows'][] = $db->record;
+			$max = $db->record['pkey'];
 		}
 		if ($max>0) { 
 			$u->sessionvars[$key] = $max;
@@ -272,8 +272,8 @@ class chat extends StudentService {
 	function showRun($db,&$u,&$lcObj,&$t) {	
 		$lcObj->templateName = "chat_show";
 		$db->query("select * from chatThreads");
-		while($db->next_record()) { 
-			extract($db->Record);
+		while($db->nextRecord()) { 
+			extract($db->record);
 			$x = "<a href=\"#\" onClick=\"window.open('";
 			$x .= appurl("{$this->module_name}/chat/event=admin/chatThread=$chatThread");
 			$x .= "','$username','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=300,height=300');\">$username $chatThread</a>";
@@ -307,15 +307,15 @@ class chat extends StudentService {
 	function usershowRun($db,&$u,&$arg,&$t) {
 		$arg->templateName='chat_usershow';
 		$db->queryOne("select * from lcUsers where username='".$arg->getvars['username']."'"); 
-		$t['usershow'] = $db->Record;
+		$t['usershow'] = $db->record;
 		$this->presentor = "emptypresentation";
 	}
 
 	function userlistRun($db,&$u,&$arg,&$t) {
 		$arg->templateName='chat_userlist';
 		$db->query("select distinct(username) from chat where chat_id='{$this->chat_id}' and timeint>=".(time()-900)." order by username");
-		while($db->next_record()) {
-			$t['users'][] = $db->Record;
+		while($db->nextRecord()) {
+			$t['users'][] = $db->record;
 		}
 		$this->presentor = "emptypresentation";
 	}
@@ -385,8 +385,8 @@ class chat extends StudentService {
 			}
 			$db->query($sql);
 
-			while($db->next_record()) {
-				extract($db->Record);
+			while($db->nextRecord()) {
+				extract($db->record);
 				$message = stripslashes($message);
 				$nameclass = "regname$style";
 				$messclass = "regmess$style";
@@ -544,8 +544,8 @@ if ($chatstyle=="") { $chatstyle="2"; }
 		$sql = "select * from chatQ order by timeint ASC ";
 		$db->query($sql);
 
-		while($db->next_record()) {
-			extract($db->Record);
+		while($db->nextRecord()) {
+			extract($db->record);
 			$message = stripslashes($message);
 			$post = "<a href=\"".appurl("chat/main/event=moveQ/move=1/pkey=$pkey")."\">approve</a>\n";
 			$del = "<a href=\"".appurl("chat/main/event=moveQ/pkey=$pkey")."\">del</a>\n";
@@ -567,7 +567,7 @@ if ($chatstyle=="") { $chatstyle="2"; }
 			$pkey = $lcObj->getvars["pkey"];
 			if ($lcObj->getvars["move"]==1) { 
 				$db->queryOne("select * from chatQ where pkey=$pkey");
-				extract($db->Record);
+				extract($db->record);
 				$message = addslashes($message);
 				$username = addslashes($username);
 				$sql ="insert into chat (style,color,username,message,timeint,timedate) values ('$style','$color','$username','$message',".time().",'".date("Y-m-d H:i:s")."')";

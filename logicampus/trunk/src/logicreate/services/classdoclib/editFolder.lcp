@@ -206,8 +206,8 @@ class editFolder extends classdoclibService {
 		$db->query("select action,gid from classdoclib_Sharing where folderKey = ".$parentFolder->pkey);
 		$query = 'insert into classdoclib_Sharing (folderKey, action, exclude, gid) VALUES (%d, %d, %d, "%s")';
 
-		while ( $db->next_record() ) {
-			$db->query( sprintf($query,$cat->pkey,$db->Record['action'],$db->Record['exclude'],$db->Record['gid']) );
+		while ( $db->nextRecord() ) {
+			$db->query( sprintf($query,$cat->pkey,$db->record['action'],$db->record['exclude'],$db->record['gid']) );
 		}
 
 		$this->presentor = 'redirectPresentation';
@@ -227,7 +227,7 @@ class editFolder extends classdoclibService {
 
 		// selecting trash can (to move the requested folder too)
 		$db->queryOne("select pkey from classdoclib_Folders where folderType=0 and class_id=".$u->activeClassTaught->id_classes);
-		$trashFolder = $db->Record['pkey'];
+		$trashFolder = $db->record['pkey'];
 
 		$db->query("update classdoclib_Folders set trashed='y', origparent= parentKey, parentKey=$trashFolder where (owner='".$u->username."' and pkey=".$trash->pkey. ")");
 		folderloop($trash->pkey, $u->activeClassTaught->id_classes,'y');
@@ -271,7 +271,7 @@ class editFolder extends classdoclibService {
 
 		// Finding our trash folder
 		$db->queryOne("select pkey from classdoclib_Folders where folderType=0 and class_id=".$u->activeClassTaught->id_classes);
-		$trashFolder = $db->Record['pkey'];
+		$trashFolder = $db->record['pkey'];
 		
 		if ((int)$trashFolder == 0)
 		{	$this->presentor = 'errorMessage';
@@ -283,8 +283,8 @@ class editFolder extends classdoclibService {
 
 		// selecting folders that were marked for trashing at an earlier time
 		$db->query("select pkey from classdoclib_Folders where trashed='y' and folderType=2 and class_id = ".$u->activeClassTaught->id_classes);
-		while($db->next_record()) {
-			$folders[] = $db->Record['pkey'];
+		while($db->nextRecord()) {
+			$folders[] = $db->record['pkey'];
 		}
 		
 		// going through the selected (above) and removing
@@ -312,8 +312,8 @@ function folderloop($id, $cid, $status='y') {
 	$db->query("select pkey from classdoclib_Folders where parentKey = $id and class_id = $cid");
 	$loop = array();
 	
-	while($db->next_record()) {
-		$loop[] = $db->Record['pkey'];
+	while($db->nextRecord()) {
+		$loop[] = $db->record['pkey'];
 	}
 	
 	while(list($k,$parent) = each($loop)) {

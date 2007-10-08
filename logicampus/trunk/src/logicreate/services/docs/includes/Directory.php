@@ -26,9 +26,9 @@
               WHERE directoryID='$directoryID'";
 
       $result = $this->db->queryOne($sql);
-      if(is_array($this->db->Record) && count($this->db->Record))
+      if(is_array($this->db->record) && count($this->db->record))
       {
-        $this->setFrom($this->db->Record);
+        $this->setFrom($this->db->record);
         return true;
       }
 
@@ -43,9 +43,9 @@
               WHERE name='$name'";
 
       $result = $this->db->queryOne($sql);
-      if(is_array($this->db->Record) && count($this->db->Record))
+      if(is_array($this->db->record) && count($this->db->record))
       {
-        $this->setFrom($this->db->Record);
+        $this->setFrom($this->db->record);
         return true;
       }
 
@@ -63,10 +63,10 @@
       $this->db->query($sql);
       if($this->db->getNumRows())
       {
-        while($this->db->next_record())
+        while($this->db->nextRecord())
         {
           $dir = & new Docs_Directory();
-          $dir->setFrom($this->db->Record);
+          $dir->setFrom($this->db->record);
 
           $ret[] = $dir;
         }
@@ -89,10 +89,10 @@
         $this->db->query($sql);
         if($this->db->getNumRows())
         {
-          while($this->db->next_record())
+          while($this->db->nextRecord())
           {
             $file = & new Docs_File();
-            $file->setFrom($this->db->Record);
+            $file->setFrom($this->db->record);
 
             $ret[] = $file;
           }

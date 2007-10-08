@@ -39,7 +39,7 @@ class webliography extends StudentService {
 				$db->queryOne('select txTitle from class_links_categories
 					where id_classes="'.$u->activeClassTaken->id_classes.'"
 					and id_class_links_categories="'.$category.'"');
-				$t['catname'] = $db->Record['txTitle'];
+				$t['catname'] = $db->record['txTitle'];
 			}
 
 			// select all of the top level categories
@@ -47,17 +47,17 @@ class webliography extends StudentService {
 				where id_class_links_categories_parent='.$category.'
 				and id_classes="'.$u->activeClassTaken->id_classes.'"';
 			$db->query($sql);
-			while ( $db->next_record() ) {
+			while ( $db->nextRecord() ) {
 
 				$db2 = DB::GetHandle();
 				// count the links under this category
 				$db2->queryOne('SELECT count(id_class_links) AS count 
 					FROM class_links
-					WHERE id_class_links_categories="'.$db->Record['id_class_links_categories'].'"');
+					WHERE id_class_links_categories="'.$db->record['id_class_links_categories'].'"');
 
-				$t['cats'][$db->Record['id_class_links_categories']] = array(
-					'title' => $db->Record['txTitle'],
-					'count' => $db2->Record['count']
+				$t['cats'][$db->record['id_class_links_categories']] = array(
+					'title' => $db->record['txTitle'],
+					'count' => $db2->record['count']
 				);
 			}
 
@@ -67,9 +67,9 @@ class webliography extends StudentService {
 					where id_class_links_categories_parent='$id'
 					and id_classes='".$u->activeClassTaken->id_classes."'";
 				$db->query($sql);
-				while ( $db->next_record() ) {
-					$t['cats'][$id]['subs'][$db->Record['id_class_links_categories']]
-						= $db->Record['txTitle'];
+				while ( $db->nextRecord() ) {
+					$t['cats'][$id]['subs'][$db->record['id_class_links_categories']]
+						= $db->record['txTitle'];
 				}
 			}
 			
@@ -82,8 +82,8 @@ class webliography extends StudentService {
 				AND id_classes="'.$u->activeClassTaken->id_classes.'"
 				ORDER BY hits';
 			$db->query($sql);
-			while ( $db->next_record() ) {
-				$t['links'][] = $db->Record;
+			while ( $db->nextRecord() ) {
+				$t['links'][] = $db->record;
 			}
 
 		}

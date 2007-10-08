@@ -38,14 +38,14 @@ class announcements extends StudentService {
 				limit '.$min.','.$max;
 			$db->query($sql); 
 
-			while ($db->next_record()) $t['announcements'][] = $db->Record;
+			while ($db->nextRecord()) $t['announcements'][] = $db->record;
 
 			// figure out whether or not we want to display the prev/next links
 			// based on how many rows there are
 			$sql = 'select count(id_class_announcements) as count from class_announcements
 				where id_classes='.$u->activeClassTaken->id_classes;
 			$db->queryOne($sql);
-			$count = $db->Record['count'];
+			$count = $db->record['count'];
 			$t['showprev'] = $min > 0;
 			$t['shownext'] = $max < $count;
 		}
@@ -63,9 +63,9 @@ class announcements extends StudentService {
 				and dt_display < ".DB::getFuncName('NOW()')."";
 			$db->queryOne($sql);
 
-			$t['announcement_text'] = $db->Record['tx_description'];
-			$t['announcement_title'] = $db->Record['tx_title'];
-			$t['announcement_posted'] = $db->Record['dt_display'];
+			$t['announcement_text'] = $db->record['tx_description'];
+			$t['announcement_title'] = $db->record['tx_title'];
+			$t['announcement_posted'] = $db->record['dt_display'];
 			$this->sectionTitle = 'Announcement';
 
 		}
