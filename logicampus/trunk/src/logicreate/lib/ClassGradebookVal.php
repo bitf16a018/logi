@@ -9,7 +9,7 @@ class ClassGradebookValBase {
 	var $idClassGradebookVal;
 	var $idClassGradebookEntries;
 	var $idClasses;
-	var $username;
+	var $studentId;
 	var $score;
 	var $comments;
 	var $dateCreated;
@@ -19,7 +19,7 @@ class ClassGradebookValBase {
 	'idClassGradebookVal'=>'integer',
 	'idClassGradebookEntries'=>'integer',
 	'idClasses'=>'integer',
-	'username'=>'varchar',
+	'studentId'=>'varchar',
 	'score'=>'float',
 	'comments'=>'longvarchar',
 	'dateCreated'=>'integer',
@@ -119,7 +119,7 @@ class ClassGradebookValPeerBase {
 		$st->fields['id_class_gradebook_val'] = 'id_class_gradebook_val';
 		$st->fields['id_class_gradebook_entries'] = 'id_class_gradebook_entries';
 		$st->fields['id_classes'] = 'id_classes';
-		$st->fields['username'] = 'username';
+		$st->fields['student_id'] = 'student_id';
 		$st->fields['score'] = 'score';
 		$st->fields['comments'] = 'comments';
 		$st->fields['date_created'] = 'date_created';
@@ -141,7 +141,7 @@ class ClassGradebookValPeerBase {
 		$st->fields['id_class_gradebook_val'] = $this->idClassGradebookVal;
 		$st->fields['id_class_gradebook_entries'] = $this->idClassGradebookEntries;
 		$st->fields['id_classes'] = $this->idClasses;
-		$st->fields['username'] = $this->username;
+		$st->fields['student_id'] = $this->studentId;
 		$st->fields['score'] = $this->score;
 		$st->fields['comments'] = $this->comments;
 		$st->fields['date_created'] = $this->dateCreated;
@@ -167,7 +167,7 @@ class ClassGradebookValPeerBase {
 		$st->fields['id_class_gradebook_val'] = $obj->idClassGradebookVal;
 		$st->fields['id_class_gradebook_entries'] = $obj->idClassGradebookEntries;
 		$st->fields['id_classes'] = $obj->idClasses;
-		$st->fields['username'] = $obj->username;
+		$st->fields['student_id'] = $obj->studentId;
 		$st->fields['score'] = $obj->score;
 		$st->fields['comments'] = $obj->comments;
 		$st->fields['date_created'] = $obj->dateCreated;
@@ -235,7 +235,7 @@ class ClassGradebookValPeerBase {
 		$x->idClassGradebookVal = $row['id_class_gradebook_val'];
 		$x->idClassGradebookEntries = $row['id_class_gradebook_entries'];
 		$x->idClasses = $row['id_classes'];
-		$x->username = $row['username'];
+		$x->studentId = $row['student_id'];
 		$x->score = $row['score'];
 		$x->comments = $row['comments'];
 		$x->dateCreated = $row['date_created'];
@@ -287,8 +287,8 @@ class ClassGradebookVal extends ClassGradebookValBase {
 	}
 
 
-	// given a student username, I will return an array of ClassGradebookVal objects
-	function getValsByStudent($username) {
+	// given a student primary key, I will return an array of ClassGradebookVal objects
+	function getValsByStudentId($userId) {
 
 		global $lcUser;
 
@@ -313,7 +313,7 @@ class ClassGradebookVal extends ClassGradebookValBase {
 		// Get all values for the user/class
 		$db->query('select id_class_gradebook_val,id_class_gradebook_entries from class_gradebook_val
 			where id_classes="'.$lcUser->activeClassTaught->id_classes.'"
-			and username="'.$username.'"');
+			and student_id="'.$userId.'"');
 		while ( $db->nextRecord() )
 			$vals[$db->record['id_class_gradebook_entries']] = $db->record['id_class_gradebook_val'];
 
@@ -335,7 +335,7 @@ class ClassGradebookVal extends ClassGradebookValBase {
 
 	}
 
-	// given a student username, I will return an array of ClassGradebookVal objects
+	// given a grade book entry ID, I will return an array of ClassGradebookVal objects
 	function getValsByEntry($entryid) {
 		global $lcUser;
 
@@ -359,7 +359,7 @@ class ClassGradebookVal extends ClassGradebookValBase {
 
 
 		// Get all the students in the class
-		$sql = 'SELECT p.firstname,p.lastname,p.username 
+		$sql = 'SELECT p.firstname,p.lastname,p.username, U.pkey as userId
 			FROM class_enrollment AS ss
 			left join lcUsers as U on ss.student_id=U.pkey
 			left join profile as p on p.username=U.username
@@ -368,7 +368,7 @@ class ClassGradebookVal extends ClassGradebookValBase {
 			ORDER BY p.lastname';
 		$db->query($sql);
 		while ($db->nextRecord()) {
-			$students[$db->record['username']] = array(
+			$students[$db->record['userId']] = array(
 				'firstname' => $db->record['firstname'],
 				'lastname' => $db->record['lastname'],
 			);
@@ -383,17 +383,17 @@ class ClassGradebookVal extends ClassGradebookValBase {
 
 
 		// build the array of objects to return. create new val objects if they're missing
-		while ( list($user,$namearr) = @each($students) ) {
+		while ( list($userId,$namearr) = @each($students) ) {
 			$val = ClassGradebookVal::load( array(
 				'id_classes' => $lcUser->activeClassTaught->id_classes,
-				'username' => $user,
+				'student_id' => $userId,
 				'id_class_gradebook_entries' => $entryid
 			) );
 			if ( !is_object($val) ) {
 				$val = new ClassGradebookVal();
 				$val->title = $etitle;
 				$val->set( 'idClassGradebookEntries', $entryid );
-				$val->set( 'username', $user );
+				$val->set( 'studentId', $userId );
 			}
 			$val->title =  $title;
 			$val->idClasses = $lcUser->activeClassTaught->id_classes;

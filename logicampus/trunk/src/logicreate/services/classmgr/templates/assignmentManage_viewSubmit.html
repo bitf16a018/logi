@@ -121,7 +121,7 @@ if ( !$t['entryLinked'] ) {
 	?>
 	<fieldset style="padding: 5px;">
 	<legend><b>Teacher Grading<b></legend>
-	<form method="POST" action="<?=appurl('classmgr/assignmentManage/event=gradeStudent/id_class_assignments='.$t['id_class_assignments'].'/student='.$t['student']);?>">
+	<form method="POST" action="<?=appurl('classmgr/assignmentManage/event=gradeStudent/student='.$t['student']);?>">
 
 	<p>
 	Points:&nbsp;
@@ -137,6 +137,7 @@ if ( !$t['entryLinked'] ) {
 	<p>
 	<input type="submit" value="Update" name="submit">
 	</p>
+	<input type="hidden" name="seqId" value="<?=$t['sequenceId'];?>"/>
 	</form>
 	</fieldset>
 	<?php
