@@ -32,16 +32,34 @@ class Myobj extends FacultyService {
 
 		//$lobs = LobContentPeer::doSelect();
 
-
-		$lobItems = array();
-		$idx=0;
-		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject, B.subdisc
+		//get total count for paged tables.
+		$db->query('SELECT count(*) as totalcount
 		       	FROM lob_repo_entry as A
 			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id
 			LEFT JOIN lob_user_link as C on A.lob_repo_entry_id = C.lob_repo_entry_id
 			WHERE C.user_id = '.$u->userId.'
 			');
 
+		$db->nextRecord();
+		$db->freeResult();
+		$totalCount = $db->record['totalcount'];
+
+
+		$pageIdx = intval($lc->getvars['p']);
+		if ($pageIdx ==0 ) {$pageIdx =1;}
+
+
+		$lobItems = array();
+		$idx=0;
+		$limitCount = 30;
+		$limitStart = $limitCount * ($pageIdx-1);
+		$db->query('SELECT A.*,B.author, B.license, B.copyright,B.subject, B.subdisc
+		       	FROM lob_repo_entry as A
+			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id
+			LEFT JOIN lob_user_link as C on A.lob_repo_entry_id = C.lob_repo_entry_id
+			WHERE C.user_id = '.$u->userId.'
+			LIMIT '.$limitStart.','.$limitCount.'
+			');
 
 		while($db->nextRecord()) {
 		//foreach ($lobs as $lobObj) {
@@ -62,7 +80,12 @@ class Myobj extends FacultyService {
 		$dm->ignoreColumn('mimetype');
 		$dm->ignoreColumn('subdisc');
 		$dm->ignoreColumn('lobRepoEntryId');
-		$table = new LC_Table($dm);
+
+		$table = new LC_TablePaged($dm);
+		$table->url =  appurl('lobrepo').'/myobj/p=%d';
+		$table->maxRows = $totalCount;
+		$table->rowsPerPage = $limitCount = 30;
+		$table->currentPage = $pageIdx;
 		$columnModel = &$table->getColumnModel();
 		$col = &$columnModel->getColumnAt(0);
 		$col->justify = 'left';
@@ -92,7 +115,7 @@ class Myobj extends FacultyService {
 		foreach ($classLinkObjs as $linkObj) {
 			$linkIds[$linkObj->lobClassRepoId][] = $linkObj->classId;
 		}
-		$t['lobTable']->classLinkIds = $linkIds;
+//		$t['lobTable']->classLinkIds = $linkIds;
 //		print_r($t['lobTable']);
 	}
 

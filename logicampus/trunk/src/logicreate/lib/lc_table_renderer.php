@@ -9,6 +9,7 @@ class LC_TableRenderer {
 	var $html;	//holds the renered html
 	var $table;		//the table to render, must be of type LC_Table
 	var $style = 'clear:right;';
+	var $cssClass = 'datatable';
 
 	function LC_TableRenderer($t) {
 		$this->table = $t;
@@ -40,7 +41,11 @@ class LC_TableRenderer {
 	 * opens the table
 	 */
 	function startTable() {
-		$this->html .= '<table cellpadding="0" cellspacing="1" class="datatable" width="100%" style="'.$this->style.'">';
+		$this->html .= '<table border="0" cellpadding="0" cellspacing="1" width="100%" style="'.$this->style.'"';
+		if ( strlen($this->cssClass) ) {
+			$this->html .= ' class="'.$this->cssClass.'" ';
+		}
+		$this->html .= '>';
 		$this->html .= "\n";
 	}
 
@@ -213,11 +218,11 @@ class LC_TableRendererPaged extends LC_TableRenderer {
 		$maxRows = $this->table->getMaxRows();
 		$pages = ceil($maxRows / $this->table->rowsPerPage);
 		$this->html .= '<div class="datatable_nav" style="padding-top:7px;" align="right">';
-		$this->html .= '<a href="'.$this->table->getPrevUrl().'">&laquo;Prev</a> | ';
+		$this->html .= '<a href="'.$this->table->getPrevUrl($this->table->currentPage).'">&laquo;Prev</a> | ';
 		for ($x=1; $x<=$pages; ++$x) {
 			$this->html .= ' <a href="'.$this->table->getPageUrl($x).'">'.$x.'</a>';
 		}
-		$this->html .= ' | <a href="'.$this->table->getNextUrl().'">Next&raquo;</a>';
+		$this->html .= ' | <a href="'.$this->table->getNextUrl($this->table->currentPage).'">Next&raquo;</a>';
 		$this->html .= ' Current Page: '.$this->table->currentPage;
 		$this->html .= '</div>';
 		parent::startTable();
@@ -232,11 +237,11 @@ class LC_TableRendererPaged extends LC_TableRenderer {
 		$maxRows = $this->table->getMaxRows();
 		$pages = ceil($maxRows / $this->table->rowsPerPage);
 		$this->html .= '<div class="datatable_nav" style="padding-bottom:7px;" align="right">';
-		$this->html .= '<a href="'.$this->table->getPrevUrl().'">&laquo;Prev</a> | ';
+		$this->html .= '<a href="'.$this->table->getPrevUrl($this->table->currentPage).'">&laquo;Prev</a> | ';
 		for ($x=1; $x<=$pages; ++$x) {
 			$this->html .= ' <a href="'.$this->table->getPageUrl($x).'">'.$x.'</a>';
 		}
-		$this->html .= ' | <a href="'.$this->table->getNextUrl().'">Next&raquo;</a>';
+		$this->html .= ' | <a href="'.$this->table->getNextUrl($this->table->currentPage).'">Next&raquo;</a>';
 		$this->html .= ' Current Page: '.$this->table->currentPage;
 		$this->html .= '</div>';
 	}
@@ -476,4 +481,25 @@ class LC_TableSelectRenderer extends LC_TableCellRenderer {
 		return $html."\n\t</select>&nbsp;Days\n";
 	}
 }
+
+class LC_TableStaticRenderer extends LC_TableCellRenderer {
+
+	var $values;
+	var $returnSpace = true;
+
+	function getRenderedValue() {
+		if (!isset($this->values[$this->row])) {
+			if ($this->returnSpace === true) {
+				return '&nbsp;';
+			} else {
+				return '';
+			}
+		}
+		return $this->values[$this->row];
+	}
+}
+
+
+
+
 ?>

@@ -136,34 +136,65 @@ class LC_Table {
 	function setColumnNameAt($i,$n) {
 		$this->tableHeader->setColumnName($i,$n);
 	}
+
+
+	/**
+	 * add a column at the specifiec index
+	 * @return	int	 new index
+	 */
+	function addColumnAt($idx, $c) { 
+		$newColumns = array();
+		$newMap     = array();
+
+		for($x = 0; $x < count($this->columnModel->tableColumns); $x++) {
+			if ($x === $idx) {
+				$newColumns[] = $c;
+				$newMap[] = $c->name;
+			}
+			$newColumns[] =& $this->columnModel->tableColumns[$x];
+			$newMap[] = $this->tableModel->colMap[$x];
+		}
+		$this->columnModel->tableColumns = $newColumns;
+		$this->tableModel->colMap = $newMap;
+		return $idx;
+	}
 }
 
 
 
 class LC_TablePaged extends LC_Table {
 
-	var $rowsPerPage = 10;
+	var $rowsPerPage = 30;
 	var $currentPage = 1;
 	var $url;
+	var $maxRows     = 1;
 
 
-	function getPrevUrl() {
-		return '#';
+	function getPrevUrl($pageIdx=1) {
+		return $this->getPageUrl($pageIdx-1);
 	}
 
 
-	function getNextUrl() {
-		return '#';
+	function getNextUrl($pageIdx=1) {
+		$maxRows = $this->getMaxRows();
+		$pages = ceil($maxRows / $this->rowsPerPage);
+		$nextPage = $this->currentPage +1;
+		if ($nextPage > $pages) {
+			return '#';
+//			$nextPage = $pages;
+		}
+
+		return $this->getPageUrl($pageIdx+1);
 	}
 
 
-	function getPageUrl($i) {
-		return '#';
+	function getPageUrl($pageIdx=1) {
+		return sprintf($this->url, $pageIdx);
 	}
 
 
 	function getMaxRows() {
-		return 1;
+		return $this->maxRows;
 	}
 }
 
@@ -567,6 +598,24 @@ class LC_TableDefaultColumnModel extends LC_TableColumnModel {
 		$idx = count($this->tableColumns);
 		$c->setIndex($idx);
 		$this->tableColumns[$idx] = $c;
+		return $idx;
+	}
+
+	/**
+	 * add a column at the specifiec index
+	 * @return	int	 new index
+	 */
+	function addColumnAt($idx, $c) { 
+		$newColumns = array();
+
+		for($x = 0; $x < count($this->tableColumns); $x++) {
+			if ($x === $idx) {
+				$newColumns[] = $c;
+			}
+			$newColumns[] =& $this->tableColumns[$x];
+		}
+		$this->tableColumns = $newColumns;
+
 		return $idx;
 	}
 
