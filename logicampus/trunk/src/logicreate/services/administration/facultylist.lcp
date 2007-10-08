@@ -49,8 +49,8 @@ class facultylist extends AdminService
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{	$a_faculty_list[] = $db->Record;
+		while ($db->nextRecord())
+		{	$a_faculty_list[] = $db->record;
 		}	
 		
 		$t['a_faculty_list'] = $a_faculty_list;

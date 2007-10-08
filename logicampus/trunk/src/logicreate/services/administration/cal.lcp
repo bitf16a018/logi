@@ -277,7 +277,7 @@ class cal extends AdminService
 	
 	function viewRun($db,&$u,&$lc,&$t) {
 		$db->queryOne("select * from _activities where pkey='".addslashes($lc->getvars['pkey'])."'");
-		$t = array_merge($t,$db->Record);
+		$t = array_merge($t,$db->record);
 		$this->activityRun($db,$u,$lc,$t);
 	}
 	

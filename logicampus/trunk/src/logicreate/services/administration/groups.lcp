@@ -29,11 +29,11 @@ class groups extends AdminService {
 		$arg->templateName = 'groups_main';
 		
 		$db->query("select * from lcGroups");
-		while ($db->next_record() ) {
-			if ( in_array($db->Record[gid],$this->dontdelete) ) {
-				$db->Record[groupName] = '*'.$db->Record[groupName];
+		while ($db->nextRecord() ) {
+			if ( in_array($db->record[gid],$this->dontdelete) ) {
+				$db->record[groupName] = '*'.$db->record[groupName];
 			}
-			$t["group_opt"] .= "<option value=\"".$db->Record[gid]."\">".$db->Record[groupName]." (".$db->Record[gid].") </option>\n";
+			$t["group_opt"] .= "<option value=\"".$db->record[gid]."\">".$db->record[groupName]." (".$db->record[gid].") </option>\n";
 		}
         }
 
@@ -63,9 +63,9 @@ class groups extends AdminService {
 
 		//grab the permissions that they have
 		$db->query("select displayName, lcPerms.action, mid from lcRegistry left join lcPerms on lcRegistry.mid = lcPerms.moduleID and lcPerms.groupID = '".$arg->getvars[1]."' order by displayName");
-		while ($db->next_record() ) {
-			$t[modNames][$db->Record['displayName']][id] = $db->Record['mid'];
-			$temp[$db->Record['displayName']][] = $db->Record['action'];
+		while ($db->nextRecord() ) {
+			$t[modNames][$db->record['displayName']][id] = $db->record['mid'];
+			$temp[$db->record['displayName']][] = $db->record['action'];
 		}
 
 		$t[perms] = $temp;
@@ -74,7 +74,7 @@ class groups extends AdminService {
 		//grab all custom permissions
 		while (list ($modName,$mid) = @each($t[modNames]) ) {
 			$db->queryOne("select perms from lcRegistry where mid = '".$mid[id]."'");
-			$permsPairs = explode('|',substr($db->Record[perms],1,-1) );
+			$permsPairs = explode('|',substr($db->record[perms],1,-1) );
 				while (list ($k,$v) = @each($permsPairs) ) {
 					list ($permk,$permname) = split(';',$v);
 					if ($permk == '') {continue; }
@@ -87,7 +87,7 @@ class groups extends AdminService {
 
 		//a few other UI things
 		$db->queryOne("Select groupName from lcGroups where  gid = '".$arg->getvars[1]."'");
-		$t[gName] = $db->Record['groupName'];
+		$t[gName] = $db->record['groupName'];
 		$t[gid] = $arg->getvars[1];
 		$arg->templateName = "groups_show";
 	}
@@ -107,8 +107,8 @@ class groups extends AdminService {
 		
 		$sql = "select * from lcGroups where gid = '".$arg->postvars[group_opt]."'";
 		$db->query($sql);
-		$db->next_record();
-		$oldGroup = $db->Record;
+		$db->nextRecord();
+		$oldGroup = $db->record;
 
 				//get full name from gid
 		$sql = "delete from lcGroups where pkey = ".$oldGroup[pkey];
@@ -141,7 +141,7 @@ class groups extends AdminService {
 		//integrity check
 		$sql = "select * from lcGroups where gid = '".$arg->postvars['gid']."' or groupName = '".$arg->postvars['groupName']."'";
 		$db->query($sql);
-		if ($db->next_record()) {
+		if ($db->nextRecord()) {
 			$t[message] = "Duplicate Groups (".$arg->postvars['groupName'].",".$arg->postvars['gid'].").  Either the gid or groupName chosen is already in use.";
 			$this->run($db,$u,$arg,$t);
 			return;
@@ -172,8 +172,8 @@ class groups extends AdminService {
 			}
 //exit();
 		$db->query("select displayName from lcRegistry where mid = '".$mid."'");
-		$db->next_record();
-	$t[message] = "Group permissions updated for module : ".$db->Record['displayName'];
+		$db->nextRecord();
+	$t[message] = "Group permissions updated for module : ".$db->record['displayName'];
 	$this->showRun($db,$u,$arg,$t);
 	}
 

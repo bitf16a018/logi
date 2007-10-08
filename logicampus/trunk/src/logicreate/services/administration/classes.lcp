@@ -66,13 +66,13 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record()) {
+		while ($db->nextRecord()) {
 			$ast_calendar = new assessmentscheduling();
-			$ast_calendar->set_id_item($db->Record['assessment_id']);
-			$ast_calendar->set_id_class($db->Record['class_id']);
-			$ast_calendar->set_date_start($db->Record['date_available']);
-			$ast_calendar->set_date_end($db->Record['date_unavailable']);
-			$ast_calendar->set_title($db->Record['display_name']);
+			$ast_calendar->set_id_item($db->record['assessment_id']);
+			$ast_calendar->set_id_class($db->record['class_id']);
+			$ast_calendar->set_date_start($db->record['date_available']);
+			$ast_calendar->set_date_end($db->record['date_unavailable']);
+			$ast_calendar->set_title($db->record['display_name']);
 			$ast_calendar->set_allday(true);
 			
 			$ast_calendar->save();
@@ -109,16 +109,16 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record()) {
+		while ($db->nextRecord()) {
 			$exam_calendar = new examscheduling();
 			
-			$exam_calendar->set_id_class($db->Record['id_classes']);
-			$exam_calendar->set_id_item($db->Record['id_exam_schedule_classes_dates']);
-			$exam_calendar->set_owner($db->Record['facultyId']);
-			$exam_calendar->set_title('['.$db->Record['courseFamily'].$db->Record['courseNumber'].'] '.addslashes(stripslashes($db->Record['title'])));
-			$exam_calendar->set_description(addslashes(stripslashes($db->Record['instructions'])));
-			$exam_calendar->set_date_start($db->Record['date_start']);
-			$exam_calendar->set_date_end($db->Record['date_end']);
+			$exam_calendar->set_id_class($db->record['id_classes']);
+			$exam_calendar->set_id_item($db->record['id_exam_schedule_classes_dates']);
+			$exam_calendar->set_owner($db->record['facultyId']);
+			$exam_calendar->set_title('['.$db->record['courseFamily'].$db->record['courseNumber'].'] '.addslashes(stripslashes($db->record['title'])));
+			$exam_calendar->set_description(addslashes(stripslashes($db->record['instructions'])));
+			$exam_calendar->set_date_start($db->record['date_start']);
+			$exam_calendar->set_date_end($db->record['date_end']);
 			
 			$exam_calendar->save();
 			
@@ -150,12 +150,12 @@ class classes extends AdminService
 
 		$db->query($sql);
 		
-		while ($db->next_record()) {
+		while ($db->nextRecord()) {
 			// roll throw and create new gradebook entries for all these friggin classes
 			
 			$esc = new ExamScheduleClasses();
-			$esc->idClasses = $db->Record['id_classes'];
-			$esc->idSemester = $db->Record['id_semesters'];
+			$esc->idClasses = $db->record['id_classes'];
+			$esc->idSemester = $db->record['id_semesters'];
 			$esc->status = 0;
 			$esc->southCampus = 0;
 			$esc->southeastCampus = 0;
@@ -166,7 +166,7 @@ class classes extends AdminService
 			$esc->save();
 			
         	if ($esc->idExamScheduleClasses == false) {
-			echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->Record['id_classes'].'"*';
+			echo '*** ALERT:: ExamClass::Entry failed to added for you while building examdates:: *id_classes='.$db->record['id_classes'].'"*';
         		break;
         	}
 			
@@ -193,14 +193,14 @@ class classes extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record()) {
+		while ($db->nextRecord()) {
 			// roll throw and create new gradebook entries for all these friggin classes
 			
         	$gradebookObj = new ClassGradebookBase();
-        	$gradebookObj->set('idClasses', $db->Record['id_classes']);
+        	$gradebookObj->set('idClasses', $db->record['id_classes']);
         	$gradebookObj->save();
         	if ($gradebookObj->idClassGradebook == false) {
-			echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->Record['id_classes'].'"*';
+			echo '*** ALERT:: Gradebook::Entry failed to added for you while building class gradebooks:: *id_classes='.$db->record['id_classes'].'"*';
         		break;
         	}
 			
@@ -221,9 +221,9 @@ class classes extends AdminService
 		WHERE B.class_id IS NULL';
 		$db->query($sql);
 
-		while ($db->next_record()) {
-			$new_id_class = $db->Record['id_classes'];
-			$facultyId = trim($db->Record['facultyId']);
+		while ($db->nextRecord()) {
+			$new_id_class = $db->record['id_classes'];
+			$facultyId = trim($db->record['facultyId']);
 			echo $new_id_class . '|'. $facultyId. '<br>';
 		/*	
 			include_once(LIB_PATH. 'documentLibraryLib.php');
@@ -404,7 +404,7 @@ class classes extends AdminService
 				WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$snum;
 				
 				$db->queryOne($sql);
-				if ($db->Record['SECTION_exists']) {
+				if ($db->record['SECTION_exists']) {
 					// deny the adding of the class, inform them that section number exists already
 					$t['error'] .= 'Section #'. (int)$snum. ' exists<br>';
 					$f->error = true;
@@ -567,17 +567,17 @@ class classes extends AdminService
 		$sql = '
 		SELECT count(DISTINCT (A.username) ) AS f_count FROM profile as A';
 		$db->queryOne($sql);
-		$rec_f_count = $db->Record['f_count'];
+		$rec_f_count = $db->record['f_count'];
 		
 		$sql = '
 		SELECT count(DISTINCT (B.id_semesters) ) AS s_count FROM semesters as B';
 		$db->queryOne($sql);
-		$rec_s_count = $db->Record['s_count'];
+		$rec_s_count = $db->record['s_count'];
 		
 		$sql = '
 		SELECT count(DISTINCT (C.id_courses) ) AS c_count FROM  courses AS C';
 		$db->queryOne($sql);
-		$rec_c_count = $db->Record['c_count'];
+		$rec_c_count = $db->record['c_count'];
 		
 		if ( $rec_f_count ==false ) {
 			$t['error'] = "You must have at least one faculty member in the database to add a class.";
@@ -596,11 +596,11 @@ class classes extends AdminService
 		
 		$db->queryOne($sql);
 
-		if ( $db->Record['f_count'] ==false ) {
+		if ( $db->record['f_count'] ==false ) {
 			$t['error'] = "You must have at least one faculty member in the database to add a class.";
-		} else if ( $db->Record['s_count'] == false ) {
+		} else if ( $db->record['s_count'] == false ) {
 			$t['error'] = "You must have at least one semester in the database to add a class.";
-		} else if ( $db->Record['c_count'] == false) {
+		} else if ( $db->record['c_count'] == false) {
 			$t['error'] = "you must have at least one course in the database to add a class.";
 		}
 */
@@ -664,8 +664,8 @@ class classes extends AdminService
 				
 				$a_db_sec_numbers = array();
 				$db->query($sql);
-				while ($db->next_record()) {
-					$a_db_sec_numbers[] = $db->Record['sectionNumber'];
+				while ($db->nextRecord()) {
+					$a_db_sec_numbers[] = $db->record['sectionNumber'];
 					
 				}
 
@@ -700,7 +700,7 @@ class classes extends AdminService
 						WHERE classes.id_semesters='.$this->cleanedArray['id_semesters'].' AND class_sections.sectionNumber='. (int)$number;
 
 						$db->queryOne($sql);
-						if ($db->Record['SECTION_exists']) {
+						if ($db->record['SECTION_exists']) {
 							// deny the adding of the class, inform them that section number exists already
 							$t['error'] .= 'Section #'. (int)$number. ' exists<br>';
 							$f->error = true;
@@ -807,10 +807,10 @@ class classes extends AdminService
 			
 			$sql_string = 'SELECT id_class_assignments FROM class_assignments WHERE id_classes='.$id_classes;
 			$db->query($sql_string);
-			while ($db->next_record()) {
-				$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->Record['id_class_assignments'];
-				$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->Record['id_class_assignments'];
-				$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->Record['id_class_assignments'];
+			while ($db->nextRecord()) {
+				$sql[] = 'DELETE FROM class_assignments_grades WHERE id_class_assignments='.$db->record['id_class_assignments'];
+				$sql[] = 'DELETE FROM class_assignments_turnin WHERE id_class_assignments='.$db->record['id_class_assignments'];
+				$sql[] = 'DELETE FROM class_assignments_link WHERE id_class_assignments='.$db->record['id_class_assignments'];
 			}
 			$sql[] = 'DELETE FROM class_assignments WHERE id_classes='.$id_classes;
 			
@@ -823,9 +823,9 @@ class classes extends AdminService
 			
 			$sql_string = 'SELECT id_class_lessons FROM class_lessons WHERE id_classes='.$id_classes;
 			$db->query($sql_string);
-			while ($db->next_record()) {
-				$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->Record['id_class_lessons'];
-				$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->Record['id_class_lessons'];
+			while ($db->nextRecord()) {
+				$sql[] = 'DELETE FROM class_lesson_links WHERE id_class_lessons='.$db->record['id_class_lessons'];
+				$sql[] = 'DELETE FROM class_lesson_objectives WHERE id_class_lesson='.$db->record['id_class_lessons'];
 			}
 			$sql[] = 'DELETE FROM class_lessons WHERE id_classes='.$id_classes;
 
@@ -856,8 +856,8 @@ class classes extends AdminService
 			
 			$sql_string = 'SELECT assessment_id FROM assessment WHERE class_id='.$id_classes;
 			$db->query($sql_string);
-			while ($db->next_record()) {
-				$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->Record['assessment_id'];
+			while ($db->nextRecord()) {
+				$sql[] = 'DELETE FROM assessment_question WHERE assessment_id='.$db->record['assessment_id'];
 			}
 			
 			$sql[] = 'DELETE FROM assessment WHERE class_id='.$id_classes;
@@ -868,8 +868,8 @@ class classes extends AdminService
 			$sql_string = 'SELECT pkey FROM classdoclib_Folders WHERE class_id='.$id_classes;
 			$db->query($sql_string);
 			
-			while ($db->next_record()) {
-				$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->Record['pkey'];
+			while ($db->nextRecord()) {
+				$sql[] = 'DELETE FROM classdoclib_Files WHERE folder='.$db->record['pkey'];
 			}
 			
 			$sql[] = 'DELETE FROM classdoclib_Folders WHERE class_id='.$id_classes;
@@ -973,8 +973,8 @@ $tables = array("class_announcements",
 function related_delete($db,$parent,$keycolumn,$key,$parentcolumn,$child,$childcolumn='') {
 	if ($childcolumn=='') { $childcolumn=$parentcolumn; }
 	$db->query("select * from $parent where $keycolumn=$key");
-	while($db->next_record()) {
-		$list[] = $db->Record[$parentcolumn];
+	while($db->nextRecord()) {
+		$list[] = $db->record[$parentcolumn];
 	}
 	if (is_array($list)) { 
 	fakequery("delete from $child where $childcolumn=".implode(" or $childcolumn=",$list));

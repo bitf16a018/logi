@@ -209,7 +209,7 @@ class semesters extends AdminService
 					WHERE semesterId=\''.$this->cleanedArray['semesterTerm'].$this->cleanedArray['semesterYear']['year'].'\'
 					';
 					$db->queryOne($sql);
-					if ($db->Record['semester_exists'])
+					if ($db->record['semester_exists'])
 					{	$t['error'] .= '<li>The semester term and year already exist, please choose another.</li>';
 						$hasErrors = true;
 					}
@@ -232,7 +232,7 @@ class semesters extends AdminService
 							WHERE semesterId=\''.$this->cleanedArray['semesterTerm'].$this->cleanedArray['semesterYear']['year'].'\'
 							';
 							$db->queryOne($sql);
-							if ($db->Record['semester_exists'])
+							if ($db->record['semester_exists'])
 							{	$t['error'] .= '<li>The semester term and year already exist, please choose another</li>';
 								$hasErrors = true;
 							}

@@ -75,7 +75,7 @@ class courses extends AdminService
 		/*
 		$db->queryOne("select count(*) from courses");
 		$maxcourses = (int)base64_decode(MAX_COURSES);
-		if ($db->Record[0] >= $maxcourses) { 
+		if ($db->record[0] >= $maxcourses) { 
 			$t['msg'] = 'You are at the course maximum of '.$maxcourses.' for this installation.  Please contact your server administrator for details.';
 			$this->run($db,$u,$lc,$t);
 			return;
@@ -167,36 +167,36 @@ class courses extends AdminService
 	function viewCourseRun(&$db,&$u,&$lc,&$t)
 	{
 		$db->queryOne('select * from courses where id_courses='.$lc->getvars['id']);
-		$t['courseData'] = $db->Record;
-		$t['courseFamilyNumber'] = $db->Record['courseFamily'].$db->Record['courseNumber'];
+		$t['courseData'] = $db->record;
+		$t['courseFamilyNumber'] = $db->record['courseFamily'].$db->record['courseNumber'];
 
 		$t['preReqs'] = implode('<br>',array(
-			$db->Record['preReq1'],
-			$db->Record['preReq2'],
-			$db->Record['preReq3'],
-			$db->Record['preReq4']
+			$db->record['preReq1'],
+			$db->record['preReq2'],
+			$db->record['preReq3'],
+			$db->record['preReq4']
 		));
 		$t['preReqs'] = preg_replace('/^(<br>)+/','',$t['preReqs']);
 		$t['preReqs'] = preg_replace('/(<br>){2,}/','<br>',$t['preReqs']);
 
 		$t['coReqs'] = implode('<br>',array(
-			$db->Record['coReq1'],
-			$db->Record['coReq2'],
-			$db->Record['coReq3'],
-			$db->Record['coReq4']
+			$db->record['coReq1'],
+			$db->record['coReq2'],
+			$db->record['coReq3'],
+			$db->record['coReq4']
 		));
 		$t['coReqs'] = preg_replace('/^(<br>)+/','',$t['coReqs']);
 		$t['coReqs'] = preg_replace('/(<br>){2,}/','<br>',$t['coReqs']);
 
 		$sql = 'select username,firstname,lastname from profile left join classes on username=facultyId where courseFamilyNumber="'.$t['courseFamilyNumber'].'"';
 		$db->query($sql);
-		while ($db->next_record()) $t['faculty'][] = $db->Record;
+		while ($db->nextRecord()) $t['faculty'][] = $db->record;
 
 		$sql = 'select c.sectionNumbers,c.classType,f.firstname,f.lastname
 			from classes as c, profile as f
 			where f.username=c.facultyId and id_courses='.$lc->getvars['id'];
 		$db->query($sql);
-		while ($db->next_record()) $t['classes'][] = $db->Record;
+		while ($db->nextRecord()) $t['classes'][] = $db->record;
 
 		$t['editlink'] = APP_URL.'administration/courses/event=editCourse/id='.$lc->getvars['id'];
 
@@ -364,9 +364,9 @@ class semesterInfo extends PersistantObject
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{ 
-			$a_semesterlist[$db->Record['id_semesters']] = $db->Record['semesterTerm']. ' '. $db->Record['semesterYear'];
+			$a_semesterlist[$db->record['id_semesters']] = $db->record['semesterTerm']. ' '. $db->record['semesterYear'];
 		}
 		
 	return $a_semesterlist;

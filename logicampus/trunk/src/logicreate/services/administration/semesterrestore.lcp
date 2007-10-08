@@ -86,9 +86,9 @@ class semesterrestore extends AdminService
 		GROUP BY A.id_semesters';
 		$db->query($sql);
 		
-		while ($db->next_record())
-		{	if ($db->Record['class_count'] == 0)
-				$a_import_enabled[] = $db->Record;
+		while ($db->nextRecord())
+		{	if ($db->record['class_count'] == 0)
+				$a_import_enabled[] = $db->record;
 		}
 		
 		$t['a_import_enabled_semester'] = $a_import_enabled;
@@ -115,9 +115,9 @@ class semesterrestore extends AdminService
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		
-		while ($db->next_record())
-		{	$db->Record['stat'] = $a_backup_file[$db->Record['id_semesters']];
-			$a_semester[$db->Record['id_semesters']] = $db->Record;
+		while ($db->nextRecord())
+		{	$db->record['stat'] = $a_backup_file[$db->record['id_semesters']];
+			$a_semester[$db->record['id_semesters']] = $db->record;
 		}
 		
 		$t['a_semester'] = $a_semester;
@@ -1735,29 +1735,29 @@ class semesterrestore extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	
 			$i_replaced = false;
 			$a_replacable_items = array(); //clobbering array (refreshing)
 			
-			$a_replacable_items = $this->find_all_items_and_id($db->Record['txText'], array('classroom/lessons/event=viewcontent/'));
+			$a_replacable_items = $this->find_all_items_and_id($db->record['txText'], array('classroom/lessons/event=viewcontent/'));
 			
 			if (count($a_replacable_items) > 0)
 			{
 				foreach($a_replacable_items as $item)
 				{
-					$db->Record['txText'] = str_replace($item['fullstring'], $item['originalstring'].'id='.$this->map_content[$item['id']], $db->Record['txText']);
+					$db->record['txText'] = str_replace($item['fullstring'], $item['originalstring'].'id='.$this->map_content[$item['id']], $db->record['txText']);
 					$i_replaced = true;
 				}
 				
 				
 					
-					//echo 'Replacing text on (Content): '. $db->Record['id_class_lesson_content']. '<br>';
+					//echo 'Replacing text on (Content): '. $db->record['id_class_lesson_content']. '<br>';
 					
 					$sql = '
 					UPDATE class_lesson_content
-					SET txText=\''.str_replace('\'', '\'\'', stripslashes($db->Record['txText'])).'\'
-					WHERE id_class_lesson_content='. $db->Record['id_class_lesson_content'];
+					SET txText=\''.str_replace('\'', '\'\'', stripslashes($db->record['txText'])).'\'
+					WHERE id_class_lesson_content='. $db->record['id_class_lesson_content'];
 					
 					$db_saver->query($sql);
 									

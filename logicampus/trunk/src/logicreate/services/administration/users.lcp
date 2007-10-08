@@ -80,18 +80,18 @@ class users extends AdminService {
 		}else { 
 			$db->query("select *, lc.username as lc_username from lcUsers as lc LEFT JOIN profile on lc.username = profile.username where $where order by $order LIMIT ".$t[start].",".$this->PAGE_SIZE);
 		}
-		while ($db->next_record() ) {
-			if ( ($db->Record['firstname']== '') and 
-           ($db->Record['lastname'] == '') ) {
+		while ($db->nextRecord() ) {
+			if ( ($db->record['firstname']== '') and 
+           ($db->record['lastname'] == '') ) {
 
-				$db->Record['profiledata'] = "<i>Incomplete profile data</i>";
+				$db->record['profiledata'] = "<i>Incomplete profile data</i>";
 
 			} else {
 
-				$db->Record['profiledata'] = "<a href=\"".modurl("users/username=".$db->Record['lc_username']."/event=showUser")."\">".$db->Record['lastname'].", ".$db->Record['firstname']."</a>";
+				$db->record['profiledata'] = "<a href=\"".modurl("users/username=".$db->record['lc_username']."/event=showUser")."\">".$db->record['lastname'].", ".$db->record['firstname']."</a>";
 
 			}
-			$t['users'][] = $db->Record;
+			$t['users'][] = $db->record;
 		}
 
 		if ($this->sql) { 
@@ -102,39 +102,39 @@ class users extends AdminService {
 			$db->query("select count(username) from ".$this->table." lc where $where");
 		}
 
-		$db->next_record();
-		$t['result_pages'] = ceil( $db->Record[0] / $this->PAGE_SIZE);
+		$db->nextRecord();
+		$t['result_pages'] = ceil( $db->record[0] / $this->PAGE_SIZE);
 		$t['current_page'] = ceil( $t[start] / $this->PAGE_SIZE) + 1;
-		$t['max_results'] = $db->Record[0];
+		$t['max_results'] = $db->record[0];
 		$t['PAGE_SIZE'] = $this->PAGE_SIZE;
 
 		//groups
 		$db->query("select * from lcGroups");
-		while ($db->next_record() ) {
-			$t["group_opt"] .= "<option value=\"".$db->Record[gid]."\">".$db->Record[groupName]." (".$db->Record[gid].") </option>\n";
+		while ($db->nextRecord() ) {
+			$t["group_opt"] .= "<option value=\"".$db->record[gid]."\">".$db->record[groupName]." (".$db->record[gid].") </option>\n";
 		}
 
 		//profile
 		$db->query("describe profile");	//get profile meta data
-		$db->next_record(); 		//drop off pkey
+		$db->nextRecord(); 		//drop off pkey
 		$t['profile_opt'] .= "<option value='_email'>Email</option>\n";
 		$t['profile_opt'] .= "<option value='_username'>Username</option>\n";
-		while ($db->next_record() ) {
-			$t['profile_opt'] .= "<option value=\"".$db->Record[0]."\">".$db->Record[0]."</option>\n";
+		while ($db->nextRecord() ) {
+			$t['profile_opt'] .= "<option value=\"".$db->record[0]."\">".$db->record[0]."</option>\n";
 		}
 
 		$db->query("select * from courses order by courseFamily, courseNumber, courseName");
 
-		while($db->next_record()) {
+		while($db->nextRecord()) {
 
-			$x[$db->Record['id_courses']] = substr($db->Record['courseFamily']." ".$db->Record['courseNumber']." - ".$db->Record['courseName'], 0, 40);
+			$x[$db->record['id_courses']] = substr($db->record['courseFamily']." ".$db->record['courseNumber']." - ".$db->record['courseName'], 0, 40);
 
 		}
 
 		$t['courses'] = makeOptions($x, (int)$this->course);
 		$db->query("select * from semesters");
-		while($db->next_record()) {
-			$s[$db->Record['id_semesters']] = $db->Record['semesterId'];
+		while($db->nextRecord()) {
+			$s[$db->record['id_semesters']] = $db->record['semesterId'];
 		}
 		$t['semesters'] = makeOptions($s, (int)$this->semester);
 
@@ -404,10 +404,10 @@ class users extends AdminService {
 		username='".$lc->getvars['username']."'";
 
 		$db->query($sql);
-		while($db->next_record() )
+		while($db->nextRecord() )
 		{
-			$data['courseFamily'][$db->Record['id_profile_faculty_coursefamily']] =
-			$db->Record['id_profile_faculty_coursefamily'];
+			$data['courseFamily'][$db->record['id_profile_faculty_coursefamily']] =
+			$db->record['id_profile_faculty_coursefamily'];
 
 		}
 		
@@ -472,10 +472,10 @@ class users extends AdminService {
 
 		// Grab the GROUPS
 		$db->query("select * from lcGroups order by groupName");
-		while ($db->next_record() ) {
-			$t[group_opt] .= "<option value=\"".$db->Record[gid]."\"";
-			if ( @ in_array ($db->Record[gid],$user->groups) ) { $t[group_opt] .= " SELECTED "; }
-			$t[group_opt] .= ">".$db->Record[groupName]." (".$db->Record[gid].") </option>\n";
+		while ($db->nextRecord() ) {
+			$t[group_opt] .= "<option value=\"".$db->record[gid]."\"";
+			if ( @ in_array ($db->record[gid],$user->groups) ) { $t[group_opt] .= " SELECTED "; }
+			$t[group_opt] .= ">".$db->record[groupName]." (".$db->record[gid].") </option>\n";
 		}
 
 			# Pass user object to template
@@ -531,8 +531,8 @@ class users extends AdminService {
 	function showDeleteRun (&$db, &$u, &$arg, &$t ) {
 			$arg->templateName ="users_showDelete";
 			$db->query("select username from lcUsers where username = '".$arg->getvars['username']."'");
-			$db->next_record();
-			$t['username'] = $db->Record['username'];
+			$db->nextRecord();
+			$t['username'] = $db->record['username'];
 	}
 
 
@@ -562,9 +562,9 @@ class users extends AdminService {
 		$this->presentor = 'debug';
 		$username = $arg->getvars[1];
 		$db->query("select sessKey from lcSessions where username = '$username'");
-		if ($db->next_record() ) {
+		if ($db->nextRecord() ) {
 			//set cookie
-			setcookie("LOGINAS",$db->Record[0],0,$tail,COOKIE_HOST);
+			setcookie("LOGINAS",$db->record[0],0,$tail,COOKIE_HOST);
 			header("Cache-Control: no-cache");
 			header("Location: ".DEFAULT_URL);
 			exit();
@@ -600,8 +600,8 @@ class users extends AdminService {
 		if ($arg->postvars['users']) {
 			$orclause = @join(" or pkey = ",$arg->postvars['users']);
 			$db->query("select pkey,username from lcUsers where pkey = $orclause");
-			while ($db->next_record() ) {
-				$u->sessionvars['user_collection'][$db->Record[0]] = $db->Record[1];
+			while ($db->nextRecord() ) {
+				$u->sessionvars['user_collection'][$db->record[0]] = $db->record[1];
 			}
 			$u->saveSession();
 		}
@@ -706,8 +706,8 @@ class users extends AdminService {
 		$this->sectionTitle = 'Sync Students';
 
 		$db->query('select semesterId, semesterTerm, semesterYear, id_semesters from semesters');
-		while ($db->next_record() ) { 
-			$t['sems'][$db->Record['id_semesters']] = $db->Record['semesterTerm']. ' ' .$db->Record['semesterYear'];
+		while ($db->nextRecord() ) { 
+			$t['sems'][$db->record['id_semesters']] = $db->record['semesterTerm']. ' ' .$db->record['semesterYear'];
 		}
 		$lc->templateName = 'users_syncStudents';
 	}
@@ -715,7 +715,7 @@ class users extends AdminService {
 // add or delete a single student
 	function syncStudentsIndividualRun(&$db, &$u, &$lc, &$t ) {
 		$db->queryOne('select id_semesters from semesters where dateStart <= '.DB::getFuncName("NOW()").' AND dateEnd >= '.DB::getFuncName("NOW()"));
-		$semester_id = sprintf('%d',$db->Record[0]);
+		$semester_id = sprintf('%d',$db->record[0]);
 		$button = $lc->postvars['button'];
 		$line = str_replace('"','',$lc->postvars['line']);
 		list($usr,$pwd,$ssn,$sec) = split(',', $line);
@@ -848,8 +848,8 @@ flush();
 		//find active semester if none submitted
 		if ( ! $lc->postvars['semester_id'] ) {
 			$db->query('select id_semesters from semesters where dateStart <= '.DB::getFuncName('NOW()').' AND dateEnd >= '.DB::getFuncName('NOW()'));
-			$db->next_record();
-			$semester_id = sprintf('%d',$db->Record[0]);
+			$db->nextRecord();
+			$semester_id = sprintf('%d',$db->record[0]);
 		} else {
 			$semester_id = sprintf('%d',$lc->postvars['semester_id']);
 		}
@@ -955,10 +955,10 @@ flush();
 					('%s','%s',%d)";
 				$dbmail = DB::getHandle('mail');
 				$db->query('select * from class_student_sections where active = 0 and semester_id='.$semester_id);
-				while ( $db->next_record() ) {
+				while ( $db->nextRecord() ) {
 					$dbmail->query(
 					sprintf( $mailSQL,
-						$db->Record['id_student'],
+						$db->record['id_student'],
 						rand(10000),
 						0),false
 					);
@@ -966,7 +966,7 @@ flush();
 					$dbmail->query("insert into mail_accounts_temp
 					(username,password,action)
 					VALUES
-					('".','".$db->Record['username']."','".rand(10000)."',0)";
+					('".','".$db->record['username']."','".rand(10000)."',0)";
 		*/
 				}
 		}

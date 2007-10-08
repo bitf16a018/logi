@@ -260,7 +260,7 @@ class enrollment extends AdminService {
 // only dealing with current semester right now
 // 
 		$db->queryOne("select id_semesters from semesters where dateStart<=now()  and dateDeactivation>=now()");
-//		$semesterId = (int)$db->Record['id_semesters'];
+//		$semesterId = (int)$db->record['id_semesters'];
 
 		$name = addslashes(stripslashes($lc->getvars['username']));
 
