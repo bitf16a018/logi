@@ -103,7 +103,7 @@ class servicePermissions extends AdminService
 	function setPermissionsRun(&$db,&$u,&$lc,&$t)
 	{
 		$db->query('select gid from lcGroups');
-		while ($db->next_record()) $gids[] = $db->Record['gid'];
+		while ($db->nextRecord()) $gids[] = $db->record['gid'];
 
 		while (list(,$val) = @each($gids)) {
 			if ($lc->postvars[$val]) {
@@ -127,13 +127,13 @@ class servicePermissions extends AdminService
 			where p.moduleID="administration"
 			and p.groupID=g.gid
 			and p.action="'.$service.'"');
-		while ($db->next_record())
-			$services[] = $db->Record['groupID'];
+		while ($db->nextRecord())
+			$services[] = $db->record['groupID'];
 
 		$db->query('select gid,groupName from lcGroups');
-		while ($db->next_record()) {
-			if (in_array($db->Record['gid'], $services)) $check = " checked";
-			$ret .= '<input type="checkbox" name="'.$db->Record['gid'].'"'.$check.' />&nbsp;'.$db->Record['groupName'].'<br/>';
+		while ($db->nextRecord()) {
+			if (in_array($db->record['gid'], $services)) $check = " checked";
+			$ret .= '<input type="checkbox" name="'.$db->record['gid'].'"'.$check.' />&nbsp;'.$db->record['groupName'].'<br/>';
 			unset($check);
 		}
 		return $ret;

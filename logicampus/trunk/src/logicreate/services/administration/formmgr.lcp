@@ -69,12 +69,12 @@ class formMgr extends AdminService{
 		# Grab all of the ADMIN forms and show 
 		$sql = "select * from lcFormInfo where type !='site' and type !='add' order by name asc";
 		$db->query($sql);
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{
-			$tmp[] = "<a href=\"".$this->APP."event=addModifyFormField/type=".$db->Record['type']."/action=replace/formId=".$arg->getvars['pkey']."\">\n
+			$tmp[] = "<a href=\"".$this->APP."event=addModifyFormField/type=".$db->record['type']."/action=replace/formId=".$arg->getvars['pkey']."\">\n
 					<img src=\"".$this->PIC."filenew.gif\" border=\"0\"></a>\n
 			<br>
-			<a href=\"".$this->APP."event=addModifyFormField/type=".$db->Record['type']."/action=replace/formId=".$arg->getvars['pkey']."\">".$db->Record['name']."</a>\n";
+			<a href=\"".$this->APP."event=addModifyFormField/type=".$db->record['type']."/action=replace/formId=".$arg->getvars['pkey']."\">".$db->record['name']."</a>\n";
 		}
 		#htmlTable($array,$cols,$w="",$colorArray="",$cp="",$cs="",$brd="", $cellAlignment="left")
 		$t['fieldTypes'] = htmlTable($tmp, 4, "100%", array(), 1, 4, 0, "center");
@@ -244,7 +244,7 @@ class formMgr extends AdminService{
 		
 		# Grab the pkey of this type of form
 		$db->queryOne("select formCode from lcFormInfo where type='$type' limit 1");
-		$lcFormPkey = $db->Record['formCode'];
+		$lcFormPkey = $db->record['formCode'];
 				
 		# action should be either replace or update
 		# this is used to switch out the buildSQL statement
@@ -258,7 +258,7 @@ class formMgr extends AdminService{
 			
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$values = $db->Record;
+			$values = $db->record;
 		}
 		
 		# If action = update we are doing a modification
@@ -270,7 +270,7 @@ class formMgr extends AdminService{
 			
 			$db->RESULT_TYPE = MYSQL_ASSOC;
 			$db->queryOne($sql);
-			$values = $db->Record;
+			$values = $db->record;
 	
 		}
 		#echo $action;	
@@ -303,7 +303,7 @@ class formMgr extends AdminService{
 		$type = $arg->postvars['type'];
 		# Grab the formCode of this type of form
 		$db->queryOne("select formCode from lcFormInfo where type='$type' limit 1");
-		$formCode = $db->Record['formCode'];
+		$formCode = $db->record['formCode'];
 		
 		#validate form input
 		$f = new SiteForm();
@@ -336,7 +336,7 @@ class formMgr extends AdminService{
 			$getlastsortnum = "select sort from lcForms where formId='".$arg->postvars['formId']."' order by sort desc limit 1";
 			$db->queryOne($getlastsortnum);
 			
-			$sortnum = $db->Record['sort'] + 1;
+			$sortnum = $db->record['sort'] + 1;
 			$sql = "$sql, sort='$sortnum', row='$sortnum'";
 		}
 		#echo $sql;
@@ -419,7 +419,7 @@ class formMgr extends AdminService{
 		 $sql = "select sort from lcForms where pkey='$pkey'";
 		 
 		 $db->queryOne($sql);
-		 $oldKey = $db->Record['sort'];
+		 $oldKey = $db->record['sort'];
 		
 		 if ($method == 'up')
 		 {
@@ -430,14 +430,14 @@ class formMgr extends AdminService{
 		 
 		 $sql = "select formId from lcForms where pkey='$pkey'";
      	 $db->queryOne($sql);
-     	 $formId = $db->Record['formId'];
+     	 $formId = $db->record['formId'];
 
      	 $sql = "select pkey, sort from lcForms where formId=$formId";
      	 $db->query($sql);
      	 
-     	 while($db->next_record())
+     	 while($db->nextRecord())
      	 {
-     	  	$tmp[$db->Record['pkey']] = $db->Record['sort'];
+     	  	$tmp[$db->record['pkey']] = $db->record['sort'];
      	 }
      	 
      	 # sort the array and grab the last value so we can see what is last
@@ -494,10 +494,10 @@ class formMgr extends AdminService{
 		$formPkey = $arg->getvars['formPkey'];
 		$sql = "select pkey, sort from lcForms where formId='$formPkey'";
 		$db->query($sql);
-		while($db->next_record())
+		while($db->nextRecord())
 		{	$n++;
 			$db2 = DB::getHandle();
-			$sql = "update lcForms set sort='$n', row='$n' where pkey='".$db->Record['pkey']."'";
+			$sql = "update lcForms set sort='$n', row='$n' where pkey='".$db->record['pkey']."'";
 			$db2->query($sql);
 		}
 		$arg->getvars['pkey'] = $formPkey;
@@ -511,7 +511,7 @@ class formMgr extends AdminService{
 		$sql = "select * from lcFormInfo where pkey='$pkey'";
 		$db->RESULT_TYPE = MYSQL_ASSOC;
 		$db->queryOne($sql);
-		$info = $db->Record;
+		$info = $db->record;
 	
 	
 		$formInfoKey = time();
@@ -532,10 +532,10 @@ class formMgr extends AdminService{
 		$sql = "select * from lcForms where formId='$pkey'";
 		$db->query($sql);
 	
-		while ($db->next_record() )
+		while ($db->nextRecord() )
 		{
-			#debug($db->Record);
-			while (list ($k, $v) = @each($db->Record))
+			#debug($db->record);
+			while (list ($k, $v) = @each($db->record))
 			{
 				if ($k == 'pkey')
 				{

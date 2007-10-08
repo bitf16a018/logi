@@ -55,9 +55,9 @@ class classes_extra extends AdminService
 
 			$db->RESULT_TYPE= MYSQL_ASSOC;
 			$db->query($sql);
-			while($db->next_record()) {
-				#debug($db->Record);
-				$x[$db->Record['id_classes']] = $db->Record['courseFamily'].$db->Record['courseNumber']." - ".$db->Record['courseName'].' ('.$db->Record['faculty'].')';
+			while($db->nextRecord()) {
+				#debug($db->record);
+				$x[$db->record['id_classes']] = $db->record['courseFamily'].$db->record['courseNumber']." - ".$db->record['courseName'].' ('.$db->record['faculty'].')';
 			}
 
 		}
@@ -107,12 +107,12 @@ class classes_extra extends AdminService
 				
 			$db->queryOne($sql);
 			
-			$t['classInfo'] = $db->Record;
+			$t['classInfo'] = $db->record;
 			$this->sectionTitle .= ' - '.$t['classInfo']['courseName'];
 			$sql = "select * from class_extra_faculty where id_classes = $class";
 			$db->query($sql);
-			while($db->next_record()) {
-				$t['list'][] = $db->Record;
+			while($db->nextRecord()) {
+				$t['list'][] = $db->record;
 			}
 			
 			$g = new datagrid('classes_extra','show');

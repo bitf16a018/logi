@@ -65,11 +65,11 @@ class search extends AdminService
 		
 		$db->query($sql);
 		
-		while ($db->next_record())
+		while ($db->nextRecord())
 		{	$fl_teacher = true;
 			
-			$op_taught[$db->Record['id_classes']] = '['.$db->Record['semesterId'].'] '.$db->Record['courseFamily'].$db->Record['courseNumber']. ' '.$db->Record['courseName']. ' ('.$db->Record['facultyId'].') ';
-			$a_full_class_id_list[] = $db->Record['id_classes'];
+			$op_taught[$db->record['id_classes']] = '['.$db->record['semesterId'].'] '.$db->record['courseFamily'].$db->record['courseNumber']. ' '.$db->record['courseName']. ' ('.$db->record['facultyId'].') ';
+			$a_full_class_id_list[] = $db->record['id_classes'];
 		}
 	
 		// end filterage
@@ -250,12 +250,12 @@ class search extends AdminService
 			$db->query($sql);
 			
 			$t['output'] == array();
-			while ($db->next_record())
+			while ($db->nextRecord())
 			{
-				if ($db->Record['calendarType'])
+				if ($db->record['calendarType'])
 				{	
-					$tmp = new $db->Record['calendarType'];
-					$val = $this->array2object($db->Record);
+					$tmp = new $db->record['calendarType'];
+					$val = $this->array2object($db->record);
 					//debug($val);
 					if ($tmp->autoLoad($val) && $tmp->cansee(time(), false, true))
 					{	
@@ -275,14 +275,14 @@ class search extends AdminService
 				
 				} else
 				{	
-					$output = '<b>'.date('F jS Y', $db->Record['startdate']).'</b><br>'.
-								$db->Record['title'];
+					$output = '<b>'.date('F jS Y', $db->record['startdate']).'</b><br>'.
+								$db->record['title'];
 					
-					if ($db->Record['description'])
-					{	$output .= '<br><i>Description</i>: '. $db->Record['description'];
+					if ($db->record['description'])
+					{	$output .= '<br><i>Description</i>: '. $db->record['description'];
 					}
-					if ($db->Record['location'])
-					{	$output .= '<br><i>Location</i>: '. $db->Record['location'];
+					if ($db->record['location'])
+					{	$output .= '<br><i>Location</i>: '. $db->record['location'];
 					}
 						
 					$t['output'][] = $output;
