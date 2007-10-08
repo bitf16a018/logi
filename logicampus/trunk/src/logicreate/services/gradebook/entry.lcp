@@ -5,9 +5,11 @@ include_once(LIB_PATH.'ClassGradebookVal.php');
 include_once(LIB_PATH.'ClassGradebookEntries.php');
 include_once(LIB_PATH.'ClassGradebookCategories.php');
 
-include(LIB_PATH.'lc_table.php');
-include(LIB_PATH.'lc_table_renderer.php');
-include(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+include_once(LIB_PATH.'lc_lob.php');
+
+include_once(LIB_PATH.'lc_lesson_sequence.php');
 
 
 /**
@@ -121,8 +123,7 @@ class entry extends FacultyService {
 
 			$this->inactivelinks[] = 'Add Entry';
 			$lc->templateName='entry_add';
-			$this->sectionTitle = 'Add Entry';
-
+			$this->sectionTitle = 'Gradebook Entries &gt;&gt; Add Entry';
 
 			// Make sure there are categories
 			$db->queryOne('select count(id_class_gradebook_categories) as cnt from class_gradebook_categories
@@ -154,15 +155,14 @@ class entry extends FacultyService {
 		 * Load all activities and tests from the chosen class.
 		 */
 		function editRun(&$db, &$u, &$lc, &$t) {
-			$this->sectionTitle = 'Edit Entry';
+			$this->sectionTitle = 'Gradebook Entries &gt;&gt; Edit Entry';
 			$lc->templateName='entry_add';
-			$gbEntry = ClassGradebookEntries::load( array(
+			$t['gbeObj'] = ClassGradebookEntries::load( array(
 				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
 				'id_classes' => $u->activeClassTaught->id_classes
 			) );
-			$t['gbeObj'] = $gbEntry;
 
-			if(!$gbEntry->idClassGradebookEntries)
+			if(!$t['gbeObj']->idClassGradebookEntries)
 			{
 				# we didn't get an object back
 				# which means they don't have access
@@ -173,6 +173,25 @@ class entry extends FacultyService {
 				$t['errorTitle'] = $this->permissionErrorTitle;
 				return;
 			}
+
+
+			//load a list of lessons to use their titles as labels
+			$lessonList = ClassLessonsPeer::doSelect(' id_classes = '.$u->activeClassTaught->id_classes);
+			$newArray = array();
+			foreach ($lessonList as $lesObj) {
+				$newArray[$lesObj->idClassLessons] = $lesObj->title;
+			}
+			$lessonList = $newArray;
+
+			//load a selection of all activities and tests for linking
+			$sequenceList = ClassLessonSequencePeer::doSelect(' lob_type ="activity" or lob_type = "test"');
+
+			$t['optionList'] = array();
+			foreach ($sequenceList as $seqObj) {
+				$t['optionList'][$seqObj->classLessonSequenceId] = $lessonList[$seqObj->lessonId] .':&nbsp;' .$seqObj->lobTitle;
+			}
+
+			$t['selectedSeqId'] = $t['gbeObj']->classLessonSequenceId;
 		}
 
 		/**
