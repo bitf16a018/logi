@@ -149,9 +149,9 @@ class mysql extends DB {
 	}
 
 
-	function nextRecord($resID=false) {
+	function next_record($resID=false) {
 		$ret = $this->nextRecord($resID);
-		$this->record =& $this->record;
+		$this->Record =& $this->record;
 		return $ret;
 	}
 
