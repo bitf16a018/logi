@@ -18,8 +18,8 @@ CREATE TABLE class_assignments_grades (
   id_student varchar(32) NOT NULL default '',
   comments text NOT NULL,
   grade float(10,2) default NULL,
-  PRIMARY KEY  (id_class_assignments_grades)
-  KEY `id_class_assignments` (`id_class_assignments_idx`)
+  PRIMARY KEY  (id_class_assignments_grades),
+  KEY `id_class_assignments_idx` (`id_class_assignments`)
 ) TYPE=MyISAM;
 
 CREATE TABLE class_assignments_turnin (
@@ -34,7 +34,7 @@ CREATE TABLE class_assignments_turnin (
   assign_file_size int(11) NOT NULL default '0',
   assign_file_blob longblob NOT NULL,
   PRIMARY KEY  (id_class_assignments_turnin),
-  KEY `id_class_assignments` (`id_class_assignments_idx`)
+  KEY `id_class_assignments_idx` (`id_class_assignments`)
 ) TYPE=MyISAM;
 
 
