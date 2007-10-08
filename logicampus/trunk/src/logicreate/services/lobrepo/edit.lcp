@@ -37,7 +37,10 @@ class Edit extends FacultyService {
 			if (strlen($t['lob']->lobSub->lobText) > 1000) {
 				$t['lob_description'] .= ' ...';
 			}
+		} else {
+				$t['lob_description'] = $t['lob']->repoObj->lobDescription;
 		}
+
 		$t['lob_bytes'] = Lc_Lob_Util::formatBytes($t['lob']->repoObj->lobBytes);
 
 		if ($t['lob']->lobSubType == 'image') {
@@ -63,6 +66,10 @@ class Edit extends FacultyService {
 			$lc->templateName = 'add_doc';
 		} else if ($lob->isImage()) {
 			$lc->templateName = 'add_image';
+		} else if ($lob->isActivity()) {
+			$lc->templateName = 'add_activity';
+		} else if ($lob->isTest()) {
+			$lc->templateName = 'add_test';
 		} else {
 			$lc->templateName = 'add_html';
 		}
@@ -146,6 +153,19 @@ class Edit extends FacultyService {
 		$t['url'] = appurl('lobrepo/edit/c='.$id);
 	}
 
+
+	/**
+	 * Update the notes field, do not increase the version number.
+	 */
+	function notesRun(&$db,&$u,&$lc,&$t) {
+		$lobId = intval($lc->postvars['id']);
+		$lobObj = LobRepoEntry::load($lobId);
+		$lobObj->lobNotes = $lc->postvars['lob_notes'];
+		$lobObj->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj/');
+	}
 
 	function saveActRun(&$db,&$u,&$lc,&$t) {
 		$id = intval($lc->postvars['lob_id']);
