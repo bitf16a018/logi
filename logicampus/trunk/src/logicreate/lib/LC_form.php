@@ -891,6 +891,7 @@
 			# Error checking for group permissions needs to be put in
 			# not sure the best way to handle it
 		
+			$hiddenFieldsHtml = '';
 			$HTML = '<form action="'.$this->action.'" method="'.$this->method.'" enctype="'.$this->enctype.'">';
 			$HTML .= "\n";
 			$HTML .= '<table width="'.$this->width.'" border="'.$this->border.'" cellspacing="'.$this->cellspacing.'" cellpadding="'.$this->cellpadding.'">';
@@ -965,7 +966,7 @@
 					
 					#}
 					
-				 	$HTML .= '<tr><td valign="'.$this->lvalign.'" class="'.$this->cssLeft.'">'.$title.'</td><td valign="'.$this->rvalign.'" class="'.$this->cssRight.'">'.$tmpForm.' '.$msg.'</td></tr>';
+				 	$HTML .= '<tr>'."\n\t\t".'<td valign="'.$this->lvalign.'" class="'.$this->cssLeft.'">'.$title.'</td><td valign="'.$this->rvalign.'" class="'.$this->cssRight.'">'.$tmpForm.' '.$msg.'</td>'."\n".'</tr>'."\n\t";
 					$HTML .= "\n";
 				 	unset($tmpForm);
 				 	unset($title);
@@ -986,11 +987,14 @@
 				$tmp = $v['type'];
 				#echo $func;
 				$func = $tmp.'ToHTML';
-				
-				$HTML .= $this->$func($v);
+				if ($v['type'] == 'hidden') {
+					$hiddenFieldsHtml .= $this->$func($v);
+				} else {
+					$HTML .= $this->$func($v)."\n\t";
+				}
 				
 			}		
-			$HTML .= '</table></form>';
+			$HTML .= '</table>'.$hiddenFieldsHtml.'</form>';
 			
 			if ($this->showRequiredMessage)
 			{	$HTML .= '<div style="font-size: 85%">'.$this->requiredMessage.'</div>';
