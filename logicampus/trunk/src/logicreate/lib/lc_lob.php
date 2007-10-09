@@ -40,6 +40,20 @@ class Lc_Lob {
 		return $this->repoObj->lobSubType == 'document';
 	}
 
+	/**
+	 * Acitivty/assignment style content. homework, upload a file, etc.
+	 */
+	function isActivity() {
+		return $this->repoObj->lobType == 'activity';
+	}
+
+	/**
+	 * Test/exam style content.
+	 */
+	function isTest() {
+		return $this->repoObj->lobType == 'test';
+	}
+
 	function isText() {
 		return $this->repoObj->lobSubType == 'text';
 	}
@@ -480,6 +494,7 @@ class Lc_Lob_Activity extends Lc_Lob {
 			$this->repoObj   = LobRepoEntry::load($id);
 			$tests           = $this->repoObj->getLobActivitysByLobRepoEntryId();
 			$this->lobSub    = $tests[0];
+			$this->lobMetaObj = LobMetadata::load(array('lob_repo_entry_id'=>$id));
 		}
 	}
 
