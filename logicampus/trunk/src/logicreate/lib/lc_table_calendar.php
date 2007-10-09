@@ -293,8 +293,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 		}
 
 		if ( $eventWindow == 'day' ) {
-			$this->windowStartTS = mktime(0,0,0,$this->m,$this->d,$this->y);
-			$this->windowEndTS = mktime(23,59,59,$this->m,$this->d,$this->y);
+			$this->windowStartTS = mktime(0,0,0,$this->m,$this->d,$this->y)- 1000000;
+			$this->windowEndTS = mktime(23,59,59,$this->m,$this->d,$this->y) + 1000;
 		}
 
 		//FIXME
@@ -302,6 +302,7 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 		}
 
 		$this->loadClassEvents($this->windowStartTS, $this->windowEndTS);
+		$this->loadLessonEvents($this->windowStartTS, $this->windowEndTS);
 	}
 
 
@@ -417,7 +418,7 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 	 */
 	function getEventsAtHour($dateStamp) {
 		$ret = array();
-//		echo "Hour is : ".date('G:i:s',$dateStamp);
+//		echo "Hour is : ".date('G:i:s',$evtStart);
 //		echo "<br/><br/>";
 		foreach($this->events as $blank=>$evt) {
 			list($m,$d,$y,$g) = explode(' ', date('m d Y G',$evt['startdate']));
@@ -460,7 +461,50 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 		$db = DB::getHandle();
 		$db->query($sql);
 		while( $db->nextRecord() ) {
-			$this->events[$db->record['pkey']] = $db->record;
+			$this->events[] = $db->record;
+		}
+	}
+
+
+	/**
+	 * Load up events relative to the student's enrollment in the class.
+	 *
+	 * Use enrollment dates or semester start/stop dates to calculate offets
+	 */
+	function loadLessonEvents($start,$end) {
+		$classIds = implode($this->classIds, ' or id_classes=');
+
+		$sql ='
+			SELECT C.activeOn + start_offset as startdate
+			, C.inactiveOn + due_offset  as enddate
+			, A.lob_title as title
+			, A.start_offset
+			, A.due_offset
+			, A.lob_type as calendarType
+			FROM class_lesson_sequence AS A
+			LEFT JOIN classes AS B on A.class_id = B.id_classes
+
+			LEFT JOIN class_lessons AS C on A.lesson_id = C.id_class_lessons
+
+
+			WHERE 
+			(class_id = '.$classIds.')
+			AND (lob_type = "activity" OR lob_type = "test")
+
+			HAVING 
+			( (startdate )>='.$start.' AND (startdate) <= '.$end.')
+			OR
+			(
+				( (enddate) >= '.$start.' AND (enddate) <= '.$end.')
+				AND (due_offset > 0  OR due_offset IS NULL)
+			)
+';
+
+//debug($sql,1);
+		$db = DB::getHandle();
+		$db->query($sql);
+		while( $db->nextRecord() ) {
+			$this->events[] = $db->record;
 		}
 	}
 }
@@ -804,6 +848,7 @@ class LC_TableRenderer_DayCalendar extends LC_TableRenderer_Calendar {
 	 * print column headers
 	 */
 	function paintHeaders() {
+
 		$this->html .= '<thead>';
 		$this->html .= '<tr class="center_justify">';
 		$numCols = $this->table->getColumnCount();
@@ -876,10 +921,11 @@ class LC_TableRenderer_DayCalendar extends LC_TableRenderer_Calendar {
 				$renderer = $this->table->getCellRenderer($x,$y);
 				$renderer->row = $x;
 				$renderer->col = $y;
+
 				if ($y==0 ) {
 					$renderer->value = $x;
 				} else {
-					$renderer->value = $this->table->tableModel->getEventsAtHour( mktime($x+1, 0, 0, $this->table->tableModel->m, $this->table->tableModel->d, $this->table->tableModel->y ) );
+					$renderer->value = $this->table->tableModel->getEventsAtHour( mktime($x, 0, 0, $this->table->tableModel->m, $this->table->tableModel->d, $this->table->tableModel->y ) );
 				}
 
 				$css = $renderer->getCellCSS();
@@ -972,22 +1018,24 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 //		debug($evt);
 		$evtType = strtolower($evt['calendarType']);
 		switch( $evtType ) {
-			case 'classroomassignments':
-				$type = 'Assignment:';
+			case 'activity':
+				$type = 'Activity:';
 				if ($evtStart == $this->targetDate->timeStamp) {
-					$type = 'Assignment (Assigned):';
+					$type = 'Activity (Assigned):';
 				} else if ($evtEnd == $this->targetDate->timeStamp) {
-					$type = 'Assignment (Due):';
+					$type = 'Activity (Due):';
 				}
 				break;
-			case 'assessmentscheduling':
-				$type = 'Assessment:';
+			case 'test':
+				$type = 'Test:';
 				if ($evtStart == $this->targetDate->timeStamp) {
-					$type = 'Assessment (Assigned):';
+					$type = 'Test (Assigned):';
 				} else if ($evtEnd == $this->targetDate->timeStamp) {
-					$type = 'Assessment (Due):';
+					$type = 'Test (Due):';
 				}
 				break;
+
+
 			default:
 				$type = '';
 				break;
