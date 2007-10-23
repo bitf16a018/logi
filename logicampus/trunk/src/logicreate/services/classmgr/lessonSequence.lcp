@@ -55,29 +55,39 @@ class LessonSequence extends FacultyService {
 		//move currently ranked item into a temp position
 		$sql1 = "UPDATE class_lesson_sequence
 			SET rank=-1 
-			WHERE rank = ".$curRank;
+			WHERE rank = ".$curRank."
+			AND class_id = ".$class_id."
+			LIMIT 1";
 
 
 		if ($lc->getvars['ud'] == 'up') {
 			//move the above ranked item down
 			$sql2 = "UPDATE class_lesson_sequence
-				SET rank=rank+1 
-				WHERE rank = ".$upRank;
+				SET rank=".$upRank."+1 
+				WHERE rank <= ".$curRank."
+				AND class_id = ".$class_id."
+				ORDER BY rank DESC
+				LIMIT 1";
 			//move selected rank into new position
 			$sql3 = "UPDATE class_lesson_sequence
 				SET rank=".$upRank." 
-				WHERE rank =-1";
+				WHERE rank =-1
+				AND class_id = ".$class_id;
 		}
 
 		if ($lc->getvars['ud'] == 'dn') {
 			//move the below ranked item up
 			$sql2 = "UPDATE class_lesson_sequence
-				SET rank=rank-1 
-				WHERE rank = ".$dnRank;
+				SET rank=".$dnRank."-1 
+				WHERE rank >= ".$curRank."
+				AND class_id = ".$class_id."
+				ORDER BY rank ASC
+				LIMIT 1";
 			//move selected rank into new position
 			$sql3 = "UPDATE class_lesson_sequence
 				SET rank=".$dnRank." 
-				WHERE rank =-1";
+				WHERE rank =-1
+				AND class_id = ".$class_id;
 		}
 
 		$db->query($sql1);
@@ -268,8 +278,10 @@ class LessonSequence extends FacultyService {
 				$sequences[$objIdx]->startOffset = ($lc->postvars['startOffset'][$objIdx] * 60*60*24);
 				$save = true;
 			}
+			//due offset is number of days *after* the start of this object.
 			if( isset($lc->postvars['dueOffset'][$objIdx]) ) {
 				$sequences[$objIdx]->dueOffset = ($lc->postvars['dueOffset'][$objIdx] * 60*60*24);
+				$sequences[$objIdx]->dueOffset += $sequences[$objIdx]->startOffset;
 				$save = true;
 			}
 			if ($save) {
