@@ -57,6 +57,7 @@ class LessonSequence extends FacultyService {
 			SET rank=-1 
 			WHERE rank = ".$curRank."
 			AND class_id = ".$class_id."
+			ORDER BY rank DESC 
 			LIMIT 1";
 
 
@@ -122,8 +123,8 @@ class LessonSequence extends FacultyService {
 			//debug($seqItems);
 			//die('no sequences yet');
 		}
-		foreach ($sequences as $objIdx => $obj) {
 
+		foreach ($sequences as $objIdx => $obj) {
 			//change the "type" field into an image representing the mime.
 			//no reason why i'm changing lobType instead of lobMime
 			$sequences[$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
