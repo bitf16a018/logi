@@ -54,7 +54,7 @@ class LessonManager extends FacultyService {
 		$dg->setCellAlign('links','left');
 
 		$t['content'] = $dg->toHTML();
-*/
+//*/
 
 		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
 		$t['lessonDataGridList'] = array();
@@ -161,7 +161,7 @@ class LessonManager extends FacultyService {
 		// using LessonRenderer
 		// also, correct the checkbox selection state with a one to
 		// many lookup
-		$sql = "SELECT A.lob_class_repo_id, A.class_id, B.title, A.lesson_id
+		$sql = "SELECT A.lob_class_repo_id, A.class_id, B.title, A.lesson_id, A.class_lesson_sequence_id
 			FROM class_lesson_sequence AS A
 			LEFT JOIN class_lessons AS B
 			  ON A.lesson_id = B.id_class_lessons
@@ -313,7 +313,7 @@ class LessonManager extends FacultyService {
 		// using LessonRenderer
 		// also, correct the checkbox selection state with a one to
 		// many lookup
-		$sql = "SELECT A.class_lesson_sequence_id, A.lesson_id, A.lob_class_repo_id, B.title
+		$sql = "SELECT A.class_id, A.lesson_id, A.lob_class_repo_id, B.title
 			FROM class_lesson_sequence AS A
 			LEFT JOIN class_lessons AS B
 			  ON A.lesson_id = B.id_class_lessons
@@ -346,7 +346,7 @@ class LessonManager extends FacultyService {
 		$table->setColumnNameAt(2,'Lesson');
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
-		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->idName = 'lob_class_repo_id';
 		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
 
 		$t['table'] = new LC_TableRenderer($table);
@@ -461,7 +461,7 @@ class LessonManager extends FacultyService {
 			LEFT JOIN class_lessons AS B
 			  ON A.lesson_id = B.id_class_lessons
 			WHERE A.class_id = ".$class_id."
-			AND A.lob_type = 'activity'
+			AND A.lob_type = 'test'
 			ORDER BY B.title";
 		$db->query($sql);
 		while ($db->nextRecord()) {
@@ -490,7 +490,7 @@ class LessonManager extends FacultyService {
 		$col_c->justify='left';
 		$col_c->cellRenderer = new LC_TableLessonRenderer();
 		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
-		$col_c->cellRenderer->idName = 'assessment_id';
+		$col_c->cellRenderer->idName = 'lob_class_repo_id';
 
 		$t['table'] = new LC_TableRenderer($table);
 	}
@@ -862,7 +862,7 @@ class LessonManager extends FacultyService {
 		$db->query($sql);
 		while ( $db->nextRecord() )
 			$t['assessments'][] = $db->record['display_name'];
-*/
+//*/
 
 
 		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lessonId.' ORDER BY rank');
@@ -875,6 +875,9 @@ class LessonManager extends FacultyService {
 			$t['seqItems'][$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
 
 			//change unix timestamp offset into days
+//			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24). ' days <br/> 9:00 am <br/><a href="#">change</a>';
+//			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24) . ' days <br/> 9:00 am <br/><a href="#">change</a>';
+
 			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
 			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
 		}
@@ -914,37 +917,42 @@ class LessonManager extends FacultyService {
 		$colD->justify='left';
 
 		//create a gradebook entry column
+// *
 		$column = new LC_TableColumn();
-		$column->setName( "Gradebook" );
+		$column->setName( "Grade" );
 		$column->cellRenderer = new LC_TableStaticRenderer();
 		$column->cellRenderer->values = array(2=>'no entry');
-		$column->maxWidth=128;
+		$column->maxWidth=75;
 		$table->addColumnAt(2,$column);
+//*/
 
 		$colB = &$columnModel->getColumnAt(3);
-		$colB->maxWidth=64;
+		$colB->maxWidth=180;
 		$colB->name = 'Start';
 		$colB->cellRenderer = new LC_TableSelectRenderer();
+		$colB->cellRenderer->label = "&nbsp;@<select><option>9:00 am</option></select>";
 		$colB->cellRenderer->idName = 'startOffset';
 		$colB->cellRenderer->fieldName = 'startOffset';
-		$colB->cellRenderer->options = array(0=>'0');
-		for ($qq=1; $qq< 21; $qq++) { 
-			$colB->cellRenderer->options[] = $qq;
+		$colB->cellRenderer->options = array(0=>'First Day');
+		for ($qq=1; $qq< 31; $qq++) { 
+			$colB->cellRenderer->options[] = $qq.' days';
 		}
 
 		$colC = &$columnModel->getColumnAt(4);
-		$colC->maxWidth=64;
+		$colC->maxWidth=200;
 		$colC->name = 'Due';
 		$colC->cellRenderer = new LC_TableSelectRenderer();
+		$colC->cellRenderer->label = "&nbsp;@<select><option>9:00 am</option></select>";
 		$colC->cellRenderer->idName = 'dueOffset';
 		$colC->cellRenderer->fieldName = 'dueOffset';
 		$colC->cellRenderer->options = array(0=>'Never');
-		for ($qq=1; $qq< 21; $qq++) { 
-			$colC->cellRenderer->options[] = $qq;
+		$colC->cellRenderer->skipEmpty = true;;
+		for ($qq=1; $qq< 31; $qq++) { 
+			$colC->cellRenderer->options[] = $qq .' days later';
 		}
 
 		$col = &$columnModel->getColumnAt(5);
-		$col->maxWidth=64;
+		$col->maxWidth=50;
 		$col->name = 'Rank';
 		$col->cellRenderer = new LC_Table_SequenceRenderer();
 		$col->cellRenderer->id = $lessonId;
