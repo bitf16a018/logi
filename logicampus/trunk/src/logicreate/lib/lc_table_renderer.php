@@ -451,6 +451,9 @@ class LC_TableSelectRenderer extends LC_TableCellRenderer {
 	var $idName;
 	var $fieldName = 'item';
 	var $options = array();
+	var $label = '';
+	var $useKeysAsValues = true;
+	var $skipEmpty = false;
 
 	function LC_TableSelectRenderer() {
 		$this->options = array( 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
@@ -473,12 +476,20 @@ class LC_TableSelectRenderer extends LC_TableCellRenderer {
 			$idValue = $this->value->{$this->idName};
 			$selected = ($this->selectedVal == $this->value->{$this->selectedKey}) ? ' CHECKED ':'';
 		}
-
-		foreach ($this->options as $v) {
-			if ($v == $this->value) { $selected = 'selected="SELECTED"';} else { $selected = '';}
-			$html .= "<option value=\"".$v."\" ".$selected.">".$v."</option>\n\t";
+		if ($this->skipEmpty && $this->value == 0) {
+			return '';//"N/A";
 		}
-		return $html."\n\t</select>&nbsp;Days\n";
+
+		foreach ($this->options as $k => $v) {
+			if ($this->useKeysAsValues) {
+				$value = $k;
+			} else {
+				$value = $v;
+			}
+			if ($value == $this->value) { $selected = 'selected="SELECTED"';} else { $selected = '';}
+			$html .= "<option value=\"".$value."\" ".$selected.">".$v."</option>\n\t";
+		}
+		return $html."\n\t</select>".$this->label."\n";
 	}
 }
 
