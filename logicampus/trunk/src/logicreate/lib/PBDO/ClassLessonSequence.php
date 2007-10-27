@@ -17,8 +17,11 @@ class ClassLessonSequenceBase {
 	var $linkText;
 	var $notBeforeSeqId;
 	var $startOffset;
+	var $startTime;
 	var $endOffset;
+	var $endTime;
 	var $dueOffset;
+	var $dueTime;
 	var $gracePeriodDays;
 	var $rank;
 	var $hideUntilStart;
@@ -36,8 +39,11 @@ class ClassLessonSequenceBase {
 	'linkText'=>'varchar',
 	'notBeforeSeqId'=>'int',
 	'startOffset'=>'int',
+	'startTime'=>'mediumint',
 	'endOffset'=>'int',
+	'endTime'=>'mediumint',
 	'dueOffset'=>'int',
+	'dueTime'=>'mediumint',
 	'gracePeriodDays'=>'int',
 	'rank'=>'integer',
 	'hideUntilStart'=>'int',
@@ -46,8 +52,11 @@ class ClassLessonSequenceBase {
 	var $__nulls = array( 
 	'notBeforeSeqId'=>'notBeforeSeqId',
 	'startOffset'=>'startOffset',
+	'startTime'=>'startTime',
 	'endOffset'=>'endOffset',
+	'endTime'=>'endTime',
 	'dueOffset'=>'dueOffset',
+	'dueTime'=>'dueTime',
 	'gracePeriodDays'=>'gracePeriodDays');
 
 
@@ -149,8 +158,11 @@ class ClassLessonSequencePeerBase {
 		$st->fields['link_text'] = 'link_text';
 		$st->fields['not_before_seq_id'] = 'not_before_seq_id';
 		$st->fields['start_offset'] = 'start_offset';
+		$st->fields['start_time'] = 'start_time';
 		$st->fields['end_offset'] = 'end_offset';
+		$st->fields['end_time'] = 'end_time';
 		$st->fields['due_offset'] = 'due_offset';
+		$st->fields['due_time'] = 'due_time';
 		$st->fields['grace_period_days'] = 'grace_period_days';
 		$st->fields['rank'] = 'rank';
 		$st->fields['hide_until_start'] = 'hide_until_start';
@@ -180,8 +192,11 @@ class ClassLessonSequencePeerBase {
 		$st->fields['link_text'] = $this->linkText;
 		$st->fields['not_before_seq_id'] = $this->notBeforeSeqId;
 		$st->fields['start_offset'] = $this->startOffset;
+		$st->fields['start_time'] = $this->startTime;
 		$st->fields['end_offset'] = $this->endOffset;
+		$st->fields['end_time'] = $this->endTime;
 		$st->fields['due_offset'] = $this->dueOffset;
+		$st->fields['due_time'] = $this->dueTime;
 		$st->fields['grace_period_days'] = $this->gracePeriodDays;
 		$st->fields['rank'] = $this->rank;
 		$st->fields['hide_until_start'] = $this->hideUntilStart;
@@ -189,8 +204,11 @@ class ClassLessonSequencePeerBase {
 
 		$st->nulls['not_before_seq_id'] = 'not_before_seq_id';
 		$st->nulls['start_offset'] = 'start_offset';
+		$st->nulls['start_time'] = 'start_time';
 		$st->nulls['end_offset'] = 'end_offset';
+		$st->nulls['end_time'] = 'end_time';
 		$st->nulls['due_offset'] = 'due_offset';
+		$st->nulls['due_time'] = 'due_time';
 		$st->nulls['grace_period_days'] = 'grace_period_days';
 
 		$st->key = 'class_lesson_sequence_id';
@@ -218,8 +236,11 @@ class ClassLessonSequencePeerBase {
 		$st->fields['link_text'] = $obj->linkText;
 		$st->fields['not_before_seq_id'] = $obj->notBeforeSeqId;
 		$st->fields['start_offset'] = $obj->startOffset;
+		$st->fields['start_time'] = $obj->startTime;
 		$st->fields['end_offset'] = $obj->endOffset;
+		$st->fields['end_time'] = $obj->endTime;
 		$st->fields['due_offset'] = $obj->dueOffset;
+		$st->fields['due_time'] = $obj->dueTime;
 		$st->fields['grace_period_days'] = $obj->gracePeriodDays;
 		$st->fields['rank'] = $obj->rank;
 		$st->fields['hide_until_start'] = $obj->hideUntilStart;
@@ -227,8 +248,11 @@ class ClassLessonSequencePeerBase {
 
 		$st->nulls['not_before_seq_id'] = 'not_before_seq_id';
 		$st->nulls['start_offset'] = 'start_offset';
+		$st->nulls['start_time'] = 'start_time';
 		$st->nulls['end_offset'] = 'end_offset';
+		$st->nulls['end_time'] = 'end_time';
 		$st->nulls['due_offset'] = 'due_offset';
+		$st->nulls['due_time'] = 'due_time';
 		$st->nulls['grace_period_days'] = 'grace_period_days';
 
 		$st->key = 'class_lesson_sequence_id';
@@ -298,8 +322,11 @@ class ClassLessonSequencePeerBase {
 		$x->linkText = $row['link_text'];
 		$x->notBeforeSeqId = $row['not_before_seq_id'];
 		$x->startOffset = $row['start_offset'];
+		$x->startTime = $row['start_time'];
 		$x->endOffset = $row['end_offset'];
+		$x->endTime = $row['end_time'];
 		$x->dueOffset = $row['due_offset'];
+		$x->dueTime = $row['due_time'];
 		$x->gracePeriodDays = $row['grace_period_days'];
 		$x->rank = $row['rank'];
 		$x->hideUntilStart = $row['hide_until_start'];
