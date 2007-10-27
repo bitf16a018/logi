@@ -715,6 +715,7 @@ class assignmentManage extends FacultyService {
 		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();
 		$lesson = new LC_Lesson($lessonId);
+		$t['lessonTitle'] = $lesson->getTitle();
 
 		$activityLob = $lessonSequence->fetchObject($classSeqId);
 
@@ -852,6 +853,7 @@ class assignmentManage extends FacultyService {
 		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();
 		$lesson = new LC_Lesson($lessonId);
+		$t['lessonTitle'] = $lesson->getTitle();
 
 		$activityLob = $lessonSequence->fetchObject($classSeqId);
 
