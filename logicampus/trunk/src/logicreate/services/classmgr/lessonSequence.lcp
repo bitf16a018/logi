@@ -130,8 +130,8 @@ class LessonSequence extends FacultyService {
 			$sequences[$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
 
 			//change unix timestamp offset into days
-			$sequences[$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
-			$sequences[$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+//			$sequences[$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+//			$sequences[$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
 
 		}
 //		$t['seqItems'] = $sequences;
@@ -276,13 +276,15 @@ class LessonSequence extends FacultyService {
 		foreach ($sequences as $objIdx => $obj) {
 			$save = false;
 			if( isset($lc->postvars['startOffset'][$objIdx]) ) {
-				$sequences[$objIdx]->startOffset = ($lc->postvars['startOffset'][$objIdx] * 60*60*24);
+				$sequences[$objIdx]->startOffset = ($lc->postvars['startOffset'][$objIdx] );
+				$sequences[$objIdx]->startOffset += intval($lc->postvars['startOffset_time'][$objIdx] );
 				$save = true;
 			}
 			//due offset is number of days *after* the start of this object.
 			if( isset($lc->postvars['dueOffset'][$objIdx]) ) {
-				$sequences[$objIdx]->dueOffset = ($lc->postvars['dueOffset'][$objIdx] * 60*60*24);
-				$sequences[$objIdx]->dueOffset += $sequences[$objIdx]->startOffset;
+				$sequences[$objIdx]->dueOffset = ($lc->postvars['dueOffset'][$objIdx] );
+				$sequences[$objIdx]->dueOffset += ($sequences[$objIdx]->startOffset - ($sequences[$objIdx]->startOffset % 86400));
+				$sequences[$objIdx]->dueTime = intval($lc->postvars['dueOffset_time'][$objIdx] );
 				$save = true;
 			}
 			if ($save) {

@@ -74,9 +74,11 @@ class LessonManager extends FacultyService {
 				$sequences[$objIdx]->lobType = '<img width="24" height="24" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
 
 				//change unix timestamp offset into days
-				$sequences[$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
-				$sequences[$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+/*
+				$sequences[$objIdx]->startOffset = ($obj->startOffset );
+				$sequences[$objIdx]->dueOffset = ($obj->dueOffset );
 
+*/
 			}
 
 			$dm = new LC_Table_ObjectModel($sequences);
@@ -100,6 +102,9 @@ class LessonManager extends FacultyService {
 			$dm->ignoreColumn('hideUntilStart');
 			$dm->ignoreColumn('hideAfterEnd');
 			$dm->ignoreColumn('rank');
+			$dm->ignoreColumn('dueTime');
+			$dm->ignoreColumn('endTime');
+			$dm->ignoreColumn('startTime');
 
 
 			$table = new LC_Table($dm);
@@ -736,7 +741,8 @@ class LessonManager extends FacultyService {
 		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
 		$t['activeOnStruct']['fieldName'] = 'activeOn';
 		$t['activeOnStruct']['displayName'] = 'Active On';
-		$t['activeOnStruct']['dateTimeBit'] = 63;
+		//$t['activeOnStruct']['dateTimeBit'] = 63;
+		$t['activeOnStruct']['dateTimeBit'] = 7;
 
 		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
 		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
@@ -820,7 +826,8 @@ class LessonManager extends FacultyService {
 		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
 		$t['activeOnStruct']['fieldName'] = 'activeOn';
 		$t['activeOnStruct']['displayName'] = 'Active On';
-		$t['activeOnStruct']['dateTimeBit'] = 63;
+//		$t['activeOnStruct']['dateTimeBit'] = 63;
+		$t['activeOnStruct']['dateTimeBit'] = 7;
 
 		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
 		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
@@ -878,8 +885,8 @@ class LessonManager extends FacultyService {
 //			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24). ' days <br/> 9:00 am <br/><a href="#">change</a>';
 //			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24) . ' days <br/> 9:00 am <br/><a href="#">change</a>';
 
-			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
-			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+//			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+//			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
 		}
 
 		$dm = new LC_Table_ObjectModel($t['seqItems']);
@@ -902,6 +909,9 @@ class LessonManager extends FacultyService {
 		$dm->ignoreColumn('gracePeriodDays');
 		$dm->ignoreColumn('hideUntilStart');
 		$dm->ignoreColumn('hideAfterEnd');
+		$dm->ignoreColumn('dueTime');
+		$dm->ignoreColumn('startTime');
+		$dm->ignoreColumn('endTime');
 
 
 		$table = new LC_Table($dm);
@@ -929,8 +939,7 @@ class LessonManager extends FacultyService {
 		$colB = &$columnModel->getColumnAt(3);
 		$colB->maxWidth=180;
 		$colB->name = 'Start';
-		$colB->cellRenderer = new LC_TableSelectRenderer();
-		$colB->cellRenderer->label = "&nbsp;@<select><option>9:00 am</option></select>";
+		$colB->cellRenderer = new LC_Table_DateOffsetRenderer();
 		$colB->cellRenderer->idName = 'startOffset';
 		$colB->cellRenderer->fieldName = 'startOffset';
 		$colB->cellRenderer->options = array(0=>'First Day');
@@ -941,12 +950,13 @@ class LessonManager extends FacultyService {
 		$colC = &$columnModel->getColumnAt(4);
 		$colC->maxWidth=200;
 		$colC->name = 'Due';
-		$colC->cellRenderer = new LC_TableSelectRenderer();
-		$colC->cellRenderer->label = "&nbsp;@<select><option>9:00 am</option></select>";
+		$colC->cellRenderer = new LC_Table_DateOffsetRenderer();
+		//$colC->cellRenderer = new LC_TableSelectRenderer();
+		$colC->cellRenderer->zeroLabel = "Never";
 		$colC->cellRenderer->idName = 'dueOffset';
 		$colC->cellRenderer->fieldName = 'dueOffset';
 		$colC->cellRenderer->options = array(0=>'Never');
-		$colC->cellRenderer->skipEmpty = true;;
+		$colC->cellRenderer->skipEmpty = true;
 		for ($qq=1; $qq< 31; $qq++) { 
 			$colC->cellRenderer->options[] = $qq .' days later';
 		}
@@ -1209,6 +1219,68 @@ class LC_Table_SequenceRenderer extends LC_TableCellRenderer {
 		return '<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=up">Up</a> <br/>
 			<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=dn">Down</a>
 			';
+	}
+}
+
+
+class LC_Table_DateOffsetRenderer extends LC_TableCellRenderer{
+
+	var $selectedVal;
+	var $selectedKey;
+	var $idName;
+	var $fieldName = 'item';
+	var $options = array();
+	var $label = '';
+	var $useKeysAsValues = true;
+	var $skipEmpty = false;
+	var $dayList = array();
+	var $timeList = array();
+	var $dayLabel = ' days';
+	var $zeroLabel = 'First Day';
+
+	function LC_Table_DateOffsetRenderer() {
+		$this->timeList = array();
+		for ($x=0; $x < 24; ++$x) {
+			for ($y=0; $y < 60; $y+=30) {
+				if ($x < 12) {
+					$ampm = 'AM';
+				} else {
+					$ampm = 'PM';
+				}
+				$fieldValue = $x * 60*60;
+				$fieldValue += $y * 60;
+				if ($x == 0 ) {
+					$this->timeList[$fieldValue] = ($x+12).':'.sprintf('%02d',$y). ' '.$ampm;
+				} else if ($x > 12) {
+					$this->timeList[$fieldValue] = ($x-12).':'.sprintf('%02d',$y). ' '.$ampm;
+				} else {
+					$this->timeList[$fieldValue] = $x.':'.sprintf('%02d',$y). ' '.$ampm;
+				}
+			}
+		}
+
+		//prepopulate days
+		for ($x = 1; $x <= 30; $x++) {
+			$this->dayList[ ($x*60*60*24) ] = $x .$this->dayLabel;
+		}
+	}
+
+	function getRenderedValue() {
+		if ($this->skipEmpty && $this->value == 0) {
+			return '';//"N/A";
+		}
+		$hours = $this->value % 86400; //seconds per day
+		$days = $this->value - $hours;
+
+		$time = "<select name=\"".$this->fieldName."[".$this->row."]\">\n";
+		$time .= "\t<option value=\"0\">".$this->zeroLabel."</option>\n";
+		$time .= Form::makeOptions($this->dayList,$days)."</select>\n";
+
+		$time .= "&nbsp;@<select name=\"".$this->fieldName."_time[".$this->row."]\">";
+		$time .= "\t<option value=\"0\">".$this->zeroLabel."</option>\n";
+		$time .= Form::makeOptions($this->timeList,$hours)."</select>\n";
+		return $time;
+
 	}
 }
 

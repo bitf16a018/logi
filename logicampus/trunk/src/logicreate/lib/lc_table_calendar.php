@@ -418,9 +418,10 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 	 */
 	function getEventsAtHour($dateStamp) {
 		$ret = array();
-//		echo "Hour is : ".date('G:i:s',$evtStart);
+//		echo "Hour is : ".date('m d Y G:i:s',$dateStamp)."<br/>\n";
 //		echo "<br/><br/>";
 		foreach($this->events as $blank=>$evt) {
+//		echo "Start is : ".date('m d Y G:i:s',$evt['startdate'])." title is : ".$evt['title']."<br/>\n";
 			list($m,$d,$y,$g) = explode(' ', date('m d Y G',$evt['startdate']));
 			$evtStart = mktime($g,0,0,$m,$d,$y);
 			list($m,$d,$y,$g) = explode(' ', date('m d Y G',$evt['enddate']));
