@@ -56,7 +56,8 @@ class LessonNew extends FacultyService {
 		$t['activeOnStruct']['defaultValue'] = time();
 		$t['activeOnStruct']['displayName'] = 'Active On';
 		$t['activeOnStruct']['fieldName'] = 'activeOn';
-		$t['activeOnStruct']['dateTimeBit'] = 63;
+//		$t['activeOnStruct']['dateTimeBit'] = 63;
+		$t['activeOnStruct']['dateTimeBit'] = 7;
 		$t['activeOnStruct']['endYear'] = 4;
 
 		$t['inactiveOnStruct']['defaultValue'] = (time()+86400);
