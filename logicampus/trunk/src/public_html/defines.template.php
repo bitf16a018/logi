@@ -47,16 +47,6 @@ define('SITE_DISPLAY_NAME','LogiCampus');
 //	http://www.foo.com/~user/home/
 //	        ^----base      ^------tail
 
-$relpath='../logicreate/';
-if (! file_exists($relpath)) {
-	$relpath='./logicreate/';
-	if (! file_exists($relpath)) {
-		$relpath='../../logicreate/';
-		if (! file_exists($relpath)) {
-			die("Cannot find logicreate directory.");
-		}
-	}
-}
 
 $PHPSESSID = @$_COOKIE['PHPSESSID'];
 
@@ -68,6 +58,19 @@ $tail = str_replace($script,'',$scriptName);
 $tail = str_replace('herc/','',$tail);
 $doc = dirname(__FILE__).'/';
 
+
+
+//find the logicreate folder
+$relpath='../logicreate/';
+if (! file_exists($doc.$relpath)) {
+	$relpath='./logicreate/';
+	if (! file_exists($doc.$relpath)) {
+		$relpath='../../logicreate/';
+		if (! file_exists($doc.$relpath)) {
+			die("Cannot find logicreate directory.");
+		}
+	}
+}
 
 
 define('DOCUMENT_ROOT',$doc);
