@@ -58,7 +58,6 @@ if (! file_exists($relpath)) {
 	}
 }
 
-$relpath='../logicreate/';
 $PHPSESSID = @$_COOKIE['PHPSESSID'];
 
 $base = $_SERVER['HTTP_HOST'];
