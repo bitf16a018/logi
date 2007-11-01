@@ -74,11 +74,9 @@ class LessonManager extends FacultyService {
 				$sequences[$objIdx]->lobType = '<img width="24" height="24" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
 
 				//change unix timestamp offset into days
-/*
-				$sequences[$objIdx]->startOffset = ($obj->startOffset );
-				$sequences[$objIdx]->dueOffset = ($obj->dueOffset );
+				$sequences[$objIdx]->startOffset = ($obj->startOffset /60/60/24);
+				$sequences[$objIdx]->dueOffset = (($obj->dueOffset - $obj->startOffset) /60/60/24);
 
-*/
 			}
 
 			$dm = new LC_Table_ObjectModel($sequences);
@@ -875,7 +873,19 @@ class LessonManager extends FacultyService {
 		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lessonId.' ORDER BY rank');
 
 
+		$gbcodeList = array();
 		foreach ($t['seqItems'] as $objIdx => $obj) {
+
+			$t['seqItems'][$objIdx]->startOffset = $obj->startOffset.'|'.$obj->startTime;
+
+			if ($obj->lobType == 'test' || $obj->lobType == 'activity') {
+
+				$t['seqItems'][$objIdx]->dueOffset = (($obj->dueOffset - $obj->startOffset));
+				$t['seqItems'][$objIdx]->dueOffset = $obj->dueOffset.'|'.$obj->dueTime;
+				$gbcodeList[] = 'link to grade';
+			} else {
+				$gbcodeList[] = '';
+			}
 
 			//change the "type" field into an image representing the mime.
 			//no reason why i'm changing lobType instead of lobMime
@@ -887,6 +897,7 @@ class LessonManager extends FacultyService {
 
 //			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
 //			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+
 		}
 
 		$dm = new LC_Table_ObjectModel($t['seqItems']);
@@ -931,7 +942,7 @@ class LessonManager extends FacultyService {
 		$column = new LC_TableColumn();
 		$column->setName( "Grade" );
 		$column->cellRenderer = new LC_TableStaticRenderer();
-		$column->cellRenderer->values = array(2=>'no entry');
+		$column->cellRenderer->values = $gbcodeList;
 		$column->maxWidth=75;
 		$table->addColumnAt(2,$column);
 //*/
@@ -1265,12 +1276,17 @@ class LC_Table_DateOffsetRenderer extends LC_TableCellRenderer{
 		}
 	}
 
+	/**
+	 * time and date are delivered in one $this->value variable
+	 * separated by a pipe char.
+	 */
 	function getRenderedValue() {
-		if ($this->skipEmpty && $this->value == 0) {
+		//empty values still have the pipe character
+		if ($this->skipEmpty && strlen($this->value) < 2) {
 			return '';//"N/A";
 		}
-		$hours = $this->value % 86400; //seconds per day
-		$days = $this->value - $hours;
+
+		list($days,$hours) = @explode('|',$this->value);
 
 		$time = "<select name=\"".$this->fieldName."[".$this->row."]\">\n";
 		$time .= "\t<option value=\"0\">".$this->zeroLabel."</option>\n";
