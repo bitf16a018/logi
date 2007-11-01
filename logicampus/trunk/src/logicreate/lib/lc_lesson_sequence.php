@@ -16,7 +16,7 @@ class LC_LessonSequence {
 	 *  Load all class_lesson_sequence items and store them in ->items
 	 */
 	function loadItems() {
-		$this->items = ClassLessonSequencePeer::doSelect( 'class_id = '.$this->classId.' and lesson_id = '.$this->lessonId);
+		$this->items = ClassLessonSequencePeer::doSelect( 'class_id = '.$this->classId.' and lesson_id = '.$this->lessonId. ' order by rank');
 	}
 
 	function fetchObject($sequenceId) {
@@ -86,6 +86,47 @@ class LC_LessonSequence {
 		if (count($contentIds) < 1) { $contentIds = array(0);}
 		$this->updateSequence($contentIds, $lobData, 'content');
 	}
+
+	function setStartDay($objIdx, $intDays) {
+		$this->items[$objIdx]->startOffset = $intDays * (60*60*24);
+	}
+
+	function setStartTime($objIdx, $timestamp) {
+		$this->items[$objIdx]->startTime = $timestamp;
+	}
+
+	function getStartDay($objIdx) {
+		return $this->items[$objIdx]->startOffset / (60/60/24);
+	}
+
+	function getStartTime($objIdx) {
+		return $this->items[$objIdx]->startTime;
+	}
+
+	/**
+	 * Must be set after startDay
+	 */
+	function setDueDay($objIdx, $intDays) {
+		$this->items[$objIdx]->dueOffset = $intDays * (60*60*24);
+		$this->items[$objIdx]->dueOffset += $this->items[$objIdx]->startOffset;
+	}
+
+	/**
+	 * Sets the hour and minute of the due time, requires unix timestamp
+	 */
+	function setDueTime($objIdx, $timestamp) {
+		$this->items[$objIdx]->dueTime = $timestamp;
+	}
+
+	function getDueDay($objIdx) {
+		return $this->items[$objIdx]->dueOffset / (60/60/24);
+	}
+
+	function getDueTime($objIdx) {
+		return $this->items[$objIdx]->dueTime;
+	}
+
+
 
 	/**
 	 * Wrap utility function to update sequence table.
