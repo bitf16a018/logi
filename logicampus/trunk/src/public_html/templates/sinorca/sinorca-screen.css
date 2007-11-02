@@ -458,3 +458,6 @@ UL
 	background-color:#EEF;
 }
 
+TABLE.ie_drop_fix {
+	margin-right:-100%;
+}
