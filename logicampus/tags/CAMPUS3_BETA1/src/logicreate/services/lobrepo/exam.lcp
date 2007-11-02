@@ -1,0 +1,138 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+
+include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_lob_test.php');
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class Exam extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'exam_main';
+		$testId = intval($lc->postvars['id']);
+
+		if (! is_object($u->sessionvars['test_obj']) ) {
+			$test = new Lc_Lob_Test($testId);
+			$test->setTitle( $lc->postvars['title']);
+			$test->setInstructions( $lc->postvars['instructions']);
+			$test->setNotes( $lc->postvars['notes']);
+			$t['testId'] = $test->get('lobRepoEntryId');
+			$u->sessionvars['test_obj'] = $test;
+		}
+
+		$t['questionList'] = $u->sessionvars['test_obj']->questionObjs;
+
+
+		$t['questions_total_points'] = sprintf('%d', 0);
+		$t['questions_count'] = sprintf('%d', $u->sessionvars['test_obj']->getQuestionCount());
+//debug($test,1);
+	}
+
+
+	/**
+	 */
+	function editQuestionRun(&$db, &$u, &$lc, &$t) {
+		$lc->templateName='exam_question_mchoice';
+		$t['questionType'] = 'mchoice';
+//		$testId = intval($lc->postvars['id']);
+
+		//load this question from the question array
+		if (isset($lc->getvars['qidx'])) {
+			$t['questionObj'] = $u->sessionvars['test_obj']->questionObjs[$lc->getvars['qidx']];
+			$t['qidx'] = intval($lc->getvars['qidx']);
+		} else {
+			$t['questionObj'] = new LobTestQst();
+			$t['qidx'] = -1;
+		}
+		$t['q'] = $t['questionObj'];
+
+//debug($test,1);
+	}
+
+
+	function saveQuestionRun(&$db, &$u, &$lc, &$t) {
+		if (! is_object($u->sessionvars['test_obj']) ) {
+			$u->sessionvars['test_obj'] = new Lc_Lob_Test();
+		}
+
+		$type = 'unknown';
+		switch($lc->postvars['questionType']) {
+			case 'mchoice':
+				$type = 'QUESTION_MCHOICE';
+				break;
+		}
+		if ($type == 'unknown') {
+			$u->addSessionMessage('Unknown question type.','e');
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = appurl('lobrepo/exam/');
+			return;
+		}
+		$qidx = intval($lc->postvars['qidx']);
+		$u->sessionvars['test_obj']->setQuestion($qidx,$lc->postvars['questionText'], $type);
+		foreach ($lc->postvars['labels'] as $lidx => $label) {
+			if ($label == '') { continue; }
+			$isCorrect = $lc->postvars['correct'] == $lidx;
+			if (!$u->sessionvars['test_obj']->addLabel($label, $isCorrect, $qidx)) {
+				die('failed label.  label = '.$label);
+			}
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/exam/');
+	}
+
+
+	/**
+	 */
+	function deleteQuestionRun(&$db, &$u, &$lc, &$t) {
+
+		//load this question from the question array
+		if (isset($lc->getvars['qidx'])) {
+			unset($u->sessionvars['test_obj']->questionObjs[$lc->getvars['qidx']]);
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/exam/');
+	}
+
+
+	/**
+	 * Commit the test in the session to the database
+	 */
+	function saveTestRun(&$db, &$u, &$lc, &$t) {
+//		debug($u->sessionvars['test_obj'],1);
+		$u->sessionvars['test_obj']->save();
+
+		$lobUserObj = new LobUserLink();
+		$lobUserObj->set('lobRepoEntryId',$u->sessionvars['test_obj']->repoObj->getPrimaryKey());
+		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->set('lobKind','content');
+		$lobUserObj->save();
+
+		unset($u->sessionvars['test_obj']);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj/');
+	}
+}
+
+?>

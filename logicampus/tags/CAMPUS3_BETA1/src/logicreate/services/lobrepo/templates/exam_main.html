@@ -1,0 +1,222 @@
+<? 
+if ($t['message']) { ?>
+<div style="color: blue;"><?=$t['message'];?></div>
+<br>
+<? } ?>
+
+<form method="GET" action="<?=modurl('exam/event=editQuestion/id='.$t['testId']);?>">
+<FIELDSET>
+<LEGEND>ADD a question</LEGEND>
+<table width="100%" border="0">
+<tr>
+        <td align="center">
+                <input type="submit" name="type" id="mc_submit" value="Multiple Choice" style="width:130px;">
+        </td>
+        <td align="center">
+                <input type="submit" name="type" id="ma_submit" value="Multiple Answer" style="width:130px;">
+        </td>
+        <td align="center">
+                <input type="submit" name="type" id="mq_submit" value="Matching Question" style="width:130px;">
+        </td>
+        <td align="center">
+                <input type="submit" name="type" id="tf_submit" value="True/False" style="width:130px;">
+        </td>
+        <td align="center">
+                <input type="submit" name="type" id="fb_submit" value="Fill in the Blank" style="width:130px;">
+        </td>
+        <td align="center">
+                <input type="submit" name="type" id="es_submit" value="Essay" style="width:130px;">
+        </td>
+</tr>
+</table>
+</FIELDSET>
+</form>
+
+
+<p>&nbsp;</p>
+
+<form method="POST" action=<?=modurl('exam/');?>">
+<table width="100%" border="0">
+	<tr>
+		<td>
+			<span style="color: green;">Green Text</span> = Correct Answers
+		</td>
+		<td align="right">
+			<?=lct('Points');?>: <?= $t['questions_total_points'];?>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span style="color: #000000;background: #FFFF00">Yellow Text</span> = Possible mis-spelled word
+		</td>
+		<td align="right">
+			<?=lct('Question');?>: <?= $t['questions_count'];?>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			&nbsp;	
+		</td>
+		<td align="right">
+		<!--
+			<a href="<?=modurl('main/event=spellcheck/id='.$t['assessment']->assessmentId);?>">SPELL CHECK</a>
+			-->
+		</td>
+	</tr>
+</table>
+
+	<?php
+	$a_jscript = array();
+
+		foreach($t['questionList'] as $k=>$v) { 
+		
+		$a_jscript[] = 'points'.$v->lobTestQstId;
+		?>
+<FIELDSET>
+<LEGEND><a href="<?=APP_URL?>lobrepo/exam/event=editQuestion/qidx=<?=$k;?>">EDIT</a> &mdash; <a href="<?=APP_URL?>lobrepo/exam/event=deleteQuestion/qidx=<?=$k;?>" onclick="return confirm('Are you sure?');">DELETE</a></LEGEND>
+<table width="100%" border="0">
+	<tr>
+		<td>
+			<?= ($k+1);?>)
+		</td>
+		<td width="15%">
+			<i><?= $v->qstText; ?></i>
+		</td>
+		<td width="90%" align="right" colspan="1">
+			Points <input type="text" size="3" name="points[<?=$v->assessmentQuestionId?>]" value="<?=$v->questionPoints?>" id="points<?=$v->assessmentQuestionId?>">
+
+		</td>
+	</tr>
+	<tr>
+		<td colspan="1" valign="bottom">
+			&nbsp;
+		</td>
+		<td colspan="2">
+			<b><?= $v->questionText; ?></b>
+		</td>
+	</tr>
+	<? //show choices
+	$count = $v->qstChoices;  // neeed to know total
+	while (list ($cc,$c) = @each($v->qstChoices) ) {
+
+	// mgk 10/19/03 - FIXME - put this in to help display issue, but it might
+	// be a bigger issue.  every mchoice question has 10 answers, with most blank
+	// AIMed mark - no answer yet
+	if (trim($c['label'])!='') { 
+
+		// matching questions have this data in here.
+		if ( $cc === 'randomAnswers' ) continue;
+	?>
+	<tr>
+		<td colspan="1" valign="bottom">
+			&nbsp;
+		</td>
+		<td colspan="1" align="right">
+			<?=chr($cc+65);?>.
+		</td>
+		<td colspan="1" align="left">
+			<?
+			# ALL FIB answers are considered to be good answers
+			# but we need to print them a little different and print
+			# the alternate answers separate
+			if ($v->questionTypeId == QUESTION_FILLINBLANK)
+			{
+					if ($cc == 0)
+					{
+					?>
+						<div style="color: green; font-size: 105%">
+							<?= $c['label'];?>
+						</div>
+					<?
+					if ($count >= 2)
+						{
+							echo '</td></tr><tr><td colspan="2"><b>Alternate Answers</b></td></tr>';
+						}
+					continue;
+
+					} else {
+					echo $c->label;
+					continue;
+					}
+			} 			
+			
+			if ($v->questionTypeId == QUESTION_MATCHING)
+			{ 
+				if ($c['label'] == '')
+				{ 
+					echo '<i>no question entered</i>';
+				}
+				?>
+				<?= $c['label'];?> (
+				<span style="color: green; font-size: 105%">
+					<?=$c['correct'];?>
+				</span>)
+<?			continue;
+			}  // end MATCHING IF 
+
+			if ($c['correct'] === true) { ?>
+			<div style="color: green; font-size: 105%">
+			<?= $c['label'];?>
+			</div>
+			<? } else { ?>
+				<?=$c['label'];?>
+		<?	}  ?>
+		</td>
+	</tr>
+<? } // end if label!=''?> 
+<? } ?> 
+	<tr>
+	<td colspan='3' align="right">
+
+			Change Position:
+			<select name="order[<?=$k?>]" onChange="document.q<?=$v->assessmentQuestionId;?>.submit();">
+			<?=makeOptions($t['dropDownData'], $k+1);?>
+			</select>
+			<input type="submit" name="sort" value="go"/>
+	</td></tr>
+</table>
+</FIELDSET>
+
+<br>
+<? } ?>
+<script>
+	var pointsarray = new Object();
+<?php
+
+	foreach($a_jscript as $myId)
+	{	
+		echo '	
+	pointsarray["'.$myId.'"] = true;';		
+	}
+
+	
+?>
+
+function checkPoints()
+{
+	var tmp_element; 
+	
+	for (field in pointsarray) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (tmp_element.value == "" || tmp_element.value == 0 || tmp_element.value == "0")
+		{
+			alert('You must apply at least 1 point per question');
+			return false;
+		}
+		
+	}
+	
+return true;	
+}
+
+
+</script>
+
+	<p align="right">
+			<input type="hidden" name="event" value="saveTest">
+			<input type="submit" name="submit" value="Save Test"/>
+	</p>
+
+</form>

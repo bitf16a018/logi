@@ -1,0 +1,115 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+include_once(LIB_PATH.'SiteForms.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_lob_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class add extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $applinks = array (
+		'All Learning Objects'=>'',
+		'Import Learning Objects'=>'import',
+		'My Learning Objects'=>'myobj',
+		'Add Learning Objects'=>'add',
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'add_main';
+
+		$t['lob'] = new LC_Lob_Content();
+
+		$ext = addslashes($lc->getvars['m']);
+		$mimetype = Lc_Lob_Util::getMimeForSubtype($lc->getvars['t'],$ext);
+		switch($lc->getvars['t']) {
+			case 'html':
+				$lc->templateName = 'add_html';
+				break;
+
+			case 'image':
+				$lc->templateName = 'add_image';
+				break;
+
+			case 'audio':
+			case 'doc':
+				$lc->templateName = 'add_doc';
+				break;
+
+			case 'text':
+				$lc->templateName = 'add_text';
+				break;
+
+			case 'activity':
+				$lc->templateName = 'add_activity';
+				break;
+
+			case 'test':
+				$lc->templateName = 'add_test';
+				break;
+
+		}
+		$t['mimetype'] = $mimetype;
+	}
+
+
+	function uploadToLob(&$lob,&$lc,$upName) {
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+
+		$lob->set('lobFilename', urlencode( $lc->uploads[$upName]['name'] ) );
+		$lob->set('lobBinary', file_get_contents( $lc->uploads[$upName]['tmp_name'] ) );
+		$lob->set('lobContent', $lc->postvars['txText']);
+		$lob->set('lobSubType',$lc->postvars['lob_sub_type']);
+		$n =& $lc->uploads[$upName]['name'];
+
+		$ext = substr (
+			$n, 
+		       (strrpos($n, '.')  - strlen($n) +1)
+			);
+
+		$ext = strtolower($ext);
+		$m = Lc_Lob::getMimeForSubtype($lc->postvars['lob_sub_type'],$ext);
+		$lob->set('lobMime', $m);
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'),$ext)
+		);
+	}
+
+
+/*
+	function textToLob(&$lob,&$lc) {
+		$lob->set('lobContent', $lc->postvars['txText']);
+		LC_Lob::getSubType($lc->postvars['mime']);
+		$lob->set('lobSubType',$lc->postvars['lob_sub_type']);
+		$lob->set('lobTitle', $lc->postvars['txTitle']);
+		$lob->set('lobMime', $lc->postvars['mime']);
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			LC_Lob::createLinkText($lob->get('lobTitle'))
+		);
+
+	}
+*/
+
+}
+
+?>

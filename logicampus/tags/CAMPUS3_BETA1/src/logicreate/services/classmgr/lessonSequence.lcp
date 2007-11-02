@@ -1,0 +1,344 @@
+<?php
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
+
+// PBDO is the new standard, above object is DEPRECATED
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
+include_once(LIB_PATH.'lc_lesson_sequence.php');
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+include(LIB_PATH.'lc_lob.php');
+//include(SERVICE_PATH.'classmgr/lc_table_lesson.php');
+
+
+class LessonSequence extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+//	var $authorizer = 'native';
+
+	// links
+	var $inactivelinks = array( 'Lessons' );
+	var $applinks = array (
+		'List Lessons' => 'lessonManager/',
+		'Add a Lesson' => 'lessonNew/event=add'
+	);
+        var $navlinks = array (
+                'Classroom Manager' => 'display/',
+                'Announcements'=>'announcements/',
+                'Assessment Manager' => '%assessments/',
+                'Assignments' => 'assignmentManage/',
+                'Content' => 'lessonContent/',
+                'FAQ' => 'faq/',
+                'File Resource Manager' => '%classdoclib/',
+                'Gradebook' => '%gradebook/',
+                'Lessons' => 'lessonManager/',
+                'Objectives' => 'lessonObjectives/',
+                'Webliography' => 'lessonWebliography/'
+        );
+
+
+
+	/**
+	 * move a sequence object up one rank
+	 */
+	function rankRun(&$db,&$u,&$lc,&$t) {
+		$class_id = $u->activeClassTaught->id_classes;
+		$lesson_id = (int) $lc->getvars['id'];
+		$curRank = (int) $lc->getvars['r'];
+		$upRank = $curRank - 1;
+		$dnRank = $curRank + 1;
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		//move currently ranked item into a temp position
+		$sql1 = "UPDATE class_lesson_sequence
+			SET rank=-1 
+			WHERE rank = ".$curRank."
+			AND class_id = ".$class_id."
+			ORDER BY rank DESC 
+			LIMIT 1";
+
+
+		if ($lc->getvars['ud'] == 'up') {
+			//move the above ranked item down
+			$sql2 = "UPDATE class_lesson_sequence
+				SET rank=".$upRank."+1 
+				WHERE rank <= ".$curRank."
+				AND class_id = ".$class_id."
+				ORDER BY rank DESC
+				LIMIT 1";
+			//move selected rank into new position
+			$sql3 = "UPDATE class_lesson_sequence
+				SET rank=".$upRank." 
+				WHERE rank =-1
+				AND class_id = ".$class_id;
+		}
+
+		if ($lc->getvars['ud'] == 'dn') {
+			//move the below ranked item up
+			$sql2 = "UPDATE class_lesson_sequence
+				SET rank=".$dnRank."-1 
+				WHERE rank >= ".$curRank."
+				AND class_id = ".$class_id."
+				ORDER BY rank ASC
+				LIMIT 1";
+			//move selected rank into new position
+			$sql3 = "UPDATE class_lesson_sequence
+				SET rank=".$dnRank." 
+				WHERE rank =-1
+				AND class_id = ".$class_id;
+		}
+
+		$db->query($sql1);
+		$db->query($sql2);
+		$db->query($sql3);
+
+		//redirect
+		//go back to the main overview page, all the controls that used to be in this lessonSequence
+		// service are now in there too.
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+
+	}
+
+
+	/**
+	 * show all the LOBs for this lesson (Learning OBjects)
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'lessonSequence_main';
+		$this->sectionTitle = 'Change Lesson Order';
+
+		$class_id = $u->activeClassTaught->id_classes;
+		$lesson_id = (int) $lc->getvars['id'];
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id.' ORDER BY rank');
+
+		if (count ($sequences) < 1) { 
+			$sequences = $this->initSequences($class_id, $lesson_id, $db);
+			//debug($seqItems);
+			//die('no sequences yet');
+		}
+
+		foreach ($sequences as $objIdx => $obj) {
+			//change the "type" field into an image representing the mime.
+			//no reason why i'm changing lobType instead of lobMime
+			$sequences[$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+
+			//change unix timestamp offset into days
+//			$sequences[$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+//			$sequences[$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+
+		}
+//		$t['seqItems'] = $sequences;
+
+		$dm = new LC_Table_ObjectModel($sequences);
+		$dm->ignoreColumn('_new');
+		$dm->ignoreColumn('_modified');
+		$dm->ignoreColumn('_version');
+		$dm->ignoreColumn('_entityVersion');
+		$dm->ignoreColumn('__attributes');
+		$dm->ignoreColumn('__nulls');
+
+		$dm->ignoreColumn('classLessonSequenceId');
+		$dm->ignoreColumn('lessonId');
+		$dm->ignoreColumn('classId');
+		$dm->ignoreColumn('lobClassRepoId');
+		$dm->ignoreColumn('lobSubType');
+		$dm->ignoreColumn('lobMime');
+		$dm->ignoreColumn('linkText');
+		$dm->ignoreColumn('notBeforeSeqId');
+		$dm->ignoreColumn('endOffset');
+		$dm->ignoreColumn('gracePeriodDays');
+		$dm->ignoreColumn('hideUntilStart');
+		$dm->ignoreColumn('hideAfterEnd');
+
+
+		$table = new LC_Table($dm);
+
+		$columnModel = &$table->getColumnModel();
+		$columnModel->tableColumns[0]->name  =' ';
+		$columnModel->tableColumns[1]->name  ='Title';
+
+		$colA = &$columnModel->getColumnAt(0);
+		$colA->maxWidth=64;
+
+		$colD = &$columnModel->getColumnAt(1);
+		$colD->justify='left';
+
+		$col = &$columnModel->getColumnAt(4);
+		$col->maxWidth=64;
+		$col->name = 'Rank';
+		$col->cellRenderer = new LC_Table_SequenceRenderer();
+		$col->cellRenderer->id = $lesson_id;
+
+
+		$colB = &$columnModel->getColumnAt(2);
+		$colB->maxWidth=64;
+		$colB->name = 'Start';
+		$colB->cellRenderer = new LC_TableSelectRenderer();
+		$colB->cellRenderer->idName = 'startOffset';
+		$colB->cellRenderer->fieldName = 'startOffset';
+		$colB->cellRenderer->options = array(0=>'0');
+		for ($qq=1; $qq< 21; $qq++) { 
+			$colB->cellRenderer->options[] = $qq;
+		}
+
+		$colC = &$columnModel->getColumnAt(3);
+		$colC->maxWidth=64;
+		$colC->name = 'Due';
+		$colC->cellRenderer = new LC_TableSelectRenderer();
+		$colC->cellRenderer->idName = 'dueOffset';
+		$colC->cellRenderer->fieldName = 'dueOffset';
+		$colC->cellRenderer->options = array(0=>'Never');
+		for ($qq=1; $qq< 21; $qq++) { 
+			$colC->cellRenderer->options[] = $qq;
+		}
+
+
+
+		$t['table'] = new LC_TableRenderer($table);
+		$t['id'] = $lesson_id;
+
+//		debug($sequences);
+	}
+
+
+	function initSequences($class_id,$lesson_id,$db) {
+		$sequenceItems = array();
+		$initRank = 1;
+
+		//load linked content, assignments, and assessments
+
+		$sql = "SELECT A.id_class_assignments, A.title
+			FROM class_assignments AS A
+			LEFT JOIN class_assignments_link as B on B.id_class_assignments = A.id_class_assignments
+			WHERE A.id_classes = ".$class_id."
+			AND  B.id_class_lessons = ".$lesson_id;
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$lob = new ClassLessonSequence();
+			$lob->set('lessonId', $lesson_id);
+			$lob->set('classId',  $class_id);
+			$lob->set('lobClassRepoId',    $db->record['id_class_assignments']);
+			$lob->set('lobMime',  'X-LMS');
+			$lob->set('lobType',  'activity');
+			$lob->set('lobTitle', $db->record['title']);
+			$lob->set('linkText', $db->record['title']);
+			$lob->set('visible',  1);
+			$lob->set('rank', $initRank++);
+			$lob->save();
+			$sequenceItems[] = $lob;
+		}
+
+
+		$sql = "SELECT A.id_class_lesson_content, A.txTitle
+			FROM class_lesson_content AS A
+			WHERE A.id_classes = ".$class_id."
+			AND  A.id_class_lessons = ".$lesson_id;
+
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$lob = new ClassLessonSequence();
+			$lob->set('lessonId', $lesson_id);
+			$lob->set('classId',  $class_id);
+			$lob->set('lobClassRepoId',    $db->record['id_class_lesson_content']);
+			$lob->set('lobMime',  'text/html');
+			$lob->set('lobType',  'content');
+			$lob->set('lobTitle', $db->record['txTitle']);
+			$lob->set('linkText', $db->record['txTitle']);
+			$lob->set('visible',  1);
+			$lob->set('rank', $initRank++);
+			$lob->save();
+			$sequenceItems[] = $lob;
+		}
+
+
+		return $sequenceItems;
+	}
+
+
+	/**
+	 * Save all the days for the sequenced items.
+	 *
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$class_id = $u->activeClassTaught->id_classes;
+		$lesson_id = (int) $lc->getvars['id'];
+
+//		$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$class_id. ' AND lesson_id = '.$lesson_id.' ORDER BY rank');
+
+		$lessonSeqObj = new LC_LessonSequence($lesson_id,$class_id);
+		$lessonSeqObj->loadItems();
+		foreach ($lessonSeqObj->items as $objIdx => $obj) {
+			$save = false;
+			if( isset($lc->postvars['startOffset'][$objIdx]) ) {
+				$lessonSeqObj->setStartDay($objIdx, intval($lc->postvars['startOffset'][$objIdx])/60/60/24);
+				$lessonSeqObj->setStartTime($objIdx, intval($lc->postvars['startOffset_time'][$objIdx]));
+				$save = true;
+			}
+			//due offset is number of days *after* the start of this object.
+			if( isset($lc->postvars['dueOffset'][$objIdx]) ) {
+				if( $lc->postvars['dueOffset'][$objIdx] == -1) {
+					$lessonSeqObj->setDueDay($objIdx, -1);
+				} else {
+					$lessonSeqObj->setDueDay($objIdx, intval($lc->postvars['dueOffset'][$objIdx])/60/60/24);
+					$lessonSeqObj->setDueTime($objIdx, intval($lc->postvars['dueOffset_time'][$objIdx]));
+				}
+				$save = true;
+			}
+/*
+debug($objIdx);
+debug($lessonSeqObj->items[$objIdx]->dueOffset);
+debug($lessonSeqObj->items[$objIdx]->dueTime);
+*/
+			if ($save) {
+				$lessonSeqObj->items[$objIdx]->save();
+			}
+		}
+//exit();
+
+		$u->addSessionMessage('Dates have been saved.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+
+	}
+
+	/**
+	 * Do they have authority for this lesson? Yes, return true. No, give them an error
+	 * and return false. (The caller need only return.)
+	 */
+	function checkAuth($lessonid, &$db, &$u, &$t) {
+		$db->queryOne("select count(id_class_lessons) as cnt from class_lessons as l
+			left join classes as c on l.id_classes=c.id_classes
+			where l.id_classes='{$u->activeClassTaught->id_classes}'
+			and l.id_class_lessons='{$lessonid}'");
+		if (!$db->record['cnt'] || intval($lessonid) == 0 ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to modify that lesson.";
+			return false;
+		} else return true;
+	}
+
+}
+
+
+
+class LC_Table_SequenceRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+//		debug($this->value);
+		return '<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=up">Up</a> <br/>
+			<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=dn">Down</a>
+			';
+	}
+}
+
+
+?>

@@ -1,0 +1,189 @@
+<?=$t['sectionheader'];?>
+<?=$t['msg'];?>
+
+<?=
+debug($t['sequence']);
+?>
+<TABLE width="100%">
+<tr>
+	<td><b>Title:</b></td>
+	<td><?=$t['activity']->get('lobTitle');?></td>
+</tr>
+<tr>
+<td><b>Became active on:</b></td><td><?=date('l jS F Y', $t['startDate']);?></td>
+</tr>
+<tr>
+<td><b>Due on:</b></td><td><?php echo $t['noDueDate'] ?  date('l jS F Y', $t['dueDate']) : '<i>No due date</i>' ;?></td>
+</tr>
+
+<tr>
+	<td colspan="2">
+	
+	<fieldset>
+		<legend><b>Instructions:</b></legend>
+		
+		<table cellpadding="10" cellspacing="0" border="0" width="100%">
+		<tr>
+			<td>
+				<?=$t['activity']->get('lobDescription');?>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+
+<br>
+<a target="_blank" href="<?=modurl('assignments/event=view/print=yes/id='.$t['assignment']['id_class_assignments']);?>">Click here for printer friendly version</a>
+
+	</td>
+</tr>
+
+<tr>
+
+	<td colspan="2">
+&nbsp; <!-- spacer-->
+	</td>
+</tr>
+
+<?php
+	if ($t['f_showform'])
+	{
+?>
+
+<tr>
+
+	<td colspan="2">
+	
+	<fieldset style="padding: 5px;">
+	<legend><b style="font-size: 110%">Student Assignment</b></legend>
+	<form method="POST" enctype="multipart/form-data" id="assignment_form" onsubmit="return assignment_presubmit();">
+	<input type="hidden" name="event" value="submitAssignment">
+	<table cellpadding="2" cellspacing="1" border="0" width="100%">
+		
+		<?php
+		if ($t['f_showform_file'])
+		{
+			// roll through attachments
+			if (is_array($t['attachments']) && count($t['attachments']) > 0)
+			{	
+				
+				foreach($t['attachments'] as $k=>$attachment)
+				{
+					echo '
+					<tr>
+						<td><B>Attachment:</B></td>
+						<td style="color: blue;"><b>
+							'.$attachment['assign_file_name']. ' </b>&nbsp;&nbsp;(size '. $attachment['assign_file_size'].') &nbsp;&nbsp;&nbsp;(Added '. 
+									date('F jS Y g:i a',strtotime($attachment['dateTurnin']))
+									.')
+						</td>					
+					</tr>	
+					';
+				}
+				
+				
+				?>
+				<tr>
+					<td colspan="2"><hr></td>
+				</tr>
+				<?php
+				
+			}
+			
+		}
+		if ($t['f_showform_text'])
+		{
+			?>
+			<tr>
+				<td colspan="2"><?=$t['assigntext'];?></td>
+			</tr>
+			<?
+		}
+		?>
+		<tr><td colspan="2">&nbsp; <!-- spacer--></td></tr>
+		<?php
+		if ($t['f_showform_text'])
+		{
+		?>
+		<tr>
+			<td valign="top"><b>Enter Text:</b></td>
+			<td><textarea cols="50" rows="10" name="assigntext"><?=$t['assigntext'];?></textarea></td>
+		</tr>
+		<?php
+		}
+		?>
+		<?php
+		if ($t['f_showform_file'])
+		{
+		?>
+		<tr>
+			<td><b>Uploading Note:</b></td>
+			<td>
+				File uploads are limited to 10 megabytes each.
+			</td>
+		</tr>
+		<tr>
+			<td><b>Upload Assignment</b></td>
+			<td><input size="39" type="file" name="uploadassignment"><td>
+		</tr>
+		<?php
+		}
+		?>
+
+		<?php
+		if ($t['f_showform_audio'])
+		{
+		?>
+		<tr>
+			<td colspan="2">
+				<fieldset><legend>Audio</legend>
+					<APPLET 
+					codebase="<?= BASE_URL;?>commentrec/"
+					archive="<?= BASE_URL;?>commentrec/swing-layout-1.0.jar,<?= BASE_URL;?>commentrec/commentrec.jar,<?= BASE_URL;?>commentrec/jspeex.jar" CODE=com/metrofindings/applet/CommentRecApplet.class WIDTH=380 HEIGHT=112 id="commentrec">
+					<PARAM name="MAYSCRIPT" value="true"/>
+					</APPLET>
+				</fieldset>
+			<input type="hidden" value="" name="audio_data" id="audio_data">
+			</td>
+		</tr>
+		<?php
+		}
+		?>
+
+
+		<tr>
+			<td colspan="2" align="center">
+			<input type="submit" value="Send Assignment" name="submit">
+			</td>
+		</tr>
+	</table>
+	</form>
+	</fieldset>
+<br>
+
+</td>
+
+<tr>
+
+	<td colspan="2">
+&nbsp; <!-- spacer-->
+	</td>
+</tr>
+
+<?php
+	}
+
+?>
+</TABLE>
+
+<script language="javascript">
+	function assignment_presubmit() {
+		var appletobj = document.getElementById('commentrec');
+		if ( (appletobj && typeof appletobj == 'object') || typeof appletobj == 'function' ) { 
+			var inputElement = document.getElementById('audio_data');
+			var blob = appletobj.attachSound();
+			inputElement.value =  blob;
+			return true;
+		}
+		return true;
+	}
+</script>

@@ -1,0 +1,926 @@
+<?php
+
+	define('LC_FAQ_USE_CATEGORIES', true);
+	define('LC_FAQ_USE_COMMUNITY_VOTING', true);
+	define('LC_FAQ_DB_TABLE_PREFIX', 'helpdesk_');
+	define('LC_FAQ_MOD_BASE', 'faq/'); // always have an ending / if this is a non/default module, otherwise it's blank
+	
+	/**
+	 *	@note	To change the section title, look in the classes
+	 *			variable section to rename it
+	 *			
+	 *			To modify which permission / group of people that
+	 *			have managerial statis, look at is_management()
+	 *
+	 *			Remember that there exists (currently) verbage about
+	 *			helpdesk's, if you want to use this as a stand alone
+	 *			faq system, you need to modify the following pages 
+	 *			that have helpdesk verbage on them.
+	 *				templates/faq_ask.html
+	 *				templates/faq_ask_thankyou.html
+	 *			and last, the sectiontitle variable of the faq class (below)
+	 */
+	 
+/**
+ *	
+ 	Make sure to use LC_FAQ_DB_TABLE_PREFIX if you are prefixing the below tables
+ 	otherwise set it to null or ''
+ 	
+	CREATE TABLE faq (
+	  id_faq int(10) unsigned NOT NULL auto_increment,
+	  id_faq_category int(10) unsigned NOT NULL default '0',
+	  tx_question varchar(255) NOT NULL default '',
+	  tx_answer text NOT NULL,
+	  dt_submitted datetime NOT NULL default '0000-00-00 00:00:00',
+	  fl_approved int(11) NOT NULL default '0',
+	  PRIMARY KEY  (id_faq),
+	  KEY id_faq_category (id_faq_category)
+	) TYPE=MyISAM;
+
+	CREATE TABLE faq_vote (
+	  username varchar(32) NOT NULL default '',
+	  id_faq int(10) unsigned NOT NULL default '0',
+	  ii_vote int(11) NOT NULL default '0',
+	  KEY username (username),
+	  KEY id_faq (id_faq)
+	) TYPE=MyISAM COMMENT='tracks users to their votes.';
+	
+	CREATE TABLE `faq_category` (
+		`id_faq_category` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+		`tx_category` VARCHAR( 100 ) NOT NULL ,
+		PRIMARY KEY ( `id_faq_category` )
+	);
+	
+	ALTER TABLE `faq` ADD `ic_viewed` INT UNSIGNED NOT NULL;
+	ALTER TABLE `faq` ADD `tx_username` VARCHAR( 32 ) NOT NULL AFTER `id_faq_category`;
+ */
+
+/**
+ *	This is needed to suppliment the need for dynamic table making
+ *	I need for categorical view
+ *	I need for making option lists (select lists)
+ *
+ *	@include
+ *	@see faq::run()	
+ *	@see faq::reviewquestionRun();
+ */
+include_once(LIB_PATH. 'LC_html.php');
+
+
+/**
+ *	Faq Class/Service
+ *
+ *	@access public
+ *	@security	Registered Users
+ *
+ *	@note	This faq system operates on a categorical system
+ *			So w/out a category, you can't operate this mod
+ *
+ *	@todo	1.	Convert flat categorical way to a child/parent
+ *				this will require an addition field added to the category table (id parent)
+ *				a. 	Build a counter that will total the children's 
+ *					faq count into it's total faq count
+ *			2.	Build administrator tools for this.
+ *			3.	Make sure fl_approved is always taken into consideration
+ *			4.	Consider a backup plan to show faq's even if they aren't
+ *				in a category. Make the categorical system optional entirely
+ *			5.	Prefix the table name with a class variable for easy moving/moding
+ *			6.	Adding a feature to track the approver and when.
+ *
+ *	@methoddescriptions
+ *		run()	to show a topographical view of categories and # of faqs in each
+ *				if you're an admin, you get to see a list of unapproved faqs.
+ *		showquestionsRun()	Showing questions from within a category (comes after
+ *				clicking on a category from run().
+ *		showanswerRun()		Showing an answer from a specific question (comes from
+ *				clicking on a question from showquestionsRun()
+ *		voteRun()			While viewing an answer (showanswerRun()) you have a 
+ *				chance to vote on it (if you haven't already). this event votes
+ *				on the question/answer pair and returns you to showanswerRun()
+ *		askRun()			Anyone can ask a question or provide a question / answer
+ *				pair they believe would be beneficial to the community. It must be
+ *				evaluated, so it goes into the system in an *unapproved* state that
+ *				waits for approval.
+ *		reviewquestionRun()	As an admin, you will have access to this, you may get
+ *				here in multiple ways, one through run() (unapproved list) or by
+ *				viewing a question/answer pair directly through showanswerRun(). 
+ *				here you will be able to remove it, change categories, approve,
+ *				update the information, see when it was submitted, it's current rating
+ *				and who submitted it.
+ *		searchRun()			Searching and giving back results
+ *		is_management()	A simple getter that determines if users is staff/admin
+ *		
+ */
+class faq extends RegAuth 
+{
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Help Desk FAQs';
+	var $navlinks = array('Help Desk'=>''
+	);
+	
+	var $inactivelinks = array(
+	);
+	
+	var $fl_management = false;
+	
+	
+	/** 
+	 *	Sets the application links accordingly
+	 *
+	 *	@constructor
+	 *	@global	$lcUser				object
+	 */
+	function faq($u='')
+	{
+		global $lcUser;
+		
+		$this->applinks['List FAQs'] = LC_FAQ_MOD_BASE;
+		$this->applinks['Search FAQs'] = LC_FAQ_MOD_BASE.'event=search';
+		$this->applinks['Submit FAQ'] = LC_FAQ_MOD_BASE.'event=ask';
+		
+		
+		if ($this->is_management($lcUser))
+		{	
+			if (LC_FAQ_USE_CATEGORIES)
+			{	$this->applinks['Manage FAQ categories'] = 'faq/event=categories';
+			}
+			
+			$this->fl_management = true;
+		}
+		
+	}
+
+
+	/**
+	 *	Determine if the user is within the administration group (ie: admin, helpdesk admin / staff)
+	 *
+	 *	@access	public
+	 *	@param	$u					object		User object
+	 *	@return 					boolean
+	 */
+	function is_management($u)
+	{	
+		if (in_array("hdstaff",$u->groups) || in_array("hdadmin",$u->groups) || in_array('admin', $u->groups))
+		{	return true;
+		}
+		
+	return false;
+	}
+
+
+	/**
+	 *	First look at the faqs is a list of categories with the number of faq's 
+	 *	w/in each faq category.
+	 */
+	function run(&$db,&$u,&$lc,&$t) 
+	{
+		$this->inactivelinks[] = 'List FAQs';
+		
+		$sql = '';
+		$a_faq = array();
+		$a_faq_notapproved = array();
+		$a_faq_categoryless = array();	// faqs that have no categories attached
+		
+		$t['is_staff'] = false;
+		
+		$lc->templateName 	= 'faq_main';
+//auto-comment		$lc->templateStyle 	= 'private';
+
+		/** 
+		 *	Grabs all categories and counts the number of approved faqs w/in each category
+		 *	
+		 *	@note	These are misnamed, i'm using a_faq when it should be a_category
+		 */
+		$sql = '
+		SELECT B.tx_category, B.id_faq_category, count(A.id_faq) as total_faqs_in_this_category
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq as A
+		INNER JOIN '.LC_FAQ_DB_TABLE_PREFIX.'faq_category as B
+			ON A.id_faq_category=B.id_faq_category
+		WHERE fl_approved=1
+		GROUP BY id_faq_category
+		ORDER BY B.tx_category ASC
+		';
+		
+		if (LC_FAQ_USE_CATEGORIES)
+		{
+			$db->query($sql);
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			
+			while ($db->nextRecord())
+			{	$a_faq[] = $db->record;
+			}
+		}
+		
+		$t['a_faq'] = $a_faq;
+		
+		$sql = '
+		SELECT A.id_faq, A.tx_question
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq as A
+		WHERE A.fl_approved=1 ';
+		
+		if (LC_FAQ_USE_CATEGORIES)
+		{	$sql .= '
+			AND A.id_faq_category=0';
+		}
+		
+		$sql .= '
+		ORDER BY A.tx_question ASC
+		';
+			
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$a_faq_categoryless[] = $db->record;
+		}
+		
+		/**
+		 *	If you are an adminstrator / helpdesk staff
+		 *	You are entitled to see all unapproved faq's 
+		 */
+		if ($this->fl_management)
+		{
+			
+			$t['is_staff'] = true;
+			
+			$sql = '
+			SELECT  id_faq, dt_submitted, tx_question, tx_username
+			FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq
+			WHERE fl_approved=0
+			ORDER BY dt_submitted DESC
+			';
+			
+			$db->query($sql);
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			
+			while ($db->nextRecord())
+			{	$a_faq_notapproved[] = $db->record;
+			}
+			
+		}
+		
+		$t['a_faq_notapproved'] = $a_faq_notapproved;
+		$t['a_faq_categoryless'] = $a_faq_categoryless;
+	}
+
+
+	/**
+	 *	Showing a list of questions
+	 */
+	function showquestionsRun($db,&$u,&$lc,&$t)
+	{
+		$a_question = array();
+		$id_faq_category = 0;
+		
+		$lc->templateName 	= 'faq_showquestions';
+//auto-comment		$lc->templateStyle 	= 'private';
+		
+		if ((int)$lc->getvars[2] > 0)
+		{	$id_faq_category = (int)$lc->getvars[2];
+		}
+		
+		/**
+		 *	@see	faq::#todo #4
+		 */
+		if ($id_faq_category <= 0)	// fall back if my required information is not here.
+		{	$this->run($db, $u, $lc, $t);
+			return;
+		}
+		
+		// grabbing all faq's connected to the specified id_faq_category them that are approved
+		$sql = '
+		SELECT A.id_faq, A.tx_question, B.tx_category
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq as A
+		INNER JOIN '.LC_FAQ_DB_TABLE_PREFIX.'faq_category as B
+			ON A.id_faq_category=B.id_faq_category
+		WHERE A.fl_approved=1
+		AND A.id_faq_category='.$id_faq_category.'
+		ORDER BY A.tx_question ASC
+		';
+		
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$a_question[] = $db->record;
+		}
+		
+		$t['a_question'] = $a_question;
+
+	}
+
+
+	/**
+	 *	Shows the question w/ the answer along with the voting panel (if applicable)
+	 *	If an answer is found, we mark it as viewed as well.
+	 *
+	 *	@event
+	 */
+	function showanswerRun($db, &$u, &$lc, &$t)
+	{
+		$a_answer = array();
+		$id_faq = 0;
+		
+		$lc->templateName 	= 'faq_showanswer';
+//auto-comment		$lc->templateStyle 	= 'private';
+		
+		/**
+		 *	Making sure the id_faq (which lives in _GET position 2
+		 *
+		 * 	@note	I chose to use a positioned id rather than a named
+		 *			variable becuase it's just to damn ugly and I feel
+		 *			I can keep track of it a little easier this way
+		 *			which forces me to pay more attention to order.
+		 */
+		if ((int)$lc->getvars[2] > 0)
+		{	$id_faq = (int)$lc->getvars[2];
+		}
+		
+		/**
+		 *	Grabbing the requested faq to view it's answer/question
+		 *	
+		 *	@note	The problem with this is that it may fail, if it 
+		 *			does, I'm not sure how to recover (go back to 
+		 *			where we came from)
+		 *
+		 *	@todo	figure out how to recover if a failure to find 
+		 *			requested faq occures
+		 *
+		 *	@note	I changed the below sql to use left join instead of right
+		 *			to accomidate future (non)categorized entries
+		 */
+		$sql = '
+		SELECT A.id_faq, A.tx_question, A.tx_answer, A.id_faq_category, A.tx_username, A.dt_submitted, B.tx_category
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq as A
+		LEFT JOIN '.LC_FAQ_DB_TABLE_PREFIX.'faq_category as B
+			ON A.id_faq_category=B.id_faq_category
+		WHERE A.fl_approved=1
+		AND A.id_faq='.$id_faq.'
+		ORDER BY A.tx_question ASC
+		';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		/**
+		 *	Determining if we found a faq or not
+		 */	
+		if ((int)$db->record['id_faq'] > 0)
+		{
+			$t['a_answer'] = $db->record;
+		
+			/**
+			 *	Has this user voted before? we'll find out!
+			 */
+			$sql = '
+			SELECT count(username) has_user_voted
+			FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_vote
+			WHERE id_faq='.$t['a_answer']['id_faq'].'
+			AND username=\''.$u->username.'\'
+			';
+			
+			$db->queryOne($sql);
+			
+			$t['a_answer']['has_user_voted'] = $db->record['has_user_voted'];
+			
+			// see if we should show a rating (this may be converted to allow anyone to see the rating)
+			if ($this->fl_management)
+			{
+				// calculate rating for helpdeskstaffmembers
+				$sql = '
+				SELECT AVG(ii_vote) as user_vote_average, count(id_faq) as users_voted
+				FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_vote
+				WHERE id_faq='.$t['a_answer']['id_faq'].'
+				GROUP BY id_faq
+				';
+				
+				$db->RESULT_TYPE = MYSQL_ASSOC;
+				$db->queryOne($sql);
+				$t['a_answer']['users_voted'] = $db->record['users_voted'];
+				$t['a_answer']['user_vote_average'] = ceil($db->record['user_vote_average']);
+
+			} else 
+			{
+				// as a regular user, we will count your view, management views do not count
+				$sql = '
+				UPDATE '.LC_FAQ_DB_TABLE_PREFIX.'faq
+				SET ic_viewed = ic_viewed+1
+				WHERE id_faq='.$t['a_answer']['id_faq'].'
+				';
+				
+				$db->query($sql);
+			}
+
+		} else
+		{
+			/**
+			 *	Recover from a failed faq find
+			 *	
+			 *	@note	maybe swap templates out that states to use back button?
+			 */
+			echo 'debug::Failed to find faq, maybe its not approved?';
+		}
+		
+		$t['a_answer']['is_admin'] = $this->fl_management;
+		
+	}
+	
+	
+	/**
+	 *	To execute the voting process, this is a submission catcher
+	 *
+	 *	First we try and locate this persons vote for this particular faq
+	 *	by identifing the faq by id_faq. If the person has voted, we simply
+	 *	exit out with an error statement reporting the news to the end-user
+	 *	If they haven't voted we make sure the scale (the vote) that was 
+	 *	submitted is in the bounds 1-5, if not, we exit out with an error msg
+	 *	otherwise, if everything goes through, we update there information 
+	 *	into the database voting table, which includes the username, the vote, 
+	 *	and the id of the faq the vote belongs to. We then pop back out to 
+	 *	showing the answer (viewing the faq they are voting on.
+	 *
+	 *	@event
+	 *	@see	self::showanswerRun()
+	 *
+	 */
+	function voteRun($db, &$u, &$lc, &$t)
+	{
+		$id_faq = 0;
+		$ii_vote = 0;
+		
+		if ((int)$lc->getvars[2] > 0)
+		{	$id_faq = (int)$lc->getvars[2];
+		}
+		
+		$ii_vote = (int)$lc->postvars['faqvote'];
+		
+		$sql = '
+		SELECT count(username) has_user_voted
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_vote
+		WHERE id_faq='.$id_faq.'
+		AND username=\''.$u->username.'\'
+		';
+		// link this sql to the faq itself to prove it exists
+		
+		$db->queryOne($sql);
+		
+		if ($db->record['has_user_voted'])
+		{	
+			echo 'You\'ve voted before!';
+		
+		} else
+		{	
+			if ($ii_vote <= 0 || $ii_vote > 5)
+			{	echo 'You are voting out of bounds.. ';
+			} else
+			{
+				/**
+				 *	Grab faq to see if it has been approved yet or not
+				 */
+				$sql = '
+				SELECT fl_approved
+				FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq
+				WHERE id_faq='.$id_faq.'
+				';
+				$db->queryOne($sql);
+				
+				if ($db->record['fl_approved'])
+				{
+					// Submitting the vote
+					$sql = '
+					INSERT INTO '.LC_FAQ_DB_TABLE_PREFIX.'faq_vote
+					(id_faq, ii_vote, username)
+					VALUES
+					('.$id_faq.', '.$ii_vote.', \''.$u->username.'\')
+					';
+					
+					$db->query($sql);
+					
+				} else
+				{	echo 'debug::you may not vote on a non-approved faq';
+				}
+			}
+		}
+		
+		$this->showanswerRun($db, $u, $lc, $t);
+		
+	}
+
+	
+	/** 
+	 *	Will allow people to ask questions and render them unapproved
+	 *	but a staff member or admin can approve/edit these.
+	 */
+	function askRun($db, &$u, &$lc, &$t)
+	{
+		$this->sectionTitle = $this->sectionTitle .= ' - Ask A Question';
+		$this->inactivelinks[] = 'Submit FAQ';
+		
+		$lc->templateName 	= 'faq_ask';
+//auto-comment		$lc->templateStyle 	= 'private';
+		
+		if ($lc->postvars['submit'] == 'Submit Question')
+		{
+			$t['ask'] = $lc->postvars;
+			
+			/**
+			 *	This is the only requirement check, is there a question?
+			 */
+			if (strlen(trim($lc->postvars['faqquestion'])) > 0)
+			{
+				if (strlen(trim($lc->postvars['faqanswer'])) > 0)
+				{	$lc->postvars['faqanswer'] = html_entity_decode($lc->postvars['faqanswer']);
+				}
+				// enter it into the system as *not approved*
+				$sql = '
+				INSERT INTO '.LC_FAQ_DB_TABLE_PREFIX.'faq
+				(tx_username, tx_question, tx_answer, dt_submitted, fl_approved)
+				VALUES
+				(\''.$u->username.'\',
+				 \''.str_replace('\'', '\'\'', stripslashes($lc->postvars['faqquestion'])).'\',
+				 \''.str_replace('\'', '\'\'', stripslashes($lc->postvars['faqanswer'])).'\',
+				 ".DB::getFuncName('NOW()').",
+				 0
+				)
+				';
+				$db->query($sql);
+				
+				/**
+				 *	I'm forced to use a direct call to affected rows because our
+				 *	database library doesn't provide this information.
+				 */
+				if (mysql_affected_rows())
+				{	// entered, lets thank them and be done.
+					// change templates to a thank you.
+					$t['ask'] = array(); // cleaning output
+					$lc->templateName = 'faq_ask_thankyou';
+					
+				} else
+				{	// it didnt get entered, lets ask them to reenter the information.
+					echo 'Please try entering the information again.';
+				}				
+				
+			} else
+			{	echo 'You must submit a question, the answer is optional';
+			}
+		}
+		
+	}
+	
+	
+	/** 
+	 *	To review a question, approved or not approved, this is the central
+	 *	area to update / delete / approve questions.
+	 */
+	function reviewquestionRun($db, &$u, &$lc, &$t)
+	{
+		$a_category = array('0'=>'Un-Categorized');
+		$id_faq = 0;
+
+		$this->sectionTitle = $this->sectionTitle .= ' - FAQ Editor';
+		
+		$lc->templateName 	= 'faq_review';
+//auto-comment		$lc->templateStyle 	= 'private';
+		
+		if ((int)$lc->getvars[2] > 0)
+		{	$id_faq = (int)$lc->getvars[2];
+		}
+		
+		/** 
+		 *	Making sure you are an admin figure, otherwise you get kicked out.
+		 */
+		if ($this->fl_management == false)
+		{	$this->run($db, $u, $lc, $t);
+			return;
+		}
+		
+		/**
+		 *	Making sure question exists in our database + gathering all faq data
+		 */
+		$sql = '
+		SELECT *
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq
+		WHERE id_faq='.$id_faq.'
+		';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$faq = $db->record;
+						
+		// check if we found the thing
+		// then react, push into a template var
+		// test to see if we found faq here
+			$sql = '
+			SELECT AVG(ii_vote) as votes_average, count(id_faq) as votes_total
+			FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_vote
+			WHERE id_faq='.$id_faq.'
+			GROUP BY id_faq
+			';
+			
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			$db->queryOne($sql);
+			$faq['votes_total'] = $db->record['votes_total'];
+			$faq['votes_average'] = ceil($db->record['votes_average']);
+
+		
+		/**
+		 *	Gathering all categories up
+		 *	
+		 *	@todo	What if categories don't exist yet, we must
+		 *			not allow a faq to be updated? this goes back
+		 *			to faq::#todo #4
+		 *			faq::#todo #1 should apply here for visuals
+		 */
+		$sql = '
+		SELECT *
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_category
+		';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{	$a_category[$db->record['id_faq_category']] = $db->record['tx_category'];
+		}
+
+		/** 
+		 *	Time to check for submittals to react, if update / delete
+		 *	the above information is needed and so i've chosen to 
+		 *	keep everything within one event to keep the redundancy of
+		 *	checks to a minimum.
+		 *
+		 *	I've also chosen to use getvars positioning, it just forces
+		 *	me to pay more attention, thus being less sloppy, if you 
+		 *	don't like this, it is becuase you are a sloppy programmer.
+		 */
+		if ($lc->postvars['submit'] == 'Remove Question')
+		{
+			if ($lc->postvars['id_faq'] == $id_faq)
+			{
+				$sql = '
+				DELETE 
+				FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq
+				WHERE id_faq='.$id_faq.'
+				';
+				$db->query($sql);
+				
+				$sql = '
+				DELETE
+				FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_vote
+				WHERE id_faq='.$id_faq.'
+				';
+				$db->query($sql);
+			
+				// I have no error catching, or checking to see if
+				// something was removed or not.. so what do we do after the removal?
+				// push out to main listing.
+				// or to category?
+				
+				$this->presentor = 'redirectPresentation';
+				
+				if ($faq['fl_approved'])
+				{
+					if ($faq['id_faq_category'])
+					{	$t['url'] = modurl(LC_FAQ_MOD_BASE.'event=showquestions/'.$faq['id_faq_category']);
+					} else
+					{	$t['url'] = modurl(LC_FAQ_MOD_BASE);
+					}
+					
+				} else
+				{	$t['url'] = modurl(LC_FAQ_MOD_BASE);
+				}
+				
+			} else
+			{	echo 'You are playing with the form, please do not, and resubmit.';
+			}
+			
+		}
+		
+		if ($lc->postvars['submit'] == 'Update Question')
+		{
+			if ($lc->postvars['id_faq'] == $id_faq)
+			{
+				/**
+				 *	@phpnote	html_entity_decode will segfault php4.3.1 if the lengh of input is 0/null
+				 */
+
+				/**
+				 *	We must have a length on answer and question
+				 */
+				if (strlen(trim($lc->postvars['tx_answer'])) > 1 && strlen(trim($lc->postvars['tx_question'])) > 1)
+				{
+					$sql = '
+					UPDATE '.LC_FAQ_DB_TABLE_PREFIX.'faq
+					SET 
+					tx_answer=\''.str_replace('\'', '\'\'', stripslashes(html_entity_decode($lc->postvars['tx_answer']))).'\',
+					tx_question=\''.str_replace('\'', '\'\'', stripslashes($lc->postvars['tx_question'])).'\',
+					id_faq_category='.(int)$lc->postvars['id_faq_category'].',			
+					fl_approved='.(int)$lc->postvars['fl_approved'].'
+					WHERE id_faq='.$id_faq.'
+					';
+					$db->query($sql);
+					// check for affected rows, may be report if it's the exactly same input.
+					// so now it's updated, what next? do we say. Thnak you and provide a link to somewhere?
+					// or do we go right back to viewing the question (normal people see)
+					
+					// if it's approved
+					$this->presentor = 'redirectPresentation';
+					if ((int)$lc->postvars['fl_approved'])
+					{	// lets review this in it's natural form
+						$t['url'] = modurl(LC_FAQ_MOD_BASE.'event=showanswer/'.$id_faq);
+					} else
+					{	// back to the listing of unapproved entries
+						$t['url'] = modurl(LC_FAQ_MOD_BASE);
+					}
+					return;
+				} else
+				{
+					// report error in length
+					echo 'Error, you must supply us with enough information to submit/update';
+					
+				}
+				
+			} else
+			{	echo 'There is a faq id error, you need to not play with the form';
+			}
+			
+		}
+		
+		/**
+		 *	Prividing our template with the appropriate variable:data
+		 */
+		$t['categories'] = $a_category;
+		$t['faq'] = $faq; // I want to assign this above, but I've instead chosen not to, for organization
+		
+	}
+	
+	
+	/**
+	 *	To be an all in one place for categories, add / update / delete
+	 *
+	 *	@note	All processing of actions take place in the upper part of
+	 *			the function, the gathering of all categories for display
+	 *			is in the lower section of the function.
+	 */
+	function categoriesRun($db, &$u, &$lc, &$t)
+	{
+		$a_category = array();
+		
+		$lc->templateName 	= 'faq_category';
+//auto-comment		$lc->templateStyle 	= 'private';
+		
+		$this->inactivelinks[] = 'Manage FAQ categories';
+		$this->sectionTitle = $this->sectionTitle .= ' - Category Administration';
+		
+		// detect if we're removing a cat
+		if ($lc->postvars['submit'] == 'Remove')
+		{
+			if ((int)$lc->postvars['id_faq_category'] > 0)
+			{
+				$sql = '
+				DELETE 
+				FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_category
+				WHERE id_faq_category='.(int)$lc->postvars['id_faq_category'].'
+				';
+				$db->query($sql);
+				// check for affected row maybe?
+				
+				$sql = '
+				UPDATE '.LC_FAQ_DB_TABLE_PREFIX.'faq
+				SET id_faq_category=0
+				WHERE id_faq_category='.(int)$lc->postvars['id_faq_category'].'
+				';
+				$db->query($sql);
+				
+			} else
+			{	echo 'debug::could not locate the cateogry you wish to remove';
+			}
+		}
+		
+		// detect if we're updating one
+		if ($lc->postvars['submit'] == 'Update')
+		{
+			if (strlen(trim($lc->postvars['tx_category'])) > 0 && (int)$lc->postvars['id_faq_category'] > 0)
+			{
+				$sql = '
+				UPDATE '.LC_FAQ_DB_TABLE_PREFIX.'faq_category
+				SET tx_category=\''.str_replace('\'', '\'\'', stripslashes(html_entity_decode($lc->postvars['tx_category']))).'\'
+				WHERE id_faq_category='.(int)$lc->postvars['id_faq_category'].'
+				';
+				$db->query($sql);
+				// check for affected row maybe?
+				$t['error_msg'][] = 'Thank you, category updated';
+				
+			} else
+			{	
+				$t['error_msg'][] = 'You must give a category name to update this category';
+			
+			}
+		}
+		
+		// detect if we're adding one
+		if ($lc->postvars['submit'] == 'Add')
+		{
+			if (strlen(trim($lc->postvars['tx_category'])) > 0)
+			{
+				
+				$sql = '
+				INSERT INTO '.LC_FAQ_DB_TABLE_PREFIX.'faq_category
+				(tx_category)
+				VALUES
+				(\''.str_replace('\'', '\'\'', stripslashes($lc->postvars['tx_category'])).'\')
+				';
+
+				$db->query($sql);
+				// report a category was added
+				$t['error_msg'][] = 'Thank you, category added!';
+				
+			} else
+			{	$t['error_msg'][] = 'You must give a category name to add a cateogry';				
+			}
+			
+		}
+		
+		/**
+		 *	Gathering all categories up
+		 *	
+		 *	@todo		faq::#todo #1 should apply here for visuals
+		 */
+		$sql = '
+		SELECT A.tx_category, A.id_faq_category, count(B.id_faq) AS faq_count
+		FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq_category AS A
+		LEFT JOIN '.LC_FAQ_DB_TABLE_PREFIX.'faq AS B ON A.id_faq_category = B.id_faq_category
+		GROUP BY A.id_faq_category
+		';
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{	$a_category[$db->record['id_faq_category']] = $db->record['tx_category'];
+			$t['category_faq_count'][$db->record['id_faq_category']] = $db->record['faq_count'];
+		}
+		
+		// output will always stay here.
+		// if the user wants to leave, they will do so by links provided by the menu bar at the top
+		$t['a_category'] = $a_category;
+		//$t['category_faq_count'] key = the id of the category and it's value is how many faqs are attached to it
+	}
+	
+	/**
+	 *	To search and give back results of a search through this event
+	 *
+	 *	@note	no notes!
+	 */
+	function searchRun($db, &$u, &$lc, &$t)
+	{
+		$a_results = array();
+		$fl_searching = false;
+		
+		$lc->templateName 	= 'faq_search';
+//auto-comment		$lc->templateStyle 	= 'private';
+		
+		$this->inactivelinks[] = 'Search FAQs';
+		$this->sectionTitle = $this->sectionTitle .= ' - Searching';
+		
+		if ($lc->postvars['submit'] == 'Search')
+		{
+			if (strlen($lc->postvars['searchable']) > 2)
+			{
+				$searchable = str_replace('\'', '\'\'', stripslashes($lc->postvars['searchable']));
+				
+				/** 
+				 *	@todo	strip bogus characters from $searchable
+				 */
+				$sql = '
+				SELECT A.id_faq, A.tx_question, B.tx_category
+				FROM '.LC_FAQ_DB_TABLE_PREFIX.'faq as A
+				LEFT JOIN '.LC_FAQ_DB_TABLE_PREFIX.'faq_category as B
+					ON A.id_faq_category=B.id_faq_category
+				WHERE A.fl_approved=1 AND (tx_answer LIKE \'%'.$searchable.'%\'
+				OR tx_question LIKE \'%'.$searchable.'%\')
+				ORDER BY B.tx_category ASC, A.tx_question ASC
+				';
+				
+				$db->query($sql);
+				$db->RESULT_TYPE = MYSQL_ASSOC;
+				
+				while ($db->nextRecord())
+				{	$a_results[] = $db->record;
+				}
+				
+			} else
+			{	
+				$t['error_msg'][] = 'You must provide us with something to search for.';
+			}
+			
+			$fl_searching = true;
+				
+		}
+		
+		$t['a_results'] = $a_results;
+		$t['fl_searching'] = $fl_searching;
+	}
+	
+	
+}
+?>

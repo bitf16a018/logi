@@ -1,0 +1,113 @@
+<?=$t['sectionheader'];?>
+
+
+<?php
+if ( !$t['entryLinked'] ) { 
+	echo lcMessageBox('In order to grade this activity you must create a gradebook entry.','i', 'No Gradebook Entry');
+}
+?>
+
+<?php
+//debug($t['activity']);
+?>
+<style>
+	td.title
+	{	font-weight: bold;
+	}
+</style>
+<TABLE>
+<tr>
+	<td class="title">Title:</td>
+	<td><?=$t['activity']->get('lobTitle');?></td>
+</tr>
+<tr>
+	<td class="title">Belongs to Lesson:</td>
+	<td><?=$t['lessonTitle'] ? $t['lessonTitle'] : '<i>None assigned</i>';?></td>
+</tr>
+<tr>
+	<td class="title">Active on:</td><td><?=date('l jS \o\f F Y', $t['startDate']);?></td>
+<tr>
+	<td class="title">Due on:</td>
+	<td><?php
+		if ($t['dueDate'] > 0 ) {
+			echo date('l jS \o\f F Y \a\t h:i A', $t['dueDate']);
+		} else {
+			echo lct("No Due Date");
+		}
+		?>
+	</td>
+</tr>
+<tr>
+	<td class="title">Gradebook Code:</td><td><?=$t['entryCode'];?></td>
+</tr>
+<tr>
+	<td class="title" colspan="2">Instructions:</td>
+</tr>
+<tr>
+	<td colspan="2"><?=$t['activity']->get('lobDescription');?></td>
+</tr>
+
+</table>
+
+<br>
+
+<?php
+if ($t['entryLinked'] ) { ?>
+<fieldset>
+	<legend>Congratulations</legend>
+	<center>This assignment is linked to a gradebook entry already. (<?=$t['entryCode'];?>)  
+		You do not need to publish anymore, once you update a student's points the changes will reflect
+		in the gradebook immediately under gradebook code <?= $t['entryCode'];?>.</center>
+</fieldset>
+<?php
+} 
+?>
+
+<br>
+<br>
+
+<span id="datagrid">
+
+<table class="datagrid" width="100%" cellpadding="2" cellspacing="1">
+
+	<tr valign="top" class="even">
+		<th valign="top">Student Name</th>
+		<th valign="top">Status</th>
+		<th valign="top">Grade</th>
+		<th valign="top" align="left">Date Completed</th>
+		<th valign="top" align="left">&nbsp;</th>
+	</tr>
+	
+<?php
+
+if (is_array($t['student_list']) && count($t['student_list'])) {
+
+	foreach($t['student_list'] as $k=>$v) {
+		?>
+		<tr style="<?=((++$i%2) ? 'background-color: #e7e7e7;': '');?>">
+			<td><?=$v['lastname']. ', '.$v['firstname'];?></td>
+			<?=(($v['completed']) ? '<td style="color: green; font-weight: bold;">Turned In</td>' : '<td style="color: red; font-weight: bold;">Incomplete</td>') ?>
+			<td><?=(($v['grade'] != null) ? $v['grade'] : 'N/A')?></td>
+			<td><?=$v['datecompleted'];?></td>
+			<td><a href="<?=appurl('classmgr/assignmentManage/event=viewSubmit/id='. $t['sequenceId'].'/student='. $v['username']);?>">Grade</a></td>
+		</tr>
+		<?php
+	}
+}
+
+?>
+
+	<tr valign="top" class="even">
+		<th valign="top">Student Name</th>
+		<th valign="top">Status</th>
+		<th valign="top">Grade</th>
+		<th colspan="2" valign="top" align="left">Date Completed</th>
+	</tr>
+	
+</table>
+
+</span>
+
+
+
+

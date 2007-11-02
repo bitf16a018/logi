@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<LINK REL="Stylesheet" HREF="<?= _BASE_URL ;?>templates/site.css" TYPE="text/css">
+
+	<TITLE>Hercules Control Station</TITLE>
+</HEAD>
+
+<BODY bgcolor="#ada592">
+
+
+
+<script language="javascript">
+	function requestDelete($pkey,$formId) {
+		if (confirm ('Are you sure you want to delete this field from this form?') ) {
+			document.location='<?=_APP_URL?>formMgr/event=deleteField/pkey='+$pkey+'/formId='+$formId;
+		}
+	}
+</script>
+
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+
+      			Form Management
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+
+				<td class="white">
+					<table width="100%"  border="0" cellspacing="2" cellpadding="4">
+						<tr>
+						<td nowrap align="center" valign="top">
+							<a href="<?=_APP_URL?>formMgr">
+								<img src="<?=_PICS_URL?>filenew.gif" border="0"></a>
+							<br>
+
+							<a href="<?=_APP_URL?>formMgr">
+							Site Forms</a>
+						</td>
+
+						<td nowrap align="center" valign="top">
+							
+							<a href="#" onclick="requestDelete(<?=$t['fieldPkey']?>,'<?=$t['formId']?>');return false;"><img src="<?=_PICS_URL?>edittrash.gif" border="0"></a>
+							<br>
+							<a href="#" onclick="requestDelete(<?=$t['fieldPkey']?>,'<?=$t['formId']?>');return false;">Delete Field</a>
+							
+						</td>
+						<td nowrap align="center" valign="top">
+							
+							<a href="#" onclick="requestDelete(<?=$t['pkey']?>,'<?=$t['name']?>');return false;"><img src="<?=_PICS_URL?>edittrash.gif" border="0"></a>
+							<br>
+							<a href="#" onclick="history.back(-1);return false;">&lt;-Back</a>
+							
+						</td>						
+						</tr>
+						
+						
+					</table>
+
+					</td>
+			</tr>
+		</table>
+
+	</td></tr>
+</table>
+<br>&nbsp;<br>
+<div style="color: red;"> <?=$t['message']?> </div>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+
+      			Add / Modify Field<b> <?=$t['name']?> </b>
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="600">
+		<table border="1" width="100%">
+			<tr>
+
+				<td class="white">
+					<table width="100%"  border="0" cellspacing="2" cellpadding="4">
+						<tr>
+						<td nowrap align="center" valign="top">
+							<?=$t['form']?>
+						</td>
+						</tr>
+						
+						
+					</table>
+
+					</td>
+			</tr>
+		</table>
+
+	</td></tr>
+</table>
+<br>&nbsp;<br>
+
+</body>
+</html>
+

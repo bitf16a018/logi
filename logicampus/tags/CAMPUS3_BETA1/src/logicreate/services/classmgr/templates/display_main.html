@@ -1,0 +1,132 @@
+<?=$t['sectionheader'];?>
+<?
+if ($t['motd']) {
+	echo lcMessageBox($t['motd'], lct('Message of the Day'));
+}
+?>
+
+
+<table width="100%" border="0" cellspacing="10" cellpadding="2" class="ie_drop_fix">
+	<tr> 
+		<td width="30%" valign="top">
+			<div class="coursemaintitle">
+				Setup Your Class
+			</div>
+			<ol style="font-size:130%">
+			<li><a href="<?=modurl('classSetup');?>"><?=lct('Classroom Setup')?></a></li>
+			<li><a href="<?=APP_URL?>classmgr/syllabusManage"><?=lct('Syllabus')?></a></li>
+			<li><a href="<?=APP_URL?>gradebook/main/event=controlPanel"><?=lct('Gradebook Setup')?></a></li>
+			<li><a href="<?=APP_URL?>classmgr/users/"><?=lct('Student Management')?></a></li>
+			<li style="margin-bottom:1em;"><a href="<?=APP_URL?>classmgr/faq/"><?=lct('FAQs')?></a></li>
+			<li><a href="<?=APP_URL?>classmgr/textbooks"><?=lct('Textbooks')?></a></li>
+			<li><a href="<?=APP_URL?>classmgr/examschedule/"><?=lct('Exam Scheduling')?></a></li>
+			<li><a href="<?=APP_URL?>classmgr/orientations/"><?=lct('Orientation Scheduling')?></a></li>
+			<!--
+			<li><a href="<?=modurl('scorm/event=import');?>"><?=lct('Import SCORM')?></a></li>
+			-->
+			<?
+			if ($t['ITVClass']) { ?>
+			<li><a href="<?=APP_URL?>classmgr/seminars/event=view"><?=lct('Seminar Scheduling')?></a></li>
+			<? } ?>
+			</ol>
+		</td>
+		<td width="30%" valign="top">
+			<div class="coursemaintitle">
+				Create Class Content
+			</div>
+			<ol style="font-size:130%">
+			<li><a href="<?=appurl('lobrepo/myobj');?>"><?=lct('Content')?></a></li>
+
+			<li><a href="<?=modurl('lessonManager');?>"><?=lct('Lessons')?></a></li>
+			<!--
+			<li><a href="<?=modurl('lessonContent');?>"><?=lct('Content')?></a></li>
+			-->
+			<li><a href="<?=modurl('lessonObjectives');?>"><?=lct('Objectives')?></a></li>
+			<li style="margin-bottom:1em;"><a href="<?=modurl('lessonWebliography');?>"><?=lct('Webliography')?></a></li>
+
+			<li><a href="<?=APP_URL?>classroom/details/id_classes=<?=$t['classObj']->id_classes?>"><?=lct('View Classroom')?></a></li>
+			<!--
+			<li><a href="<?=modurl('adjustDates');?>">Adjust All Dates</a></li>
+			-->
+			<li><a href="<?=modurl('dataexchange');?>"><?=lct('Backup Class Content')?></a></li>
+			<li><a href="<?=APP_URL?>classmgr/semestercopy/"><?=lct('Semester Copy')?></a></li>
+			</ol>
+		</td>
+		<td width="30%" valign="top">
+			<div class="coursemaintitle">
+				Run Your Class
+			</div>
+			<ol style="font-size:130%">
+
+			<li><a href="<?=APP_URL?>gradebook/main/"><?=lct('Gradebook')?></a></li>
+			<li><a href="<?=appurl('classmgr/assignmentManage/');?>"><?=lct('Activities')?></a></li>
+			<li style="margin-bottom:1em;"><a href="<?=appurl('assessments');?>"><?=lct('Test Manager')?></a></li>
+			<li><a href="<?=modurl('cal/');?>"><?=lct('Calendar')?></a></li>
+			<li><a href="<?=modurl('announcements/');?>"><?=lct('Announcements')?></a></li>
+			<li><a href="#" onClick = "window.open('<?=APP_URL?>classchat/main/event=initialize/id_classes=<?=$obj->user->activeClassTaught->id_classes?>','generic2','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=790,height=500');"><?=lct('Chat')?></a></li>
+			<li style="margin-bottom:1em;"><a href="<?=appurl('classforums/main/');?>id_classes=<?=$t['classObj']->id_classes?>"><?=lct('Discussion Forums')?></a></li>
+			<li><a href="<?=modurl('contactStudents/');?>"><?=lct('Contact Students')?></a></li>
+			<li><a href="<?=modurl('studentPresentation');?>"><?=lct('Student Presentation')?></a></li>
+			<li><a href="<?=modurl('studentProfile');?>"><?=lct('Student Profile')?></a></li>
+			</ol>
+		</td>
+	</tr>
+</table>
+
+
+<!-- table of lesson details -->
+
+<style type="text/css">
+.table_disable
+{
+background-color:#EEE;
+color:#333;
+}
+
+.table_disable A
+{
+background-color:#EEE;
+color:#333;
+}
+
+</style>
+
+<table width="100%" border="0" cellspacing="7" cellpadding="2">
+	<tr> 
+		<td width="30%" colspan="3" valign="top">
+			<div class="coursemaintitle">
+				Lesson Overview
+			</div>
+		</td>
+	</tr>
+
+<?php
+$now = time();
+foreach ($t['lessonList'] as $idx=>$lessonObj) {
+if ($lessonObj->isFinished() ) {
+	$class = 'table_disable';}  else { $class = ''; }
+?>
+
+	
+	<tr class="<?=$class;?>"><td class="<?=$class;?>">
+			<?= ($idx + 1);?>.&nbsp; <a href="<?= appurl('classmgr').'/lessonManager/event=show/id='.$lessonObj->getId();?>"><?= $lessonObj->getTitle();?></a>
+	</td>
+	<td class="<?=$class;?>">
+		Starts in: <?= $lessonObj->daysTilStart();?> day(s)
+	</td>
+	<td  class="<?=$class;?>">
+		Ends in: <?= $lessonObj->daysTilEnd();?> day(s)
+	</td>
+	</tr>
+	<tr class="<?=$class;?>">
+		<td colspan="3"  class="<?=$class;?>">
+			Number of <em>content</em> items in use: <?= $t['contentCount'][$idx];?>
+			<br/>
+			Number of <em>activity</em> items in use: <?= $t['activityCount'][$idx];?>
+			<br/>
+			Number of <em>assessment</em> items in use: <?= $t['assessmentCount'][$idx];?>
+		</td>
+	</tr>
+<?php } ?>
+</table>
+

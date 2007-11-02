@@ -1,0 +1,91 @@
+<? 
+
+/******
+* helpdesk module for tccd
+* 8/3/03
+*
+******/
+ 
+include_once (LIB_PATH."LC_html.php"); 
+include_once (LIB_PATH."SiteForms.php"); 
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskStatus.php");
+ 
+ 
+class hdStatus extends RegAuth { 
+ 
+	var $presentor = "htmlPresentation"; 
+ 
+	var $sectionTitle = 'Help Desk';
+	var $navlinks = array(
+		
+	);
+	var $applinks = array(
+		'List Tickets' => '',
+		'Submit new ticket' => 'helpdeskSubmit'
+		
+	);
+	var $inactivelinks = array(
+	);
+	 
+	 
+	/** 
+	 * Show template to add status 
+	 */ 
+
+	function run(&$db,&$u,&$arg,&$t) { 
+			// no run.. this service does actions and return to another page
+	}
+
+// add status
+
+	function addrun(&$db,&$u,&$arg,&$t) { 
+
+// security hack, but it works for now
+		if ( !(in_array("hdadmin", $u->groups) || in_array('hdadmin', $u->groups)) ) { 
+			$arg->templateName = 'access_denied';
+//auto-comment			$arg->templateStyle = 'private';
+			return;
+		}
+		
+		if (strlen(trim($arg->postvars['label'])) == 0)
+		{	
+			$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2");
+		
+		} else 
+		{
+			$h = new HelpdeskStatus();
+			$h->helpdeskStatusLabel = $arg->postvars['label'];
+			$h->save();
+			$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2");
+		}
+	}
+
+// edit status (only delete right now)
+
+	function editRun(&$db,&$u,&$arg,&$t) { 
+
+// security hack, but it works for now
+	if ( !(in_array("hdadmin", $u->groups) || in_array('admin', $u->groups)) ) { 
+		$arg->templateName = 'access_denied';
+//auto-comment		$arg->templateStyle = 'private';
+		return;
+	}
+		$id = $arg->postvars['helpdesk_status_id'];
+		if ($arg->postvars['button']=="Delete" && ($id != 1 && $id != 2 && $id != 3)) { 
+			$db->query("delete from helpdesk_status where helpdesk_status_id='$id'");
+			$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2");
+		} else 
+		{	$this->presentor = "redirectPresentation";
+			$t['url'] = appurl("helpdesk/main/event=admin2/msg=nobase");
+		}
+		
+	}
+
+}
+
+?>

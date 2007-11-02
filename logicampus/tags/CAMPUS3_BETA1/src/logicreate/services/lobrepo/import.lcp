@@ -1,0 +1,347 @@
+<?
+
+
+include_once(LIB_PATH.'PBDO/LobRepoEntry.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobActivity.php');
+include_once(LIB_PATH.'PBDO/LobTest.php');
+
+include_once(LIB_PATH.'lc_lob.php');
+
+/**
+ * Learning Object Repository
+ */
+class Import extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='import_main';
+	}
+
+
+	function handleUploadRun(&$db,&$u,&$lc,&$t) {
+		if ($lc->uploads['lobxml']['error']) {
+			die('upload error');
+		}
+
+		//debug($lc->uploads);
+
+		$tempdir = $this->tempdir('/tmp', 'campus');
+		$this->tempdir = $tempdir;
+		//debug($tempdir);
+
+		//$za = zip_open($lc->uploads['lobxml']['tmp_name']);
+		//debug($za);
+
+		exec('unzip -d '. $tempdir.' '.$lc->uploads['lobxml']['tmp_name'] );
+
+//		exit();
+
+		$doc = new DomDocument('1.0', 'UTF-8');
+		$doc->substituteEntities=false;
+		$doc->resolveExternals=false;
+		$doc->preserveWhiteSpace=true;
+		$doc->validateOnParse=false;
+		if (!$doc->load( $tempdir."/learningobjects.xml") ) {
+			echo "can't open xml file.";
+			return false;
+		}
+
+		$root = $doc->childNodes;
+		//get the "lobcol" node
+		$collectionNode = $root->item(0);
+
+		$lobNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/learning_object','obj');
+		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
+			$node = $lobNodes->item($xidx);
+			if ($node->nodeType == XML_TEXT_NODE) {
+				continue;
+			}
+			$lobSub = null;
+			$lobObj = $this->makeRepoNode($node);
+			$lobMetaObj = $this->processLobMeta($node);
+			$lobUserObj = new LobUserLink();
+
+			if ($lobObj === null) { 
+echo "skipping node .. ".$node->tagName."...<br/>\n";
+				continue; /*die('null object'); continue;*/ 
+			}
+			if ($lobObj->lobType == 'content') {
+				$lobSub = $this->makeContentNode($node);
+			}
+			if ($lobObj->lobType == 'activity') {
+				$lobSub = $this->makeActivityNode($node);
+			}
+
+
+//			echo "saving ".$xidx." lob ... <br/>\n";
+		//	debug($lobObj->lobTitle);
+			$lobObj->save();
+
+			if ( is_object($lobSub) ) {
+				$lobSub->set('lobRepoEntryId',$lobObj->getPrimaryKey());
+				$lobSub->save();
+//				echo $xidx." is a *CONTENT* lob ... <br/>\n";
+//				echo substr($lobSub->lobText,0,1000)."<br/>\n";
+			}
+//*
+			$lobMetaObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
+			$lobMetaObj->save();
+
+			$lobUserObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('isOwner','1');
+			$lobUserObj->save();
+//*/
+
+		}
+
+
+		$u->addSessionMessage('Successfully added content.');
+
+//		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
+
+
+		unlink($tempdir.'/learningobjects.xml');
+		rmdir($tempdir);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj');
+	}
+
+	/**
+	 * return a lob content sub-object
+	 */
+	function makeContentNode($n) {
+		$result = $n->getElementsByTagname('content');
+		$textContent = $result->item(0);
+		$lobSub = new LobContent();
+		$lobSub->lobText = $textContent->nodeValue;
+		return $lobSub;
+	}
+
+	/**
+	 * return a lob activity sub-object
+	 */
+	function makeActivityNode($n) {
+		$result = $n->getElementsByTagname('response');
+		$responseNode = $result->item(0);
+		$lobSub = new LobActivity();
+		switch($resposneNode->nodeValue) {
+			case 'upload':
+				$lobSub->responseTypeId = 1;
+				break;
+			case 'text':
+				$lobSub->responseTypeId = 2;
+				break;
+			case 'uploadandtext':
+				$lobSub->responseTypeId = 3;
+				break;
+			case 'forum':
+				$lobSub->responseTypeId = 4;
+				break;
+			case 'none':
+				$lobSub->responseTypeId = 5;
+				break;
+			case 'audio':
+				$lobSub->responseTypeId = 6;
+				break;
+
+			default:
+				$lobSub->responseTypeId = 5;
+		}
+		return $lobSub;
+	}
+
+	
+	/**
+	 * return a lob object
+	 */
+	function makeRepoNode($n) {
+		$result = $n->getElementsByTagname('type');
+		$type = $result->item(0);
+		/*
+		print_r($type);
+		echo "new lob: <br/>";
+//		debug($type);
+		echo $type->nodeValue;
+		echo "\n<br/>";
+		echo "name lob: <br/>";
+		echo $type->tagName;
+		echo "<br/>";
+		// */
+
+		$children = $type->childNodes;
+		$content = '';
+		if ($children->length) {
+			$content = trim($children->item(0)->nodeValue);
+			$guid = $n->getAttribute('guid');
+			$dbid = $n->getAttribute('dbid');
+		}
+		else {
+			die ('unknown class: '. get_class($type)); 
+			return null;
+		}
+
+		$lob = null;
+		$lob    = new LobRepoEntry();
+		$lob->set('lobGuid',$guid);
+		switch ($content) {
+			case 'content':
+				$lob->set('lobType','content');
+				break;
+			case 'activity':
+				$lob->set('lobType','activity');
+				break;
+			case 'test':
+				$lob->set('lobType','test');
+				break;
+		}
+		if ($lob->lobType == '') { return null; die ('unknown type '. $content); }
+
+
+		$result = $n->getElementsByTagname('title');
+		$node = $result->item(0);
+		$children = $node->childNodes;
+		$lob->set('lobTitle', trim($children->item(0)->nodeValue) );
+
+		$result = $n->getElementsByTagname('content');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobContent', trim($children->item(0)->nodeValue) );
+		}
+
+		$result = $n->getElementsByTagname('filename');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobFilename', trim($children->item(0)->nodeValue) );
+
+			$urlTitle = Lc_Lob_Util::createLinkText(trim($children->item(0)->nodeValue));
+			$lob->set('lobUrltitle', $urlTitle );
+			$lob->set('lobBinary', file_get_contents($this->tempdir.'/content/'.trim($children->item(0)->nodeValue)) );
+		} else {
+			$urlTitle = Lc_Lob_Util::createLinkText(trim( $lob->get('lobTitle')) );
+			$lob->set('lobUrltitle', $urlTitle );
+		}
+
+		$result = $n->getElementsByTagname('description');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobDescription', trim($children->item(0)->nodeValue) );
+		}
+
+
+		$result = $n->getElementsByTagname('subtype');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobSubType', trim($children->item(0)->nodeValue) );
+		}
+
+		$result = $n->getElementsByTagname('mime');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobMime', trim($children->item(0)->nodeValue) );
+		}
+
+		return $lob;
+//		debug($children);
+	}
+
+
+	/**
+	 * return a lob metadata object
+	 */
+	function processLobMeta($n) {
+		$result = $n->getElementsByTagname('metadata');
+		$meta = $result->item(0);
+		$children = $meta->childNodes;
+
+
+		$lob = null;
+		$lob = new LobMetadata();
+
+		foreach($children as $childNode) {
+			if ($childNode->nodeType == XML_TEXT_NODE) {
+				continue;
+			}
+
+			$tag = $childNode->tagName;
+			$subchild = $childNode->childNodes;
+			$lob->set($tag, trim($subchild->item(0)->nodeValue) );
+		}
+/*
+
+		$result = $n->getElementsByTagname('lobtitle');
+		$node = $result->item(0);
+		$children = $node->childNodes;
+		$lob->set('lobTitle', trim($children->item(0)->nodeValue) );
+
+		$result = $n->getElementsByTagname('lobcontent');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobContent', trim($children->item(0)->nodeValue) );
+		}
+
+		$result = $n->getElementsByTagname('lobfilename');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobFilename', trim($children->item(0)->nodeValue) );
+			$lob->set('lobUrltitle', urlencode(trim($children->item(0)->nodeValue)) );
+		} else {
+			$urltitle = $lob->get('lobTitle');
+			$urltitle = str_replace(' ', '_', $urltitle);
+			$urltitle = urlencode($urltitle);
+			$lob->set('lobUrltitle', $urltitle );
+		}
+
+		$result = $n->getElementsByTagname('lobdescription');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobDescription', trim($children->item(0)->nodeValue) );
+		}
+
+
+		$result = $n->getElementsByTagname('subtype');
+		$node = $result->item(0);
+		if (is_object($node) ){
+			$children = $node->childNodes;
+			$lob->set('lobSubType', trim($children->item(0)->nodeValue) );
+		}
+
+ */
+
+		return $lob;
+	}
+
+
+	function tempdir($dir, $prefix='', $mode=0700) {
+		if (substr($dir, -1) != '/') $dir .= '/';
+
+		do {
+			$path = $dir.$prefix.mt_rand(0, 9999999);
+		} while (!mkdir($path, $mode));
+
+		return $path;
+	}
+}
+?>

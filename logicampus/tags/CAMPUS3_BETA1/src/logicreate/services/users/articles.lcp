@@ -1,0 +1,63 @@
+<?
+
+ /******
+ * Article Management for End-Users
+ * Objective(s) - Allows users to re-submit articles which were rejected and check on articles where are pending.
+ * By:  keith elder (9/10/02)
+ ******/
+
+class articles extends RegAuth {
+
+	var $presentor = "htmlPresentation";
+
+
+	function articles()
+	{
+		global $lcObj;
+//auto-comment		$lcObj->templateStyle = 'private';
+	}
+
+	function run(&$db,&$u,&$arg,&$t) {
+
+		# Grab all returned articles and display them.
+		$sql = "select pkey, title, introtext, maintext, notes from articles where author='".$u->username."' and status='Return'";
+		$db->query($sql);
+		while($db->nextRecord()) {
+			$t[returned][] = $db->record;
+		}
+		# Show all pending articles
+		$sql = "select title from articles where author='".$u->username."' and status='Pending'";
+		$db->query($sql);
+		while($db->nextRecord()) {
+			$t[pending][] = $db->record;
+		}
+	}
+
+	function editReturnRun(&$db,&$u,&$arg,&$t) {
+		$sql = "select pkey, title, introtext, maintext, author from articles where pkey='".$arg->getvars[pkey]."'";
+		$db->queryOne($sql);
+		if ($db->record[author] == $u->username) { 
+			$t[article] = $db->record;
+		} else {
+			$t[error] = "There was an error re-submitting this article.  Please contact the webmaster.";
+		}
+		$arg->templateName = "editReturn";
+	}
+
+	function editReturnPostRun(&$db,&$u,&$arg,&$t) {
+		$db->queryOne("select author from articles where pkey='".$arg->postvars[pkey]."'");
+		if($u->username != $db->record[author]) { 
+			$t[error] = "You are not the owner of this article.";
+			$this->run(&$db,&$u,&$arg,&$t);
+
+		} else { 
+			$db->query("update articles set title='".$arg->postvars[title]."', introtext='".$arg->postvars[introtext]."', maintext='".$arg->postvars[maintext]."', status='Pending' where pkey='".$arg->postvars[pkey]."'");
+			$reg = lcRegistry::load('news');
+			if ($reg->config['_EmailNewNewsTo'] != "") {
+				mail($reg->config['_EmailNewNewsTo'], "Re-submitted Article: ".$arg->postvars[title], $arg->postvars[introtext]."\n\n".$arg->postvars[maintext], "From: ".WEBMASTER_EMAIL."\nReply-To: ".$u->email);
+			}
+			$this->run(&$db,&$u,&$arg,&$t);
+		}
+	}
+}
+?>

@@ -1,0 +1,166 @@
+<?
+/*
+ * pool. allows teachers to select questions from other tests to be ported
+ * over to the <assessmentId> test.
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+
+class pool extends FacultyService {
+
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Copy Questions From Pool';
+
+	var $data = array();  # cleaned form data
+	var $applinks = array (
+		'List Assessments' => 'main',
+		'Add Assessment' => 'main/event=add'
+		);
+	var $navlinks = array(
+		'Calendar' => 'cal',
+		'Grade book' => '%gradebook'
+	);
+
+	var $inactivelinks = array (
+		'Add Assessment' => 'main/event=add'
+	);
+
+
+
+	function run($db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'pool_main';
+
+		$assessmentId = $t['assessmentId'] = (int)$lc->getvars['id'];
+
+		// Get all the tests for this class
+		$t['assessments'] = AssessmentPeer::doSelect( 'class_id="'.$u->activeClassTaught->id_classes.'"' );
+
+		// Make sure the provided assessmentId belongs to the user
+		$flag = false;
+		foreach ( $t['assessments'] as $ass ) {
+			if ( $ass->assessmentId == $assessmentId ) { $flag = true; break; }
+		}
+		reset($t['assessments']);
+
+		if ( !$flag ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You do not have permission to edit that assessment.';
+			return;
+		}
+		if ( count($t['assessments']) < 2 ) { // their destination assessment doesn't count
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You do not have any other assessments to pull questions from!';
+			return;
+		}
+	}
+
+	// Pull all questions from the chosen assessmentId's and put them in a nifty little datagrid
+	function pickQuestionsRun(&$db,&$u,&$lc,&$t) {
+
+		/*
+		print 'AllQids:'; debug($u->sessionvars['AllQids']);
+		print 'questionPool:'; debug($u->sessionvars['questionPool']);
+		print 'getvars:'; debug($lc->getvars);
+		print 'postvars:'; debug($lc->postvars);
+		*/
+
+		$btnText = 'Copy Questions'; // the submit button
+
+		if ( $lc->postvars['id'] ) $u->sessionvars['pool']['destAssessmentId'] = (int)$lc->postvars['id'];
+
+		// set the sessionvar with the checkboxes from the previous page
+		foreach ( $u->sessionvars['pool']['AllQids'] as $qid ) {
+			// Add the $qid ?
+			if ( !in_array($qid, $u->sessionvars['pool']['questionPool']) && in_array($qid, array_keys($lc->postvars['question'])) ) {
+				$u->sessionvars['pool']['questionPool'][] = $qid;
+			}
+			// Remove the $qid ?
+			if ( in_array($qid, $u->sessionvars['pool']['questionPool']) && !in_array($qid, array_keys($lc->postvars['question'])) ) {
+				foreach ( $u->sessionvars['pool']['questionPool'] as $k => $v ) {
+					if ( $v == $qid ) {
+						unset( $u->sessionvars['pool']['questionPool'][$k] );
+						break;
+					}
+				}
+			}
+		}
+
+		if ( $lc->postvars['thebutton'] == $btnText ) { $this->copyQuestionsRun($db,$u,$lc,$t); return; }
+
+		// build the where clause if necessary, or just pull it from the session
+		if ( is_array($lc->postvars['assessment']) ) {
+			$where = array();
+			foreach ( array_keys($lc->postvars['assessment']) as $assid ) {
+				$where[] = 'q.assessment_id="'.$assid.'"';
+			}
+			$u->sessionvars['pool']['poolWhere'] = $where;
+		} else if ( $u->sessionvars['pool']['poolWhere'] ) { 
+			$where = $u->sessionvars['pool']['poolWhere'];
+		} else {
+			$t['error'] = 'You must select at least one assessment.';
+			$this->Run($db,$u,$lc,$t);
+			return;
+		}
+
+		// build the datagrid
+		unset($u->sessionvars['pool']['AllQids']);
+		$qids = array();  // array of assessment_question_id's
+		$dg = new questionPoolGrid( $this->module, $this->serviceName );
+		$dg->table = 'assessment_question as q';
+		$dg->column = 'q.assessment_question_id, q.question_display, q.question_text, a.display_name';
+		$dg->where = '('.implode(' or ', $where).') and a.class_id="'.$u->activeClassTaught->id_classes.'"';
+		$dg->joins = 'left join assessment as a on a.assessment_id=q.assessment_id';
+
+		$dg->ignore = array( 'assessment_question_id' );
+		$dg->headers = array(
+			'question_display' => 'Question Type',
+			'question_text' => 'Question Text',
+			'display_name' => 'Assessment Title'
+		);
+		$dg->prependColumn( '
+			<? $u = &lcUser::getCurrentUser(); $u->sessionvars["pool"]["AllQids"][] = $assessment_question_id;
+			global $qids; $qids[] = $assessment_question_id; ?>
+			<input type="checkbox" name="question[<?=$assessment_question_id;?>]" id="question[<?=$assessment_question_id;?>]" 
+			<? if ( in_array($assessment_question_id, $u->sessionvars["pool"]["questionPool"]) ) print "CHECKED"; ?> />', ' ' );
+		$dg->setFooter( '
+			<input type="hidden" name="id" value="'.(int)$lc->getvars['id'].'" />
+			<input type="hidden" name="event" value="pickQuestions" />
+			<input type="submit" name="thebutton" value="'.$btnText.'" />' );
+		$dg->rowsPerPage = 100;
+
+		$t['table'] = $dg->toHTML();
+
+		$lc->templateName = 'pool_pickQuestions';
+//auto-comment		$lc->templateStyle = 'private';
+	}
+
+	function copyQuestionsRun(&$db,&$u,&$lc,&$t) {
+	
+		$pool = $u->sessionvars['pool']['questionPool']; // the questions to be copied
+		$destAssessmentId = $u->sessionvars['pool']['destAssessmentId'];
+		print ">>".$destAssessmentId;
+
+		foreach ( $pool as $qid ) {
+			$assq = AssessmentQuestion::load( $qid, $u->activeClassTaught->id_classes );
+			$assq->_new = true;
+			$assq->assessmentQuestionId = '';
+			$assq->assessmentId = $destAssessmentId;
+			$assq->save();
+		}
+
+		unset($u->sessionvars['pool']);
+
+		$u->sessionvars['message'] = '<span style="color:blue;">Questions copied successfully.</span>';
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = MOD_URL.'main/event=view/id='.$destAssessmentId;
+	}
+
+}
+?>

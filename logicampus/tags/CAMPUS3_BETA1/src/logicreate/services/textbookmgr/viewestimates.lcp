@@ -1,0 +1,174 @@
+<?php
+/*
+ *
+ * Estimations on how many books per campus for a particular semester
+ *
+ *	@note	I am waiting on ticket 496
+ *			http://dl.tccd.edu/index.php/hd/helpdeskView/496
+ *			to finish this. 
+ *	
+ */
+
+ 
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+
+class viewestimates extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+	var $authorizer = 'native';
+	var $sectionTitle = 'Textbook Estimations';
+	
+	var $navlinks = array(
+		'Text Book Manager' => 'main/',
+	);
+	var $applinks = array(
+		'Estimates'=>'estimates/',
+		'View estimates'=>'viewestimates/',
+		'Duplicate Books' => 'dup',
+	);
+	var $inactivelinks = array(
+	);
+
+	/** 
+	 *	Native Authorization, we only want textbook admins
+	 *	and admins to enter. This function is triggered
+	 *	by the framework becuase a classvariable::authorizer
+	 *	has been set to "native"
+	 *
+	 *	@access	public
+	 *	@return					boolean
+	 */	
+	function authorize() {
+
+		// Only tbadmin or tbsadmin users allowed here
+		global $lcUser;
+		return in_array('tbadmin', $lcUser->groups)
+			|| in_array('admin', $lcUser->groups) || in_array("tbsadmin",$lcUser->groups);
+	}
+
+	function Run(&$db,&$u,&$lc,&$t) {
+		$x = new datagrid('textbookmgr','viewestimates');
+		$x->table = "textbook_estimates";
+		$x->overrideColumn('<a href="<?=modurl("viewestimates/event=view/key=$textbook_estimates_key");?>">view</a>','textbook_estimates_key');
+		if (in_array("admin",$u->groups) or in_array("tbadmin",$u->groups)) { 
+		$x->prependColumn('<a href="<?=modurl("viewestimates/event=delete/key=$textbook_estimates_key");?>">del</a>','del');
+		}
+		$x->headers = array('textbook_estimates_key'=>' ','textbook_estimates_name'=>'Estimate sheet');
+		$t['table'] = $x->toHTML();
+		$lc->templateName = "viewestimates_main";
+	}
+
+	function updateRun(&$db,&$u,&$lc,&$t) {
+		$se = (int)$lc->postvars['se'];
+		$so = (int)$lc->postvars['so'];
+		$ne = (int)$lc->postvars['ne'];
+		$nw= (int)$lc->postvars['nw'];
+		$key = (int)$lc->getvars['key'];
+		$db->query("update textbook_estimates_data set se=$se, nw=$nw, so=$so, ne=$ne where textbook_estimates_data_key=$key");
+
+		if ($u->sessionvars['estimatekey']) { 
+			$lc->getvars['key'] = $u->sessionvars['estimatekey'];
+		}
+		$this->viewrun($db,$u,$lc,$t);
+	}
+	function deleteRun(&$db,&$u,&$lc,&$t) {
+		$db->queryOne("delete from textbook_estimates_data where textbook_estimates_key=".(int)$lc->getvars['key']);
+		$db->queryOne("delete from textbook_estimates where textbook_estimates_key=".(int)$lc->getvars['key']);
+		$this->run($db,$u,$lc,$t);
+	}
+	function editRun(&$db,&$u,&$lc,&$t) {
+		$db->queryOne("select * from textbook_estimates_data where textbook_estimates_data_key=".(int)$lc->getvars['key']);
+		$t['books'][] = $db->record;
+		$t['key'] = $lc->getvars['key'];
+		$lc->templateName = "viewestimates_edit";
+	}
+
+	function viewRun(&$db,&$u,&$lc,&$t) {
+		if ($lc->getvars['print']=='y') { $this->presentor='emptyPresentation'; }
+		$t['key'] = (int)$lc->getvars['key'];
+		$u->sessionvars['estimatekey'] = $t['key'];
+		$lc->templateName = 'viewestimates_view';
+
+		$sql = '
+		SELECT A.*, B.*, C.sectionNumbers
+		FROM textbook_estimates_data as A
+		LEFT JOIN textbook_classes as B ON A.id_textbook_classes=B.id_textbook_classes
+		LEFT JOIN classes as C ON B.id_classes=C.id_classes
+		WHERE A.textbook_estimates_key='.(int)$lc->getvars['key'].'
+		ORDER BY courseFamily, courseNumber
+		';
+		$db->query($sql);
+		
+		//$db->query("select * from textbook_estimates_data where textbook_estimates_key=".(int)$lc->getvars['key'] ." order by courseFamily, courseNumber");
+		while($db->nextRecord()) {
+			$t['books'][$db->record['textbook_estimates_data_key']] = $db->record;
+		}
+		// oops - mgk - 11/12/03 - forgot 'required' - look it up
+		/**
+		 *	Wow, this block of code is a pile of shit. This is 
+		 *	horribly flawed and super innacurate. 
+		 *
+		 *	I've added a *solid* connection between the estimates
+		 *	table and the original textbook entry so we have acess
+		 *	to all the information we could possibly need.
+
+		 *	Another issue is at hand, the estimation table (books)
+		 *	has unneeded redundant information, since we have a
+		 *	connection to the original textbook we dont need this
+		 *	and we can save space and processing power. I'm not 
+		 *	going to remove this info now but these fields
+		 *	should be removed.
+		 */
+		
+		reset($t['books']);
+		if (0) {
+		while(list($k,$v) = each($t['books'])) { 
+		if (0) {
+			echo("Select A.required, B.* from textbook_classes A, classes B left join classes on A.id_classes=classes.id_classes where B.facultyId='".$v['instructor']."'
+			and publisher='".$v['publisher']."' and isbn='".$v['isbn']."' and title='".addslashes($v['title'])."' and 
+			author='".$v['author']."'");
+			}
+
+			$db->queryOne("Select A.required, A.bundled_items, B.* from textbook_classes A, classes B left join classes on A.id_classes=classes.id_classes where B.facultyId='".$v['instructor']."'
+			and isbn='".$v['isbn']."' and title='".addslashes($v['title'])."' and 
+			author='".$v['author']."'");
+			$v['required'] = $db->record[0];
+			$v['sectionNumbers'] = $db->record['sectionNumbers'];
+			$v['bundled_items'] = $db->record['bundled_items'];
+			$t['books'][$k] = $v;
+
+		}
+		}
+		$lc->templateName = 'viewestimates_view';
+	
+	}
+
+	
+	function removeBookEstimateRun(&$db, &$u, &$lc, &$t)
+	{
+		$id_datakey = (int)$lc->getvars['datakey'];
+
+		if ($id_datakey == 0)
+		{	$t['msg'] = 'Could not remove the entry, try again';
+		} else
+		{
+			$t['msg'] = 'Book removed from this estimations list';
+			/**
+			 *	What the f is a datakey?
+			 */
+			$sql = '
+			DELETE FROM textbook_estimates_data
+			WHERE textbook_estimates_data_key='.$id_datakey.'
+			';
+			$db->query($sql);
+		}
+
+		$this->viewRun($db, $u, $lc, $t);
+	}
+	
+
+}
+?>

@@ -1,0 +1,1627 @@
+<?php
+/*
+ *	REMEMBER TO MAKE YOUR *BACKUP* Directory
+ *		example: logicreate/backup
+ *				 logicreate/lib
+ *				 logicreate/services
+ *		thats where it should be.. in with lib and services.. 
+ *		make sure it's WORLD read and writeable 
+ *		make sure you have ZIP installed on your system too.
+ 
+ *
+ * Service will act as a gateway into the rest of the
+ * application.
+ *
+ 
+ NOTE::: making an attribute set to  array('BASE64'=>'1') will base64 encode the value
+ 		and when reading the xml it will auto base64_Decode it.
+ 
+ NOTE::: I NEED CLASS SECTION NUMBERS
+ 
+ NOTE:: There is a max script memory limit problem with this, it consumes a very large amount
+ 		of memory, you need to up it in your php.ini
+ 
+ */
+include_once(LIB_PATH.'xmlparser.php');
+
+// necessary evils
+set_time_limit(3000);
+ignore_user_abort(true);
+
+class backupclasses extends AdminService 
+{
+	var $presentor = 'htmlPresentation';
+
+	// links
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Restore Class' => 'classrestore/',
+		'Restore Semesters' => 'semesterrestore/'
+	);
+	
+	var $id_classes =0;
+	
+	var $obj_zip;
+	var $current_dir = '';
+	
+	/**
+	 * construct a fancy filename for the users
+	 */
+	function run(&$db,&$u,&$lc,&$t) 
+	{
+		$a_semester = array();
+
+		// select semesters to backup
+		$id_classes = $u->activeClassTaught->id_classes;
+
+		/**
+		 *	Gathering all semesters that have at least 1 class attached
+		 *	and the count of classes per these particular semesters to backup
+		 */
+		$sql = '
+		SELECT A.id_semesters, A.semesterTerm, A.semesterYear, count(B.id_classes) as class_count
+		FROM semesters as A
+		INNER JOIN classes as B ON A.id_semesters=B.id_semesters
+		GROUP BY A.id_semesters';
+		
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{	$a_semester[$db->record['id_semesters']] = $db->record['semesterYear'].' '.$db->record['semesterTerm'].' ( <i>'.$db->record['class_count'].' classes</i> )';
+		}
+		
+		$t['a_semester'] = $a_semester;
+		
+		$lc->templateName  = 'backupclasses_main';
+//auto-comment		$lc->templateStyle = 'private';
+
+	}
+	
+	function helloRun($db, &$u, &$lc, &$t)
+	{	$this->presentor = 'emptyPresentation';
+	}
+	
+	/**
+	 *	This is a step to get the progress bar in visible site before the first item gets processed
+	 */
+	function goRun($db, &$u, &$lc, &$t)
+	{	
+		$this->presentor 	= 'emptyPresentation';
+		$lc->templateName  	= 'backupclasses_progress';
+		
+		exec('rm -rf /tmp/semester_backup/');
+		
+		header('Refresh: 2;'.modurl('backupclasses/event=semester/'.$lc->getvars[2].'/1'));
+		/// cleanup
+				
+	}
+	
+	
+	function semesterRun($db, &$u, &$lc, &$t)
+	{
+		$this->presentor 	= 'emptyPresentation';
+		$lc->templateName  	= 'backupclasses_progress';
+		
+		$semesterid = $lc->getvars[2];
+		$placement = (int)$lc->getvars[3];
+		
+		if ($placement <= 0)
+		{	$placement = 1;
+			// clean the palette
+		}
+		
+		$t['placement'] = $placement;	
+		$this->obj_zip = new LcZipFile();
+		
+		$sql = '
+		SELECT id_semesters, semesterTerm, semesterYear
+		FROM semesters 
+		WHERE id_semesters='.$semesterid.'';
+		$db->queryOne($sql);
+		
+		$t['semesterlabel'] = '( '.$db->record['semesterYear'].' '.$db->record['semesterTerm'].' )';
+		
+		// assume: semester id is valid
+		// grab count of classes to process
+		$sql = '
+		SELECT count(id_classes) as class_count
+		FROM classes
+		WHERE id_semesters='.$semesterid.'
+		';
+		$db->queryOne($sql);
+		$t['total_classes'] = $db->record['class_count'];
+		
+		$sql = '
+		SELECT id_classes 
+		FROM classes
+		WHERE id_semesters='.$semesterid.'
+		ORDER BY id_classes ASC
+		LIMIT '.$placement. ', 1
+		';
+		
+		$db->queryOne($sql);
+		
+		if (is_array($db->record))
+		{
+			error_log('Classroom: '. $db->record['id_classes'], 0);
+			$this->current_dir = 'classroom_'.$db->record['id_classes'].'/';
+			error_log('Classroom DIR: '. $this->current_dir, 0);
+
+			$this->gather($db->record['id_classes']);
+		
+		} 
+		
+		if ($placement <= $t['total_classes'])
+		{
+			header('Refresh: 1;'.modurl('backupclasses/event=semester/'.$semesterid. '/'.($placement+1)));
+			
+		} else
+		{	
+			exec('cd /tmp/semester_backup;rm -f '.LIB_PATH.'../backup/semester_'.$semesterid.'.zip;zip -r '.LIB_PATH.'../backup/semester_'.$semesterid.'.zip ./;');
+			//;rm -rf /tmp/semester_backup/
+			$t['placement'] += 1;
+		}
+		
+	}
+	
+	
+	function gather($id_classes)
+	{
+		$xmlObj = new xmlparser('<dataexchange></dataexchange>');
+		
+	    $this->obj_zip->add_dir($this->current_dir.'library/');
+		$this->obj_zip->add_dir($this->current_dir.'content/');
+		$this->obj_zip->add_dir($this->current_dir.'assignments/');
+ 
+		$this->id_classes = $id_classes;
+		
+
+		// select base information (as much as I can in 1 query)
+		$sql = '
+		SELECT 
+			a.id_classes,		b.id_courses,
+			a.classType,		b.courseFamily,
+			a.facultyId,		b.courseNumber,
+			a.stylesheet,		b.courseName,
+			a.id_semesters,		b.courseDescription,
+			a.sectionNumbers,	b.preReq1,
+						b.preReq2,
+						b.preReq3,
+						b.preReq4,
+						b.coReq1,
+						b.coReq2,
+						b.coReq3,
+						b.coReq4,
+			s.semesterId
+					
+		FROM classes as a
+			INNER JOIN courses as b
+				ON a.id_courses=b.id_courses
+			INNER JOIN semesters as s
+				ON a.id_semesters=s.id_semesters
+		
+		WHERE a.id_classes='.$id_classes.'
+		';
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		$filename = 'classroom_'.$db->record['courseFamily']. $db->record['courseNumber'].'_'.$db->record['semesterId'].'.zip';
+
+		$xml_raw_save = '';
+				
+		$root =& $xmlObj->getRoot();
+		
+		$classroom_node[] = new xml_node('CLASSROOM', 
+								array(	'ID'=>$db->record['id_classes'], 
+										'CLASSTYPE'=>$db->record['classType'],
+										'ID_SEMESTERS'=>$db->record['id_semesters'],
+										'STYLESHEET'=>$db->record['stylesheet'],
+										'FACULTYID'=>$db->record['facultyId'],
+										'SECTIONNUMBERS'=>$db->record['sectionNumbers']
+									 )
+								);
+
+		$root->children =& $classroom_node;
+		
+		$course_attr[] = new xml_node('courseName', array('BASE64'=>'1'), null, $db->record['courseName']);								
+		$course_attr[] = new xml_node('courseDescription', array('BASE64'=>'1'), null, $db->record['courseDescription']);
+		$course_attr[] = new xml_node('courseFamily', null, null, $db->record['courseFamily']);
+		$course_attr[] = new xml_node('courseNumber', null, null, $db->record['courseNumber']);
+		$course_attr[] = new xml_node('coReq1', null, null, $db->record['coReq1']);
+		$course_attr[] = new xml_node('coReq2', null, null, $db->record['coReq2']);
+		$course_attr[] = new xml_node('coReq3', null, null, $db->record['coReq3']);
+		$course_attr[] = new xml_node('coReq4', null, null, $db->record['coReq4']);
+		$course_attr[] = new xml_node('preReq1', null, null, $db->record['preReq1']);
+		$course_attr[] = new xml_node('preReq2', null, null, $db->record['preReq2']);
+		$course_attr[] = new xml_node('preReq3', null, null, $db->record['preReq3']);
+		$course_attr[] = new xml_node('preReq4', null, null, $db->record['preReq4']);
+		
+		$classroom_child_node[] = new xml_node('COURSE', array('ID'=>$db->record['id_courses']), $course_attr);
+		
+		
+		$application_nodes[] = $this->get_faq_nodes();
+		
+		$application_nodes[] = $this->get_syllabus_nodes();
+		
+		$application_nodes[] = $this->get_announcement_nodes();
+		
+		
+		$application_nodes[] = $this->get_assignments_nodes();
+		
+		$application_nodes[] = $this->get_links_categories_nodes();
+		
+		$application_nodes[] = $this->get_links_nodes();
+		
+		$application_nodes[] = $this->get_objectives_nodes();
+		// NOT NEEDED // $application_nodes[] = $this->get_presentations_nodes();
+		
+		$application_nodes[] = $this->get_documentlibrary_nodes();
+		
+		$application_nodes[] = $this->get_textbook_nodes();
+		// NOT NEEDED // $application_nodes[] = $this->get_seminars_nodes();
+		// NOT NEEDED // $application_nodes[] = $this->get_orientations_nodes();
+		// NOT NEEDED // $application_nodes[] = $this->get_exam_schedule_nodes();
+		
+		/*	NOTE: I need to limit calendar stuff.. ex: no examscheduling stuff
+		 */
+		
+		$application_nodes[] = $this->get_calendar_nodes();	// needs to be last, becuase it links
+		
+		$application_nodes[] = $this->get_lessons_nodes();
+		
+		$application_nodes[] = $this->get_content_nodes();
+
+		// whats left?
+		// gradebook
+		// assessments
+		// forum entries? (applies to a few apps)
+		
+		$application_nodes[] = $this->get_assessments_nodes();
+
+		
+		$application_nodes[] = $this->get_gradebook_nodes();
+		
+		$application_nodes[] = $this->get_gradebook_categories_nodes();
+		
+		$application_nodes[] = $this->get_gradebook_entries_nodes();
+		// NOT NEEDED // $application_nodes[] = $this->get_gradebook_val_nodes();
+		
+		
+		/**
+		 *	I need to remember that this information will only be used
+		 *	for IMPORTING (COPY) not RESTORATION (overwriting) (work out NULLs too on the IMPORT)
+		 */
+		$classroom_child_node[] = new xml_node('APPLICATIONS', null, $application_nodes, null);
+		
+		$classroom_node[0]->children = $classroom_child_node;
+		
+		
+		$fh = tmpfile();
+		$xmlObj->write_file($fh);
+		
+		$file_size = ftell($fh);
+        rewind($fh);
+        // I think i'm going to have to rewrite this, becuase i can't pump out more than the php upload limit 15M
+        $silly = fread($fh, $file_size);
+        
+        fclose($fh);
+	
+        $this->obj_zip->add_file($silly,$this->current_dir.'classroom.xml');
+    
+    
+	}
+	
+	
+	// xml node makers!
+	function get_assessments_nodes()
+	{
+		$sql = '
+		SELECT * 
+		FROM assessment
+		WHERE class_id='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		$xml_child_node = array();
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('display_name',array('BASE64'=>1), null, $db->record['display_name']);
+			$xml_sub_child[] = new xml_node('date_available',null, null, $db->record['date_available']);
+			$xml_sub_child[] = new xml_node('date_unavailable',null, null, $db->record['date_unavailable']);
+			$xml_sub_child[] = new xml_node('mail_responses', null, null, $db->record['mail_responses']);
+			$xml_sub_child[] = new xml_node('auto_publish', null, null, $db->record['auto_publish']);
+			$xml_sub_child[] = new xml_node('num_retries', null, null, $db->record['num_retries']);
+			$xml_sub_child[] = new xml_node('minute_limit', null, null, $db->record['minute_limit']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>1), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>1), null, $db->record['instructions']);
+			$xml_sub_child[] = new xml_node('show_result_type', null, null, $db->record['show_result_type']);
+			$xml_sub_child[] = new xml_node('possible_points', null, null, $db->record['possible_points']);
+			
+			$xml_sub_child[] = new xml_node('QUESTIONS', null, $this->get_assessments_questions($db->record['assessment_id']));	
+			//error_log('questions');
+			//$xml_sub_child[] = new xml_node('ANSWERS', null, $this->get_assessments_answers_nodes($db->record['assessment_id']));
+			//error_log('answer');
+			//$xml_sub_child[] = new xml_node('LOG', null, $this->get_assessments_log($db->record['assessment_id']));
+			//error_log('log');
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'assessment_id'=>$db->record['assessment_id']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('ASSESSMENT', null, $xml_child_node);
+	}
+
+
+	function get_assessments_answers_nodes($assessment_id)
+	{
+		$sql = '
+		SELECT * 
+		FROM assessment_answer
+		WHERE id_classes='.$this->id_classes.'
+		';
+		$xml_child_node = array();
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('asessment_id',null, null, $db->record['assessment_id']);
+			$xml_sub_child[] = new xml_node('assessment_question_id',null, null, $db->record['assessment_question_id']);
+			$xml_sub_child[] = new xml_node('student_id', null, null, $db->record['student_id']);
+			$xml_sub_child[] = new xml_node('points_earned', null, null, $db->record['points_earned']);
+			$xml_sub_child[] = new xml_node('points_given', null, null, $db->record['points_given']);
+			$xml_sub_child[] = new xml_node('assessment_question_values', array('BASE64'=>1), null, $db->record['assessment_question_values']);
+			
+			#$xml_sub_child[] = new xml_node('INQUIRIES', null, $this->get_textbookinquiries_nodes());
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'assessment_answer_id'=>$db->record['assessment_answer_id']
+									 	 ), $xml_sub_child
+									);
+		}
+		if (count($xml_child_node) == 0)
+		{	return null;
+		}
+	return $xml_child_node;
+	}
+
+
+
+/*	Do not execute through xml. it's a subexecution through get_asessments_nodes()
+ */
+	function get_assessments_questions($assessment_id)
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM assessment_question
+		WHERE assessment_id='.$assessment_id.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('question_type', null, null, $db->record['question_type']);
+			$xml_sub_child[] = new xml_node('question_sort', null, null, $db->record['question_sort']);
+			$xml_sub_child[] = new xml_node('question_points', null, null, $db->record['question_points']);
+			$xml_sub_child[] = new xml_node('question_display', array('BASE64'=>1), null, $db->record['question_display']);
+			$xml_sub_child[] = new xml_node('question_text', array('BASE64'=>1), null, $db->record['question_text']);
+			$xml_sub_child[] = new xml_node('question_choices', array('BASE64'=>1), null, $db->record['question_choices']);
+			$xml_sub_child[] = new xml_node('question_input', array('BASE64'=>1), null, $db->record['question_input']);
+			$xml_sub_child[] = new xml_node('file_hash', array('BASE64'=>1), null, $db->record['file_hash']);
+								
+			$xml_child_node[] =new xml_node('ITEM', 
+								array(	'assessment_question_id'=>$db->record['assessment_question_id']
+									 	 ), $xml_sub_child
+								);
+		}
+		
+		if (count($xml_child_node) == 0)
+		{	return null;
+		}
+	return $xml_child_node;
+	}
+
+
+/*	Do not execute through xml. it's a subexecution through get_asessments_nodes()
+ */
+	function get_assessments_log($assessment_id)
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM assessment_log
+		WHERE assessment_id='.$assessment_id.'
+			AND id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('id_student', null, null, $db->record['id_student']);
+			$xml_sub_child[] = new xml_node('start_date', null, null, $db->record['start_date']);
+			$xml_sub_child[] = new xml_node('end_date', null, null, $db->record['end_date']);
+								
+			$xml_child_node[] =new xml_node('ITEM', 
+								array(	'id_assignment_log'=>$db->record['id_assessment_log']
+									 	 ), $xml_sub_child
+								);
+		}
+		if (count($xml_child_node) == 0)
+		{	return null;
+		}
+	return $xml_child_node;
+	}
+
+
+	function get_textbook_nodes()
+	{
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM textbook
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('south_campus',null, null, $db->record['south_campus']);
+			$xml_sub_child[] = new xml_node('southeast_campus',null, null, $db->record['southeast_campus']);
+			$xml_sub_child[] = new xml_node('northeast_campus',null, null, $db->record['northeast_campus']);
+			$xml_sub_child[] = new xml_node('northwest_campus', null, null, $db->record['northwest_campus']);
+			$xml_sub_child[] = new xml_node('noTextbooks', null, null, $db->record['noTextbooks']);
+			$xml_sub_child[] = new xml_node('INQUIRIES', null, $this->get_textbookinquiries_nodes());
+			 
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_textbook'=>$db->record['id_textbook']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('TEXTBOOK', null, $xml_child_node);
+	}
+	
+	
+	function get_textbookinquiries_nodes()
+	{	$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM textbook_classes
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('author',array('BASE64'=>'1'), null, $db->record['author']);
+			$xml_sub_child[] = new xml_node('title',array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('publisher', array('BASE64'=>'1'), null, $db->record['publisher']);
+			$xml_sub_child[] = new xml_node('edition', null, null, $db->record['edition']);
+			$xml_sub_child[] = new xml_node('copyright', null, null, $db->record['copyright']);
+			$xml_sub_child[] = new xml_node('isbn', null, null, $db->record['isbn']);
+			$xml_sub_child[] = new xml_node('required', null, null, $db->record['required']);
+			$xml_sub_child[] = new xml_node('bundled', null, null, $db->record['bundled']);
+			$xml_sub_child[] = new xml_node('bundled_items', null, null, $db->record['bundled_items']);
+			##$xml_sub_child[] = new xml_node('last_item', null, null, $db->record['last_item']);
+			$xml_sub_child[] = new xml_node('type', null, null, $db->record['type']);
+			$xml_sub_child[] = new xml_node('status', null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('note', null, null, $db->record['note']); // is this sensitive information? should i be giving this to a teacher?
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_textbook_classes'=>$db->record['id_textbook_classes']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  $xml_child_node;
+	}
+	
+	
+	
+	function get_documentlibrary_nodes()
+	{	$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM classdoclib_Folders
+		WHERE class_id='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	
+			$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('name',null, null, $db->record['name']);
+			$xml_sub_child[] = new xml_node('parentKey',null, null, $db->record['parentKey']);
+			$xml_sub_child[] = new xml_node('owner', null, null, $db->record['owner']);
+			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->record['notes']);
+			$xml_sub_child[] = new xml_node('trashed', null, null, $db->record['trashed']);
+			$xml_sub_child[] = new xml_node('origparent', null, null, $db->record['origparent']);
+			$xml_sub_child[] = new xml_node('folderType', null, null, $db->record['folderType']);
+			
+			$xml_sub_child[] = new xml_node('CLASSDOCLIB_FILES', null, $this->get_document_files($db->record['pkey']));
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'pkey'=>$db->record['pkey']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASSDOCLIB_FOLDERS', null, $xml_child_node);
+	}
+	
+	
+	function get_document_files($folderKey)
+	{
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM classdoclib_Files
+		WHERE folder='.$folderKey.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			
+			if (trim($db->record['diskName']) == '')
+				continue;
+				
+			$xml_sub_child[] = new xml_node('daHasha',null, null, $db->record['daHasha']);
+			$xml_sub_child[] = new xml_node('file', array('BASE64'=>'1'), null, $db->record['file']);
+			$xml_sub_child[] = new xml_node('displayname', array('BASE64'=>'1'), null, $db->record['displayname']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('mime', null, null, $db->record['mime']);
+			//$xml_sub_child[] = new xml_node('folder', null, null, $db->record['folder']); // not needed at all! but for good measure we'll keep it
+			$xml_sub_child[] = new xml_node('owner', null, null, $db->record['owner']);
+			$xml_sub_child[] = new xml_node('filedate', null, null, $db->record['filedate']);
+			$xml_sub_child[] = new xml_node('size', null, null, $db->record['size']);
+			$xml_sub_child[] = new xml_node('diskName', null, null, $db->record['diskName']);
+			$xml_sub_child[] = new xml_node('trashed', null, null, $db->record['trashed']);
+			$xml_sub_child[] = new xml_node('origfolder', null, null, $db->record['origfolder']); // how to handle in copy!
+			
+			// instead of encoding the contents of a file into xml
+			// add in an identifier and copy the original file into
+			// the temp directory
+			
+			$this->obj_zip->add_file(
+						file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->record['diskName'], 0, 2). '/'.substr($db->record['diskName'],(strlen($db->record['diskName'])-2)).'/'.$db->record['diskName']),
+						$this->current_dir.'library/'.str_replace('/', ' ', strip_tags($db->record['diskName'])));
+		/**
+			$xml_sub_child[] = new xml_node('data', null, null, 
+											base64_encode(
+												file_get_contents(DOCUMENT_ROOT.'../logicreate/classLibrary/'. substr($db->record['diskName'], 0, 2). '/'.substr($db->record['diskName'],(strlen($db->record['diskName'])-2)).'/'.$db->record['diskName'])
+												)
+											);
+		**/								
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'pkey'=>$db->record['pkey']
+									 	 ), $xml_sub_child
+									);
+			
+		}
+		
+	return  $xml_child_node; 
+	}
+	
+	
+	function get_content_nodes()
+	{
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM class_lesson_content
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('id_class_lessons',null, null, $db->record['id_class_lessons']);
+			$xml_sub_child[] = new xml_node('txTitle', array('BASE64'=>'1'), null, $db->record['txTitle']);
+			//$xml_sub_child[] = new xml_node('txText',  null, null, null);
+			$xml_sub_child[] = new xml_node('dateCreated', null, null, $db->record['dateCreated']);
+			
+			$this->obj_zip->add_file(
+						$db->record['txText'],
+						$this->current_dir.'content/'.str_replace('/', ' ', strip_tags($db->record['txTitle'].'.html')));
+						
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_lesson_content'=>$db->record['id_class_lesson_content']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_LESSON_CONTENT', null, $xml_child_node);
+	}
+	
+	
+	// look at the objectives link, it uses id_class_lesson .. <-- NO S lessons
+	function get_lessons_nodes()
+	{
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM class_lessons
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		$db2 = DB::getHandle();
+		$db2->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_links = null;
+			$xml_objectives = null;
+			$xml_assignments = null;
+			$xml_sub_sub_child = null;
+			
+			// find all links to lessons
+			$sql2 = '
+			SELECT * FROM 
+			class_lesson_links
+			WHERE id_class_lessons='. $db->record['id_class_lessons'];
+			
+			$db2->query($sql2);
+			while ($db2->nextRecord())
+			{	$xml_links[] = new xml_node('id_class_links',null, null, $db2->record['id_class_links']);
+			}
+			$xml_sub_sub_child[] = new xml_node('LINKS',null, $xml_links);
+			
+			$sql2 = '
+			SELECT * FROM 
+			class_lesson_objectives
+			WHERE id_class_lesson='. $db->record['id_class_lessons'];
+			
+			$db2->query($sql2);
+			while ($db2->nextRecord())
+			{	$xml_objectives[] = new xml_node('id_class_objectives',null, null, $db2->record['id_class_objectives']);
+			}
+			$xml_sub_sub_child[] = new xml_node('OBJECTIVES',null,$xml_objectives);
+
+			
+			$sql2 = '
+			SELECT * FROM 
+			class_assignments_link
+			WHERE id_class_lessons='. $db->record['id_class_lessons'];
+			
+			$db2->query($sql2);
+			while ($db2->nextRecord())
+			{	$xml_assignments[] = new xml_node('id_class_assignments',null, null, $db2->record['id_class_assignments']);
+			}
+			$xml_sub_sub_child[] = new xml_node('ASSIGNMENTS',null,$xml_assignments);
+			
+			
+			
+			// refer to the CONTENT node in APPS for mappings
+//			$xml_sub_sub_child[] = new xml_node('CONTENT',null);
+			
+			$xml_sub_child[] = new xml_node('MAPPINGS',null, $xml_sub_sub_child);
+			
+			$xml_sub_child[] = new xml_node('createdOn',null, null, $db->record['createdOn']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('activeOn', null, null, $db->record['activeOn']);
+			$xml_sub_child[] = new xml_node('inactiveOn', null, null, $db->record['inactiveOn']);
+			$xml_sub_child[] = new xml_node('checkList', array('BASE64'=>'1'), null, $db->record['checkList']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_lessons'=>$db->record['id_class_lessons']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_LESSONS', null, $xml_child_node);
+	}
+	
+	
+	/**
+	 *	I think there is supposed to be a forum system put inplace to discuss this presentation
+	 *	I will have to export that when it's created
+	 */
+	function get_presentations_nodes()
+	{
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM class_presentations
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('title',null, null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('lesson',null, null, $db->record['lesson']);
+			$xml_sub_child[] = new xml_node('status', null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('author', null, null, $db->record['author']);
+			$xml_sub_child[] = new xml_node('createdOn', null, null, $db->record['createdOn']);
+			$xml_sub_child[] = new xml_node('content', array('BASE64'=>'1'), null, $db->record['content']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_presentations'=>$db->record['id_presentations']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_PRESENTATIONS', null, $xml_child_node);
+	}
+	
+	
+	function get_objectives_nodes()
+	{
+		$xml_child_node = array();
+		$sql = '
+		SELECT * 
+		FROM class_objectives
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('objective', array('BASE64'=>'1'), null, $db->record['objective']);
+			$xml_sub_child[] = new xml_node('f_hide',null, null, $db->record['f_hide']);
+			$xml_sub_child[] = new xml_node('i_sort', null, null, $db->record['i_sort']);
+									
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_objectives'=>$db->record['id_class_objectives']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_OBJECTIVES', null, $xml_child_node);
+	}
+	
+	
+	function get_links_categories_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_links_categories
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('id_class_links_categories_parent',null, null, $db->record['id_class_links_categories_parent']);
+			$xml_sub_child[] = new xml_node('txTitle', array('BASE64'=>'1'), null, $db->record['txTitle']);
+			$xml_sub_child[] = new xml_node('sortOrder', null, null, $db->record['sortOrder']);
+									
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_links_categories'=>$db->record['id_class_links_categories']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_LINKS_CATEGORIES', null, $xml_child_node);
+	}
+	
+	function get_links_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_links
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('id_class_links_categories',null, null, $db->record['id_class_links_categories']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('url', array('BASE64'=>'1'), null, $db->record['url']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('dateCreated', null, null, $db->record['dateCreated']);
+			$xml_sub_child[] = new xml_node('createdby', null, null, $db->record['createdby']);
+			$xml_sub_child[] = new xml_node('hits', null, null, $db->record['hits']);
+						
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_links'=>$db->record['id_class_links']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_LINKS', null, $xml_child_node);
+	}
+	
+	
+	/** The following hasn't been built yet so i can not export them
+	 *
+	 *	a) Forums
+	 */		
+	function get_assignments_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_assignments
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		$db2 = DB::getHandle();
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_grades_node = null;
+			$xml_turnedin_node = null;
+			/*
+			$sql2 = '
+			SELECT * FROM  class_assignments_turnin
+			WHERE id_class_assignments='. $db->record['id_class_assignments'].'
+			';
+			$db2->query($sql2);
+			$db2->RESULT_TYPE = MYSQL_ASSOC;
+			while ($db2->nextRecord())
+			{
+				$xml_turnedin_node[] = new xml_node('WORK',
+											array('id_class_assignments_turnin'=>$db2->record['id_class_assignments_turnin'],
+												  'id_student' => $db2->record['id_student'],
+												  'dateTurnin' =>$db2->record['dateTurnin'],
+												  'assign_type' =>$db2->record['assign_type'], 
+												  'assign_text' =>base64_encode($db2->record['assign_text']),
+												  'assign_file_mime' =>$db2->record['assign_file_mime'],
+												  'assign_file_name' =>$db2->record['assign_file_name'],
+												  'assign_file_size' =>$db2->record['assign_file_size']												  
+												  )
+											, null, null
+											);
+											
+						if ($db2->record['assign_file_size'] > 0)										
+						{	
+							//
+							//	I'm backing this up, but it's not needed.
+							///
+							// This is because mikes change to the assignment upload file 
+							// I have to work out both
+							if (strlen($db2->record['assign_file_blob']) > 80)
+							{
+								$this->obj_zip->add_file(
+								$db2->record['assign_file_blob'],
+								$this->current_dir.'assignments/'.str_replace('/', ' ', strip_tags($db2->record['assign_file_name'])));
+								
+							} else
+							{
+								$data = file_get_contents(CONTENT_PATH.'/uploads/'.$db2->record['assign_file_blob']);
+								$this->obj_zip->add_file(
+								$data,
+								$this->current_dir.'assignments/'.$db2->record['assign_file_name']);
+								$data = null;
+								unset($data); // making sure i keep these resources in check
+							}
+							
+						}
+						
+			}
+			
+			$sql2 = '
+			SELECT * FROM  class_assignments_grades
+			WHERE id_class_assignments='. $db->record['id_class_assignments'].'
+			';
+			$db2->query($sql2);
+			$db2->RESULT_TYPE = MYSQL_ASSOC;
+			while ($db2->nextRecord())
+			{
+				$xml_grades_node[] = new xml_node('GRADE',
+											array('id_class_assignments_grades'=>$db2->record['id_class_assignments_grades'],
+												  'id_student' => $db2->record['id_student'],
+												  'BASE64' => 1,
+												  'grade' =>$db2->record['grade']
+												  ),
+												  null,
+												  $db2->record['comments']
+											);
+			}
+			*/
+			//$xml_sub_child[] = new xml_node('TURNEDIN',null, $xml_turnedin_node);
+			//$xml_sub_child[] = new xml_node('GRADES',null, $xml_grades_node);
+			
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('instructions', array('BASE64'=>'1'), null, $db->record['instructions']);
+			$xml_sub_child[] = new xml_node('dueDate', null, null, $db->record['dueDate']);
+			$xml_sub_child[] = new xml_node('noDueDate', null, null, $db->record['noDueDate']);
+			$xml_sub_child[] = new xml_node('activeDate', null, null, $db->record['activeDate']);
+			$xml_sub_child[] = new xml_node('responseType', null, null, $db->record['responseType']);
+			$xml_sub_child[] = new xml_node('dateNoAccept', null, null, $db->record['dateNoAccept']);
+			
+							
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_assignments'=>$db->record['id_class_assignments']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_ASSIGNMENTS', null, $xml_child_node);
+	}
+	
+
+	// @@@@ not done, i need to grab scheduled dates as well
+	function get_exam_schedule_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM exam_schedule_classes
+		WHERE id_classes='.$this->id_classes.'
+		';
+
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('status',null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('received_date',null, null, $db->record['received_date']);
+			$xml_sub_child[] = new xml_node('oncampus_exam', null, null, $db->record['oncampus_exam']);
+			$xml_sub_child[] = new xml_node('south_campus', null, null, $db->record['south_campus']);
+			$xml_sub_child[] = new xml_node('southeast_campus', null, null, $db->record['southeast_campus']);
+			$xml_sub_child[] = new xml_node('northeast_campus', null, null, $db->record['northeast_campus']);
+			$xml_sub_child[] = new xml_node('northwest_campus', null, null, $db->record['northwest_campus']);
+			$xml_sub_child[] = new xml_node('note', null, null, $db->record['note']);
+						
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_exam_schedule_classes'=>$db->record['id_exam_schedule_classes']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('EXAM_SCHEDULE_CLASSES', null, $xml_child_node);
+	}
+	
+	
+	function get_seminars_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM seminar_classes_dates
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('num_seminar',null, null, $db->record['num_seminar']);
+			$xml_sub_child[] = new xml_node('south_date',null, null, $db->record['south_date']);
+			$xml_sub_child[] = new xml_node('south_time_start',null, null, $db->record['south_time_start']);
+			$xml_sub_child[] = new xml_node('south_time_end', null, null, $db->record['south_time_end']);
+			$xml_sub_child[] = new xml_node('northeast_date', null, null, $db->record['northeast_date']);
+			$xml_sub_child[] = new xml_node('northeast_time_start', null, null, $db->record['northeast_time_start']);
+			$xml_sub_child[] = new xml_node('northeast_time_end', null, null, $db->record['northeast_time_end']);
+			$xml_sub_child[] = new xml_node('northwest_date', null, null, $db->record['northwest_date']);
+			$xml_sub_child[] = new xml_node('northwest_time_start', null, null, $db->record['northwest_time_start']);
+			$xml_sub_child[] = new xml_node('northwest_time_end', null, null, $db->record['northwest_time_end']);
+			$xml_sub_child[] = new xml_node('southeast_date', null, null, $db->record['southeast_date']);
+			$xml_sub_child[] = new xml_node('southeast_time_start', null, null, $db->record['southeast_time_start']);
+			$xml_sub_child[] = new xml_node('southeast_time_end', null, null, $db->record['southeast_time_end']);
+			$xml_sub_child[] = new xml_node('entry_status', null, null, $db->record['entry_status']);
+			$xml_sub_child[] = new xml_node('note', array('BASE64'=>'1'), null, $db->record['note']);
+						
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_seminar_classes_dates'=>$db->record['id_seminar_classes_dates']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('SEMINAR_CLASSES_DATES', null, $xml_child_node);
+	}
+	
+	
+	function get_orientations_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM orientation_classes
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('status',null, null, $db->record['status']);
+			$xml_sub_child[] = new xml_node('first_date_id',null, null, $db->record['first_date_id']);
+			$xml_sub_child[] = new xml_node('first_campus_location',null, null, $db->record['first_campus_location']);
+			$xml_sub_child[] = new xml_node('first_allotted_minutes', null, null, $db->record['first_allotted_minutes']);
+			$xml_sub_child[] = new xml_node('first_preferred_time', null, null, $db->record['first_preferred_time']);
+			$xml_sub_child[] = new xml_node('first_time_range_start', null, null, $db->record['first_time_range_start']);
+			$xml_sub_child[] = new xml_node('first_time_range_end', null, null, $db->record['first_time_range_end']);
+			$xml_sub_child[] = new xml_node('second_date_id', null, null, $db->record['second_date_id']);
+			$xml_sub_child[] = new xml_node('second_campus_location', null, null, $db->record['second_campus_location']);
+			$xml_sub_child[] = new xml_node('second_allotted_minutes', null, null, $db->record['second_allotted_minutes']);
+			$xml_sub_child[] = new xml_node('second_preferred_time', null, null, $db->record['second_preferred_time']);
+			$xml_sub_child[] = new xml_node('second_time_range_start', null, null, $db->record['second_time_range_start']);
+			$xml_sub_child[] = new xml_node('second_time_range_end', null, null, $db->record['second_time_range_end']);
+			$xml_sub_child[] = new xml_node('instructions', null, null, $db->record['instructions']);
+			$xml_sub_child[] = new xml_node('notes', null, null, $db->record['notes']);
+			$xml_sub_child[] = new xml_node('finalDateTime', null, null, $db->record['finalDateTime']);
+			$xml_sub_child[] = new xml_node('finalSessionLength', null, null, $db->record['finalSessionLength']);
+			$xml_sub_child[] = new xml_node('finalCampus', null, null, $db->record['finalCampus']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_orientation_classes'=>$db->record['id_orientation_classes']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('ORIENTATION_CLASSES', null, $xml_child_node);
+	}
+	
+	
+	function get_calendar_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM lcEvents
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('calendarID',null, null, $db->record['calendarID']);
+			$xml_sub_child[] = new xml_node('calendarType',null, null, $db->record['calendarType']);
+			$xml_sub_child[] = new xml_node('username',null, null, $db->record['username']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('description', array('BASE64'=>'1'), null, $db->record['description']);
+			$xml_sub_child[] = new xml_node('location', array('BASE64'=>'1'), null, $db->record['location']);
+			$xml_sub_child[] = new xml_node('startdate', null, null, $db->record['startdate']);
+			$xml_sub_child[] = new xml_node('enddate', null, null, $db->record['enddate']);
+			$xml_sub_child[] = new xml_node('lastmodified', null, null, $db->record['lastmodified']);
+			$xml_sub_child[] = new xml_node('repeatType', null, null, $db->record['repeatType']);
+			$xml_sub_child[] = new xml_node('repeatCount', null, null, $db->record['repeatCount']);
+			$xml_sub_child[] = new xml_node('repeatData', null, null, $db->record['repeatData']);
+			$xml_sub_child[] = new xml_node('repeatExclude', null, null, $db->record['repeatExclude']);
+			$xml_sub_child[] = new xml_node('repeatUntil', null, null, $db->record['repeatUntil']);
+			$xml_sub_child[] = new xml_node('id_item', null, null, $db->record['id_item']);
+			$xml_sub_child[] = new xml_node('id_item_sub', null, null, $db->record['id_item_sub']);
+			$xml_sub_child[] = new xml_node('f_allday', null, null, $db->record['f_allday']);
+			$xml_sub_child[] = new xml_node('f_showwhenactive', null, null, $db->record['f_showwhenactive']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'pkey'=>$db->record['pkey']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_CALENDAR', null, $xml_child_node);
+	}
+	
+	
+	function get_syllabus_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_syllabuses
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('instructionMethods', array('BASE64'=>'1'), null, $db->record['instructionMethods']);
+			$xml_sub_child[] = new xml_node('gradingScale', array('BASE64'=>'1'), null, $db->record['gradingScale']);
+			$xml_sub_child[] = new xml_node('courseReqs', array('BASE64'=>'1'), null, $db->record['courseReqs']);
+			$xml_sub_child[] = new xml_node('courseObjectives',  array('BASE64'=>'1'), null, $db->record['courseObjectives']);
+			$xml_sub_child[] = new xml_node('emailPolicy', array('BASE64'=>'1'), null, $db->record['emailPolicy']);
+			$xml_sub_child[] = new xml_node('other', array('BASE64'=>'1'), null, $db->record['other']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_syllabuses'=>$db->record['id_class_syllabuses']
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_SYLLABUSES', null, $xml_child_node);
+	}
+	
+	function get_announcement_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_announcements
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('dt_created',null, null, $db->record['dt_created']);
+			$xml_sub_child[] = new xml_node('dt_display',null, null, $db->record['dt_display']);
+			$xml_sub_child[] = new xml_node('tx_title', array('BASE64'=>'1'), null, $db->record['tx_title']);
+			$xml_sub_child[] = new xml_node('tx_description', array('BASE64'=>'1'), null, $db->record['tx_description']);
+			$xml_sub_child[] = new xml_node('id_faculty_createdby', null, null, $db->record['id_faculty_createdby']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_announcements'=>$db->record['id_class_announcements'],
+									
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_ANNOUNCEMENTS', null, $xml_child_node);
+	}
+	
+	
+	function get_faq_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_faqs
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{	$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('category', array('BASE64'=>'1'), null, $db->record['category']);
+			$xml_sub_child[] = new xml_node('answer', array('BASE64'=>'1'), null, $db->record['answer']);
+			$xml_sub_child[] = new xml_node('question', array('BASE64'=>'1'), null, $db->record['question']);
+			$xml_sub_child[] = new xml_node('clicks', null, null, $db->record['clicks']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_faqs'=>$db->record['id_class_faqs']											
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_FAQS', null, $xml_child_node);
+	}
+   
+		
+	function get_gradebook_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_gradebook
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{
+			$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('a_upper', null, null, $db->record['a_upper']);
+			$xml_sub_child[] = new xml_node('a_lower', null, null, $db->record['a_lower']);
+			$xml_sub_child[] = new xml_node('b_lower', null, null, $db->record['b_lower']);
+			$xml_sub_child[] = new xml_node('c_lower', null, null, $db->record['c_lower']);
+			$xml_sub_child[] = new xml_node('d_lower', null, null, $db->record['d_lower']);
+			$xml_sub_child[] = new xml_node('calculation_type', null, null, $db->record['calculation_type']);
+			$xml_sub_child[] = new xml_node('color_missing_grade', array('BASE64'=>'1'), null, $db->record['color_missing_grade']);
+			$xml_sub_child[] = new xml_node('roundScoresUp', null, null, $db->record['roundScoresUp']);
+			$xml_sub_child[] = new xml_node('total_points', null, null, $db->record['total_points']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_gradebook'=>$db->record['id_class_gradebook']											
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_GRADEBOOK', null, $xml_child_node);
+	}
+	
+	
+	function get_gradebook_categories_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_gradebook_categories
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{
+			$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('weight', null, null, $db->record['weight']);
+			$xml_sub_child[] = new xml_node('label', array('BASE64'=>'1'), null, $db->record['label']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_gradebook_categories'=>$db->record['id_class_gradebook_categories']											
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_GRADEBOOK_CATEGORIES', null, $xml_child_node);
+	}
+	
+	
+	function get_gradebook_entries_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_gradebook_entries
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{
+			$xml_sub_child = null;
+			
+			
+			$xml_sub_child[] = new xml_node('id_class_gradebook_categories', null, null, $db->record['id_class_gradebook_categories']);
+			$xml_sub_child[] = new xml_node('title', array('BASE64'=>'1'), null, $db->record['title']);
+			$xml_sub_child[] = new xml_node('gradebook_code', array('BASE64'=>'1'), null, $db->record['gradebook_code']);
+			
+			$xml_sub_child[] = new xml_node('total_points', null, null, $db->record['total_points']);
+			$xml_sub_child[] = new xml_node('publish_flag', null, null, $db->record['publish_flag']);
+			$xml_sub_child[] = new xml_node('date_due', null, null, $db->record['date_due']);
+			
+			$xml_sub_child[] = new xml_node('notes', array('BASE64'=>'1'), null, $db->record['notes']);
+			
+			// PAY ATTENTION TO THIS
+			$xml_sub_child[] = new xml_node('assessment_id', null, null, $db->record['assessment_id']);
+			$xml_sub_child[] = new xml_node('assignment_id', null, null, $db->record['assignment_id']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_gradebook_entries'=>$db->record['id_class_gradebook_entries']											
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_GRADEBOOK_ENTRIES', null, $xml_child_node);
+	}
+	
+	// restore only (NO COPY OPTION) maybe not allow this
+	function get_gradebook_val_nodes()
+	{
+		$xml_child_node = array();
+		
+		$sql = '
+		SELECT * 
+		FROM class_gradebook_val
+		WHERE id_classes='.$this->id_classes.'
+		';
+		
+		$db = DB::getHandle();
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		
+		while ($db->nextRecord())
+		{
+			$xml_sub_child = null;
+			$xml_sub_child[] = new xml_node('id_class_gradebook_entries', null, null, $db->record['id_class_gradebook_entries']);
+			$xml_sub_child[] = new xml_node('username', array('BASE64'=>'1'), null, $db->record['username']);
+			$xml_sub_child[] = new xml_node('score', null, null, (($db->record['score'] == null) ? 'NULL' : $db->record['score']));
+			
+			$xml_sub_child[] = new xml_node('comments', array('BASE64'=>'1'), null, $db->record['comments']);
+			
+			$xml_sub_child[] = new xml_node('date_created', null, null, $db->record['date_created']);
+			$xml_sub_child[] = new xml_node('date_modified', null, null, $db->record['date_modified']);
+			
+			$xml_child_node[] =new xml_node('ITEM', 
+									array(	'id_class_gradebook_val'=>$db->record['id_class_gradebook_val']											
+									 	 ), $xml_sub_child
+									);
+		}
+		
+	return  new xml_node('CLASS_GRADEBOOK_VAL', null, $xml_child_node);
+	}
+
+/*
+ *
+ * Processes the choices made above and makes a compresses .zip file.
+ * We should look at using XML to save this file so we can easily build 
+ * an import routine to pull stuff this export generated back into the system.
+ *
+ * Input data: classID
+ * Output data: form
+ *
+ */
+       
+	function exportClassRun(&$db,&$u,&$lc,&$t) {
+            $lc->templateName='dataexchange_main';
+//auto-comment			$lc->templateStyle = 'private';
+			
+       }       
+}
+
+
+class LcZipFile {
+
+	var $datasec = array();
+	var $ctrl_dir = array();
+	var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
+	var $old_offset = 0;
+
+	var $location_root = '/tmp/semester_backup';
+	/**
+	 *	Constructor:: Starts the process by exec'ing out and
+	 *	creating the initial directory, but first cleaning up
+	 *	a previously left directory as well.
+	 *
+	 *	@note	I can not do proper error checking with an 
+	 *			exec command, I could be potentially
+	 *			screwing up alot of things, or at least
+	 *			dirtying up directories with junk files.
+	 *			lets pray linux perms will stop us from 
+	 *			making things go astray
+	 */
+	function LcZipFile()
+	{
+		// cleaning up 
+		exec('cd /tmp');
+		
+		// creating directory and moving into it (our base directory, where all of our work will be done from)
+		exec('mkdir -p '.$this->location_root.';cd '.$this->location_root.';');
+		
+	}
+	
+	
+	/**
+	 *	Add a directory but without moving outside the 
+	 *	root directory (or: self::$location_root)
+	 */
+	function add_dir($name) 
+	{	
+		exec('mkdir -p '.$this->location_root.'/'.$name.';');
+	}
+
+
+	function add_file($data, $filename) 
+	{	
+		if (!$handle = fopen($this->location_root.'/'.$filename, 'w+')) 
+		{
+			error_log("Cannot open file (".$this->location_root."/$filename)", 0);
+        	return;
+    	}
+
+		fwrite($handle, $data);
+        fclose($handle);
+    	
+	} 
+ 
+
+	function file() { 
+		$data = implode("", $this->datasec); 
+		$ctrldir = implode("", $this->ctrl_dir); 
+
+	   return 
+		$data. 
+		$ctrldir. 
+		$this -> eof_ctrl_dir. 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("V", strlen($ctrldir)). 
+		pack("V", strlen($data)). 
+		"\x00\x00"; 
+	} 
+
+}
+
+
+/**
+ *	This class was not ment for large scale zips as it
+ *	maintains everything in memory. 
+ */
+class LcZipFile_original {
+
+	var $datasec = array();
+	var $ctrl_dir = array();
+	var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
+	var $old_offset = 0;
+
+
+	function add_dir($name) {
+		$name = str_replace("\\","/", $name);
+
+		$fr = "\x50\x4b\x03\x04";
+		$fr .= "\x0a\x00";
+		$fr .= "\x00\x00";
+		$fr .= "\x00\x00";
+		$fr .= "\x00\x00\x00\x00";
+
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+		$fr .= pack("v",strlen($name));
+		$fr .= pack("v",0);
+		$ft .= $name;
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+		$fr .= pack("V",0);
+
+		$this->datasec[] = $fr;
+
+		$new_offset = $this->old_offset + strlen($fr);
+
+		$cdrec = "\x50\x4b\x01\x02";
+		$cdrec .="\x00\x00";
+		$cdrec .="\x0a\x00";
+		$cdrec .="\x00\x00";
+		$cdrec .="\x00\x00";
+		$cdrec .="\x00\x00\x00\x00";
+		$cdrec .= pack("V",0);
+		$cdrec .= pack("V",0);
+		$cdrec .= pack("V",0);
+		$cdrec .= pack("v",strlen($name));
+		$cdrec .= pack("v",0);
+		$cdrec .= pack("v",0);
+		$cdrec .= pack("v",0);
+		$cdrec .= pack("v",0);
+		$ext = "\x00\x00\x10\x00";
+		$ext = "\xff\xff\xff\xff";
+		$cdrec .= pack("V",16);
+		$cdrec .= pack("V",$this->old_offset);
+		$cdrec .= $name;
+
+		$this->ctrl_dir[] = $cdrec;
+		$this->old_offset = $new_offset;
+
+	}
+
+
+	function add_file($data, $name) { 
+		$name = str_replace("\\", "/", $name); 
+		$unc_len = strlen($data); 
+		$crc = crc32($data); 
+		$zdata = gzcompress($data); 
+		$zdata = substr ($zdata, 2, -4); 
+		//should be strlen if substr, or original ?
+		$c_len = strlen($zdata); 
+
+		$fr = "\x50\x4b\x03\x04"; 
+		$fr .= "\x14\x00"; 
+		$fr .= "\x00\x00"; 
+		$fr .= "\x08\x00"; 
+		$fr .= "\x00\x00\x00\x00"; 
+		$fr .= pack("V",$crc); 
+		$fr .= pack("V",$c_len); 
+		$fr .= pack("V",$unc_len); 
+		$fr .= pack("v", strlen($name) ); 
+		$fr .= pack("v", 0 ); 
+		$fr .= $name; 
+		$fr .= $zdata; 
+		$fr .= pack("V",$crc); 
+		$fr .= pack("V",$c_len); 
+		$fr .= pack("V",$unc_len); 
+
+		$this->datasec[] = $fr;
+
+		$new_offset = strlen(implode("", $this->datasec)); 
+
+		$cdrec = "\x50\x4b\x01\x02"; 
+		$cdrec .="\x00\x00"; 
+		$cdrec .="\x14\x00"; 
+		$cdrec .="\x00\x00"; 
+		$cdrec .="\x08\x00"; 
+		$cdrec .="\x00\x00\x00\x00"; 
+		$cdrec .= pack("V",$crc); 
+		$cdrec .= pack("V",$c_len); 
+		$cdrec .= pack("V",$unc_len); 
+		$cdrec .= pack("v", strlen($name) ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("v", 0 ); 
+		$cdrec .= pack("V", 32 ); 
+		$cdrec .= pack("V", $this->old_offset ); 
+
+		$this -> old_offset = $new_offset; 
+
+		$cdrec .= $name; 
+		$this -> ctrl_dir[] = $cdrec; 
+	} 
+ 
+
+	function file() { 
+		$data = implode("", $this->datasec); 
+		$ctrldir = implode("", $this->ctrl_dir); 
+
+	   return 
+		$data. 
+		$ctrldir. 
+		$this -> eof_ctrl_dir. 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("V", strlen($ctrldir)). 
+		pack("V", strlen($data)). 
+		"\x00\x00"; 
+	} 
+
+}
+?>
+

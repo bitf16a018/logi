@@ -1,0 +1,326 @@
+<?
+
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'Assessment.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+//only use for static datedropdown
+include_once(LIB_PATH.'LC_form.php');
+include_once(LIB_PATH.'lc_calendar.php');
+include_once(LIB_PATH.'LC_html.php');
+
+
+include_once(SERVICE_PATH.'classmgr/adjustDates.lcp');
+
+ 
+class AdjustLessonDates extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $authorizer = 'teachesClassesAuth';
+	var $sectionTitle = 'Lesson Dates';
+	var $navlinks = array (
+                'Classroom Manager' => 'display/',
+                'Announcements'=>'announcements/',
+                'Assessment Manager' => '%assessments/',
+                'Assignments' => 'assignmentManage/',
+                'Content' => 'lessonContent/',
+                'FAQ' => 'faq/',
+                'File Resource Manager' => '%classdoclib/',
+                'Gradebook' => '%gradebook/',
+                'Lessons' => 'lessonManager/',
+                'Objectives' => 'lessonObjectives/',
+                'Webliography' => 'lessonWebliography/'
+        );
+	var $dateFormat = 'M d y';
+	var $dateTimeFormat = 'M d y h:i A';
+	var $cellPadding = '7';
+
+
+	/**
+	 * Show a list of all items that have some sort of date
+	 * and that are bound to a lesson
+	 *
+	 * Input data: class_id, lesson_id
+	 * Output data: 2 datagrids (lc_table)
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'adjustLessonDates_main';
+		$this->authorizer = 'facultyGroupCheck';
+		$class_id = (int)$u->activeClassTaught->id_classes;
+		$lesson_id = (int)$lc->getvars['lesson_id'];
+
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+
+		//security check
+		include_once(LIB_PATH.'PBDO/ClassLessons.php');
+		$l = ClassLessons::load($lesson_id);
+		if ( $l->idClasses != $class_id ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "No permission to edit this lesson.";
+		}
+		//get the lesson title for this page
+		$t['lessonTitle'] = $l->get('title');
+
+
+
+		$helper = new AdjustDates();
+		// LESSONS
+		$t['lesson'] = $helper->getLessonTable($class_id,$db,$lesson_id);
+		//REPLACE RENDERERS IN THE TABLE WITH DATE PULLDOWNS
+		$columnModel = &$t['lesson']->table->getColumnModel();
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->cellRenderer = new LC_TableDateDropdownRenderer('activeOn','');
+		$col_b->cellRenderer->bits = 63;
+		$col_b->maxWidth=150;
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->cellRenderer = new LC_TableDateDropdownRenderer('deactiveOn','');
+		$col_c->maxWidth=150;
+
+
+		// ASSESSMENTS
+		$t['assessment'] = $helper->getAssessmentTable($class_id,$db,$lesson_id);
+		//REPLACE RENDERERS IN THE TABLE WITH DATE PULLDOWNS
+		$columnModel = &$t['assessment']->table->getColumnModel();
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->cellRenderer = new LC_TableDateDropdownRenderer('dateAvailable','');
+		$col_b->cellRenderer->bits = 63;
+		$col_b->maxWidth=150;
+		$col_b->style="padding-top:".$this->cellPadding."px;padding-bottom:".$this->cellPadding."px";
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->cellRenderer = new LC_TableDateDropdownRenderer('dateUnavailable','');
+		$col_c->cellRenderer->bits = 63;
+		$col_c->maxWidth=150;
+		$col_c->style="padding-top:".$this->cellPadding."px;padding-bottom:".$this->cellPadding."px";
+
+
+		// ASSIGNMENTS
+		$t['assignment'] = $helper->getAssignmentTable($class_id,$db,$lesson_id);
+		//REPLACE RENDERERS IN THE TABLE WITH DATE PULLDOWNS
+		$columnModel = &$t['assignment']->table->getColumnModel();
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->cellRenderer = new LC_TableDateDropdownRenderer('activeDate','');
+		$col_b->cellRenderer->bits = 63;
+		$col_b->maxWidth=150;
+		$col_b->style="padding-top:".$this->cellPadding."px;padding-bottom:".$this->cellPadding."px";
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->cellRenderer = new LC_TableDateDropdownRenderer('dueDate','');
+		$col_c->cellRenderer->bits = 63;
+		$col_c->maxWidth=150;
+		$col_c->style="padding-top:".$this->cellPadding."px;padding-bottom:".$this->cellPadding."px";
+
+		$col_d = &$columnModel->getColumnAt(3);
+		$col_d->cellRenderer = new LC_TableDateDropdownRenderer('doNotAccept','');
+		$col_d->cellRenderer->bits = 63;
+		$col_d->maxWidth=150;
+		$col_d->style="padding-top:".$this->cellPadding."px;padding-bottom:".$this->cellPadding."px";
+
+		$t['lesson_id'] = $lesson_id;
+	}
+
+
+	/**
+	 * Save all items associated with this lesson
+	 *
+	 * Save a list of dates to the lesson in this class
+	 * The ids from the HTML are RESULT SET IDs, not record, or row, ids.
+	 * This means the same query to display must be executed in the 
+	 * same manner.
+	 *
+	 * Input data: class_id, list of result set ids and dates
+	 * Output data: redirect
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+
+		$class_id = (int)$u->activeClassTaught->id_classes;
+		$lesson_id = (int)$lc->postvars['lesson_id'];
+		$helper = new AdjustDates();
+
+		//LESSON
+		$db->query($helper->getLessonOnlyQuery($class_id,$lesson_id));
+
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$row = 0;
+		$updates = array();
+		while ($db->nextRecord()) {
+
+			$activeOnStamp = mktime(
+				$lc->postvars['activeOn'][$row]['hour'],
+				$lc->postvars['activeOn'][$row]['min'],
+				0,
+				$lc->postvars['activeOn'][$row]['month'],
+				$lc->postvars['activeOn'][$row]['day'],
+				$lc->postvars['activeOn'][$row]['year']);
+			$deactiveOnStamp = mktime(0,0,0,
+				$lc->postvars['deactiveOn'][$row]['month'],
+				$lc->postvars['deactiveOn'][$row]['day'],
+				$lc->postvars['deactiveOn'][$row]['year']);
+
+			if ( $activeOnStamp != $db->record['date_available'] 
+				|| $deactiveOnStamp != $db->record['date_unavailable'] ) {
+				$updates[$db->record['id_class_lessons']]['date_available'] = $activeOnStamp;
+				$updates[$db->record['id_class_lessons']]['date_unavailable'] = $deactiveOnStamp;
+			}
+			++$row;
+		}
+//debug($updates,1);
+
+		$updateSQL = 'UPDATE class_lessons
+				SET activeOn = %d,
+				inactiveOn = %d
+				where id_class_lessons = %d';
+		foreach ($updates as $id=>$v) {
+			$db->query( sprintf($updateSQL,
+				$v['date_available'],
+				$v['date_unavailable'],
+				$id
+			));
+		}
+
+
+		//ASSESSMENTS
+		$db->query($helper->getAssessmentLessonQuery($class_id,$lesson_id));
+
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$row = 0;
+		$updates = array();
+		while ($db->nextRecord()) {
+			
+			$activeOnStamp = mktime(
+				$lc->postvars['dateAvailable'][$row]['hour'],
+				$lc->postvars['dateAvailable'][$row]['min'],
+				0,
+				$lc->postvars['dateAvailable'][$row]['month'],
+				$lc->postvars['dateAvailable'][$row]['day'],
+				$lc->postvars['dateAvailable'][$row]['year']);
+
+			$deactiveOnStamp = mktime(
+				$lc->postvars['dateUnavailable'][$row]['hour'],
+				$lc->postvars['dateUnavailable'][$row]['min'],
+				0,
+				$lc->postvars['dateUnavailable'][$row]['month'],
+				$lc->postvars['dateUnavailable'][$row]['day'],
+				$lc->postvars['dateUnavailable'][$row]['year']);
+
+			if ( $activeOnStamp != $db->record['date_available'] 
+				|| $deactiveOnStamp != $db->record['date_unavailable'] ) {
+				$updates[$db->record['assessment_id']]['date_available'] = $activeOnStamp;
+				$updates[$db->record['assessment_id']]['date_unavailable'] = $deactiveOnStamp;
+			}
+			++$row;
+		}
+
+		$updateSQL = 'UPDATE assessment
+				SET date_available = %d,
+				date_unavailable = %d
+				where assessment_id = %d';
+		foreach ($updates as $id=>$v) {
+			$db->query( sprintf($updateSQL,
+				$v['date_available'],
+				$v['date_unavailable'],
+				$id
+			));
+		}
+
+		//update the events calendar
+		$calendarSQL = 'UPDATE lcEvents
+				SET startdate = %d,
+				enddate = %d
+				where id_item = %d
+				AND id_classes = %d
+				AND calendarType = "assessmentscheduling"';
+		foreach ($updates as $id=>$v) {
+			$db->query( sprintf($calendarSQL,
+				$v['date_available'],
+				$v['date_unavailable'],
+				$id,
+				$class_id
+			));
+		}
+
+
+		//ASSIGNMENTS
+		$db->query($helper->getAssignmentLessonQuery($class_id,$lesson_id));
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$row = 0;
+		$updates = array();
+		while ($db->nextRecord()) {
+
+			$activeStamp = mktime(
+				$lc->postvars['activeDate'][$row]['hour'],
+				$lc->postvars['activeDate'][$row]['min'],
+				0,
+				$lc->postvars['activeDate'][$row]['month'],
+				$lc->postvars['activeDate'][$row]['day'],
+				$lc->postvars['activeDate'][$row]['year']);
+
+			$dueDateStamp = mktime(
+				$lc->postvars['dueDate'][$row]['hour'],
+				$lc->postvars['dueDate'][$row]['min'],
+				0,
+				$lc->postvars['dueDate'][$row]['month'],
+				$lc->postvars['dueDate'][$row]['day'],
+				$lc->postvars['dueDate'][$row]['year']);
+
+			$dateNoAcceptStamp = date('Y-m-d G:i:s',mktime(
+				$lc->postvars['doNotAccept'][$row]['hour'],
+				$lc->postvars['doNotAccept'][$row]['min'],
+				0,
+				$lc->postvars['doNotAccept'][$row]['month'],
+				$lc->postvars['doNotAccept'][$row]['day'],
+				$lc->postvars['doNotAccept'][$row]['year']));
+		
+
+			if ( $activeStamp != $db->record['activeDate'] 
+				|| $dueDateStamp != $db->record['dueDate'] 
+				|| $dateNoAcceptStamp != $db->record['dateNoAccept'] ) {
+				$updates[$db->record['id_class_assignments']]['activeDate'] = $activeStamp;
+				$updates[$db->record['id_class_assignments']]['dueDate'] = $dueDateStamp;
+				$updates[$db->record['id_class_assignments']]['dateNoAccept'] = $dateNoAcceptStamp;
+			}
+			++$row;
+		}
+
+		$updateSQL = 'UPDATE class_assignments
+				SET activeDate = %d,
+				dueDate = %d,
+				dateNoAccept = \'%s\'
+				where id_class_assignments = %d';
+		foreach ($updates as $id=>$v) {
+			$db->query( sprintf($updateSQL,
+				$v['activeDate'],
+				$v['dueDate'],
+				$v['dateNoAccept'],
+				$id
+			));
+		}
+
+		//update the events calendar
+		$calendarSQL = 'UPDATE lcEvents
+				SET startdate = %d,
+				enddate = %d
+				where id_item = %d
+				AND id_classes = %d
+				AND calendarType = "classroomassignments"';
+		foreach ($updates as $id=>$v) {
+			$db->query( sprintf($calendarSQL,
+				$v['activeDate'],
+				$v['dueDate'],
+				$id,
+				$class_id
+			));
+		}
+
+
+		//send them back to the lesson manager
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('lessonManager/');
+	}
+
+}
+?>

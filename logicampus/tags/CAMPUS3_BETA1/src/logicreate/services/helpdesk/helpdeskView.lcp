@@ -1,0 +1,147 @@
+<? 
+
+/******
+* helpdesk module for tccd
+* 8/3/03
+*
+******/
+ 
+include_once (LIB_PATH."LC_html.php"); 
+include_once (LIB_PATH."SiteForms.php"); 
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncident.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskIncidentLog.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskCategory.php");
+include_once (SERVICE_PATH."helpdesk/HelpdeskComments.php");
+ 
+class helpdeskView extends RegAuth { 
+ 
+	var $presentor = "htmlPresentation"; 
+  
+	var $sectionTitle = 'Help Desk';
+	var $navlinks = array(
+		
+	);
+	var $applinks = array(
+		'List Tickets' => '',
+		'Submit new ticket' => 'helpdeskSubmit'
+		
+	);
+	var $inactivelinks = array(
+	);
+	 
+	/** 
+	 * Show template to add issue
+	 */ 
+
+	function run(&$db,&$u,&$arg,&$t) 
+	{ 
+//auto-comment		$arg->templateStyle = 'private';
+		
+		$id = (int)$arg->getvars[1];
+
+		// flick if you are an admin to click on the "BY" to login as them
+		$canUseLoginAs = false;
+		$showComments = false;
+
+		if (in_array('hdadmin',$u->groups) 
+			|| in_array('hdstaff',$u->groups) 
+			|| in_array('admin', $u->groups) ) {
+
+			// get a list of technicians
+			$db->query("select * from lcUsers where groups like '%hdstaff%' or groups like '%|admin|%' or groups like '%|hdadmin|%'");
+			while($db->nextRecord()) {
+				$list[$db->record['username']] = $db->record['username'];
+			}
+			$t['techs'] = makeOptions($list);
+
+
+			$db->queryOne("select * from helpdesk_incident 
+			left join helpdesk_status on helpdesk_status.helpdesk_status_id = helpdesk_incident.status
+			where helpdesk_id=$id");
+			$canUseLoginAs = true;
+			$showComments = true;
+			$t['canSeeComments'] = true;
+			$arg->templateName = 'helpdeskView_admin';
+		} else 
+		{
+			$db->queryOne("select * from helpdesk_incident 
+			left join helpdesk_status on helpdesk_status.helpdesk_status_id = helpdesk_incident.status
+			where helpdesk_id=$id and userid='".$u->profile->get('username'). '\'');
+		}
+		$t['hd'] = $db->record;
+		
+		$j = HelpdeskCategory::loadAll();
+		
+		$t['categories'][0] = 'uncategorized';
+		foreach($j as $k=>$v) {
+			$t['categories'][$v->helpdeskCategoryId] = $v->helpdeskCategoryLabel;
+		}		
+
+
+		if ($showComments) {
+			$t['comment'] = HelpdeskComments::load(array('userid'=>$t['hd']['userid']));
+		}
+
+
+		// if we got a record back then we had permission to view it.
+		if ($db->record) { 
+			$u->sessionvars['helpdesk_id'] = $id;
+			$db->query("select * from helpdesk_incident_log where helpdesk_id=$id");
+			while($db->nextRecord()) {
+				$t['log'][] = $db->record;
+			}
+		}
+		$arg->templateName = "helpdeskView_main";
+
+
+		if (in_array('hdadmin',$u->groups) 
+			|| in_array('hdstaff',$u->groups) 
+			|| in_array('admin', $u->groups) ) {
+
+			$arg->templateName = 'helpdeskView_admin';
+		}
+
+		if ($arg->getvars['saved'] == 1) {
+			$t['saveMessage'] = true;
+		}
+	}
+
+// add issue submitted from user
+// if user not a helpdeskadmin user, we have the username
+// if not, we'll take it from the form
+// because a helpdeskadmin user will have the 'username' 
+// option in the form
+	function addrun(&$db,&$u,&$arg,&$t) { 
+//auto-comment		$arg->templateStyle = 'private';
+		
+		$f = new Siteform();
+		if (in_array("hdadmin",$u->groups) || in_array('admin', $u->groups) ) {
+			$t['error'] = $f->validateForm('helpdeskSubmitAdmin', $arg->postvars);
+		} else {
+			$t['error'] = $f->validateForm('helpdeskSubmit', $arg->postvars);
+		}
+		if ($t['error']) { 
+			$this->run($db,$u,$arg,$t);
+			return;
+		}
+		
+// no errors, let's commit to helpdeskIncident
+// __FIX_ME
+// still missing 'category' selection
+		$h = HelpdeskIncidentPeer::row2Obj($arg->postvars);
+		$h->timedateOpen = time();
+		$h->status = 1; 	// initial status - pending?
+		$h->_new = true;
+		$h->userid = $u->pkey;
+		$h->save();
+
+		$j = new HelpdeskIncidentLog();
+		$j->helpdeskId = $h->helpdeskId;
+		$j->action = 'Initial details';
+		$j->userid = $h->userid;
+		$j->timedate = time();
+		$j->comment = $arg->postvars['details'];
+		$j->save();
+	}
+}
+?>

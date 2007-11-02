@@ -1,0 +1,174 @@
+<?php 
+print $t['sectionheader'];
+?>
+
+<?php
+if ( is_array($t['errors']) ) {
+echo '<div class="error_message">Some errors occurred when processing your request:<ul>';
+	foreach($t['errors'] as $blank=>$error) {
+		echo '<li>'.$error.'</li>';
+	}
+	echo '</div></ul>';
+}
+?>
+
+
+<table width="100%" border="0" cellspacing="3" cellpadding="2">
+	
+	<tr class="<?=$class;?>">
+		<td class="<?=$class;?>">
+			<h3><?= $t['lessonObj']->getTitle();?></h3>
+		</td>
+	<td class="<?=$class;?>">
+		Starts in: <?= $t['lessonObj']->daysTilStart();?> day(s)
+	</td>
+	<td  class="<?=$class;?>">
+		Ends in: <?= $t['lessonObj']->daysTilEnd();?> day(s)
+	</td>
+	</tr>
+	<tr>
+		<td colspan="3">
+		 &nbsp;<a href="<?= appurl('classmgr').'/lessonManager/event=edit/id='.$t['lessonObj']->getId();?>">[Change Name and Dates]</a>
+ 		</td>
+	</tr>
+</table>
+
+<style type="text/css">
+	#seq_form select {
+		font-size: 8pt;
+		border: 1px ridge gray;
+	}
+</style>
+
+<form name="seq_form" id="seq_form" action="<?=appurl('classmgr');?>/lessonSequence/event=save/id=<?=$t['lessonId'];?>" method="POST">
+<?php
+echo $t['table']->toHtml();
+?>
+
+<input type="submit" name="save_btn" id="save_btn" value="Save Changes"/>
+</form>
+<p>&nbsp;</p>
+
+	<div style="float:right;padding-top:.5em;width:48%;align:right;">
+		<fieldset>
+			<legend>Lesson Content</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkContent/id='.$t['lessonId']);?>">Change Content</a>
+			<?php
+			if ( ! is_array($t['contentItems']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Content</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['contentItems'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+		<fieldset>
+			<legend>Activities</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssignments/id='.$t['lessonId']);?>">Change Activities</a>
+			<?php
+			if ( ! is_array($t['assignments']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Activities</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['assignments'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+		<fieldset>
+			<legend>Assessments</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkAssessments/id='.$t['lessonId']);?>">Change Assessments</a>
+			<?php
+			if ( ! is_array($t['assessments']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Assessments</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['assessments'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	
+
+	<div style="width:48%;align:right;">
+		<fieldset>
+			<legend>Lesson Objectives</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkObjectives/id='.$t['lessonId']);?>">Change Objectives</a>
+			<?php
+			if ( ! is_array($t['objectives']) ) {
+			?>
+			<br/>
+			<span style="color:red;font-style:italic;">No Objectives</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['objectives'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+
+
+	<div style="width:48%;align:right">
+		<fieldset>
+			<legend>Lesson Check List</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=checkList/id='.$t['lessonId']);?>">Change Check List</a>
+			<?php
+			if ( ! is_array($t['checkList']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Check List</span>
+			<?php } ?>
+
+			<ol>
+				<?php
+				foreach ($t['checkList'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ol>
+		</fieldset>
+	</div>
+
+
+
+	<div style="width:48%;align:left;">
+		<fieldset>
+			<legend>Web Links</legend>
+			<a href="<?= appurl('classmgr/lessonManager/event=linkWeb/id='.$t['lessonId']);?>">Change Web Links</a>
+			<?php
+			if ( ! is_array($t['web']) ) {
+			?>
+			<br/>
+			<span style="font-style:italic;">No Web Links</span>
+			<?php } ?>
+			<ul>
+				<?php
+				foreach ($t['web'] as $k=>$v) {
+				?>
+				<li><?= $v;?></li>
+				<?php } ?>
+			</ul>
+		</fieldset>
+	</div>
+	
+
+
+
+	<p style="clear:both;">&nbsp;</p>

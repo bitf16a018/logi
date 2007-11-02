@@ -1,0 +1,14 @@
+<?=$t['sectionheader'];?>
+<?=$t['pageDisplay'];?>
+<h3>Chat for <?=$obj->user->activeClassTaken->courseName;?></h3>
+
+<?php
+echo lcMessageBox(
+'To join the chat for this class <a href="#" onClick = "window.open(\''.appurl('classchat/main/event=initialize').'\',\'generic2\',\'toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=790,height=500\');">click here</a>,  a new window will open.'
+,'i','Start the Chat'); 
+?>
+<BR/><BR/>
+Please note that all chats are archived for security purposes.  
+Please don't say anything in here that you wouldn't want repeated or viewed by faculty or other students.
+<hr size="1">
+<a title="Chat Transcripts for this classroom" href="<?=modurl('chat/event=transcript');?>">Classroom chat transcripts may be obtained by clicking here</a>

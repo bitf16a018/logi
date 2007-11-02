@@ -1,0 +1,210 @@
+<?
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+
+/**
+ * file management 
+ *
+ * edit the properties of one folder and/or any of
+ * its contianed files.
+ */
+
+class editFile extends classdoclibService {
+
+
+	/** 
+	 * show the folder and all of it's contents.
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		// @@@ BUG: [low_prio] the file doesn't really have to belong to this folder.. 
+		// you just have to have access to it.
+		$t['folder'] = LC_folder::load($lc->getvars['fid'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		if ($t['folder'] == null ) {
+			$lc->templateName = 'error_file';
+			return;
+		}
+		$t['folder']->getContents();
+		
+		$t['file'] = $t['folder']->contents[$lc->getvars['file']];
+		
+		if ($t['file'] == null)
+		{	$lc->templateName = 'error_file';
+			return;
+		}
+		
+		$cat = LC_folder::getVisibleFolders($u,$u->activeClassTaught->id_classes,FOLDER_EDIT);
+
+		$view = new FileMGTView($cat);
+
+		$t['dropdown'] = $view->renderAsOptions();
+
+	}
+
+
+
+	function updateFileRun(&$db,&$u,&$lc,&$t) {
+		$folder = LC_folder::load($lc->postvars['fid'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		if ($folder == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder';
+			return;
+		}
+		$folder->getContents();
+
+		// make sure they have access to the file
+		$flag = 0;
+		$val = $folder->contents[$lc->postvars['file']];
+		if ( ! is_object($val) ) {
+			$t['msg'] = 'There was a problem with the file.';
+			return;
+		}
+
+		// trash the appropriate garbage
+		if ($lc->postvars['trash'] == 'ok') {
+			
+			// TRASH THIS
+			return;
+		}
+		
+		// Set name/description
+		$val->displayname = $lc->postvars['displayname'];
+		$val->description = $lc->postvars['description'];
+		$t['msg'] = 'The file has been updated successfully.';
+		$u->sessionvars['doc_message'] = 'The file has been updated successfully.';
+		$val->save();
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl("classdoclib/main/".$val->folder);
+
+	}
+
+
+	function copyMoveFileRun(&$db,&$u,&$lc,&$t) {
+
+		//make sure user can edit folder/contents
+		$folder = LC_folder::load($lc->postvars['fid'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		$destfolder = LC_folder::load($lc->postvars['destfid'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		if ( $folder == null || $destfolder == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this folder';
+			return;
+		}
+		$folder->getContents();
+		$file = $folder->contents[$lc->postvars['file']];
+
+		//see if a move or copy command was sent
+		//execute $file->move($destfid) or $file->copy($destfid)
+		switch($lc->postvars['op']) {
+			case 'copy':
+				$x = $file->displayname;
+				
+				if (strpos($x,"(copy")>0) { 
+					list($front,$end) = split("\(copy",$x);
+					$end = str_replace(")","",$end);
+					echo "end=$end"."ddd";
+					if (strlen($end)>0) { 
+						$new = $end+1;
+					} else { $new = 2; }
+					$x = $front." (copy $new)";
+					$file->displayname = $x;
+				} else {
+				$file->displayname .= " (copy)";
+				}
+				$file->copyFile($destfolder->pkey);
+				break;
+			case 'move':
+				$file->moveFile($destfolder->pkey);
+				break;
+		}
+
+
+		//choose a display, redirect or comfirmation page
+		// mgk 06/21/03 - choosing to redirect to new folder ID where copy/move was made
+		$t['url'] = appurl("classdoclib/main/".$destfolder->pkey);
+		$this->presentor = "redirectPresentation";
+		
+	}
+
+	/**
+	 * unmove a folder to the 'trash'
+	 */
+	function untrashRun(&$db,&$u,&$lc,&$t) {
+// get trash folder pkey
+
+		$class_id = $u->activeClassTaught->id_classes;
+
+		$trash = LC_file::getSingle($lc->getvars['file'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		if ($trash->pkey) {
+			$db->query("update classdoclib_Files set folder=origfolder, trashed='n' where pkey=".(int)$lc->getvars['file']);
+			$db->queryOne("select folder from classdoclib_Files where pkey=".(int)$lc->getvars['file']);
+			$folder = $db->record['folder'];
+			$db->queryOne("select trashed from classdoclib_Folders where pkey=$folder");
+			if ($db->record['trashed']=='y') { 
+			$db->query("update classdoclib_Files set folder=0, trashed='n' where pkey=".(int)$lc->getvars['file']);
+			}
+		}
+		$t['url'] = appurl("classdoclib/main/".$trash->folder);
+		$this->presentor = "redirectPresentation";
+		return;
+	
+	}
+
+	/**
+	 * move a folder to the 'trash'
+	 */
+	function trashRun(&$db,&$u,&$lc,&$t) {
+// get trash folder pkey
+
+		$class_id = $u->activeClassTaught->id_classes;
+		$db->queryOne("select pkey from classdoclib_Folders where class_id='$class_id' and folderType=0");
+		$trashPkey = $db->record['pkey'];
+
+		$trash = LC_file::getSingle($lc->getvars['file'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		if ($trash->pkey) {
+			$db->query("update classdoclib_Files set origfolder=folder, folder='$trashPkey', trashed='y' where pkey=".(int)$lc->getvars['file']);
+		}
+		$t['url'] = appurl("classdoclib/main/".$trash->folder);
+		$this->presentor = "redirectPresentation";
+		return;
+		$lc->postvars['fid'];
+
+
+
+
+		//move the folder to the trash table
+		$trash = LC_file::getSingle($lc->getvars['file'],$u->activeClassTaught->id_classes,FOLDER_EDIT);
+		if ($trash == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You don\'t have permission to edit this file.';
+			return;
+		}
+
+		//folder is okay, serialize it and stick it in the classdoclib_Trash
+		$body = serialize($trash);
+		$trash->owner = addslashes($trash->owner);
+		$trash->class_id = addslashes($trash->class_id);
+		$trash->name = addslashes($trash->name);
+		$sql = "insert into classdoclib_Trash 
+			(pkey,owner,class_id,name,data)
+			VALUES
+			($trash->pkey,'$trash->owner',$trash->class_id,'$trash->displayname','$body')";
+
+		$db->query($sql);
+
+		//repeat for folder->contents
+
+		//remove folder and contents from db
+		$trash->delete();
+
+		//redirect out
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = APP_URL.'classdoclib/main/';
+
+	}
+
+
+
+}
+?>

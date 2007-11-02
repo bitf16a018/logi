@@ -1,0 +1,167 @@
+<?=$t['sectionheader'];?>
+
+<?php
+//debug($t);
+
+if ($t['esc']->idClasses)
+{	
+	$db = DB::getHandle();
+	$db->RESULT_TYPE = MYSQL_ASSOC;
+	
+	$sql = '
+	SELECT A.facultyId, B.firstname, B.lastname, A.courseFamilyNumber, C.courseName, D.semesterTerm, D.semesterYear
+	FROM classes as A
+	INNER JOIN profile as B ON A.facultyId=B.username
+	INNER JOIN courses as C ON A.id_courses=C.id_courses
+	INNER JOIN semesters as D ON A.id_semesters=D.id_semesters
+	WHERE A.id_classes='.$t['esc']->idClasses.'
+	';
+	$db->queryOne($sql);
+	
+	echo '<b><a href="'.APP_URL.'administration/facultylist/'.$db->record['facultyId'].'" title="Click to view profile!" target="_blank">'.$db->record['firstname']. ' '. $db->record['lastname']. '</a>';
+	echo '<br>';
+	echo $db->record['courseFamilyNumber']. ' - '.$db->record['courseName'].' ('.$db->record['semesterTerm'].' '.$db->record['semesterYear'].')';
+	echo '</b>';
+	
+}
+
+?>
+<p>Click <a href="<?=modurl('main/event=edit/id='.$t['classid']);?>">here</a> to edit this class's exam dates.<p>
+
+<fieldset>
+<legend><b>General Testing Information</b></legend>
+
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+	<td valign="top">
+
+<? if ( $t['esc']->_new ) { ?>
+<i>No data entered yet.</i>
+<? } else { ?>
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td align="right"><b>Overall Status:</b></td>
+	<td><?=$t['esc']->status;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Received Date:</b></td>
+	<td><?=date('M j @ h:i A', strtotime($t['esc']->receivedDate));?></td>
+</tr>
+<tr>
+	<td align="right"><b>On Campus Exam?</b></td>
+	<td><?=$t['esc']->oncampusExam;?></td>
+</tr>
+</table>
+<? } ?>
+
+	</td>
+
+<? if ( preg_match( '/Yes/', $t['esc']->oncampusExam ) ) { ?>
+	<td width=30>&nbsp;</td>
+	<td valign="top">
+<table border=0 cellpadding=2 cellspacing=0>
+<tr>
+	<td align="right"><b>South Campus:</b></td>
+	<td><?=$t['esc']->southCampus;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Southeast Campus:</b></td>
+	<td><?=$t['esc']->southeastCampus;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Northeast Campus:</b></td>
+	<td><?=$t['esc']->northeastCampus;?></td>
+</tr>
+<tr>
+	<td align="right"><b>Northwest Campus:</b></td>
+	<td><?=$t['esc']->northwestCampus;?></td>
+</tr>
+</table>
+	</td>
+<? } ?>
+</tr>
+</table>
+</fieldset>
+
+<h3>Entered Testing Dates</h3>
+
+<?
+$flag = false;
+foreach ( $t['esc']->emClassDates as $idExamScheduleDates => $obj ) {
+	if ( $obj->_new ) continue; 
+	$flag = true;
+	?>
+<fieldset>
+	<legend>
+	<b><?=date('M j @ h:i A', strtotime($obj->dateStart));?> - 
+		<?=date('M j @ h:i A', strtotime($obj->dateStart));?> ( <?=$obj->status;?> )</b>
+	</legend>
+	
+	<table width="100%" border=0 cellpadding=5 cellspacing=0>
+	<tr>
+		<td valign="top">
+			<table border=0 cellpadding=2 cellspacing=0 style="padding:5px 5px 5px 20px;">
+			<? if ( !$obj->_new ) { ?>
+			<tr>
+				<td align="right"><b>Title:</b></td>
+				<td><?=$obj->title ? $obj->title : '<i>Untitled</i>';?></td>
+			</tr>
+			<? } ?>
+			<tr>
+				<td align="right"><b>Status:</b></td>
+				<td><?=$obj->status;?></td>
+			</tr>
+			<? if ( !$obj->_new ) { ?>
+			<tr>
+				<td align="right"><b>New Exam?</b></td>
+				<td><?=$obj->newExam;?></td>
+			</tr>
+			<? } ?>
+			</table>
+		</td>
+		<? if ( $obj->instructions ) { ?>
+		<td valign="top">
+			<p>
+				<b>Instructions:</b><br />
+				<?=$obj->instructions;?>
+			</p>
+		</td>
+		<? } ?>
+		<? if ( !$obj->_new ) { ?>
+		<td valign="top">
+			<table border=0 cellpadding=2 cellspacing=0>
+			<tr>
+				<td align="right"><b>South copies:</b></td>
+				<td><?=$obj->southCopies;?></td>
+			</tr>
+			<tr>
+				<td align="right"><b>Southeast copies:</b></td>
+				<td><?=$obj->southeastCopies;?></td>
+			</tr>
+			<tr>
+				<td align="right"><b>Northeast copies:</b></td>
+				<td><?=$obj->northeastCopies;?></td>
+			</tr>
+			<tr>
+				<td align="right"><b>Northwest copies:</b></td>
+				<td><?=$obj->northwestCopies;?></td>
+			</tr>
+			</table>
+		</td>
+		<? } ?>
+		<? if ( $obj->note ) { ?>
+		<td valign="top">
+			<p>
+				<b>Note from Exam Manager:</b><br />
+				<?=$obj->note;?>
+			</p>
+		</td>
+		<? } ?>
+	</tr>
+	</table>
+</fieldset>
+<? }
+
+if ( !$flag ) print '<i>No dates have been entered.</i>';
+?>
+

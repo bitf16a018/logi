@@ -1,0 +1,148 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+class download extends classdoclibService {
+
+	var $authorizer = 'native';
+
+	/**
+	 * allow both students and teachers to download a file from 
+	 * a class document library
+	 */
+	function authorize(&$lc,&$u) {
+		if ($u->activeClassTaught->id_classes != '') {
+			return true;
+		}
+		if ($u->activeClassTaken->id_classes != '') {
+			return true;
+		}
+		return false;
+	}
+
+
+	/**
+	 * 'shows' the file to the user.
+	 * pushes the file to the user for download or
+	 * view.
+	 */
+	function run($db,&$u,&$lcObj,&$t) {
+
+		$pkey = $lcObj->getvars["pkey"];
+		if ($lcObj->getvars["view"]==1) { 
+			$save = true;
+		}
+		
+		// stripping bad characters.. md5hash does not have these characters
+		$fhash = eregi_replace('[^0-9a-zA-z]', '', stripslashes($lcObj->getvars['fhash']));
+		
+		// moved out of loop
+		if (!$u->activeClassTaught) {
+#			$class_id = (int)$u->activeClassTaken->id_classes;
+			$facultyId = $u->activeClassTaken->facultyId;
+		} else {
+#			$class_id = (int)$u->activeClassTaught->id_classes;
+			$facultyId = $u->activeClassTaught->facultyId;
+		}
+
+		// mgk - 8/21/04
+		// owner is the facultyId
+		// instead of mapping to the class you're in, we map to the 
+		// teacher of the class you're in.  this allows the content to be 
+		// tied to a teacher, not a class
+		
+		// START FHASH // I'm allowing this to be backwards compatible for now
+		if (strlen($fhash) == 32)	{	
+
+			$sql = '
+			SELECT A.pkey 
+			FROM classdoclib_Files as A
+			INNER JOIN classdoclib_Folders as B
+				ON A.folder=B.pkey
+			WHERE (B.owner=\''.$facultyId.'\'
+			AND A.daHasha=\''.$fhash.'\')
+			';
+			$db->queryOne($sql);
+			if ($db->record == false) {
+				//no permission to view this file
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You do not have permission to view this content.";
+				return;
+				
+			}
+			
+		$pkey = $db->record['pkey'];			
+		}
+		// END FHASH
+	
+		/**
+		 * We must have a pkey, if we don't, we can not continue.
+		 * we *throw in the chips* and show permission denied.
+		 */
+		if ($pkey == false)
+		{	$this->presentor = 'errorMessage';
+			$t['message'] = 'You do not have permission to access the contents of this folder';
+			return;
+		}
+		
+		// Adding the fallback, class taken, if not. maybe i'm a teacher?
+		$x = LC_file::getSingle($pkey, $class_id);
+		
+
+		//permission to view folder?
+		if ( $x == null ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'You do not have permission to access the contents of this folder';
+			return;
+		}
+
+
+		ob_end_clean();
+
+
+
+		$fullpath = LC_DiskRepository::getFullPath($x->diskName);
+
+		//use this part for sending as attachment. (download)
+		/*
+		header("Content-type: ".$x->mime."; file=".$x->file);
+		header("Content-type: application/octet-stream;");
+		header("Content-Length: ".$x->size);
+		header("Content-Disposition: attachment; filename=".$x->file);
+		header("Content-Transfer-Encoding: binary");
+		*/
+
+		//repository is messed up?
+		if (! file_exists($fullpath) || $x->diskName == '' ) {
+			$this->presentor = 'errorMessage';
+			$t['details'] = 'There is a problem with the server\'s file repository.  The file ('.$x->filename.') cannot be found.';
+			$t['message'] = 'This file does not exist';
+			return;
+		}
+		
+		header("Cache-control: public");
+		header("Content-type: ".$x->mime);
+		header("Content-length: ".$x->size);
+		header("Content-Disposition: attachment; filename=".$x->file);
+
+		$fd = fopen($fullpath,"r");
+		fpassthru($fd);
+		exit();
+	}
+
+}
+?>

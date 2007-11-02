@@ -1,0 +1,50 @@
+<?
+/*
+ *
+ *  App to manage remote user access to uploaded test files
+ *
+ */
+include_once(LIB_PATH."datagrid.php");
+
+class show extends NoAuth {
+
+	var $presentor='htmlPresentation';
+
+	function show() {
+	 	$this->filePrefix = CONTENT_PATH."/uploads/remote_test_";
+	}
+/*
+ *
+ * nothing.. it's all template links(icons)
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$hash = addslashes($lc->getvars[1]);
+			$db->queryOne("select * from remote_test_files where hash='$hash'");
+			$t['file'] = $db->record;
+			$lc->templateName='show_main';
+		}
+
+		function dlRun(&$db,&$u,&$lc,&$t) {
+			$hash = addslashes($lc->getvars[1]);
+			$db->queryOne("select * from remote_test_files where hash='$hash'");
+			$x = $db->record;
+			ob_end_clean();
+			header("Content-type: ".$x['mime']); 
+			header("Content-length: ". $x['size']);
+			header("Content-Disposition: attachment; filename=".$x['file']);
+			#echo $this->filePrefix."".$x['hash'];exit();
+			readfile($this->filePrefix."".$x['hash']);
+			$db->query("update remote_test_files set clicks=clicks+1 where hash='".$x['hash']."'");
+			exit();
+		}
+
+
+
+
+}
+
+?>

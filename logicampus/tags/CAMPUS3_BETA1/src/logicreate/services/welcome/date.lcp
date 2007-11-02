@@ -1,0 +1,11 @@
+<?
+
+class date extends BasicAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,$arg,&$t) {
+		$t["date"] = date($this->DATE_FORMAT);
+	}
+}
+?>

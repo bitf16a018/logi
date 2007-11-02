@@ -1,0 +1,142 @@
+<?
+/**
+ * class to search an entire site
+ * from user entered queries
+ */
+class search extends BasicAuth {
+
+	var $presentor = 'htmlPresentation';
+
+	/**
+	 * display a query page.
+	 */
+	function run (&$db, &$u, &$arg, &$t) {
+		//let the template handle it.
+	}
+
+
+	/**
+	 * perform search with mysql full text indexing
+	 * input term should be get or post vars 'q'
+	 */
+	function searchRun (&$db, &$u, &$arg, &$t) {
+		$term = addslashes(stripslashes(strip_tags(trim ($arg->postvars['q']))));
+		if ($term == '') 
+			$term = trim ($arg->getvars['q']);
+		$t['q'] = $term;
+		$term = addSlashes($term);
+
+		$groups = createGroupCheck($u->groups);
+		$notgroups = createGroupCheck($u->groups,"notgroups");
+
+		// individual searches allowed here
+		// add more as needed (help)
+		if ($arg->getvars['stype'] == 'shop')
+		{   $zquery = " AND modID='shop' ";
+		}
+		if ($arg->getvars['stype'] == 'faq')
+		{   $zquery = " AND modID='faq' ";
+		}
+		
+		if ($arg->getvars['stype'] == 'html')
+		{   $zquery = " AND modID='html' ";
+		}
+		if ($arg->getvars['stype'] == 'news')
+		{   $zquery = " AND modID='news' ";
+		}
+		if ($arg->getvars['stype'] == 'users')
+		{   $zquery = " AND modID='users' ";
+		}
+		
+		
+		/* unfortunately
+		   i have to make a full fledged query becuase
+		   i haven't figured out how to get a count on a match
+		 */
+		$sql = " SELECT title,link,type, MATCH searchdata AGAINST ";
+		$sql .=" ('$term') AS score ";
+		$sql .=" FROM lcSearch WHERE MATCH (searchdata) AGAINST ";
+		$sql .=" ('$term') ";
+		$sql .= "and ( ($groups) and not ($notgroups) ) ". $zquery;	
+		$sql .= "order by score DESC";
+		$db->query($sql);
+		
+		$t['total_found'] = $db->getNumRows();
+		
+		$this_many = $this->_ReturnedResultsPerPage;
+		
+		if ($arg->getvars['position'] == '')
+		{   $offset = 0;
+		    // make searchkey
+		    $search_key = rand(1000, 9999);
+		    
+		} else 
+		{ 
+		    $offset = (int)$arg->getvars['position'];
+		    
+		}
+		
+		$t['position']= $offset;
+		
+		$t['button']['prev'] = 'prev';
+		$t['button']['next'] = 'next';
+		
+		
+        $searchingbytype = '';
+        if ($arg->getvars['stype'])
+        {   $searchingbytype = '/stype='.$arg->getvars['stype'];
+        }
+
+		if ($this_many < $t['total_found'])
+		{
+		    // check for prev/next
+		    if (($this_many+$offset) < $t['total_found'])
+		    {   
+		        //$offset +=$this_many;
+		        $t['button']['next'] = '<a class="searchprvnxt" href="'.APP_URL.'search/main?event=search&q='.stripslashes($arg->getvars['q']).'&position='.($offset+$this_many).$searchingbytype.'">next</a>';
+		        
+		    }
+		    
+		    if (($offset-$this_many) >= 0)
+		    {   
+		        //$offset -= $this_many;
+		        $t['button']['prev'] = '<a class="searchprvnxt" href="'.APP_URL.'search/main?event=search&q='.stripslashes($arg->getvars['q']).'&position='.($offset-$this_many).$searchingbytype.'">prev</a>';
+		        
+		    }
+		}
+		
+		$query = " SELECT MATCH searchdata AGAINST ";
+		$query .=" ('$term') AS score ";
+		$query .=" FROM lcSearch WHERE MATCH (searchdata) AGAINST ";
+		$query .=" ('$term') ";
+		$query .= "and ( ($groups) and not ($notgroups) ) ". $zquery;	
+		$query .= "order by score DESC LIMIT 1";
+		
+		$db->queryOne($query);
+		$top_score = number_format($db->record['score'], 2);
+        
+		$query = " SELECT title,link,type, searchdata, MATCH searchdata AGAINST ";
+		$query .=" ('$term') AS score ";
+		$query .=" FROM lcSearch WHERE MATCH (searchdata) AGAINST ";
+		$query .=" ('$term') ";
+		$query .= "and ( ($groups) and not ($notgroups) ) ". $zquery;	
+		$query .= "order by score DESC LIMIT ".$offset.",".$this_many;
+		$t['showing'] =0;
+		
+		$db->query($query);
+		while ($db->nextRecord() ){
+			$vt = number_format($db->record['score'],2);
+			$db->record['score'] = ceil((($vt*100)/$top_score)). '%'; //
+		    $t['results'][] = $db->record;
+			$t['showing']++;
+		}
+		
+		
+		# Added 8/20/02 by Keith Elder
+        # cache the search for later stats
+		$ut = time();
+		$db->query("insert into searchCache set username='".$u->username."', text='$term', timestamp='$ut'");
+
+	}
+}
+?>

@@ -1,0 +1,382 @@
+<?
+/**
+ * The main view for the gradebook.  By default the
+ * gradebook will display a roster of all students
+ * on the left and columns will represent
+ * assessments.
+ *
+ */
+
+include_once(LIB_PATH."gradeBookObj.php");
+include_once(LIB_PATH."LC_html.php");
+
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
+
+
+class gradebook extends FacultyOnlyService {
+
+	var $presentor='htmlPresentation';
+
+	// links
+	var $sectionTitle = 'Gradebook';
+	var $navlinks = array (
+		'Classroom Overview' => '%classmgr/display/',
+		'Announcements'=>'%classmgr/announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Content' => '%classmgr/lessonContent/',
+		'FAQ' => '%classmgr/faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => '%classmgr/lessonManager/',
+		'Objectives' => '%classmgr/lessonObjectives/',
+		'Webliography' => '%classmgr/lessonWebliography/'
+	);
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
+		'Gradebook Setup' => 'main/event=controlPanel/'
+	);
+
+	var $inactivelinks = array('Gradebook');
+	/**
+	 * Displays the spreadsheet view of the gradebook.  This is the
+	 * default view.
+	 * 
+	 * Input data: course ID
+	 * Output data: display spreadsheet view
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='main_main';
+//auto-comment		$lc->templateStyle = 'private';
+		$this->inactivelinks[] = 'Gradebook Home';
+
+		if ( $lc->postvars['filteractive'] ) {
+			$filter['filteractive'] = addslashes(trim($lc->postvars['filteractive']));
+		} else {
+			$filter['filteractive'] = 'Active';
+		}
+		if ( intval($lc->postvars['filtersection']) > 0 ) {
+			$filter['filtersection'] = (int)$lc->postvars['filtersection'];
+		}
+
+		$filter['filterletter'] = addslashes(trim($lc->postvars['filterletter']));
+		$filter['filtercat'] = addslashes(trim($lc->postvars['filtercat']));
+
+		$u->sessionvars['filter'] = $filter;
+		$t = array_merge( $t, $filter );
+
+		// Load all gradebook categories 
+		// for the filter drop downs
+		$t['gbCats'] = ClassGradebook::loadCategoryList($u->activeClassTaught->id_classes);
+		$t['gbCats'][0] = 'All Categories';
+
+		// Load all student section numbers
+		// for the filter drop downs
+		$t['sectionNumbers'] = explode("\n",$u->activeClassTaught->sectionNumbers);
+		array_unshift($t['sectionNumbers'],'All Sections');
+
+		// get the semester name
+		$db->queryOne('select semesterTerm, semesterYear from semesters
+			where id_semesters='.$u->activeClassTaught->id_semesters);
+		$t['semester'] = $db->record['semesterTerm'].' '.$db->record['semesterYear'];
+
+		// stupid hack to get a feedback message
+		if ($u->sessionvars['message']) {
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
+		}
+	}
+
+
+	/**
+	 * Displays the control panel for the gradebook 
+	 * this is an interface to other things like import, export and prefs
+	 * 
+	 * Input data: class ID
+	 * Output data: display static template
+	 */
+	function controlPanelRun(&$db,&$u,&$lc,&$t) {
+
+		$this->inactivelinks[] = 'Gradebook Setup';
+		$lc->templateName='main_controlpanel';
+
+		$this->sectionTitle = 'Gradebook Setup';
+
+		if ($u->sessionvars['message']) {
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
+		}
+
+	}
+
+
+	/**
+	 * Shows the table that sits in the iframe
+	 * iframe should be scrollable in 800x600 but also fully
+	 * visible.  No browser scrolling.  Repeat student names column
+	 * every (X) columns
+	 * 
+	 * chop off student names at 23 characters, add nowrap
+	 * Input data: class ID
+	 * Output data: display static template
+	 */
+	function IFrameRun(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName='main_iframe';
+		$this->presentor = 'EmptyPresentation';
+//auto-comment		$lc->templateStyle = 'private';
+
+		// repeat student names every ? columns
+		$printNamesEvery = 8;
+		$printHeadersEvery = 13;
+		$droppedStudentRowColor = '#ffa6a6';
+
+		// Get the filters from the session
+		$filter = $u->sessionvars['filter'];
+
+		// pull in gradebook preferences
+		$gradebook = ClassGradebook::load( array(
+			'id_classes' => $u->activeClassTaught->id_classes,
+		) );
+
+		// apply filters
+		switch ( $filter['filteractive'] ) {
+			case 'Active': $gradebook->filterActive = 1; break;
+			case 'Dropped': $gradebook->filterActive = 0; break;
+		}
+		if ( $filter['filterletter'] && $filter['filterletter'] != 'All' )
+			$gradebook->filterLastname = $filter['filterletter'];
+		if ( $filter['filtercat'] )
+			$gradebook->filterCategory = $filter['filtercat'];
+		if ( $filter['filtersection'] )
+			$gradebook->filterSection = $filter['filtersection'];
+
+
+		// these four methods are necassary for getting a GB overview table
+		$gradebook->loadCategories();
+		$gradebook->getEntries();
+		$gradebook->getStudents();
+		$gradebook->loadVals();
+
+		// FIX THIS SO STUDENTS DO NOT DISAPPEAR
+if (count($gradebook->students)%$printHeadersEvery ==0) { 
+	$printHeadersEvery +=1;
+}
+		if ( count($gradebook->students) == 0 )
+		{
+			$t['table'] = 'There are no students in your class. You must have students to view the gradebook.';
+			return;
+		}
+
+		//associate vals and students based on a number of criteria
+		// (dropped, due date ...)
+		$gradebook->setStudentVals();
+
+
+		$gradebook->calculateEntryWeights();
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
+
+		$counter = $printNamesEvery;  // this will count down in the code
+		// $table is an array of arrays representing the content for all cells, including
+		// blank ones and repeating names.
+		$table = array();
+		$counter--;
+
+
+		//ADD CLOUMN HEADERS TO THE GRADEBOOK TABLE
+		// we need to repeat this every $printHeadersEvery times
+		if ( $gradebook->calculationType == 1 ) {
+			$columnFooter = array( 'Weighted %' );
+		} else {
+			$columnFooter = array( 'Total Points' );
+		}
+		$columnHeaders = array();
+
+		reset($gradebook->entries);
+		while ( list($entid, $entry) = @each($gradebook->entries) ) {
+
+			$columnHeaders[] = '<a target="_parent" href="'.
+				modurl('assessment/event=editAsmt/id='.$entid).
+				'">'.$entry->gradebookCode.'</a>';
+			$counter--;
+			if ( $counter == 0 ) {
+				$columnHeaders[] = '&nbsp;';
+			}
+
+			//ADD CLOUMN FOOTERS TO THE GRADEBOOK TABLE
+			// Push on totals for each entry
+			if ( $gradebook->calculationType == 1 ) {
+				$columnFooter[] = $entry->weightedPercent;
+				if ( $counter == 0 ) {
+					$columnFooter[] = 'Weighted %';
+				}
+			} else {
+				$columnFooter[] = $entry->totalPoints;
+				if ( $counter == 0 ) {
+					$columnFooter[] = 'Total Points';
+				}
+			}
+			if ( $counter == 0 ) {
+				$counter = $printNamesEvery;  // reset counter
+			}
+		}
+
+		//FINISH the header and footer arrays
+		if ( $gradebook->calculationType == 1 ) {
+			$columnFooter[] = '&nbsp;'; // for the "total" column
+		} else {
+			$columnFooter[] = '<b>'.$gradebook->possiblePoints.'</b>'; // for the "total" column
+		}
+
+		$columnHeaders[] = 'Total';
+
+
+		// Get each student grades while finishing up the table data
+		reset($gradebook->students);
+		while ( list($username,$stud) = @each($gradebook->students) ) {
+
+			$row = array();  // array of cells to be pushed onto table[]
+
+
+			// build the student's row. start with their name.
+			$counter = $printNamesEvery;
+			$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+			$counter--;
+
+			reset($gradebook->entries);
+			while ( list($entid,$entry) = @each($gradebook->entries) ) {
+				// index.php/assessments/grade/event=view/studentid=adam/id=5
+				//use proper decimal places, none for whole integers, one place for fractions
+				if ( isset($stud->vals[$entid]->score) ) {
+					if ( intval($stud->vals[$entid]->score) == $stud->vals[$entid]->score ) {
+						$stud->vals[$entid]->score = (int)$stud->vals[$entid]->score;
+					} else {
+						$stud->vals[$entid]->score = sprintf('%.1f',$stud->vals[$entid]->score);
+					}
+				}
+
+#echo $entid;
+#echo "<HR>";
+#debug($stud->vals);
+				//print the score to the row
+				if ( !isset($stud->vals[$entid]->score) && !$entry->publishFlag ) {
+					$text = '<i>???-*</i>';
+				} else if ( !isset($stud->vals[$entid]->score) && $entry->publishFlag ) {
+					$text = '???';
+				} else if ( isset($stud->vals[$entid]->score) && !$entry->publishFlag ) {
+					$text = '<i>'.$stud->vals[$entid]->score.'-*</i>';
+				} else {
+					//if the score is "failing" make the font red
+					// david wissore, 10-22-2003
+
+					if ( $entry->totalPoints == 0 ) {
+						$text = $stud->vals[$entid]->score.' / EC';
+					} else { 
+						$pct = sprintf('%.2f',$stud->vals[$entid]->score / $entry->totalPoints * 100);
+						$text = $stud->vals[$entid]->score.' / '.$pct.'%';
+					}
+
+					//this needs to be different for percentage classes, 
+					// the get letter grade is good for the final letter grade
+					// but not for each entry because they are all points based
+					// no matter what
+					if ( $gradebook->calculationType == 1 ) {
+//print "<!-- $letter ".$stud->vals[$entid]->score." ".$entry->totalPoints ." -->\n";
+						$letter = $gradebook->getLetterGrade( 
+							($stud->vals[$entid]->score/$entry->totalPoints )*100
+							,$entry->totalPoints);
+					} else {
+						$letter = $gradebook->getLetterGrade($stud->vals[$entid]->score,$entry->totalPoints);
+					}
+					if ( $letter == 'F' ) {
+						$text = "<font color=red>$text</font>";
+					}
+
+					if ( $stud->vals[$entid]->disqualified ) {
+						$text = 'd '.$text.'';
+					}
+
+				}
+
+/*
+				if ( $entry->assessmentId ) {
+					$row[] = '<a target="PARENT"  href="'.appurl('assessments/grade/event=view/studentid='
+						.$username.'/id='.$entry->assessmentId).'">'.$text.'</a>';
+				} else {
+*/
+				//edit single should work for both assessments and assignments
+				$row[] = popup( modurl('entry/').'event=editSingle/entid='
+					.$entid.'/user='.$username, 200, 400, $text );
+
+				$counter--;
+				if ( $counter == 0 ) {
+			#		$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='
+			#			.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
+					$row[] = $stud->lastname.', '.$stud->firstname;
+					$counter = $printNamesEvery;  // reset counter
+				}
+			}
+
+/**
+*
+I am putting in a hack here that basically says this
+If you have 0 points. You are probably not THAT dumb
+to get 0 points and have taken a test/quiz.. so we
+won't show any grade
+
+note: i'm usinga terany if block becuase its inline.
+*/
+			// push on the total points
+			if ( $stud->isWithdrawn() ) {
+				$currRow = 'Withdrawn';
+			} else {
+				if ( $gradebook->calculationType == 1 ) {
+					$currRow = $stud->weightedAverage.'% ';
+					if (($stud->possiblePoints) ) {
+						$currRow .= '/ '.$gradebook->getLetterGrade($stud->weightedAverage,$stud->possiblePoints);
+					}
+				} else {
+					$currRow = $stud->totalPointsEarned.' / '
+						.sprintf( "%0.2f", $stud->totalPointsEarned / $stud->possiblePoints * 100).'% ';
+					if (($stud->possiblePoints) ) {
+						$currRow .= '/ '.$gradebook->getLetterGrade($stud->totalPointsEarned,$stud->possiblePoints);
+					}
+				}
+			}
+			$row[] = $currRow;
+			unset($currRow);
+			
+			if ( !$stud->active ) {
+				$row['inactive'] = true;
+			}
+
+			$table[] = $row;
+		}
+
+		$t['table'] = $table;
+		$t['columnHeaders'] = $columnHeaders;
+		$t['columnFooter'] = $columnFooter;
+		$t['printHeadersEvery'] = $printHeadersEvery;
+//		unset($table);
+//		unset($columnFooter);
+//		unset($columnHeaders);
+
+		// stupid hack to get a feedback message
+		if ($u->sessionvars['message']) {
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
+		}
+	}
+}
+
+?>
