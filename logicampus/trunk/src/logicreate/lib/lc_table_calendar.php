@@ -427,7 +427,12 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 			list($m,$d,$y,$g) = explode(' ', date('m d Y G',$evt['enddate']));
 			$evtEnd = mktime($g,0,0,$m,$d,$y);
 
-			if ($evtStart == $dateStamp || $evtEnd == $dateStamp) {
+			if ($evtStart == $dateStamp) {
+				$evt['startorend'] = 'start';
+				$ret[] = $evt;
+			}
+			if ($evtEnd == $dateStamp) {
+				$evt['startorend'] = 'end';
 				$ret[] = $evt;
 //			} else {
 //				echo "event is not at this hour ".$evt['title']." ". date('m d Y G:i:s', $evt['startdate'])."<br/>";
@@ -1063,23 +1068,38 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 		list($m,$d,$y) = explode(' ', date('m d Y',$evt['enddate']));
 		$evtEnd = mktime(0,0,0,$m,$d,$y);
 
-//		debug($evt);
 		$evtType = strtolower($evt['calendarType']);
 		switch( $evtType ) {
 			case 'activity':
 				$type = 'Activity:';
-				if ($evtStart == $this->targetDate->timeStamp) {
-					$type = 'Activity (Assigned):';
-				} else if ($evtEnd == $this->targetDate->timeStamp) {
-					$type = 'Activity (Due):';
+				if (isset($evt['startorend']) ) {
+					if ($evt['startorend'] == 'start') {
+						$type = 'Activity (Assigned):';
+					} else {
+						$type = 'Activity (Due):';
+					}
+				} else {
+					if ($evtStart == $this->targetDate->timeStamp) {
+						$type = 'Activity (Assigned):';
+					} else if ($evtEnd == $this->targetDate->timeStamp) {
+						$type = 'Activity (Due):';
+					}
 				}
 				break;
 			case 'test':
 				$type = 'Test:';
-				if ($evtStart == $this->targetDate->timeStamp) {
-					$type = 'Test (Assigned):';
-				} else if ($evtEnd == $this->targetDate->timeStamp) {
-					$type = 'Test (Due):';
+				if (isset($evt['startorend']) ) {
+					if ($evt['startorend'] == 'start') {
+						$type = 'Activity (Assigned):';
+					} else {
+						$type = 'Activity (Due):';
+					}
+				} else {
+					if ($evtStart == $this->targetDate->timeStamp) {
+						$type = 'Test (Assigned):';
+					} else if ($evtEnd == $this->targetDate->timeStamp) {
+						$type = 'Test (Due):';
+					}
 				}
 				break;
 
