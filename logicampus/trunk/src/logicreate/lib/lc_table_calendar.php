@@ -1090,9 +1090,9 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 				$type = 'Test:';
 				if (isset($evt['startorend']) ) {
 					if ($evt['startorend'] == 'start') {
-						$type = 'Activity (Assigned):';
+						$type = 'Test (Assigned):';
 					} else {
-						$type = 'Activity (Due):';
+						$type = 'Test (Due):';
 					}
 				} else {
 					if ($evtStart == $this->targetDate->timeStamp) {
