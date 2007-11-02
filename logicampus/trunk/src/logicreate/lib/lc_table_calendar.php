@@ -476,11 +476,13 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 		$classIds = implode($this->classIds, ' or id_classes=');
 
 		$sql ='
-			SELECT C.activeOn + start_offset as startdate
-			, C.inactiveOn + due_offset  as enddate
+			SELECT C.activeOn
+			, C.inactiveOn
 			, A.lob_title as title
 			, A.start_offset
+			, A.start_time
 			, A.due_offset
+			, A.due_time
 			, A.lob_type as calendarType
 			FROM class_lesson_sequence AS A
 			LEFT JOIN classes AS B on A.class_id = B.id_classes
@@ -491,7 +493,8 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 			WHERE 
 			(class_id = '.$classIds.')
 			AND (lob_type = "activity" OR lob_type = "test")
-
+';
+/*
 			HAVING 
 			( (startdate )>='.$start.' AND (startdate) <= '.$end.')
 			OR
@@ -500,11 +503,52 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 				AND (due_offset > 0  OR due_offset IS NULL)
 			)
 ';
+ */
 
 //debug($sql,1);
 		$db = DB::getHandle();
 		$db->query($sql);
 		while( $db->nextRecord() ) {
+			$startDaysUnix = $db->record['start_offset'];
+			$startTimeUnix = $db->record['start_time'];
+			$dueDaysUnix = $db->record['due_offset'];
+			$dueTimeUnix = $db->record['due_time'];
+			$min = ($startTimeUnix /60)%60;
+			$hour = ( ($startTimeUnix) / (60*60));
+
+			$dateObj = new LC_Calendar_DateInfo($db->record['activeOn']);
+			$db->record['startdate'] = mktime(
+				$dateObj->hour+$hour,
+				$dateObj->min +$min,
+				$dateObj->sec,
+				$dateObj->month,
+				$dateObj->date + ($startDaysUnix / 86400),
+				$dateObj->year
+			);
+
+			/*
+debug(date('m d Y G i s', $db->record['activeOn']));
+debug(date('m d Y G i s', $db->record['startdate']));
+debug($db->record['title']);
+debug($startDaysUnix/86400);
+debug($dateObj);
+			 */
+			if ($dueDaysUnix == -1) {
+				$db->record['enddate'] = 0;
+			} else {
+				$min = ($dueTimeUnix /60)%60;
+				$hour = ( ($dueTimeUnix) / (60*60));
+
+				$db->record['enddate'] = mktime(
+					$dateObj->hour+$hour,
+					$dateObj->min +$min,
+					$dateObj->sec,
+					$dateObj->month,
+					$dateObj->date + (($dueDaysUnix) / 86400),
+					$dateObj->year
+				);
+			}
+
 			$this->events[] = $db->record;
 		}
 	}
@@ -996,8 +1040,11 @@ class LC_TableCellRenderer_CalendarEventList extends LC_TableCellRenderer {
 					$ret .= '<br/>'.$plainDesc;
 				}
 			}
-			if ($v['enddate'] - $v['startdate'] < (60*60) ) {
-				$ret .= '<br/>Event ends in one hour or less.';
+			//check to see if there even is an enddate
+			if ($v['enddate'] > $v['startdate']) {
+				if ($v['enddate'] - $v['startdate'] < (60*60) ) {
+					$ret .= '<br/>Event ends in one hour or less.';
+				}
 			}
 			$ret .='</li>';
 		}
@@ -1137,6 +1184,9 @@ class LC_Calendar_DateInfo {
 	var $month = 0;
 	var $weekOfMonth = 0;
 	var $timeStamp;
+	var $hour = -1;
+	var $min = -1;
+	var $sec = -1;
 
 
 	function LC_Calendar_DateInfo($ts) { 
@@ -1145,7 +1195,10 @@ class LC_Calendar_DateInfo {
 		list($this->dayOfWeek,
 			$this->year,
 			$this->date,
-			$this->month)  = explode(' ' , date('w Y d m',$ts));
+			$this->month,
+			$this->hour,
+			$this->min,
+			$this->sec)  = explode(' ' , date('w Y d m G i s',$ts));
 	}
 
 }

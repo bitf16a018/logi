@@ -284,8 +284,12 @@ class LessonSequence extends FacultyService {
 			}
 			//due offset is number of days *after* the start of this object.
 			if( isset($lc->postvars['dueOffset'][$objIdx]) ) {
-				$lessonSeqObj->setDueDay($objIdx, intval($lc->postvars['dueOffset'][$objIdx])/60/60/24);
-				$lessonSeqObj->setDueTime($objIdx, intval($lc->postvars['dueOffset_time'][$objIdx]));
+				if( $lc->postvars['dueOffset'][$objIdx] == -1) {
+					$lessonSeqObj->setDueDay($objIdx, -1);
+				} else {
+					$lessonSeqObj->setDueDay($objIdx, intval($lc->postvars['dueOffset'][$objIdx])/60/60/24);
+					$lessonSeqObj->setDueTime($objIdx, intval($lc->postvars['dueOffset_time'][$objIdx]));
+				}
 				$save = true;
 			}
 /*
