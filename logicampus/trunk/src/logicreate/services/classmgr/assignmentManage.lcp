@@ -572,7 +572,7 @@ class assignmentManage extends FacultyService {
 			{
 				$sql = '
 				INSERT INTO class_assignments_grades
-				SET id_class_assignments='.(int)$lc->getvars['id_class_assignments'].',
+				SET id_class_assignments='.(int)$lc->postvars['seqId'].',
 				comments=\''. str_replace("'", '\'\'', stripslashes($lc->postvars['teachercomments'])). '\',
 				grade='. number_format($lc->postvars['grade'], 2). ',
 				id_student=\''.$username.'\'
@@ -919,7 +919,7 @@ class assignmentManage extends FacultyService {
 		$studentId = addslashes($lc->getvars['student']);
 		$t['studentId'] = $studentId;
 
-		$t['attachments'] = $this->getAssignmentsByType(1,
+		$t['attachments'] = $this->getAssignmentsByType($t['activity']->lobSub->responseTypeId,
 				$studentId,
 				$u->activeClassTaught->id_classes,
 				$t['sequenceId']
