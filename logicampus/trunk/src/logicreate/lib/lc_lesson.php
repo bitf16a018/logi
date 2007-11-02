@@ -140,5 +140,30 @@ class LC_Lesson {
 	function isFinished() {
 		return $this->lessonDo->inactiveOn < time();
 	}
+
+	/**
+	 * Store a lesson into the users' session
+	 */
+	function storeLessonInSession($lessonId, &$u) {
+		$ut = time();
+		$db = DB::getHandle();
+		$sql = "select * from class_lessons
+			where id_class_lessons='".$lesson_id."'
+			and id_classes='{$u->activeClassTaken->id_classes}'";
+		if (!$u->isFaculty())
+			$sql .= " and (activeOn < ".time()."
+				and inactiveOn > ".time().')';
+
+		$db->queryOne($sql);
+		$u->sessionvars['activeLesson'] = $db->record;
+	}
+
+	/**
+	 * Find a lesson ID for a particular sequence
+	 */
+	function getLessonIdForSequenceId($seqId) {
+		$seqObj = ClassLessonSequence::load($seqId);
+		return $seqObj->lessonId;
+	}
 }
 ?>
