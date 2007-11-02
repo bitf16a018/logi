@@ -1,0 +1,130 @@
+<?
+/*
+ * adminforum
+ * Last updated 2/7/2002
+ * 
+ * Purpose:
+ * Forum admin system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LC_object.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LC_forum.php");
+include_once(LIB_PATH."LC_html.php");
+require_once(LIB_PATH."LC_sql.php");
+
+
+class forum extends HercAuth  {
+	  var $presentor = "adminPresentation";
+
+	function Run($db,&$u,&$lcObj,&$t) {
+		$g = new lcGroup($db);
+		$g->getList();
+		$grouplist = $g->displayList;
+
+		$db->query("select * from forums");
+		while($db->nextRecord()) { 
+			extract($db->record);
+
+// make the action tags (edit/del)
+			$act = "<a href=\"".MOD_URL."main/event=edit/fid=$fid"."\">edit</a> | ";
+			$act .= "<a href=\"".MOD_URL."main/event=confirm/fid=$fid"."\">del</a>";
+
+			$tr .= "<tr><td valign=\"top\">$fid</td><td valign=\"top\"><b><a href=\"".MOD_URL."main/event=edit/fid=$fid"."\">$forumname</a></b><br>Description: $forumdesc<br>Default: $defaultstatus<br>Uploadcount: $uploadcount<br>$act</td>\n";
+if ($recentpost==0) { $recentpost='never'; } else { 
+$recentpost = date("m/d/Y h:i A",$recentpost); }
+			$tr .= "<td valign=\"top\">Visible: $validposts<br>Pending: $waitingposts<br>Threads: $numthreads</td><td valign=\"top\">$recentpost</td></tr>\n";
+			$tr .= "<tr><td colspan=4><hr></td></tr>\n";
+		}
+		$t["table"] = $tr;
+	}
+
+
+	function editRun($db,&$u,&$lcObj,&$t) {
+// get groups info (long names in displayList)
+
+		$g = new lcGroup($db);
+		$g->getList();
+		$grouplist = $g->displayList;
+
+		$fid = $lcObj->getvars["fid"];
+		$db->queryOne("select * from forums where fid='$fid'");
+
+// pull record into vars
+		@extract($db->record);
+		
+// put general data into template
+		$t = $db->record;
+
+// deal with perms
+		$forumperms = array("view","post","moderate");
+
+		$p .= "<tr><td>&nbsp;</td>";
+		while(list($k,$v) = each($forumperms)) { 
+			$p .= "<td>$v</td>";
+		}
+		$p .= "</tr>";
+
+		$db->query("select * from forumPerms where fid='$fid'");
+		while($db->nextRecord()) {
+			$perm[$db->record["groups"]][$db->record["perm"]] = true;
+		}
+		while(list($k,$v) = each($grouplist)) { 
+			$p .= "<tr><td>$v</td>";
+			reset($forumperms);
+			while(list($k1,$v1) = each($forumperms)) {
+				$on = "";
+				if ($perm[$k][$v1]) { $on = " checked"; }
+				$p .= "<td><input type=\"checkbox\" value=\"y\" name=\"perm[$k][$v1]\"$on></td>";
+			}
+			$p .= "</tr>\n";
+		}
+		$t["perms"] = $p;
+
+		$lcObj->templateName = "edit";
+	}
+
+
+
+	function updateRun($db,&$u,&$lcObj,&$t) {
+		$in = $lcObj->postvars["in"];
+		$perm = $lcObj->postvars["perm"];
+		$fid = $in["fid"];
+                    
+		//update emails, description, name, default status
+		$f = PersistantObject::_load('forummod','forums',$fid,'*','fid');
+		$f->defaultstatus = $in['defaultstatus'];
+		$f->email = $in['email'];
+		$f->forumname = $in['forumname'];
+		$f->forumdesc = $in['forumdesc'];
+		$f->fid = $fid;
+
+	if (! $f->updateForum() ) {
+		$f->addForum();
+	}
+        
+		$db->query("delete from forumPerms where fid='$fid'");
+		while(list($k,$v) = @each($perm)) { 
+			while(list($p,$val) = @each($v)) { 
+				if ($val=="y") { 
+					$db->query("insert into forumPerms (fid,groups,perm) values ('$fid','$k','$p')");
+				}
+			}
+		}
+
+		$this->run($db,$u,$lcObj,$t);
+	}
+
+
+	function confirmRun($db,&$u,&$lcObj,&$t) {
+		$t[fid] = $lcObj->getvars[fid];
+		$t[forumname]=$lcObj->getvars[fid];
+		$lcObj->templateName = "confirm";
+	}
+	function delRun($db,&$u,&$lcObj,&$t) {
+		$fid = $lcObj->postvars[in][fid];
+		$db->query("delete from forums where fid='$fid'");
+		$db->query("delete from forumPerms where fid='$fid'");
+		$this->run($db,$u,$lcObj,$t);
+	}
+}

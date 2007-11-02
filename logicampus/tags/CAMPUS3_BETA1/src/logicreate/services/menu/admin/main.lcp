@@ -1,0 +1,41 @@
+<?
+
+include_once(INSTALLED_SERVICE_PATH."menu/menuObj.php");
+
+
+class menu extends HercAuth {
+	var $presentor = "adminPresentation";
+
+	/**
+	 * show the details of one menu
+	 */
+	function detailsRun(&$db, &$u, &$arg, &$t) {
+
+		if ( intval($arg->getvars['mid']) < 1 ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'No menu id specified';
+			return;
+		}
+		$menuID = $arg->getvars['mid'];
+		$menu = MenuObj::get($menuID);
+		$omenu = $menu;
+		$menuView = new MenuListView($menu->treeList);
+		$t['menus'] = $menuView->toEditableTable($menu->title,$menu->pkey);
+		$t['mid'] = $menu->pkey;
+		$arg->templateName = 'main_details';
+
+		$db->queryOne("select * from menuCache where pkey=$menuID");
+		$cachedMenu = unserialize($db->record['menuObj']);
+
+	}
+
+
+
+	function run(&$db, &$u, &$arg, &$t) {
+
+		$t[menus] = MenuObj::getAll();
+
+	}
+}
+
+?>

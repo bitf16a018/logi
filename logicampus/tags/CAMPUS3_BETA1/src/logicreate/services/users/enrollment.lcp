@@ -1,0 +1,192 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_class.php');
+include_once(LIB_PATH.'lc_enrollment.php');
+
+class enrollment extends RegAuth {
+
+	var $presentor = "htmlPresentation";
+	var $PAGE_SIZE = 30;
+	var $cleanedArray = array();
+
+	
+
+	/**
+	 * Show list of classes (sections) a student is in
+	 * and give option to add to new classes
+	 *
+	 */
+	function run (&$db,&$u,&$lc,&$t) {
+
+		# Update active semester and store in user session
+		if ($lc->postvars['semester'])
+		{
+			$u->sessionvars['enrollmentSemesterId'] = $lc->postvars['semester'];
+		} elseif ($u->sessionvars['enrollmentSemesterId'] == '')
+			{
+				$u->sessionvars['enrollmentSemesterId']  = semesterObj::getCurrentID();
+			}
+		
+
+		$name = $u->username;
+		if ($name=='') 
+		{ 
+			$name = $u->username;
+		}
+
+		if ($name == '')
+		{
+			$lc->templateName = 'enrollment_error';
+			$t['error'] = '<h3>Fatal error:  No student selected.</h3>';
+			return;
+		}
+
+		$this->sectionTitle .= ' for <u><a style="font-size: 100%;">'.$name.'</a></u>';
+		$t['username'] = $name;
+
+
+		//only show semesters if simple mode is off
+		if (LcSettings::isModuleOff('LOGICAMPUS_SIMPLE_MODE')) {
+
+			$f = new SiteForm();
+			$f->getForm('semester', array('semester'=>$u->sessionvars['administration']['classes']));
+			$f->action = modurl("enrollment/main/username=$name");
+			$t['form'] = $f->ToHTML();
+
+			# Take active semesterId out of sessionvar
+			$semesterId = $u->sessionvars['enrollmentSemesterId'];
+			// get classes taken
+			$classes = classObj::getAllClassesTaken($name, $semesterId);
+		} else {
+			// get classes taken
+			$classes = classObj::getAllClassesTaken($name);
+		}
+
+		$d = new datagrid('users','enrollment');
+		$d->headers = array(
+			"del"=>" ", 
+			"sectionNumber"=>"Section",
+			"firstname"=>"First Name", 
+			"lastname"=>"Last Name", 
+			"courseName"=>"Course Name",
+			"courseFamily"=>"Course Family",
+			'courseNumber'=>'Course Number',
+			"classType"=>"Type",
+			"facultyId"=>'Facutly ID',
+			"id_student"=>"Student ID",
+			'semesterID'=>'Semester'
+			);
+
+		$d->prependColumn('<?$name="'.$name.'";?><a href="<?=modurl("enrollment/event=remove/semester=$semesterID/username=".$name."/id=".$id_classes."_".$sectionNumber);?>">Drop</a>',"del");
+		$d->display = array("courseName","sectionNumber", "classType","courseFamilyNumber","facultyName");
+		$d->setRows($classes);
+		$d->ignore = array (
+				'id_class_resource', 
+				'stylesheet', 
+				'_dsn',
+				'_pkey', 
+				'sectionNumbers', 
+				'id_courses',
+				'active',
+				'dateWithdrawn',
+				'noexam',
+				'id_semesters',
+				'id_classes',
+				'facultyId',
+				'facultyName',
+				'courseFamilyNumber',
+				'title',
+				'classType',
+				'section',
+				'__loaded',
+				'semester_id'
+		);
+		$t['classes'] = $d->toHTML();
+		$lc->templateName = 'enrollment_main';
+		
+
+		$classArray = LcClass::getAvailableClasses();
+		foreach ($classArray as $idx => $classObj) {
+			$x = explode("\n",$classObj->sectionNumbers);
+			foreach($x as $k=>$v) { 
+				$optId = sprintf('%d_%d',$classObj->id_classes,$v);
+				$c[$optId] = $classObj->courseFamily." ".
+				$classObj->courseNumber." - ".$classObj->courseName." - ".
+				" ($v) - ".$classObj->facultyId;
+			}
+		}
+		$t['courses'] = makeOptions($c);
+	}
+
+
+	/**
+	 *
+	 */
+	function addRun(&$db,&$u,&$lc,&$t) {
+
+		$name = addslashes(stripslashes($lc->postvars['username']));
+		$classSectionNumber = $lc->postvars['id'];
+
+		list($classId,$sectionNumber) = explode('_',$classSectionNumber);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
+
+
+//		$semesterId = $u->sessionvars['enrollmentSemesterId'];
+
+		$classEnrollment = new lcClassEnrollment($classId);
+		$classEnrollment->addStudent($u->userId,$sectionNumber);
+
+		$classEnrollment->save();
+
+		updateSessionVars($db,$u);
+
+		$lc->templateName = 'enrollment_main';
+		$this->run($db,$u,$lc,$t);
+	}
+
+
+	/**
+	 *
+	 */
+	function removeRun (&$db,&$u,&$lc,&$t) {
+		// only dealing with current semester right now
+		// 
+
+
+		$classSectionNumber = $lc->getvars['id'];
+
+		list($classId,$sectionNumber) = explode('_',$classSectionNumber);
+		$sectionNumber = (int)$sectionNumber;
+		$classId = (int)$classId;
+
+		$classEnrollment = new lcClassEnrollment($classId);
+		$classEnrollment->withdrawStudent($u->userId,$sectionNumber);
+
+		$classEnrollment->save();
+
+		updateSessionVars($db,$u);
+
+		$lc->templateName = 'enrollment_main';
+		$this->run($db,$u,$lc,$t);
+
+	}
+}
+?>

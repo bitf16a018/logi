@@ -1,0 +1,1597 @@
+<?php
+
+/**
+ *	TODO: 
+ *
+ 		##Calendar is about finished, i have to find any other objects (cal) in handle there operations here
+ 		## Lessons and it's Linked up content is needed to be finished up
+ 		##Class document library needs finishing up.
+ 		
+	BUGS:
+
+		Classroom Folders aren't working correctly
+		
+			
+ 		Restore needs testing
+ 		Copy needs testing
+ 		
+ 		Then usability, how things are gonna be handled (work)
+ *
+ */
+include_once(LIB_PATH.'xmlparser.php');
+
+
+class classrestore extends AdminService
+{
+	
+	// form stuff
+	var $cleanedArray = array();
+		
+	var $presentor = "htmlPresentation";
+	
+
+	// Links
+	var $sectionTitle = 'Class Manager';
+	var $navlinks = array(
+		'Administration Home' => '',
+		'Restore Class' => 'classes/restore',
+		'Restore All Classes' => 'classes/event=restoreall',
+		'Backup Classes' => 'classes/event=backup'
+	);
+	var $applinks = array(
+		'List Classes' => 'classes/',
+		'Add a Class' => 'classes/event=add'
+	);
+	
+	var $mode = 'restore';
+	var $id_semester;
+	
+	var $map_assignments = array();
+	var $map_link_categories = array();
+	var $map_link = array();
+	var $map_objectives = array();
+	var $map_content = array();
+	
+	var $map_gradebook_category = array();
+	var $map_gradebook_entries = array();
+	
+	var $obj_db;
+	
+	var $home_dir;
+	
+	var $__errors = array();
+	
+	# Displays Classes by default (chooses current semster by default)	
+	function Run($db,&$u,&$lc,&$t)
+	{
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'restore_main';
+
+		$a_semester = array('Fall'=>'Fall', 'Winter'=>'Winter', 'Spring'=>'Spring', 'Summer'=>'Summer', 'Summer Mini'=>'Summer Mini', 'Summer I'=>'Summer I', 'Summer II'=>'Summer II', 'Spring Mini'=>'Spring Mini', 'Fall Mini'=>'Fall Mini', 'Winter Mini'=>'Winter Mini');
+		$sql = "select id_semesters, semesterTerm, semesterId, semesterYear from semesters order by semesterYear DESC";
+		
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{
+			$t['optionSemester'][$db->record['id_semesters']] = $a_semester[$db->record['semesterTerm']].' '.$db->record['semesterYear'];
+		}
+	
+	}
+	
+	
+	function copyRun($db,&$u,&$lc,&$t)
+	{
+		
+		// need to know which semester to copy it into
+		$this->mode = 'copy';
+		
+		// i need a semester id too i think!
+		$this->id_semester=$lc->postvars['id_semesters']; // assign it sessionvar[semeseter] or something like that.
+		$this->restoreRun($db, $u, $lc, $t); // execute restore with mode changed
+	}
+	
+	function restoreRun($db,&$u,&$lc,&$t)
+	{
+		$this->obj_db =& $db;
+		
+		/**
+			Create a temporary directory
+			unzip tmp uploaded file into the new directory
+			exec('mkdir /tmp/[tmpname.dir]; mv [tmpname] /tmp[tmpname.dir]; cd /tmp/[tmpname.dir]; unzip tmpname;');
+			classroom.xml is the master file
+				/assignments		// assignment turned in data (only used on RESTORE NOT COPY(duplication))
+				/content			// content files. with extra .html on the end of the name
+				/library			// document library (files)
+		
+		 **/
+		 
+		$file_xml = $lc->uploads['classroom'];
+		if (file_exists($file_xml['tmp_name']) == false)
+		{		echo 'Sorry, but the file was not uploaded correctly';
+			debug($file_xml);
+			return;
+		}
+		$file = explode('/',$file_xml['tmp_name']);
+		$file = array_pop($file);
+		
+		$classroom_xml = $file_xml['tmp_name'].'_dir/classroom.xml';
+		$this->home_dir = $file_xml['tmp_name'].'_dir/';
+		
+		exec('mkdir '.$file_xml['tmp_name'].'_dir;mv '.$file_xml['tmp_name'].' /tmp/'.$file.'_dir;cd /tmp/'.$file.'_dir;unzip -o '.$file.';');
+		
+		$xml_contents = file_get_contents($classroom_xml);
+		
+		$xmlObj = new xmlparser($xml_contents);
+		
+		$root_node =& $xmlObj->getRoot();
+		
+		if (is_array($root_node->children))
+		foreach($root_node->children as $classroom_node)
+		{	
+			
+			// may roll through MANY classrooms (classroom_node = a full classroom, including all application data, ect)
+			if ($classroom_node->tag == 'CLASSROOM')
+			{
+				// execute classroom restore
+				$this->classroom_node($classroom_node);
+				
+			} else
+			{
+				// what other tag could it be? if anything else, we won't process. we have one responsability.. to restore CLASSROOM node
+			}
+			
+		}
+
+		exec('rm -rf '.$file_xml['tmp_name'].'_dir');
+		
+		//exit();
+		$this->presentor = 'redirectPresentation';
+		
+		$t['url'] = modurl('classes/event=edit/id='.$this->using_classes_id);
+		$this->run($db, $u, $lc, $t);
+
+	}
+	
+	
+	function classroom_node($node)
+	{
+		$this->using_classes_id = $node->attrs['ID'];
+		// lets extract the information for the base class
+		// I am restoreing. so i am replacing into!
+		// be aware that id_semester should be placed in by outside help rather than XML on a COPYTO
+		if ($this->mode == 'copy')
+		{
+			$sql = '
+			INSERT INTO classes
+			SET
+			id_semesters='.$this->id_semester.',';
+
+		} else
+		{
+			$sql = '
+			REPLACE INTO classes
+			SET
+			noexam='.$node->attrs['NOEXAM'].',
+			id_classes='.$node->attrs['ID'].',
+			id_semesters='.$node->attrs['ID_SEMESTERS'].',';
+			
+		}
+		
+		$sql .= '
+			classType=\''.$node->attrs['CLASSTYPE'].'\',
+			stylesheet=\''.$node->attrs['STYLESHEET'].'\',
+			/**sectionNumbers=\''.str_replace(' ', "\n",$node->attrs['SECTIONNUMBERS']).'\', **/';
+
+		// course information (do i need to scroll through the tags? I'm not really supposed to restore course!)
+		$course_node = array_shift($node->children);
+		
+		$sql .= '
+			id_courses='.$course_node->attrs['ID']. ',';
+
+		foreach($course_node->children as $k=>$v)
+		{
+			if ($v->tag == 'COURSEFAMILY')
+			{	$sql .= 'courseFamily=\''.$v->value.'\',';
+				$courseFamily = $v->value;
+			}
+			
+			if ($v->tag == 'COURSENUMBER')
+			{	$sql .= 'courseNumber=\''.$v->value.'\',';
+				$courseNumber = $v->value;
+			}
+			
+		}
+		
+		$sql .= 'courseFamilyNumber=\''.$courseFamily.$courseNumber.'\'';
+		
+		
+		$this->obj_db->query($sql);
+		$this->__errors[] = __LINE__. ' '. mysql_error();
+		// execute sql and get inserted ID if its' a copy!
+		if ($this->mode == 'copy')
+		{	$this->using_classes_id = $this->obj_db->getInsertID();
+		}
+		
+		$application_node = array_shift($node->children);
+		
+		if ($application_node->tag == 'APPLICATIONS')
+		{
+			// roll thorugh the applications
+			if (is_array($application_node->children))
+			foreach($application_node->children as $application)
+			{
+				//debug($application);
+		///		echo 'APP::'.$application->tag. '::';
+				$this->{'xml_'.$application->tag}(&$application->children); // I am passing the child node because I WANT TO!
+		//		echo '<br>';
+			}
+			
+		}
+		
+		debug($this->__errors);
+		
+	}
+	
+	
+	function remove_first_comma($string)
+	{
+		$pos_of_comma = strpos($string, ',');
+		$string_first = substr($string, 0, ($pos_of_comma));
+		$string_second = substr($string, ($pos_of_comma+1));
+		return $string_first. $string_second;
+	}
+	
+	/**
+	 *
+	 *	@@DONE
+	 */
+	function xml_CLASS_FAQS($node)
+	{
+		foreach($node as $faq)
+		{
+			$sql = '
+			REPLACE INTO class_faqs
+			SET
+			';
+			
+			if ($this->mode != 'copy')
+			{
+				$sql .= '
+				id_class_faqs='.$faq->attrs['ID_CLASS_FAQS'];
+			}
+			
+			foreach($faq->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			// INSERT ON EVERY ROUND! OR stuff the sql into an array and roll through it at end of function.. or return it
+		}
+		
+	}
+	
+	
+	/**
+	 * @@DONE
+	 */	
+	function xml_CLASS_ANNOUNCEMENTS($node)
+	{
+		foreach($node as $announcement)
+		{
+			$sql = '
+			REPLACE INTO class_announcements
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_announcements='.$announcement->attrs['ID_CLASS_ANNOUNCEMENTS'];
+			}
+			
+			foreach($announcement->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);	
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	
+	/**
+	 *
+	 *	@@DONE
+	 */
+	function xml_CLASS_SYLLABUSES($node)
+	{
+		foreach($node as $syllabus)
+		{
+			$sql = '
+			REPLACE INTO class_syllabuses
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_syllabuses='.$syllabus->attrs['ID_CLASS_SYLLABUSES'];
+			}
+			
+			foreach($syllabus->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+			
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	
+	/**
+	 *
+	 *	Some difficult things I need to workout.
+	 *		1] mapping the id_item and id_subitem to it's correct counterpart via calendarType
+	 *		2] refer to number 1.. sheesh!
+	 */
+	function xml_CLASS_CALENDAR($node)
+	{
+		$calendarType = '';
+		$id_item = '';
+		$id_sub_item = '';
+		
+		foreach($node as $calendar)
+		{
+			$sql = '
+			REPLACE INTO lcEvents
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= ' 
+				pkey='.$calendar->attrs['PKEY'];
+			}
+			
+			foreach($calendar->children as $field_node)
+			{
+				if ($field_node->tag == 'CALENDARTYPE')
+				{	$calendarType = $field_node->value;
+				}
+				
+				if ($field_node->tag == 'ID_ITEM')
+				{	$id_item = $field_node->value;
+					$field_node->value = '::ITEM::';
+				}
+				
+				if ($field_node->tag == 'ID_ITEM_SUB')
+				{	$id_item_sub = $field_node->value;
+					$field_node->value = '::ITEMSUB::';
+				}
+				
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+
+			}
+			
+			$sql .=', id_classes='.$this->using_classes_id;
+
+			
+			// we need to 
+			// find mappings of id's (incase this is a COPY)
+			if ($this->mode == 'copy')
+			{
+				switch($calendarType)
+				{
+					case 'classroomassignments':
+						// execute database query
+						// do some sort of replace on the sql string now?!
+						$sql = str_replace('::ITEM::', $this->map_assignments[$id_item], $sql);
+						$sql = str_replace('::ITEMSUB::', '0', $sql);
+						// execute query
+						
+						if ($this->mode == 'copy')
+						{	$sql = $this->remove_first_comma($sql);
+						}
+						
+						$this->obj_db->query($sql);
+						$this->__errors[] = __LINE__. ' '. mysql_error();
+						break;
+					
+					case 'orientationsscheduling':	// do not query (we are in copy mode)
+						break;
+						
+					/**
+						Add in any new objects here
+						// seminar
+
+					 */
+					case '':
+						$sql = str_replace('::ITEM::', $id_item, $sql);
+						$sql = str_replace('::ITEMSUB::', $id_item_sub, $sql);
+						if ($this->mode == 'copy')
+						{	$sql = $this->remove_first_comma($sql);
+						}
+						
+						$this->obj_db->query($sql);
+						//execute query 
+						$this->__errors[] = __LINE__. ' '. mysql_error();
+						break;
+					
+				}
+				
+			} else 
+			{	$sql = str_replace('::ITEM::', $id_item, $sql);
+				$sql = str_replace('::ITEMSUB::', $id_item_sub, $sql);
+				// execute query
+				if ($this->mode == 'copy')
+				{	$sql = $this->remove_first_comma($sql);
+				}
+				
+				$this->obj_db->query($sql);
+				$this->__errors[] = __LINE__. ' '. mysql_error();
+			}
+			
+		}
+		
+	}
+	
+	
+	// @@@@ NOTE DONE.. need to handle TURNIN and GRADES section of assignments
+	function xml_CLASS_ASSIGNMENTS($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_assignments
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_assignments='.$nodette->attrs['ID_CLASS_ASSIGNMENTS'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				if ($field_node->tag == 'TURNEDIN')
+				{	
+					$this->xml_CLASS_ASSIGNMENTS_TURNIN($field_node->children,$nodette->attrs['ID_CLASS_ASSIGNMENTS'],$nodette->attrs['ID_CLASS_ASSIGNMENTS']);
+					continue;
+				}
+				
+				if ($field_node->tag == 'GRADES')
+				{	
+					$this->xml_CLASS_ASSIGNMENTS_GRADES($field_node->children,$nodette->attrs['ID_CLASS_ASSIGNMENTS'],$nodette->attrs['ID_CLASS_ASSIGNMENTS']); // , $id_class_assignment);
+					continue;
+				}
+
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+
+			}
+			// execute
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			$this->map_assignments[$nodette->attrs['ID_CLASS_ASSIGNMENTS']] = $this->obj_db->getInsertID();
+		}
+		
+	}
+
+	
+	// I need to pass in the assignment ID ( on a copy ) not on a restore
+	/**
+	 *	@@NOTE Only on restore, NOT copy
+	 *
+	 *	@@DONE
+	 */
+	function xml_CLASS_ASSIGNMENTS_GRADES($node, $assignid)
+	{
+		if ($this->mode == 'copy')
+		{	return true;
+		}
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_assignments_grades
+			SET
+				id_class_assignments_grades='.$nodette->attrs['ID_CLASS_ASSIGNMENTS_GRADES'].',';
+			
+			$sql .= '
+			id_student=\''.$nodette->attrs['ID_STUDENT'].'\',
+			comments=\''.str_replace('\'', '\'\'',$nodette->value).'\',
+			grade='.$nodette->attrs['GRADE'].',
+			id_class_assignments='.$assignid.'
+			';
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+		}
+		
+	}
+
+	
+	/**
+	 *	@@NOTE Only on restore, NOT copy
+	 *
+	 *	@@DONE
+	 */
+	function xml_CLASS_ASSIGNMENTS_TURNIN($node, $assignid)
+	{
+		if ($this->mode == 'copy')
+		{	return true;
+		}
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_assignments_turnin
+			SET
+				id_class_assignments_turnin='.$nodette->attrs['ID_CLASS_ASSIGNMENTS_TURNIN'].',';
+			
+			$sql .= '
+			id_student=\''.$nodette->attrs['ID_STUDENT'].'\',
+			dateTurnin=\''.$nodette->attrs['DATETURNIN'].'\',
+			assign_type=\''.$nodette->attrs['ASSIGN_TYPE'].'\',
+			assign_text=\''.str_replace('\'', '\'\'',$nodette->attrs['ASSIGN_TEXT']).'\',
+			assign_file_mime=\''.$nodette->attrs['ASSIGN_FILE_MIME'].'\',
+			assign_file_name=\''.str_replace('\'', '\'\'',$nodette->attrs['ASSIGN_FILE_NAME']).'\',
+			assign_file_size=\''.$nodette->attrs['ASSIGN_FILE_SIZE'].'\',
+			assign_file_blob=\''.$nodette->value.'\',
+			id_class_assignments='.$assignid.'
+			';
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+		}
+		
+	}
+
+	/**
+	 *	@@DONE
+	 */
+	function xml_CLASS_LINKS_CATEGORIES($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_links_categories
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_links_categories='.$nodette->attrs['ID_CLASS_LINKS_CATEGORIES'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			// execute and keep track of ID
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			if ($this->mode == 'copy')
+				$this->map_link_categories[$nodette->attrs['ID_CLASS_LINKS_CATEGORIES']] = $this->obj_db->getInsertId();
+		}
+		
+		
+	}
+
+	/**
+	 *	@@DONE
+	 */
+	function xml_CLASS_LINKS($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_links
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_links='.$nodette->attrs['ID_CLASS_LINKS'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				// if we're in a copy.. then we need to update the id categories to the NEW id we created
+				if ($field_node->tag == 'ID_CLASS_LINKS_CATEGORIES' && $this->mode == 'copy')
+				{	$field_node->value = $this->map_link_categories[$field_node->value];
+				}	
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+				
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			// execute
+			if ($this->mode == 'copy')
+				$this->map_link[$nodette->attrs['ID_CLASS_LINKS']] = $this->obj_db->getInsertID();
+		}
+		
+	}
+	
+	/**
+	 *	I will need to make a mapping of the old number to the new number.. maybe arary[oldnumber] = newnumber.
+	 *  it will make it easy for me
+	 */
+	// I will need to soak up the id number on a copy
+	/**
+	 *	@@DONE
+	 *
+	 */
+	function xml_CLASS_OBJECTIVES($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_objectives
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_objectives='.$nodette->attrs['ID_CLASS_OBJECTIVES'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+			if ($this->mode == 'copy')
+				$this->map_objectives[$nodette->attrs['ID_CLASS_OBJECTIVES']] = $this->obj_db->getInsertID();
+			
+			// INSERT ON EVERY ROUND! OR stuff the sql into an array and roll through it at end of function.. or return it
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@NOTE Only on restore, will not copy presentations to a new class
+	 *
+	 *	@@DONE
+	 */
+	function xml_CLASS_PRESENTATIONS($node)
+	{
+		if ($this->mode == 'copy')
+		{	return true;
+		}
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_presentations
+			SET
+				id_presentations='.$nodette->attrs['ID_PRESENTATIONS'];
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+		}
+
+	}
+	
+	/**
+	 *	@@DONE
+	 */
+	// needs executing AFTER lessons
+	function xml_CLASS_LESSON_CONTENT($node)
+	{
+		/// I need the lesson id to seed these contents with.. (not all have it)
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_lesson_content
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_lesson_content='.$nodette->attrs['ID_CLASS_LESSON_CONTENT'];
+			}
+			$textname = null;
+			// HANDLE the new lesson IDS
+			foreach($nodette->children as $field_node)
+			{
+			
+				if ($field_node->tag == 'TXTITLE')
+				{	$textname = $field_node->value.'.html';
+				}
+				
+				if ($field_node->tag == 'ID_CLASS_LESSONS' && $field_node->value == '')
+				{	
+					$sql .= ','."\n".strtolower($field_node->tag).'=NULL';
+				} else 
+				{	// MAKE SURE ID_CLASS_LESSONS can handle NULL!
+					
+					if ($field_node->tag == 'ID_CLASS_LESSONS' && $this->mode == 'copy')
+					{	// executing a copy
+						// us mappings
+						$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$this->map_lessons[$field_node->value]).'\'';
+						
+					} else 
+					{
+						$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+					}
+					
+				}
+			}
+
+			// get content contnets
+			$sql .= ','."\n".'txText=\''. str_replace('\'', '\'\'',file_get_contents($this->home_dir.'content/'.$textname)).'\'';
+			
+			$sql .= ', id_classes='.$this->using_classes_id;
+
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+			if ($this->mode == 'copy')
+			{	$this->map_content[$nodette->attrs['ID_CLASS_LESSON_CONTENT']] =  $this->obj_db->getInsertID();
+			}
+			
+		}
+		
+		if ($this->mode == 'copy')
+		{	$this->rebuildContent();		
+		}
+		
+	}
+
+	
+	// dont forget assignments have mappings to lessons
+	// I need to swap the lessons with the linking tables.. lessons should be on top as to get an ID to pass to the linking tables
+	function xml_CLASS_LESSONS($node)
+	{
+		$a_mapping = array();
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_lessons
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_lessons='.$nodette->attrs['ID_CLASS_LESSONS'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				if ($field_node->tag == 'MAPPINGS')
+				{	$a_mapping = $field_node->children;
+					continue;
+					// execute mapping IDS HERE? 
+				}
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			// execute query
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			// if copy get inserted id
+			if ($this->mode == 'copy')
+			{	$lesson_id = $this->obj_db->getInsertID();
+			} else 
+			{	$lesson_id = $nodette->attrs['ID_CLASS_LESSONS'];
+			}
+			
+			$this->map_lessons[$nodette->attrs['ID_CLASS_LESSONS']] = $lesson_id;
+			
+			// pass id to mapping method
+			$this->xml_MAPPING($a_mapping, $lesson_id);
+			
+		}
+
+	}
+
+	
+	/**
+	 *	@@DONE
+	 */
+	function xml_MAPPING($node, $id_lesson)
+	{
+		foreach($node as $nodette)
+		{
+			if ($nodette->tag == 'LINKS')
+			{
+				foreach($nodette->children as $nizod)
+				{
+					if ($this->map_link[$nizod->value] == '')
+						continue;
+						
+					$sql = '
+					REPLACE INTO class_lesson_links
+					SET';
+			
+					if ($this->mode != 'copy')
+					{	
+						$sql .= '
+						id_class_links='.$nizod->value; 
+					} else 
+					{
+						$sql .= '
+						id_class_links='.$this->map_link[$nizod->value];
+					}
+					$sql .= ', id_class_lessons='.$id_lesson;
+					
+					$this->obj_db->query($sql);
+					$this->__errors[] = __LINE__. ' '. mysql_error();
+				}
+				
+			}
+			
+			if ($nodette->tag == 'OBJECTIVES')
+			{
+				foreach($nodette->children as $nizod)
+				{
+					$sql = '
+					REPLACE INTO class_lesson_objectives
+					SET';
+			
+					if ($this->mode != 'copy')
+					{	
+						$sql .= '
+						id_class_objectives='.$nizod->value; 
+					} else 
+					{
+						$sql .= '
+						id_class_objectives='.$this->map_objectives[$nizod->value];
+					}
+					$sql .= ', id_class_lesson='.$id_lesson;
+		
+					$this->obj_db->query($sql);
+					$this->__errors[] = __LINE__. ' '. mysql_error();
+				}
+			}
+
+			// need to impliment this in the dataexchange
+			if ($nodette->tag == 'ASSIGNMENTS')
+			{
+				foreach($nodette->children as $nizod)
+				{
+					$sql = '
+					REPLACE INTO class_assignments_link
+					SET';
+			
+					if ($this->mode != 'copy')
+					{	
+						$sql .= '
+						id_class_assignments='.$nizod->value; 
+					} else 
+					{
+						$sql .= '
+						id_class_assignments='.$this->map_assignments[$nizod->value];
+					}
+					$sql .= ', id_class_lessons='.$id_lesson;
+					
+					$this->obj_db->query($sql);
+					$this->__errors[] = __LINE__. ' '. mysql_error();
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@DONE
+	 */
+	function xml_CLASSDOCLIB_FOLDERS($node)
+	{
+		foreach($node as $nodette)
+		{
+			$a_files = array();
+			
+			$sql = '
+			REPLACE INTO classdoclib_Folders
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				pkey='.$nodette->attrs['PKEY'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				if ($field_node->tag == 'CLASSDOCLIB_FILES')
+				{	$a_files = $field_node->children;
+					//$this->xml_CLASSDOCLIB_FILES($field_node->children);
+					continue;
+				}
+				
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', class_id='.$this->using_classes_id;
+		
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);	
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			/// execute insert
+			if ($this->mode == 'copy')
+			{	$folder_id = $this->obj_db->getInsertID();
+			} else 
+			{	$folder_id = $nodette->attrs['PKEY'];
+			}
+			
+			$this->xml_CLASSDOCLIB_FILES($a_files, $folder_id);
+			// INSERT ON EVERY ROUND! OR stuff the sql into an array and roll through it at end of function.. or return it
+		}
+		
+	}
+	
+	/**
+	 *	@@DONE
+	 */
+	function xml_CLASSDOCLIB_FILES($node, $id_folder)
+	{
+		$base = DOCUMENT_ROOT.'../logicreate/classLibrary/';
+		
+		foreach($node as $nodette)
+		{
+			$diskname = '';
+			
+			$sql = '
+			REPLACE INTO classdoclib_Files
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				pkey='.$nodette->attrs['PKEY'];
+			}
+			
+			// hashes stay the same.. 
+			foreach($nodette->children as $field_node)
+			{	$org = null;
+			
+				if ($field_node->tag == 'DISKNAME')
+				{	
+					$orgDiskname = $field_node->value;
+					if ($this->mode == 'copy')
+					{	
+	                	$field_node->value = md5(microtime().'RYANRULES'.uniqid().$field_node->value);
+					}
+					$diskname = $field_node->value;
+					
+	                $dir1 = substr($diskname,0,2);
+	                $dir2 = substr($diskname,-2,2);
+	                
+	                //echo '<br><br>'. $base.$dir1. '/'. $dir2. '/'.$diskname;
+	                
+	                @mkdir($base.$dir1, 0777);
+	                @mkdir($base.$dir1.'/'.$dir2, 0777);
+	              
+	                $fp = @fopen($base.$dir1.'/'.$dir2.'/'.$diskname, "w+"); // overwrites any existing file
+					
+	                @fwrite($fp, file_get_contents($this->home_dir.'library/'.$orgDiskname), strlen(file_get_contents($this->home_dir.'library/'.$orgDiskname)));
+					@fclose($fp);
+					
+	                // push file into filesystem
+
+				}
+				/*
+				if ($field_node->tag == 'DATA')
+				{	
+					//echo '<br><br>'. $base.$dir1. '/'. $dir2. '/'.$diskname;
+					$fp = @fopen($base.$dir1.'/'.$dir2.'/'.$diskname, "w+"); // overwrites any existing file
+	                //echo $php_errormsg. '<br><br>';
+	                
+					@fwrite($fp, base64_decode($field_node->value), strlen(base64_decode($field_node->value)));
+					@fclose($fp);
+	                // ON COPY
+						
+					continue;
+				}
+				*/
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+			$sql .=', folder='.$id_folder;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@NOTE Only for restore, NOT copy
+	 */
+	function xml_CLASS_GRADEBOOK($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_gradebook
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_gradebook='.$nodette->attrs['ID_CLASS_GRADEBOOK'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+						
+		}
+		
+	}
+	
+	/**
+	 *	@@NOT
+	 */
+	function xml_CLASS_GRADEBOOK_CATEGORIES($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_gradebook_categories
+			SET';
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_gradebook_category='.$nodette->attrs['ID_CLASS_GRADEBOOK_CATEGORIES'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+			if ($this->mode == 'copy')
+			{	
+				$this->map_gradebook_category[$nodette->attrs['ID_CLASS_GRADEBOOK_CATEGORIES']] = $this->obj_db->getInsertId();
+			}
+
+		}
+		
+	}
+	
+	/**
+	 *	@@NOTE Only for restore, NOT copy
+	 *		@@@@@@ WORK WITH ASSIGNMENT_ID.. not ATTACHED YET
+	 */
+	function xml_CLASS_GRADEBOOK_ENTRIES($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_gradebook_entries
+			SET';
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_gradebook_entries='.$nodette->attrs['ID_CLASS_GRADEBOOK_ENTRIES'];
+			}
+			foreach($nodette->children as $field_node)
+			{
+				
+				if ($field_node->tag == 'ID_CLASS_GRADEBOOK_CATEGORIES' && $this->mode == 'copy')
+				{	$field_node->value = $this->map_gradebook_category[$field_node->value]; // assigning new category id
+				}				
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+
+			$sql .=', id_classes='.$this->using_classes_id;
+
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+			if ($this->mode == 'copy')
+				$this->map_gradebook_entries[$nodette->attrs['ID_CLASS_GRADEBOOK_ENTRIES']] = $this->obj_db->getInsertId();
+
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@NOTE Only for restore, NOT copy
+	 */
+	function xml_CLASS_GRADEBOOK_VAL($node)
+	{
+		if ($this->mode == 'copy')
+		{	return true;
+		}
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO class_gradebook_val
+			SET';
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_class_gradebook_val='.$nodette->attrs['ID_CLASS_GRADEBOOK_VAL'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				if ($field_node->tag == 'ID_CLASS_GRADEBOOK_ENTRIES' && $this->mode == 'copy')
+				{	$field_node->value = $this->map_gradebook_entries[$field_node->value]; // assigning new category id
+				}				
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+
+			$sql .=', id_classes='.$this->using_classes_id;
+
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@NOTE Only for restore, NOT copy
+	 */
+	function xml_EXAM_SCHEDULE_CLASSES($node)
+	{
+		if ($this->mode == 'copy')
+		{	return true;
+		}
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO exam_schedule_classes
+			SET
+				id_exam_schedule_classes='.$nodette->attrs['ID_EXAM_SCHEDULE_CLASSES'];
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	/** 
+	 *	These can not be used in COPY procedure 
+	 *
+	 *	@@NOTE Only for restore purposes
+	 *
+	 *	@@DONE
+	 */
+	function xml_ORIENTATION_CLASSES($node)
+	{
+		if ($this->mode == 'copy')
+		{	return true;
+		}
+		
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO orientation_classes
+			SET
+				id_orientation_classes='.$nodette->attrs['ID_ORIENTATION_CLASSES'];
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;	
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@DONE
+	 *
+	 *	@@NOTE I'm not sure if this should be included in COPYS
+	 */
+	function xml_SEMINAR_CLASSES_DATES($node)
+	{
+		foreach($node as $announcement)
+		{
+			$sql = '
+			REPLACE INTO seminar_classes_dates
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_seminar_classes_dates='.$announcement->attrs['ID_SEMINAR_CLASSES_DATES'];
+			}
+			
+			foreach($announcement->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@DONE
+	 */
+	function xml_TEXTBOOK($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO textbook
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_textbook='.$nodette->attrs['ID_TEXTBOOK'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				if ($field_node->tag == 'INQUIRIES')
+				{	$this->xml_TEXTBOOK_CLASSES($field_node->children);
+					continue;
+				}
+				
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+		
+			$sql .=', id_classes='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+		}
+		
+	}
+	
+	/**
+	 *	@@DONE
+	 */
+	function xml_ASSESSMENT($node)
+	{
+		
+		
+		foreach($node as $nodette)
+		{
+			$a_questions = array();
+			
+			$sql = '
+			REPLACE INTO assessment
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				assessment_id='.$nodette->attrs['ASSESSMENT_ID'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				if ($field_node->tag == 'QUESTIONS')
+				{	//$this->xml_ASSESSMENT_QUESTIONS($field_node->children);
+					$a_questions = $field_node->children;
+					continue;
+				}
+				if ($field_node->tag == 'ANSWERS')
+				{	continue;
+				}
+				if ($field_node->tag == 'LOG')
+				{	continue;
+				}
+				
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
+			}
+		
+			$sql .=', class_id='.$this->using_classes_id;
+			
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->map_assessments[$nodette->attrs['ASSESSMENT_ID']] = $this->obj_db->getInsertID();
+			$this->xml_ASSESSMENT_QUESTIONS($a_questions, $this->map_assessments[$nodette->attrs['ASSESSMENT_ID']]);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+			
+		}
+		
+	}
+	
+	
+	function xml_ASSESSMENT_QUESTIONS($node, $assessment_id)
+	{
+		if (is_array($node) && count($node) > 0)
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO assessment_question
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				assessment_question_id='.$nodette->attrs['ASSESSMENT_QUESTION_ID'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{	
+				if ($field_node->tag == 'STATUS' && $this->mode == 'copy')
+				{	$field_node->value = 1; // setting it to pending
+				}
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',stripslashes($field_node->value)).'\'';
+			}
+
+			$sql .=', assessment_id='.$assessment_id;
+
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+	
+	/**
+	 *	@@DONE
+	 */
+	function xml_TEXTBOOK_CLASSES($node)
+	{
+		foreach($node as $nodette)
+		{
+			$sql = '
+			REPLACE INTO textbook_classes
+			SET';
+			
+			if ($this->mode != 'copy')
+			{	$sql .= '
+				id_textbook_classes='.$nodette->attrs['ID_TEXTBOOK_CLASSES'];
+			}
+			
+			foreach($nodette->children as $field_node)
+			{
+				$sql .= ','."\n".strtolower($field_node->tag).'=\''. str_replace('\'', '\'\'',$field_node->value).'\'';
+			}
+
+			$sql .=', id_classes='.$this->using_classes_id;
+
+			if ($this->mode == 'copy')
+			{	$sql = $this->remove_first_comma($sql);
+			}
+			
+			$this->obj_db->query($sql);
+			$this->__errors[] = __LINE__. ' '. mysql_error();
+		}
+		
+	}
+	
+
+	/**
+	 *	$this->map_content holds the relationship between the [old]=new
+	 *
+	 *	@@NOTE Only ran on an IMPORT (duplication) not a restore
+	 */
+	function rebuildContent()
+	{
+		$db = DB::getHandle();
+		$db_saver = DB::getHandle();
+		
+		$sql = '
+			SELECT id_class_lesson_content, txText
+			FROM class_lesson_content
+			WHERE id_classes='.$this->using_classes_id.' AND 
+			txText LIKE \'%classroom/lessons/event=viewcontent/id=%\'
+			';
+		
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{	
+			$i_replaced = false;
+			$a_replacable_items = array(); //clobbering array (refreshing)
+			
+			$a_replacable_items = $this->find_all_items_and_id($db->record['txText'], array('classroom/lessons/event=viewcontent/'));
+			
+			if (count($a_replacable_items) > 0)
+			{
+				foreach($a_replacable_items as $item)
+				{
+					$db->record['txText'] = str_replace($item['fullstring'], $item['originalstring'].'id='.$this->map_content[$item['id']], $db->record['txText']);
+					$i_replaced = true;
+				}
+				
+				
+					
+					//echo 'Replacing text on (Content): '. $db->record['id_class_lesson_content']. '<br>';
+					
+					$sql = '
+					UPDATE class_lesson_content
+					SET txText=\''.str_replace('\'', '\'\'', stripslashes($db->record['txText'])).'\'
+					WHERE id_class_lesson_content='. $db->record['id_class_lesson_content'];
+					
+					$db_saver->query($sql);
+									
+				
+			}
+			
+		}
+	}
+	
+	
+	/**
+	 */
+	function find_all_items_and_id($STRING, $a_item)
+    {
+        $i=0;
+        $a_return_item = array();
+        $length = strlen($STRING);
+
+        foreach($a_item as $item)
+        { 	
+        	$i=0; //reset on each iteration of item (pointer)
+        	
+        	if (strpos($STRING, $item. 'id=') > 0)
+	        {	
+	                while ($i< $length)
+	                {
+	                        $p = strpos($STRING, $item. 'id=', ($i+1));
+	
+	                        if ($i==$p || $p === false)
+	                        {       break;
+	                        }
+	
+	                        if ($p > $i)
+	                        {       $x = strpos($STRING, '"', $p+1);
+	                        		
+	                        		// if the " (quote) is greater than 15 ( i dont want to stray to far.. we will stop
+	                        		if (($x-($p+strlen($item. 'id='))) > 15)
+	                        		{	$i= ($p+strlen($item. 'id='));
+	                        			continue;
+	                        		}
+	                        	
+	                                $a_return_item[] = array('fullstring' => substr($STRING, $p, ($x-$p)), 'originalstring'=>$item, 'id'=> array_pop(explode('=', substr($STRING, $p, ($x-$p)) )) );
+                               	//debug($a_return_item);
+	                                $i=$p;
+	                        }
+	                }
+	        }
+        
+        }
+        
+    return $a_return_item;
+    }
+    
+    
+    
+}
+
+?>

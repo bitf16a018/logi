@@ -1,0 +1,13 @@
+<?=$t['sectionheader'];?>
+
+<p>Select a student below to view their gradesheet.</p>
+
+<table border=0 cellpadding=2 cellspacing=0>
+<? foreach ( $t['gradebook']->students as $user => $student ) { ?>
+<tr>
+	<td><a href="<?=modurl('gradesbystudent/event=view/user='
+		.$user);?>"><?=$student->lastname.', '.$student->firstname;?></a></td>
+</tr>
+<? } ?>
+</table>
+

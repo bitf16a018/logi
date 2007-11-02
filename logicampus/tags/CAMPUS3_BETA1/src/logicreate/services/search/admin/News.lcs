@@ -1,0 +1,39 @@
+<?
+class NewsSearchTool extends searchTool {
+
+	function NewsSearchTool() {
+		$this->moduleName =  'News';
+		$this->tableName  =  'articles';
+		$this->keyName    =  'pkey';
+		$this->mid	  =  'news';
+		$this->filename   =  'News';
+		$this->getCountSQL = 'Select count(pkey) from '.$this->tableName.' where status="Active"';
+	}
+
+	function initQuery() {
+		$this->db = DB::getHandle();
+		$this->db->query('select * from '.$this->tableName.' where status ="Active"');
+	}
+
+	function nextItem() {
+		$tmp = new SearchEntry();
+		if (!$this->db->next_record() ) {
+			return false;
+		}
+		$tmp->searchdata = $this->db->Record[title] . ' ';
+
+		$tmp->searchdata .= $tmp->searchdata = eregi_replace("<image([^>]+)>", '', $this->db->Record[maintext] . ' ');;
+		$tmp->searchdata .= $this->db->Record[author];
+		$tmp->searchdata = searchTool::stripNoiseWords($tmp->searchdata);
+
+		$tmp->title = $this->db->Record[title];
+		$tmp->type = 'News';
+		$tmp->link = 'news/main/'.$this->db->Record[pkey].'/event=view';
+		$tmp->modID = $this->mid;
+		$tmp->mkey = $this->db->Record[pkey];
+		$tmp->groups = $this->db->Record[groups];
+		$tmp->notgroups = $this->db->Record[notgroups];
+		return $tmp;
+	}
+}
+?>

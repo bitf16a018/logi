@@ -1,0 +1,386 @@
+<?
+include_once(SERVICE_PATH."/users/TblBlog.php");
+include_once(SERVICE_PATH."/users/TblBlogEntry.php");
+include_once(LIB_PATH."LC_form.php");
+
+class blog extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function getSidebar($blogObj, $u) { 
+		if (is_object($blogObj)) { 
+			$entrys = $blogObj->getTblBlogEntrys();	
+
+			if ($u->sessionvars['blogmonthyear']==0) { 
+				$u->sessionvars['blogmonthyear'] = date("m/d/Y");
+			}
+
+			$month = strtotime($u->sessionvars['blogmonthyear']);
+			$start = strtotime(date("M 1, Y", $month));
+			$end = strtotime("+1 month", $start)-1;
+
+		// only show things for the current or selected month
+			if (is_array($entrys)) {
+
+			  foreach($entrys as $k=>$v) { 
+				if ($v->blogParentId==0) { 
+					if ($v->blogEntryTimedate>=$start and $v->blogEntryTimedate<=$end) {
+						$x = $v->getTblBlogEntrys(); 
+						$v->commentCount = count($x);
+						$temp[$v->blogEntryTimedate] = $v;
+					}
+					$t['blogEntryMonths'][strtotime(date("F 1 Y", $v->blogEntryTimedate))] = date("F Y", $v->blogEntryTimedate);
+				}
+			  }
+			  @krsort($temp);
+			}
+		}
+		return array($temp, $t);
+	}
+
+	function run($db,&$u,&$arg,&$t) {
+		$username = $arg->getvars[1];
+
+		if ($username=='') { 
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'No weblog account selected';
+			return;
+		}
+
+		$t['username'] = $username;
+
+		$row = TblBlogPeer::doSelect("blog_owner='$username'");	
+		$blog = $row[0];
+		$t['blog'] = $blog;
+
+		// check if this blog allows viewing from 'a' or 'r'
+		// if 'r' are we a public user?
+
+		if ($blog->blogAllowViewing=='r') { 
+			if ($u->isAnonymous()) { 
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'Sorry, this weblog is only viewable by registered users.';
+				return;
+			}
+		}
+
+		$t['posting'] = true;
+		if ($blog->blogAllowPosting=='n') { 
+			$t['posting'] = false;
+		}
+		if ($blog->blogAllowPosting=='r') { 
+			if ($u->isAnonymous()) { 
+				$t['posting'] = false;
+			}
+		}
+
+
+		if ($arg->getvars['month']) { 
+			$u->sessionvars['blogmonthyear'] = date("m/d/Y",intval($arg->getvars['month']));
+		}
+
+		list($temp, $x) = $this->getSideBar($blog, $u);
+		$t = array_merge($t, $x);
+
+// pass entries to template for display
+		$t['entries'] = $temp;
+
+		if (strtolower($u->username) == strtolower($username)) { // are we the same person as the blog ID
+			$t['isOwner'] = true;
+		}
+
+	}
+
+
+	function readrun($db,&$u,&$arg,&$t) {
+		$username = $arg->getvars[1];
+
+// we'll have a blogEntryId, need to get the parent Blog ID from that
+		$blogEntryId = $arg->getvars[2];
+
+		$t['entry'] = TblBlogEntry::load($blogEntryId);
+		$t['replies'] = $t['entry']->getTblBlogEntrys($t['entry']->blogEntryId);
+		$t['blog'] = TblBlog::load($t['entry']->blogId);
+
+		$blog = $t['blog'];
+		$t['posting'] = true;
+		if ($blog->blogAllowPosting=='n') { 
+			$t['posting'] = false;
+		}
+		if ($blog->blogAllowPosting=='r') { 
+			if ($u->isAnonymous()) { 
+				$t['posting'] = false;
+			}
+		}
+
+
+		list($temp, $x) = $this->getSideBar($t['blog'], $u);
+		$t = array_merge($t,$x);
+
+		if (strtolower($u->username) == strtolower($username)) { // are we the same person as the blog ID
+			$t['isOwner'] = true;
+		}
+		$t['username'] = $username;
+
+// posting form
+		if ($t['posting']) { 
+			$f = new form();
+			$f->addHidden("blogEntryId",$t['entry']->blogEntryId);
+			$f->addText("blogEntryPosterId","Name",$u->sessionvars['blog_name'],20,50);
+			$f->addText("blogEntryPosterEmail","Email",$u->sessionvars['blog_email'],20,50);
+			$f->addText("blogEntryPosterUrl","URL",$u->sessionvars['blog_url'],20,50);
+			$f->addText("blogEntryTitle","Title",'',30,30);
+			$f->addSelect("blogEntryPosterNotify","Email when other comments are added?","n=no,y=yes",$u->sessionvars['blog_poster_notify']);
+			$f->addTextArea("blogEntryText","Text",50,5,'');
+			$f->addSubmit("submit","Add comment");
+			$f->method='post';
+			$f->action=modurl("blog/event=post");
+			$f->fieldPermissions = false;
+			$t['form'] = $f->ToHTML();
+		}
+	}
+
+
+	function postrun($db,&$u,&$arg,&$t) {
+		$u->sessionvars['blog_name'] = $arg->postvars['blogEntryPosterId'];
+		$u->sessionvars['blog_email'] = $arg->postvars['blogEntryPosterEmail'];
+		$u->sessionvars['blog_url'] = $arg->postvars['blogEntryPosterUrl'];
+		$u->sessionvars['blog_poster_notify'] = $arg->postvars['blogEntryPosterNotify'];
+
+		$blogEntryId = $arg->postvars['blogEntryId'];
+		$comment = strip_tags($arg->postvars['blogEntryText'], "<b></b><i><i><a></a><u></u><p></p><li></li><ol></ol><ul></ul><br/><p/>");
+		$url = strip_tags($arg->postvars['blogEntryPosterUrl']);
+		$email = strip_tags($arg->postvars['blogEntryPosterEmail']);
+		$name = strip_tags($arg->postvars['blogEntryPosterId']);
+		$title= strip_tags($arg->postvars['blogEntryTitle']);
+		$postNotify = strip_tags($arg->postvars['blogEntryPosterNotify']);
+
+		// get the original entry for the parent blog id	
+		$originalEntry = TblBlogEntry::load($blogEntryId);
+
+		$entry = new TblBlogEntry();
+		$entry->blogId = $originalEntry->blogId;
+		$entry->blogParentId = stripslashes($blogEntryId);
+		$entry->blogEntryPosterId =  stripslashes($name);
+		$entry->blogEntryPosterEmail =  stripslashes($email);
+		$entry->blogEntryPosterUrl =  stripslashes($url);
+		$entry->blogEntryText =  stripslashes($comment);
+		$entry->blogEntryTitle =  stripslashes($title);
+		$entry->blogEntryPosterNotify=  stripslashes($postNotify);
+		$entry->blogEntryDescription = '';
+		$entry->blogEntryTimedate= time();
+		$entry->save();
+		$t['message'] = "Message posted";
+
+		$arg->getvars[2] = $arg->postvars['blogEntryId'];
+		$blog = TblBlog::load($entry->blogId);
+		$arg->getvars[1] = $blog->blogOwner;
+
+		$arg->templateName = 'blog_read';
+
+// do email notify
+
+		// do the weblog owner if they want to be notified too
+		if ($blog->blogEmailNotify) { 
+			$mails[$blog->blogEmailNotify] = $blog->blogEmailNotify;
+		}
+
+		$sql = "select distinct(blog_entry_poster_email) from tbl_blog_entry where blog_parent_id=".$blog->blogId." and blog_entry_poster_notify='y'";
+		$db->query($sql);
+
+// debug stuff
+#ob_start();debug($originalEntry);debug($blog);$x = ob_get_contents(); ob_end_clean();
+
+		$message = "$x\n\n\nYou asked to be notified of any new postings to the '".$originalEntry->blogEntryTitle."' thread on the '".$blog->blogName."' web log.  Please visit ".modurl("blog/".$blog->blogOwner."/".$originalEntry->blogEntryId."/event=read")." to read new comments made to that thread.";
+
+		while($db->nextRecord()){ 
+			$mails[$db->record[0]] = $db->record[0];
+		}
+		while(list($k,$v) = each($mails)) { 
+			mail($v,"New post added to thread '".$originalEntry->blogEntryTitle."'",$message,"From: ".WEBMASTER_EMAIL);
+		}
+
+		$this->readRun($db,$u,$arg,$t);
+	}
+
+	function mypostRun($db,&$u,&$arg,&$t) {
+		$arg->templateName = 'blog_mypost';
+
+	}
+
+	function mypostSubmitRun($db,&$u,&$arg,&$t) {
+		$arg->templateName = 'blog_mypost';
+		if (strtolower($u->username)!= strtolower($arg->getvars[1]) ) { 
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission";
+			return;
+		}
+
+		$row = TblBlogPeer::doSelect("blog_owner='".$u->username."'");	
+		$blog = $row[0];
+
+		$comment = strip_tags($arg->postvars['comment'], "<b></b><i><i><a></a><u></u><p></p><li></li><ol></ol><ul></ul><br/><p/>");
+		$url = strip_tags($arg->postvars['url']);
+		$email = strip_tags($arg->postvars['email']);
+		$title= strip_tags($arg->postvars['title']);
+		$description = strip_tags($arg->postvars['description']);
+
+
+
+		$entry = new TblBlogEntry();
+		$entry->blogId = $blog->blogId;;
+		$entry->blogParentId = 0;
+		$entry->blogEntryPosterId =  $u->username;
+		$entry->blogEntryPosterEmail =  $u->email;
+		$entry->blogEntryPosterUrl =  '';
+		$entry->blogEntryText =  stripslashes($comment);
+		$entry->blogEntryTitle =  stripslashes($title);
+		$entry->blogEntryPosterNotify=  stripslashes($postNotify);
+		$entry->blogEntryDescription = stripslashes($description);
+		$entry->blogEntryTimedate= time();
+		$entry->save();
+		$t['message'] = "Message posted";
+
+		$arg->templateName = 'blog';
+		$t['message'] = "Weblog entry added";
+		$this->run($db,$u, $arg, $t);
+
+	}
+
+
+	function deleteEntryRun($db,&$u,&$arg,&$t) {
+		$username = strtolower($u->username);
+		$blogEntryId = $arg->getvars['id'];
+		$originalEntry = TblBlogEntry::load($blogEntryId);
+		$blog = TblBlog::load($originalEntry->blogId);
+		if (strtolower($blog->blogOwner)==$username) { // we have permission
+			$originalEntry->delete(true);
+// relations are messed up - do it manually - 'deep' delete doesn't link right
+			$db->query("delete from tbl_blog_entry where blog_parent_id=".$blogEntryId);
+			#echo("delete from tbl_blog_entry where blog_parent_id=".$blogEntryId);
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl("blog/".$u->username);
+				
+	}
+
+
+	function deletePostRun($db,&$u,&$arg,&$t) {
+		$username = strtolower($u->username);
+		$blogEntryId = $arg->getvars['id'];
+		$originalEntry = TblBlogEntry::load($blogEntryId);
+		$reread = $originalEntry->blogParentId;
+		$blog = TblBlog::load($originalEntry->blogId);
+		if (strtolower($blog->blogOwner)==$username) { // we have permission
+			$originalEntry->delete();
+		}
+		$this->presentor = 'redirectPresentation';
+		if ($reread>0) { 
+			$t['url'] = modurl("blog/".$u->username."/$reread/event=read");
+		} else { 
+			$t['url'] = modurl("blog/".$u->username);
+		}
+				
+	}
+
+
+	function setuprun($db,&$u,&$arg,&$t) {
+		if (strtolower($u->username)!= strtolower($arg->getvars[1]) ) { 
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission";
+			return;
+		}
+
+		$blog = TblBlogPeer::doSelect("blog_owner='".$u->username."'");
+		$t['blog'] = $blog[0];
+		if (!is_object($t['blog'])) { 
+			$t['blog'] = new blog();
+			$t['blog']->blogOwner= $u->username;
+		}
+	}
+
+
+	function setupPostrun($db,&$u,&$arg,&$t) {
+		if (strtolower($u->username)!= strtolower($arg->getvars[1]) ) { 
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission";
+			return;
+		}
+
+		$blog = TblBlog::load($arg->postvars['blog']['blogId']);
+
+		if (!is_object($blog)) { 
+			$blog = new TblBlog();
+		}
+
+		foreach($arg->postvars['blog'] as $k=>$v) { 
+			$arg->postvars['blog'][$k] = stripslashes($arg->postvars['blog'][$k]);
+		}
+
+		$blog->setArray($arg->postvars['blog']);	
+		$blog->blogOwner = $u->username;
+		$blog->save();		
+		
+		$arg->templateName = 'blog_setup';
+		$t['message'] = "Weblog information updated";
+		$this->setuprun($db,$u, $arg, $t);
+	}
+
+
+	function editPostRun($db,&$u,&$arg,&$t) {
+		$blogEntryId = $arg->postvars['blogEntryId'];
+		$originalEntry = TblBlogEntry::load($blogEntryId);
+		$username = strtolower($u->username);
+		$originalBlog = TblBlog::load($originalEntry->blogId);
+		if ($username != strtolower($originalBlog->blogOwner)) { 
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You do not have permission to edit this item";
+			return;
+		}	
+		
+		$originalEntry->blogEntryText = stripslashes($arg->postvars['blogEntryText']);
+		list($text,$edited) = split("<!--blogedited-->", $originalEntry->blogEntryText);
+		$text .= "<!--blogedited-->\n\n<br/>(edited on ".date("m/d/Y h:i A")." by ".$u->username.")<br/>\n";
+		$originalEntry->blogEntryText = $text;
+
+
+		$originalEntry->blogEntryTitle = stripslashes($arg->postvars['blogEntryTitle']);
+		if ($originalEntry->blogParentId==0) { 
+			$originalEntry->blogEntryDescription = stripslashes($arg->postvars['blogEntryDescription']);
+			$originalEntry->blogEntryTitle = stripslashes($arg->postvars['blogEntryTitle']);
+		}
+		$originalEntry->save();
+		$this->presentor='redirectPresentation';
+		$t['url'] = modurl("blog/".$u->username);
+	}
+
+	function editEntryRun($db,&$u,&$arg,&$t) {
+		$blogEntryId = $arg->getvars['id'];
+		$originalEntry = TblBlogEntry::load($blogEntryId);
+		$username = strtolower($u->username);
+		$originalBlog = TblBlog::load($originalEntry->blogId);
+		if ($username != strtolower($originalBlog->blogOwner)) { 
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You do not have permission to edit this item";
+			return;
+		}	
+
+		$t['entry'] = $originalEntry;
+		$arg->templateName = 'blog_edit';		
+
+		$f = new form();
+		$f->method='post';
+		$f->action=modurl("blog/event=editPost");
+		$f->addHidden("blogEntryId",$originalEntry->blogEntryId);
+		$f->addText("blogEntryTitle","Title",$originalEntry->blogEntryTitle,30,30);
+		if ($t['entry']->blogParentId==0) { 
+			$f->addTextArea("blogEntryDescription","Short intro",50,5,$originalEntry->blogEntryDescription);
+		}
+		$f->addTextArea("blogEntryText","Text",50,5,$originalEntry->blogEntryText);
+		$f->addSubmit("Update entry");
+		$f->fieldPermissions = false;
+		$t['form'] = $f->ToHTML();
+
+	}
+}
+?>

@@ -1,0 +1,90 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(LIB_PATH."datagrid.php");
+
+class view extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+
+	function run($db,&$u,&$lc,&$t) {	
+		$key = (int)$lc->getvars[1];
+// get permissions for this forum
+
+		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
+		$db->query("select distinct lc_forum_perm_action AS action
+			FROM lc_forum_perm 
+			WHERE lc_forum_id=".(int)$key." and $x");
+		while($db->nextRecord()) {
+			$t['perms'][$db->record['action']] = true;
+		}
+
+		if (!$t['perms']['read']) { 
+			echo "You can't read this forum"; exit();
+		}
+
+
+		$forum = lcForum::load($key);
+		//__FIXME__ add checking for security failures
+		if (! is_object($forum) ) {
+			$t['message'] = "No forum found for key: $key";
+			$this->presentor = 'errorMessage';
+			return;
+		}
+		$t['forumChildren'] = $forum->getLcForums();
+		$t['posts'] = $forum->getLcForumPosts();
+		$nposts = $t['posts'];
+		while(list($k,$v) = @each($nposts)) {
+			if ($v->lcForumPostStatus==0) { 
+				$posts[] = $v;
+			}
+		}
+
+		while(list($sec,$forums) = @each($t['forumChildren'])) {
+			$k = $forums->getLcForums();
+			$forumChildren[$forums->lcForumId] = $forums->getLcForums();
+		}
+		@reset($t['forumChildren']);
+		$t['forumChildren2'] = $forumChildren;
+		$t['forum'] = $forum;
+
+		// use datagrid for display of top level posts
+		// for easier paging
+		$grid = new datagrid('forum','view');
+		$grid->datarows = $posts;
+		$grid->_totalRows = count($posts);
+		$grid->ignore = array('_new','_modified','lcForumId',
+			'lcForumPostStatus','lcForumRecentPoster','lcForumPostParentId',
+			'__attributes','lcForumPostMessage','lcForumPostThreadId','lcForumPostId',
+			'lcForumThreadCount','lcForumPostTimedate','lcForumRecentPostId',
+			'lcForumFile1Name','lcForumFile1SysName', 'lcForumFile1Size',
+			'lcForumFile1MIME', 'lcForumFile2Name', 'lcForumFile2SysName', 
+			'lcForumFile2Size', 'lcForumFile2MIME', 'lcForumFile1Count', 'lcForumFile2Count');
+		$grid->headers= array('lcForumRecentPostTimedate'=>"Last post",'lcForumPostUsername'=>'Thread starter','lcForumPostTitle'=>"Thread",'lcForumReplyCount'=>"Replies");
+		$grid->overrideColumn('<a href="<?=appurl("forum/viewPost/".$lcForumPostId);?>"><?=$lcForumPostTitle;?></a>','lcForumPostTitle');
+		$grid->overrideColumn('<? if ($lcForumRecentPostTimedate>0) { echo date("m/d/Y h:i A",$lcForumRecentPostTimedate);?><BR>by <?=$lcForumRecentPoster; } ?>','lcForumRecentPostTimedate');
+		$t['table'] = $grid->toHTML();
+		$lc->templateName = 'view_main';
+
+
+
+		return;
+
+	}
+
+
+}
+?>

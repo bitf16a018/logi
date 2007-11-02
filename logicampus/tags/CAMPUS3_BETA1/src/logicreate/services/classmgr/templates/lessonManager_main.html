@@ -1,0 +1,33 @@
+<?=$t['sectionheader'];?>
+<?if($t['error']){?><span style="color:red"><?=$t['error']?></span><?}?>
+<?if($t['msg']){?><span style="color:blue"><?=$t['msg']?></span><?}?>
+
+
+
+
+<?php
+$now = time();
+foreach ($t['lessonList'] as $idx=>$lessonObj) {
+if ($lessonObj->isFinished() ) {
+	$class = 'table_disable';}  else { $class = ''; }
+?>
+
+<table width="100%" border="0" cellspacing="5" cellpadding="2">
+	
+	<tr class="<?=$class;?>"><td class="<?=$class;?>">
+			<?= ($idx + 1);?>.&nbsp; <a href="<?= appurl('classmgr').'/lessonManager/event=show/id='.$lessonObj->getId();?>"><?= $lessonObj->getTitle();?></a>
+	</td>
+	<td class="<?=$class;?>" width="20%">
+		Starts in: <?= $lessonObj->daysTilStart();?> day(s)
+	</td>
+	<td  class="<?=$class;?>" width="20%">
+		Ends in: <?= $lessonObj->daysTilEnd();?> day(s)
+	</td>
+	</tr>
+</table>
+
+	<?php
+		echo $t['lessonDataGridList'][$lessonObj->getId()]->toHtml();
+	?>
+	<p></p>
+<?php } ?>

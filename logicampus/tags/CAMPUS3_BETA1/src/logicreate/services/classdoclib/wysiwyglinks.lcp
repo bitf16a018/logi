@@ -1,0 +1,235 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH."documentLibraryLib.php");
+include_once(LIB_PATH."LC_html.php");
+
+/**
+ * file management 
+ * Folder managers can share files in nested folders.
+ * Only certain groups can download
+ */
+// contentlinks ONLY //
+class wysiwyglinks extends classdoclibService {
+
+
+	var $presentor = 'emptyPresentation';
+	
+	function framerun(&$db,&$u,&$lcObj,&$t)
+	{	
+		//echo $this->get_webimages_folder_id($u->activeClassTaught->id_classes);
+		$lcObj->templateName = 'wysiwyg_links_frame';
+	}
+	
+	
+	/**
+	 * show a folder's contents.
+	 * Use the getvars to find out which folder is open.
+	 */
+	function run(&$db,&$u,&$lcObj,&$t) {
+		
+		$lcObj->templateName = 'wysiwyg_links';
+		$t['catName'] = 'Content Links';
+
+		// find all content links within classroom
+		$sql = '
+		SELECT * FROM class_lesson_content
+		WHERE id_classes='. $u->activeClassTaught->id_classes.'
+		';
+		
+		$db->query($sql);
+
+		while ($db->nextRecord())
+		{
+			$t['links'][] = "\n\n\n\n".'<a onclick="parent.document.getElementById(\'linklabel\').value = \''.addslashes(stripslashes(htmlentities($db->record['txTitle']))).'\'; parent.document.getElementById(\'url\').value = \''. appurl('classroom/lessons/event=viewcontent/id='.$db->record['id_class_lesson_content']).'\'; return false;" href="#">'.htmlentities(stripslashes($db->record['txTitle']), ENT_QUOTES).'</a>';
+		
+		}
+	
+	}
+
+
+}
+
+
+class FileWYSView extends ListView{
+
+	var $a_filearray;
+	var $id_of_folder=0;
+
+	
+	/**
+	 * render a TreeList as an Explorer Tree
+	 *
+	 * @return	String	HTML output
+	 */
+	function renderAsExplorer($open='',$withControls=0, $a_files= '') {
+
+		if (is_array($a_files))
+		{	$this->a_filearray = $a_files;
+		}
+	
+		$ret = "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+		$this->tree->reset();
+
+		
+		while ($this->tree->traverse())
+		{
+			/* shows specific and children folder*/
+			/*
+			//debug($this->tree->p_CurrentNode->contents);
+			if (($this->tree->p_CurrentNode->contents['name'] == 'Web Images' && 
+				$this->tree->p_CurrentNode->contents['parentKey'] == 0) || 
+				($this->tree->p_CurrentNode->contents['name'] == 'Assignments' && 
+				$this->tree->p_CurrentNode->contents['parentKey'] == 0)) 
+			{
+				$this->tree->p_CurrentNode->expanded = false;	
+				continue;
+			}
+			*/
+			
+//			echo $this->tree->p_CurrentNode->contents['pkey']. '<br>';	
+			//keep folders closed by default
+			if ($this->tree->p_CurrentNode->expanded != true) 
+				{ $this->tree->p_CurrentNode->expanded = false; }
+
+			//colors
+			++$c %2 ==0 ? $color="even": $color="odd";
+
+			$ret .= "\n\t\t<tr><td>\n\n\t\t<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td NOWRAP>";
+/* */
+
+
+			//wrap link around folder icons
+			
+
+			//find out which image to print (connecting lines)
+			/*  */
+			if ($this->tree->p_CurrentNode->hasChild() && $this->tree->p_CurrentNode->hasSibling())
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+			else 
+				if ($this->tree->p_CurrentNode->hasChild())
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+				if ($this->tree->p_CurrentNode->hasSibling()) 
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+		
+		
+			// print all types of pipes as you cycle through each level of indent
+			for ($q=0; $q < $this->tree->p_CurrentNode->indent; ++$q) {
+				if ($this->tree->stack[$q]->hasSibling()) {
+					$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"20\" border=\"0\">";
+				} else {
+					$w = count($this->tree->p_CurrentNode->indent) * 18;
+					$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"$w\" border=\"0\">";
+				}
+			}
+			
+				$ret .= "</td>";
+
+	
+				$ret .= "<td  height=\"15\" width=\"98%\">";
+				$ret .= "<a href=\"".MOD_URL."wysiwygcontentlinks/".$this->tree->p_CurrentNode->contents['pkey'].'/'.$this->id_of_folder."\">";
+				//open folder
+					
+				if ($open == $this->tree->p_CurrentNode->contents['pkey'] ) {
+					$ret .= "<img src=\"".IMAGES_URL."folder-open.gif\" border=\"0\" align=\"center\" height=\"15\" width=\"17\">";
+				} else {
+					$ret .= "<img src=\"".IMAGES_URL."folder.gif\" border=\"0\" align=\"center\" height=\"15\" width=\"17\">";
+				}
+				$ret .= "</a> ";
+				$ret .= "<a href=\"".MOD_URL."wysiwygcontentlinks/".$this->tree->p_CurrentNode->contents['pkey'].'/'.$this->id_of_folder."\">";
+				$ret .= $this->tree->p_CurrentNode->contents['name'];
+				$ret .= "</a>";
+				$ret .= "</td>";
+				
+				if ($open == $this->tree->p_CurrentNode->contents['pkey'] && is_array($this->a_filearray)) 
+				{	
+					foreach($this->a_filearray as $k=>$v)
+					{
+						$ret .= '
+						</tr>
+						<tr>
+						<td>';
+						
+						//find out which image to print (connecting lines)
+			if ($this->tree->p_CurrentNode->hasChild() && $this->tree->p_CurrentNode->hasSibling())
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif?S\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+			else 
+				if ($this->tree->p_CurrentNode->hasChild())
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+				if ($this->tree->p_CurrentNode->hasSibling()) 
+				{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+				}
+			else 
+			{
+				$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" border=\"0\" align=\"center\" height=\"18\" width=\"20\">";
+			}
+
+						$ret .= '</td>	
+						<td  height="15" width="98%">
+						';
+
+						// this needs to change if no underfolders exist
+						if ($k == (count($this->a_filearray)-1) && $this->tree->p_CurrentNode->hasSibling() == false)
+						{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"20\" border=0>";
+						} else
+						{	$ret .= "<img src=\"".IMAGES_URL."spacer.gif\" height=\"18px\" align=\"center\" width=\"20\" border=0>";
+						}
+						
+
+						$ret .= '<img src="'.IMAGES_URL.'document.gif" border="0" height="15" width="18">';
+						$ret .= '<a onclick="parent.document.getElementById(\'linklabel\').value = \''.$v->description.'\'; parent.document.getElementById(\'url\').value = \''. appurl('classdoclib/download/pkey='.$v->pkey).'\'; return false;" href="'.APP_URL.'classdoclib/download/pkey='.$v->pkey.'/'.$v->file.'">';
+						$ret .= $v->file. '</a>';
+						
+						/*
+						$v->size
+						$v->filedate
+						$v->description
+						*/
+						
+						$ret .= '</td>
+						';	
+
+					}
+				
+				}
+				
+		$ret .= "</tr></table>\n\n\t";
+
+		$ret .= "\n\t\t</td></tr>\n\n\t\t";
+		}
+		
+		$ret .= "\n\t\t</table>\n";
+		
+	return $ret;
+	}
+
+
+	
+}
+
+?>

@@ -1,0 +1,32 @@
+<?=$t['sectionheader'];?>
+
+<table border=0 width="100%" style="font-weight:bold;">
+<tr>
+	<td><? if ($t['showprev']) { ?><a href="<?=modurl('announcements/limit='.$t['prev']);?>">&lt;-- <?=lct('Prev');?> 5</a><? } ?></td>
+	<td align="right"><? if ($t['shownext']) { ?><a href="<?=modurl('announcements/limit='.$t['next']);?>"><?=lct('Next');?> 5 --&gt;</a><? } ?></td>
+</tr>
+</table>
+
+<?
+if ( !count($t['announcements']) ) {
+	print '<p style="margin-left:20px;"><i>There are no announcements for this class.</i></p>';
+}
+
+while (list(,$a) = @each($t['announcements'])) { ?>
+	<div class="colorbar">
+		<?=$a['tx_title'];?>
+	</div>
+	<div style="padding:3px 0 0 10px;font-size:x-small;">
+		<b><?= lct('Posted On');?>:</b> <i><?=date("l jS of F Y", strtotime($a['dt_display']));?></i>
+	</div>
+	<div style="padding:5px 20px 20px 20px;">
+		<?=$a['tx_description'];?>
+	</div>
+<? } ?>
+
+<table border=0 width="100%" style="font-weight:bold;">
+<tr>
+	<td><? if ($t['showprev']) { ?><a href="<?=modurl('announcements/limit='.$t['prev']);?>">&lt;-- <?=lct('Prev');?> 5</a><? } ?></td>
+	<td align="right"><? if ($t['shownext']) { ?><a href="<?=modurl('announcements/limit='.$t['next']);?>"><?=lct('Next');?> 5 --&gt;</a><? } ?></td>
+</tr>
+</table>

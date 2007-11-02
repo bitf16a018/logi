@@ -1,0 +1,466 @@
+<?
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'gradeBookObj.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+include_once(LIB_PATH.'lc_lob.php');
+
+include_once(LIB_PATH.'lc_lesson_sequence.php');
+
+
+/**
+ * Handles adding and editing entries.
+ *
+ */
+class entry extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $permissionErrorTitle = '<h3>Permission Error</h3>';
+	var $permissionError      = '
+							Either the entry you were trying to access is not 
+							a valid entry or you do not have access to edit that
+							grade book 
+							entry.  We suggest going back to the main classroom 
+							manager page and trying again.  If you continue to get 
+							this error feel free to contact the help desk.';
+	var $dataError = '<h3>Problem saving your information</h3>
+					  There was a problem saving your informatino to the
+					  database.  We suggest trying again.  If you get this
+					  message consistently, please contact the site administrator.';
+
+	// links
+	var $sectionTitle = 'Gradebook Entries';
+
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
+		'Gradebook Setup' => 'main/event=controlPanel/'
+	);
+
+
+	# Holds cleaned postvar data
+	var $data = array();
+
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$this->inactivelinks[] = 'List Entries';
+		$lc->templateName='entry_main';
+
+		$t['gbe'] = ClassGradebookEntriesPeer::doSelect('id_classes="'.$u->activeClassTaught->id_classes.'" order by  id_class_gradebook_categories, title');
+		//customize data for the table
+		foreach ($t['gbe'] as $idx => $gbe) {
+			$gbe->title = 
+				'<a href="'.modurl('entry').'/event=edit/id='.$gbe->idClassGradebookEntries.'">'.$gbe->title.'</a>';
+		}
+
+		$dm = new LC_Table_ObjectModel($t['gbe']);
+
+		$dm->ignoreColumn('_new');
+		$dm->ignoreColumn('_modified');
+		$dm->ignoreColumn('_version');
+		$dm->ignoreColumn('__attributes');
+		$dm->ignoreColumn('__nulls');
+		$dm->ignoreColumn('_entityVersion');
+		$dm->ignoreColumn('idClassGradebookEntries');
+		$dm->ignoreColumn('idClasses');
+//		$dm->ignoreColumn('idClassGradebookCategories');
+		$dm->ignoreColumn('publishFlag');
+		$dm->ignoreColumn('dateDue');
+		$dm->ignoreColumn('assessmentId');
+		$dm->ignoreColumn('assignmentId');
+	
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+
+		$colA = &$columnModel->getColumnAt(0);
+		$colA->justify='left';
+		$colA->maxWidth='64';
+		$colA->cellRenderer = new LC_Table_CategoryNameRenderer();
+		$colA->name='Category';
+/*
+	$tbl .= "<tr>\n\t<td><a href=\"".modurl('entry')."/event=edit/id=$id\">$title</a></td>\n\t<td width=30>&nbsp;</td>\n\t<td><a href=\"".modurl('entry')."/event=delete/id=$id\" onclick=\"if(confirm('Are you sure you want to remove this entry and all your students\' grades for it?')) { return true; } else { return false; }\">delete</a></td>\n</tr>\n";
+*/
+
+		$colB = &$columnModel->getColumnAt(1);
+		$colB->justify='left';
+
+
+		$colC = &$columnModel->getColumnAt(1);
+		$colC->name='Name';
+
+		$colD = &$columnModel->getColumnAt(2);
+		$colD->maxWidth='64';
+		$colD->name='Code';
+
+
+		$colE = &$columnModel->getColumnAt(4);
+		$colE->justify='left';
+		$colE->maxWidth='256';
+
+		$t['datagrid'] = new LC_TableRenderer($table);
+
+		// Get the categories
+		$db->query("SELECT 
+			id_class_gradebook_categories, label 
+			FROM class_gradebook_categories
+			WHERE id_classes='".$u->activeClassTaught->id_classes."'");
+
+		while ($db->nextRecord()) {
+			$colA->cellRenderer->categories[$db->record['id_class_gradebook_categories']] = 
+				$db->record['label'];
+		}
+	}
+
+		function addRun(&$db,&$u,&$lc,&$t) {
+
+			$this->inactivelinks[] = 'Add Entry';
+			$lc->templateName='entry_add';
+			$this->sectionTitle = 'Gradebook Entries &gt;&gt; Add Entry';
+
+			// Make sure there are categories
+			$db->queryOne('select count(id_class_gradebook_categories) as cnt from class_gradebook_categories
+				where id_classes="'.$u->activeClassTaught->id_classes.'"');
+			if ($db->record['cnt'] == 0) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'You must first create a <a href="'
+					.modurl('category/event=add/').'">new category</a> before you do this.';
+				return;
+			}
+
+			# Load up the add entry form
+			$f = new SiteForm();
+			$f->getForm('gbaddentry', $this->data);
+			
+			// are we coming from the beautiful and entrancing classmgr/assignmentManage?
+			if (strlen($lc->getvars['title']) > 2)
+			{	$f->modFormValue('title', base64_decode(str_replace('*', '=', $lc->getvars['title']))); // i may have to url[de\en]code this [IE] needs testing
+				$f->modFormValue('gradebookCode', base64_decode(str_replace('*', '=', $lc->getvars['title']))); // i may have to url[de\en]code this [IE] needs testing
+			}
+			
+			$t['form'] = $f->ToHTML();
+
+		}
+
+		/**
+		 * Show a form for editing.
+		 * 
+		 * Load all activities and tests from the chosen class.
+		 */
+		function editRun(&$db, &$u, &$lc, &$t) {
+			$this->sectionTitle = 'Gradebook Entries &gt;&gt; Edit Entry';
+			$lc->templateName='entry_add';
+			$t['gbeObj'] = ClassGradebookEntries::load( array(
+				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if(!$t['gbeObj']->idClassGradebookEntries)
+			{
+				# we didn't get an object back
+				# which means they don't have access
+				# to this entry for some reason
+				# let's load up the error page.
+				$lc->templateName = 'entry_error';
+				$t['error'] = $this->permissionError;
+				$t['errorTitle'] = $this->permissionErrorTitle;
+				return;
+			}
+
+
+			//load a list of lessons to use their titles as labels
+			$lessonList = ClassLessonsPeer::doSelect(' id_classes = '.$u->activeClassTaught->id_classes);
+			$newArray = array();
+			foreach ($lessonList as $lesObj) {
+				$newArray[$lesObj->idClassLessons] = $lesObj->title;
+			}
+			$lessonList = $newArray;
+
+			//load a selection of all activities and tests for linking
+			$sequenceList = ClassLessonSequencePeer::doSelect(' lob_type ="activity" or lob_type = "test"');
+
+			$t['optionList'] = array();
+			foreach ($sequenceList as $seqObj) {
+				$t['optionList'][$seqObj->classLessonSequenceId] = $lessonList[$seqObj->lessonId] .':&nbsp;' .$seqObj->lobTitle;
+			}
+
+			$t['selectedSeqId'] = $t['gbeObj']->classLessonSequenceId;
+		}
+
+		/**
+		 * Save changes to the entry.
+		 *
+		 * Allow for redirects to various other parts of the system.
+		 */
+		function updateRun(&$db, &$u, &$lc, &$t)
+		{
+			# Error check to make sure
+			# who ever is posting information
+			# to the server has access to update this pkey
+			# information to the server
+			if (isset($lc->getvars['id']))
+			{
+				$gbeId = intval($lc->getvars['id']);
+				// it's an edit
+				$gbEntry = ClassGradebookEntries::load( array(
+					'id_class_gradebook_entries' => $gbeId,
+					'id_classes' => $u->activeClassTaught->id_classes
+				) );
+				if (!$gbEntry->idClassGradebookEntries)
+				{
+					# User does not have access to post
+					# this event to the system
+					$lc->templateName = 'entry_error';
+					$t['msg'] = $this->permissionError;
+					return;
+				}
+
+				$t['message'] = 'Gradebook entry modified successfully';
+			
+			} else {
+				// it's an add
+				$gbEntry = new ClassGradebookEntries();
+				$gbEntry->idClassGradebookCategories = intval($lc->postvars['category']);
+				$gbEntry->idClasses = $u->activeClassTaught->id_classes;
+
+				$t['message'] = 'Gradebook entry added successfully';
+			}
+
+
+			$gbEntry->set('classLessonSequenceId', intval($lc->postvars['seqId']));
+			$gbEntry->set('title', inputCleanString($lc->postvars['title']));
+			$gbEntry->set('gradebookCode',inputCleanString($lc->postvars['gradebookCode']));
+
+			$gbEntry->set( 'idClassGradebookCategories', $lc->postvars['category'] );
+			$gbEntry->set( 'publishFlag', $lc->postvars['publishFlag'] ? 1 : 0 );
+			$gbEntry->set( 'totalPoints', intval($lc->postvars['totalPoints']) );
+			$gbEntry->save();
+			
+			if (!$e = ErrorStack::PullError('db'))
+			{
+				$u->sessionvars['message'] = $t['message'];
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = appurl('gradebook').'/entry';
+			} else {
+				$lc->templateName = 'entry_error';
+				$t['msg'] = $e;
+			}
+		}
+
+
+		function showGrdByStuRun(&$db,&$u,&$lc,&$t) {
+
+			$lc->templateName = 'entry_showGrdbyStu';
+
+			// Get user info and set the title
+			$t['user'] = lcUser::getUserByUsername($lc->getvars['user']);
+			$this->sectionTitle = 'Grades for '
+				.$t['user']->profile->values['lastname'].', '.$t['user']->profile->values['firstname'];
+
+			$t['vals'] = ClassGradebookVal::getValsByStudentId($t['user']->userId);
+			$count = count($t['vals']);
+			for($i=0; $i<$count; $i++)
+			{
+				$t['vals'][$i]->entry = ClassGradebookEntries::load($t['vals'][$i]->idClassGradebookEntries);
+			}
+			/*
+			// Find the scores total and average
+			$t['total'] = 0;
+			while ( list(,$v) = @each($t['vals']) ) {
+				$t['total'] += $v->score;
+			}
+			$t['average'] = count($t['vals']) == 0 ? 0 : $t['total'] / count($t['vals']);
+			reset($t['vals']);
+			*/
+
+			if ( !count($t['vals']) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'The given user doesn\'t have any grades for this class.';
+				return;
+			}
+				
+		}
+
+		function showGrdByStuUpdateRun(&$db,&$u,&$lc,&$t) {
+
+			while ( list($entid, $score) = @each($lc->postvars['score']) ) {
+				$val = ClassGradebookVal::load( array(
+					'id_classes' => $u->activeClassTaught->id_classes,
+					'id_class_gradebook_entries' => $entid,
+					'username' => $lc->postvars['user']
+				) );
+				if ( !is_object($val) ) {
+					// There isn't a val in the db for this user, let's make them one!
+					$val = new ClassGradebookVal();
+					$val->set( 'idClassGradebookEntries', $entid );
+					$val->set( 'idClasses', $u->activeClassTaught->id_classes );
+					$val->set( 'username', $lc->postvars['user'] );
+				}
+
+				/*
+				// make sure they put in a score
+				if ( !preg_match("/^\d+$/", $score) ) {
+					$t['error'] = 'Please enter a score for each entry. Note that entries before the invalid one have still been saved.';
+					$lc->getvars['user'] = $val->username;
+					$this->showGrdByStuRun($db,$u,$lc,$t);
+					return;
+				}
+				*/
+
+				$flag = true;  // do an update?
+				// yes we always do
+
+				if ($val->score != $score) {
+					$val->set( 'score', $score );
+					$flag = true;
+				}
+				if ($val->comments != $lc->postvars['comments'][$entid]) {
+					$val->set( 'comments', stripslashes($lc->postvars['comments'][$entid]) );
+					$flag = true;
+				}
+
+				if ( $flag == true ) {
+					$val->save();
+					$t['message'] = 'Your changes have been saved.';
+				}
+
+			}
+			$u->sessionvars['message'] = $t['message'];
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = MOD_URL;
+
+		}
+
+
+		function deleteRun(&$db,&$u,&$lc,&$t) {
+
+			$entry = ClassGradebookEntries::load( array(
+				'id_class_gradebook_entries' => (int)$lc->getvars['id'],
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if ( !is_object($entry) ) {
+				$this->presentor = 'errorMessage';
+				$t['message'] = 'You do not have permission to delete that entry.';
+				return;
+			}
+
+			$u->sessionvars['message'] = $entry->title.' has been deleted.';
+
+			// delete associated vals
+			ClassGradebookEntriesPeer::doDelete($entry, true);
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = MOD_URL;
+		}
+
+
+		// displays a form for editing a single student/entry. for use in a pop-up
+		function editSingleRun(&$db,&$u,&$lc,&$t) {
+
+			$lc->templateName = 'entry_editSingle';
+			$this->presentor = 'emptyPresentation';
+
+			$entid = (int)$lc->getvars['entid'];
+			$user = $lc->getvars['user'];
+
+			$t['entry'] = ClassGradebookEntries::load( array(
+				'id_class_gradebook_entries' => $entid,
+				'id_classes' => $u->activeClassTaught->id_classes
+			) );
+
+			if ( !is_object($t['entry']) ) {
+				$t['error'] = 'Access to that entry has been denied.';
+				return;
+			}
+
+			$t['val'] = ClassGradebookVal::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes,
+				'id_class_gradebook_entries' => $entid,
+				'username' => $user
+			) );
+
+			$db->queryOne("select firstname,lastname from profile where username='$user'");
+			$t['user'] = array(
+				'username' => $user,
+				'firstname' => $db->record['firstname'],
+				'lastname' => $db->record['lastname']
+			);
+
+		}
+
+		function updateSingleRun(&$db,&$u,&$lc,&$t) { 
+
+			$lc->templateName = 'entry_editSingle';
+			$this->presentor = 'emptyPresentation';
+			$t['done'] = true;
+
+			$entid    = (int)$lc->postvars['entid'];
+			$user     = $lc->postvars['user'];
+			$score    = (int)$lc->postvars['score'];
+			$comments = $lc->postvars['comments'];
+
+			$val = ClassGradebookVal::load( array(
+				'id_classes' => $u->activeClassTaught->id_classes,
+				'id_class_gradebook_entries' => $entid,
+				'username' => $user
+			) );
+
+			if ( !is_object($val) ) {
+
+				if ( is_int($score) || is_int($comments) ) {
+
+					// There was no val, and they just entered new data. create new val.
+					$val = new ClassGradebookVal();
+					$val->set( 'idClasses' , $u->activeClassTaught->id_classes );
+					$val->set( 'idClassGradebookEntries', $entid );
+					$val->set( 'username' , $user );
+					$val->set( 'score' , $score );
+					$val->set( 'comments' , stripslashes($comments) );
+					$val->save();
+					$u->sessionvars['message'] = 'The score record has been saved.';
+
+				} else {
+
+					// There was no entry, and they didn't enter anything new. do nothing.
+					$u->sessionvars['message'] = 'Nothing happened.';
+				}
+
+			} else {
+
+				if ( $score != '' || $comments != '' ) {
+
+					// we loaded up a val that exists. set the score/comments and save.
+					$val->set( 'score' , $score );
+					$val->set( 'comments' , stripslashes($comments) );
+					$val->save();
+					$u->sessionvars['message'] = 'The score record has been saved.';
+
+				} else {
+
+					// There was a score, but they just removed it.
+					ClassGradebookValPeer::doDelete($val, false);
+					$u->sessionvars['message'] = 'The score record has been removed.';
+				}
+
+			} 
+
+		}
+
+	}	
+
+class LC_Table_CategoryNameRenderer extends LC_TableCellRenderer {
+
+	var $categories = array();
+
+	function getRenderedValue() {
+		return $this->categories[$this->value];
+	}
+}
+?>

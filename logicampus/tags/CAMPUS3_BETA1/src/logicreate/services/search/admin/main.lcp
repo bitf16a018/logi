@@ -1,0 +1,98 @@
+<?
+
+/**
+ * search 
+ * 
+ * handles reindexing of DBs via searchManager
+ */
+require(SERVICE_PATH."search/admin/searchManager.lcp");
+
+
+class search extends HercAuth {
+
+	var $presentor = "AdminPresentation";
+        var $_CacheResults = 25;
+
+	/**
+	 * show a list of searchable modules to the user
+	 */
+	 function run (&$db, &$u, &$arg, &$t) {
+	 	//provide a list of searchable mods
+	 	//search this file's dir for .lcs files (logicreate search plugins)
+
+		if ($dir = @opendir(INSTALLED_SERVICE_PATH."search/admin/")) {
+		  while (($file = readdir($dir)) !== false) {
+		  	if ( substr($file,-3) != 'lcs') continue;
+			include_once(INSTALLED_SERVICE_PATH.'search/admin/'.$file);
+			$class  =  substr($file,0,-4).'SearchTool';
+			$plugins[] = new $class(); 
+		  }  
+		  closedir($dir);
+		}
+		
+		while ( list($k,$plugin) = @each($plugins) ) {
+	//		print_r($plugin);
+			unset($x);
+			$x['name'] = $plugin->moduleName;
+			$x['mid'] = $plugin->filename;
+			$db->queryOne($plugin->getCountSQL);
+			$x['rec'] = $db->record[0];
+
+			$db->queryOne("select count(mkey) from lcSearch where modID = '".$plugin->mid."'");
+			$x['irec'] = $db->record[0];
+		$t[modlist][] = $x;
+		} 	
+
+		/******
+		* Get the items which are searched on the site
+		******/
+
+		$t[numResults] = $this->_CacheResults;
+
+		$db->query("select text, count(*) as count from searchCache group by text order by count desc limit ".$this->_CacheResults."");
+		while($db->nextRecord())
+			{
+				$t[cacheResults][] = "<li><b>".$db->record[text]."</b> (".$db->record[count].")";
+			}
+
+	 }
+
+
+	/**
+	 * perform the reindexing via the searchManager
+	 */
+	function reindexRun(&$db, &$u, &$arg, &$t) {
+		$manager = new SearchManager();
+
+		include(INSTALLED_SERVICE_PATH.'search/admin/'.$arg->postvars[mid].'.lcs');
+		$toolName = $arg->postvars[mid] .'SearchTool';
+		$tool = new $toolName();
+
+		if ($tool != '') {
+			$sql = "delete from lcSearch where modID='".$tool->moduleName."'";
+			$db->query($sql);
+			$tool->initQuery();
+			$manager->setTool($tool);
+			if ($arg->postvars[drop] == 'on') {
+				$manager->dropRecords();
+			}
+			$t['output'] = $manager->reIndex();
+			$this->run($db,$u,$arg,$t);
+		} else {
+			print "appropriate tool not found";
+		}
+	}
+
+
+
+	/**
+	 * Test searchManager here 
+	 */
+	function testRun(&$db,&$u,&$arg,&$t) {	
+		$manager = new SearchManager();
+		$manager->reIndex();
+	}
+
+
+}
+?>

@@ -1,0 +1,72 @@
+	/**
+	 *	Old Datagrid
+	 */
+
+	.datatable {
+		background-color:#CCC;
+	}
+	.datatable TR {
+		background-color:#EFEFEF;
+	}
+	.datatable TR TH {
+		padding: 0px 7px 0px 7px;
+		background-color:#036;
+		color:white;
+	}
+
+	.datatable TR.even {
+		background-color:white;
+	}
+
+	.datatable TR.odd {
+		background-color:#EFEFEF;
+	}
+
+	.datatable TR TD {
+		padding:0px 7px 0px 7px;
+	}
+
+	.center_justify {
+		text-align:center;
+	}
+	.left_justify {
+		text-align:left;
+	}
+	.right_justify {
+		text-align:right;
+	}
+
+	.datatable_nav {
+		padding:0px 7px 0px 7px;
+		margin:0px;
+	}
+
+
+	
+	/**
+	 *	Datagrid
+	 */
+	#datagrid table {
+		border: 1px solid silver;
+	}
+	#datagrid table tr th {
+		background-color: #003399;
+		color: white;
+	}
+	#datagrid table tr th a {
+		color: white;
+	}
+	#datagrid table tr td {
+		padding: 3px;
+	}
+
+	#datagrid table tr td.error {
+		background-color: #FF84BD;
+	}
+	#datagrid table tr.even {
+		/*background-color: white; */
+	}
+	#datagrid table tr.odd {
+		background-color: #EEEEEE;
+	}
+

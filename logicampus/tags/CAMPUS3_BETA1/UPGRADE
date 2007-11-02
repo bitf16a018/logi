@@ -1,0 +1,29 @@
+PATCHES
+================================================================================
+The "patches" folder contains sql statements and php scripts that might be 
+necassary to run from one version to the next.
+
+
+
+UPGRADE INFORMATION
+================================================================================
+This file will assist in how to upgrade from LogiCampus release to release.
+
+UPGRADE LogiCampus 1.0.3 -> 1.0.4
+Uncompress the logicampus-1.0.4.tar.gz file to a temporary directory.  Copy the 
+'logicreate' folder over the top of your current installation. Done.
+
+
+
+NFS MOUNTS (optional)
+================================================================================
+A series of NFS mounts can balanace files saved to the disk between two or more 
+web servers.  The relevant directories are:
+* logicreate/content
+* logicreate/classLibrary
+* public_html/images/photos
+
+In order to make a completely new release you need to open the archive and 
+re-symlink the live folder.  The NFS mounts can be mounted throught a symlink 
+but the full path needs to be specified everytime (with no tab completion).
+

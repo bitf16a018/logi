@@ -1,0 +1,169 @@
+<?
+/*
+ *
+ * Default service
+ *
+ */
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+include_once(LIB_PATH.'Textbook.php');
+include_once(LIB_PATH.'TextbookClasses.php');
+
+class dup extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+
+	var $sectionTitle = 'Textbook Duplicator';
+	var $navlinks = array(
+		'Text Book Manager' => 'main/',
+		
+	);
+	var $applinks = array(
+		'Duplicate Books' => 'dup',
+	);
+	var $inactivelinks = array(
+	);
+
+	var $authorizer = 'native';
+
+	function authorize() {
+
+		// Only tbadmin or tbsadmin users allowed here
+		global $lcUser;
+		return in_array('tbadmin', $lcUser->groups)
+			|| in_array('admin', $lcUser->groups);
+	}
+
+
+	function Run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'dup_main';
+		$db->query("select * from semesters");
+		while($db->nextRecord()) { 
+			$s[$db->record[0]] = $db->record[2]." - ".$db->record[1];
+		}
+		$t['sem'] = makeOptions($s);
+		$sql = 'select l.id_classes, l.courseFamilyNumber, o.courseName, p.firstname, p.lastname
+			from classes as l
+			left join courses as o on o.id_courses=l.id_courses
+			left join profile as p on p.username=l.facultyId
+			order by courseFamilyNumber';
+			$db->query($sql);
+
+
+	}
+
+	function chooseRun(&$db,&$u,&$lc,&$t) {
+		$button = $lc->postvars['button'];
+		$from = $lc->postvars['from'];
+		$to = $lc->postvars['to'];
+
+		$db->queryOne("select * from semesters where id_semesters=$from");
+		if ($e = ErrorStack::pullError('db') ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "There was some database error, make sure you chose all the input fields from the
+				previous page.";
+			return;
+
+		}
+		$t['fromsemester'] = $db->record[2]." - ".$db->record[1];
+
+		$db->queryOne("select * from semesters where id_semesters=$to");
+		if ($e = ErrorStack::pullError('db') ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "There was some database error, make sure you chose all the input fields from the
+				previous page.";
+			return;
+
+		}
+		$t['tosemester'] = $db->record[2]." - ".$db->record[1];
+
+
+		if (strpos($button,"all")>0) { 
+			$lc->templateName = 'dup_all';
+		} else { 
+			$lc->templateName = 'dup_one_many';
+		}
+		$sql ="select c.*, d.* from classes c, courses d where c.id_courses=d.id_courses and (c.id_semesters=$from) ORDER BY d.courseFamily, d.courseNumber";
+		$db->query($sql);
+		while($db->nextRecord()){
+			$num = $db->record['courseFamilyNumber'];
+			$name = $db->record['courseName'];
+			$first = $db->record['firstname'];
+			$last= $db->record['lastname'];
+			$id = $db->record['facultyId'];
+			$id = ucwords(str_replace("."," ",$id));
+			$x = "$num - $name - $id";
+			$arrayfrom[$db->record['id_classes']] = $x;
+		}
+		$sql ="select c.*, d.* from classes c, courses d where c.id_courses=d.id_courses and (c.id_semesters=$to) ORDER BY d.courseFamily, d.courseNumber";
+		$db->query($sql);
+		if (strpos($button,"single")>0) { // copying a single to potential multiples - no restriction
+			while($db->nextRecord()){
+				$num = $db->record['courseFamilyNumber'];
+				$name = $db->record['courseName'];
+				$id = $db->record['facultyId'];
+				$id = ucwords(str_replace("."," ",$id));
+				$first = $db->record['firstname'];
+				$last= $db->record['lastname'];
+				$x = "$num - $name - $id";
+				$arrayto[$db->record['id_classes']] = $x;
+			}
+		} else { // copying 'all' so we should only show classes that are the same both times
+			while($db->nextRecord()){
+				if ($arrayfrom[$db->record[1]]!='') {
+					$num = $db->record['courseFamilyNumber'];
+					$name = $db->record['courseName'];
+					$first = $db->record['firstname'];
+					$last= $db->record['lastname'];
+					$x = $db->record['id_classes']." "."$num - $name - $first $last";
+					$arrayto[$db->record['id_classes']] = $x;
+				}
+			}
+		} // end else
+		$t['to'] = makeOptions($arrayto);
+		$t['from'] = makeOptions($arrayfrom);
+	}
+
+	function dupRun(&$db,&$u,&$lc,&$t) {
+
+		// This will be an array of old class id => new class id
+		$from = $lc->postvars['from'];	
+		$to = $lc->postvars['to'];	
+		
+		while(list($key,$val) = each($to)) { 
+			
+			$obj = null; // clean
+			$a_obj = null; // clean
+			$a_obj = TextbookClassesPeer::doSelect('id_classes='.$from);
+			
+			foreach($a_obj as $obj)
+			{
+				$obj->idClasses = $val;
+				$obj->status 	= 1;
+				$obj->_new		= true;
+				
+				$obj->save();
+			}
+			
+			/*
+			// this design allows only 1 single book to be updated
+			$x = persistantObject::_load("book","textbook_classes",$from,"*","id_classes");
+			unset($x->id_textbook_classes);
+			$x->status=1;
+			$x->id_classes = $val;
+			$x->_save("textbook_classes");
+			*/
+		}
+
+		$u->sessionvars['message'] = 'Conversion completed successfully.';
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl();
+	}
+
+}
+class book extends persistantObject { }
+?>

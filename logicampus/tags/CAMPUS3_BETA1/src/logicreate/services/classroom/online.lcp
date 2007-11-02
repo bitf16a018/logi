@@ -1,0 +1,62 @@
+<?
+
+include_once(LIB_PATH.'lc_enrollment.php');
+
+/*
+ *
+ * Displays class members that are online.
+ *
+ */
+
+class online extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+	var $sectionTitle = "Who's Online";
+	var $inactivelinks = array(
+		'Who\'s Online',
+	);
+
+/*
+ *
+ * Default event
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='online_main';
+			$sections = explode("\n",
+			$u->activeClassTaken->sectionNumbers);
+
+			$enrollmentObj = new lcClassEnrollment($u->activeClassTaken->id_classes);
+
+			$userIdArray = array();
+			foreach ($enrollmentObj->classEnrollmentDos as $enrollmentDo ) {
+				$userIdArray[] = $enrollmentDo->studentId;
+			}
+			if (count($userIdArray) < 1) {
+				$userIdArray[] = 0;
+			}
+			$idList = '('.implode(',',$userIdArray).')';
+			
+			$query = "
+				SELECT lcSessions.username 
+				FROM lcSessions 
+				LEFT JOIN lcUsers on lcSessions.username = lcUsers.username
+ 
+				WHERE lcUsers.pkey in ".$idList."
+				AND (unix_timestamp((".DB::getFuncName('NOW()')." + 0 )) - unix_timestamp(gc) < 1800)  
+				AND lcSessions.username!=''";
+
+			$db->query($query);
+			$db->RESULT_TYPE = MYSQL_ASSOC;
+			while($db->nextRecord()) {
+				$t['users'][]= $db->record;
+			}
+			$t['loggedin'] = count($t['users']);
+		}
+}
+
+?>

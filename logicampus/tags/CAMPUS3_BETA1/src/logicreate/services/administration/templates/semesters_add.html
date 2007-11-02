@@ -1,0 +1,17 @@
+
+
+<? if ($t['editmode'] == false) {
+$type='Adding a new semester'; } else { $type='Editing existing semester'; }
+?>
+
+<?=$t['sectionheader'];?>
+
+<h3><?=$t['action'];?></h3>
+<span style="color: red"><?php
+if ($t['error'])
+{	echo '<b>ERROR:</b><ul>'. $t['error']. '</ul>';
+}
+?></span>
+
+<?=$t['form'];?>
+

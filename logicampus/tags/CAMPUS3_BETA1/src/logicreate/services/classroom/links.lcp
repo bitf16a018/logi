@@ -1,0 +1,64 @@
+<?
+
+class links extends StudentService {
+
+	var $presentor='htmlPresentation';
+
+/*
+ *
+ * Default event
+ * 
+ * Input data:  $u->activeClassTaken, id_link
+ * Output data: updates counter, redirects to link
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+
+			$id = intval($lc->getvars['id']);
+
+			$check = $this->checkContentPermission($u->activeClassTaken->id_classes, 'class_links', 
+			'id_class_links', 'id_classes', $id);
+			if ($check)
+			{
+				$sql = "update class_links set hits = hits +1 where
+				id_class_links='".$id."'"; 
+				$db->query($sql);
+
+				$sql = "select url from class_links where id_class_links='".$id."'";
+				$db->queryOne($sql);
+				$this->presentor = 'redirectPresentation';
+				if ( substr($db->record['url'],0,7) != 'http://' ) {
+					$db->record['url'] = 'http://'.$db->record['url'];
+				}
+
+				$t['url'] = $db->record['url'];
+				return;
+			}
+
+			
+		}
+
+# current active class
+# table we are checking
+# table pkey name
+# content id
+# active class id
+		function checkContentPermission($activeClassTaken, $table, $tablePkeyLabel,
+		$contentLabel, $contentPkey)
+		{
+			$db = DB::getHandle();
+			$sql = "SELECT $contentLabel FROM $table WHERE 
+					$tablePkeyLabel ='$contentPkey'";
+			$db->queryOne($sql);
+			if ($activeClassTaken == $db->record[$contentLabel])
+			{
+				return true;
+			}
+			return false;               
+		}
+
+
+
+}
+
+?>

@@ -1,0 +1,49 @@
+<h4>Student Test</h4>
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+
+
+<form action="<?=appurl('lobrepo').'/exam/';?>" method="POST" enctype="application/x-www-form-urlencoded">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+	<tr>
+		<td valign="top" class="row1">*Title</td>
+		<td valign="top" class=""><input type="text" id="title" name="title" value="" size="40" maxlength="50"></td>
+	</tr>
+
+	<tr>
+		<td valign="top" class="row1" valign="top">*Instructions for students</td>
+		<td valign="top" class="">
+			<textarea name="instructions" cols="40" rows="5" id="instructions"></textarea>
+		</td>
+	</tr>
+
+	<tr>
+		<td valign="top" class="row1" valign="top">Notes (only for faculty)</td>
+		<td valign="top" class="">
+			<textarea name="notes" cols="40" rows="5" id="notes"></textarea>
+		</td>
+	</tr>
+
+	<tr>
+		<td colspan="2" valign="top" class="">&nbsp;</td>
+	</tr>
+	<tr>
+		<td valign="top" class="row1">
+			<input type="hidden" name="lob_id" value="<?=$t['lob']->get('lobRepoEntryId');?>">
+		</td>
+		<td valign="top" class=""><input type="submit" id="sbmt_button" name="sbmt_button" value="Add Questions"></td>
+	</tr>
+</table>
+
+</form>
+<div style="font-size: 85%">*denotes a required field</div>
+

@@ -1,0 +1,9 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+
+
+<?php
+echo $t['datagrid']->toHtml();
+?>
+

@@ -1,0 +1,249 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(LIB_PATH."datagrid.php");
+include_once(INSTALLED_SERVICE_PATH."forum/forumTree.php");
+
+
+class admin extends AdminAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function Run($db,&$u,&$lc,&$t) {	
+		$lc->templateName = 'admin_main';	
+	}
+
+
+// show a list of current sections
+// with ability to add/edit/delete (moving would be  sort order)
+// sections are 'top level only' categorization not nested
+// forums ARE nested tho
+
+	function sectionsRun($db,&$u,&$lc,&$t) {	
+	// initial sample data assumed tree strucutre - will be flat
+	// so the 'where' clause can be taken away from the doSelect soon
+		$t['sections'] = LcForumSectionPeer::doSelect(" lc_forum_section_parent_id=0 or lc_forum_section_parent_id IS NULL");
+		$lc->templateName = 'admin_section';	
+	}
+
+//
+// show a section info with form to add/update
+
+	function sectionEditRun($db,&$u,&$lc,&$t) {	
+		$key = (int)$lc->getvars['key'];
+		if ($key) { 
+			$t['section'] = LcForumSection::load($key);
+			$i = LcForumPeer::doSelect(" 1=1 order by lc_forum_id");
+		}
+		$lc->templateName = 'admin_sectionEdit';	
+
+// get list of top level forums to associate with a section
+		$i = LcForumPeer::doSelect(" lc_forum_parent_id=0 order by lc_forum_id");
+		while(list($k,$v) = each($i)) {
+			$list[$v->lcForumId] = $v->lcForumName;
+		}
+		$t['list'] = makeOptions($list);
+	}
+
+//
+// update/add a section from sectionEdit POST result
+
+	function sectionUpdateRun($db,&$u,&$lc,&$t) {	
+		$data = $lc->postvars['section'];
+		$section = LcForumSectionPeer::row2Obj($data);
+// ack - don't like this
+// needs to be a more automated way in the 
+// save method
+		if ($section->lcForumSectionId=='') { 
+			$section->_new =true;
+		}
+		$section->save();
+
+// run through 'list' 
+// to determine what forums are linked to this section
+		while(list($k,$v) = each($lc->postvars['list'])) {
+			$forum = LcForum::load($v);
+			$forum->lcForumSectionId = $section->lcForumSectionId;
+			$forum->save();
+		}
+		$lc->templateName = 'admin_sectionUpdate';	
+	}
+
+//
+//  delete a section - link from sectionEdit
+
+	function sectionDeleteRun($db,&$u,&$lc,&$t) {	
+		$key = (int)$lc->getvars['key'];
+		$section = LcForumSection::load($key);
+		if (is_object($section)) { 
+			LcForumSectionPeer::doDelete($section, true);
+		}
+		$lc->templateName = 'admin_sectionDelete';	
+	}
+
+	function forumsRun($db,&$u,&$lc,&$t) {	
+		$i = LcForumPeer::doSelect(" (lc_forum_numeric_link=0 or lc_forum_numeric_link IS NULL) and 1=1 order by lc_forum_id");
+		$t['forumss'] = $i;
+		$k = new TreeList();
+		$k->keyName = 'lcForumId';
+		$k->keyParentName = 'lcForumParentId';
+		$k->loadObjects($i);
+		$lc->templateName = 'admin_forum';	
+		$l = new ForumAdminView($k);
+		$l->url = appurl("forum/admin/event=");
+		$l->deleteurl = appurl("forum/admin/event=forumDelete");
+		$l->editurl = appurl("forum/admin/event=forumEdit");
+		$t['table'] = $l->renderAsTable();
+	}
+
+//
+// show a forum info with form to add/update
+
+	function forumEditRun($db,&$u,&$lc,&$t) {	
+		$key = (int)$lc->getvars['key'];
+
+		if ($key) { 
+			$t['forum'] = LcForum::load($key);
+		}
+		$i = LcForumPeer::doSelect(" lc_forum_numeric_link=0 and  1=1 order by lc_forum_id");
+		$k = new TreeList();
+		$k->keyName = 'lcForumId';
+		$k->keyParentName = 'lcForumParentId';
+		$k->loadObjects($i);
+		$l = new ForumAdminView($k);
+if ($t['forum']) { 
+		$t['options'] = $l->renderAsOptions($t['forum']->lcForumParentId);
+		$f_perms = $this->getForumPerms($t['forum']->lcForumId);
+}
+		
+		$t['read_perms'] = makeOptions($this->getGroups(), $f_perms['read']);
+		$t['post_perms'] = makeOptions($this->getGroups(), $f_perms['post']);
+		$t['dele_perms'] = makeOptions($this->getGroups(), $f_perms['dele']);
+
+		$lc->templateName = 'admin_forumEdit';	
+	}
+
+
+	function getForumPerms($id_forum)
+	{
+		
+		$a_perms = array();
+		
+		$db = DB::getHandle();
+		
+		$sql = "SELECT * FROM lc_forum_perm WHERE lc_forum_id=".$id_forum;
+#echo $sql; exit();	
+		$db->query($sql);
+#die(microtime());
+		
+		while ($db->nextRecord())
+		{	
+			$a_perms[$db->record['lc_forum_perm_action']][$db->record['lc_forum_perm_id']] = $db->record['lc_forum_perm_group'];
+		}
+	return $a_perms;
+	}
+
+
+	function getGroups()
+	{
+		$a_group = array();
+		
+		$db = DB::getHandle();
+		
+		$sql = '
+		SELECT groupName, gid FROM lcGroups';
+		
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{	$a_group[$db->record['gid']] = $db->record['groupName'];
+		}
+		
+	return $a_group;		
+	}
+	
+//
+// update/add a forum from forumEdit POST result
+
+	function forumUpdateRun($db,&$u,&$lc,&$t) {	
+		$data = $lc->postvars['forum'];
+		$forum = LcForumPeer::row2Obj($data);
+		
+		if ($lc->postvars['forum']['lc_forum_id'])
+		{	$forum = lcForum::load($lc->postvars['forum']['lc_forum_id']);
+			$forum->setArray($lc->postvars['forum']);
+			if ($forum->lcForumParentId != 0)
+			{	$forum->lcForumSectionId = 0;
+			}	
+		} 
+		
+		if ($forum->lcForumId == $forum->lcForumParentId) { 
+			$forum->lcForumParentId=0;
+		}
+
+		if ($forum->lcForumId)
+		{
+			// we know there's a forum for sure to plaay with
+			$sql = '
+			DELETE 
+			FROM lc_forum_perm
+			WHERE lc_forum_id='.$forum->lcForumId.'
+			';
+			$db->query($sql);
+			// clean slate.. lets add them or (re-add)
+			
+		}
+		
+		
+//		foreach($lc->postvars['for
+		
+// ack - don't like this
+// needs to be a more automated way in the 
+// save method
+		if ($forum->lcForumId=='') { 
+			$forum->_new =true;
+		}
+		
+		$forum->save();
+		
+		foreach($lc->postvars['read_perms'] as $group)
+		{	$db->queryOne('INSERT INTO lc_forum_perm SET lc_forum_perm_action=\'read\', lc_forum_perm_label=\'You can read\', lc_forum_perm_group=\''.$group.'\', lc_forum_id='.$forum->lcForumId);
+		}
+		foreach($lc->postvars['post_perms'] as $group)
+		{	$db->queryOne('INSERT INTO lc_forum_perm SET lc_forum_perm_action=\'post\', lc_forum_perm_label=\'You may post a message\', lc_forum_perm_group=\''.$group.'\', lc_forum_id='.$forum->lcForumId);
+		}
+		foreach($lc->postvars['dele_perms'] as $group)
+		{	$db->queryOne('INSERT INTO lc_forum_perm SET lc_forum_perm_action=\'dele\', lc_forum_perm_label=\'You may delete a message\', lc_forum_perm_group=\''.$group.'\', lc_forum_id='.$forum->lcForumId);
+		}
+		
+		$lc->templateName = 'admin_forumUpdate';	
+	}
+
+//
+//  delete a section - link from sectionEdit
+
+	function forumDeleteRun($db,&$u,&$lc,&$t) {	
+		$key = (int)$lc->getvars['key'];
+		$forum= LcForum::load($key);
+		if (is_object($forum)) { 
+			LcForumPeer::doDelete($forum);
+			$t['message'] = 'Forum removed from the system';
+		}
+		
+		$this->forumsRun($db, $u, $lc, $t);	
+	}
+
+}
+?>

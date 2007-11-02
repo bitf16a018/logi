@@ -1,0 +1,379 @@
+<?
+/*
+ * courses
+ * created 05/25/03
+ *
+ */
+ 
+
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'courseObj.php');
+
+
+class courses extends AdminService 
+{
+
+	var $presentor = "htmlPresentation";
+	var $cleanedArray = array();  # used for forms
+	var $authorizer = 'ServiceMapAuth';
+
+	// links
+	var $sectionTitle = 'Courses';
+	var $navlinks = array(
+		'Administration Home' => ''
+	);
+	var $applinks = array(
+		'List Courses' => 'courses/',
+		'Add Course' => 'courses/event=addCourse'
+	);
+	
+
+	# Displays main list of courses and displays them
+	function Run($db,&$u,&$lc,&$t)
+	{
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		if ($lc->getvars[$datagrid->sortVar] == '')
+		{	
+			$datagrid->orderby = 'courseFamily';
+		}
+		$datagrid->table = 'courses';
+		
+		$datagrid->setCellWidth('links', '125');
+		$datagrid->setCellAlign('links', 'center');
+		
+		$datagrid->setCellWidth('courseFamily', '75');
+		
+		$datagrid->ignore = array('id_courses','courseNumber','courseDescription',
+			'preReq1', 'preReq2', 'preReq3', 'preReq4',
+			'coReq1', 'coReq2', 'coReq3', 'coReq4');
+		$datagrid->overrideColumn('<?=$courseFamily.$courseNumber;?>', 'courseFamily');
+		$datagrid->postpendColumn('<a href="<?=appurl("administration/courses/event=viewCourse/id=$id_courses");?>">view</a> | <a href="<?=appurl("administration/courses/event=editCourse/id=$id_courses");?>">edit</a> | <a href="<?=appurl("administration/courses/event=deleteCourse/id=$id_courses");?>" onclick="if (confirm(\'Are you SURE you want to delete this course?\')) { return true; } else { return false; }">delete</a>', 'links');
+		$datagrid->headers = array(
+			'courseFamily' => 'Course #',
+			'courseName'   => 'Course Title',
+			'links'        => ' '
+		);
+		$datagrid->sortColumns = array('courseFamily','courseName');
+		$datagrid->class = 'datagrid';
+		$t['table'] = $datagrid->toHTML();
+
+		$this->sectionTitle = 'Course Listing';
+		$this->inactivelinks = array( 'List Courses' );
+		$lc->templateName = 'courses_main';
+	}
+
+	# Adds a course to the system
+	function addCourseRun(&$db,&$u,&$lc,&$t)
+	{
+		$f = new Siteform();
+
+
+		// mgk 12/7/03
+		// limit on adding courses
+		/*
+		$db->queryOne("select count(*) from courses");
+		$maxcourses = (int)base64_decode(MAX_COURSES);
+		if ($db->record[0] >= $maxcourses) { 
+			$t['msg'] = 'You are at the course maximum of '.$maxcourses.' for this installation.  Please contact your server administrator for details.';
+			$this->run($db,$u,$lc,$t);
+			return;
+		} 
+*/
+		if ($lc->postvars['addcourse'] == 'Add Course!') {
+			#debug($lc->postvars, 1);
+			$t['error'] = $f->validateForm('admincourse', $lc->postvars);
+			$this->cleanedArray = $f->cleanedArray;
+			#debug($f, 1);
+			
+			if (!$f->hasErrors()) {
+
+				$courses = new courseObj();
+				$courses->_loadArray($f->cleanedArray);
+				$courses->courseFamily = strtoupper($courses->courseFamily);
+				$courses->_saveToDB();
+
+				$t['msg'] = 'Course added successfully.';
+				$this->run($db,$u,$lc,$t);
+				return;
+			} 
+		}
+
+		$f->getForm('admincourse', $this->cleanedArray);
+		$t['form'] = $f->ToHTML();
+		$this->sectionTitle = 'Add Course';
+		$this->inactivelinks = array( 'Add Course' );
+		$lc->templateName = 'courses_addcourse';
+	}
+
+	function editCourseRun(&$db,&$u,&$lc,&$t) {
+
+		$this->sectionTitle = 'Edit Course';
+
+		$f = new Siteform();
+		$courses = courseObj::_getFromDB($lc->getvars['id'], 'id_courses');
+
+		// if they clicked the submit button, commit their info to the db
+		// and take them back to main
+		if ($lc->postvars['addcourse'] == 'Update Course!' && is_object($courses)) {
+			$t['error'] = $f->validateForm('admincourse', $lc->postvars);
+			
+			if (!$f->hasErrors()) {
+
+				$this->cleanedArray = $f->cleanedArray;
+				$courses->_loadArray($f->cleanedArray);
+				$courses->courseFamily = strtoupper($courses->courseFamily);
+				$courses->_saveToDB();
+
+				$t['msg'] = 'The course was modfied successfully.';
+				$this->run($db,$u,$lc,$t);
+				return;
+			}
+		}
+
+		// make sure we have the object data. if we do, show them the form
+		if (!is_object($courses)) {
+			$t['error'] = 'Could not load course for editing.';
+			$this->run($db,$u,$lc,$t);
+			return;
+		} else {
+			$f->getForm('admincourse', $courses);
+			$f->modFormValue('addcourse', 'Update Course!');
+			$t['form'] = $f->ToHTML();
+			$lc->templateName = 'courses_addcourse';
+		}
+	}
+
+	// make sure we got a valid id, and delete the entry if we did.
+	function deleteCourseRun(&$db,&$u,&$lc,&$t)
+	{
+//auto-comment		$lc->templateStyle = 'private';		
+
+		$courses = courseObj::_getFromDB($lc->getvars['id'], 'id_courses');
+		if (is_object($courses)) {
+			$courses->_deleteToDB();
+			$t['msg'] = 'Course was deleted successfully.';
+			$this->run($db,$u,$lc,$t);
+			return;
+		} else {
+			$t['error'] = 'Course does not exist!';
+			$this->run($db,$u,$lc,$t);
+			return;
+		}
+	}
+
+	// Populate $t with all sorts of goodies
+	function viewCourseRun(&$db,&$u,&$lc,&$t)
+	{
+		$db->queryOne('select * from courses where id_courses='.$lc->getvars['id']);
+		$t['courseData'] = $db->record;
+		$t['courseFamilyNumber'] = $db->record['courseFamily'].$db->record['courseNumber'];
+
+		$t['preReqs'] = implode('<br>',array(
+			$db->record['preReq1'],
+			$db->record['preReq2'],
+			$db->record['preReq3'],
+			$db->record['preReq4']
+		));
+		$t['preReqs'] = preg_replace('/^(<br>)+/','',$t['preReqs']);
+		$t['preReqs'] = preg_replace('/(<br>){2,}/','<br>',$t['preReqs']);
+
+		$t['coReqs'] = implode('<br>',array(
+			$db->record['coReq1'],
+			$db->record['coReq2'],
+			$db->record['coReq3'],
+			$db->record['coReq4']
+		));
+		$t['coReqs'] = preg_replace('/^(<br>)+/','',$t['coReqs']);
+		$t['coReqs'] = preg_replace('/(<br>){2,}/','<br>',$t['coReqs']);
+
+		$sql = 'select username,firstname,lastname from profile left join classes on username=facultyId where courseFamilyNumber="'.$t['courseFamilyNumber'].'"';
+		$db->query($sql);
+		while ($db->nextRecord()) $t['faculty'][] = $db->record;
+
+		$sql = 'select c.sectionNumbers,c.classType,f.firstname,f.lastname
+			from classes as c, profile as f
+			where f.username=c.facultyId and id_courses='.$lc->getvars['id'];
+		$db->query($sql);
+		while ($db->nextRecord()) $t['classes'][] = $db->record;
+
+		$t['editlink'] = APP_URL.'administration/courses/event=editCourse/id='.$lc->getvars['id'];
+
+		$this->sectionTitle = 'View Course: '.$t['courseData']['courseName']
+			.' ('.$t['courseFamilyNumber'].')';
+		$lc->templateName = 'courses_viewcourse';
+//auto-comment		$lc->templateStyle = 'private';
+	}
+
+	/**
+	 * Place the info from one semester into a form for another semester
+	 * Don't save anything yet
+	 */
+	function semesterInfoCopyToRun(&$db,&$u,&$lc,&$t)
+	{
+		$this->sectionTitle = 'Semester Course Info';	
+		$id_to_copy_to = intval($lc->postvars['id_semesters']);
+		$id_to_copy_from = intval($lc->postvars['copyfrom']);
+		
+		$t['extra'] = object2array(semesterInfo::loadSemester($id_to_copy_to));
+			
+		if (count($this->cleanedArray) <= 0) {
+			$this->cleanedArray = object2array(semesterInfo::load($id_to_copy_from));
+		}
+		
+		if ($this->cleanedArray['id_semesters']) {
+			$f = new SiteForm();
+			$f->getForm('admincourseinfo', $this->cleanedArray);
+
+			// changing the id semester so that it's copied TO the following id
+			$f->modFormValue('id_semesters', $id_to_copy_to);
+			$t['form'] = $f->ToHTML();
+		} else {
+			trigger_error("Failed to load semester info");
+		}
+		
+		$lc->templateName = 'courses_semesterInfo';
+//auto-comment		$lc->templateStyle = 'private';		
+	}
+
+
+	#  Allows the admin to edit course specific information based on 
+	#  on a semester.  This information will be progated to all
+	#  classes.
+	
+	/**
+	 *		 
+	 *  Things i need to watch for
+	 *		1) valid id_semesters
+	 *
+	 */
+	function semesterInfoRun(&$db,&$u,&$lc,&$t)
+	{	$this->sectionTitle = 'Semester Course Info';	
+		$id_semesters = (int)$lc->postvars['id_semesters'];
+
+		/*
+		 *	! loads nothing but a way to "choose" a form
+		 *		user chooses which semester thye wish to apply this info too
+		 *		then the 
+		 *
+		 */
+		
+		// upon first hit of this page (you will be asked to select a semester)
+		// well then we will seed the loader to choose "current" semester
+		// else it will be seeded with id_semseter from postvars
+		
+		if ($id_semesters > 0)
+		{
+			
+			$t['extra'] = object2array(semesterInfo::loadSemester($id_semesters));
+
+			if (count($this->cleanedArray) <= 0) {
+				$this->cleanedArray = object2array(semesterInfo::load($id_semesters));
+			}
+			if ($this->cleanedArray['id_semesters'])
+			{	
+				$f = new SiteForm();
+				$f->getForm('admincourseinfo', $this->cleanedArray);
+				// Although this is only useful upon "Loading Semester", it doesn't matter anytime after, so keep it here
+				$f->modFormValue('id_semesters', $id_semesters);
+				$t['form'] = $f->ToHTML();
+			}
+		}
+
+		$lc->templateName = 'courses_semesterInfo';
+//auto-comment		$lc->templateStyle = 'private';		
+	}
+
+
+	function semesterInfoPostRun($db,&$u,&$lc,&$t)
+	{
+		$this->sectionTitle = 'Semester Course Info';	
+		
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('admincourseinfo', $lc->postvars);
+
+		$this->cleanedArray = $f->cleanedArray;
+		
+		if ($t['error'] != '') 
+		{	
+			$this->semesterInfoRun($db, $u, $lc, $t);
+
+		} else 
+		{
+			$funky = semesterInfo::createFromArray("semesterInfo",$lc->postvars);
+			
+			unset($funky->event);
+			unset($funky->submit);
+			unset($funky->extra);
+			// I wish there was a way that this would RETURN something to let me know the status of the save!
+			$funky->save();
+			
+			$lc->templateName = 'courses_semesterInfo_thankyou';	
+			return;
+		}		
+//auto-comment		$lc->templateStyle = 'private';		
+
+	}
+	
+	
+}
+ 
+class temporary
+{
+}
+
+class semesterInfo extends PersistantObject
+{
+	
+	function load($id_semesters) {
+		$x= semesterInfo::_load('temporary',"semesters_course_info",$id_semesters,"*", 'id_semesters');
+		//list($x->office_phone_ac,$x->office_phone_su, $x->office_phone_ex) = split("-",$x->phone);
+		return $x;
+		
+	}
+	
+	function loadSemester($id_semesters) {
+		$x= semesterInfo::_load('temporary',"semesters",$id_semesters,"*", 'id_semesters');
+		//list($x->office_phone_ac,$x->office_phone_su, $x->office_phone_ex) = split("-",$x->phone);
+		return $x;
+		
+	}
+	
+	function save() {
+		echo $this->_save("semesters_course_info");
+	}
+	
+	/**
+	 *	Get a list of semesters (Not semester Info)
+	 *	This functino doesn't belong here and needs moved out somewhere but for now.. it stays
+	 *
+	 * 	@return	array(key[id_semseter]=>value[semesterId(literal)])
+	 */
+	function getSemesterList()
+	{	
+		$a_semesterlist = array();
+		
+		$db = DB::getHandle();
+	
+		$sql = '
+		SELECT semesterTerm, semesterYear, id_semesters
+		FROM semesters
+		ORDER BY semesterYear DESC
+		';
+		
+		$db->query($sql);
+		
+		while ($db->nextRecord())
+		{ 
+			$a_semesterlist[$db->record['id_semesters']] = $db->record['semesterTerm']. ' '. $db->record['semesterYear'];
+		}
+		
+	return $a_semesterlist;
+	}
+	
+	
+}
+
+
+?>

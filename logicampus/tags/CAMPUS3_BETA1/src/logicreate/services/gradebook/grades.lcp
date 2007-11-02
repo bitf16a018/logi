@@ -1,0 +1,232 @@
+<?
+/*
+ *
+ * Used for inserting new grades, viewing grades,
+ * publishing grades from other apps.
+ *
+ */
+include_once(LIB_PATH. "LC_form.php");
+ 
+class grades extends FacultyService {
+
+	var $presentor='htmlPresentation';
+
+	var $cleanedArray = array();
+/*
+ *
+ * Displays a form which allows a faculty member to enter an
+ * entry into the gradebook  (this is different than an
+ * assessment).
+ * 
+ * Input data: 
+ * Output data: displays form
+ *
+ */
+		function addEntryRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_addEntry';
+			$f = new form();
+			$f->getForm(100056, $this->cleanedArray);
+			
+			$t['form'] = $f->toHtml();
+			
+		}
+		
+		function addEntryPostRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_addEntry';
+			$f = new form();
+			$t['error'] = $f->validateForm(100056,$lc->postvars);
+			
+			$this->cleanedArray = $f->cleanedArray;
+			
+			if ($t['error'])
+			{	
+				$this->addEntryRun($db, $u, $lc, $t);
+			} else
+			{
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = APP_URL. 'gradebook/'; 
+			}
+			/*
+			if ($lc->postvars['action'] == 'add')
+			{
+				// process
+				
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = APP_URL. 'gradebook/'; 
+				return;
+			}*/
+
+		}
+
+/*
+ *
+ * Removes an assessment from the grade book.  This destroys
+ * any grades a student had from taking the assessment.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function asmtDeleteRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_asmtDelete';
+
+		}
+
+/*
+ *
+ * Displays all "entries" and "assessments" from the grade book
+ * and allows the teacher to select one for deletion.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function delEntryRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_delEntry';
+
+		}
+
+/*
+ *
+ * Edit a single grade for one student for a entry in the grade
+ * book.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function editEntryRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_editEntry';
+
+		}
+
+/*
+ *
+ * Removes an entry from the gradebook for all students.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function entryDeleteRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_entryDelete';
+//auto-comment			$lc->templateStyle = 'private';
+			
+		}
+
+/*
+ *
+ * not used
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function Run(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_main';
+//auto-comment			$lc->templateStyle = 'private';
+
+		}
+
+/*
+ *
+ * Publishes the given assessment passed to it.  Can take more
+ * than one assessment.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function publishAsmtRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_publishAsmt';
+
+		}
+
+/*
+ *
+ * Displays all grades for an assessment for all students.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function showGrdbyAsmtRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_showGrdbyAsmt';
+
+		}
+
+/*
+ *
+ * Shows all grades for students for a grade book entry. 
+ * Allows the teacher to re-submit grades.
+ * 
+ * Input data: 
+ * Output data: 
+ *
+ */
+		function showGrdbyEntryRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_showGrdbyEntry';
+
+		}
+
+/*
+ *
+ * Processes input from editEntry and stores the information in
+ * the database.
+ * 
+ * Input data: list of new grades
+ * Output data: confirmation
+ *
+ */
+		function updateEntryRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_updateEntry';
+//auto-comment			$lc->templateStyle = 'private';
+			
+			$f = new form();
+			$f->getForm(100056, $this->cleanedArray);
+			$f->updateEvent('updateEntryPost');		// modifier
+			$f->updateSubmitBtn('Update Entry');	// modifier
+			$t['form'] = $f->toHtml();
+			
+		}
+		
+		
+		function updateEntryPostRun(&$db,&$u,&$lc,&$t) {
+			$lc->templateName='grades_updateEntry';
+//auto-comment			$lc->templateStyle = 'private';
+			
+			$f = new form();
+			$t['error'] = $f->validateForm(100056,$lc->postvars);
+			
+			$this->cleanedArray = $f->cleanedArray;
+			
+			if ($t['error'])
+			{	
+				$this->updateEntryRun($db, $u, $lc, $t);
+			} else
+			{
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = APP_URL. 'gradebook/'; 
+			}
+
+		}
+
+
+		function updateWeightedTotalsRun(&$db,&$u,&$lc,&$t) {
+			
+			$lc->templateName='grades_updateWeightedTotals';
+//auto-comment			$lc->templateStyle = 'private';
+			
+			if ($lc->postvars['action'] == 'update')
+			{
+				// process 				
+				$this->presentor = 'redirectPresentation';
+				$t['url'] = APP_URL. 'gradebook/'; 
+				return;
+			}
+			
+		}
+
+}
+
+?>

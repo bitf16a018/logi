@@ -1,0 +1,610 @@
+<?php
+
+
+include_once(LIB_PATH.'xmlparser.php');
+
+
+class semestercopy extends FacultyService  {
+	
+	// form stuff
+	var $cleanedArray = array();
+		
+	var $presentor = "htmlPresentation";
+	
+
+	// Links
+	var $sectionTitle = 'Classroom Update';
+	
+	var $applinks = array(
+		'Export Classroom' => 'dataexchange/'
+	);
+	
+	var $mode = 'restore';
+	var $id_semester;
+	
+	var $map_assignments = array();
+	var $map_link_categories = array();
+	var $map_link = array();
+	var $map_objectives = array();
+	var $map_content = array();
+	
+	var $map_gradebook_category = array();
+	var $map_gradebook_entries = array();
+	
+	var $obj_db;
+	
+	var $home_dir;
+	
+	var $__errors = array();
+	
+	# Displays Classes by default (chooses current semster by default)	
+	function Run($db,&$u,&$lc,&$t) {
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'semestercopy_main';
+
+		/**
+		 *	List all classes belonging to teacher
+		 *	Only list out classes that are within or past editing phases
+		 */
+		$sql = '
+		SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
+		FROM classes as A
+		INNER JOIN courses as B ON A.id_courses=B.id_courses
+		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+		WHERE A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+		
+		$db->query($sql);
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		while ($db->nextRecord()) {
+		//	$t['selections'][$db->record['id_classes']] = $db->record;
+			$class[$db->record['id_classes']] = $db->record['courseFamilyNumber']." ".
+			htmlentities($db->record['courseName'],ENT_QUOTES)." (".$db->record['semesterId'].")";
+		}
+                $t['fromoptions'] = makeOptions($class, $u->activeClassTaught->id_classes);
+
+                $class = '';
+
+                $sql = '
+                SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
+                FROM classes as A
+                INNER JOIN courses as B ON A.id_courses=B.id_courses
+                INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+                WHERE A.facultyId=\''.$u->username.'\' AND C.dateDeactivation >= now()
+                ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+
+                $db->query($sql);
+                $db->RESULT_TYPE = MYSQL_ASSOC;
+                while ($db->nextRecord()) {
+                //      $t['selections'][$db->record['id_classes']] = $db->record;
+                        $class[$db->record['id_classes']] = $db->record['courseFamilyNumber']." ".
+                        htmlentities($db->record['courseName'],ENT_QUOTES)." (".$db->record['semesterId'].")";
+                }
+                $t['tooptions'] = makeOptions($class);
+
+	}
+	
+	
+	/**
+	 *	After hitting the run() and selecting a class, you come here
+	 *	Here we determine if the classroom you choose to update is really yours
+	 *	then we choose which classroom to update it *with* thus excluding (graying)
+	 *	out the previous selected semester in run() to show which one is going to be
+	 *	updated
+	 */
+	function selectClassRun($db, &$u, &$lc, &$t)  {
+		$fl_ismyclass = false;
+		$id_classes = (int)$lc->postvars['id_classes_update'];
+		
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'semestercopy_selectClass';
+		
+		/**
+		 *	List all classes belonging to teacher
+		 *	Only list out classes that are within or past editing phases
+		 *	** same as above, we're just going to run a few checks and mod the data on the fly
+		 */
+		$sql = '
+		SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
+		FROM classes as A
+		INNER JOIN courses as B ON A.id_courses=B.id_courses
+		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+		WHERE A.facultyId=\''.$u->username.'\' 
+		AND
+		((C.dateAccountActivation <= now()) OR (A.id_classes='.$id_classes.'))
+		AND A.id_classes >= '.$id_classes.'
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+	
+		$db->query($sql);
+
+		while ($db->nextRecord()) {
+			if ($id_classes == $db->record['id_classes']) {
+				$db->record['id_classes_update'] = $db->record['id_classes'];
+				$t['selected'] = $db->record;
+				$fl_ismyclass = true;
+			}
+			
+			$t['selections'][$db->record['id_classes']] = $db->record;
+			
+		}
+		
+		if ($fl_ismyclass == false) {
+			// error, you didn't select a class or you didn't select one that is yours.
+		 	$this->run($db, $u, $lc, $t);
+		}
+		
+	}
+	
+	
+	/**
+	 * After hitting the list of classes to use 
+	 * to update the first (run) with
+	 * We are going to try and find out if we can verify that is my class.
+	 *
+	 */
+	function selectWithRun($db, &$u, &$lc, &$t) {
+		$fl_ismyclass = false;
+		
+		$id_classes = (int)$lc->postvars['id_classes_update_to'];
+		$id_classes_with = (int)$lc->postvars['id_classes_update_from'];
+		
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'semestercopy_selectWith';
+		
+		/**
+		 *	List all classes belonging to teacher
+		 *	Only list out classes that are within or past editing phases
+		 *	** same as above, we're just going to run a few checks 
+		 *	** I maintain a similar sql as above with the intent to verify existance
+		 */
+		$sql = '
+		SELECT A.id_classes
+		FROM classes as A
+		INNER JOIN courses as B ON A.id_courses=B.id_courses
+		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+		WHERE 
+		(A.id_classes='.$id_classes.' OR A.id_classes='.$id_classes_with.') AND
+		A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+		
+		$db->query($sql);
+		if ($db->getNumRows() == 2) {
+			// pushing to template
+			$t['update'] = $this->getClass($id_classes, $u->profile->get('username'), $db);
+			$t['with'] = $this->getClass($id_classes_with, $u->profile->get('username'), $db);
+			
+		} else {
+			// error, you didn't select a class or you didn't select one that is yours.
+		 	$this->run($db, $u, $lc, $t);
+		}
+		
+	}
+	
+	
+	function selectYouSureRun($db, &$u, &$lc, &$t) {
+		$id_classes_to = (int)$lc->postvars['id_classes_update'];
+		$id_classes_from = (int)$lc->postvars['id_classes_with'];
+		$ic_sure = $lc->postvars['ic_sure'];
+
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'semestercopy_selectWith';
+
+
+		/**
+		 * List all classes belonging to teacher
+		 * Only list out classes that are within or past editing phases
+		 * ** same as above, we're just going to run a few checks 
+		 * ** I maintain a similar sql as above with the intent to verify existance
+		 */
+
+		$sql = '
+		SELECT A.id_classes
+		FROM classes as A
+		INNER JOIN courses as B ON A.id_courses=B.id_courses
+		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+		WHERE 
+		(A.id_classes='.$id_classes_to.' OR A.id_classes='.$id_classes_from.') AND
+		A.facultyId=\''.$u->username.'\' AND C.dateAccountActivation <= now()
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+		
+		$db->query($sql);
+		if ($db->getNumRows() == 2) {
+			// pushing to template
+			$t['update'] = $this->getClass($id_classes_to, $u->profile->get('username'), $db);
+			$t['with'] = $this->getClass($id_classes_from, $u->profile->get('username'), $db);
+			
+		} else {
+			// error, you didn't select a class or you didn't select one that is yours.
+		 	$this->run($db, $u, $lc, $t);
+		}
+
+
+		$this->semesterCopyClass( $id_classes_from, $id_classes_to, $db);
+
+		$this->presentor = 'redirectPresentation';
+
+		$t['url'] = modurl('semestercopy/event=done/');
+	}
+	
+
+
+
+	/**
+	 *	Use this event to update a classroom with another's backup file
+	 *
+	 *	Quick description of process:
+	 *		Wipes out selected classes information
+	 *		and imports backup file's info into it
+	 */
+	function semesterCopyClass($id_classes_from, $id_classes_to, &$db) {
+
+		//all this code sucks, needs to use PBDO
+
+		//what to update: 
+		// assignments, assignments_link 
+		// gradebook, gradebook_categories, gradebook_entries
+		// class_lessons, class_lesson_links, class_lesson_content, class_links, class_links_categories, class_objectives, class_lesson_objectives
+		// class_syllabuses
+
+		// don't do this anymore
+		// classdoclib_Files, Folders, Sharing
+
+
+		//what not to update, announcements
+		// assignments_grades
+		// class_presentations 
+		// class_sections
+		// class_student_sections
+		// 
+
+
+		//need info on (exams, textbooks)
+
+		$this->id_classes_to = $id_classes_to;
+
+		$this->id_classes_from = $id_classes_from;
+
+		//USE PBDO
+		include_once(LIB_PATH.'PBDO/ClassAssignments.php');
+		#include_once(LIB_PATH.'PBDO/ClassAssignmentsLink.php');
+		include_once(LIB_PATH.'PBDO/ClassLessonContent.php');
+		include_once(LIB_PATH.'PBDO/ClassLessons.php');
+		include_once(LIB_PATH.'PBDO/ClassLinks.php');
+		include_once(LIB_PATH.'PBDO/ClassLinksCategories.php');
+		include_once(LIB_PATH.'PBDO/ClassObjectives.php');
+		include_once(LIB_PATH.'PBDO/ClassSyllabuses.php');
+
+		include_once(LIB_PATH.'ClassGradebook.php');
+		include_once(LIB_PATH.'ClassGradebookCategories.php');
+		include_once(LIB_PATH.'ClassGradebookEntries.php');
+
+		// wipe table of new id_classes or class_id (id_classes_to)
+		// load an objecti (id_classes_from)
+		// set _new to true (to force an insert)
+		// remove primary key
+		// update id_classes or class_id
+		// update relationships (if any)
+		// save
+
+		// if it's a many to many table,
+		// cycle through array of old to new mappings for the lesson
+		// select the old relationshp from the table via the old id
+		// if the the related data via the old key just pulled from the table
+		// insert the new relation into the table with both new keys
+		// (does this logic leave orphaned data if there was a class already in 
+		//  the copy to slot?)
+//print "<pre>\n";
+		//class lessons
+		$lessons_old_to_new = array();
+		$db->query("DELETE FROM class_lessons WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLessonsPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$oldid = $pbdo->idClassLessons;
+			$lessons_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassAssignments = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$lessons_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+
+
+		//class assignments
+		$assignments_old_to_new = array();
+		$db->query("DELETE FROM class_assignments WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassAssignmentsPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$oldid = $pbdo->idClassAssignments;
+			$assignments_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassAssignments = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$assignments_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+		//class assignments link (many to many table)
+		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
+			$db->query("SELECT * FROM class_assignments_link WHERE id_class_lessons = ".$oldid);
+			while ($db->nextRecord()) {
+				$new_assignment = $assignments_old_to_new[$db->record['id_class_assignments']];
+				//did this old lesson have an assignment?
+				if ( $new_assignment > 0 ) {
+					$db->query("INSERT INTO class_assignments_link
+					(id_class_lessons,id_class_assignments)
+					VALUES
+					(".$newid.",".$new_assignment.")");
+				}
+			}
+		}
+
+
+
+		//class links categories
+		$links_old_to_new = array();
+		$db->query("DELETE FROM class_links_categories WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLinksCategoriesPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$oldid = $pbdo->idClassLinksCategories;
+			$links_cats_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassLinks = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$links_cats_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+		//assume that every old categories is now a new one
+		// traverse throu links_cats_old_to_new and update the parent id
+		reset($links_cats_old_to_new);
+		while ( list($oldid, $newid) = @each($links_cats_old_to_new) ) {
+			$db->query('UPDATE class_links_categories SET id_class_links_categories_parent = '.$newid.' where id_class_links_categories_parent = '.$oldid.' and id_classes = '.$id_classes_to);
+
+		}
+
+		//class links
+		$links_old_to_new = array();
+		$db->query("DELETE FROM class_links WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLinksPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$oldid = $pbdo->idClassLinks;
+			$links_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassLinks = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->set('idClassLinksCategories', sprintf('%d',$links_cats_old_to_new[$pbdo->idClassLinksCategories]));
+			$pbdo->save();
+			$links_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+		//class lesson links (many to many table)
+		@reset($lessons_old_to_new);
+		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
+			$db->query("SELECT * FROM class_lesson_links WHERE id_class_lessons = ".$oldid);
+			while ($db->nextRecord()) {
+				$new_link = $links_old_to_new[$db->record['id_class_links']];
+				//did this old lesson have a link?
+				if ( $new_link > 0 ) {
+					$db->query("INSERT INTO class_lesson_links
+					(id_class_lessons,id_class_links)
+					VALUES
+					(".$newid.",".$new_link.")");
+				}
+			}
+		}
+
+
+
+
+		//class objectives
+		$objectives_old_to_new = array();
+		$db->query("DELETE FROM class_objectives WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassObjectivesPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$oldid = $pbdo->idClassObjectives;
+			$links_old_to_new[$oldid] = 0;
+			$pbdo->_new = true;
+			$pbdo->idClassObjectives = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+			$objectives_old_to_new[$oldid] = $pbdo->getPrimaryKey();
+		}
+
+
+		//class lesson links (many to many table)
+		@reset($lessons_old_to_new);
+		while ( list($oldid, $newid) = @each($lessons_old_to_new) ) {
+			$db->query("SELECT * FROM class_lesson_objectives WHERE id_class_lesson = ".$oldid);
+			while ($db->nextRecord()) {
+				$new_objective = $objectives_old_to_new[$db->record['id_class_objectives']];
+				//did this old lesson have a link?
+				if ( $new_objective > 0 ) {
+					$db->query("INSERT INTO class_lesson_objectives
+					(id_class_lesson,id_class_objectives)
+					VALUES
+					(".$newid.",".$new_objective.")");
+				}
+			}
+		}
+
+
+		//no more many to many relationships
+		// basically no more lesson data
+
+
+
+		//class lesson content
+		$db->query("DELETE FROM class_lesson_content WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassLessonContentPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$pbdo->_new = true;
+			$pbdo->idClassLessonContent = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->set('idClassLessons', $lessons_old_to_new[$pbdo->idClassLessons]);
+			$pbdo->save();
+		}
+
+
+		//class syllabuses
+		$db->query("DELETE FROM class_syllabuses WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassSyllabusesPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$pbdo->_new = true;
+			$pbdo->idClassSyllabuses = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+		}
+
+
+		//class gradebook
+		$db->query("DELETE FROM class_gradebook WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassGradebookPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$pbdo->_new = true;
+			$pbdo->idClassGradebook = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+		}
+
+
+		//class gradebook categories
+		$db->query("DELETE FROM class_gradebook_categories WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassGradebookCategoriesPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$pbdo->_new = true;
+			$pbdo->idClassGradebookCategories = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+		}
+
+
+		//class gradebook entries
+		$db->query("DELETE FROM class_gradebook_entries WHERE id_classes = $id_classes_to");
+		$pbdoArray = ClassGradebookEntriesPeer::doSelect(' id_classes = '.$id_classes_from);
+		for ($x = 0; $x < count($pbdoArray); $x++) {
+			$pbdo = $pbdoArray[$x];
+			$pbdo->_new = true;
+			$pbdo->idClassGradebookEntries = '';
+			$pbdo->set('idClasses', $id_classes_to);
+			$pbdo->save();
+		}
+
+//exit();
+	}
+
+
+
+
+
+	function doneRun($db, &$u, &$lc, &$t)
+	{
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'semestercopy_done';
+	}
+	
+
+
+	function getClass($id_classes, $facultyId, $db)
+	{	
+		$sql = '
+		SELECT A.id_classes, B.courseName, A.courseFamilyNumber, C.semesterId, semesterYear
+		FROM classes as A
+		INNER JOIN courses as B ON A.id_courses=B.id_courses
+		INNER JOIN semesters as C ON A.id_semesters=C.id_semesters
+		WHERE A.id_classes='.$id_classes.' 
+		AND A.facultyId=\''.$facultyId.'\' 
+		AND C.dateAccountActivation <= now()
+		ORDER BY C.semesterYear DESC, A.courseFamilyNumber DESC, A.id_classes';
+		
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->queryOne($sql);
+		
+		return $db->record;
+	}
+}
+
+
+class LcZipFile {
+
+	var $datasec = array();
+	var $ctrl_dir = array();
+	var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
+	var $old_offset = 0;
+
+	var $location_root = '/tmp/semester_backup';
+	/**
+	 *	Constructor:: Starts the process by exec'ing out and
+	 *	creating the initial directory, but first cleaning up
+	 *	a previously left directory as well.
+	 *
+	 *	@note	I can not do proper error checking with an 
+	 *			exec command, I could be potentially
+	 *			screwing up alot of things, or at least
+	 *			dirtying up directories with junk files.
+	 *			lets pray linux perms will stop us from 
+	 *			making things go astray
+	 */
+	function LcZipFile($location_root = '')
+	{
+		if ($location_root != '')
+			$this->location_root = $location_root;
+			
+		// cleaning up 
+		exec('cd /tmp');
+		
+		// creating directory and moving into it (our base directory, where all of our work will be done from)
+		exec('mkdir -p '.$this->location_root.';cd '.$this->location_root.';');
+		
+	}
+	
+	
+	/**
+	 *	Add a directory but without moving outside the 
+	 *	root directory (or: self::$location_root)
+	 */
+	function add_dir($name) 
+	{	
+		exec('mkdir -p '.$this->location_root.'/'.$name.';');
+	}
+
+
+	function add_file($data, $filename) 
+	{	
+		if (!$handle = fopen($this->location_root.'/'.$filename, 'w+')) 
+		{
+			error_log("Cannot open file (".$this->location_root."/$filename)", 0);
+        	return;
+    	}
+
+		fwrite($handle, $data);
+        		fclose($handle);
+    	
+	} 
+ 
+
+	function file() { 
+		$data = implode("", $this->datasec); 
+		$ctrldir = implode("", $this->ctrl_dir); 
+
+	   return 
+		$data. 
+		$ctrldir. 
+		$this -> eof_ctrl_dir. 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("v", sizeof($this->ctrl_dir)). 
+		pack("V", strlen($ctrldir)). 
+		pack("V", strlen($data)). 
+		"\x00\x00"; 
+	} 
+}
+?>

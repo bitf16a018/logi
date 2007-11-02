@@ -1,0 +1,77 @@
+<?
+/*
+ * forum
+ * Last updated 10/1/2002 
+ * 
+ * Purpose:
+ * Forum system
+ */
+
+
+include_once(INSTALLED_SERVICE_PATH."forum/LcForum.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumModerator.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPost.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumPerm.php");
+include_once(INSTALLED_SERVICE_PATH."forum/LcForumSection.php");
+include_once(INSTALLED_SERVICE_PATH."forum/forumTree.php");
+include_once(LIB_PATH."datagrid.php");
+
+class viewPost extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function Run($db,&$u,&$lc,&$t) {	
+		$t['search'] = $lc->getvars[2];
+		$mode = $lc->getvars['mode'];
+		if ($mode=='t') { 
+			$u->sessionvars['forum']['view_mode'] = 't';
+		}
+		if ($mode=='f') { 
+			$u->sessionvars['forum']['view_mode'] = 'f';
+		}
+		$mode = $u->sessionvars['forum']['view_mode'];
+		if ($mode!='t') { $mode=='f'; }
+
+		$key = (int)$lc->getvars[1];
+
+		
+		$forumPost = lcForumPost::load($key);
+
+		$x = " lc_forum_perm_group='".implode("' or lc_forum_perm_group='",$u->groups)."' ";
+		$db->query("select distinct lc_forum_perm_action from lc_forum_perm where lc_forum_id=".(int)$forumPost->lcForumId." and $x");
+		while($db->nextRecord()) {
+			$t['perms'][$db->record[0]] = true;
+		}
+		if (!$t['perms']['read']) { 
+			echo "You can't read this forum"; exit();
+		}
+// __FIX_ME
+// need some code to check if the key belongs in a forum
+// to which someone has read access
+//
+		$forumPost->children = array_merge($forumPost->children,$forumPost->getLcForumPosts());
+
+
+		$t['forumPost'] = $forumPost;
+		$lc->templateName = 'viewPost_main';
+
+// threaded mode, not flat
+		if ($mode=='t') { 		
+			$tree = new ForumTreeList();
+			$tree->keyName = 'lcForumPostId';
+			$tree->keyParentName = 'lcForumPostParentId';
+			$tree->loadObjects($forumPost->children);
+			$tree->perms= $t['perms'];
+			$tree->highlight = $t['search'];
+#			debug($forumPost->children);
+
+			$view = new ForumView($tree);
+			$view->perms = $t['perms'];
+			$t['view'] = $view->renderAsTable();
+
+			$lc->templateName = 'viewPost_main_threaded';
+		}
+
+	}
+}
+?>

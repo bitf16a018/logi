@@ -1,0 +1,643 @@
+<?
+/*
+ * assessments
+ *
+ */
+include_once(LIB_PATH.'AssessmentAnswer.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+include_once(LIB_PATH.'Assessment.php');
+include_once(LIB_PATH.'PBDO/AssessmentEventLink.php');
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+
+class assessments extends FacultyService {
+
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Class Assessments';
+
+	var $data = array();  # cleaned form data
+	var $applinks = array (
+		'List Assessments' => 'main',
+		'Add Assessment' => 'main/event=add',
+		'Restore Assessment' => 'restore/'
+		);
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Announcements'=>'%classmgr/announcements/',
+		'Assessment Manager' => '%assessments/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Content' => '%classmgr/lessonContent/',
+		'FAQ' => '%classmgr/faq/',
+		'File Resource Manager' => '%classdoclib/',
+		'Gradebook' => '%gradebook/',
+		'Lessons' => '%classmgr/lessonManager/',
+		'Objectives' => '%classmgr/lessonObjectives/',
+		'Webliography' => '%classmgr/lessonWebliography/'
+	);
+	var $inactivelinks = array (
+		'Add Assessment' => 'main/event=add',
+		'Assessment Manager'
+	);
+
+
+
+	function run($db,&$u,&$lc,&$t) {
+
+		$lc->getvars['dgorder'] = 'display_name';
+
+		$dg = new datagrid( $this->module, $this->serviceName );
+		$dg->table = 'assessment';
+		$dg->column = 'assessment_id,display_name,date_available,date_unavailable,description,num_retries,possible_points';
+		$dg->where = 'class_id="'.$u->activeClassTaught->id_classes.'"';
+		$db->sortVar='sort';
+
+		$dg->ignore = array( 'assessment_id', 'date_available', 'date_unavailable');
+		$dg->headers = array( 'display_name' => 'Name', 'description' => 'Description', 'num_retries'=>'Retries','possible_points'=>'Points Possible');
+
+		$dg->postpendColumn( '<? if (time() >= $date_available && time() <= $date_unavailable) { echo "Yes";} else if ( $date_unavailable == 0 ) { echo "No Date Set"; } else if (time() >= $date_unavailable) { echo "Done"; }  else { echo "No";} ?>', 'Available Now?' );
+
+		$dg->postpendColumn( '
+			<a href="'.modurl('grade/id=<?=$assessment_id?>').'">Students</a>'
+			, 'Grade');
+
+		$dg->setCellWidth('Grade',80);
+		$dg->setCellAlign('Grade','center');
+
+		$dg->postpendColumn( '
+			<a href="'.modurl('main/event=view/id=<?=$assessment_id;?>').'">Change</a>'
+			 , 'Questions' );
+
+		$dg->setCellWidth('Questions',80);
+		$dg->setCellAlign('Questions','center');
+
+		$dg->postpendColumn( '
+			<a href="'.modurl('edit/event=edit/id=<?=$assessment_id;?>').'">Edit</a> 
+			&bull;
+			<a href="'.modurl('main/event=setAvailability/id=<?=$assessment_id;?>').'">Availability</a> 
+			&bull; 
+			<a href="'.modurl('main/event=remove/id=<?=$assessment_id?>').'">Remove</a>', 
+			'Actions' );
+		$dg->setCellWidth('Actions',200);
+		$dg->setCellAlign('Actions','center');
+
+		$dg->overrideColumn('<? if (!$num_retries) { echo "None";} else { echo $num_retries; }?>', 'num_retries');
+		$dg->overrideColumn('<? echo $display_name ."<br/><br/>
+		<a href=\"".appurl(\'assessments/backup/id=\'.$assessment_id)."\">backup...</a>"; ?>', 'display_name');
+
+
+		$dg->setCellAlign('possible_points','center');
+		$dg->setCellAlign('num_retries','center');
+
+		$dg->sortColumns = 	array('display_name');
+	
+		/*
+			index.php/asmtmgr/questions">Edit</a>
+			index.php/asmtmgr/assessment/event=setAvailability">Set Availability</a>
+			index.php/asmtmgr/assessment/event=removeAsmt">Remove
+		*/
+
+		$t['table'] = $dg->toHTML();
+
+		// stupid hack to get a feedback message
+		if ($u->sessionvars['message']) {
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
+		}
+
+		$lc->templateName = 'main_main';
+//auto-comment		$lc->templateStyle = 'private';
+	}
+
+
+	/**
+	 * show form to insert a new assessment
+	 * take down name, description, instructions,
+	 */
+	function addRun($db,&$u,&$lc,&$t) {
+		$lc->templateName = 'main_add';
+//auto-comment		$lc->templateStyle = 'private';
+		$f = new SiteForm();
+		$f->getForm('addassessment', $lc->postvars);
+		$t['form'] = $f->ToHTML();
+	}
+
+
+	/**
+	 * insert new assessment into the DB
+	 */
+	function insertRun($db,&$u,&$lc,&$t) {
+
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('addassessment', $lc->postvars);
+		if ($t['error'])
+		{
+			$this->addRun($db, $u, $lc, $t);
+			return;
+		}
+		
+		$a = new Assessment();
+		$a->classId = $u->activeClassTaught->id_classes;
+		$a->displayName = $lc->postvars['displayName'];
+		$a->description = $lc->postvars['description'];
+		$a->instructions = $lc->postvars['instructions'];
+
+		$a->mailResponses = (int)($lc->postvars['mailResponses'] == 'on');
+		$a->autoPublish = (int)($lc->postvars['autoPublish'] == 'on');
+
+		$a->set('showResultType',0);
+		$a->set('showAfterClose',0);
+		$a->set('isPrintable',0);
+		$a->set('possiblePoints',0);
+
+		if ( intval($a->classId) == 0 ) {
+			print "active class id of 0, dying...";
+			exit();
+			trigger_error('empty class id');
+			return false;
+		}
+
+		$a->save();
+
+		# Add new assessment to the gradebook
+		$assessmentId = $a->getPrimaryKey();
+		$gb = new ClassGradebookEntries();
+		$gb->idClasses = $u->activeClassTaught->id_classes;
+		$gb->title = $lc->postvars['displayName'];
+		$gb->assessmentId = $assessmentId;
+		$gb->gradebookCode = $lc->postvars['gradebookCode'];
+		$gb->idClassGradebookCategories = $lc->postvars['idClassGradebookCategories'];
+		$gb->notes = $lc->postvars['description'];
+		$gb->save();
+
+//auto-comment		$lc->templateStyle = 'private';
+		$this->run($db, $u, $lc, $t);
+		return;
+	}
+
+
+	/**
+	 * updates the points per question
+	 * use the key sort=go in postvars to switch to the
+	 * sort method.
+	 */
+	function updatePointsRun($db, &$u, &$lc, &$t)
+	{
+		//one form is used for sorting and updating points, of sort=='go' do sorting then return;
+		if ($lc->postvars['sort'] == 'go') {
+			$this->sortRun($db,$u,$lc,$t);
+			return;
+		}
+
+
+		$array = $lc->postvars['points'];
+		$count = count($array);
+		while(list ($questionId, $points) = @each($array) )
+		{
+				$qst = AssessmentQuestion::load($questionId, $u->activeClassTaught->id_classes);
+				if (is_object($qst))
+				{
+					$qst->questionPoints = $points;
+#					$qst->_modified = true;
+					$qst->save();
+				}
+			# keep track of total points so we can update GB
+			$total += $points;
+		}
+
+		# Update the gradebook entry total number of points
+		$entry = ClassGradebookEntriesPeer::doSelect("assessment_id='".$lc->postvars['assessmentId']."'
+			AND id_classes='".$u->activeClassTaught->id_classes."'");
+		$entry = $entry[0];
+		if (is_object($entry) )
+		{
+			# If we have an assessment object and an entry object, we can delete
+			$entry->totalPoints = $total;
+			$entry->save();
+		}
+
+		$t['message'] = 'Points Updated';
+		$lc->getvars['id'] = $lc->postvars['assessmentId'];
+		$this->viewRun($db, $u, $lc, $t);
+		return;
+	}
+
+
+
+	function viewRun($db,&$u,&$lc,&$t) {
+
+		include_once(LIB_PATH.'LC_html.php');
+		$lc->templateName = 'main_view';
+		$t['assessment'] = Assessment::load($lc->getvars['id'],$u->activeClassTaught->id_classes);
+
+		# See if a student has started taking the test
+		# Pass this to the template to disable certain features
+		$t['canAddQuestions'] = true;
+		if ($t['assessment']->isTaken() )
+		{
+			$t['canAddQuestions'] = false;
+		}
+
+
+		$t['questions'] = $t['assessment']->getAssessmentQuestions();
+
+		//__FIXME__ add in security checks for ownership (assessment == null)
+
+		$this->sectionTitle .= ' - '.$t['assessment']->displayName;
+		$t['questions_total'] = 0;
+		$t['questions_total_points'] = 0;
+
+
+
+		foreach($t['questions'] as $k=>$v) {
+			$t['questions_total_points'] += $v->questionPoints;
+			$t['questions_total']++;
+
+		}
+
+		for ($i=1; $i<=$t['questions_total']; $i++)
+		{
+			$t['dropDownData'][$i] = $i;
+		}
+
+		reset ($t['questions']);
+		if ($u->sessionvars['message'])
+		{
+			$t['message'] = $u->sessionvars['message'];
+			unset($u->sessionvars['message']);
+		}
+
+		# Add set availability link to applinks
+		$this->applinks['Set Availability'] =
+		'main/event=setAvailability/id='.$t['assessment']->assessmentId;
+		$this->applinks['Grade Students'] =
+		'grade/id='.$t['assessment']->assessmentId;
+
+// mgk 09/06/03 - trying to update the assessment possible_points
+$t['assessment']->possiblePoints = $t['questions_total_points'];
+$t['assessment']->save();
+	}
+
+
+	/**
+	 * show a choice to delete or not
+	 * you may not remove an in-progress assessment
+	 */
+	function removeRun($db,&$u,&$lc,&$t) {
+		# Load up the assessment ID to pass to template
+
+		$t['assessment'] = Assessment::load($lc->getvars['id'], $u->activeClassTaught->id_classes);
+		if ($t['assessment'])
+		{
+			$lc->templateName = 'main_remove';
+		} else {
+			$lc->templateName = 'main_error';
+			$t['message'] = "You do not have permission to edit this assessment.";
+		}
+
+		if ( $t['assessment']->dateAvailable <= time() && $t['assessment']->dateUnavailable >= time() ) {
+			$lc->templateName = 'main_error';
+			$t['message'] = "You may not remove an assessment while students are able to take it.";
+		}
+		
+	}
+
+	/**
+	 * Removes the assessment and all things associated with it
+	 */
+	function removeConfirmRun($db,&$u,&$lc,&$t) {
+	
+		$lc->postvars['id'] = (int) $lc->postvars['id'];
+		if ($lc->postvars['id'] && $lc->postvars['remove'])
+		{
+			$ast = Assessment::load($lc->postvars['id'], $u->activeClassTaught->id_classes);
+			if (is_object($ast) )
+			{
+				// purge calendar item
+				include_once(LIB_PATH.'eventsObj.php');
+				
+				$ast_calendar = new assessmentscheduling();
+				$ast_calendar->set_id_item($ast->assessmentId);
+				$ast_calendar->set_id_class($ast->classId);
+				$ast_calendar->dbLoad();	// try and load it up.. if it can
+				
+				if ($ast_calendar->pkey > 0)
+				{	$ast_calendar->delete(); // only delete if we can confirm we have something loaded through dbLoad()
+				}
+				
+				AssessmentPeer::doDelete($ast);
+				# Delete the gradebook entry as well
+				$gb = ClassGradebookEntriesPeer::doSelect("assessment_id='".$ast->assessmentId."'
+				AND id_classes='".$u->activeClassTaught->id_classes."'");
+				$gb = $gb[0];
+				if (is_object($gb) )
+				{
+		 			ClassGradebookEntriesPeer::doDelete($gb);
+				} else {
+					$t['message'] = '<h3>Error</h3>We were unable to remove the gradebook entry.  We did delete the assessment.';
+					$lc->templateName = 'main_error';
+					return;
+				}
+	
+				$t['message'] = "$as->displayName Removed";
+			} else {
+				$this->presentor = 'errorMessage';
+				$t['message'] = "You do not have permission to remove this assessment.";
+				return;
+			}
+		} else {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You do not have permission to remove this assessment.";
+			$t['details'] = "Your browser did not supply all the credentials necassary.";
+			return;
+		}
+
+		$this->run($db, $u, $lc, $t);
+		return;
+		
+	}
+
+
+
+	function setAvailabilityRun($db,&$u,&$lc,&$t) {
+
+		# Check if their are questions, if no questions, error
+		$asmt = Assessment::load($lc->getvars['id'], $u->activeClassTaught->id_classes);
+		$questions = $asmt->getAssessmentQuestions();
+		if(count($questions) == 0) 
+		{
+			$t['message'] = '<h3>Error</h3> You must have at least one question before you can set the availability on your assessment.';
+			$lc->templateName = 'main_error';
+			return;
+		}
+		$this->sectionTitle = 'Set Assessment Availability';
+		$lc->templateName = 'main_setAvailability';
+		if (!$lc->postvars)
+		{
+			$lc->postvars = Assessment::load($lc->getvars['id'], $u->activeClassTaught->id_classes);
+		}
+		 
+		$f = new SiteForm();
+		$f->getform('setavailability', $lc->postvars);
+		$t['form'] = $f->ToHTML();
+	
+	}
+
+
+
+	function processAvailabilityRun($db,&$u,&$lc,&$t) {
+		$assessmentId = (int)$lc->getvars['id'];
+		$f = new SiteForm();
+		$t['error'] = $f->validateForm('setavailability', $lc->postvars);
+		if ($t['error'])
+		{
+			$this->setAvailabilityRun($db, $u, $lc, $t);
+			return;
+		}
+		# Loads the object based on the getvar ID
+		$ast = Assessment::load($assessmentId, $u->activeClassTaught->id_classes);
+		if (!is_object($ast) ) {
+			$t['error'] = '<ul><li>Unable to load assessment.</li></ul>';
+			$this->setAvailabilityRun($db, $u, $lc, $t);
+			return;
+		}
+			
+		# updates time to unix time
+		$lc->postvars['dateAvailable'] = dateArray2Timestamp($lc->postvars['dateAvailable']);
+		$lc->postvars['dateUnavailable'] = dateArray2Timestamp($lc->postvars['dateUnavailable']);
+
+		# push postvars onto the object and overwrite what is there 
+		$ast->set('dateAvailable',$lc->postvars['dateAvailable']);
+		$ast->set('dateUnavailable',$lc->postvars['dateUnavailable']);
+		$ast->set('numRetries',$lc->postvars['numRetries']);
+		$ast->set('minuteLimit',$lc->postvars['minuteLimit']);
+		//$ast->set('isPrintable',$lc->postvars['isPrintable']);
+		$ast->set('autoPublish',$lc->postvars['autoPublish']);
+		$ast->set('mailResponses',$lc->postvars['mailResponses']);
+		$ast->set('showResultType',$lc->postvars['showResultType']);
+		//$ast->set('showAfterClose',$lc->postvars['showAfterClose']);
+
+
+		//try to find a calendar event for this assessment
+		//PBDO
+		$eventLink = AssessmentEventLink::load( 
+			array('assessment_id'=>$ast->assessmentId)
+			);
+
+		if (! is_object($eventLink) ) {
+			$eventLink = new AssessmentEventLink();
+		}
+
+		# save it
+		include_once(LIB_PATH.'eventsObj.php');
+		$ast_calendar = new assessmentscheduling();
+		$ast_calendar->setPrimaryKey($eventLink->get('lcEventId'));
+		$ast_calendar->set_id_class($ast->classId);
+		$ast_calendar->dbLoad();	// try and load it up.. if it can
+
+		//TODO, take this out
+		$ast_calendar->set_id_item($ast->assessmentId);
+
+		$ast_calendar->set_date_start($ast->dateAvailable);
+		$ast_calendar->set_date_end($ast->dateUnavailable);
+		$ast_calendar->set_title($ast->displayName);
+		$ast_calendar->set_allday(true);
+
+		$ast_calendar_id = $ast_calendar->save();
+		if ($ast_calendar_id) {
+			//echo 'ok it was saved';
+		} else {
+			//echo 'was not saved.';
+		}
+
+		// Add to calendar (lcEvents)
+		// the id_item column is not enough for reverse lookups
+		$eventLink->set('assessmentId',$assessmentId);
+		$eventLink->set('lcEventId',$ast_calendar_id);
+		if ($eventLink->get('lcEventId') == 0) {
+			$eventLink->set('lcEventId',$ast_calendar->pkey);
+		}
+		$eventLink->save();
+
+		$ast->save();
+
+		# Update the gradebook entry
+		$entry = ClassGradebookEntriesPeer::doSelect("assessment_id='".$ast->assessmentId."' AND id_classes='".$u->activeClassTaught->id_classes."'");
+		$entry = $entry[0];
+		if (is_object($entry) )
+		{
+			$entry->set('totalPoints', $ast->possiblePoints);
+			$entry->set('dateDue', $lc->postvars['dateUnavailable']);
+			$entry->publishFlag = $lc->postvars['autoPublish'];
+			$entry->save();
+		} else {
+			$t['message'] = '<h3>Fatal Error</h3>Unable to update gradebook entry. This is a fatal error and needs to be corrected by the database administrator.  Please contact the helpdesk.';
+			$lc->templateName = 'main_error';
+			return;
+		}
+
+		$this->run($db, $u, $lc, $t);
+		return;
+	}
+
+
+	/**
+	 * exec out to aspell command line
+	 */
+	function spellcheckRun($db,&$u,&$lc,&$t) {
+
+
+		$t['assessment'] = Assessment::load($lc->getvars['id'],$u->activeClassTaught->id_classes);
+		$t['questions'] = $t['assessment']->getAssessmentQuestions();
+
+		//__FIXME__ add in security checks for ownership (assessment == null)
+
+
+		//__FIXME__ try to get pspell working in php
+
+		foreach ($t['questions'] as $k=>$q) {
+
+			$words = $q->questionText;
+			exec('echo "'.escapeshellarg($words).'" | aspell -l',$misspelled,$spellStatus);
+			$misspelled  = array_unique($misspelled);
+			foreach($misspelled as $w) {
+				$words = preg_replace("/\b$w\b/",'<span style="color: #000000; background:#FFFF00;">'.$w.'</span>',$words);
+				
+					// __FIXME__
+					// need to catch 'words' not just letters in strings
+				$words = preg_replace("/\b$w\b/",'<span style="color: #000000; background:#FFFF00;">'.$w.'</span>',$words);
+			}
+
+			$t['questions'][$k]->questionText =  $words;
+
+
+
+			foreach ($t['questions'][$k]->questionChoices as $kk=>$qq) {
+
+				$words = $qq->label;
+				exec('echo "'.escapeshellarg($words).'" | aspell -l',$misspelled,$spellStatus);
+				$misspelled  = array_unique($misspelled);
+				foreach($misspelled as $w) {
+					$words = preg_replace("/\b$w\b/",'<span style="color: #000000; background-color: #FFFF00">'.$w.'</span>',$words);
+					// __FIXME__
+					// need to catch 'words' not just letters in strings
+					$words = preg_replace("/\b$w\b/",'<span style="color: #000000; background-color: #FFFF00">'.$w.'</span>',$words);
+				}
+
+				$t['questions'][$k]->questionChoices[$kk]->label =  $words;
+			}
+
+
+		}
+
+		foreach($t['questions'] as $k=>$v) {
+			$t['questions_total_points'] += $v->questionPoints;
+			$t['questions_total']++;
+
+		}
+
+		for ($i=1; $i<=$t['questions_total']; $i++)
+		{
+			$t['dropDownData'][$i] = $i;
+		}
+
+		/**
+		 *	Added 11.20.03 RS
+		 *		Needed the block below because this logic needs to be there
+		 */
+		$t['canAddQuestions'] = true;
+		if ($t['assessment']->isTaken() )
+		{
+			$t['canAddQuestions'] = false;
+		}
+
+
+		reset ($t['questions']);
+
+
+		$lc->templateName = 'main_view';
+	}
+
+
+	/**
+	 * sort the question to the proper place
+	 * qid = the id of the question to sort
+	 * id = the assessment
+	 * order = the new order
+	 * method = get
+	 */
+	function sortRun($db,&$u,&$lc,&$t) {
+		$id= (int)$lc->getvars['id'];
+		$order= $lc->postvars['order'];
+
+		$ast = Assessment::load($id,$u->activeClassTaught->id_classes);
+		//__FIXME__ add security
+
+		$questions = $ast->getAssessmentQuestions();
+
+		// find whether the move is up or down
+		foreach ($order as $k=>$o ) {
+			if ( $k != $o-1 ) {
+				$updown = ($k > $o)? true:false;
+				$question = $questions[$k];
+				$key = $k;
+				break; // we no longer need to sort through the rest, it will just cause problems.
+			}
+		}
+		//don't allow move onto self
+		if  (!$question) {
+			$t['url']  = modurl('main/event=view/id='.$id);
+			$this->presentor = 'redirectPresentation';
+			return;
+		}
+/*
+print "going to move question ";
+debug($question);
+print "from $k to $o";
+debug($questions,1);
+*/
+
+		reset($questions);
+		// perform up and down sorts seperately
+		if ($updown) {
+			//new file moves up
+			$start = $o-1;
+			$end = $key;
+			$current = $start;
+			$last = $question;
+			$questions[$end] = $questions[$end+1];
+			do {
+				$tmp = $questions[$current];
+				$questions[$current] = $last;
+				$last = $tmp;
+			} while (++$current <= $end);
+		} else {
+			//new file moves down
+			$start = $o-1;
+			$end = $key;
+			$current = $start;
+			$last = $question;
+			do {
+				$tmp = $questions[$current];
+				$questions[$current] = $last;
+				$last = $tmp;
+			} while (--$current >= $end);
+		}
+
+
+		reset($questions);
+		foreach ($questions as $k=>$q ) {
+			if ($k != $q->questionSort ) {
+				$q->questionSort = $k;
+				$q->save();
+			}
+		}
+
+		$t['url']  = modurl('main/event=view/id='.$id);
+		$this->presentor = 'redirectPresentation';
+	}
+}
+?>

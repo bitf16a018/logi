@@ -1,0 +1,124 @@
+<?=$t['sectionheader'];?>
+
+<?php
+if ( strlen($t['error']) > 0 ) { ?>
+	<?= lcMessageBox($t['error'],'e');?>
+<?php } ?>
+
+<div style="padding:5px;">
+	<div align="right" style="float:right;text-align:right;">
+	<?php if ($t['prevUrl']) { ?>
+		<a href="<?= $t['prevUrl'];?>" style="font-size:90%;">&lt;&lt;&nbsp;Prev</a>&nbsp;&nbsp;
+	<?php } ?>
+	<?php if ($t['nextUrl']) { ?>
+		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next&nbsp;&gt;&gt;</a>
+	<?php } ?>
+	</div>
+	<H2 style="display:inline;margin:1px;"><?= $t['lesson']['title'];?></H2>
+	&nbsp;<a href="<?= appurl('classroom/lessons/event=view/id='.$t['lesson']['id_class_lessons']);?>">[lesson home]</a>
+	<hr style="margin:0px;padding:0px"/>
+	<p></p>
+
+<?php
+
+if ($t['file']['mime'] == 'image/jpeg' || $t['file']['mime'] == 'image/png') {
+
+?>
+	<div align="left" style="margin:auto;width:auto;text-align:center;">
+<?php
+//debug($t['file']);
+
+	echo '<h3>'.$t['file']['title'].'</h3>';
+	echo ''.$t['file']['description'].'';
+	echo "<br/>\n";
+	echo '<img src="'.appurl('classroom/content/').$t['uniqcode'].'/'.$t['file']['linkText'].'"/>';
+	echo "<br/>\n";
+	echo '<em>'.$t['file']['caption'].'</em>';
+?>
+
+	</div>
+<?php
+
+
+
+}
+
+
+if ($t['file']['mime'] == 'text/html') {
+
+	echo '<h3>'.$t['file']['title'].'</h3>';
+	echo "<br/>\n";
+	echo $t['file']['content'];
+}
+?>
+
+<?php
+//debug($t['lob']);
+//needs to be handled internal by the LMS.  Items such as tests and assignments and forums
+if ($t['lob']['lob_mime'] == 'X-LMS/activity') {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+	<?php
+	echo '<h3>Activity</h3>';
+	echo 'Name: '.$t['lob']['lob_title'];
+	echo "<br/>\n";
+	echo 'Instructions: ';
+	echo $t['lob']['lob_description'];
+	echo "<br/>\n";
+	echo '<a href="'.appurl('classroom/assignments/event=view/id='.$t['seqObj']->classLessonSequenceId).'">Start the activity.</a>';
+	?>
+</fieldset>
+</div>
+<?php
+
+}
+
+if ($t['lob']['lob_mime'] == 'X-LMS/test') {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+<?php
+	echo '<h3>Test:&nbsp; '.$t['lob']['lob_title'].'</h3>';
+	echo 'Time limit: '. $t['activity']['minute_limit'].' minutes';
+	echo "<br/>\n";
+	echo 'Retries: '. $t['activity']['num_retries'].' time(s)';
+	echo "<br/>\n";
+	echo 'Instructions: ';
+	echo $t['activity']['instructions'];
+	echo "<br/>\n";
+	echo '<a href="'.appurl('test/take/event=start/id='.$t['activity']['assessment_id']).'">Start the test.</a>';
+	?>
+</fieldset>
+</div>
+<?php
+}
+
+//debug($t['file']);
+if ( strstr($t['file']['mime'] , 'application/') ) {
+?>
+<div align="left" style="margin:auto;width:50%;">
+<fieldset>
+	<img align="right" height="64" width="64" src="<?=$t['iconUrl'];?>"/>
+	<h3><?=$t['file']['title']?></h3>
+	size: <?=$t['file']['bytesize'];?> bytes
+	<br/>
+	<a href="<?=appurl('classroom/content/'.$t['uniqcode'].'/'.$t['file']['linkText']);?>">Click to download.</a>
+</fieldset>
+</div>
+<?php
+}
+?>
+
+<p></p>
+	<div align="right" style="float:right;text-align:right;">
+	<?php if ($t['prevUrl']) { ?>
+		<a href="<?= $t['prevUrl'];?>" style="font-size:90%;">&lt;&lt;&nbsp;Prev</a>&nbsp;&nbsp;
+	<?php } ?>
+	<?php if ($t['nextUrl']) { ?>
+		<a href="<?= $t['nextUrl'];?>" style="font-size:90%;">Next&nbsp;&gt;&gt;</a>
+	<?php } ?>
+	</div>
+</div>

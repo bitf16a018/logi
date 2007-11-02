@@ -1,0 +1,157 @@
+<?
+
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+
+include_once(LIB_PATH.'LC_user.php');
+include_once(LIB_PATH.'Assessment.php');
+
+class gradesbystudent extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+
+	// links
+	var $sectionTitle = 'View Grades by Student';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => 'jack',
+	);
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
+		'Gradebook Setup' => 'main/event=controlPanel/'
+	);
+
+
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'gradesbystudent_main';
+		$this->inactivelinks[] = 'View Grades by Student';
+
+		$gradebook = ClassGradebook::load(
+			array( 'id_classes' => $u->activeClassTaught->id_classes ) );
+
+		$gradebook->getStudents();
+
+		if ( !count($gradebook->students) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'There are no students in your class. You need students to view students\' grades.';
+			return;
+		}
+
+		$t['gradebook'] = $gradebook;
+
+	}
+
+	function viewRun(&$db,&$u,&$lc,&$t) {
+
+		$this->inactivelinks[] = 'View Grades by Student';
+		$lc->templateName = 'gradesbystudent_view';
+
+		$uname = $lc->getvars['user'];
+
+		if ( $lc->getvars['print'] ) {
+			$this->presentor = 'emptyPresentation';
+		} else {
+			$this->applinks['Printer Friendly'] = 'gradesbystudent/event=view/user='.$uname.'/print=yes';
+		}
+
+
+
+
+
+
+		// load up the gradebook and tell it to do a bunch of work for me.
+		$gradebook = ClassGradebook::load( 
+			array('id_classes' => $u->activeClassTaught->id_classes ) );
+
+		if ( !is_object($gradebook) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'The gradebook for your class could not be found. Please contact
+				the help desk immediately and report this.';
+			return;
+		}
+
+
+		$gradebook->loadCategories();
+		$gradebook->loadVals();
+		$gradebook->getEntries(false);
+		$gradebook->getStudent($lc->getvars['user']); // we only need one if we use a clever SQL statement below
+		$gradebook->setStudentVals();
+		
+		$gradebook->calculateWeightedAverages();
+		$gradebook->calculatePercentScores();
+
+		// check to make sure they passed a valid student id
+		if ( !is_object($gradebook->students[$uname]) ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = 'The requested student does not exist in your class.';
+			return;
+		}
+
+
+		$db->query("	SELECT sum(score) as score,username from class_gradebook_val 
+				WHERE id_classes = ".$u->activeClassTaught->id_classes."
+				GROUP BY username
+		");
+
+		//assume rank is one, push rank down for each student that has a higher score
+		$t['rank'] = 1;
+		while ($db->nextRecord() ) {
+			if ($lc->getvars['user'] == $db->record['username']) {
+				$usersScore = $db->record['score'];
+			}
+			$scores[$db->record['username']] = $db->record['score'];
+		}
+		foreach ($scores as $username => $score) {
+			if ($lc->getvars['user'] == $username) continue;
+			if ($score > $usersScore) $t['rank']++;
+			$t['totalRanks']++;
+		}
+
+
+		//loop through all categories and all vals for this one student,
+		// build up all info to pass to template
+		foreach ( $gradebook->categories as $catid => $cat ) {
+
+			$t['categories'][$catid]['possible'] = 0;
+			$t['categories'][$catid]['earned'] = 0;
+			$t['categories'][$catid]['letter'] = 'N/A';
+			$t['categories'][$catid]['label'] = $cat->label;
+
+			foreach ( $gradebook->students[$lc->getvars['user']]->vals as $valid => $val ) {
+				if ( $gradebook->entries[$valid]->idClassGradebookCategories != $catid )
+				continue;
+				if ( $val->isDisqualified() )
+				continue;
+
+				$t['categories'][$catid]['possible'] += $gradebook->entries[$valid]->totalPoints;
+				$t['categories'][$catid]['earned'] += $val->score;
+			}
+
+			$t['categories'][$catid]['letter'] = $gradebook->getLetterGrade(
+				$t['categories'][$catid]['earned'],
+				$t['categories'][$catid]['possible']);
+	
+		}
+		$t['gradebook'] = $gradebook;
+		$t['username'] = $lc->getvars['user'];
+
+		$user = lcUser::getUserByUsername($uname);
+		$t['student'] = $user->profile->values['firstname'].' '.$user->profile->values['lastname'];
+		$t['course'] = $u->activeClassTaught->courseName;
+		$t['instructor'] = $u->activeClassTaught->facultyName;
+
+	}
+
+
+}
+?>

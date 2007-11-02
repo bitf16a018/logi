@@ -1,0 +1,1298 @@
+<?php
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH.'classLessonObj.php');
+include_once(LIB_PATH.'lc_lesson_sequence.php');
+include_once(LIB_PATH.'lc_lob.php');
+// PBDO is the new standard, above object is DEPRECATED
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
+include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
+
+include(LIB_PATH.'lc_table.php');
+include(LIB_PATH.'lc_table_renderer.php');
+include(SERVICE_PATH.'classmgr/lc_table_lesson.php');
+
+
+
+class LessonManager extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+//	var $authorizer = 'native';
+
+	// links
+	var $inactivelinks = array( 'Lessons' );
+	var $applinks = array (
+		'List Lessons' => 'lessonManager/',
+		'Add a Lesson' => 'lessonNew/event=add'
+	);
+
+
+	/**
+	 * Show the main page of the lesson manager: a list of all the lessons
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'lessonManager_main';
+		$this->inactivelinks[] = 'List Lessons';
+		$this->sectionTitle = 'List Lessons';
+
+		$classId = $u->activeClassTaught->id_classes;
+
+/*
+		$dg->sortColumns = array( 'activeOn', 'title' );
+		$dg->postpendColumn('
+			<ul style="margin:0px;padding-left:15px">
+			<li><a href="<?=appurl("classroom/lessons/event=view/id_classes='.$u->activeClassTaught->id_classes.'/id=$id_class_lessons");?>">View</a></li>
+			<li><a href="<?=appurl("classmgr/lessonManager/event=edit/id=$id_class_lessons");?>">Edit</a></li>
+			<li><a href="<?=appurl("classmgr/lessonManager/event=deleteConf/id=$id_class_lessons");?>">Delete</a></li>
+			<li><a href="<?=appurl("classmgr/adjustLessonDates/lesson_id=$id_class_lessons");?>">Dates</a></li>
+			</ul>',
+			'links'); 
+		$dg->setCellWidth('links',65);
+		$dg->setCellAlign('links','left');
+
+		$t['content'] = $dg->toHTML();
+//*/
+
+		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
+		$t['lessonDataGridList'] = array();
+
+		foreach ($t['lessonList'] as $idx => $lessonObj) {
+
+			//display sequence grid of all components
+
+			$lessonId = (int) $lessonObj->getId();
+
+			$sequences = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lessonId.' ORDER BY rank');
+
+			foreach ($sequences as $objIdx => $obj) {
+
+				//change the "type" field into an image representing the mime.
+				//no reason why i'm changing lobType instead of lobMime
+				$sequences[$objIdx]->lobType = '<img width="24" height="24" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+
+				//change unix timestamp offset into days
+				$sequences[$objIdx]->startOffset = ($obj->startOffset /60/60/24);
+				$sequences[$objIdx]->dueOffset = (($obj->dueOffset - $obj->startOffset) /60/60/24);
+
+			}
+
+			$dm = new LC_Table_ObjectModel($sequences);
+			$dm->ignoreColumn('_new');
+			$dm->ignoreColumn('_modified');
+			$dm->ignoreColumn('_version');
+			$dm->ignoreColumn('_entityVersion');
+			$dm->ignoreColumn('__attributes');
+			$dm->ignoreColumn('__nulls');
+
+			$dm->ignoreColumn('classLessonSequenceId');
+			$dm->ignoreColumn('lessonId');
+			$dm->ignoreColumn('classId');
+			$dm->ignoreColumn('lobClassRepoId');
+			$dm->ignoreColumn('lobSubType');
+			$dm->ignoreColumn('lobMime');
+			$dm->ignoreColumn('linkText');
+			$dm->ignoreColumn('notBeforeSeqId');
+			$dm->ignoreColumn('endOffset');
+			$dm->ignoreColumn('gracePeriodDays');
+			$dm->ignoreColumn('hideUntilStart');
+			$dm->ignoreColumn('hideAfterEnd');
+			$dm->ignoreColumn('rank');
+			$dm->ignoreColumn('dueTime');
+			$dm->ignoreColumn('endTime');
+			$dm->ignoreColumn('startTime');
+
+
+			$table = new LC_Table($dm);
+
+			$columnModel = &$table->getColumnModel();
+			$columnModel->tableColumns[0]->name  =' ';
+			$columnModel->tableColumns[1]->name  ='Title';
+
+			$colA = &$columnModel->getColumnAt(0);
+			$colA->maxWidth=64;
+
+			$colD = &$columnModel->getColumnAt(1);
+			$colD->justify='left';
+
+			$colB = &$columnModel->getColumnAt(2);
+			$colB->maxWidth=64;
+			$colB->name = 'Start';
+
+			$colC = &$columnModel->getColumnAt(3);
+			$colC->maxWidth=64;
+			$colC->name = 'Due';
+
+			$t['lessonDataGridList'][$lessonId] = new LC_TableRenderer($table);
+		}
+
+	}
+
+
+	/**
+	 * Edit the assignments to this lesson
+	 */
+	function linkAssignmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Activities';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveAssignments';
+		$t['pageHeading'] = 'Lesson Activities';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
+		$db->setResultType('ASSOC');
+		$sql = "SELECT A.lob_class_repo_id, A.lob_title
+			FROM lob_class_activity AS B
+			LEFT JOIN lob_class_repo AS A
+				ON B.lob_class_repo_id = A.lob_class_repo_id
+			WHERE A.class_id = ".$class_id."
+			ORDER BY A.lob_title";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.lob_class_repo_id, A.class_id, B.title, A.lesson_id, A.class_lesson_sequence_id
+			FROM class_lesson_sequence AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.lesson_id = B.id_class_lessons
+			WHERE A.class_id = ".$class_id."
+			AND A.lob_type = 'activity'
+			ORDER BY B.title";
+		$db->query($sql);
+		$db->setResultType('ASSOC');
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['lob_class_repo_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['lob_class_repo_id']][] = $db->record['lesson_id'];
+		}
+
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->idName = 'lob_class_repo_id';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Assignment');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+		$col_c->cellRenderer->idName = 'lob_class_repo_id';
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Edit the assignments to this lesson
+	 */
+	function linkWebRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Web Links';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveWeb';
+		$t['pageHeading'] = 'Lesson Web Links';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT A.id_class_links, A.title
+			FROM class_links AS A
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.title";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_links, A.id_class_lessons, B.title
+			FROM class_lesson_links AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lessons = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_links']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_links']][] = $db->record['id_class_lessons'];
+		}
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+		$col->cellRenderer->idName = 'id_class_links';
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Web Link');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_links';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Edit the objectives to this lesson
+	 */
+	function linkContentRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		$user_id = intval($u->userId);
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Content';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveContent';
+		$t['pageHeading'] = 'Lesson Content';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		if( is_object($lesson))
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT A.lob_class_repo_id, B.lob_title
+			FROM lob_class_repo AS A
+			LEFT JOIN lob_repo_entry AS B 
+				ON A.lob_repo_entry_id = B.lob_repo_entry_id
+			WHERE A.class_id = ".$class_id."
+			AND B.lob_type = 'content'
+			ORDER BY B.lob_title";
+
+		$lobs = array();
+		$db->query($sql);
+		while($db->nextRecord()) {
+			$lobs[] = $db->record;
+		}
+		$dm = new LC_Table_ItemModel($lobs);
+		$dm->ignoreColumn('user_id');
+
+		$table = new LC_Table($dm);
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.class_id, A.lesson_id, A.lob_class_repo_id, B.title
+			FROM class_lesson_sequence AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.lesson_id = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['lob_class_repo_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['lob_class_repo_id']][] = $db->record['lesson_id'];
+		}
+		// */
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		//only used for object values
+//		$col->cellRenderer->idName = 'lob_class_repo_id';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Content');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'lob_class_repo_id';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+
+	/**
+	 * Edit the objectives to this lesson
+	 */
+	function linkObjectivesRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Objectives';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveObjectives';
+		$t['pageHeading'] = 'Lesson Objectives';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		if( is_object($lesson))
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT A.id_class_objectives, A.objective
+			FROM class_objectives AS A
+			WHERE A.id_classes = ".$class_id."
+			ORDER BY A.objective";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.id_class_objectives, A.id_class_lesson, B.title
+			FROM class_lesson_objectives AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.id_class_lesson = B.id_class_lessons
+			WHERE B.id_classes = ".$class_id."
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['id_class_objectives']][] = $db->record['title'];
+			$itemsToLessons[$db->record['id_class_objectives']][] = $db->record['id_class_lesson'];
+		}
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->idName = 'id_class_objectives';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Objective');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->idName = 'id_class_objectives';
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Edit the assessments to this lesson
+	 */
+	function linkAssessmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$this->sectionTitle = 'Change Assessments';
+		$lc->templateName = 'lessonManager_linkItems';
+		$t['saveEvent'] = 'saveAssessments';
+		$t['pageHeading'] = 'Lesson Assessments';
+		$t['lessonId'] = $lesson_id;
+		$lesson = ClassLessons::load($lesson_id);
+		$t['title'] = $lesson->get('title');
+
+
+		$sql = "SELECT A.lob_class_repo_id, A.lob_title
+			FROM lob_class_test AS B
+			LEFT JOIN lob_class_repo AS A
+				ON B.lob_class_repo_id = A.lob_class_repo_id
+			WHERE A.class_id = ".$class_id."
+			ORDER BY A.lob_title";
+
+		$dm = new LinkedItemsModel($sql,$db);
+
+		$table = new LC_Table($dm);
+
+
+		//show the one to many relationship of lessons in one column
+		// using LessonRenderer
+		// also, correct the checkbox selection state with a one to
+		// many lookup
+		$sql = "SELECT A.lob_class_repo_id, A.class_id, B.title, A.lesson_id
+			FROM class_lesson_sequence AS A
+			LEFT JOIN class_lessons AS B
+			  ON A.lesson_id = B.id_class_lessons
+			WHERE A.class_id = ".$class_id."
+			AND A.lob_type = 'test'
+			ORDER BY B.title";
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$itemsToTitles[$db->record['lob_class_repo_id']][] = $db->record['title'];
+			$itemsToLessons[$db->record['lob_class_repo_id']][] = $db->record['lesson_id'];
+		}
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->maxWidth=60;
+		$table->setColumnNameAt(0,'&nbsp;');
+		$col->cellRenderer = new LC_TableLessonCheckboxRenderer();
+		$col->cellRenderer->selectedVal = $lesson_id;
+		$col->cellRenderer->selectedKey = 'id_class_lessons';
+		$col->cellRenderer->idName = 'lob_class_repo_id';
+		$col->cellRenderer->itemsToLessons = $itemsToLessons;
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$table->setColumnNameAt(1,'Assessment');
+		$col_b->maxWidth=360;
+		$col_b->justify='left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$table->setColumnNameAt(2,'Lesson');
+		$col_c->justify='left';
+		$col_c->cellRenderer = new LC_TableLessonRenderer();
+		$col_c->cellRenderer->lessonTitles = $itemsToTitles;
+		$col_c->cellRenderer->idName = 'lob_class_repo_id';
+
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Save the objectives to this lesson
+	 */
+	function saveContentRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		$user_id = intval($u->userId);
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+
+		//get all lesson items for security
+		$sql = "
+			SELECT A.lob_class_repo_id, A.lob_title, A.lob_urltitle, A.lob_mime, A.lob_type, A.lob_sub_type
+			FROM lob_class_repo AS A
+			WHERE A.class_id = ".$class_id."";
+
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['lob_class_repo_id'];
+			$lobRecord[$db->record['lob_class_repo_id']] = $db->record;
+		}
+
+		//clean input array to match allowable items
+		$validEntry = false;
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+				$validEntry = true;
+			}
+		}
+
+		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence->updateContent($itemArray,$lobRecord);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+	}
+
+
+
+	/**
+	 * Save the objectives to this lesson
+	 */
+	function saveObjectivesRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_objectives
+			FROM class_objectives AS A
+			WHERE A.id_classes = ".$class_id;
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_objectives'];
+		}
+
+		//clean input array to match allowable items
+		$validEntry = false;
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+				$validEntry = true;
+			}
+		}
+
+		if (!$validEntry) {
+			$this->linkObjectivesRun($db,$u,$lc,$t);
+			$t['message'] = "You need to choose at least one objective.";
+			return false;
+		}
+
+
+		//wipe all previous objective links for this lesson
+		$db->query('DELETE from class_lesson_objectives 
+			WHERE id_class_lesson = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_objectives
+		(id_class_objectives,id_class_lesson)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Save the web links to this lesson
+	 */
+	function saveWebRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = "SELECT A.id_class_links
+			FROM class_links AS A
+			WHERE A.id_classes = ".$class_id;
+		$db->query($sql);
+		while ($db->nextRecord()) {
+			$allowableItems[] = $db->record['id_class_links'];
+		}
+
+		//clean input array to match allowable items
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+			}
+		}
+
+		//wipe all previous web links for this lesson
+		$db->query('DELETE from class_lesson_links 
+			WHERE id_class_lessons = '.$lesson_id);
+
+		//insert each new link
+		$insert = 'INSERT INTO class_lesson_links
+		(id_class_links,id_class_lessons)
+		VALUES (%d, %d)';
+
+		foreach($itemArray as $k=>$v) {
+			if ($v < 1 ) continue;
+
+			$db->query( sprintf($insert, $v, $lesson_id));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Save the assignments to this lesson
+	 */
+	function saveAssignmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = 
+			"SELECT A.lob_class_repo_id, lob_title
+			FROM lob_class_repo AS A
+			WHERE A.class_id = ".$class_id;
+		$db->query($sql);
+
+		$lobRecord = array();
+		while ($db->nextRecord()) {
+			$linkText = LC_Lob_Util::createLinkText($db->record['lob_title']);
+			$allowableItems[] = $db->record['lob_class_repo_id'];
+			$lobRecord[$db->record['lob_class_repo_id']] = 
+				array('lob_title' => $db->record['lob_title'],
+				'lob_urltitle' => $linkText,
+				'lob_mime' => 'X-LMS/assignment'
+				);
+		}
+
+		//clean input array to match allowable items
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+			}
+		}
+
+
+		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence->updateAssignments($itemArray,$lobRecord);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+	}
+
+
+	/**
+	 * show the editing page
+	 */
+	function editRun(&$db,&$u,&$lc,&$t) {
+
+		$this->sectionTitle = 'Edit Lesson';
+		$lc->templateName = 'lessonManager_edit';
+		$defaults = array();
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		$t['lessonId'] = $lesson_id;
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		DEFINE(LESSON_ID, $lesson_id); // for the custom fields
+
+
+		// Get the basic info about the lesson
+		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
+			from class_lessons
+			where id_class_lessons='{$lesson_id}'";
+		$db->queryOne($sql);
+		$t['title'] = $db->record['title'];
+		$t['description'] = $db->record['description'];
+		$t['createdOn'] = $db->record['createdOn'];
+		$t['activeOn'] = $db->record['activeOn'];
+		$t['inactiveOn'] = $db->record['inactiveOn'];
+		if ( strlen( trim( $db->record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->record['checkList']) );
+
+		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+		$t['activeOnStruct']['fieldName'] = 'activeOn';
+		$t['activeOnStruct']['displayName'] = 'Active On';
+		//$t['activeOnStruct']['dateTimeBit'] = 63;
+		$t['activeOnStruct']['dateTimeBit'] = 7;
+
+		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
+		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
+		$t['inactiveOnStruct']['dateTimeBit'] = 7;
+	}
+
+
+	/**
+	 * This page will show a detailed overview of the entire lesson.
+	 */
+	function showRun(&$db,&$u,&$lc,&$t) {
+
+		$this->sectionTitle = 'Lesson Overview';
+		$lc->templateName = 'lessonManager_show';
+		$defaults = array();
+		$lessonId = intval($lc->getvars['id']);
+		$classId = $u->activeClassTaught->id_classes;
+		$t['lessonId'] = $lessonId;
+
+		$t['lessonObj'] = new LC_Lesson($lessonId);
+
+		if (!$this->checkAuth($lessonId,$db,$u,$t)) return;
+
+		DEFINE(LESSON_ID, $lessonId); // for the custom fields
+
+
+		// get the content pages
+		/*
+		$sql = "SELECT A.id_class_lesson_content, A.txTitle
+			FROM class_lesson_content AS A
+			WHERE A.id_classes='{$classId}'";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['contentPages'][$db->record['id_class_lesson_content']] = $db->record['txTitle'];
+
+		// get the content field
+		$sql = "select id_class_lesson_content from class_lesson_content
+			where id_class_lessons='{$lessonId}'";
+		$db->queryOne($sql);
+		$t['content'] = $db->record['id_class_lesson_content'];
+		 */
+
+		// get the objectives
+		$sql = "SELECT A.objective 
+			FROM class_objectives AS A
+			LEFT JOIN class_lesson_objectives AS B
+			  ON A.id_class_objectives=B.id_class_objectives
+			WHERE B.id_class_lesson='{$lessonId}'
+			AND A.id_classes = '{$classId}'";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['objectives'][] = $db->record['objective'];
+
+		// get the content
+		$sql = "SELECT A.lob_title
+			FROM class_lesson_sequence AS A
+			WHERE A.lesson_id='{$lessonId}'
+			AND A.class_id = '{$classId}'
+			AND lob_type = 'content'
+			ORDER BY rank";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['contentItems'][] = $db->record['lob_title'];
+
+
+
+		// Get the basic info about the lesson
+		$sql = "select title, description, createdOn, activeOn, inactiveOn, checkList
+			from class_lessons
+			where id_class_lessons='{$lessonId}'";
+		$db->queryOne($sql);
+		$t['title'] = $db->record['title'];
+		$t['description'] = $db->record['description'];
+		$t['createdOn'] = $db->record['createdOn'];
+		$t['activeOn'] = $db->record['activeOn'];
+		$t['inactiveOn'] = $db->record['inactiveOn'];
+		if ( strlen( trim( $db->record['checkList'] ) ) > 0 )
+			$t['checkList'] = split("\n", trim($db->record['checkList']) );
+
+		$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+		$t['activeOnStruct']['fieldName'] = 'activeOn';
+		$t['activeOnStruct']['displayName'] = 'Active On';
+//		$t['activeOnStruct']['dateTimeBit'] = 63;
+		$t['activeOnStruct']['dateTimeBit'] = 7;
+
+		$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+		$t['inactiveOnStruct']['fieldName'] = 'inactiveOn';
+		$t['inactiveOnStruct']['displayName'] = 'Inactive On';
+		$t['inactiveOnStruct']['dateTimeBit'] = 7;
+
+		// get the web links
+		$sql = "SELECT A.id_class_links, A.title
+			FROM class_links AS A
+			LEFT JOIN class_lesson_links  AS B
+			  ON A.id_class_links=B.id_class_links
+			WHERE B.id_class_lessons='{$lessonId}'
+			AND A.id_classes = '{$classId}'";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['web'][] = $db->record['title'];
+
+
+		// get the assignments
+		$sql = "SELECT A.lob_class_repo_id, A.lob_title
+			FROM lob_class_repo AS A
+			LEFT JOIN class_lesson_sequence  AS B
+			  ON A.lob_class_repo_id=B.lob_class_repo_id
+			WHERE B.lesson_id='{$lessonId}'
+			AND A.class_id = '{$classId}'
+			AND A.lob_type = 'activity'";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['assignments'][] = $db->record['lob_title'];
+
+		// get the ssessments
+/*
+		$sql = "SELECT A.assessment_id, A.display_name
+			FROM assessment AS A
+			LEFT JOIN assessment_lesson_link  AS B
+			  ON A.assessment_id=B.assessment_id
+			WHERE B.lesson_id='{$lessonId}'
+			AND A.class_id = '{$classId}'";
+		$db->query($sql);
+		while ( $db->nextRecord() )
+			$t['assessments'][] = $db->record['display_name'];
+//*/
+
+
+		$t['seqItems'] = ClassLessonSequencePeer::doSelect(' class_id = '.$classId. ' AND lesson_id = '.$lessonId.' ORDER BY rank');
+
+
+		$gbcodeList = array();
+		foreach ($t['seqItems'] as $objIdx => $obj) {
+
+			$t['seqItems'][$objIdx]->startOffset = $obj->startOffset.'|'.$obj->startTime;
+
+			if ($obj->lobType == 'test' || $obj->lobType == 'activity') {
+
+				$t['seqItems'][$objIdx]->dueOffset = (($obj->dueOffset - $obj->startOffset));
+				$t['seqItems'][$objIdx]->dueOffset = $obj->dueOffset.'|'.$obj->dueTime;
+				$gbcodeList[] = 'link to grade';
+			} else {
+				$gbcodeList[] = '';
+			}
+
+			//change the "type" field into an image representing the mime.
+			//no reason why i'm changing lobType instead of lobMime
+			$t['seqItems'][$objIdx]->lobType = '<img width="48" height="48" src="'.IMAGES_URL.'mimetypes/'.LC_Lob_Util::getMimeIcon($obj->lobMime).'" title="Mime: '.$mimetype.'" />';
+
+			//change unix timestamp offset into days
+//			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24). ' days <br/> 9:00 am <br/><a href="#">change</a>';
+//			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24) . ' days <br/> 9:00 am <br/><a href="#">change</a>';
+
+//			$t['seqItems'][$objIdx]->startOffset = ($obj->startOffset / 60/60/24);
+//			$t['seqItems'][$objIdx]->dueOffset = ($obj->dueOffset / 60/60/24);
+
+		}
+
+		$dm = new LC_Table_ObjectModel($t['seqItems']);
+		$dm->ignoreColumn('_new');
+		$dm->ignoreColumn('_modified');
+		$dm->ignoreColumn('_version');
+		$dm->ignoreColumn('_entityVersion');
+		$dm->ignoreColumn('__attributes');
+		$dm->ignoreColumn('__nulls');
+
+		$dm->ignoreColumn('classLessonSequenceId');
+		$dm->ignoreColumn('lessonId');
+		$dm->ignoreColumn('classId');
+		$dm->ignoreColumn('lobClassRepoId');
+		$dm->ignoreColumn('lobSubType');
+		$dm->ignoreColumn('lobMime');
+		$dm->ignoreColumn('linkText');
+		$dm->ignoreColumn('notBeforeSeqId');
+		$dm->ignoreColumn('endOffset');
+		$dm->ignoreColumn('gracePeriodDays');
+		$dm->ignoreColumn('hideUntilStart');
+		$dm->ignoreColumn('hideAfterEnd');
+		$dm->ignoreColumn('dueTime');
+		$dm->ignoreColumn('startTime');
+		$dm->ignoreColumn('endTime');
+
+
+		$table = new LC_Table($dm);
+
+		$columnModel = &$table->getColumnModel();
+		$columnModel->tableColumns[0]->name  =' ';
+		$columnModel->tableColumns[1]->name  ='Title';
+
+		$colA = &$columnModel->getColumnAt(0);
+		$colA->maxWidth=64;
+
+		$colD = &$columnModel->getColumnAt(1);
+		$colD->justify='left';
+
+		//create a gradebook entry column
+// *
+		$column = new LC_TableColumn();
+		$column->setName( "Grade" );
+		$column->cellRenderer = new LC_TableStaticRenderer();
+		$column->cellRenderer->values = $gbcodeList;
+		$column->maxWidth=75;
+		$table->addColumnAt(2,$column);
+//*/
+
+		$colB = &$columnModel->getColumnAt(3);
+		$colB->maxWidth=180;
+		$colB->name = 'Start';
+		$colB->cellRenderer = new LC_Table_DateOffsetRenderer();
+		$colB->cellRenderer->idName = 'startOffset';
+		$colB->cellRenderer->fieldName = 'startOffset';
+
+		$colC = &$columnModel->getColumnAt(4);
+		$colC->maxWidth=200;
+		$colC->name = 'Due';
+		//true or false, allow never to be an option?
+		$colC->cellRenderer = new LC_Table_DateOffsetRenderer(true);
+		$colC->cellRenderer->zeroLabel = "Same Day";
+		$colC->cellRenderer->idName = 'dueOffset';
+		$colC->cellRenderer->fieldName = 'dueOffset';
+		$colC->cellRenderer->skipEmpty = true;
+
+		$col = &$columnModel->getColumnAt(5);
+		$col->maxWidth=50;
+		$col->name = 'Rank';
+		$col->cellRenderer = new LC_Table_SequenceRenderer();
+		$col->cellRenderer->id = $lessonId;
+
+
+		$t['table'] = new LC_TableRenderer($table);
+		$t['id'] = $lesson_id;
+
+	}
+
+
+
+	/**
+	 * commit the posted data to the database, if worthy
+	 */
+	function updateRun(&$db,&$u,&$lc,&$t)
+	{
+		$f = new Siteform();
+		$lessonId = $lc->getvars['id'];
+
+		if (!$this->checkAuth($lessonId,$db,$u,$t)) return;
+
+		$activeOn = dateArray2TimestampFull($lc->postvars['activeOn']);
+		$inactiveOn = dateArray2Timestamp($lc->postvars['inactiveOn']);
+
+		$title = htmlentities($lc->postvars['title']);
+		$desc = htmlentities($lc->postvars['description']);
+
+		$errors = array();
+		if ( strlen($title) < 3 ) {
+			$errors[] = "The title is not long enough.";
+		}
+
+		if ( strlen($desc) < 3 ) {
+			$errors[] = "The description is not long enough.";
+		}
+
+		if ( count($errors) > 0 ) {
+			$t['errors'] = $errors;
+			$this->editRun($db,$u,$lc,$t);
+			//keep the user values
+			$t['title'] = $lc->postvars['title'];
+			$t['description'] = $lc->postvars['description'];
+			$t['activeOn'] = $lc->postvars['activeOn'];
+			$t['inactiveOn'] = $lc->postvars['inactiveOn'];
+			$t['content'] = intval($lc->postvars['content']);
+
+			$t['activeOnStruct']['defaultValue'] = $t['activeOn'];
+			$t['inactiveOnStruct']['defaultValue'] = $t['inactiveOn'];
+			return;
+		}
+
+		$content_id = intval($lc->postvars['content']);
+
+                //load PBDO Object
+                $lesson = ClassLessons::load($lessonId);
+                $lesson->set('title',$lc->postvars['title']);
+                $lesson->set('description',$lc->postvars['description']);
+                $lesson->set('activeOn',$activeOn);
+                $lesson->set('inactiveOn',$inactiveOn);
+                if($lesson->save()) {
+                        $t['msg'] = 'Lesson updated successfully.';
+                } else {
+                        $t['msg'] = 'Lesson update failed!';
+                }
+
+		// take care of the content table
+		$db->query( "update class_lesson_content set
+			id_class_lessons=NULL
+			where id_class_lessons='{$lessonId}'" );
+		$db->query( "update class_lesson_content set
+			id_class_lessons='{$lessonId}'
+			where id_class_lesson_content=".$content_id );
+
+		$u->addSessionMessage('Lesson changes saved.');
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lessonId);
+
+	}
+
+
+	/**
+	 * confirm the lesson deletion and ask if we should remove or just unlink the
+	 * external items.
+	 */
+	function deleteConfRun(&$db,&$u,&$lc,&$t)
+	{
+		$lc->templateName = 'lessonManager_deleteConf';
+		$lessonid = $lc->getvars['id'];
+
+		$db->queryOne( "select title from class_lessons where id_class_lessons='{$lessonid}'");
+		$t['lessonTitle'] = $db->record['title'];
+		$t['id_class_lessons'] = $lessonid;
+		$t['id_classes'] = $u->activeClassTaught->id_classes;
+
+	}
+
+
+	/**
+	 * delete the lesson
+	 */
+	function deleteRun(&$db,&$u,&$lc,&$t)
+	{
+		$lessonid = $lc->getvars['id'];
+
+		if (!$this->checkAuth($lessonid,$db,$u,$t)) return;
+
+		// just set the lesson id in all the tables to NULL
+		$db->query("update class_lesson_content set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
+	//	$db->query("update class_objectives set id_class_lessons=NULL where id_class_lessons='{$lessonid}'");
+
+		// we just want to remove the link associations for weblinks and objectives.
+		$db->query("delete from class_lesson_links where id_class_lessons='{$lessonid}'");
+		$db->query("delete from class_lesson_objectives where id_class_lesson='{$lessonid}'");
+		$db->query("delete from class_assignments_link where id_class_lessons='{$lessonid}'");
+
+		// finally, delete the lesson itself
+		$db->query("delete from class_lessons where id_class_lessons='{$lessonid}'");
+
+		$t['msg'] = 'The lesson has been removed and all its associated content, objectives,
+			and assignments have been unlinked. You may now reuse these items in other lessons';
+
+		$this->Run($db,$u,$lc,$t);
+		
+	}
+
+
+	/**
+	 * Show the Check List for editing
+	 */
+	function checkListRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		$sql = "select checkList, title
+			from class_lessons
+			where id_class_lessons='{$lesson_id}'";
+
+		$db->queryOne($sql);
+
+		$t['checkList'] = split("\n", $db->record['checkList']);
+		$t['title'] = $db->record['title'];
+		$t['lessonId'] = $lesson_id;
+
+		$lc->templateName = 'lessonManager_checkList';
+	}
+
+
+	/**
+	 * Save the check list to this lesson
+	 */
+	function saveCheckListRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+
+		foreach($lc->getvars['checkList'] as $k=>$v) {
+			if ( strlen(trim($v)) > 0 ) {
+				$checkList .= htmlentities($v)."\n";
+			}
+		}
+
+		$sql = "UPDATE class_lessons 
+			SET checkList='%s'
+			WHERE id_class_lessons='{$lesson_id}'";
+
+		$db->query( sprintf($sql,
+				$checkList)
+			);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+	}
+
+
+	/**
+	 * Save the assessments to this lesson
+	 */
+	function saveAssessmentsRun(&$db,&$u,&$lc,&$t) {
+		$lesson_id = intval($lc->getvars['id']);
+		$class_id = $u->activeClassTaught->id_classes;
+		if (!$this->checkAuth($lesson_id,$db,$u,$t)) return;
+	
+		$itemArray = $lc->getvars['item'];
+		if (! is_array($itemArray) ) {
+			$itemArray = array();
+		}
+
+		//get all lesson items for security
+		$sql = 
+			"SELECT A.lob_class_repo_id, lob_title
+			FROM lob_class_repo AS A
+			WHERE A.class_id = ".$class_id;
+
+		$db->query($sql);
+		$lobRecord = array();
+		while ($db->nextRecord()) {
+			$linkText = LC_Lob_Util::createLinkText($db->record['lob_title']);
+			$allowableItems[] = $db->record['lob_class_repo_id'];
+			$lobRecord[$db->record['lob_class_repo_id']] = 
+				array('lob_title' => $db->record['lob_title'],
+					'lob_urltitle' => $linkText,
+					'lob_mime' => 'X-LMS/test'
+				);
+		}
+
+		//clean input array to match allowable items
+		$validEntry = false;
+		foreach($itemArray as $k=>$v) {
+			if  ( ! in_array($v, $allowableItems) ) {
+				$itemArray[$k] = 0;
+			} else {
+				$itemArray[$k] = intval($v);
+				$validEntry = true;
+			}
+		}
+
+
+		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence->updateTests($itemArray,$lobRecord);
+
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/lessonManager/event=show/id='.$lesson_id);
+	}
+
+
+
+
+	/**
+	 * Do they have authority for this lesson? Yes, return true. No, give them an error
+	 * and return false. (The caller need only return.)
+	 */
+	function checkAuth($lessonid, &$db, &$u, &$t) {
+		$db->queryOne("select count(id_class_lessons) as cnt from class_lessons as l
+			left join classes as c on l.id_classes=c.id_classes
+			where l.id_classes='{$u->activeClassTaught->id_classes}'
+			and l.id_class_lessons='{$lessonid}'");
+		if (!$db->record['cnt'] || intval($lessonid) == 0 ) {
+			$this->presentor = 'errorMessage';
+			$t['message'] = "You don't have permission to modify that lesson.";
+			return false;
+		} else return true;
+	}
+
+}
+
+
+class LC_Table_SequenceRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+//		debug($this->value);
+		return '<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=up">Up</a> <br/>
+			<a href="'.appurl('classmgr/lessonSequence/').'id='.$this->id.'/r='.$this->value.'/event=rank/ud=dn">Down</a>
+			';
+	}
+}
+
+
+class LC_Table_DateOffsetRenderer extends LC_TableCellRenderer{
+
+	var $selectedVal;
+	var $selectedKey;
+	var $idName;
+	var $fieldName = 'item';
+	var $options = array();
+	var $label = '';
+	var $useKeysAsValues = true;
+	var $skipEmpty = false;
+	var $dayList = array();
+	var $timeList = array();
+	var $dayLabel = ' days';
+	var $zeroLabel = 'First Day';
+	var $allowNever = false;
+
+	function LC_Table_DateOffsetRenderer($allowNever=false) {
+		$this->allowNever = $allowNever;
+		for ($x=0; $x < 24; ++$x) {
+			for ($y=0; $y < 60; $y+=30) {
+				if ($x < 12) {
+					$ampm = 'AM';
+				} else {
+					$ampm = 'PM';
+				}
+				$fieldValue = $x * 60*60;
+				$fieldValue += $y * 60;
+				if ($x == 0 ) {
+					$this->timeList[$fieldValue] = ($x+12).':'.sprintf('%02d',$y). ' '.$ampm;
+				} else if ($x > 12) {
+					$this->timeList[$fieldValue] = ($x-12).':'.sprintf('%02d',$y). ' '.$ampm;
+				} else {
+					$this->timeList[$fieldValue] = $x.':'.sprintf('%02d',$y). ' '.$ampm;
+				}
+			}
+		}
+
+		//prepopulate days
+		if ($this->allowNever === true) {
+			$this->dayList[-1] = 'Never';
+		}
+
+		$this->dayList[0] = $this->zeroLabel;
+		for ($x = 1; $x <= 30; $x++) {
+			$this->dayList[ ($x*60*60*24) ] = $x .$this->dayLabel;
+		}
+	}
+
+	/**
+	 * time and date are delivered in one $this->value variable
+	 * separated by a pipe char.
+	 */
+	function getRenderedValue() {
+		//empty values still have the pipe character
+		if ($this->skipEmpty && strlen($this->value) < 2) {
+			return '';//"N/A";
+		}
+		list($days,$hours) = @explode('|',$this->value);
+
+		$time = "<select name=\"".$this->fieldName."[".$this->row."]\">\n";
+		$time .= Form::makeOptions($this->dayList,$days)."</select>\n";
+
+		$time .= "&nbsp;@<select name=\"".$this->fieldName."_time[".$this->row."]\">";
+		$time .= Form::makeOptions($this->timeList,$hours)."</select>\n";
+		return $time;
+
+	}
+}
+
+?>

@@ -1,0 +1,79 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH.'LC_html.php');
+
+class studentProfile  extends FacultyService {
+
+	var $presentor = 'HTMLPresentation';
+
+	// links
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $applinks = array( );
+	var $sectionTitle = 'Student Profiles';
+
+	function studentProfile() {
+		global $lcObj;
+//auto-comment		$lcObj->templateStyle = 'private';
+
+	}
+
+
+	function run(&$db,&$u,&$lc,&$t) {
+
+		$lc->templateName = 'studentProfile_main';
+
+		$sql = "select username,firstname,lastname,photo from profile as p
+			left join class_student_sections as ss on ss.id_student=p.username
+			left join class_sections as s on s.sectionNumber=ss.sectionNumber
+			where s.id_classes='{$u->activeClassTaught->id_classes}' AND ss.active=1
+			order by lastname";
+		$db->query($sql);
+
+		$tbl = array();
+
+		while ($db->nextRecord()) {
+
+			$photo = is_file(IMAGES_PATH.'photos/'.$db->record['photo'])
+				? 'photos/'.$db->record['photo']
+				: 'noimage.png';
+
+			$tbl[] = '<a href="'.appurl('users/view/'.$db->record['username']).'">'
+				.'<img border="0" src="'.IMAGES_URL.$photo.'" alt="'
+				.$db->record['lastname'].', '.$db->record['firstname'].'" /><br/>'
+				.$db->record['lastname'].', '.$db->record['firstname'].'</a>';
+		}
+
+		if (count($tbl))
+			$t['table'] = htmlTable( $tbl, 4, '100%', '', 5, 2, 0, 'center' );
+		else
+			$t['table'] = '<i>Sorry, it seems that there aren\'t any students enrolled in this class. If you believe this not to be true, please contact the help desk.</i>';
+
+	}
+
+
+
+}
+
+?>

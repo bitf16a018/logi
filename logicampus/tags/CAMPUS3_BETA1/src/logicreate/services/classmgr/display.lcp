@@ -1,0 +1,85 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'lc_lesson.php');
+include_once(LIB_PATH.'PBDO/ClassLessons.php');
+
+
+/**
+ * Provide a good overview of the chosen class.
+ *
+ */
+class display extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+/**
+ * Display a list of all available activities in the
+ *  classmgr app.
+ * Also, show a table of all lessons in the class and all the 
+ *  content linked to that lesson.
+ *
+ * Input data: id_classes
+ * Output data: main class page
+ *
+ */
+	function run(&$db,&$u,&$lc,&$t) 
+	{
+		$t['classObj'] = $u->activeClassTaught;
+		$this->inactivelinks[] = 'Classroom Manager';
+
+		$lc->templateName = 'display_main';
+
+		/*****
+		* MOTD
+		****/
+		$t['motd'] = LcSettings::getSystemMotd();
+
+
+		if (strlen($t['motd']) == 0)
+		{
+			unset($t['motd']);
+		}
+		if ($u->activeClassTaught->classType == 'ITV')
+		{
+			$t['ITVClass'] = true;
+		}
+		
+		if ($u->activeClassTaught->classType == 'Internet')
+		{
+			$t['Internet'] = true;
+		}
+
+		$classId = $u->activeClassTaught->id_classes;
+		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
+
+		$t['contentCount'] = array();
+		$t['activityCount'] = array();
+		$t['testCount'] = array();
+		foreach ($t['lessonList'] as $idx => $lessonObj) {
+			$t['contentCount'][$idx] = $lessonObj->getContentCount();
+			$t['activityCount'][$idx] = $lessonObj->getObjectCountByType('activity');
+			$t['assessmentCount'][$idx] = $lessonObj->getObjectCountByType('assessment');
+		}
+
+	}
+}
+
+?>

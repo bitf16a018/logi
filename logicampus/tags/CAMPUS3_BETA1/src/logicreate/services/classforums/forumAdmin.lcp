@@ -1,0 +1,616 @@
+<?php
+
+include_once(INSTALLED_SERVICE_PATH."classforums/classforums_lib.php");
+
+include_once(LIB_PATH."PBDO/ClassGroup.php");
+include_once(LIB_PATH."PBDO/ClassGroupMember.php");
+
+include_once(LIB_PATH."LC_html.php");
+
+include_once(SERVICE_PATH.'classforums/lc_table_forums.php');
+
+/**
+ * Class Forums
+ *
+ * A redisign of the original forums
+ * This is intended to provide a more robust
+ * solution to student <-> teacher interaction
+ * via the forums.
+ *
+ * You need to be a student to use this interface.
+ * Faculty should use another one.
+ */
+class ForumAdmin extends FacultyService {
+
+	var $presentor = 'htmlPresentation';
+	var $sectionTitle = 'Classroom Forums';
+
+	var $applinks = array();
+	var $navlinks = array();
+
+	function buildNavLinks() {
+		$this->navlinks = array (
+		lct('Class Forums Home') => '%classforums/'
+		);
+	}
+
+	function buildAppLinks() {
+		$this->applinks = array (
+		lct('Add Forum') => 'forumAdmin/event=newForum',
+		lct('Manage Forums') => 'forumAdmin/',
+		lct('Add/Manage Categories') => 'categories/',
+		lct('View Trash') => 'forumAdmin/event=viewTrash'
+		);
+	}
+
+
+
+	function run (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forumAdmin_main';
+
+		$dm = new LC_Table_ForumModerator($u);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col_a = &$columnModel->getColumnAt(0);
+		$col_a->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_a->cellRenderer->fieldName = 'move';
+		$col_a->cellRenderer->idName = 'classForumId';
+		$col_a->cellRenderer->selectedKey = 'classForumId';
+		$col_a->cellRenderer->selectedVal = '1';
+		$col_a->maxWidth=35;
+		$col_a->justify = 'center';
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->justify = 'left';
+
+		$col_c = &$columnModel->getColumnAt(2);
+		$col_c->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_c->cellRenderer->fieldName = 'locked';
+		$col_c->cellRenderer->idName = 'classForumId';
+		$col_c->cellRenderer->selectedKey = 'isLocked';
+		$col_c->cellRenderer->selectedVal = '1';
+		$col_c->maxWidth=64;
+
+/*
+		$col_d = &$columnModel->getColumnAt(3);
+		$col_d->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_d->cellRenderer->fieldName = 'moderated';
+		$col_d->cellRenderer->idName = 'classForumId';
+		$col_d->cellRenderer->selectedKey = 'isModerated';
+		$col_d->cellRenderer->selectedVal = '1';
+		$col_d->maxWidth=64;
+*/
+
+//		$col_e = &$columnModel->getColumnAt(4);
+		$col_e = &$columnModel->getColumnAt(3);
+		$col_e->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_e->cellRenderer->fieldName = 'visible';
+		$col_e->cellRenderer->idName = 'classForumId';
+		$col_e->cellRenderer->selectedKey = 'isVisible';
+		$col_e->cellRenderer->selectedVal = '1';
+		$col_e->maxWidth=64;
+
+/*
+		$col_f = &$columnModel->getColumnAt(5);
+		$col_f->cellRenderer = new LC_TableCheckboxRenderer();
+		$col_f->cellRenderer->fieldName = 'files';
+		$col_f->cellRenderer->idName = 'classForumId';
+		$col_f->cellRenderer->selectedKey = 'allowUploads';
+		$col_f->cellRenderer->selectedVal = '1';
+		$col_f->maxWidth=64;
+*/
+
+		//$col_g = &$columnModel->getColumnAt(6);
+		$col_g = &$columnModel->getColumnAt(4);
+		$col_g->maxWidth=90;
+
+
+		$headerModel = &$table->getHeaderModel();
+		$col_c = &$headerModel->getColumnAt(2);
+		$col_c->justify = 'center';
+
+		$col_d = &$headerModel->getColumnAt(3);
+		$col_d->justify = 'center';
+
+		$col_e = &$headerModel->getColumnAt(4);
+		$col_e->justify = 'center';
+
+		$col_f = &$headerModel->getColumnAt(5);
+		$col_f->justify = 'center';
+
+
+
+		//make sub headers for forum categories
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+			$categoryArray[$id] = $name;
+
+			$thisCount = $dm->getForumsInCategory($id);
+			if ($thisCount < 1) { continue; }
+
+			$subHeaderModel = new LC_TableDefaultColumnModel();
+			$sub_col_a = new LC_TableColumn();
+			$sub_col_a->name = lct('Category').': '. $v->getName();
+			$subHeaderModel->addColumn($sub_col_a);
+			$subHeader = new LC_DefaultTableHeader($subHeaderModel);
+			$subHeader->row = $forumCount;
+
+			$forumCount += $thisCount;
+
+			$table->addSubHeader($subHeader);
+		}
+		$t['categoryPulldown'] = makeOptions($categoryArray);
+		$t['table'] = new LC_TableRenderer($table);
+	}
+
+
+	/**
+	 * Show the page to add a new forum
+	 */
+	function newForumRun (&$db, &$u, &$lc, &$t) {
+		$lc->templateName = 'forumAdmin_editForum';
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+			$categoryArray[$id] = $name;
+		}
+		$t['categories'] = $categoryArray; 
+	}
+
+
+	/**
+	 * Show the page to add a new forum
+	 */
+	function editForumRun (&$db, &$u, &$lc, &$t) {
+		$lc->templateName = 'forumAdmin_editForum';
+		$forumId = (int)$lc->getvars['forum_id'];
+		$forum = ClassForum_Forums::load($forumId);
+		if ($forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+		$t['name'] = $forum->getName();
+		$t['description'] = $forum->getDescription();
+		$t['categoryId'] = (int)$forum->getCategoryId();
+		$t['forumId'] = $forumId;
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+			$categoryArray[$id] = $name;
+		}
+		$t['categories'] = $categoryArray; 
+	}
+
+
+	/**
+	 * Add a new forum or edit an existing one
+	 */
+	function saveForumRun (&$db, &$u, &$lc, &$t) {
+		$forumId = (int)$lc->postvars['forum_id'];
+		if ($forumId > 0 ) {
+			$x = ClassForum_Forums::load($forumId);
+			if ($x->getClassId() != $u->activeClassTaught->id_classes) {
+				$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+				$this->presentor = 'errorMessage';
+				return false;
+			}
+		} else { 
+			$x = new ClassForum_Forums();
+			$x->setClassId( $u->activeClassTaught->id_classes );
+			//visible by default
+			$x->setVisible( true );
+		}
+	
+
+		$x->setName( $lc->postvars['name'] );
+		$x->setDescription( $lc->postvars['description'] );
+		$x->setCategoryId( $lc->postvars['category_id']);
+		$x->save();
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('forumAdmin/');
+	}
+
+
+	/**
+	 * move forums as well as save invisible, locked, moderated, and uploads...
+	 */
+	function saveChangesRun (&$db, &$u, &$lc, &$t) {
+
+		//moving categories
+		$cat_move_to = (int)$lc->postvars['cat_move_to'];
+		if ($cat_move_to > -1) {
+			foreach ($lc->postvars['move'] as $blank=>$id) {
+				$db->query(
+				//echo(
+				ClassForum_Queries::getQuery('moveForum',
+					array ($cat_move_to, $id, $u->activeClassTaught->id_classes)
+				));
+			}
+		}
+
+		//locked
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('is_locked', $u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['locked'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('is_locked', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		//moderated
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('is_moderated',$u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['moderated'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('is_moderated', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		//visible
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('is_visible',$u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['visible'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('is_visible', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		//uploads
+		$db->query(
+		ClassForum_Queries::getQuery('unsetAllForums',
+			array ('allow_uploads',$u->activeClassTaught->id_classes)
+		));
+
+		foreach ($lc->postvars['files'] as $blank=>$id) {
+			$db->query(
+			ClassForum_Queries::getQuery('setForum',
+				array ('allow_uploads', $id, $u->activeClassTaught->id_classes)
+			));
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('forumAdmin/');
+	}
+
+
+	/**
+	 * show a list of forums to which to move this thread
+	 */
+	function moveThreadRun (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forumAdmin_moveThread';
+
+		$dm = new LC_Table_ForumModerator($u);
+
+		$table = new LC_Table($dm);
+		$columnModel = &$table->getColumnModel();
+		$col_a = &$columnModel->getColumnAt(0);
+		$col_a->cellRenderer = new LC_TableRadioRenderer();
+		$col_a->cellRenderer->fieldName = 'move';
+		$col_a->cellRenderer->idName = 'classForumId';
+		$col_a->cellRenderer->selectedVal = '1';
+		$col_a->cellRenderer->selectedKey = 'classForumId';
+		$col_a->maxWidth=35;
+		$col_a->justify = 'center';
+
+		$col_b = &$columnModel->getColumnAt(1);
+		$col_b->justify = 'left';
+
+		$col_c = &$columnModel->removeColumnAt(2);
+
+		$col_d = &$columnModel->removeColumnAt(3);
+
+		$col_e = &$columnModel->removeColumnAt(4);
+
+		$col_f = &$columnModel->removeColumnAt(5);
+
+		$col_g = &$columnModel->removeColumnAt(6);
+
+		//make sub headers for forum categories
+
+		$categories = ClassForum_Categories::getAll($u->activeClassTaught->id_classes);
+
+		foreach($categories as $k=>$v) {
+
+			// as we're looping through, capture each 
+			// category name/ID to display in dropdown
+
+			$name 	= $v->getName();
+			$id 	= $v->getCategoryId();	
+
+			$thisCount = $dm->getForumsInCategory($id);
+			if ($thisCount < 1) { continue; }
+
+			$subHeaderModel = new LC_TableDefaultColumnModel();
+			$sub_col_a = new LC_TableColumn();
+			$sub_col_a->name = lct('Category').': '. $v->getName();
+			$subHeaderModel->addColumn($sub_col_a);
+			$subHeader = new LC_DefaultTableHeader($subHeaderModel);
+			$subHeader->row = $forumCount;
+
+			$forumCount += $thisCount;
+
+			$table->addSubHeader($subHeader);
+		}
+
+		$t['table'] = new LC_TableRenderer($table);
+		$t['postId'] = (int)$lc->getvars['post_id'];
+	}
+
+
+	/**
+	 * Save the thread movement
+	 */
+	function postMoveThreadRun (&$db, &$u, &$lc, &$t) {
+
+		$moveToId = (int) $lc->postvars['move'];
+		$postId = (int) $lc->postvars['post_id'];
+
+		//check for ownership of the posted thread and the 
+		// desired destination forum
+		$forum = ClassForum_Forums::load($moveToId);
+		if ($forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+		}
+		$post = ClassForum_Posts::load($postId);
+		$origForum = $post->getForum();
+		if ($origForum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread that you do not own.";
+		}
+
+		if ( strlen($t['message']) > 0 ) {
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+
+		$db->query(
+			ClassForum_Queries::getQuery('moveThreadForum',
+				array($moveToId,$postId)
+			));
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = modurl('forum/forum_id='.$moveToId);
+	}
+
+
+	/**
+	 * Trash a thread.
+	 * Move the thread to the trash_posts table
+	 */
+	function trashThreadRun (&$db, &$u, &$lc, &$t) {
+
+		$postId = (int) $lc->getvars['post_id'];
+		$post = ClassForum_Posts::load($postId);
+
+		//check for ownership of the posted thread and the 
+		// desired destination forum
+		$forum = $post->getForum();
+		if ($forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread to a forum that you do not own.";
+		}
+
+		if ( strlen($t['message']) > 0 ) {
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$post->trashThread();
+		$lc->templateName = 'forumAdmin_trashThread';
+		$t['forumId'] = $forum->getForumId();
+		$t['forumName'] = $forum->getName();
+	}
+
+
+	/**
+	 * Show trashed messages
+	 */
+	function viewTrashRun (&$db, &$u, &$lc, &$t) {
+
+		$lc->templateName = 'forumAdmin_viewTrash';
+		$forumId = -1;
+		$this->forumId = -1;
+
+		$rpp = 15; //rows per page
+		$cp = (int) $lc->getvars['page']; //current page
+		if ($cp < 1) {
+			$cp = 1;
+		}
+
+		//FIXME check for closed, visibility, etc
+		$dm = new LC_TableModel_TrashTopicList($u->activeClassTaught->id_classes, $rpp, $cp);
+
+		$table = new LC_TablePaged_TrashTopicList($dm);
+		$table->rowsPerPage = $rpp;
+		$table->currentPage = $cp;
+		$table->forumId = (int) $lc->getvars['forum_id'];
+
+		$columnModel = &$table->getColumnModel();
+
+		$col = &$columnModel->getColumnAt(0);
+		$col->cellRenderer = new LC_TableRenderer_TrashTopic();
+		$col->justify = 'left';
+
+		$col_b = &$columnModel->getColumnAt(3);
+		$col_b->maxWidth=60;
+
+		$t['table'] = new LC_TableRendererPaged($table);
+	}
+
+
+	/**
+	 * Show trashed messages
+	 */
+	function unTrashRun (&$db, &$u, &$lc, &$t) {
+		$threadId = $lc->getvars['thread_id'];
+		$post = ClassForum_Posts::loadFromTrash($threadId);
+		$forum = $post->getForum();
+		if ( $forum->getClassId() != $u->activeClassTaught->id_classes) {
+			$t['message'] = "You are trying to move a thread that you do not own.";
+			$this->presentor = 'errorMessage';
+			return false;
+		}
+
+		$post->unTrashThread();
+
+		$lc->templateName = 'forumAdmin_unTrash';
+		$t['forumName'] =  $forum->getName();
+		$t['forumId'] =  $forum->getForumId();
+	}
+}
+
+
+
+class LC_Table_ForumModerator extends LC_TableModel {
+
+	var $forums = array();
+
+	/**
+	 * make a 5 x 10 grid of nonsense
+	 */
+	function LC_Table_ForumModerator($u) {
+		$this->forums = ClassForum_Forums::getAll($u->activeClassTaught->id_classes);
+	}
+
+
+	//sub-class
+	/**
+	 * Returns the number of rows in the model.
+	 */
+	function getRowCount() {
+		return (count($this->forums));
+	}
+
+
+	/**
+	 * Returns the number of cols in the model.
+	 */
+	function getColumnCount() {
+		return 5;
+	}
+
+
+	/**
+	 * Returns the name of a column.
+	 */
+	function getColumnName($columnIndex) {
+		switch ($columnIndex) {
+			case '0':
+				return '&nbsp;'; break;
+
+			case '1':
+				return 'Forum'; break;
+
+			case '2':
+				return 'Locked'; break;
+
+/*
+			case '3':
+				return 'Moderated'; break;
+*/
+
+			case '3':
+				return 'Visible'; break;
+
+/*
+			case '5':
+				return 'Files'; break;
+*/
+
+			case '4':
+				return '&nbsp;'; break;
+		}
+	}
+
+
+	/**
+	 * return the value at an x,y coord
+	 */
+	function getValueAt($x,$y) {
+		$forum = $this->forums[$x];
+		switch ($y) {
+			case 0:
+				return $forum;
+			case 1:
+				return $forum->_dao->name;
+			case 2:
+				return $forum;
+			case 3:
+				return $forum;
+/*
+			case 4:
+				return $forum;
+			case 5:
+				return $forum;
+*/
+			case 4:
+				return '<a href="'.modurl('forumAdmin/event=editForum/forum_id='.$forum->getForumId()).'">[ Edit ]</a> <!--<a href="#">[ People ]</a>-->';
+		}
+	}
+
+
+
+	/**
+	 * Custom function to get number of forums
+	 * in a certain category
+	 * saves from hitting the DB, since all the forums are loaded already
+	 */
+	function getForumsInCategory($catId) {
+		$ret = 0;
+		foreach($this->forums as $k => $v ) {
+			if ($v->getCategoryId() == $catId) {
+				$ret++;
+			}
+		}
+		return $ret;
+	}
+}
+
+
+class LC_TableForumRenderer extends LC_TableCellRenderer {
+
+	function getRenderedValue() {
+		return '<a href="'.appurl('classforums/forum/').'forum_id='.$this->value->classForumId.'">'.$this->value->name.'</a> <br/>'.$this->value->description;
+	}
+}
+
+
+?>

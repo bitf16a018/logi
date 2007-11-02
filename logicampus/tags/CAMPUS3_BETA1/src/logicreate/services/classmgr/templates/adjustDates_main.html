@@ -1,0 +1,35 @@
+<?php
+echo $t['sectionheader'];
+?>
+
+<?php
+$tables = array ('lesson', 'assessment', 'assignment', 'announce', 'event');
+$names = array ('Lesson', 'Assessment', 'Assignment', 'Announcement', 'Calendar Event');
+
+for ($x=0; $x < count($tables); ++$x ) {
+$key = $tables[$x];
+$name = $names[$x];
+?>
+
+<div>
+	<div align="right" style="float:right">
+		<input onclick="document.location.href='<?=modurl('adjustDates/event='.$key);?>';" style="font-size:97%" type="button" value="Adjust Dates"/>
+	</div>
+	<img align="middle" border="0" style="margin:0px;padding:0px;" src="/images/calendar.png"/>
+	<H2 style="display:inline;margin:1px;"><?=$name;?> Dates</H2>
+</div>
+<?php
+
+if ($t[$key]->table->getRowCount() < 1) {
+	echo "<i>No {$key}s found.</i>";
+} else {
+	echo $t[$key]->toHTML();
+}
+
+?>
+<br/><br/>
+
+<?php
+}
+?>
+

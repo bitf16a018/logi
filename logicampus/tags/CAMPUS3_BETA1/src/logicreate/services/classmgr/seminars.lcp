@@ -1,0 +1,245 @@
+<?
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+/*
+ *
+ * This is the main page for setting up a classroom. 
+ * Any classroom specific things that you need are done
+ * in this file and corresponding templates.
+ *
+ */
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'SeminarClassesDates.php');
+include_once(LIB_PATH.'semesterObj.php');
+
+class seminars extends FacultyService {
+
+
+   	var $presentor='htmlPresentation';
+	var $cleanedArray = array();
+
+	var $navlinks = array (
+		'Classroom Manager' => 'display',
+		'Lessons' => 'lessonManager/',
+		'Webliography' => 'lessonWebliography/',
+		'FAQ' => 'faq/',
+		'Assignments' => 'assignmentManage/',
+		'Content' => 'lessonContent/',
+		'Presentations' => 'studentPresentation',
+		'Objectives' => 'lessonObjectives/'
+	);
+	var $inactivelinks = array( 'Select Classroom Style' );
+	var $sectionTitle = 'Seminar Scheduling';
+	var $applinks = array('View Seminars'=>'seminars/event=view','Add New Seminar'=> 'seminars/event=add');
+	
+	var $authorizer = 'native';	
+
+
+	function run($db, &$u, &$lc, &$t)
+	{
+		$t['url'] = APP_URL.'classmgr/seminars/event=view';
+		$this->presentor = 'redirectPresentation';
+	}
+	
+	function authorize($lc, $u)
+	{
+		if ($u->activeClassTaught->classType !=  'ITV')
+			{
+				return false;
+			}
+			
+		if ( $u->activeClassTaught->id_classes == '' )
+			{
+				return false;
+			}
+		return true;
+	}
+
+	function addRun(&$db,&$u,&$lc,&$t) 
+	{
+		if (!$this->checkAccess($u) )
+		{
+			$lc->templateName = 'seminars_error';
+			$t['message'] = 'The date range to modify seminars is not currently active.';
+			return;
+		}
+			$sql = "SELECT count(*) as count FROM seminar_classes_dates
+			WHERE id_classes='".$u->activeClassTaught->id_classes."'";
+			$db->queryOne($sql);
+			# update the count on the seminar
+			$obj->numSeminar = $db->record['count'] + 1;
+			$obj->idClasses = $u->activeClassTaught->id_classes;
+			if ($obj->numSeminar == 5)
+			{
+				$t['message'] =  "You cannot add more than 4
+				Seminars to your class.";
+				$lc->templateName = 'seminars_error';
+				return;
+			}
+
+		$lc->templateName = 'seminars_edit';
+		$f = new SiteForm($u->groups);
+		$f->fieldPermissions = true;
+		$f->getForm('seminar', $t['entry']);
+		$t['form'] = $f->ToHTML();
+	}
+	
+
+	function viewRun($db, &$u, &$lc, &$t)
+	{
+		$lc->templateName = 'seminars_view';	
+		
+		$t['data'] =
+		SeminarClassesDatesPeer::doSelect("id_classes='".$u->activeClassTaught->id_classes."' ORDER BY num_seminar ASC");
+;
+	}
+
+	function editRun($db, &$u, &$lc, &$t)
+	{
+		if (!$this->checkAccess($u) )
+		{
+			$lc->templateName = 'seminars_error';
+			$t['message'] = 'The date range to modify seminars is not currently active.';
+			return;
+		}
+		
+		if (!$lc->getvars['id'])
+		{
+			$t['message'] = 'There was no ID passed.  Please start
+			over.';
+			$lc->templateName = 'seminars_error';
+			return;
+		}
+
+	
+		$t['entry'] = SeminarClassesDates::load($lc->getvars['id']);
+		# __FIX_ME__ add sememster checking
+		if ($t['entry']->entryStatus == 3 || $t['entry']->entryStatus == 2)
+		{
+			$t['message'] = 'This entry has marked either <b>Pending</b> or <b>Approved</b> and cannot be modified at this time.  Please contact DL staff if you need assistance.';	
+			$lc->templateName = 'seminars_error';
+			return;
+		}
+		$lc->templateName = 'seminars_edit';
+		$f = new SiteForm();
+		$f->getForm('seminar', $t['entry']);
+		$t['form'] = $f->ToHTML();
+	}
+
+	function updateRun($db, &$u, &$lc, &$t)
+	{
+
+		if (!$this->checkAccess($u) )
+		{
+			$lc->templateName = 'seminars_error';
+			$t['message'] = 'The date range to modify seminars is not currently active.';
+			return;
+		}
+		
+		if ($lc->getvars['event'] == 'add')
+		{
+			$obj = new SeminarClassesDates();
+			$sql = "SELECT count(*) as count FROM seminar_classes_dates
+				WHERE id_classes='".$u->activeClassTaught->id_classes."'";
+			$db->queryOne($sql);
+			# update the count on the seminar
+			$obj->numSeminar = $db->record['count'] + 1;
+			$obj->idClasses = $u->activeClassTaught->id_classes;
+			if ($obj->numSeminar == 5)
+			{
+				$t['message'] =  "You cannot add more than 4
+				Seminars to your class.";
+				$lc->templateName = 'seminars_error';
+				return;
+			}
+		}	
+
+	
+		if ($lc->getvars['event'] == 'edit')
+		{
+			$obj = SeminarClassesDates::load($lc->getvars['id']);	
+			# make sure they are not trying to edit an entry with status of 3
+			if ($obj->entryStatus == 3)
+			{
+				$lc->templatename = 'seminars_error';
+				$t['message'] = 'This Seminar has already been approved and cannot be modified.  If you need to modify this entry, please contact the help desk.';
+				return;
+			}	
+		}
+		$data = $this->formatPostvars($lc->postvars, $obj->__attributes);	
+
+		$obj->setArray($data);
+
+		# since entrystatus can be blank, push it onto the object
+		# seperately
+		$obj->entryStatus = 1;
+		$obj->save();
+		
+		# Send the ADMIN an email alert
+		
+		
+		# Build up array of fields
+		
+		$obj->mailAdmin(
+			"A seminar was added or modified in the system by a faculty member.  
+			Here is the information:\n\n 
+			
+			Course Modifed:  ".$u->activeClassTaught->courseName."\n
+			Faculty:  ".$u->activeClassTaught->facultyName."\n
+			Class ID: ".$u->activeClassTaught->id_classes."\n
+			Review Submission: ".APP_URL."seminarorientation/seminars/main/event=view/id=".$u->activeClassTaught->id_classes."
+			");
+		$t['url'] =
+		APP_URL.'classmgr/seminars/event=view';
+		$this->presentor = 'redirectPresentation';
+	}
+
+	# Takes post vars and formats the date fields
+	# so we can load them onto the object
+	function formatPostvars($vars, $attribs)
+	{
+		foreach ($attribs AS $k=>$type)
+		{
+			if ($type == 'datetime')
+			{
+				$arr[$k] = dateArray2DBDateTime($vars[$k]);	
+				continue;
+			}
+
+			if ($type == 'time')
+			{
+				$arr[$k] = dateArray2DBTime($vars[$k]);
+				continue;
+			}
+
+			$arr[$k] = $vars[$k];
+		}
+		return $arr;
+	}
+	
+	# Checks to make sure the user can modify the entries
+	function checkAccess($u)
+	{
+			$semObj = semesterObj::_getFromDB($u->activeClassTaught->id_semesters, 'id_semesters');
+			$ut = time();
+			if ( (strtotime($semObj->dateStartITVseminar) < $ut) and  ($ut < strtotime($semObj->dateEndITVseminar) ) )
+			{
+				return true;
+			}
+			return false;
+	}
+}
+
+?>
