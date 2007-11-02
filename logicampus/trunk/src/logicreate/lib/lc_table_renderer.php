@@ -168,7 +168,7 @@ class LC_TableRenderer {
 				}
 
 
-				$renderer = $this->table->getCellRenderer($x,$y);
+				$renderer =& $this->table->getCellRenderer($x,$y);
 				$this->table->prepareRenderer($renderer,$x,$y);
 
 				$css = $renderer->getCellCSS();
@@ -191,7 +191,6 @@ class LC_TableRenderer {
 				}
 
 				$this->html .='>';
-
 
 				$this->html .= $renderer->getRenderedValue();
 				$this->html .= '</td>';

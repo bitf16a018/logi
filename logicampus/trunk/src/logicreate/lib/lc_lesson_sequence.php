@@ -107,8 +107,12 @@ class LC_LessonSequence {
 	 * Must be set after startDay
 	 */
 	function setDueDay($objIdx, $intDays) {
-		$this->items[$objIdx]->dueOffset = $intDays * (60*60*24);
-		$this->items[$objIdx]->dueOffset += $this->items[$objIdx]->startOffset;
+		if ($intDays == -1) {
+			$this->items[$objIdx]->dueOffset = -1;
+		} else {
+			$this->items[$objIdx]->dueOffset = $intDays * (60*60*24);
+			$this->items[$objIdx]->dueOffset += $this->items[$objIdx]->startOffset;
+		}
 	}
 
 	/**

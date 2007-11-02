@@ -953,24 +953,16 @@ class LessonManager extends FacultyService {
 		$colB->cellRenderer = new LC_Table_DateOffsetRenderer();
 		$colB->cellRenderer->idName = 'startOffset';
 		$colB->cellRenderer->fieldName = 'startOffset';
-		$colB->cellRenderer->options = array(0=>'First Day');
-		for ($qq=1; $qq< 31; $qq++) { 
-			$colB->cellRenderer->options[] = $qq.' days';
-		}
 
 		$colC = &$columnModel->getColumnAt(4);
 		$colC->maxWidth=200;
 		$colC->name = 'Due';
-		$colC->cellRenderer = new LC_Table_DateOffsetRenderer();
-		//$colC->cellRenderer = new LC_TableSelectRenderer();
-		$colC->cellRenderer->zeroLabel = "Never";
+		//true or false, allow never to be an option?
+		$colC->cellRenderer = new LC_Table_DateOffsetRenderer(true);
+		$colC->cellRenderer->zeroLabel = "Same Day";
 		$colC->cellRenderer->idName = 'dueOffset';
 		$colC->cellRenderer->fieldName = 'dueOffset';
-		$colC->cellRenderer->options = array(0=>'Never');
 		$colC->cellRenderer->skipEmpty = true;
-		for ($qq=1; $qq< 31; $qq++) { 
-			$colC->cellRenderer->options[] = $qq .' days later';
-		}
 
 		$col = &$columnModel->getColumnAt(5);
 		$col->maxWidth=50;
@@ -1248,9 +1240,10 @@ class LC_Table_DateOffsetRenderer extends LC_TableCellRenderer{
 	var $timeList = array();
 	var $dayLabel = ' days';
 	var $zeroLabel = 'First Day';
+	var $allowNever = false;
 
-	function LC_Table_DateOffsetRenderer() {
-		$this->timeList = array();
+	function LC_Table_DateOffsetRenderer($allowNever=false) {
+		$this->allowNever = $allowNever;
 		for ($x=0; $x < 24; ++$x) {
 			for ($y=0; $y < 60; $y+=30) {
 				if ($x < 12) {
@@ -1271,6 +1264,11 @@ class LC_Table_DateOffsetRenderer extends LC_TableCellRenderer{
 		}
 
 		//prepopulate days
+		if ($this->allowNever === true) {
+			$this->dayList[-1] = 'Never';
+		}
+
+		$this->dayList[0] = $this->zeroLabel;
 		for ($x = 1; $x <= 30; $x++) {
 			$this->dayList[ ($x*60*60*24) ] = $x .$this->dayLabel;
 		}
@@ -1285,15 +1283,12 @@ class LC_Table_DateOffsetRenderer extends LC_TableCellRenderer{
 		if ($this->skipEmpty && strlen($this->value) < 2) {
 			return '';//"N/A";
 		}
-
 		list($days,$hours) = @explode('|',$this->value);
 
 		$time = "<select name=\"".$this->fieldName."[".$this->row."]\">\n";
-		$time .= "\t<option value=\"0\">".$this->zeroLabel."</option>\n";
 		$time .= Form::makeOptions($this->dayList,$days)."</select>\n";
 
 		$time .= "&nbsp;@<select name=\"".$this->fieldName."_time[".$this->row."]\">";
-		$time .= "\t<option value=\"0\">".$this->zeroLabel."</option>\n";
 		$time .= Form::makeOptions($this->timeList,$hours)."</select>\n";
 		return $time;
 
