@@ -51,11 +51,7 @@
     <mkdir dir="${build}/public_html/images/"/>
 	-->
 
-  </target>
 
-
-  <target name="dist" depends="init"
-	  description="generate an LC dist for Logicampus">
 
 	<tarfileset dir="${lcsrc}" prefix="${package.prefix}/logicreate/" id="srcdir" defaultexcludes="yes">
 		<include name="classLibrary/**"/>
@@ -108,12 +104,22 @@
 		<include name="commentrec/**"/>
 	</tarfileset>
 
+	<tarfileset id="translate" dir="lang" prefix="${package.prefix}/logicreate/lang/">
+		<include name="lct.en_US.php"/>
+		<include name="lct.es_MX.php"/>
+		<include name="lct.zh_CN.php"/>
+	</tarfileset>
 
 
 	<tarfileset id="patches" dir="patches" prefix="${package.prefix}/patches">
 		<include name="**"/>
 	</tarfileset>
 
+  </target>
+
+
+  <target name="dist" depends="init"
+	  description="generate an LC dist for Logicampus">
 
 	<!-- before files are copied to temp dir, put DB info into defines.php -->
 	<antcall target="setup"/>
@@ -136,14 +142,6 @@
 	<!-- build translation files and install -->
 	<antcall target="translate"/>
 
-	<tarfileset id="translate" dir="lang" prefix="${package.prefix}/logicreate/lang/">
-		<include name="lct.en_US.php"/>
-		<include name="lct.es_MX.php"/>
-		<include name="lct.zh_CN.php"/>
-	</tarfileset>
-
-
-
 
 	<tar tarfile="${dist}/logicampus-${lc.version}.tar.gz" compression="gzip">
 		<tarfileset refid="srcdir"/>
@@ -158,7 +156,6 @@
 	</tar>
 	<echo message="Tar saved as 'dist/${lc.version}.tar.gz'!" />
 
-	<!--
 	<zip destfile="${dist}/logicampus-${lc.version}.zip">
 		<tarfileset refid="srcdir"/>
 		<tarfileset refid="scripts"/>
@@ -171,6 +168,7 @@
 		<tarfileset refid="translate"/>
 	</zip>
 	<echo message="Zip saved as 'dist/${lc.version}.zip'!" />
+	<!--
 	-->
 	<delete dir="filtertmp"/>
 	<!--
@@ -181,32 +179,85 @@
 -->
 
 
-	<!-- need to recopy images because they shouldn't be filtered by the filterset tag -->
+  	<!-- apply LCPL to files -->
+	<!--
+	<antcall target="apply_license"/>
+	-->
 
-<!--
-	<copy todir="${build}/public_html/" overwrite="true">
-	  <fileset dir="${src}">
-		<include name="templates/private/images/**"/>
-		<include name="templates/default/images/**"/>
-		<exclude name="templates/**/*CVS*"/>
-		<exclude name="templates/**/*~"/>
-	  </fileset>
-	</copy>
-
-	<copy todir="${build}/logicreate/">
-	  <fileset dir="${src}">
-		<include name="content/**"/>
-		<exclude name="content/**/*CVS*"/>
-		<exclude name="content/**/*~"/>
-	  </fileset>
-	</copy>
+	<echo message="Archive saved in 'dist/' directory!" />
+  </target>
 
 
-	<copy file="${src}/images/lc-logo.gif" tofile="${build}/public_html/templates/default/images/lc-logo.gif" overwrite="true"/>
 
--->
+  <target name="specialwindist" depends="init, specialwininit"
+	  description="generate an LC dist for window with 7zip installer">
+
+	<!-- before files are copied to temp dir, put DB info into defines.php -->
+	<antcall target="setup"/>
+
+	<mkdir dir="filtertmp"/>
+	<filter token="version.number" value="${version.number}"/>
+	<filter token="build.date" value="${build.date}"/>
+	<filter token="version.extra" value="${version.extra}"/>
+	<copy file="${src}/index.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/defines.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/defines.template.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/settings.advanced.php" todir="filtertmp" filtering="true"/>
+	<copy file="${src}/settings.simple.php" todir="filtertmp" filtering="true"/>
+
+	<!-- build translation files and install -->
+	<antcall target="translate"/>
+
+	<!-- copy xampplite zip to dist -->
+	<!--
+		-->
+	<copy file="win-setup/xamppcampus-win32-1.6.4.zip" todir="${dist}"/>
 
 
+	<!--
+	<zip destfile="${dist}/logicampus-${lc.version}.zip">
+		-->
+
+		<!--
+		-->
+	<antcall target="specialwininit"/>
+		<!--
+	-->
+	<zip destfile="${dist}/xamppcampus-win32-1.6.4.zip" update="yes">
+		<tarfileset refid="xsrcdir" />
+		<tarfileset refid="xscripts" />
+		<tarfileset refid="xdatadir" />
+		<tarfileset refid="xdatascripts" />
+		<tarfileset refid="xdocs" />
+		<tarfileset refid="xhtml" />
+		<tarfileset refid="xhtmlfilter" />
+		<tarfileset refid="xpatches" />
+		<tarfileset refid="xtranslate" />
+	</zip>
+	<echo message="Zip saved as 'dist/xamppcampus-win32-1.6.4.zip'!" />
+	<!--
+	-->
+	<delete dir="filtertmp"/>
+	<!--
+	-->
+
+
+	<echo message="Starting 7zip compression..." />
+    <mkdir dir="7ziptmp"/>
+
+	<unzip src="${dist}/xamppcampus-win32-1.6.4.zip" dest="7ziptmp" overwrite="false"/>
+	<move todir="7ziptmp/logicampus-server-${lc.version}" preservelastmodified="true">
+		<fileset dir="7ziptmp/xampplite" />
+	</move>
+	<exec executable="/bin/bash" dir="win-setup" failonerror="true">
+		<arg line="compress.sh"/>
+		<arg line="logicampus-server-${lc.version}"/>
+	</exec>
+
+	<move file="7ziptmp/logicampus-server-${lc.version}.exe" todir="${dist}" preservelastmodified="true"/>
+
+	<echo message="Cleaning up 7zip temp dir..." />
+	<delete dir="7ziptmp"/>
 
   	<!-- apply LCPL to files -->
 	<!--
@@ -214,6 +265,75 @@
 	-->
 
 	<echo message="Archive saved in 'dist/' directory!" />
+  </target>
+
+
+  <target name="specialwininit">
+	  <property name="xampp.prefix" value="xampplite/htdocs" />
+	<tarfileset dir="${lcsrc}" prefix="${xampp.prefix}/logicreate/" id="xsrcdir" defaultexcludes="yes">
+		<include name="classLibrary/**"/>
+		<include name="cache/**"/>
+		<include name="data/**"/>
+		<include name="lib/**"/>
+		<include name="services/**"/>
+		<exclude name="services/unitTest"/>
+		<include name="content/**"/>
+		<include name="lang/fallback.php"/>
+    </tarfileset>
+
+	<tarfileset id="xscripts" dir="${scripts}" prefix="${xampp.prefix}/logicreate/scripts/" defaultexcludes="yes">
+		<include name="**"/>
+  	</tarfileset>
+
+	<tarfileset id="xdatascripts" dir="${data}" prefix="${xampp.prefix}/logicreate/scripts/" defaultexcludes="yes">
+		<include name="wipe_clean.sh"/>
+		<include name="install_metainfo.sh"/>
+	</tarfileset>
+
+
+	<tarfileset id="xdatadir" dir="${data}" prefix="${xampp.prefix}/logicreate/data/">
+		<include name="*.sql"/>
+	</tarfileset>
+
+
+	<tarfileset id="xdocs" dir="./" prefix="${xampp.prefix}">
+		<include name="${docs}license.txt"/>
+		<include name="${docs}INSTALL" />
+		<include name="${docs}SAMPLE_DATA" />
+		<include name="README" />
+		<include name="LICENSE" />
+		<include name="changelog.txt" />
+		<include name="changelog.html" />
+	</tarfileset>
+
+
+	<tarfileset id="xhtml" dir="${src}" prefix="${xampp.prefix}/" >
+		<include name="herc/**"/>
+		<include name="htmlarea/**"/>
+		<exclude name="herc/wysiwyg"/>
+		<exclude name="herc/content.php" />
+		<include name="images/**"/>
+		<include name="license.txt"/>
+		<include name="ua.js"/>
+		<include name="templates/**"/>
+		<exclude name="templates/*/images/"/>
+		<include name="install/**"/>
+		<include name="commentrec/**"/>
+	</tarfileset>
+
+	<tarfileset id="xhtmlfilter" dir="filtertmp" prefix="${xampp.prefix}/">
+		<include name="**"/>
+	</tarfileset>
+
+	<tarfileset id="xtranslate" dir="lang" prefix="${xampp.prefix}/logicreate/lang/">
+		<include name="lct.en_US.php"/>
+		<include name="lct.es_MX.php"/>
+		<include name="lct.zh_CN.php"/>
+	</tarfileset>
+
+	<tarfileset id="xpatches" dir="patches" prefix="${xampp.prefix}/patches">
+		<include name="**"/>
+	</tarfileset>
   </target>
 
 
