@@ -139,7 +139,18 @@ class assignments extends StudentService {
 		//load the assignment
 		$classSeqId    = intval($lc->getvars['id']);
 		$classId  = $u->activeClassTaken->id_classes;
-		$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
+		//find the lesson id
+		if ( empty($u->sessionvars['activeLesson']) ) {
+			$lessonId = LC_Lesson::getLessonIdForSequenceId($classSeqId);
+			LC_Lesson::storeLessonInSession($lessonId,$u);
+		} else {
+			if ( $u->sessionvars['activeLesson']['id_classes'] != $classId ) {
+				$lessonId = LC_Lesson::getLessonIdForSequenceId($classSeqId);
+				LC_Lesson::storeLessonInSession($lessonId,$u);
+			} else {
+				$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
+			}
+		}
 
 		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();

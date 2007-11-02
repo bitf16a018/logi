@@ -39,18 +39,21 @@ function run(&$db,&$u,&$lc,&$t) {
 		# Loop through all classes they are taking
 		for ($x=0; $x < $count; ++$x)  {
 			# build up SQL or clause for queries later on
-			$assignmentsOrClause .= 'class_assignments.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
+			$assignmentsOrClause .= 'class_id = '.$u->classesTaken[$x]->id_classes.' or ';
 			$lessonsOrClause .= 'class_lessons.id_classes = '.$u->classesTaken[$x]->id_classes.' or ';
 
-			$t['classdata'][$u->classesTaken[$x]->id_classes] = '<ul>';
-			# Pull in last annoucement for each class
-			$sql = "
-				SELECT id_class_assignments, title, activeDate
-				FROM class_assignments
-				WHERE id_classes='".$u->classesTaken[$x]->id_classes."'
-				AND activeDate <= $ut  and (".DB::getFuncName('unix_timestamp','dateNoAccept').">$ut or dateNoAccept='0000-00-00 00:00:00') 
-				ORDER BY dueDate ASC, activeDate DESC 
-				LIMIT 1";
+			# count total number of available assignments
+			$sql = 
+				"SELECT count(lob_class_repo_id) as num_activity
+				FROM class_lesson_sequence AS A
+				LEFT JOIN class_lessons AS B
+					ON A.lesson_id = B.id_class_lessons
+				WHERE class_id='".$u->classesTaken[$x]->id_classes."' 
+
+				AND ( (start_offset + activeOn <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
+				AND ( (due_offset   + activeOn <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
+				AND lob_type = 'activity'";
+
 
 			$db->queryOne($sql);
 			if (is_array($db->record))
@@ -118,15 +121,19 @@ function run(&$db,&$u,&$lc,&$t) {
 			 *  PULL IN ASSIGNMENTS
 			 ****/
 
-			$sql = "
-			SELECT id_class_assignments, title, class_assignments.id_classes, classes.courseFamilyNumber
-			FROM class_assignments
-			LEFT JOIN classes ON class_assignments.id_classes = classes.id_classes
-			WHERE ( $assignmentsOrClause )
-			AND activeDate <= $ut 
-			AND (dueDate >= $ut OR noDueDate = 1)
-			ORDER BY dueDate ASC, activeDate DESC 
-			LIMIT 5";
+			# count total number of available assignments
+			$sql = 
+				"SELECT class_lesson_sequence_id, lob_title as title, class_id
+				FROM class_lesson_sequence AS A
+				LEFT JOIN class_lessons AS B
+					ON A.lesson_id = B.id_class_lessons
+				WHERE (".$assignmentsOrClause.")
+
+				AND ( (start_offset + activeOn <= UNIX_TIMESTAMP()) OR start_offset IS NULL)
+				AND ( (due_offset   + activeOn <= UNIX_TIMESTAMP()) OR due_offset IS NULL)
+				AND lob_type = 'activity'
+				LIMIT 5";
+
 			$db->query($sql);
 
 			if ($db->getNumRows() >= 1)
@@ -136,7 +143,7 @@ function run(&$db,&$u,&$lc,&$t) {
 				while ($db->nextRecord() )
 				{
 					$t['assignments'] .= '<li>
-	<a href="'.APP_URL.'classroom/assignments/event=view/id_classes='.$db->record['id_classes'].'/id='.$db->record['id_class_assignments'].'">
+	<a href="'.APP_URL.'classroom/assignments/event=view/id_classes='.$db->record['class_id'].'/id='.$db->record['class_lesson_sequence_id'].'">
 	'.$db->record['title'].'</a>&nbsp;-&nbsp;'.$db->record['courseFamilyNumber'].'</li>';
 				}
 		
