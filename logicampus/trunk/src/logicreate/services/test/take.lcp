@@ -66,7 +66,7 @@ class take extends StudentService {
  * Output data:  datagrid of assessments
  *
  */
-		function Run(&$db,&$u,&$lc,&$t) {
+		function run(&$db,&$u,&$lc,&$t) {
 			include_once(LIB_PATH.'ClassGradebookEntries.php');
 			include_once(LIB_PATH.'ClassGradebookVal.php');
 			$lc->templateName='take_main';
@@ -289,7 +289,6 @@ class take extends StudentService {
 
 	function stopRun($db, &$u, &$lc, &$t) {
 		$log = $u->sessionvars['testObj']->log;
-debug($log);
 		if (!$log) {
 			# there was a serious problem
 			$t['message'] = 'There was a problem grading your test. We were unable to locate the log entry for your test.
