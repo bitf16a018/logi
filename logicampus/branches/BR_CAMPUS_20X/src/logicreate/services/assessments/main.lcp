@@ -133,7 +133,7 @@ class assessments extends FacultyService {
 	function insertRun($db,&$u,&$lc,&$t) {
 
 		$f = new SiteForm();
-		$t['error'] = $f->validateForm('addassessment', &$lc->postvars);
+		$t['error'] = $f->validateForm('addassessment', $lc->postvars);
 		if ($t['error'])
 		{
 			$this->addRun($db, $u, $lc, $t);

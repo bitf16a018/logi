@@ -289,7 +289,6 @@ class take extends StudentService {
 
 	function stopRun($db, &$u, &$lc, &$t) {
 		$log = $u->sessionvars['testObj']->log;
-debug($log);
 		if (!$log) {
 			# there was a serious problem
 			$t['message'] = 'There was a problem grading your test. We were unable to locate the log entry for your test.
