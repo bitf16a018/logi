@@ -400,10 +400,8 @@ class AssessmentQuestion extends AssessmentQuestionBase {
 		$subObj->questionChoices = $superObj->questionChoices;
 		$subObj->fileHash = $superObj->fileHash;
 
-		// Adam added this here.. it seemed necessary
-		//$subObj->questionChoices = unserialize(base64_decode($subObj->questionChoices));
-		// Commented out by Keith since this needs to be in row2Obj above
-
+		$subObj->questionChoices = unserialize(base64_decode($subObj->questionChoices));
+		$subObj->questionInput = unserialize(base64_decode($subObj->questionInput));
 	return $subObj;
 	}
 }

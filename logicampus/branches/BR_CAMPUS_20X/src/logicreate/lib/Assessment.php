@@ -408,6 +408,9 @@ class Assessment extends AssessmentBase {
 			$subObj->questionChoices = $superObj->questionChoices;
 			$subObj->fileHash = $superObj->fileHash;
 
+			$subObj->questionChoices = unserialize(base64_decode($subObj->questionChoices));
+			$subObj->questionInput = unserialize(base64_decode($subObj->questionInput));
+
 		$subObjArray[] =$subObj;
 		}
 

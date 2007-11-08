@@ -67,7 +67,7 @@ class question extends StudentService {
 	 function Run(&$db,&$u,&$lc,&$t) {
 		
 		// assume we want to display something, because no event was passed in
-		$this->displayRun($db,&$u,&$lc,&$t); 
+		$this->displayRun($db,$u,$lc,$t); 
 	}
 
 
@@ -290,7 +290,7 @@ class question extends StudentService {
 		# and need to back to the beginning, or show them a "review" page?
 		if ($qstId) {
 			$lc->postvars['questionID'] = $qstId;
-			$this->displayRun($db,&$u,&$lc,&$t);
+			$this->displayRun($db,$u,$lc,$t);
 			return;
 #			$qst = AssessmentQuestion::load($qstId, $u->activeClassTaken->id_classes);
 #			$answer = AssessmentAnswerPeer::doSelect("assessment_question_id='".$qstId."' AND
