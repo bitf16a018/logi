@@ -159,6 +159,7 @@
 	<echo message="Tar saved as 'dist/${lc.version}.tar.gz'!" />
 
 	<!--
+	-->
 	<zip destfile="${dist}/logicampus-${lc.version}.zip">
 		<tarfileset refid="srcdir"/>
 		<tarfileset refid="scripts"/>
@@ -171,7 +172,6 @@
 		<tarfileset refid="translate"/>
 	</zip>
 	<echo message="Zip saved as 'dist/${lc.version}.zip'!" />
-	-->
 	<delete dir="filtertmp"/>
 	<!--
 	-->
