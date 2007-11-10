@@ -1,0 +1,39 @@
+<style type="text/css">
+	.PASS {
+		background-color: #C0FFC0;
+	}
+	.FAIL {
+		background-color: #FCC0C0;
+	}
+	.TEST {
+		background-color: silver;
+	}
+</style>
+<h3>Unit tests available</h3>
+<table width="100%" border="1">
+	<tr>
+		<td>
+			Name
+		</td>
+		<td>
+			Description
+		</td>
+		<td>
+			Link
+		</td>
+	</tr>
+	<? while ( list($k,$v) = @each($t['tests']) ) { ?>
+	<tr class="<?=$v['css'];?>">
+		<td>
+			<?= $v['name'];?>
+		</td>
+		<td>
+			<?= $v['obj']->description;?>
+		</td>
+		<td>
+			<a href="<?= modurl('main');?>/test=<?=$v['name'];?>/event=performTest">Execute</a>
+		</td>
+	</tr>
+	<? } ?>
+</table>
+

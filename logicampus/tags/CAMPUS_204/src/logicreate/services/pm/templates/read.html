@@ -1,0 +1,70 @@
+<h2>Private Messaging</h2>
+
+<a href="<?=APP_URL?>pm">Message Center</a>&nbsp;&bull;&nbsp;<a href="<?=APP_URL?>pm/main/event=compose">Compose New Message</a>
+
+<hr/>
+
+<h3>Message</h3>
+This page displays only one message at a time.  When you are finished reviewing this message and wish to see others, you must click the 'back' button on your browser.
+
+<hr/>
+
+<? $mess = $t['message']; ?>
+<table width="100%" cellpadding="4" cellspacing="1" border="0">
+
+<tr>
+	<td class="header2" width="30%">
+<b>Subject:</b>
+	</td>
+	<td class="forum_head"><?=$mess->subject;?>
+	</td>
+</tr>
+
+<tr>
+	<td class="header2">
+	<b>From:</b>
+	</td>
+	<td class="forum_head"><a href="<?=APP_URL?>users/view/<?=$mess->userFrom;?>"><?=$mess->userFrom?></a>
+	</td>
+</tr>
+<tr>
+	<td class="header2">
+	<b>Sent on:</b>
+	</td>
+	<td class="forum_head"><?=$t['date'];?>
+	</td>
+</tr>
+<tr>
+	<td class="header2" valign="top">
+<b>Message:</b>
+	</td>
+	<td style="background-color:white;border:1px solid #999999;"><?=$mess->message;?>
+	</td>
+</tr>
+
+</table>
+<a 	onclick="if (confirm('Are you sure you want to delete this private message?')) { return true; } else { return false; }"
+	href="<?=appurl('pm/main/event=delete/mess='.$obj->getvars['pkey']);?>">Delete this Message</a>
+<hr>
+<? if (!$mess->outside) { ?>
+	<? if (!$mess->noReply) { ?>
+	<a name="reply"></a>
+	<h3>Send a reply</h3>
+	<form method="post" action="<?=appurl("pm/main/event=reply");?>">
+		<input type="hidden" name="replyto" value="<?=$mess->messageFrom;?>">
+		<table width="100%" cellpadding="4" cellspacing="1" border="0">
+		<tr><td class="header2"><b>Subject:</b></td>
+		<td class="grey"><input type='text' name='subject' maxlength='50' size='50' value='Re: <?=str_replace("'","&#039;",$mess->subject);?>'></td>
+		</tr>
+		<tr>
+		<td class="header2" valign="top"><b>Message:</b></td>
+		<td class="grey">
+		<textarea name='message' rows='15' cols='60' wrap='virtual'><?=$t['quote'];?></textarea>
+		</td>
+		</tr>
+		</table>
+		<input type='submit' value='Reply'>
+	</form>
+	<? } ?>
+<? } ?>
+

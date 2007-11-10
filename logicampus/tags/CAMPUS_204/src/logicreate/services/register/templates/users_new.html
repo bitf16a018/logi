@@ -1,0 +1,114 @@
+<?=$t['sectionheader'];?>
+
+<table border="0" cellpadding="0" cellspacing="0">
+      <tr><td class="selectedTab">
+<? 
+if ($t['error'] == '') { ?>
+<p>Please Fill out the application below for admission to the University <strong></strong>.<br>
+  Once the application is approved by the registrar, you will be able to register for classes.</p>
+<p>      <? } else { ?> 
+	    <span style="color: red;">
+<?php;
+        if ( count($t['error']) > 0 )  
+             foreach($t['error'] as $blank=>$e) {
+	         echo $e."<br>";
+		 }	
+?>
+	    </span>
+ <? } ?>
+      </p></td></tr>
+
+      <tr><td width="500" class="grey">
+
+	<form method="POST">
+	
+<table border="0" width="100%">
+<tr><td width="50%" class="white" valign="top">
+	<table width="95%" border="0" cellspacing="0" cellpadding="0">
+		<form action="<?=BASE_URL."index.php/register/users/event=registerStudent"?>" method="POST" enctype="application/x-www-form-urlencoded">
+			<tr><td colspan="2" valign="top" class="tabletitle">Account Information</td></tr>
+			<tr><td valign="top" class="">*Enter the Username</td>
+				<td valign="top" class="">
+					<input type="text" id="username" name="username" value="<?= $t['postvars']['username']; ?>" size="15" maxlength="32">
+					<div style="font-size=80%;">(spaces are not allowed, minimum 6 characters)</div></td></tr>
+			<tr><td valign="top" class="">*Enter your password</td>
+				<td valign="top" class="">
+					<input type="password" name="password" value="<?=$t['postvars']['password'];?>"></td></tr>
+			<tr><td valign="top" class="">*Enter your password again</td>
+				<td valign="top" class="">
+					<input type="password" name="password2" value="<?=$t['postvars']['password2'];?>"></td></tr>
+			<tr><td colspan="2" valign="top" class="tabletitle">Personal Information</td></tr>
+			<tr><td valign="top" class="">Title</td>
+				<td valign="top" class=""><select id="title" name="title"  size="1">	
+						<option value="Ms.">Ms.</option>
+						<option value="Mrs.">Mrs.</option>
+						<option value="Mr.">Mr.</option>
+						<option value="Dr.">Dr.</option>
+							</select></td></tr>
+			<tr><td valign="top" class="">*First name</td>
+				<td valign="top" class="">
+					<input type="text" id="firstname" name="firstname" value="<?=$t['postvars']['firstname'];?>" size="15" maxlength="25"></td></tr>
+			<tr><td valign="top" class="">*Last name</td>
+				<td valign="top" class="">
+					<input type="text" id="lastname" name="lastname" value="<?=$t['postvars']['lastname'];?>" size="15" maxlength="25"></td></tr>
+			<tr><td valign="top" class="">*Date of Birth</td>
+				<td valign="top" class="">
+					<input type="text" id="dob" name="dob" value="<?=$t['postvars']['dob'];?>" size="10" maxlength="10">
+					<div style="font-size=80%;">(Example MM/DD/YYYY: 09/26/1960)</div></td></tr>
+			<tr><td valign="top" class="">*Email Address</td>
+				<td valign="top" class="">
+					<input type="text" id="email" name="email" value="<?=$t['postvars']['email'];?>" size="25" maxlength="50">
+					<div style="font-size=80%;">(must be a valid email address)</div></td></tr>
+			<tr><td valign="top" class="">*Address</td>
+				<td valign="top" class="">
+					<input type="text" id="address" name="address" value="<?=$t['postvars']['address'];?>" size="25" maxlength="120"></td></tr>
+			<tr><td valign="top" class="">Address 2</td>
+				<td valign="top" class="">
+					<input type="text" id="address2" name="address2" value="<?=$t['postvars']['address2'];?>" size="25" maxlength="120"></td></tr>
+			<tr><td valign="top" class="">*City</td>
+				<td valign="top" class="">
+					<input type="text" id="city" name="city" value="<?=$t['postvars']['city'];?>" size="20" maxlength="50"></td></tr>
+			<tr><td valign="top" class="">State/Province</td>
+				<td valign="top" class="">
+					<input type="text" id="state" name="state" value="<?=$t['postvars']['state'];?>" size="15" maxlength="25"></td></tr>
+			<tr><td valign="top" class="">*Zip/Postal Code</td>
+				<td valign="top" class="">
+					<input type="text" id="zip" name="zip" value="<?=$t['postvars']['zip'];?>" size="7" maxlength="25"></td></tr>
+					<input type="hidden" name="sendemail" value="on"></tr></td>
+			<tr><td valign="top" class="">*Country</td>
+				<td valign="top" class="">
+					<input type="text" id="country" name="country" value="<?=$t['postvars']['country'];?>" size="15" maxlength="80"></td></tr>
+			<tr><td valign="top" class="">*Home Phone</td>
+				<td valign="top" class="">
+					<input type="text" id="hphone" name="hphone" value="<?=$t['postvars']['hphone'];?>" size="15" maxlength="30">
+					<div style="font-size=80%;">(Please include country, state, and city codes)</div></td></tr>
+			<tr><td colspan="2" valign="top" class="tabletitle">Education</td></tr>
+			<tr><td valign="top" class="">*Level of Education</td>
+				<td valign="top" class="">
+					<select id="education" name="education" value="<?=$t['postvars']['education'];?>"  size="1">	
+						<option value="High School">High School</option>
+						<option value="Associate">Associate</option>
+						<option value="Bachelor">Bachelor</option>
+						<option value="Masters">Masters</option>
+						<option value="Phd">Phd</option>
+					</select>
+					<div style="font-size=80%;">(Please select the highest level of education you have achieved)</div></td></tr>
+			<tr><td valign="top" class="">Last Institution Attended</td>
+				<td valign="top" class="">
+					<input type="text" id="lastinstitute" name="lastinstitute" value="<?=$t['postvars']['lastinstitute'];?>" size="15" maxlength="50"></td></tr>
+			<input type="hidden" name="userType" value="<?=USERTYPE_STUDENT?>">
+			<tr><td colspan="2" valign="top" class="tabletitle">Submit Admission Application</td></tr>
+			<tr><td valign="top" class=""></td>
+				<td valign="top" class="">
+					<input type="submit" id="submit" name="submit" value="Submit"></td></tr>
+			<input type="hidden" name="event" value="registerstudent">
+			<input type="hidden" name="redirect" value="<?=BASE_URL?>">
+</form></table><div style="font-size: 85%">*denotes a required field</div>
+
+	</td></tr></table>
+</td></tr></table>
+
+	</form>
+
+	<!--		<center><div class="message" width="500"><?= $t["message"]; ?></div></center> -->
+

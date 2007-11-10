@@ -1,0 +1,8 @@
+<?=$t['sectionheader'];?>
+<? if ($t['msg']) { ?> <span style="color:blue"><?=$t['msg']?></span><? }
+if ($t['error']) { ?> <span style="color:red"><?=$t['error']?></span> <? } ?>
+<p style="padding-left:30px;">
+	<b>Author:</b> <?=$t['author'];?><br>
+	<b>Created On:</b> <?=$t['createdOn'];?><br>
+</p>
+<?=$t['form'];?>

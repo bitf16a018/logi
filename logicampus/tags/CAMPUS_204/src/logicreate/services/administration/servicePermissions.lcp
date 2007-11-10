@@ -1,0 +1,143 @@
+<?
+/*
+ * servicePermissions
+ * Allows an administrator that is in the group 'admin'
+ * to set which permissions a group can access.
+ *
+ * created 05/30/03
+ * Last Modified 11/16/03
+ * 
+ *
+ */
+ 
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'LC_html.php');
+
+
+class servicePermissions extends AdminService
+	
+{
+
+	var $presentor = "htmlPresentation";
+	var $cleanedArray = array();  # used for forms
+
+	// Links
+	var $sectionTitle = 'Service Permissions';
+	var $navlinks = array(
+		'Administration Home' => '',
+		'User Manager' => 'users/',
+		'Group Manager' => 'groups/',
+		'Modify Application Permissions' => 'servicePermissions/'
+	);
+	var $applinks = array(
+		'Module Selection' => 'servicePermissions/'
+	);
+	var $inactivelinks = array( 'Modify Application Permissions' );
+
+	// List the modules to allow permissions to be granted on
+	function Run(&$db,&$u,&$lc,&$t)
+	{
+		$this->inactivelinks[] = 'Module Selection';
+//auto-comment		$lc->templateStyle = 'private';
+		$lc->templateName = 'servicePermissions_main';
+	}
+
+	// List the services available in the selected module
+	function chooseServiceRun(&$db,&$u,&$lc,&$t)
+	{
+		$this->sectionTitle = 'Choose a Service';
+		switch ($lc->getvars['module']) {
+			case 'administration':
+				$config = $this->_servicesAdministration;
+				break;
+			case 'classmgr':
+				break;
+			default:
+				$t['error'] = 'That module does not exist.';
+				$this->run($db,$u,$lc,$t);
+				return;
+				break;
+		}
+		
+		$t['list'] = '<ul>';
+		$pairs = split(',', $config);
+		while (list(,$val) = @each($pairs)) {
+			list($comp,$human) = split('=',$val);
+			$t['list'] .= '<li> <a href="'.APP_URL.'administration/servicePermissions/event=editPermissions/module='.$lc->getvars['module'].'/service='.$comp.'">'.$human.'</a></li>';
+		}
+		$t['list'] .= '<ul>';
+		$t['mod'] = $lc->getvars['module'];
+//auto-comment		$lc->templateStyle = 'private';
+		$lc->templateName = 'servicePermissions_chooseService';
+	}
+
+	// Display a form to allow the user to edit the permissions
+	function editPermissionsRun(&$db,&$u,&$lc,&$t)
+	{
+		$config = $this->_servicesAdministration;
+		$pairs = split(',', $config);
+		while (list(,$val) = @each($pairs)) {
+			list($comp,$human) = split('=',$val);
+			if ($comp == $lc->getvars['service']) {
+				$t['svc'] = $human;
+				break;
+			}
+		}
+		$t['mod'] = ucfirst($lc->getvars['module']);
+
+		$t['form'] .= '<form action="" method="POST">';
+		$t['form'] .= $this->groupsToCheckboxes($lc->getvars['module'], $lc->getvars['service'], $db);
+		$t['form'] .= '<input type="hidden" name="module" value="'.$lc->getvars['module'].'"/>';
+		$t['form'] .= '<input type="hidden" name="service" value="'.$lc->getvars['service'].'"/>';
+		$t['form'] .= '<input type="hidden" name="event" value="setPermissions"/>';
+		$t['form'] .= '<br/><input type="submit" value="Set Permissions"/>';
+		$t['form'] .= '</form>';
+
+		$this->sectionTitle = 'Permissions for '.$t['svc'];
+//auto-comment		$lc->templateStyle = 'private';
+		$lc->templateName = 'servicePermissions_groupPerms';
+	}
+
+	// Now we get to actually commit the info to the database.
+	function setPermissionsRun(&$db,&$u,&$lc,&$t)
+	{
+		$db->query('select gid from lcGroups');
+		while ($db->next_record()) $gids[] = $db->Record['gid'];
+
+		while (list(,$val) = @each($gids)) {
+			if ($lc->postvars[$val]) {
+				$db->query('replace into lcPerms set groupID="'.$val.'",moduleID="'.$lc->postvars['module']
+				.'",action="'.$lc->postvars['service'].'"');
+			} else {
+				$db->query('delete from lcPerms where groupID="'.$val.'" and moduleID="'.$lc->postvars['module']
+				.'" and action="'.$lc->postvars['service'].'"');
+			}
+		}
+		$t['msg'] = 'Permissions set successfully.';
+		$this->Run($db,$u,$lc,$t);
+	}
+
+	// This function takes a module and service, and returns a string containing a checkbox
+	// for each group in the system, and populates it (checks the appropriate boxes) with
+	// the values from the database.
+	function groupsToCheckboxes($module, $service, &$db)
+	{
+		$db->query('select p.groupID from lcGroups g,lcPerms p
+			where p.moduleID="administration"
+			and p.groupID=g.gid
+			and p.action="'.$service.'"');
+		while ($db->next_record())
+			$services[] = $db->Record['groupID'];
+
+		$db->query('select gid,groupName from lcGroups');
+		while ($db->next_record()) {
+			if (in_array($db->Record['gid'], $services)) $check = " checked";
+			$ret .= '<input type="checkbox" name="'.$db->Record['gid'].'"'.$check.' />&nbsp;'.$db->Record['groupName'].'<br/>';
+			unset($check);
+		}
+		return $ret;
+	}
+}
+
+?>
