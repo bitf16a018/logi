@@ -1,0 +1,92 @@
+<?=$t['sectionheader'];?>
+
+
+<form action="<?=modurl('edit/event=update/id='.$t['assmnt']->assessmentId);?>" method="post" enctype="application/x-www-form-urlencoded">
+
+    <table width="75%" border="0" cellspacing="1" cellpadding="0">
+      <tr>
+        <td colspan="2" valign="top" class="tabletitle">Assessment Information</td>
+      </tr>
+
+      <tr>
+        <td valign="top" class="">*Assessment Name</td>
+
+        <td valign="top" class=""><input type="text" id=
+		"displayName" name="displayName" size="45"
+		value="<?=$t['assmnt']->displayName?>"
+        maxlength="255"></td>
+      </tr>
+
+      <tr>
+        <td class="" valign="top">Description</td>
+
+        <td valign="top" class="">
+          <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+		      <textarea name="description" cols="40" rows="5" id="description"><?=$t['assmnt']->description?></textarea></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="" valign="top">Instructions</td>
+
+        <td valign="top" class="">
+          <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+		      <textarea name="instructions" cols="40" rows="5" id="instructions"><?=$t['assmnt']->instructions?></textarea></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" valign="top" class="tabletitle">Gradebook Information</td>
+      </tr>
+
+      <tr>
+        <td valign="top" class="">*Gradebook Category</td>
+
+	<td valign="top" class="">
+	  <select id="idClassGradebookCategories" 
+		  name="idClassGradebookCategories" 
+		  size="1">
+		  <option value="0">--Choose a Category--</option>
+<?php while ( list ($blank,$cat) = @each($t['categories']) ) {?>
+
+<? if ($cat->idClassGradebookCategories == $t['gbe']->idClassGradebookCategories) { ?>
+
+		<option value="<?=$cat->idClassGradebookCategories?>" SELECTED><?=$cat->label;?></option><? } else {?>
+		<option value="<?=$cat->idClassGradebookCategories?>"><?=$cat->label;?></option>
+<? } ?>
+<? } ?>
+        </select></td>
+      </tr>
+
+      <tr>
+        <td valign="top" class="">*Gradebook Code</td>
+
+        <td valign="top" class=""><input type="text" id=
+        "gradebookCode" name="gradebookCode" size="10"
+	value="<?=$t['gbe']->gradebookCode;?>"
+        maxlength="10"></td>
+      </tr>
+
+      <tr>
+        <td valign="top" class=""></td>
+
+	<td valign="top" class="">
+	  <input type="submit" 
+		id="submit" 
+		name="submit" 
+		value="Enter"></td>
+      </tr>
+    </table>
+  </form>
+
+  <div style="font-size: 85%">
+    *denotes a required field
+  </div>

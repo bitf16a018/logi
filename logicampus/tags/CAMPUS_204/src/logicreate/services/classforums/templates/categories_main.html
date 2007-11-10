@@ -1,0 +1,19 @@
+<?php echo $t['sectionheader'];?>
+
+<form action="<?= modurl('categories/event=saveCategory');?>" method="POST">
+	<fieldset>
+		<legend>Category Properties</legend>
+			Name:
+			<input type="text" id="name" name="name"/>
+
+			<br/>
+			<br/>
+			<input type="submit" id="submit_category" value="Save Category"/>
+	</fieldset>
+
+</form>
+<p>&nbsp;</p>
+
+<?php
+		echo $t['table']->toHTML();
+?>

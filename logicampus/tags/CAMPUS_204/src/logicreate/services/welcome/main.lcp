@@ -1,0 +1,44 @@
+<?
+
+class welcome extends NoAuth {
+
+	var $presentor = "htmlPresentation";
+
+	function run($db,&$u,&$lc,&$t) {
+		if ( $u->isAnonymous() ) {
+			$this->presentor = 'native';
+		}
+		$lc->templateName = 'welcome_main';
+
+
+		//message of the day (MOTD)
+		$t['motd'] = LcSettings::getSystemMotd();
+	}
+
+
+
+	function presentation (&$obj,&$t) {
+		//put the template and content together to form a 
+		// basic html page
+		if (LcSettings::isModuleOn('DEMO_MODE')) {
+			if (!@include(TEMPLATE_PATH."welcome_demo.html.php") ) { 
+				//fallback to "private"
+
+				if (!include(TEMPLATE_PATH."../private/welcome_demo.html.php") ) { 
+					echo "can't find demo welcome file.";
+				}
+			}
+		} else {
+			if (!@include(TEMPLATE_PATH."welcome_login.html.php") ) { 
+				//fallback to "private"
+
+				if (!include(TEMPLATE_PATH."../private/welcome_login.html.php") ) { 
+					echo "can't find welcome file.";
+				}
+			}
+		}
+	}
+
+
+}
+?>

@@ -1,0 +1,196 @@
+<?
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+
+include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class Edit extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName='edit_main';
+
+		$lobId = addslashes(trim($lc->getvars['c']));
+
+		$lob = new Lc_Lob_Content($lobId);
+
+		$t['lob'] = $lob;
+		// Use start of content as description
+		if (strlen($t['lob']->repoObj->lobDescription) < 1 && $t['lob']->isText()) {
+			$t['lob_description'] = substr( strip_tags($t['lob']->lobSub->lobText, '<ul><li><p><h3><h4><span>'),0,1000);
+			if (strlen($t['lob']->lobSub->lobText) > 1000) {
+				$t['lob_description'] .= ' ...';
+			}
+		}
+		$t['lob_bytes'] = Lc_Lob_Util::formatBytes($t['lob']->repoObj->lobBytes);
+
+		if ($t['lob']->lobSubType == 'image') {
+			$t['iconUrl'] = appurl('lobrepo/preview/c='.$t['lob']->lobContentId);
+		} else {
+			$t['iconUrl'] = IMAGES_URL.'mimetypes/'.Lc_Lob_Util::getMimeIcon($t['lob']->repoObj->lobMime);
+		}
+	}
+
+
+	/**
+	 * show edit form
+	 */
+	function changeRun(&$db,&$u,&$lc,&$t) {
+		$id = intval($lc->getvars['id']);
+
+		$lob = new Lc_Lob_Content($id);
+
+		$t['lob'] = $lob;
+		$t['mimetype'] = $lob->repObj->lobMime;
+
+		if ($lob->isFile()) {
+			$lc->templateName = 'add_doc';
+		} else if ($lob->isImage()) {
+			$lc->templateName = 'add_image';
+		} else {
+			$lc->templateName = 'add_html';
+		}
+	}
+
+
+	/**
+	 * Save a content obj to the db
+	 */
+	function saveRun(&$db,&$u,&$lc,&$t) {
+		$id = intval($lc->postvars['lob_id']);
+		$lob = new Lc_Lob_Content($id);
+
+		if ($lc->postvars['lob_sub_type'] == 'document') {
+			$lob->setFile(
+					$lc->uploads['content']['tmp_name'], 
+					$lc->uploads['content']['name']);
+			$lob->updateAsFile($lc->postvars['txTitle'], 'document');
+		}
+		if ($lc->postvars['lob_sub_type'] == 'image') {
+			$lob->setFile(
+					$lc->uploads['content']['tmp_name'], 
+					$lc->uploads['content']['name']);
+			$lob->updateAsFile($lc->postvars['txTitle'], 'image');
+		}
+
+		if ($lc->postvars['lob_sub_type'] == 'text') {
+			$lob->setTextContent($lc->postvars['txText']);
+			$lob->set('lobTitle', $lc->postvars['txTitle']);
+			if (@isset($lc->postvars['mime'])  && strlen($lc->postvars['mime'])) {
+				$lob->set('lobMime', $lc->postvars['mime']);
+			}
+		}
+
+		if ($lc->postvars['lob_sub_type'] == 'html') {
+			$lob->setTextContent($lc->postvars['txText']);
+			$lob->set('lobTitle', $lc->postvars['txTitle']);
+			if (@isset($lc->postvars['mime'])  && strlen($lc->postvars['mime'])) {
+				$lob->set('lobMime', $lc->postvars['mime']);
+			}
+		}
+
+
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			Lc_Lob_Util::createLinkText($lob->get('lobTitle'))
+		);
+
+		$lob->setCaption($lc->postvars['caption']);
+
+
+		if ($lob->repoObj->isNew()) {
+			$saveUser = true;
+		} else {
+			$saveUser = false;
+		}
+
+
+		$lob->updateMeta($lc->postvars);
+		$lob->save();
+		//get the new ID if a new save
+		if ($id == 0) {
+			$id = $lob->repoObj->getPrimaryKey();
+		}
+
+		if ($saveUser) {
+			$lobUserObj = new LobUserLink();
+			$lobUserObj->set('lobRepoEntryId',$lob->repoObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('lobKind','content');
+			$lobUserObj->save();
+		}
+
+//		$lob->repoObj->lobBinary = '';
+//		debug($lob);
+//		exit();
+
+		$u->addSessionMessage('Successfully saved <i>&quot;'.htmlentities($lob->get('lobTitle')).'&quot;</i>.');
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/edit/c='.$id);
+	}
+
+
+	function saveActRun(&$db,&$u,&$lc,&$t) {
+		$id = intval($lc->postvars['lob_id']);
+		$lob = new Lc_Lob_Activity($id);
+
+
+		if ($lob->repoObj->isNew()) {
+			$saveUser = true;
+		} else {
+			$saveUser = false;
+		}
+
+		$lob->setResponseType( intval( $lc->postvars['responseType'] ) );
+		$lob->set('lobSubType', $lob->getResponseTypeName() );
+
+		$lob->set('lobDescription', $lc->postvars['instructions']);
+		$lob->set('lobNotes', $lc->postvars['notes']);
+		$lob->set('lobTitle', $lc->postvars['title']);
+		//create the link text in a standard way
+		$lob->set('lobUrltitle',
+			Lc_Lob_Util::createLinkText($lob->get('lobTitle'))
+		);
+
+
+
+		$lob->save();
+		//get the new ID if a new save
+		if ($id == 0) {
+			$id = $lob->repoObj->getPrimaryKey();
+		}
+
+
+		if ($saveUser) {
+			$lobUserObj = new LobUserLink();
+			$lobUserObj->set('lobRepoEntryId',$lob->repoObj->getPrimaryKey());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('lobKind','content');
+			$lobUserObj->save();
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/edit/c='.$id);
+
+	}
+
+}
+
+?>

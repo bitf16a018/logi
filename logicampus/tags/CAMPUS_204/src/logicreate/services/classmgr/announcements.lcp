@@ -1,0 +1,189 @@
+<?php
+/*************************************************** 
+ *
+ * This file is under the LogiCreate Public License
+ *
+ * A copy of the license is in your LC distribution
+ * called license.txt.  If you are missing this
+ * file you can obtain the latest version from
+ * http://logicreate.com/license.html
+ *
+ * LogiCreate is copyright by Tap Internet, Inc.
+ * http://www.tapinternet.com/
+ ***************************************************/
+
+
+include_once(LIB_PATH. 'SiteForms.php');
+include_once(LIB_PATH. 'datagrid.php');
+include_once(LIB_PATH. 'classAnnouncements.php');
+
+class announcements extends FacultyService 
+{
+	var $presentor = 'HTMLPresentation';
+
+	// links
+	var $applinks = array(
+		'List Announcements' => 'announcements/',
+		'Add Announcement' => 'announcements/#edit'
+	);
+	var $inactivelinks = array( 'Announcements' );
+	
+
+	function run(&$db,&$u,&$lc,&$t) 
+	{	
+		$datagrid = new DataGrid($this->module,$this->serviceName);
+		$datagrid->table  = 'class_announcements';
+		$datagrid->column = 'tx_title,dt_display,id_class_announcements';
+		$datagrid->headerClass = 'classheader';
+		$datagrid->ignore = array('id_class_announcements');
+		
+		$datagrid->setCellWidth('asdf', '80');
+		$datagrid->setCellAlign('asdf', 'right');
+		$datagrid->setCellWidth('dt_display', '120');
+		$datagrid->setCellAlign('dt_display', 'left');
+		
+		$datagrid->where = 'id_classes='.$u->activeClassTaught->id_classes;
+		
+		$datagrid->sortColumns = array("tx_title", 'dt_display');
+		
+		$datagrid->headers = array('tx_title'=>'Title','dt_display'=>"Date Display", 'asdf'=>' ');
+		
+		$datagrid->postpendColumn('<nobr><a href="<?=modurl("announcements/event=edit/id=$id_class_announcements/#edit");?>">edit</a> | <a onclick="if (confirm(\'Are you sure you want to delete this announcement?\')) { return true; } else { return false; }" href="<?=modurl("announcements/event=delete/id=$id_class_announcements");?>">delete</a></nobr>','asdf');
+		
+		$datagrid->overrideColumn('<?=date("F jS, Y",strtotime($dt_display));?>','dt_display');
+		$datagrid->class = 'datagrid';
+		$t['table'] = $datagrid->toHTML();
+		//debug($this);
+		
+		if ($t['status'] != 'editing')
+		{
+			$formObj = new SiteForm();
+			$formObj->getForm('classannouncements');
+			$formObj->action = modurl('announcements/'); 
+			$t['form'] = $formObj->ToHTML();
+		}
+		
+		$this->sectionTitle = 'Announcements';
+//auto-comment		$lc->templateStyle='private';
+		$lc->templateName = 'announcements_main';
+	}
+
+	
+	function deleteRun(&$db,&$u,&$lc,&$t) 
+	{
+		$announceObj = classAnnouncements::_getFromDB('id_class_announcements', (int)$lc->getvars['id'], 'id_classes='.$u->activeClassTaught->id_classes);
+		
+		if ($announceObj->__loaded)
+		{	
+			$announceObj->_deleteFromDB();
+			$t['goodtimes'] = '<center><h4>Your announcement has been <i><b>Deleted</b></i>!</h4></center>';
+		}
+		
+		$this->run($db, $u, $lc, $t);
+	}
+	
+	
+	function editRun(&$db,&$u,&$lc,&$t) 
+	{
+		$announceObj = classAnnouncements::_getFromDB('id_class_announcements', (int)$lc->getvars['id'], 'id_classes='.$u->activeClassTaught->id_classes);
+		// @@@ integrity checking on the above object.. is it an object? (later)
+		$formObj = new SiteForm();
+			$formObj->getForm('classannouncements', $announceObj);
+			$formObj->action = modurl('announcements/'); 
+			$formObj->modFormValue('submit', 'Update Announcement');
+			$formObj->modFormValue('event', 'update');
+			$formObj->modFormValue('id_class_announcements', $announceObj->id_class_announcements);
+			$t['form'] = $formObj->ToHTML();
+			
+		$t['status'] = 'editing';
+		$this->run($db, $u, $lc, $t);	
+	}
+	
+	
+	function updateRun(&$db,&$u,&$lc,&$t) 
+	{
+		$formObj = new SiteForm();
+		
+		$t['error'] = $formObj->validateForm('classannouncements', $lc->postvars);
+		
+		if ($formObj->hasErrors() == false)
+		{
+			$announceObj = new classAnnouncements();
+			
+			$announceObj = $announceObj->_getFromDB('id_class_announcements', $formObj->cleanedArray['id_class_announcements'], 'id_classes='.$u->activeClassTaught->id_classes);
+			if (is_object($announceObj))
+			{	
+				$announceObj->_loadArray($formObj->cleanedArray);
+				$announceObj->dt_display = $formObj->cleanedArray['dt_display']['year']. '-'.$formObj->cleanedArray['dt_display']['month'].'-'.$formObj->cleanedArray['dt_display']['day'];
+				$announceObj->id_classes = $u->activeClassTaught->id_classes;	// i need it becuase _loadArray clobers it
+				$announceObj->id_faculty_createdby = $u->username;
+				$announceObj->_saveToDB();
+				
+				$t['goodtimes'] = '<center><h4>Thank you, your announcement has been <i><b>Updated</b></i>!</h4></center>';
+				
+			} else
+			{
+				$t['error'] .= '<ul><li type="square">Failed to <i><b>update</b><i> your announcement, please try again</li></ul>';
+			}			
+			$this->run($db, $u, $lc, $t);
+		} else
+		{
+			$t['error'] .= '<ul><li type="square">Failed to <i><b>update</b><i> your announcement, please try again</li></ul>';
+			$this->editRun($db, $u, $lc, $t);
+		}
+		
+		return;
+		// i need to check for existance of id and react
+		$sql = '
+			UPDATE class_announcements
+			SET tx_title=\''. $lc->postvars['title']. '\',
+			tx_description=\''. $lc->postvars['desc']. '\'
+			WHERE id_announcement='. $lc->getvars['id']. '		
+		';
+		
+		$db->query($sql);
+		if (mysql_affected_rows() == 1)
+		{	$t['messages'][] = 'Your announcement has been updated!';
+		} else
+		{	$t['messages'][] = '<font color="red">Failed to update announcement, please try again!</a>';
+			$t['record'] = $lc->postvars;
+			$t['record']['id'] = $lc->getvars['id'];
+			$t['submit_label'] = 'Update Announcement';
+			$t['event'] = 'update';
+		}
+		
+		$this->run($db, $u, $lc, $t);
+	}
+	
+	
+	function addRun(&$db,&$u,&$lc,&$t) 
+	{
+		$formObj = new SiteForm();
+		
+		$t['error'] = $formObj->validateForm('classannouncements', $lc->postvars);
+		
+		if ($formObj->hasErrors() == false)
+		{
+			$announceObj = new classAnnouncements();
+
+			$announceObj->_loadArray($lc->postvars);
+
+				$announceObj->dt_display = $formObj->cleanedArray['dt_display']['year']. '-'.$formObj->cleanedArray['dt_display']['month'].'-'.$formObj->cleanedArray['dt_display']['day'];
+				$announceObj->id_classes = $u->activeClassTaught->id_classes;
+				$announceObj->id_faculty_createdby = $u->username;
+				$announceObj->dt_created = date('Y-m-d h:i:s');
+			
+			$announceObj->_saveToDB();
+			
+			if (mysql_insert_id() > 0)
+			{	$t['goodtimes'] = '<center><h4>Thank you, your announcement has been added!</h4></center>';
+			} else
+			{	$t['error'] .= '<ul><li type="square">Failed to add your announcmenet, please try again</li></ul>';
+			}
+
+		}
+		
+		$this->run($db, $u, $lc, $t);
+	}
+}
+?>

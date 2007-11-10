@@ -1,0 +1,65 @@
+<? if (!$t['includedFromMain']) { ?>
+<?=$t['sectionheader'];?>
+<h3>Staff comments about <i><?=$t['username'];?></i></h3>
+<form method="POST">
+
+	<textarea name="helpdesk_comments" cols="85" rows="10"><?=$t['comment']->comment;?></textarea>
+	<input type="hidden" name="userid" value="<?=$t['username'];?>">
+	<input type="hidden" name="event" value="updateComments">
+
+	<br/>
+	Save comments about <i><?=$t['username'];?></i>: <input type="submit" value="Save">
+</form>
+<br/>
+<hr>
+<? } else { ?>
+<h3>Staff comments about <i><?=$t['username'];?></i></h3>
+	<?=$t['comment']->comment;?>
+	<BR>
+<? } ?>
+
+
+<h3>Helpdesk history for user <i><?=$t['username'];?></i></h3>
+<?
+if (is_array($t['incidents'])) { 
+?>
+<table width="90%" border="0">
+	<tr>
+		<th>No.</th>
+		<th>Incident Summary</th>
+		<th>Incident Submitted On</th>
+		<th>Incident Closed On</th>
+	</tr>
+<? 
+foreach ( $t['incidents'] as $i=>$incident) {
+?>
+<tr>
+	<td><?=$i+1;?>.</td>
+	<td><a href="<?=appurl("helpdesk/helpdeskView/$incident->helpdeskId");?>"><?=$incident->summary;?></a></td>
+	<td align="right"><?=date('m.d.Y',$incident->timedateOpen);?></td>
+	<td align="right"><? echo ($incident->timedateClose == 0) ? $incident->helpdeskStatusLabel: date('m.d.Y',$incident->timedateOpen);?></td>
+</tr>
+<? } ?> 
+</table>
+<? } else { ?>
+There are no helpdesk incidents recorded for this user.
+
+<? } ?>
+
+<h3>Connection history (started 10/18/03)</h3>
+<table width='90%'>
+<tr class="bartitle"><th>Time/date</th><th>Status</th><th>Browser</th><th>Version</th><th>OS</th></tr>
+<? while(list($k,$v) = each($t['history'])) { 
+if ($v['login_status']!=1) { $style = ' style="color: white; background-color: red;"'; } else { $style=''; }
+?>
+<tr<?=$style;?>>
+<td><?=date("m/d/Y h:i:s A", $v['login_attempt']);?></td>
+<td><? if ($v['login_status']==1) { echo "GOOD"; } else { echo "FAILED"; } ?></td>
+<td><?=strtoupper($v['browser']);?></td>
+<td><?=strtoupper($v['version']);?></td>
+<td><?=strtoupper($v['os']);?></td>
+</tr>
+<? } ?>
+
+
+</table>

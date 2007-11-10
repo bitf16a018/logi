@@ -1,0 +1,112 @@
+<?php
+
+
+include_once(LIB_PATH."eventsObj.php");
+ 
+
+class mastercalendar extends BasicAuth    
+{
+	
+	var $presentor = 'htmlPresentation';
+
+	var $_START_TIME = 2;
+	var $_END_TIME = 18;
+	
+	function run($db,&$u,&$lc,&$t) {
+		$t['dropdowns']['overallviews'] = array();
+		
+		$op_taken  = array();
+		$op_taught = array();
+		
+		if (trim($lc->postvars['overallviews']) != '') 
+		{	$u->sessionvars['mastercalendar']['overallviews'] = $lc->postvars['overallviews'];
+		} else
+		{	
+			if ($u->sessionvars['mastercalendar']['overallviews'] == '')
+			{	$u->sessionvars['mastercalendar']['overallviews'] = 'none';
+			}
+			
+			$lc->postvars['overallviews'] = $u->sessionvars['mastercalendar']['overallviews'];
+			
+		}
+		
+		$lc->templateName = 'main_main';
+		$this->inactivelinks[] = 'Month view';
+		
+		$mut = (is_numeric($lc->getvars['m'])) ? 
+					(int)$lc->getvars['m'] : date('m');
+		$yut = (is_numeric($lc->getvars['y'])) ? 
+					(int)$lc->getvars['y'] : date('Y');
+		$dut = (is_numeric($lc->getvars['d'])) ? 
+					(int)$lc->getvars['d'] : date('d');
+
+		if ($yut > (date('Y') + 25)) $yut = date('Y');
+		
+		$calendar_epoch_time = strtotime("$mut/1/$yut");
+		$calendar_epoch_time = mktime(0,0,0,date('m',$calendar_epoch_time),1,date('Y',$calendar_epoch_time));
+
+		if (isset($u->classesTaken) && is_array($u->classesTaken) && count($u->classesTaken) > 0)
+		{
+			if ($u->sessionvars['mastercalendar']['overallviews'] == 'vtaken')
+			{
+				foreach($u->classesTaken as $v)
+				{	$op_taken[] = trim($v->id_classes);
+				}
+				
+				$op_taken = array_unique($op_taken);
+			}
+			$t['dropdowns']['overallviews']['vtaken'] = 'View all classes taken';
+		}
+		
+		if (isset($u->classesTaught) && is_array($u->classesTaught) && count($u->classesTaught) > 0)
+		{
+			if ($u->sessionvars['mastercalendar']['overallviews'] == 'vteach')
+			{
+				foreach($u->classesTaught as $v)
+				{	$op_taught[] = trim($v->id_classes);
+				}
+				
+				$op_taught = array_unique($op_taught);
+			}
+			$t['dropdowns']['overallviews']['vteach'] = 'View all classes you teach';
+		}
+
+		$use_groups = array_unique($u->groups);
+		
+		$c = new cali($calendar_epoch_time,(strtotime("+1 months",$calendar_epoch_time)-1), '', array_merge($op_taught, $op_taken), $use_groups);
+		$c->showTitle = false;
+		$c->showTimes = false;
+		$c->calWidth = '100%';
+		$c->monthReviewURL = modurl('main/d='.$lc->getvars['d']);
+		$c->showEventCount = true;
+		
+		$c->eventDayURL = modurl('day');
+		$c->eventCountURL = modurl('day');
+		
+		$t['tinyCal'] = $c->renderMonth(date('m',$calendar_epoch_time), date('Y',$calendar_epoch_time));
+		
+		
+		
+		//debug($t['dropdowns']['overallviews']);
+		//debug($lc->postvars);
+$t['showfilterstuff'] = false;
+		if (makeOptions($t['dropdowns']['overallviews'], $u->sessionvars['mastercalendar']['overallviews']) != null)
+		{	
+			$t['showfilterstuff'] = true;
+			$t['op']['overallviews']  = 'Filter by: <select name="overallviews">';
+			$t['dropdowns']['overallviews']['none'] = 'General Events';
+			$t['op']['overallviews'] .= makeOptions($t['dropdowns']['overallviews'], $u->sessionvars['mastercalendar']['overallviews'], false);
+			$t['op']['overallviews'] .= '</select>';
+		}
+		// filter by day - day
+		
+		// search by title
+		
+		// different dropdown views
+		//debug($u);	
+	}
+	
+
+}
+
+?>

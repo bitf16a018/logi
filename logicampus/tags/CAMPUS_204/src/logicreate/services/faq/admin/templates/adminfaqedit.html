@@ -1,0 +1,77 @@
+<? global $HTTP_USER_AGENT?>
+<script language="JavaScript">
+	function openwysiwyg() {
+		window.open('<?=BASE_URL?>herc/wysiwyg/_editor.php?formname=Editor','wysiwyg','navigation=0,resizable=yes,width=820,height=700,scrollbars=yes');
+	}
+	function sendNewFile(v) {
+		Editor.elements[6].value = v;
+	}
+	function getContent() {
+		return Editor.elements[6].value;
+	}
+</script>
+
+<br>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="selectedTab">
+      			FAQ Management
+		</td>
+		<td class="selectedTab" align="right">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="500">
+		<table border="1" width="100%">
+			<tr>
+				<td class="white">
+
+<form method="post" name="Editor">
+<input type="hidden" name="event" value="update">
+<input type="hidden" name="faq[pkey]" value="<?=$t[faq]->pkey;?>">
+
+
+
+
+<BR>
+<font color="#FF0000"><?=$t["error"];?></font>
+<table>
+<tr><td bgcolor="#D0D0D0">Category:</td></tr>
+
+<tr><td>
+<? if ($t["catopt"]) {?>
+	<select name="faq[category]"><option value="">Select a category<?=$t["catopt"];?></select>
+	<br>or<BR>
+<? } ?>
+	New category <br>
+	<input type="text" name="textcategory" size="50" maxlength="50">
+	</td></tr>
+
+	<tr><td bgcolor="#D0D0D0">Group Visibility: </td></tr>
+	<tr><td><select name="faq[groups][]" size="5" multiple><?=$t["groups"];?></select></td></tr>
+
+	<tr><td bgcolor="#D0D0D0">Question:</td></tr>
+	<tr><td><input type="text" name="faq[question]" value="<?=$t[faq]->question;?>" size="70" maxlength="200"></td></tr>
+
+	<tr><td bgcolor="#D0D0D0">
+	<SCRIPT LANGUAGE="JavaScript" SRC="<?= BASE_URL;?>ua.js"></SCRIPT>
+	<script language="JavaScript"><!--
+		if ( (navigator.org == 'microsoft') && (navigator.OS == 'win')&& (navigator.version > 5) ) {
+			document.write('<img align="right" src="<?= _PICS_URL;?>visualEditor.gif" onclick="openwysiwyg();">');
+		}
+	// --></script>
+	Answer:</td></tr>
+	<tr><td><textarea name="faq[answer]" rows="16" cols="60" wrap="virtual"><?=$t[faq]->answer;?></textarea></td></tr>
+
+</table>
+
+
+<br>
+
+<input type="submit" value="Add/Update this question">
+</form>
+
+		</td></tr>
+		</table>
+</td></tr></table>

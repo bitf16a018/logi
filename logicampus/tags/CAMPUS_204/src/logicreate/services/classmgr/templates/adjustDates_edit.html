@@ -1,0 +1,32 @@
+<?php
+echo $t['sectionheader'];
+?>
+
+<div style="clear:both;">
+	<div align="left">
+		<img align="middle" src="/images/calendar.png"/>
+		<H2 style="display:inline;margin:1px;"><?= $t['itemName'];?> Dates</H2>
+	</div>
+</div>
+<br style="clear:both;">
+
+<form style="margin:0px;" method="POST" action="<?= modurl('adjustDates/event=save'.$t['itemName']);?>">
+<?php 
+
+if ($t['table']->table->getRowCount() < 1) {
+	echo "<i>No {$t['itemName']}s found for this lesson.</i>";
+} else {
+	echo '<input type="submit" value="Save Changes"/><br/><br/>';
+	echo "\n";
+	echo $t['table']->toHTML();
+	echo '<br/><input type="submit" value="Save Changes"/>';
+	echo "\n";
+}
+
+
+if ($t['lesson_id'] > 0 ) { ?>
+	<input type="hidden" name="lesson_id" value="<?=$t['lesson_id'];?>"/>
+<?php } 
+?>
+
+</form>

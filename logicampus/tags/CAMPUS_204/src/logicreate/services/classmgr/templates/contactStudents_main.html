@@ -1,0 +1,164 @@
+<?=$t['sectionheader'];?>
+
+<?php
+
+if (count($t['students']) == 0)
+{
+	echo $t['emessage'];
+	
+} else
+{
+?>
+<script>
+	var studentarray = new Object();
+<?php
+
+	foreach($t['students'] as $student_username =>$student_checkbox)
+	{	
+		//echo $student_checkbox. '<br>';
+		echo '	
+	studentarray["student_'.$student_username.'"] = false;';		
+	}
+
+	
+?>
+
+function invert_selection()
+{
+	var tmp_element; 
+	
+	for (field in studentarray) 
+	{	
+		tmp_element = document.getElementById(field);
+		
+		if (tmp_element.checked)
+		{	tmp_element.checked = false;
+		} else
+		{	tmp_element.checked = true;
+		}
+		
+	}
+	
+}
+
+function select_all()
+{
+	var tmp_element; 
+	
+	for (field in studentarray) 
+	{	
+		tmp_element = document.getElementById(field);
+		tmp_element.checked = true;
+	}
+	
+}
+
+function can_submit()
+{	
+	for (field in studentarray) 
+	{
+		if (document.getElementById(field).checked == true)
+		{	return true;
+		}
+
+	}
+}
+</script>
+<?=$t['emessage'];?>
+<br>
+
+
+
+<? if ($t['message'] != '') { ?><h3>  <?=$t['message'];?></h3><? } ?>
+
+
+<form method='post' action='<?=appurl("classmgr/contactStudents/event=submit");?>'>  
+
+
+<table width="100%">    
+<tr>       
+	<td colspan="3">
+		Select the student you wish to private message or:
+	</td>   
+</tr>    
+<tr>       
+	<td>
+		<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="select_all();">Select All</a>]</span>
+	</td>      
+	<td> 
+		<span style="font-weight:bold;color:green;text-decoration:underline;">[<a onclick="invert_selection();">Select Inverse</a>]</span>
+	</td>
+	<td></td>    
+</tr>   
+
+<tr><td colspan="3"><hr></td></tr>
+<tr>
+	<td colspan="3">
+<?php echo htmlTable($t['students'], 3, '100%', null, 2, 1, 0); ?>	
+	</td>
+</tr>
+	
+
+
+<tr>
+	<td colspan="3">&nbsp;</td>
+</tr>
+<tr><td colspan="3"><hr></td></tr>
+
+
+
+<tr>
+	<td valign="top"><b>Type of message</b><br>
+	</td>
+	<td valign="top" colspan="2">
+		<input type="radio" value="pm" checked name="type"id="type_pm"><label for="type_pm"> Private Message</label><br>
+		<input type="radio" value="email" name="type" id="type_email"><label for="type_email"> E-mail</label><br>
+		<input type="radio" value="both" name="type" id="type_both"><label for="type_both"> Both</label><br>	<Br>
+	</td>
+	
+</tr>
+
+
+
+
+<tr><td colspan="3"><hr></td></tr>
+
+
+<tr>       
+	<td colspan='3'>
+		<b>Enter Information</b>
+	</td>    
+<tr>       
+	<td colspan='2'> 
+	Enter Subject<br/>
+	<input type='text' name='subject'>
+	</td>    
+</tr>    
+<tr>
+	<td colspan="3">Additional Recipients: (i.e. dean@domain.com)<br/>
+	<input type="text" name="recipient_a" id="recipient_a">
+	</td>
+</tr>
+<tr>
+	<td colspan="3">Additional Recipients: (i.e. dean@domain.com)<br/>
+	<input type="text" name="recipient_b" id="recipient_b">
+	</td>
+</tr>
+
+<tr>       
+	<td colspan='3'> 
+		<p>Enter Message<BR>          
+		<textarea name="message" rows="8" cols="50" wrap="virtual"></textarea>        
+		</p>        
+	</td>    
+</tr>  
+</table>
+<input type="checkbox" value="copy" name="copy"> Copy to sender<br>
+
+<input type="submit" value="Send Message" onclick="if (can_submit()) { return true; } else { alert('You must select at least one student to send this message to!'); return false; } ">
+
+</form>
+
+<?php
+}
+?>

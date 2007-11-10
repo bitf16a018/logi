@@ -1,0 +1,104 @@
+<?=$t['sectionheader'];?>
+<?php
+//debug($t['asmt']);
+?>
+<br>
+<style>
+	td.title
+	{	font-weight: bold;
+	}
+</style>
+<TABLE>
+<tr>
+	<td class="title">Title:</td>
+	<td><?=$t['asmt']->title;?></td>
+</tr>
+<tr>
+	<td class="title">Belongs to Lesson:</td>
+	<td><?=$t['asmt']->lessonTitle ? $t['asmt']->lessonTitle : '<i>None assigned</i>';?></td>
+</tr>
+<tr>
+	<td class="title">Became active on:</td><td><?=date('l dS \of F Y', $t['asmt']->activeDate);?></td>
+<tr>
+	<td class="title">Due on:</td><td><?=date('l dS \of F Y \a\t h:i A', $t['asmt']->dueDate);?></td>
+</tr>
+<tr>
+	<td class="title">Gradebook Code:</td><td><?=$t['entryCode'];?></td>
+</tr>
+<tr>
+	<td class="title" colspan="2">Instructions:</td>
+</tr>
+<tr>
+	<td colspan="2"><?=$t['asmt']->instructions;?></td>
+</tr>
+
+</table>
+
+<br>
+
+<? if ($t['entryLinked'] ) { ?>
+<fieldset>
+	<legend>Congratulations</legend>
+	<center>This assignment is linked to a gradebook entry already. (<?=$t['entryCode'];?>)  
+		You do not need to publish anymore, once you update a student's points the changes will reflect
+		in the gradebook immediately under gradebook code <?= $t['entryCode'];?>.</center>
+</fieldset>
+<? } else { ?>
+<fieldset>
+	<legend>Commit this assignment to the gradebook</legend>
+	<center>In order to see these grades in the gradebook you must publish them to a gradebook entry.<br/>
+		Use this link to publish the grades on this page to a gradebook entry.  Any grades that are not 
+		turned in will be reflected as a zero (0) only if the assignment's due date is past.
+		<br/>
+		<a href="<?=appurl('classmgr/assignmentManage/event=showEntriesList/id_class_assignments='. $obj->getvars['id_class_assignments']);?>">Publish your grades to the  Gradebook</a>
+</center>
+</fieldset>
+<? } ?>
+
+<br>
+<br>
+
+<span id="datagrid">
+
+<table class="datagrid" width="100%" cellpadding="2" cellspacing="1">
+
+	<tr valign="top" class="even">
+		<th valign="top">Student Name</th>
+		<th valign="top">Status</th>
+		<th valign="top">Grade</th>
+		<th colspan="2" valign="top" align="left">Date Completed</th>
+	</tr>
+	
+<?php
+
+if (is_array($t['student_list']) && count($t['student_list'])) {
+
+	foreach($t['student_list'] as $k=>$v) {
+		?>
+		<tr style="<?=((++$i%2) ? 'background-color: #e7e7e7;': '');?>">
+			<td><?=$v['lastname']. ', '.$v['firstname'];?></td>
+			<?=(($v['completed']) ? '<td style="color: green; font-weight: bold;">Turned In</td>' : '<td style="color: red; font-weight: bold;">Incomplete</td>') ?>
+			<td><?=(($v['grade'] != null) ? $v['grade'] : 'N/A')?></td>
+			<td><?=$v['datecompleted'];?></td>
+			<td><a href="<?=appurl('classmgr/assignmentManage/event=viewAssignment/id_class_assignments='. $obj->getvars['id_class_assignments'].'/student='. $v['username']);?>">Grade</a></td>
+		</tr>
+		<?php
+	}
+}
+
+?>
+
+	<tr valign="top" class="even">
+		<th valign="top">Student Name</th>
+		<th valign="top">Status</th>
+		<th valign="top">Grade</th>
+		<th colspan="2" valign="top" align="left">Date Completed</th>
+	</tr>
+	
+</table>
+
+</span>
+
+
+
+

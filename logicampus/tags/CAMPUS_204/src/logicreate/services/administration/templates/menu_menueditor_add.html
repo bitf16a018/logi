@@ -1,0 +1,93 @@
+<?=$t['sectionheader'];?>
+
+<br>
+<form method="POST">
+
+<table border="0" width="100%">
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Title:
+</td></tr>
+<tr><td colspan="2">
+<input type="text" name="title" value="<?=$t[menu]->title?>">
+<p>
+</td></tr>
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Menu ID: (example: 'staff')
+</td></tr>
+<tr><td colspan="2">
+<input type="text" name="menuid" value="<?=$t[menu]->menuid?>">
+<p>
+</td></tr>
+
+<tr><td bgcolor="#D0D0D0" colspan="2">
+Group Visibility:
+</td></tr>
+<tr><td>
+		Include Groups:<br>
+		<select name="groups[]" size="5" MULTIPLE>
+			<?= $t[groups];?>
+		</select>
+
+		</td><td>
+		Exclude Groups:<br>
+		<select name="notgroups[]" size="5" MULTIPLE>
+			<?= $t[notgroups]; ?>
+		</select>
+
+</td></tr>
+<tr><td colspan="2">
+<input type="hidden" name="event" value="<?= $t[event];?>">
+<input type="hidden" name="pkey" value="<?=$t[menu]->pkey;?>">
+</td></tr></table>
+
+
+<p>
+
+<fieldset>
+<legend><B>Menu Type</B></legend>
+	<table width="100%">
+	<tr><td>
+		<p>
+	</td></tr>
+	<tr><td valign="top">
+		<input type="radio" name="layout" value="v" <? if (($t[menu]->layout == 'vertical') || ($t['menu']->layout==''))   { print 'CHECKED'; }?>> Vertical 
+	</td><td valign="top">
+		<table border="1" width="200"><tr><td>link <br> link <br>&nbsp;&nbsp;&nbsp;link </td></tr></table>
+	</td></tr>
+	<tr><td valign="top">
+		<input type="radio" name="layout" value="h" <? if ($t[menu]->layout == 'horizontal' )   { print 'CHECKED'; }?>> Horizontal
+	</td><td valign="top">
+		<table border="1" width="200"><tr><td align="center">| link | link | link |</td></tr></table>
+	</td></tr>
+
+	<tr><td valign="top">
+			<!--<input type="radio" name="layout" value="jh" <? $t[menu]->layout == 'jshorizontal'? print 'CHECKED': print '';?>>--> &nbsp; Javascript Horizontal
+	</td><td valign="top">
+	<table border="1" width="200"><tr><td align="center"><i>Coming Soon</i></td></tr></table>
+	</td></tr>
+	</table>
+<input type="submit" value="save">
+
+</fieldset>
+
+</form>
+
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+<? if ($t['menu']->pkey > 0 ) { ?>
+<table width="600">
+<tr><td bgcolor="#F0D0D0" colspan="2">
+	Delete this menu and all its menu items
+</tr></td>
+<tr><td>
+	<form method="POST">
+	<input type="submit" value="delete">
+	<input type="hidden" name="event" value="menueditorDelete">
+	<input type="hidden" name="pkey" value="<?=$t['menu']->pkey?>">
+	</form>
+</td></tr>
+</table>
+<? } ?>

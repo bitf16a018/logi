@@ -1,0 +1,141 @@
+<h2>Classroom Home &mdash; <?php echo $obj->user->activeClassTaken->courseFamilyNumber .' '. $obj->user->activeClassTaken->courseName;?></h2>
+<table border=0 cellpadding=2 cellspacing=0 width="80%">
+	<tr><td align="center">
+	<img border="0" src="<?=IMAGES_URL;?>icon-flag.png"/>&nbsp;<a href="<?=modurl('syllabus');?>">classroom syllabus</a>
+	</td><td align="center">
+	<img border="0" src="<?=IMAGES_URL;?>icon-users.png"/>&nbsp;<a href="<?=modurl('facultyProfile');?>">contact instructor</a>
+	</td></tr>
+</table>
+
+<table border=0 cellpadding="2" cellspacing="0" width="100%">
+<tr>
+	<td width="33%" valign="top">
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr>
+			<td class="portalbox">Class Calendar</td>
+		</tr>
+		<tr>
+			<td>
+			<div class="calendar_controls" id="calendar_controls">
+				<?=$t['calendarRenderer']->controlsToHTML();?>
+
+			</div>
+			<div class="calendar" id="calendar">
+				<?=$t['calendarRenderer']->toHTML();?>
+			</div>
+			</td>
+		</tr>
+		</table>
+
+		<br/>
+
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Lessons<br/><small>(<?=$t['_PortalNumOfLessons']?> of <?=$t['lessoncount']?> <a href="<?=APP_URL?>classroom/lessons">view all</a>)</small></td>
+		</tr>
+		<tr>
+			<td>(newest lesson is first)</td>
+		</tr>
+		<tr>
+			<td><?=$t['lessons'];?></td>
+		</tr>
+		</table>
+
+		<br/>
+
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Assignments<br/><small>(<?=$t['_PortalNumOfAssignments'];?> of <?=$t['assignmentcount'];?> <a href="<?=APP_URL?>classroom/assignments">view all</a>)</small></td>
+		</tr>
+		<? if ($t['assignments'] || $t['noduedateassignments']) { ?>
+		<? if ($t['assignments']) { ?>
+		<tr>
+			<td>(closest due date is first)</td>
+		</tr>
+		<tr>
+			<td><?=$t['assignments'];?></td>
+		</tr>
+		<? } ?>
+		<? if ($t['noduedateassignments']) { ?>
+		<tr>
+			<td><b>No Due Date</b></td>
+		</tr>
+		<tr>
+			<td><ul><?=$t['noduedateassignments'];?></ul></td>
+		</tr>
+		<? } ?>
+		<? } else { ?>
+		<tr>
+			<td><i>no assignments found</i></td>
+		</tr>
+		<? } ?>
+
+		</table>
+
+
+
+
+
+	</td>
+
+	<td width="10">&nbsp;</td>
+
+	<td valign="top">
+
+		<?php 
+		if (strlen($t['announcements']) ) {
+			echo lcMessageBox($t['announcements'],'i','Announcements'); 
+			echo "<br/>\n";
+		}
+
+		if (strlen($t['motd']) ) {
+
+			$t['motd'] = "<a href='".appurl("classroom/details/event=viewMOTD")."'>".$t['motd']."</a>";
+			echo lcMessageBox($t['motd'],'i','Message of the Day'); 
+			echo "<br/>\n";
+		}
+
+		?>
+
+
+		<ol>
+			<li><a href="<?= modurl('announcements');?>">Announcements</a></li>
+			<li><a href="<?= modurl('assessments');?>">Tests</a></li>
+			<li><a href="<?= modurl('assignments');?>">Assignments</a></li>
+			<li><a href="<?= modurl('classCalendar');?>">Calendar</a></li>
+			<li><a href="<?= modurl('chat');?>">Chat</a></li>
+			<li><a href="<?= modurl('contactStudents');?>">Classmates</a></li>
+			<li><a href="<?= appurl('classforums');?>">Discussion Board</a></li>
+			<li><a href="<?= modurl('faq');?>">Class FAQs</a></li>
+			<li><a href="<?= modurl('gradebook');?>">Gradebook</a></li>
+			<li><a href="<?= modurl('lessons');?>">Lessons</a></li>
+			<li><a href="<?= modurl('presentations');?>">Presentations</a></li>
+			<li><a href="<?= modurl('syllabus');?>">Syllabus</a></li>
+			<li><a href="<?= modurl('online');?>">Who's online</a></li>
+			<li><a href="<?= modurl('webliography');?>">Webliography</a></li>
+			<li><a href="<?= modurl('details/event=showtools');?>">Dictionary / Thesaurus</a></li>
+		</ol>
+	</td>
+</tr>
+<tr>
+	<td colspan="3">
+<?
+		# We do not show this block until a faculty 
+		# member chooses something
+		if ($t['classresource'])
+		{ ?>
+		<table cellpadding="2" cellspacing="1" style="border: 1px solid silver;" width="100%">
+		<tr class="menu">
+			<td class="portalbox">Class Resources</td>
+		</tr>
+		<tr>
+			<td><?=$t['classresource'];?></td>
+		</tr>
+		</table>
+		<? } ?>
+	</td>
+</tr>
+
+</table>
+
+

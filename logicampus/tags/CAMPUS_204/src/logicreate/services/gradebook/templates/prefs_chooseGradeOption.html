@@ -1,0 +1,12 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><br/><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><br/><?}?>
+
+Choose how you wish to setup grading for your gradebook for this
+class.  
+
+<ul>
+<li><b>Percentage</b> - Your gradebook entries are graded based on a 0-100 percent scale.</li>
+<li><b>Points</b> - Your gradebook entries are graded based upon arbitrary point values.</li>
+</ul>
+<?=$t['form'];?>

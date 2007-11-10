@@ -1,0 +1,75 @@
+<?=$t['sectionheader'];?>
+
+<?=$t['error'];?>
+<FIELDSET>
+<LEGEND><b>Test Information</b></LEGEND>
+<b>Question</b>: <?=$t['questionNumber']?> of <?=$t['questionCount'];?>  
+<b>Minutes Remaining</b>: <?=$t['minutes_remaining'];?> &nbsp; <b>Start Time</b>: <?=$t['starttime']?> &nbsp;
+<b>Test Time Limit</b>: <?=$t['minute_limit']?> minutes
+</FIELDSET>
+<br>
+
+<form method="POST" ACTION="<?=APP_URL?>test/question/event=answer">
+<input type='hidden' name='questionID' value='<?=$t['q']->assessmentQuestionId;?>'>
+	<table border="0" width="600">
+		<tr>
+			<td valign="top"><b>Question</b></td>
+			<td colspan=2>
+				<?=$t['q']->questionText;?>
+			</td>
+		</tr>
+		<? 
+		if ($t['q']->fileHash) 
+		{ ?>
+		<tr>
+			<td colspan="3" align="center">
+				<img src="<?=APP_URL?>test/viewContent/fhash=<?=$t['q']->fileHash;?>" border="0" alt="question image" align="center">
+			</td>
+		</tr>
+		<? } ?>
+		<tr>
+			<td colspan=3 height=25>&nbsp;</td>
+		</tr>
+		<tr>
+			<td><b>*Answer</b></td>
+			<td colspan=2>&nbsp;</td>
+		</tr>
+		<? for ($x=0;$x<2;++$x) { ?>
+		<? $qc = $t['q']->questionChoices[$x]; ?>
+		<?$checked = '';?>
+		<tr>
+			<td width=100 align="right">
+				<?
+				// make this A, B, C, etc) - adding 64+1 = 65 (A). 
+				// what effect for foreign character sets? 
+				// mgk - 8/14/04
+				?>
+				<? echo chr($x+65);?>.
+			</td>
+			<td width=50><?=$qc->label;?></td>
+			<td>
+			<? if ($qc->label == $t['answer']->assessmentAnswerValues) $checked = 'checked'; ?>
+				<input name="answer" value="<?=$qc->label;?>" type="radio" <?=$checked?>>
+			</td>
+		</tr>
+		<? } ?>
+	</table>
+
+<br><br>
+	<table border="0" width="100%">
+		<tr>
+			<td valign="top">
+				<input type="submit" name="prev" value="&lt;-Save and Go back">
+			</td>
+			<td valign="top" align="center">
+				<input type="submit" name="start" value="View All Questions">
+			</td>
+			<td valign="top" align="right">
+				<input type="submit" name="next" value="Save and Continue-&gt;">
+				<input type="hidden" name="assessmentAnswerId" value="<?=$t['answer']->assessmentAnswerId?>">
+				</form>
+			</td>
+		</tr>
+	</table>
+
+<p>* denotes a required field.</p>
