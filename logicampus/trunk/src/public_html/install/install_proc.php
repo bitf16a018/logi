@@ -22,6 +22,10 @@ if (isset($_POST['db_name']) ) {
 		$defines = str_replace( '@db.user@', $_POST['db_user'], $defines);
 		$defines = str_replace( '@db.password@', $_POST['db_pass'], $defines);
 		$defines = str_replace( '@db.database@', $_POST['db_name'], $defines);
+		$defines = str_replace( '@version.number@', LOGICAMPUS_VERSION, $defines);
+		$defines = str_replace( '@version.extra@', LOGICAMPUS_VERSION_STATUS, $defines);
+		$defines = str_replace( '@build.date@', LOGICAMPUS_BUILD_DATE, $defines);
+
 		$f = fopen('../defines.php','w');
 		if (!$f) {
 			$errorIds[] = 5;
