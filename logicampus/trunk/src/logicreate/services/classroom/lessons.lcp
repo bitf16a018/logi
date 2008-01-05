@@ -224,12 +224,8 @@ class lessons extends StudentService {
 		// CHECKLIST
 		$t['checkListArray'] = explode("\n",trim($t['lesson']['checkList']));
 
-
-		//DEPRECATED, we don't need to store it in the session anymore
-		// because this info is only on one page, not all pages
-		// of the lesson
-
 		// Create the sidebar and stash it in the session
+		// we need the lesson stored in the sesison for more security checks later
 		$u->sessionvars['activeLesson'] = $t['lesson'];
 
 		if ($lc->getvars['print']) {
