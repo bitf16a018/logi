@@ -41,6 +41,7 @@ class content extends StudentService {
 		$viewerAuth = false;
 		$classId=-1;
 		$lesson_id=-1;
+
 		$lesson_id = $u->sessionvars['activeLesson']['id_class_lessons'];
 		foreach ($u->classesTaken as $classObj) {
 			$code = lcClass::makeUniqueCode($classObj);
