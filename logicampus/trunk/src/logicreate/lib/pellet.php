@@ -485,8 +485,6 @@ class FacultyService extends Service {
 		if ( $lcObj->getvars['id_classes']!='' &&
 			$lcUser->activeClassTaught->id_classes != $lcObj->getvars['id_classes'] )
 		{
-			//__FIXME__ add constraint against classesTaught array;
-
 			foreach ( $lcUser->classesTaught as $k => $v) {
 				if ($v->id_classes == $lcObj->getvars['id_classes']) {
 					$lcUser->activeClassTaught = $lcUser->classesTaught[$k];

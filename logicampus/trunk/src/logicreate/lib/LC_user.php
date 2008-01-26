@@ -73,15 +73,18 @@ class lcUser {
 			return $temp;
 		}
 
+		/*
 		if (rand(1,20) >= 20 ) {
 		//gc cleanup, mysql specific with DATE_SUB
 			global $PHPSESSID;
 			$db->query("DELETE FROM lcSessions WHERE DATE_SUB(CURDATE(), INTERVAL 1 DAY) > gc",false);
 			$db->freeResult();
 		}
+*/
 		$db->query("select * from lcSessions where sesskey = '$sessID'",false);
 		$j = $db->nextRecord();
 		$db->freeResult();
+
 
 		if (!$j) {
 			//trigger_error('second try to get session for: '.$sessID);
@@ -91,38 +94,31 @@ class lcUser {
 		}
 
 		if (function_exists("gzuncompress")) { 
-			$temp2 = unserialize(gzuncompress(base64_decode($db->record['sessdata'])));
+			$sessArr = unserialize(gzuncompress(base64_decode($db->record['sessdata'])));
 		} else {
-			$temp2 = unserialize(base64_decode($db->record['sessdata']));
+			$sessArr = unserialize(base64_decode($db->record['sessdata']));
 		}
-		if (!$temp2) { 
-			$temp2 = unserialize(base64_decode($db->record['sessdata']));
+		//maybe it wasn't gzipped
+		if (!$sessArr) { 
+			$sessArr = unserialize(base64_decode($db->record['sessdata']));
 		}
-
-		if ($temp2['_userobj']->username!='anonymous') { 
-			$tt = 'got valid user obj back with user name = '.$temp2['_userobj']->username;
+		if (!$sessArr) { 
+			$sessArr = unserialize($db->record['sessdata']);
 		}
 
 		if ($j) {
-			$sessArr = $temp2;
-			/*
-			$sessArr = unserialize(gzuncompress(base64_decode($db->record["sessdata"])));
-			if (!$sessArr) {
-				$sessArr = unserialize((base64_decode($db->record["sessdata"])));
-			}
-			*/
 
 			$origSession = crc32($db->record['sessdata']);
-			if ( is_object($sessArr['_userobj']) && $sessArr['_userobj']->userType > 0) {
-				$temp = $sessArr['_userobj'];
-				$temp = lcUser::getUserByUsername($sessArr['_userobj']->username);
-				unset($sessArr['_userobj']);
+			//DEPRECATED
+			if ($sessArr["_userId"] != "") {
+				$temp = lcUser::getUserByPkey($sessArr["_userId"]);
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
 				$temp->_origChecksum = $origSession;
 				$temp->loggedIn = true;
-			} else
-			if ($sessArr["_username"] != "") {
+				$temp->loadProfile();
+			}
+			else if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
 				$temp->sessionvars = $sessArr;
 				$temp->_sessionKey = $sessID;
@@ -167,12 +163,25 @@ class lcUser {
 		$db->query("select * from lcUsers where pkey = $key",false);
 		if ( !$db->nextRecord() ) {  return new lcUser();  }
 		$db->freeResult();
-		$temp =   new lcUser();
+		switch($db->record['userType']) {
+			case USERTYPE_FACULTY:
+				$temp = new FacultyUser($db->record['username']);
+				break;
+			case USERTYPE_STUDENT:
+				$temp = new StudentUser($db->record['username']);
+				break;
+			case USERTYPE_STANDARD:
+				$temp = new StandardUser($db->record['username']);
+				break;
+			default:
+				$temp = new lcUser();
+		}
 		$temp->username = $db->record['username'];
 		$temp->password = $db->record['password'];
 		$temp->email = $db->record['email'];
 		$temp->groups = array_merge($temp->groups,explode("|",$db->record['groups']));
 		$temp->userId = $db->record['pkey'];
+		$temp->loadProfile();
 	return $temp;
 	}
 
@@ -298,7 +307,6 @@ class lcUser {
 	 * Remove from profile and profile_* specific table
 	 * Remove from proflie_course_family
 	 */
-
 	function deleteUser() {
 		
 	    $db = DB::getHandle();
@@ -370,6 +378,9 @@ class lcUser {
 		return $pkey;
 	}
 
+	function commitSessionVars() {
+		$this->sessionvars['_userId'] = $this->userId;
+	}
 
 
 	/**
@@ -384,42 +395,53 @@ class lcUser {
 
 		if ($this->_sessionKey == "") { return false; }
 		if ($this->username == "") { return false; /*print "no username"; exit();*/}
-		//unhook session from user, reverse rolse
+		//save userID to the session
+		$this->commitSessionVars();
+
 		$sessBlob = $this->sessionvars;
-		unset($this->sessionvars);
+//		unset($this->sessionvars);
 		// combatting access denied issue
 		// 8/5/03 mgk
 		// 10-16-2003 MAK
 		// $val is not defined, doesn't make sense
 		//$this->newval = crc32($val);
 
-		$sessBlob['_userobj'] = $this;
 		if (function_exists("gzcompress")) { 
 			$val = gzcompress(serialize($sessBlob));
 		} else { 
 			$val = serialize($sessBlob);
 		}
+		/*
+		 */
+			$val = serialize($sessBlob);
 
-		if ( crc32($val) == $this->_origChecksum) { return; }
+		if ( crc32($val) == $this->_origChecksum) { return true; }
 		$db = DB::getHandle();
 		$sessid = $this->_sessionKey;
-		$val=base64_encode($val);
+//		$val=base64_encode($val);
+		$val = addslashes($val);
 		$s="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		if ($this->username == "anonymous" ) { 
-			$s="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
+			$s="UPDATE lcSessions SET sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		}
-		if (!$db->query($s)) {
-			die('no update');
-			//no update record, try insert
+		$queryWorked = $db->query($s);
+		$updateWorked = $db->getAffectedRows();
+		if ($updateWorked < 0) {
+			$e = ErrorStack::pullError('php');
+
+			$s="DELETE FROM lcSessions WHERE username = '".$this->username."'";
+			$queryWorked = $db->query($s);
+			$e = ErrorStack::pullError('php');
 			$s="INSERT into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
 			if ($this->username == "anonymous" ) { 
 				$s="INSERT into lcSessions (sessdata,sesskey) values ('$val','$sessid')";
 			}
 			$db->query($s);
 		}
+		return true;
 		//sess_close(DB::getHandle(),$this->uid,serialize($this->session));
-		$sessBlob['_userobj'] = '';
-		$this->sessionvars = $sessBlob;
+//		$sessBlob['_userobj'] = '';
+//		$this->sessionvars = $sessBlob;
 	}
 
 
@@ -434,11 +456,13 @@ class lcUser {
 		if ($this->username == "anonymous" ){ return false; }
 		if ($this->username == "" ){ $this->username = 'anonymous'; return false; }
 		global $tail;
+		/*
 		if (!$this->isAnonymous()) {
 			$PHPSESSID=md5 (uniqid (rand()));
 			setcookie("PHPSESSID",$PHPSESSID,0,$tail);
 			$this->_sessionKey = $PHPSESSID;
 		}
+		 */
 		$this->sessionvars['_username'] = $this->username;
 		if (function_exists("gzcompress")) { 
 			$val = base64_encode(gzcompress(serialize($this->sessionvars)));
@@ -446,12 +470,12 @@ class lcUser {
 			$val = base64_encode((serialize($this->sessionvars)));
 
 		}
+		/*
+		 */
+		$val = serialize($this->sessionvars);
 		$this->_origChecksum = crc32($val);
-		$sessid = $this->_sessionKey;
 
-		$s="replace into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
-		$db = DB::getHandle();
-		$db->query($s,false);
+		$this->saveSession();
 		return true;
 	}
 
@@ -477,6 +501,7 @@ class lcUser {
 	 */
 	function endSession($db) {
 		$this->sessionvars["_username"] = "";
+		$this->sessionvars["_userId"] = "";
 		setCookie("PHPSESSID","",0);
 	}
 
@@ -519,14 +544,14 @@ class lcUser {
 			$this->email = $db->record['email'];
 			$this->password = $db->record['password'];
 			$this->username = $db->record['username'];
-			//__FIXME__ what is this fields for??
-			//$this->fields = $db->record;
-			$this->sessionvars['_username'] = $username;
+			$this->sessionvars['_userId'] = $db->record['pkey'];
 			$this->groups = array_merge($this->groups,explode("|",substr($db->record['groups'],1,-1)));
 			$this->userId = $db->record['pkey'];
-	//		$this->userType = $db->record['userType'];
+			$this->loadProfile();
 			return true;
 		} else {
+			$this->password = '';
+			$this->username = 'anonymous';
 			$this->groups[] = 'public';
 			return false;
 		}
