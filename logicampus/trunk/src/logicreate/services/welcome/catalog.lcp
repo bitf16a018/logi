@@ -133,7 +133,15 @@ class Catalog extends NoAuth {
 		"WHP"=>'Wellness Hlth Prom Inj Prevent',
 		"WS"=>'Women\'s Studies',
 		);
-		return $courses;
+		$db = DB::getHandle();
+//		echo ('SELECT * FROM courses WHERE courseFamily IN ("'.implode('","', array_keys($courses)).'")');
+		$db->query('SELECT * FROM courses WHERE courseFamily IN ("'.implode('","', array_keys($courses)).'")');
+		$availCourses = array();
+
+		while ($db->nextRecord()) {
+			$availCourses[ $db->record['courseFamily'] ] = $courses[ $db->record['courseFamily'] ];
+		}
+		return $availCourses;
 	}
 }
 ?>
