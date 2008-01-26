@@ -113,6 +113,7 @@ class lcUser {
 			if ($sessArr["_userId"] != "") {
 				$temp = lcUser::getUserByPkey($sessArr["_userId"]);
 				$temp->sessionvars = $sessArr;
+				$temp->unwrapSessionVars();
 				$temp->_sessionKey = $sessID;
 				$temp->_origChecksum = $origSession;
 				$temp->loggedIn = true;
@@ -121,6 +122,7 @@ class lcUser {
 			else if ($sessArr["_username"] != "") {
 				$temp = lcUser::getUserByUsername($sessArr["_username"]);
 				$temp->sessionvars = $sessArr;
+				$temp->unwrapSessionVars();
 				$temp->_sessionKey = $sessID;
 				$temp->_origChecksum = $origSession;
 				$temp->loggedIn = true;
@@ -129,6 +131,7 @@ class lcUser {
 			else {
 				$temp = new lcUser();
 				$temp->sessionvars = $sessArr;
+				$temp->unwrapSessionVars();
 				$temp->_sessionKey = $sessID;
 				$temp->_origChecksum = $origSession;
 				$temp->loadProfile();
@@ -380,7 +383,20 @@ class lcUser {
 
 	function commitSessionVars() {
 		$this->sessionvars['_userId'] = $this->userId;
+		$this->sessionvars['_activeClassTaught'] = $this->activeClassTaught;
+		$this->sessionvars['_activeClassTaken'] = $this->activeClassTaken;
+		$this->sessionvars['_classesTaken'] = $this->classesTaken;
+		$this->sessionvars['_classesTaught'] = $this->classesTaught;
 	}
+
+	function unwrapSessionVars() {
+		$this->userId = $this->sessionvars['_userId'];
+		$this->activeClassTaught = $this->sessionvars['_activeClassTaught'];
+		$this->activeClassTaken = $this->sessionvars['_activeClassTaken'];
+		$this->classesTaken = $this->sessionvars['_classesTaken'];
+		$this->classesTaught = $this->sessionvars['_classesTaught'];
+	}
+
 
 
 	/**
@@ -411,15 +427,11 @@ class lcUser {
 		} else { 
 			$val = serialize($sessBlob);
 		}
-		/*
-		 */
-			$val = serialize($sessBlob);
 
 		if ( crc32($val) == $this->_origChecksum) { return true; }
 		$db = DB::getHandle();
 		$sessid = $this->_sessionKey;
-//		$val=base64_encode($val);
-		$val = addslashes($val);
+		$val=base64_encode($val);
 		$s="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		if ($this->username == "anonymous" ) { 
 			$s="UPDATE lcSessions SET sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
@@ -463,7 +475,7 @@ class lcUser {
 			$this->_sessionKey = $PHPSESSID;
 		}
 		 */
-		$this->sessionvars['_username'] = $this->username;
+		$this->commitSessionVars();
 		if (function_exists("gzcompress")) { 
 			$val = base64_encode(gzcompress(serialize($this->sessionvars)));
 		} else {
