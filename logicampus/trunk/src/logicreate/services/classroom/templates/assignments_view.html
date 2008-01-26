@@ -1,9 +1,6 @@
 <?=$t['sectionheader'];?>
 <?=$t['msg'];?>
 
-<?=
-debug($t['sequence']);
-?>
 <TABLE width="100%">
 <tr>
 	<td><b>Title:</b></td>
@@ -32,7 +29,7 @@ debug($t['sequence']);
 	</fieldset>
 
 <br>
-<a target="_blank" href="<?=modurl('assignments/event=view/print=yes/id='.$t['assignment']['id_class_assignments']);?>">Click here for printer friendly version</a>
+<a target="_blank" href="<?=modurl('assignments/event=view/print=yes/id='.$t['activity']->repoObj->lobRepoEntryId);?>/l=<?=$t['lessonId'];?>">Click here for printer friendly version</a>
 
 	</td>
 </tr>
