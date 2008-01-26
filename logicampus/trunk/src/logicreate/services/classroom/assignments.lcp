@@ -165,6 +165,7 @@ class assignments extends StudentService {
 		$t['activity'] = $activityLob;
 		$sequence = $lessonSequence->getSequence($classSeqId);
 		$lesson = new LC_Lesson($lessonId);
+		$t['lessonId'] = $lessonId;
 		$t['startDate'] = $lessonSequence->getStartDate($lesson, $classSeqId);
 		$t['dueDate'] = $lessonSequence->getDueDate($lesson, $classSeqId);
 		$t['noDueDate'] = $sequence->dueOffset > 0;
