@@ -410,7 +410,7 @@ class lcUser {
 		$this->sysMessages = array();
 
 		if ($this->_sessionKey == "") { return false; }
-		if ($this->username == "") { return false; /*print "no username"; exit();*/}
+		if ($this->username == "") { $this->username == 'anonymous';} 
 		//save userID to the session
 		$this->commitSessionVars();
 
@@ -439,6 +439,7 @@ class lcUser {
 		$queryWorked = $db->query($s);
 		$updateWorked = $db->getAffectedRows();
 		if ($updateWorked < 0) {
+			die('update did not work ' .$updateWorked);
 			$e = ErrorStack::pullError('php');
 
 			$s="DELETE FROM lcSessions WHERE username = '".$this->username."'";
