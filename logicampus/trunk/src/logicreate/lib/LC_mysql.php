@@ -289,15 +289,23 @@ class mysql extends DB {
 
 
 	/**
-	 * Return the number of rows affected by the last query
+	 * Return the number of rows retruned by the last query
 	 *
-	 * @return int	number of affected rows
+	 * @return int	number of rows returned
 	 */
 	function getNumRows() {
 		$resID = count($this->resultSet) -1;
 		return @mysql_num_rows($this->resultSet[$resID]);
 	}
 
+	/**
+	 * Return the number of rows affected by the last query
+	 *
+	 * @return int	number of affected rows
+	 */
+	function getAffectedRows() {
+		return @mysql_affected_rows();
+	}
 
 	/**
 	 * disconnect from the database

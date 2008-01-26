@@ -83,12 +83,14 @@
 		# stores all class objects the faculty teaches
 		var $classesTaken = array();
 		var $classesTaught = array();
-		var $activeClassTaught = 0;
+		var $activeClassTaught = null;
 		var $profileTable = 'profile_faculty';
 		
-		# Constructor
-		# Grabs all classes the faculty member teaches? Maybe?
-		#only gets called on login
+		/**
+		 * FacultyUser Constructor
+		 * Grabs all classes the faculty member teaches
+		 * only gets called on login
+		 */
 		function FacultyUser ($userid) 
 		{
 			$this->classesTaught = classObj::getClassesTaught($userid,'facultyId');
@@ -143,6 +145,7 @@
 			while ( list($k,$v) = @each($lcUser->classesTaught) ) {
 				if ($v->id_classes == $classID) return true;
 			}
+			reset($lcUser->classesTaught);
 			return false;
 		}
 		
