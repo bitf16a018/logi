@@ -607,22 +607,36 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 
 			//start building nodes
 			$xml_child_nodes   = array();
+
+			//name, description
+			$less_title_node = new xml_node('lesson:title',null,null,$lessonRec['title']);
+			$less_title_node->cdata = true;
+			$xml_child_nodes[] = $less_title_node;
+
+			$less_desc_node = new xml_node('lesson:description',null,null,$lessonRec['description']);
+			$less_desc_node->cdata = true;
+			$xml_child_nodes[] = $less_desc_node;
+
+			//learning path
 			$less_seq_node = new xml_node('lesson:learningpath');
 
 			foreach($lobArray as $idx => $lob) {
 				unset($lob_seq_node);
 				$lob_seq_node = new xml_node('lesson:lobsequence',array('order'=>$lob['rank'], 'visible'=>'yes'));
 				$lob_ref_node = new xml_node('lesson:lob',array('refid'=>$lob['lob_guid']));
-				$lob_sta_node = new xml_node('lesson:start',array('type'=>'offset', format=>'unix'), null, $lob['start_offset']);
-				$lob_end_node = new xml_node('lesson:end',array('type'=>'offset', format=>'unix'), null, $lob['start_offset']);
+				$lob_sta_node = new xml_node('lesson:start',array('type'=>'offset', format=>'unix'), null, $lob['start_offset']+ $lob['start_time']);
+				$lob_end_node = new xml_node('lesson:end',array('type'=>'offset', format=>'unix'), null, $lob['end_offset']+ $lob['end_time']);
+				$lob_due_node = new xml_node('lesson:due',array('type'=>'offset', format=>'unix'), null, $lob['due_offset']+ $lob['due_time']);
 
 				$lob_seq_node->children[] = $lob_ref_node;
 				$lob_seq_node->children[] = $lob_sta_node;
 				$lob_seq_node->children[] = $lob_end_node;
+				$lob_seq_node->children[] = $lob_due_node;
 
 				$less_seq_node->children[] = $lob_seq_node;
 			}
 			$xml_child_nodes[] = $less_seq_node;
+
 
 			$guid = lcUuid();
 			$lob_nodes[] = new xml_node('lesson:lesson', 
