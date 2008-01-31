@@ -42,8 +42,6 @@ class orientations extends FacultyService
 	var $inactivelinks = array('Orientation scheduling');
 	var $sectionTitle = 'Orientation Scheduling';
 	
-	var $inactivelinks = array();
-	
 	var $applinks = array('View schedule'=>'orientations/');
 	
 	/**
