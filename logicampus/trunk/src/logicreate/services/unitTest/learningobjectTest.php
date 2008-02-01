@@ -2,6 +2,7 @@
 
 include(LIB_PATH.'lc_lob_content.php');
 include(LIB_PATH.'lc_lob_class.php');
+include(LIB_PATH.'lc_lob_test.php');
 
 class LearningObjectTest extends UnitTestCase {
 
@@ -90,15 +91,16 @@ class LearningObjectTest extends UnitTestCase {
 	 * Make a new class content from a repo entry object.
 	 */
 	function testCopyARepoEntry() {
+		$classId = 1;
 		$lob = new Lc_Lob_Content();
 		//setup a fake PKEY
 		$lob->repoObj->lobRepoEntryId = 1;
 
-		$classContent = $lob->useInClass('notify');
+		$classContent = $lob->useInClass($classId,'notify');
 		$e = ErrorStack::pullError('php');
 		//e might be an error saying that the repo doesn't have all its data.
 		if ($e) {
-			$this->fail();
+			$this->fail($e->message);
 		} else {
 			$this->assertTrue( is_object($classContent) );
 			$this->assertEqual( $classContent->type , 'content' );
