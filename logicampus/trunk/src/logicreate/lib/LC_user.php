@@ -432,24 +432,33 @@ class lcUser {
 		$db = DB::getHandle();
 		$sessid = $this->_sessionKey;
 		$val=base64_encode($val);
-		$s="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
+		$update="UPDATE lcSessions SET username =\"".$this->username."\", sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		if ($this->username == "anonymous" ) { 
-			$s="UPDATE lcSessions SET sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
+			$update="UPDATE lcSessions SET sessdata = \"".$val."\" WHERE sesskey = '".$sessid."'";
 		}
-		$queryWorked = $db->query($s);
+		$queryWorked = $db->query($update);
 		$updateWorked = $db->getAffectedRows();
 		if ($updateWorked < 0) {
-			die('update did not work ' .$updateWorked);
+//			die('update did not work ' .$updateWorked. "\n <br>".$s);
 			$e = ErrorStack::pullError('php');
 
 			$s="DELETE FROM lcSessions WHERE username = '".$this->username."'";
 			$queryWorked = $db->query($s);
 			$e = ErrorStack::pullError('php');
-			$s="INSERT into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
-			if ($this->username == "anonymous" ) { 
-				$s="INSERT into lcSessions (sessdata,sesskey) values ('$val','$sessid')";
-			}
+
+			//try the update again
+			// could be duplicate key on username, or on session ID
 			$db->query($s);
+			$queryWorked = $db->query($update);
+			$updateWorked = $db->getAffectedRows();
+			if ($updateWorked < 0) {
+				$e = ErrorStack::pullError('php');
+				$s="INSERT into lcSessions (username,sessdata,sesskey) values ('".$this->username."','$val','$sessid')";
+				if ($this->username == "anonymous" ) { 
+					$s="INSERT into lcSessions (sessdata,sesskey) values ('$val','$sessid')";
+				}
+				$db->query($s);
+			}
 		}
 		return true;
 		//sess_close(DB::getHandle(),$this->uid,serialize($this->session));
