@@ -371,6 +371,7 @@ class Lc_Lob {
 		$classLob->lobMetaObj->subject        = $meta->subject;
 		$classLob->lobMetaObj->subdisc        = $meta->subdisc;
 		$classLob->lobMetaObj->author         = $meta->author;
+		$classLob->lobMetaObj->source         = $meta->source;
 		$classLob->lobMetaObj->copyright      = $meta->copyright;
 		$classLob->lobMetaObj->license        = $meta->license;
 		$classLob->lobMetaObj->userVersion    = $meta->userVersion;

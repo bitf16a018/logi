@@ -163,7 +163,6 @@ class Edit extends FacultyService {
 		$lob = new Lc_Lob_Content($lobId);
 		$t['lob'] = $lob;
 		$t['licenses'] = $this->getLicenseArray();
-//		$lob->updateMeta($lc->postvars);
 	}
 
 	/**
