@@ -43,6 +43,7 @@
 	</tr>
 </table>
 <form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->getRepoId());?>">
+
 <input type="submit" value="Change this object"/>
 </form>
 
@@ -71,7 +72,7 @@
 				<ul>
 					<li>Private:&nbsp; <?=$lob->isPrivate();?></li>
 					<li>Version:&nbsp; <?=$lob->getVersion();?></li>
-					<li>Last update on:&nbsp; <?= $lob->getEditedOn();?></li>
+					<li>Last update:&nbsp; <?= $lob->getEditedOn();?></li>
 					<li>Date created:&nbsp; <?= $lob->getCreatedOn();?></li>
 				</ul>
 			</fieldset>
