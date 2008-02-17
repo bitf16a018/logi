@@ -1,0 +1,73 @@
+<?php $lob = $t['lob'];?>
+<h4>Edit Learning Objects</h4>
+
+<a href="<?=appurl('lobrepo/');?>">Learning Objects Home</a>
+&bull;  
+<a href="<?=appurl('lobrepo/myobj');?>">My Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/import');?>">Import Learning Objects</a>
+&bull;  
+<a href="<?=appurl('lobrepo/add');?>">Add Learning Objects</a>
+
+<hr/>
+
+<h3><?= $lob->get('lobTitle');?></h3>
+<form method="POST" action="<?=appurl('lobrepo/edit/event=saveMeta/id='.$lob->getRepoId());?>">
+
+
+<table border="0" width="600">
+	<tr>
+		<td valign="top" width="300" colspan="2">
+			<div style="width:300px">
+			<fieldset>
+				<legend>Status</legend>
+
+				<ul>
+					<li>Private:&nbsp; <?=$lob->isPrivate();?></li>
+					<li>Version:&nbsp; <?=$lob->getVersion();?></li>
+					<li>Last update on:&nbsp; <?= $lob->getEditedOn();?></li>
+					<li>Date created:&nbsp; <?= $lob->getCreatedOn();?></li>
+				</ul>
+			</fieldset>
+			</div>
+		</td>
+	</tr>
+
+	<tr>
+		<td valign="top" class="">Subject</td>
+		<td valign="top" class=""><input type="text" id="md_subj" name="md_subj" value="<?=htmlentities($t['lob']->getMeta('subject'));?>" size="50" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Sub-Discipline</td>
+		<td valign="top" class=""><input type="text" id="md_subdisc" name="md_subdisc" value="<?=htmlentities($t['lob']->getMeta('subdisc'));?>" size="50" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Author</td>
+		<td valign="top" class=""><input type="text" id="md_author" name="md_author" value="<?=htmlentities($t['lob']->getMeta('author'));?>" size="50" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">Source</td>
+		<td valign="top" class=""><input type="text" id="md_source" name="md_source" value="<?=htmlentities($t['lob']->getMeta('source'));?>" size="50" maxlength=""></td>
+	</tr>
+
+	<tr>
+		<td valign="top" class="">Copyright Year</td>
+		<td valign="top" class=""><input type="text" id="md_copyright" name="md_copyright" value="<?=htmlentities($t['lob']->getMeta('copyright'));?>" size="24" maxlength=""></td>
+	</tr>
+	<tr>
+		<td valign="top" class="">License</td>
+		<td valign="top" class=""><select id="md_license" name="md_license">
+			<?php
+			echo makeOptions($t['licenses'],  htmlentities($t['lob']->getMeta('license')));
+			?></select>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" class=""></td>
+		<td valign="top" class=""><input type="submit" id="sbmt_button" name="sbmt_button" value="Save Content"></td>
+	</tr>
+
+
+</table>
+</form>
+
