@@ -226,6 +226,7 @@ class Lc_Lob {
 	function updateMeta($vars) {
 		$this->setMeta('lobKind','content');
 		$this->setMeta('author', $vars['md_author']);
+		$this->setMeta('source', $vars['md_source']);
 		$this->setMeta('copyright', $vars['md_copyright']);
 		$this->setMeta('license', $vars['md_license']);
 		$this->setMeta('subject', $vars['md_subj']);
@@ -586,12 +587,12 @@ class Lc_Lob_Util {
 	 *
 	 * @static
 	 */
-	function getMimeForSubtype($subType,$ext='') {
+	function getMimeForSubtype($subtype,$ext='') {
 		if ($ext == 'jpeg' || $ext == 'pjpeg' || $ext == 'jpg') {
 			$ext = 'jpeg';
 		}
 
-		switch($subType) {
+		switch($subtype) {
 			case 'text':
 				return 'text/plain';
 			case 'wiki':
