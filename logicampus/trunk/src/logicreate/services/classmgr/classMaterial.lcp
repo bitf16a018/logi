@@ -284,7 +284,7 @@ class classMaterial extends FacultyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 
-		$class_id = $u->activeClassTaught->id_classes;
+		$classId = $u->activeClassTaught->id_classes;
 
 		$datagrid = new DataGrid($this->module,$this->serviceName);
 
@@ -295,7 +295,7 @@ class classMaterial extends FacultyService {
 					ON A.lob_class_repo_id = B.lob_class_repo_id
 				LEFT JOIN class_lessons AS C
 				  ON B.lesson_id = C.id_class_lessons
-				WHERE A.class_id = '.$u->activeClassTaught->id_classes.'
+				WHERE A.class_id = '.$classId.'
 				AND A.lob_type = "content"
 				ORDER BY B.due_offset ASC';
 
@@ -306,7 +306,7 @@ class classMaterial extends FacultyService {
 					ON A.lob_class_repo_id = B.lob_class_repo_id
 				LEFT JOIN class_lessons AS C
 				  ON B.lesson_id = C.id_class_lessons
-				WHERE A.class_id = '.$u->activeClassTaught->id_classes.'
+				WHERE A.class_id = '.$classId.'
 				AND A.lob_type = "content"';
 
 		$datagrid->ignore = array('lob_class_repo_id', 'lob_guid', 'class_lesson_sequence_id');
