@@ -520,6 +520,10 @@
 			required="true"
 			size="255"
 			type="VARCHAR"/>
+		<attribute name="source"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
 		<attribute name="copyright"
 			required="true"
 			size="255"
@@ -669,6 +673,10 @@
 			size="255"
 			type="VARCHAR"/>
 		<attribute name="author"
+			required="true"
+			size="255"
+			type="VARCHAR"/>
+		<attribute name="source"
 			required="true"
 			size="255"
 			type="VARCHAR"/>

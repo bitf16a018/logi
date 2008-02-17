@@ -1,7 +1,7 @@
 -- Dumping SQL for project logicampus
 -- entity version: 0.0
 -- DB type: mysql
--- generated on: 10.02.2007
+-- generated on: 02.16.2008
 
 
 DROP TABLE IF EXISTS `lob_class_metadata`;
@@ -12,6 +12,7 @@ CREATE TABLE `lob_class_metadata` (
 	`subject` varchar (255) NOT NULL, 
 	`subdisc` varchar (255) NOT NULL, 
 	`author` varchar (255) NOT NULL, 
+	`source` varchar (255) NOT NULL, 
 	`copyright` varchar (255) NOT NULL, 
 	`license` varchar (255) NOT NULL, 
 	`user_version` varchar (255) NOT NULL, 
@@ -21,5 +22,5 @@ CREATE TABLE `lob_class_metadata` (
 	PRIMARY KEY (lob_class_metadata_id) 
 );
 
-CREATE INDEX lob_class_repo_idx ON lob_class_metadata (lob_class_repo_id);
+CREATE INDEX `lob_class_repo_idx` ON `lob_class_metadata` (`lob_class_repo_id`);
 

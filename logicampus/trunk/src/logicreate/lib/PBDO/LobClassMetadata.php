@@ -11,6 +11,7 @@ class LobClassMetadataBase {
 	var $subject;
 	var $subdisc;
 	var $author;
+	var $source;
 	var $copyright;
 	var $license;
 	var $userVersion;
@@ -24,6 +25,7 @@ class LobClassMetadataBase {
 	'subject'=>'varchar',
 	'subdisc'=>'varchar',
 	'author'=>'varchar',
+	'source'=>'varchar',
 	'copyright'=>'varchar',
 	'license'=>'varchar',
 	'userVersion'=>'varchar',
@@ -126,6 +128,7 @@ class LobClassMetadataPeerBase {
 		$st->fields['subject'] = 'subject';
 		$st->fields['subdisc'] = 'subdisc';
 		$st->fields['author'] = 'author';
+		$st->fields['source'] = 'source';
 		$st->fields['copyright'] = 'copyright';
 		$st->fields['license'] = 'license';
 		$st->fields['user_version'] = 'user_version';
@@ -151,6 +154,7 @@ class LobClassMetadataPeerBase {
 		$st->fields['subject'] = $this->subject;
 		$st->fields['subdisc'] = $this->subdisc;
 		$st->fields['author'] = $this->author;
+		$st->fields['source'] = $this->source;
 		$st->fields['copyright'] = $this->copyright;
 		$st->fields['license'] = $this->license;
 		$st->fields['user_version'] = $this->userVersion;
@@ -178,6 +182,7 @@ class LobClassMetadataPeerBase {
 		$st->fields['subject'] = $obj->subject;
 		$st->fields['subdisc'] = $obj->subdisc;
 		$st->fields['author'] = $obj->author;
+		$st->fields['source'] = $obj->source;
 		$st->fields['copyright'] = $obj->copyright;
 		$st->fields['license'] = $obj->license;
 		$st->fields['user_version'] = $obj->userVersion;
@@ -247,6 +252,7 @@ class LobClassMetadataPeerBase {
 		$x->subject = $row['subject'];
 		$x->subdisc = $row['subdisc'];
 		$x->author = $row['author'];
+		$x->source = $row['source'];
 		$x->copyright = $row['copyright'];
 		$x->license = $row['license'];
 		$x->userVersion = $row['user_version'];
