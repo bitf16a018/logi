@@ -478,7 +478,7 @@ class LC_TableModel_ClassCalendar extends LC_TableModel {
 	 * Use enrollment dates or semester start/stop dates to calculate offets
 	 */
 	function loadLessonEvents($start,$end) {
-		$classIds = implode($this->classIds, ' or id_classes=');
+		$classIds = implode($this->classIds, ' or B.id_classes=');
 
 		$sql ='
 			SELECT C.activeOn
