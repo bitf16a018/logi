@@ -9,7 +9,7 @@ include_once(LIB_PATH.'PBDO/LobContent.php');
 include_once(LIB_PATH.'PBDO/LobActivity.php');
 include_once(LIB_PATH.'PBDO/LobTest.php');
 
-include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
 
 /**
  * Learning Object Repository

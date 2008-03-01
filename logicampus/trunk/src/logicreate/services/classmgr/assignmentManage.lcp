@@ -23,10 +23,10 @@ include_once(LIB_PATH."ClassGradebookEntries.php");
 include_once(LIB_PATH."ClassGradebook.php");
 include_once(LIB_PATH."ClassGradebookVal.php");
 
-include_once(LIB_PATH.'lc_lesson.php');
-include_once(LIB_PATH.'lc_lesson_sequence.php');
-include_once(LIB_PATH.'lc_lob.php');
-include_once(LIB_PATH.'lc_lob_class.php');
+include_once(LIB_PATH.'lesson/lc_lesson.php');
+include_once(LIB_PATH.'lesson/lc_lesson_sequence.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob_class.php');
 
 
 class assignmentManage extends FacultyService {

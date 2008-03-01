@@ -14,7 +14,7 @@
 
 include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'semesterObj.php');
-include_once(LIB_PATH.'lc_lesson.php');
+include_once(LIB_PATH.'lesson/lc_lesson.php');
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
 
 

@@ -3,10 +3,10 @@
  * Upload assignments and review instructor comments
  */
 include_once(LIB_PATH.'datagrid.php');
-include_once(LIB_PATH.'lc_lesson.php');
-include_once(LIB_PATH.'lc_lesson_sequence.php');
-include_once(LIB_PATH.'lc_lob.php');
-include_once(LIB_PATH.'lc_lob_class.php');
+include_once(LIB_PATH.'lesosn/lc_lesson.php');
+include_once(LIB_PATH.'lesosn/lc_lesson_sequence.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob_class.php');
 include_once(SERVICE_PATH.'pm/privmess.php');
 
 class assignments extends StudentService {

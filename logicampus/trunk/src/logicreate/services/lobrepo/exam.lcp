@@ -6,8 +6,8 @@ include_once(LIB_PATH.'PBDO/LobUserLink.php');
 include_once(LIB_PATH.'AssessmentQuestion.php');
 include_once(LIB_PATH.'AssessmentLib.php');
 
-include_once(LIB_PATH.'lc_lob.php');
-include_once(LIB_PATH.'lc_lob_test.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob_test.php');
 include_once(LIB_PATH.'lc_table.php');
 include_once(LIB_PATH.'lc_table_renderer.php');
 
