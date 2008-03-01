@@ -4,8 +4,8 @@ include_once(LIB_PATH.'SiteForms.php');
 include_once(LIB_PATH.'LC_html.php');
 include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'classLessonObj.php');
-include_once(LIB_PATH.'lc_lesson_sequence.php');
-include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lesson/lc_lesson_sequence.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
 // PBDO is the new standard, above object is DEPRECATED
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');

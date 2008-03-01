@@ -1,7 +1,7 @@
 <?
 
 include_once(LIB_PATH.'classLessonContentObj.php');
-include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
 //include_once(LIB_PATH.'datagrid.php');
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
 

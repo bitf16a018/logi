@@ -1,6 +1,6 @@
 <?php
 
-include_once(LIB_PATH.'lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob.php');
 include_once(LIB_PATH.'PBDO/LobClassRepo.php');
 include_once(LIB_PATH.'PBDO/LobClassContent.php');
 include_once(LIB_PATH.'PBDO/LobClassActivity.php');
