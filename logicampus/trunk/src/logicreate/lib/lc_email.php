@@ -1,21 +1,21 @@
 <?
 
 /*
- * lcemail class
+ * LcEmail class
  *
  * use to send regular text mail, or to attach text, html or external files 
  * to an email.
  *
  * sample usage
  * ------------
- * $m = new lcemail("eat@joes.com","pres@un.org","Subject","Regular message");
+ * $m = new LcEmail("eat@joes.com","pres@un.org","Subject","Regular message");
  * $m->send();
  *
- * $m = new lcemail("eat@joes.com","pres@un.org","Subject","Regular message");
+ * $m = new LcEmail("eat@joes.com","pres@un.org","Subject","Regular message");
  * $m->attachFile("/path/to/home/file.pdf");
  * $m->send();
  * 
- * $m = new lcemail("eat@joes.com","pres@un.org","Subject");
+ * $m = new LcEmail("eat@joes.com","pres@un.org","Subject");
  * $m->inlineHTML("<table width='500'><tr><td>TABLE CELL</td></tr></table>");
  * $m->returnpath = "foo@com.com";
  * $m->replyto = "noone@home.com";
@@ -34,7 +34,7 @@
  *
  */
 
-class lcemail{
+class LcEmail{
 
 	var $to = '';
 	var $from = '';
@@ -50,7 +50,7 @@ class lcemail{
 	var $crflag = false;
 	var $hasPlainText = false;	
 
-	function lcemail($to='',$from='',$subject='',$body='') { 
+	function LcEmail($to='',$from='',$subject='',$body='') { 
 		$this->to = $to;
 		$this->from = $from;
 		$this->returnpath = $from;
