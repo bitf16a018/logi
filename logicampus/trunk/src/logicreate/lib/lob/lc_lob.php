@@ -265,8 +265,10 @@ class Lc_Lob {
 		$ret = ($this->repoObj->getPrimaryKey() > 0);
 		
 
-		$this->lobSub->lobRepoEntryId = $this->repoObj->getPrimaryKey();
-		$this->lobSub->save();
+		if (is_object($this->lobSub) ) {
+			$this->lobSub->lobRepoEntryId = $this->repoObj->getPrimaryKey();
+			$this->lobSub->save();
+		}
 
 		$this->lobMetaObj->updatedOn = time();
 		$this->lobMetaObj->lobRepoEntryId = $this->repoObj->getPrimaryKey();

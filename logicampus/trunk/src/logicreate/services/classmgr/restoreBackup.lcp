@@ -9,8 +9,11 @@ include_once(LIB_PATH.'PBDO/LobActivity.php');
 include_once(LIB_PATH.'PBDO/LobTest.php');
 
 include_once(LIB_PATH.'lob/lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob_class.php');
 include_once(LIB_PATH.'lob/lc_lob_xml.php');
 include_once(LIB_PATH.'lesson/lc_lesson_xml.php');
+include_once(LIB_PATH.'lesson/lc_lesson_sequence.php');
+include_once(LIB_PATH.'lesson/lc_lesson.php');
 
 /**
  * Learning Object Repository
@@ -79,23 +82,23 @@ class RestoreBackup extends FacultyService {
 			if ($node->nodeType == XML_TEXT_NODE) {
 				continue;
 			}
-			$lobSub = null;
 			$lobRepoObj = Lc_Lob_Xml::parseNode($node, $tempdir);
-			if ($lobRepoObj->lobType == 'content') {
+			if ($lobRepoObj->type == 'content') {
 				$t['lob_material'][] = $lobRepoObj;
 			}
-			if ($lobRepoObj->lobType == 'activity') {
+			if ($lobRepoObj->type == 'activity') {
 				$t['lob_activity'][] = $lobRepoObj;
 			}
-			if ($lobRepoObj->lobType == 'test') {
+			if ($lobRepoObj->type == 'test') {
 				$t['lob_test'][] = $lobRepoObj;
 			}
 		}
 
-		$lessonNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/learning_object','lesson');
+		$lessonNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/lesson','lesson');
 
 		$t['lesson_list'] = array();
-		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
+		for ($xidx = 0; $xidx < $lessonNodes->length; $xidx++) {
+			$node = $lessonNodes->item($xidx);
 			$lessonObj = Lc_Lesson_Xml::parseNode($node);
 			$t['lesson_list'][] = $lessonObj;
 		}
@@ -112,6 +115,7 @@ class RestoreBackup extends FacultyService {
 	function handleUploadRun(&$db,&$u,&$lc,&$t) {
 
 		$tempdir = $u->sessionvars['restore_dir'];
+		$classId = $u->activeClassTaught->id_classes;
 
 		$doc = new DomDocument('1.0', 'UTF-8');
 		$doc->substituteEntities=false;
@@ -129,7 +133,48 @@ class RestoreBackup extends FacultyService {
 		//get the "lobcol" node
 		$collectionNode = $root->item(1);
 
+		//LOBS (course materials)
+		$lobNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/learning_object','obj');
+
+		$t['lob_material'] = array();
+		$t['lob_test'] = array();
+		$t['lob_activity'] = array();
+		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
+			$node = $lobNodes->item($xidx);
+			if ($node->nodeType == XML_TEXT_NODE) {
+				continue;
+			}
+			$lobRepoObj = Lc_Lob_Xml::parseNode($node, $tempdir);
+			$lobRepoObj->save();
+
+			$classObj = $lobRepoObj->useInClass($classId);
+		}
+
+
+		//LESSON STRUCTURE (sequence and settings)
+		$lessonNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/lesson','lesson');
+
+		$t['lesson_list'] = array();
+		for ($xidx = 0; $xidx < $lessonNodes->length; $xidx++) {
+			$node = $lessonNodes->item($xidx);
+			$lessonObj = Lc_Lesson_Xml::parseNode($node);
+			$lessonObj->lessonDo->idClasses = $classId;
+			//find the learning path, which is the encloser for all sequence items
+			$pathCollection = $node->getElementsByTagname('learningpath');
+			$path = $pathCollection->item(0);
+			if (is_object($path) ) {
+				$seqItems = Lc_Lesson_Xml::parseSequenceNodes($path);
+			}
+
+			$lessonObj->lessonSeq = new Lc_LessonSequence(-1,$classId);
+			$lessonObj->lessonSeq->items = $seqItems;
+//debug($seqItems);
+			
+$lessonObj->save();
+		}
+
 		$this->cleanupDir();
+exit();
 	}
 
 	/**
