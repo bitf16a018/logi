@@ -56,7 +56,7 @@ class LessonManager extends FacultyService {
 		$t['content'] = $dg->toHTML();
 //*/
 
-		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
+		$t['lessonList'] = Lc_Lesson::loadClassLessons($classId);
 		$t['lessonDataGridList'] = array();
 
 		foreach ($t['lessonList'] as $idx => $lessonObj) {
@@ -537,7 +537,7 @@ class LessonManager extends FacultyService {
 			}
 		}
 
-		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence = new Lc_LessonSequence($lesson_id, $class_id);
 		$lessonSequence->updateContent($itemArray,$lobRecord);
 
 		$this->presentor = 'redirectPresentation';
@@ -698,7 +698,7 @@ class LessonManager extends FacultyService {
 		}
 
 
-		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence = new Lc_LessonSequence($lesson_id, $class_id);
 		$lessonSequence->updateAssignments($itemArray,$lobRecord);
 
 		$this->presentor = 'redirectPresentation';
@@ -761,7 +761,7 @@ class LessonManager extends FacultyService {
 		$classId = $u->activeClassTaught->id_classes;
 		$t['lessonId'] = $lessonId;
 
-		$t['lessonObj'] = new LC_Lesson($lessonId);
+		$t['lessonObj'] = new Lc_Lesson($lessonId);
 
 		if (!$this->checkAuth($lessonId,$db,$u,$t)) return;
 
@@ -1185,7 +1185,7 @@ class LessonManager extends FacultyService {
 		}
 
 
-		$lessonSequence = new LC_LessonSequence($lesson_id, $class_id);
+		$lessonSequence = new Lc_LessonSequence($lesson_id, $class_id);
 		$lessonSequence->updateTests($itemArray,$lobRecord);
 
 

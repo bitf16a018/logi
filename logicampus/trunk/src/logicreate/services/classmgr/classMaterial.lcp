@@ -378,9 +378,9 @@ class classMaterial extends FacultyService {
 		$t['sequenceId']  = intval($lc->getvars['id']);
 		$lessonId = $seqItem->lessonId;
 
-		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
+		$lessonSequence = new Lc_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();
-		$lesson = new LC_Lesson($lessonId);
+		$lesson = new Lc_Lesson($lessonId);
 		$t['lessonTitle'] = $lesson->getTitle();
 
 		$activityLob = $lessonSequence->fetchObject($classSeqId);
@@ -516,9 +516,9 @@ class classMaterial extends FacultyService {
 		$t['sequenceId']  = intval($lc->getvars['id']);
 		$lessonId = $seqItem->lessonId;
 
-		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
+		$lessonSequence = new Lc_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();
-		$lesson = new LC_Lesson($lessonId);
+		$lesson = new Lc_Lesson($lessonId);
 		$t['lessonTitle'] = $lesson->getTitle();
 
 		$activityLob = $lessonSequence->fetchObject($classSeqId);
