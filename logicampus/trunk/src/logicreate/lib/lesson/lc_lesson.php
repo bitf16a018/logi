@@ -8,8 +8,10 @@ include_once(LIB_PATH.'PBDO/ClassLessons.php');
  */
 class Lc_Lesson {
 
-	var $lessonDo = null;
-	var $guid     = '';
+	var $lessonDo      = null;
+	var $guid          = '';
+	var $lessonSeq   = null;
+	var $seqLoaded     = false;
 
 	function Lc_Lesson($id=-1) {
 		if ($id > 0) {
@@ -27,6 +29,31 @@ class Lc_Lesson {
 
 		$x->lessonDo = $do;
 		return $x;
+	}
+
+	/**
+	 * Save the lessonDo
+	 */
+	function save() {
+		$goodSave = true;
+		$goodSave &= $this->lessonDo->save();
+
+		if (is_object($this->lessonSeq) ) {
+			if ($this->lessonSeq->lessonId != $this->getId() ) {
+				$this->lessonSeq->lessonId = $this->getId();
+			}
+			$goodSave &= $this->lessonSeq->save();
+		}
+		return $goodSave;
+	}
+
+	/**
+	 * Load up the LOB sequence that goes with this lesson
+	 */
+	function loadSequence($classId) {
+		$this->lessonSeq = new Lc_LessonSequence($this->getId(),$classId);
+		$this->lessonSeq->loadItems();
+		$this->seqLoaded = true;
 	}
 
 	/**

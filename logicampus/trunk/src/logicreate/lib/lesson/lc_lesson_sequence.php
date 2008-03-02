@@ -1,13 +1,14 @@
 <?php
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
+include_once(LIB_PATH.'PBDO/LobClassRepo.php');
 
-class LC_LessonSequence {
+class Lc_LessonSequence {
 
 	var $lessonId = -1;
 	var $classId  = -1;
 	var $items    = array();
 
-	function LC_LessonSequence($lessonId,$classId) {
+	function Lc_LessonSequence($lessonId,$classId) {
 		$this->lessonId = $lessonId;
 		$this->classId  = $classId;
 	}
@@ -17,6 +18,59 @@ class LC_LessonSequence {
 	 */
 	function loadItems() {
 		$this->items = ClassLessonSequencePeer::doSelect( 'class_id = '.$this->classId.' and lesson_id = '.$this->lessonId. ' order by rank');
+	}
+
+	/**
+	 * Save each item
+	 */
+	function save() {
+		foreach ($this->items as $_idx => $_item) {
+			if( isset($_item->guid)) {
+				$this->resolveReference($_item, $_item->guid);
+			}
+			if ($_item->lessonId != $this->lessonId ||
+				$_item->classId != $this->classId ) {
+					$_item->lessonId = $this->lessonId;
+					$_item->classId  = $this->classId;
+			}
+			if ($_item->rank == 0) {
+				$_item->rank = $_idx+1;
+			}
+			$_item->save();
+		}
+	}
+
+	/**
+	 * Reload a class lob and set the cached info of this sequence item.
+	 */
+	function resolveReference(&$item,$guid) {
+
+		$classLob = LobClassRepo::load( array('lob_guid'=>$guid));
+		$item->set('lobClassRepoId',  $classLob->lobClassRepoId);
+		$item->set('lobMime',     $classLob->lobMime);
+		$item->set('lobType',     $classLob->lobType);
+		$item->set('lobSubType',  $classLob->lobSubType);
+		$item->set('lobTitle',    $classLob->lobTitle);
+		$item->set('linkText',    $classLob->lobUrltitle);
+		$item->set('lobGuid',     $guid);
+		$item->set('lobVersion',  $classLob->lobVersion);
+		$item->set('visible',     1);
+		unset($item->guid);
+		/*
+lob_class_repo_id: 1
+         class_id: 1
+lob_repo_entry_id: 1
+         lob_guid: cf7ba7b8-9da9-4d1d-91dd-24d2ea65fa37
+        lob_title: activity 1
+     lob_urltitle: activity_1
+   lob_copy_style: n
+         lob_type: activity
+     lob_sub_type: Text Response
+         lob_mime: X-LMS/activity
+  lob_description: sdfadsf
+      lob_version: 3
+        lob_bytes: 0
+*/
 	}
 
 	function fetchObject($sequenceId) {

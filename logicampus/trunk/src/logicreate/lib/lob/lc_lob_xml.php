@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Process Learning Object XML formats
  */
@@ -91,31 +90,36 @@ class Lc_Lob_Xml {
 			$lob->set('lobMime', trim($children->item(0)->nodeValue) );
 		}
 
-		$lobSub = null;
-
-		if ($lobObj->lobType == 'content') {
-			$lobSub = $this->makeContentNode($n);
-		}
-		if ($lobObj->lobType == 'activity') {
-			$lobSub = $this->makeActivityNode($n);
-		}
-
-		if ( is_object($lobSub) ) {
-			$lob->lobSub = $lobSub;
-		}
-
 		$lobMetaObj = Lc_Lob_Xml::processLobMeta($n);
 		$lobUserObj = new LobUserLink();
 
 		/*
-		$lobUserObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
+		$lobUserObj->set('lobRepoEntryId',$lob->getPrimaryKey());
 		$lobUserObj->set('userId',$u->userId);
 		$lobUserObj->set('isOwner','1');
 		$lobUserObj->save();
 		 */
 
-		return $lob;
-//		debug($children);
+		//make the final wrapper object
+		$lcLob = new Lc_Lob();
+		$lcLob->repoObj = $lob;
+		$lcLob->lobMetaObj = $lobMetaObj;
+		$lcLob->type = $lob->lobType;
+
+		$lobSub = null;
+
+		if ($lob->lobType == 'content') {
+			$lobSub = $this->makeContentNode($n);
+		}
+		if ($lob->lobType == 'activity') {
+			$lobSub = $this->makeActivityNode($n);
+		}
+
+		if ( is_object($lobSub) ) {
+			$lcLob->lobSub = $lobSub;
+		}
+
+		return $lcLob;
 	}
 
 	/**
@@ -127,8 +131,7 @@ class Lc_Lob_Xml {
 		$children = $meta->childNodes;
 
 
-		$lob = null;
-		$lob = new LobMetadata();
+		$meta = new LobMetadata();
 
 		foreach($children as $childNode) {
 			if ($childNode->nodeType == XML_TEXT_NODE) {
@@ -137,8 +140,9 @@ class Lc_Lob_Xml {
 
 			$tag = $childNode->tagName;
 			$subchild = $childNode->childNodes;
-			$lob->set($tag, trim($subchild->item(0)->nodeValue) );
+			$meta->set($tag, trim($subchild->item(0)->nodeValue) );
 		}
+		return $meta;
 	}
 /*
 
