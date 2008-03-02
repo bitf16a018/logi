@@ -64,7 +64,7 @@ class RestoreBackup extends FacultyService {
 		if (!$doc->load( $tempdir."/learningobjects.xml") ) {
 			$this->presentor = 'errorMessage';
 			$t['message'] ="This file does not seem to be a proper backup file. (cannot find learningobjects.xml)"; 
-			$this->cleanupDir();
+			$this->cleanupDir($tempdir);
 			return false;
 		}
 
@@ -125,7 +125,7 @@ class RestoreBackup extends FacultyService {
 		if (!$doc->load( $tempdir."/learningobjects.xml") ) {
 			$this->presentor = 'errorMessage';
 			$t['message'] ="This file does not seem to be a proper backup file. (cannot find learningobjects.xml)"; 
-			$this->cleanupDir();
+			$this->cleanupDir($tempdir);
 			return false;
 		}
 
@@ -168,20 +168,17 @@ class RestoreBackup extends FacultyService {
 
 			$lessonObj->lessonSeq = new Lc_LessonSequence(-1,$classId);
 			$lessonObj->lessonSeq->items = $seqItems;
-//debug($seqItems);
-			
-$lessonObj->save();
+			$lessonObj->save();
 		}
 
-		$this->cleanupDir();
-exit();
+		$this->cleanupDir($tempdir);
 	}
 
 	/**
 	 * Erase /tmp/campus* and the session varaible "restore_dir"
 	 */
-	function cleanupDir() {
-		$tempdir = $u->sessionvars['restore_dir'];
+	function cleanupDir($tempdir) {
+//		$tempdir = $u->sessionvars['restore_dir'];
 		unset($u->sessionvars['restore_dir']);
 		unlink($tempdir.'/learningobjects.xml');
 		rmdir($tempdir.'/content');
