@@ -17,7 +17,7 @@ The backup file contains the following objects:
 	if ( count($t['lob_material']) ): ?>
 		<ul>
 			<? foreach ( $t['lob_material'] as $lobMaterial ): ?>
-			<li> <?= $lobMaterial->lobTitle; ?></li>
+			<li> <?= $lobMaterial->get('lobTitle'); ?></li>
 			<? endforeach; ?>
 		</ul>
 	<? endif; ?>
@@ -27,7 +27,7 @@ The backup file contains the following objects:
 	if ( count($t['lob_activity']) ): ?>
 		<ul>
 			<? foreach ( $t['lob_activity'] as $lobActivity ): ?>
-			<li> <?= $lobActivity->lobTitle; ?></li>
+			<li> <?= $lobActivity->get('lobTitle'); ?></li>
 			<? endforeach; ?>
 		</ul>
 	<? endif; ?>
@@ -37,7 +37,7 @@ The backup file contains the following objects:
 	if ( count($t['lob_test']) ): ?>
 		<ul>
 			<? foreach ( $t['lob_test'] as $lobTest ): ?>
-			<li> <?= $lobTest->lobTitle; ?></li>
+			<li> <?= $lobTest->get('lobTitle'); ?></li>
 			<? endforeach; ?>
 		</ul>
 	<? endif; ?>
