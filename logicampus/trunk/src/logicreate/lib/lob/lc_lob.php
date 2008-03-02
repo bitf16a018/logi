@@ -34,13 +34,6 @@ class Lc_Lob {
 	}
 
 	/**
-	 * Document style content, word processing files, audio, etc
-	 */
-	function isFile() {
-		return $this->repoObj->lobSubType == 'document';
-	}
-
-	/**
 	 * Acitivty/assignment style content. homework, upload a file, etc.
 	 */
 	function isActivity() {
@@ -54,6 +47,29 @@ class Lc_Lob {
 		return $this->repoObj->lobType == 'test';
 	}
 
+	/**
+	 * Content or classroom material style content.
+	 */
+	function isMaterial() {
+		return $this->repoObj->lobType == 'content';
+	}
+
+	/**
+	 * Document style content, word processing files, audio, etc
+	 *
+	 * This sub type is a binary document file that can't be displayed 
+	 * in Web pages w/o a plugin or a download.
+	 */
+	function isFile() {
+		return $this->repoObj->lobSubType == 'document';
+	}
+
+	/**
+	 * Textual content, plain text, html
+	 *
+	 * This sub type is a binary document file that can be displayed 
+	 * in Web pages.
+	 */
 	function isText() {
 		return $this->repoObj->lobSubType == 'text';
 	}
