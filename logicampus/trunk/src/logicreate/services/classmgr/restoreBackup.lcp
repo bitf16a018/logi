@@ -143,14 +143,26 @@ class RestoreBackup extends FacultyService {
 				continue;
 			}
 			$lobRepoObj = Lc_Lob_Xml::parseNode($node, $tempdir);
-			$lobRepoObj->save();
+			//don't save this object if the GUID is already present in the DB
+			$existingLob = LobRepoEntry::load( array('lob_guid'=>$lobRepoObj->repoObj->lobGuid) );
+			if (is_object($existingLob) ) {
+				$lobRepoObj->repoObj->lobRepoEntryId = $existingLob->lobRepoEntryId;
+				$lobRepoObj->_isNew = false;
+			} else {
+				$lobRepoObj->save();
+			}
 
 			//link to this user;
-			$lobUserObj = new LobUserLink();
-			$lobUserObj->set('lobRepoEntryId',$lobRepoObj->getRepoId());
-			$lobUserObj->set('userId',$u->userId);
-			$lobUserObj->set('isOwner','1');
-			$lobUserObj->save();
+			$lobUserObj = LobUserLink::load( array('lob_repo_entry_id'=>$lobRepoObj->getRepoId(), 'user_id' => $u->userId));
+			if (is_object($lobUserObj) ) {
+				//do nothing
+			} else {
+				$lobUserObj = new LobUserLink();
+				$lobUserObj->set('lobRepoEntryId',$lobRepoObj->getRepoId());
+				$lobUserObj->set('userId',$u->userId);
+				$lobUserObj->set('isOwner','1');
+				$lobUserObj->save();
+			}
 
 			$classObj = $lobRepoObj->useInClass($classId);
 		}
