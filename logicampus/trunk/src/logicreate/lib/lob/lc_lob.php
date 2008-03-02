@@ -429,6 +429,10 @@ class Lc_Lob_Content extends Lc_Lob {
 			$content         = $this->repoObj->getLobContentsByLobRepoEntryId();
 			$this->lobSub    = $content[0];
 			$this->lobMetaObj = LobMetadata::load(array('lob_repo_entry_id'=>$id));
+			if (! is_object($this->lobMetaObj) ) {
+				$this->lobMetaObj = new LobMetadata();
+				$this->lobMetaObj->createdOn = time();
+			}
 		}
 	}
 
