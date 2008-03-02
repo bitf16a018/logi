@@ -103,8 +103,6 @@ class RestoreBackup extends FacultyService {
 			$t['lesson_list'][] = $lessonObj;
 		}
 
-		$u->addSessionMessage('Successfully added content.');
-
 		$u->sessionvars['restore_dir'] = $tempdir;
 	}
 
@@ -147,6 +145,13 @@ class RestoreBackup extends FacultyService {
 			$lobRepoObj = Lc_Lob_Xml::parseNode($node, $tempdir);
 			$lobRepoObj->save();
 
+			//link to this user;
+			$lobUserObj = new LobUserLink();
+			$lobUserObj->set('lobRepoEntryId',$lobRepoObj->getRepoId());
+			$lobUserObj->set('userId',$u->userId);
+			$lobUserObj->set('isOwner','1');
+			$lobUserObj->save();
+
 			$classObj = $lobRepoObj->useInClass($classId);
 		}
 
@@ -172,6 +177,10 @@ class RestoreBackup extends FacultyService {
 		}
 
 		$this->cleanupDir($tempdir);
+
+		$u->addSessionMessage('Successfully restored backup file.');
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr/display/id_classes='.$classId);
 	}
 
 	/**
