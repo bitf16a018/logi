@@ -91,15 +91,6 @@ class Lc_Lob_Xml {
 		}
 
 		$lobMetaObj = Lc_Lob_Xml::processLobMeta($n);
-		$lobUserObj = new LobUserLink();
-
-		/*
-		$lobUserObj->set('lobRepoEntryId',$lob->getPrimaryKey());
-		$lobUserObj->set('userId',$u->userId);
-		$lobUserObj->set('isOwner','1');
-		$lobUserObj->save();
-		 */
-
 		//make the final wrapper object
 		$lcLob = new Lc_Lob();
 		$lcLob->repoObj = $lob;
@@ -139,6 +130,10 @@ class Lc_Lob_Xml {
 			}
 
 			$tag = $childNode->tagName;
+			//remove the XML namespace
+			if ( substr($tag,0,4) == 'lob:') {
+				$tag = substr($tag,4);
+			}
 			$subchild = $childNode->childNodes;
 			$meta->set($tag, trim($subchild->item(0)->nodeValue) );
 		}
