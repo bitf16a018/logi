@@ -1,0 +1,57 @@
+<?=$t['sectionheader'];?>
+
+<h3>Backup file contents...</h3>
+
+<p>
+Your backup has <b>not</b> been restored yet.  Click this button to finish the import.
+<form method="POST" action="<?=appurl('classmgr/restoreBackup/event=handleUpload');?>">
+	<input type="submit" value="Start Import">
+</form>
+</p>
+<hr/>
+<p>
+The backup file contains the following objects:
+<ul>
+	<li>Classroom Materials: <?= count($t['lob_material']);?>
+	<?
+	if ( count($t['lob_material']) ): ?>
+		<ul>
+			<? foreach ( $t['lob_material'] as $lobMaterial ): ?>
+			<li> <?= $lobMaterial->lobTitle; ?></li>
+			<? endforeach; ?>
+		</ul>
+	<? endif; ?>
+	</li>
+	<li>Student Activities: <?= count($t['lob_activity']);?>
+	<?
+	if ( count($t['lob_activity']) ): ?>
+		<ul>
+			<? foreach ( $t['lob_activity'] as $lobActivity ): ?>
+			<li> <?= $lobActivity->lobTitle; ?></li>
+			<? endforeach; ?>
+		</ul>
+	<? endif; ?>
+	</li>
+	<li>Tests: <?= count($t['lob_test']);?>
+	<?
+	if ( count($t['lob_test']) ): ?>
+		<ul>
+			<? foreach ( $t['lob_test'] as $lobTest ): ?>
+			<li> <?= $lobTest->lobTitle; ?></li>
+			<? endforeach; ?>
+		</ul>
+	<? endif; ?>
+	</li>
+	<li>Lessons: <?= count($t['lesson_list']);?>
+	<?
+	if ( count($t['lesson_list']) ): ?>
+		<ul>
+			<? foreach ( $t['lesson_list'] as $lessonObj ): ?>
+			<li> <?= $lessonObj->getTitle(); ?></li>
+			<? endforeach; ?>
+		</ul>
+	<? endif; ?>
+	</li>
+
+</ul>
+</p>

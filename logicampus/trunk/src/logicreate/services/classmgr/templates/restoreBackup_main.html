@@ -1,0 +1,11 @@
+<?=$t['sectionheader'];?>
+
+
+<h3>Upload your backup file.</h3>
+
+Add your XML file to the input box below.
+<form method="POST" action="<?=appurl('classmgr/restoreBackup/event=confirmUpload');?>" enctype="multipart/form-data">
+	<input type="file" size="35" name="lobxml">
+	<br/>
+	<input type="submit" value="Start Import">
+</form>
