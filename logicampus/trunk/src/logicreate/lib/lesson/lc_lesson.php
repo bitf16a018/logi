@@ -6,26 +6,34 @@ include_once(LIB_PATH.'PBDO/ClassLessons.php');
  *  a particular timeframe.  The time may be based on a semester, or
  *  on the enrollment date for a student.
  */
-class LC_Lesson {
+class Lc_Lesson {
 
 	var $lessonDo = null;
+	var $guid     = '';
 
-	function LC_Lesson($id=-1) {
+	function Lc_Lesson($id=-1) {
 		if ($id > 0) {
 			$this->lessonDo = ClassLessons::load($id);
 		}
 	}
 
 	/**
-	 * Create a LC_Lesson object from a loaded dataobject
+	 * Create a Lc_Lesson object from a loaded dataobject
 	 *
 	 * @static
 	 */
 	function create($do) {
-		$x = new LC_Lesson();
+		$x = new Lc_Lesson();
 
 		$x->lessonDo = $do;
 		return $x;
+	}
+
+	/**
+	 * Set the GUID
+	 */
+	function setGuid($g) {
+		$this->guid = $g;
 	}
 
 	/**

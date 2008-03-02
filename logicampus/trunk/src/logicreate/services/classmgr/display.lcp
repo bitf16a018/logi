@@ -68,7 +68,7 @@ class display extends FacultyService {
 		}
 
 		$classId = $u->activeClassTaught->id_classes;
-		$t['lessonList'] = LC_Lesson::loadClassLessons($classId);
+		$t['lessonList'] = Lc_Lesson::loadClassLessons($classId);
 
 		$t['contentCount'] = array();
 		$t['activityCount'] = array();

@@ -141,18 +141,18 @@ class assignments extends StudentService {
 		$classId  = $u->activeClassTaken->id_classes;
 		//find the lesson id
 		if ( empty($u->sessionvars['activeLesson']) ) {
-			$lessonId = LC_Lesson::getLessonIdForSequenceId($classSeqId);
-			LC_Lesson::storeLessonInSession($lessonId,$u);
+			$lessonId = Lc_Lesson::getLessonIdForSequenceId($classSeqId);
+			Lc_Lesson::storeLessonInSession($lessonId,$u);
 		} else {
 			if ( $u->sessionvars['activeLesson']['id_classes'] != $classId ) {
-				$lessonId = LC_Lesson::getLessonIdForSequenceId($classSeqId);
-				LC_Lesson::storeLessonInSession($lessonId,$u);
+				$lessonId = Lc_Lesson::getLessonIdForSequenceId($classSeqId);
+				Lc_Lesson::storeLessonInSession($lessonId,$u);
 			} else {
 				$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
 			}
 		}
 
-		$lessonSequence = new LC_LessonSequence($lessonId,$classId);
+		$lessonSequence = new Lc_LessonSequence($lessonId,$classId);
 		$lessonSequence->loadItems();
 		$activityLob = $lessonSequence->fetchObject($classSeqId);
 
@@ -164,7 +164,7 @@ class assignments extends StudentService {
 
 		$t['activity'] = $activityLob;
 		$sequence = $lessonSequence->getSequence($classSeqId);
-		$lesson = new LC_Lesson($lessonId);
+		$lesson = new Lc_Lesson($lessonId);
 		$t['lessonId'] = $lessonId;
 		$t['startDate'] = $lessonSequence->getStartDate($lesson, $classSeqId);
 		$t['dueDate'] = $lessonSequence->getDueDate($lesson, $classSeqId);
@@ -301,9 +301,9 @@ class assignments extends StudentService {
 			$classId  = $u->activeClassTaken->id_classes;
 			$lessonId = $u->sessionvars['activeLesson']['id_class_lessons'];
 
-			$lessonSequence = new LC_LessonSequence($lessonId,$classId);
+			$lessonSequence = new Lc_LessonSequence($lessonId,$classId);
 			$lessonSequence->loadItems();
-			$lesson = new LC_Lesson($lessonId);
+			$lesson = new Lc_Lesson($lessonId);
 			$activityLob = $lessonSequence->fetchObject($classSeqId);
 
 			if (!is_object($activityLob)) {
