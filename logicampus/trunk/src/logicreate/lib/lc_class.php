@@ -2,7 +2,7 @@
 
 include_once(LIB_PATH.'PBDO/Classes.php');
 include_once(LIB_PATH.'semesterObj.php');
-include_once(LIB_PATH.'lc_lesson.php');
+include_once(LIB_PATH.'lesson/lc_lesson.php');
 
 class lcClass {
 
@@ -33,12 +33,12 @@ class lcClass {
 	}
 
 	/**
-	 * Load a LC_Lesson object
+	 * Load a Lc_Lesson object
 	 *
 	 * @return boolean true if the class was loaded with no problems
 	 */
 	function loadLesson($lessonId) {
-		$this->lessons[$lessonId] = new LC_Lesson($lessonId);
+		$this->lessons[$lessonId] = new Lc_Lesson($lessonId);
 		if ($this->lessons[$lessonId]->lessonDo->idClasses != $this->classId) {
 			unset($this->lessons[$lessonId]);
 			return false;
