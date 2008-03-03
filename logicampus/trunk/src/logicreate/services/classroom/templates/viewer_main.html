@@ -44,11 +44,15 @@ if ($t['file']['mime'] == 'image/jpeg' || $t['file']['mime'] == 'image/png') {
 }
 
 
-if ($t['file']['mime'] == 'text/html') {
+if ($t['file']['mime'] == 'text/html' || $t['file']['mime'] == 'text/plain') {
 
 	echo '<h3>'.$t['file']['title'].'</h3>';
 	echo "<br/>\n";
-	echo $t['file']['content'];
+	if ($t['file']['mime'] == 'text/plain') {
+		echo nl2br($t['file']['content']);
+	} else {
+		echo $t['file']['content'];
+	}
 }
 ?>
 

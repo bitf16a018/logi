@@ -33,7 +33,6 @@ class viewer extends StudentService {
 	function run(&$db,&$u,&$lc,&$t) {
 
 		$ut = time();						
-		//print_r($lc->getvars);
 		$uniqCode = $lc->getvars[1];
 		$filename = addslashes(trim(urldecode($lc->getvars[2])));
 		$lc->templateName = 'viewer_main';
