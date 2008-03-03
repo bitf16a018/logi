@@ -98,10 +98,10 @@ class content extends StudentService {
 
 		//choose a start URL, viewer or content
 		if ( is_object($t['seqItems'][$nextIdx]) ) {
-		if ($t['seqItems'][$nextIdx]->lobMime == 'text/html') {
-			$t['nextUrl'] = appurl('classroom/content/'.$uniqCode.'/'.$t['seqItems'][$nextIdx]->linkText);
+		if ($t['seqItems'][$nextIdx]->lobMime == 'text/html' || $t['seqItems'][$nextIdx]->lobMime == 'text/plain' ) {
+			$t['nextUrl'] = appurl('classroom/content/'.$uniqCode.'/'.urlencode($t['seqItems'][$nextIdx]->linkText));
 		} else {
-			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqCode.'/'.$t['seqItems'][$nextIdx]->linkText);
+			$t['nextUrl'] = appurl('classroom/viewer/'.$uniqCode.'/'.urlencode($t['seqItems'][$nextIdx]->linkText));
 		}
 		}
 		//choose a previous URL, viewer or content
@@ -132,7 +132,7 @@ class content extends StudentService {
 		if ($db->nextRecord()) {
 			$t['file']['title'] = $db->record['lob_title'];
 			$t['file']['content'] = $db->record['lob_text'];
-			$t['file']['mime'] = 'text/html';
+			$t['file']['mime'] = $db->record['lob_mime'];
 		}
 
 		if ( strstr($db->record['lob_sub_type'] , 'image') ) {
