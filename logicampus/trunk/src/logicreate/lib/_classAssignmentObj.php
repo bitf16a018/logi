@@ -38,7 +38,7 @@ function _getFromDB($pkey,$prop='',$where='', $orderBy='', $dsn='default') {
    if($db->nextRecord()) {
       $temp = new classAssignmentObj();
       $temp->_dsn = $dsn;
-      $temp->__loaded = true; 
+      $temp->__loaded = TRUE; 
       $temp->id_class_assignments = $db->record['id_class_assignments'];
       $temp->title = $db->record['title'];
       $temp->instructions = $db->record['instructions'];
@@ -65,7 +65,7 @@ function _getAllFromDB($key, $prop, $where='', $orderBy='',$dsn='default') {
    while ($db->nextRecord()) {
       $temp = new classAssignmentObj();
       $temp->_dsn = $dsn;
-      $temp->__loaded = true; 
+      $temp->__loaded = TRUE; 
       $temp->id_class_assignments = $db->record['id_class_assignments'];
       $temp->title = $db->record['title'];
       $temp->instructions = $db->record['instructions'];
@@ -85,7 +85,7 @@ return $objects;
 }
 
 
-function _loadArray($array, $pkeyFlag=false) {
+function _loadArray($array, $pkeyFlag=FALSE) {
  if ($pkeyFlag) { 
 	$this->id_class_assignments = $array['id_class_assignments'];
  }
@@ -102,7 +102,7 @@ function _loadArray($array, $pkeyFlag=false) {
 }
 
 function _genPkey($len=50) {
-return str_replace(".","",uniqid(str_replace(" ","",microtime()), $len));
+return str_replace(".", "", uniqid(str_replace(" ", "", microtime()), $len));
 }
 
 function _saveToDB() {

@@ -2,7 +2,7 @@
 
 class AssessmentBase {
 
-	var $_new = true;	//not pulled from DB
+	var $_new = TRUE;	//not pulled from DB
 	var $_modified;		//set() called
 	var $_version = '1.6';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
@@ -61,35 +61,35 @@ class AssessmentBase {
 
 	function save($dsn="default") {
 		if ( $this->isNew() ) {
-			$this->setPrimaryKey(AssessmentPeer::doInsert($this,$dsn));
+			$this->setPrimaryKey(AssessmentPeer::doInsert($this, $dsn));
 		} else {
-			AssessmentPeer::doUpdate($this,$dsn);
+			AssessmentPeer::doUpdate($this, $dsn);
 		}
 	}
 
 
-	function load($key,$dsn="default") {
+	function load($key, $dsn="default") {
 		if (is_array($key) ) {
-			while (list ($k,$v) = @each($key) ) {
+			while (list ($k, $v) = @each($key) ) {
 			$where .= "$k='$v' and ";
 			}
-			$where = substr($where,0,-5);
+			$where = substr($where, 0, -5);
 		} else {
 			$where = "assessment_id='".$key."'";
 		}
-		$array = AssessmentPeer::doSelect($where,$dsn);
+		$array = AssessmentPeer::doSelect($where, $dsn);
 		return $array[0];
 	}
 
 
 	function loadAll($dsn="default") {
-		$array = AssessmentPeer::doSelect('',$dsn);
+		$array = AssessmentPeer::doSelect('', $dsn);
 		return $array;
 	}
 
 
-	function delete($deep=false,$dsn="default") {
-		AssessmentPeer::doDelete($this,$deep,$dsn);
+	function delete($deep=FALSE, $dsn="default") {
+		AssessmentPeer::doDelete($this, $deep, $dsn);
 	}
 
 
@@ -111,16 +111,16 @@ class AssessmentBase {
 
 	/**
 	 * only sets if the new value is !== the current value
-	 * returns true if the value was updated
-	 * also, sets _modified to true on success
+	 * returns TRUE if the value was updated
+	 * also, sets _modified to TRUE on success
 	 */
-	function set($key,$val) {
+	function set($key, $val) {
 		if ($this->{$key} !== $val) {
-			$this->_modified = true;
+			$this->_modified = TRUE;
 			$this->{$key} = $val;
-			return true;
+			return TRUE;
 		}
-		return false;
+		return FALSE;
 	}
 
 }
@@ -130,10 +130,10 @@ class AssessmentPeerBase {
 
 	var $tableName = 'assessment';
 
-	function doSelect($where,$dsn="default") {
+	function doSelect($where, $dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_SelectStatement("assessment",$where);
+		$st = new PBDO_SelectStatement("assessment", $where);
 		$st->fields['assessment_id'] = 'assessment_id';
 		$st->fields['display_name'] = 'display_name';
 		$st->fields['class_id'] = 'class_id';
@@ -157,7 +157,7 @@ class AssessmentPeerBase {
 		return $array;
 	}
 
-	function doInsert(&$obj,$dsn="default") {
+	function doInsert(&$obj, $dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("assessment");
@@ -189,14 +189,14 @@ class AssessmentPeerBase {
 		$st->key = 'assessment_id';
 		$db->executeQuery($st);
 
-		$obj->_new = false;
-		$obj->_modified = false;
+		$obj->_new = FALSE;
+		$obj->_modified = FALSE;
 		$id =  $db->getInsertID();
 		return $id;
 
 	}
 
-	function doUpdate(&$obj,$dsn="default") {
+	function doUpdate(&$obj, $dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_UpdateStatement("assessment");
@@ -227,11 +227,11 @@ class AssessmentPeerBase {
 
 		$st->key = 'assessment_id';
 		$db->executeQuery($st);
-		$obj->_modified = false;
+		$obj->_modified = FALSE;
 
 	}
 
-	function doReplace($obj,$dsn="default") {
+	function doReplace($obj, $dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		if ($this->isNew() ) {
@@ -245,10 +245,10 @@ class AssessmentPeerBase {
 	/**
 	 * remove an object
 	 */
-	function doDelete(&$obj,$deep=false,$dsn="default") {
+	function doDelete(&$obj, $deep=FALSE, $dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
-		$st = new PBDO_DeleteStatement("assessment","assessment_id = '".$obj->getPrimaryKey()."'");
+		$st = new PBDO_DeleteStatement("assessment", "assessment_id = '".$obj->getPrimaryKey()."'");
 
 		$db->executeQuery($st);
 
@@ -256,8 +256,8 @@ class AssessmentPeerBase {
 
 		}
 
-		$obj->_new = false;
-		$obj->_modified = false;
+		$obj->_new = FALSE;
+		$obj->_modified = FALSE;
 		$id =  $db->getInsertID();
 		return $id;
 
@@ -268,7 +268,7 @@ class AssessmentPeerBase {
 	/**
 	 * send a raw query
 	 */
-	function doQuery(&$sql,$dsn="default") {
+	function doQuery(&$sql, $dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 
@@ -295,7 +295,7 @@ class AssessmentPeerBase {
 		$x->showResultType = $row['show_result_type'];
 		$x->possiblePoints = $row['possible_points'];
 
-		$x->_new = false;
+		$x->_new = FALSE;
 		return $x;
 	}
 
@@ -322,24 +322,24 @@ class Assessment extends AssessmentBase {
 	# used for redirects back to the gradebook when modifying a user's score
 	var $idClassGradebookEntries= '';
 
-	function load($id,$class_id) {
-		if ( $class_id == '' ) { trigger_error('load with empty class id'); return false; }
+	function load($id, $class_id) {
+		if ( $class_id == '' ) { trigger_error('load with empty class id'); return FALSE; }
 		$array = AssessmentPeer::doSelect("class_id = $class_id and assessment_id = $id");
-		if (!is_array($array) ) { trigger_error('No permission to load assessment '.$id); return false; }
+		if (!is_array($array) ) { trigger_error('No permission to load assessment '.$id); return FALSE; }
 		return $array[0];
 	}
 
 
 
 	function loadAll($class_id) {
-		if ( $class_id == '' ) { trigger_error('Peer doSelect with empty key'); return false; }
+		if ( $class_id == '' ) { trigger_error('Peer doSelect with empty key'); return FALSE; }
 		$array = AssessmentPeer::doSelect("class_id = $class_id");
 		return $array;
 
 	}
 
-	# boolean returns true if student can take the
-	# test, false if they cannot
+	# boolean returns TRUE if student can take the
+	# test, FALSE if they cannot
 	# pass in the time stamp of when the user started taking the test
 	# ($u->sessionvars['asmt_start_date'] for example
 	function canTake($start)
@@ -364,14 +364,14 @@ class Assessment extends AssessmentBase {
 	function getAssessmentQuestions() {
 
 		$array = AssessmentQuestionPeer::doSelect('assessment_id = \''.$this->getPrimaryKey().'\' order by question_sort');
-		$cc = count ($array);
+		$cc = count($array);
 
 		for($x=0; $x<$cc; ++$x) {
 			$superObj = $array[$x];
 
 			switch($superObj->questionType) {
 				case QUESTION_TRUEFALSE:
-					$subObj = new AssessmentQuestionTrueFalse();
+					$subObj = new AssessmentQuestionTRUEFalse();
 					break;
 				case QUESTION_MCHOICE:
 					$subObj = new AssessmentQuestionMChoice();
@@ -393,11 +393,11 @@ class Assessment extends AssessmentBase {
 			}
 
 			if( $superObj->assessmentQuestionId )
-				$subObj->_new = false;
+				$subObj->_new = FALSE;
 			else
-				$subObj->_new = true;
+				$subObj->_new = TRUE;
 
-			$subObj->_modified = false;
+			$subObj->_modified = FALSE;
 			$subObj->assessmentQuestionId = $superObj->assessmentQuestionId;
 			$subObj->assessmentId = $superObj->assessmentId;
 			$subObj->questionType = $superObj->questionType;
@@ -492,7 +492,7 @@ class Assessment extends AssessmentBase {
 	{
 		$questions = $this->getAssessmentQuestions();
 		$answers = AssessmentAnswerPeer::doSelect("assessment_id='".$this->assessmentId."' AND student_id='".$studentId."' AND id_classes='".$id_classes."'");
-		 #debug($answers,1);
+		 #debug($answers, 1);
 		$this->questionCount = count($questions);
 		$answerCount = count($answers);
 		for ($i=0; $i<$this->questionCount; $i++) {
@@ -502,7 +502,7 @@ class Assessment extends AssessmentBase {
 				if ($answers[$x]->assessmentQuestionId == $questionId) {
 					#$questions[$i]->grade($answers[$x]);
 					$questions[$i]->answer = $answers[$x];
-#					debug($questions[$i],1);
+#					debug($questions[$i], 1);
 					if ($questions[$i]->questionType == QUESTION_MATCHING || $questions[$i]->questionType == QUESTION_MANSWER) 
 					{
 						$questions[$i]->answer->assessmentAnswerValues = unserialize($questions[$i]->answer->assessmentAnswerValues);

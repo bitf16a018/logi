@@ -1,6 +1,6 @@
 <?
 
-function lct($key,$args="") {
+function lct($key, $args="") {
 	extract($args);
 
 	$newArgs = array();
@@ -16,6 +16,6 @@ function lct($key,$args="") {
 		next($args);
 		$format .= " %s";
 	}
-	return vsprintf($format,$newArgs);
+	return vsprintf($format, $newArgs);
 }
 ?>
