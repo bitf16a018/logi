@@ -161,6 +161,7 @@ class mysql extends DB {
 	 */
 	function freeResult() {
 		$stuff = array_pop($this->resultSet);
+		if (is_resource($stuff))
 		mysql_free_result($stuff);
 	}
 
