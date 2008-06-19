@@ -1,8 +1,8 @@
 <?
 
-include(LIB_PATH.'lc_lob_content.php');
-include(LIB_PATH.'lc_lob_class.php');
-include(LIB_PATH.'lc_lob_test.php');
+include(LIB_PATH.'lob/lc_lob_content.php');
+include(LIB_PATH.'lob/lc_lob_class.php');
+include(LIB_PATH.'lob/lc_lob_test.php');
 
 class LearningObjectTest extends UnitTestCase {
 
@@ -96,7 +96,7 @@ class LearningObjectTest extends UnitTestCase {
 		//setup a fake PKEY
 		$lob->repoObj->lobRepoEntryId = 1;
 
-		$classContent = $lob->useInClass($classId,'notify');
+		$classContent = $lob->useInClass($classId, 'notify');
 		$e = ErrorStack::pullError('php');
 		//e might be an error saying that the repo doesn't have all its data.
 		if ($e) {
