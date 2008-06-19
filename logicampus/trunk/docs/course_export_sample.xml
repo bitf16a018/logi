@@ -123,6 +123,9 @@
 	</lob:lob>
 
 	<lesson:lesson guid="">
+		<lesson:name></lesson:name>
+		<lesson:description></lesson:description>
+
 		<lesson:objective></lesson:objective>
 		<lesson:standard></lesson:standard>
 
