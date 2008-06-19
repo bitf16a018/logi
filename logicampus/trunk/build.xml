@@ -441,10 +441,16 @@
 			start="10 March 2006"
 			end="08 February 2007"/>
 		-->
+		<!--
 		<cvschangelog dir="."
 			destfile="changelog.xml"
 			start="10 March 2006"
 			end="12 April 2007"/>
+		-->
+		<cvschangelog dir="."
+			destfile="changelog.xml"
+			start="12 April 2007"
+			end="02 November 2007"/>
 
 
 		<xslt in="changelog.xml" 
