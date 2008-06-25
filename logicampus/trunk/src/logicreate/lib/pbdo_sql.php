@@ -68,6 +68,7 @@ class PBDO_UpdateStatement extends PBDO_SQLStatement {
 			foreach ($this->fields as $k=>$v) {
 
 				$v = addslashes($v);
+				$set = '';
 				if ( $this->key != $k) {
 					//allow nulls
 					if (isset($this->nulls[$k]) && $v == null) {
