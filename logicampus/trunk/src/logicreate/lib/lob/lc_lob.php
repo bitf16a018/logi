@@ -316,7 +316,7 @@ class Lc_Lob {
 					return null;
 				}
 				$subLob  = $results[0];
-				include_once(LIB_PATH.'lc_lob_class.php');
+				include_once(LIB_PATH.'lob/lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassContent();
 				break;
 
@@ -328,20 +328,20 @@ class Lc_Lob {
 					return null;
 				}
 				$subLob  = $results[0];
-				include_once(LIB_PATH.'lc_lob_class.php');
+				include_once(LIB_PATH.'lob/lc_lob_class.php');
 				$classLob = new Lc_Lob_ClassActivity();
 				break;
 
 			case 'test':
-				include_once(LIB_PATH.'lc_lob_test.php');
+				include_once(LIB_PATH.'lob/lc_lob_test.php');
 				$results  = $repo->getLobTestsByLobRepoEntryId();
 				if (! count($results) ) {
 					trigger_error('learning object missing internal data.');
 					return null;
 				}
 				$subLob  = $results[0];
-				include_once(LIB_PATH.'lc_lob_class.php');
-				include_once(LIB_PATH.'lc_lob_class_test.php');
+				include_once(LIB_PATH.'lob/lc_lob_class.php');
+				include_once(LIB_PATH.'lob/lc_lob_class_test.php');
 				$classLob = new Lc_Lob_ClassTest();
 				break;
 		}

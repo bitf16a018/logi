@@ -1,6 +1,9 @@
 <?php
 include_once(LIB_PATH.'PBDO/LobTest.php');
 include_once(LIB_PATH.'PBDO/LobTestQst.php');
+//defines constants for question types QUESTON_*
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
 
 /**
  * Hold lob repo entries and lob test entries
