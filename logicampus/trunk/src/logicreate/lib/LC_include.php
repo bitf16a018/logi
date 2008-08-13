@@ -286,8 +286,6 @@ class lcSystem {
 		$obj->user =& lcUser::getCurrentUser();
 		$obj->menu = menuObj::getVisibleCached($obj->user->groups);
 
-               # Shopping cart menu
-               #shop::getMenu($obj->menu,$t['cart']); #CART
 		/*****
 		 * Faculty classes taught
 		 *****/
@@ -310,6 +308,9 @@ class lcSystem {
 		}
 		*/
 
+		//log errors
+		lcSystem::logErrors();
+
 		/*****
 		 * Private Messages
 		 ****/
@@ -327,14 +328,42 @@ class lcSystem {
 			$obj->user->sessionvars['_privMsgs'] = $t['_privMsgs'];
 		 }
 
-			if (defined('DEBUG') && DEBUG) {
-				$e =& ErrorStack::_singleton();
-				if ($e->count) { 
+	}
 
-				echo <<<END
+
+	function logErrors() {
+		if ((defined('DEBUG') && !DEBUG) || !defined('DEBUG')) {
+			$e =& ErrorStack::_singleton();
+			if ($e->count) { 
+			$errlog = ErrorStack::logStack();
+			$date = date('m-d-Y');
+			$time = time();
+			$u = lcUser::getCurrentUser();
+			$log = $time.':'.$u->username.':' . base64_encode($errlog);
+			$touch = 0;
+			system("touch /tmp/lcerrlog/$date.log",$touch);
+			if ($touch) {
+				system("mkdir /tmp/lcerrlog/");
+				system("touch /tmp/lcerrlog/$date.log",$touch);
+			}
+			system("echo $log >> /tmp/lcerrlog/$date.log");
+			}
+		}
+	}
+
+	function getErrorBox() {
+
+		if ((defined('DEBUG') && !DEBUG) || !defined('DEBUG')) {
+			return;
+		}
+		$e =& ErrorStack::_singleton();
+		if (!$e->count) { 
+			return;
+		}
+		echo <<<END
 
 		<form id="errorbox">
-			<div style="position:absolute;top:80px;left:70px;padding:3px;width:40em;background-color:#C0C0C0;border-style:outset">
+			<div style="position:absolute;top:80px;left:70px;padding:3px;width:50em;background-color:#C0C0C0;border-style:outset">
 			<table width="100%" cellpadding="5" cellspacing="0" border="0">
 				<tr>
 					<td valign="top">
@@ -402,32 +431,7 @@ document.getElementById('errdetailsbutton').disabled=false;
 	</form>
 
 END;
-
-				$errlog = ErrorStack::logStack();
-				//add your own email name here
-				//mail('errors@ownerssite.com','ERRORS ON CAMPUS',$errlog);
-				unset($errlog);
-				}
-			} else {
-				$e =& ErrorStack::_singleton();
-				if ($e->count) { 
-				$errlog = ErrorStack::logStack();
-				$date = date('m-d-Y');
-				$time = time();
-				$u = lcUser::getCurrentUser();
-				$log = $time.':'.$u->username.':' . base64_encode($errlog);
-				$touch = 0;
-				system("touch /tmp/lcerrlog/$date.log",$touch);
-				if ($touch) {
-					system("mkdir /tmp/lcerrlog/");
-					system("touch /tmp/lcerrlog/$date.log",$touch);
-				}
-				system("echo $log >> /tmp/lcerrlog/$date.log");
-				}
-			}
-
 	}
-
 }
 
 

@@ -172,5 +172,7 @@
 	if ($t['_newPrivMsgs']) {  
 		echo lcMessageBox('Someone sent you a new private message.  Do you want to read them?  <a href="'.appurl('pm').'">Yes, take me to my private messages.</a>','q');
 	} 
+
+	lcSystem::getErrorBox();
 ?>
 
