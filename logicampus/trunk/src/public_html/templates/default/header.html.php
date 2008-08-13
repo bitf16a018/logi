@@ -46,31 +46,19 @@
 
 
 
+<?php
+	$sysMessages = $obj->user->getSessionMessages();
+	if ( count($sysMessages) ) {
+		foreach ($sysMessages as $msgType => $msgText) {
+			echo lcMessageBox($msgText, $msgType);
+		}
+	}
 
+	if (isset($t['_newPrivMsgs'])) {  
+		echo lcMessageBox('Someone sent you a new private message.  Do you want to read them?  <a href="'.appurl('pm').'">Yes, take me to my private messages.</a>','q');
+	} 
 
-	<? if ($t['lc_message']) { ?>
-	  <!-- div layover for messages should go here -->
-	  <div class="notice" id="lc_warning">
-		  <div style="float:right;margin-right:5px;border-width:2px;border-style:solid;margin-top:3px;"
-			  onclick="document.getElementById('lc_warning').style.visibility='hidden';">X</div>
-			<b><?= $t['lc_message'];?></b>
-			<br/>
-			<?= $t['lc_message_details'];?>
-		  <br/>
-		  <br/>
-	  </div>
-	<? } ?>
+	lcSystem::getErrorBox();
+?>
 
-	<? if ($t['lc_warning']) { ?>
-	  <!-- div layover for messages should go here -->
-	  <div class="warning" id="lc_warning">
-		  <div style="float:right;margin-right:5px;border-width:2px;border-style:solid;margin-top:3px;"
-			  onclick="document.getElementById('lc_warning').style.visibility='hidden';">X</div>
-			<b><?= $t['lc_warning'];?></b>
-			<br/>
-			<?= $t['lc_warning_details'];?>
-		  <br/>
-		  <br/>
-	  </div>
-	<? } ?>
 
