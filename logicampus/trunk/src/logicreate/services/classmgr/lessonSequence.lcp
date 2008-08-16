@@ -6,7 +6,7 @@ include_once(LIB_PATH.'LC_html.php');
 // PBDO is the new standard, above object is DEPRECATED
 include_once(LIB_PATH.'PBDO/ClassLessons.php');
 include_once(LIB_PATH.'PBDO/ClassLessonSequence.php');
-include_once(LIB_PATH.'lc_lesson_sequence.php');
+include_once(LIB_PATH.'lesson/lc_lesson_sequence.php');
 
 include(LIB_PATH.'lc_table.php');
 include(LIB_PATH.'lc_table_renderer.php');
