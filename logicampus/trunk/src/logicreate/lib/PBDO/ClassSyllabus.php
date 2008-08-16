@@ -4,7 +4,7 @@ class ClassSyllabusBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $classSyllabusId;
 	var $classId;
@@ -43,6 +43,7 @@ class ClassSyllabusBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -127,11 +128,11 @@ class ClassSyllabusPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("class_syllabus");
-		$st->fields['class_syllabus_id'] = $this->classSyllabusId;
-		$st->fields['class_id'] = $this->classId;
-		$st->fields['section_title'] = $this->sectionTitle;
-		$st->fields['section_content'] = $this->sectionContent;
-		$st->fields['rank'] = $this->rank;
+		$st->fields['class_syllabus_id'] = $obj->classSyllabusId;
+		$st->fields['class_id'] = $obj->classId;
+		$st->fields['section_title'] = $obj->sectionTitle;
+		$st->fields['section_content'] = $obj->sectionContent;
+		$st->fields['rank'] = $obj->rank;
 
 
 		$st->key = 'class_syllabus_id';

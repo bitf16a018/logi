@@ -4,7 +4,7 @@ class LobActivityBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobActivityId;
 	var $lobRepoEntryId;
@@ -135,9 +135,9 @@ class LobActivityPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_activity");
-		$st->fields['lob_activity_id'] = $this->lobActivityId;
-		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
-		$st->fields['response_type_id'] = $this->responseTypeId;
+		$st->fields['lob_activity_id'] = $obj->lobActivityId;
+		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
+		$st->fields['response_type_id'] = $obj->responseTypeId;
 
 
 		$st->key = 'lob_activity_id';

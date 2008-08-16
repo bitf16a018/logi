@@ -4,7 +4,7 @@ class LobUserLinkBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobUserLinkId;
 	var $lobRepoEntryId;
@@ -126,10 +126,10 @@ class LobUserLinkPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_user_link");
-		$st->fields['lob_user_link_id'] = $this->lobUserLinkId;
-		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
-		$st->fields['user_id'] = $this->userId;
-		$st->fields['is_owner'] = $this->isOwner;
+		$st->fields['lob_user_link_id'] = $obj->lobUserLinkId;
+		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
+		$st->fields['user_id'] = $obj->userId;
+		$st->fields['is_owner'] = $obj->isOwner;
 
 		$st->nulls['is_owner'] = 'is_owner';
 

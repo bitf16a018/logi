@@ -4,7 +4,7 @@ class LcActionLogBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lcActionLogId;
 	var $lcActionLogTypeId;
@@ -55,6 +55,7 @@ class LcActionLogBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -145,17 +146,17 @@ class LcActionLogPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lc_action_log");
-		$st->fields['lc_action_log_id'] = $this->lcActionLogId;
-		$st->fields['lc_action_log_type_id'] = $this->lcActionLogTypeId;
-		$st->fields['action_datetime'] = $this->actionDatetime;
-		$st->fields['agent_ip'] = $this->agentIp;
-		$st->fields['agent_url'] = $this->agentUrl;
-		$st->fields['file'] = $this->file;
-		$st->fields['line'] = $this->line;
-		$st->fields['agent_username'] = $this->agentUsername;
-		$st->fields['message'] = $this->message;
-		$st->fields['class_id'] = $this->classId;
-		$st->fields['semester_id'] = $this->semesterId;
+		$st->fields['lc_action_log_id'] = $obj->lcActionLogId;
+		$st->fields['lc_action_log_type_id'] = $obj->lcActionLogTypeId;
+		$st->fields['action_datetime'] = $obj->actionDatetime;
+		$st->fields['agent_ip'] = $obj->agentIp;
+		$st->fields['agent_url'] = $obj->agentUrl;
+		$st->fields['file'] = $obj->file;
+		$st->fields['line'] = $obj->line;
+		$st->fields['agent_username'] = $obj->agentUsername;
+		$st->fields['message'] = $obj->message;
+		$st->fields['class_id'] = $obj->classId;
+		$st->fields['semester_id'] = $obj->semesterId;
 
 
 		$st->key = 'lc_action_log_id';

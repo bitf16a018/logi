@@ -4,7 +4,7 @@ class LobClassTestBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobClassTestId;
 	var $lobClassRepoId;
@@ -138,10 +138,10 @@ class LobClassTestPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_class_test");
-		$st->fields['lob_class_test_id'] = $this->lobClassTestId;
-		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
-		$st->fields['num_retry'] = $this->numRetry;
-		$st->fields['is_practice'] = $this->isPractice;
+		$st->fields['lob_class_test_id'] = $obj->lobClassTestId;
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
+		$st->fields['num_retry'] = $obj->numRetry;
+		$st->fields['is_practice'] = $obj->isPractice;
 
 
 		$st->key = 'lob_class_test_id';

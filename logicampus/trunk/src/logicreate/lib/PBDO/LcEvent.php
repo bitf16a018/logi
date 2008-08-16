@@ -4,7 +4,7 @@ class LcEventBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lcEventId;
 	var $calendarType;
@@ -65,6 +65,7 @@ class LcEventBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -160,22 +161,22 @@ class LcEventPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lc_event");
-		$st->fields['lc_event_id'] = $this->lcEventId;
-		$st->fields['calendar_type'] = $this->calendarType;
-		$st->fields['username'] = $this->username;
-		$st->fields['title'] = $this->title;
-		$st->fields['description'] = $this->description;
-		$st->fields['location'] = $this->location;
-		$st->fields['start_date'] = $this->startDate;
-		$st->fields['end_date'] = $this->endDate;
-		$st->fields['groups'] = $this->groups;
-		$st->fields['notgroups'] = $this->notgroups;
-		$st->fields['last_modified'] = $this->lastModified;
-		$st->fields['repeat_type'] = $this->repeatType;
-		$st->fields['repeat_count'] = $this->repeatCount;
-		$st->fields['repeat_mask'] = $this->repeatMask;
-		$st->fields['repeat_exclude'] = $this->repeatExclude;
-		$st->fields['class_id'] = $this->classId;
+		$st->fields['lc_event_id'] = $obj->lcEventId;
+		$st->fields['calendar_type'] = $obj->calendarType;
+		$st->fields['username'] = $obj->username;
+		$st->fields['title'] = $obj->title;
+		$st->fields['description'] = $obj->description;
+		$st->fields['location'] = $obj->location;
+		$st->fields['start_date'] = $obj->startDate;
+		$st->fields['end_date'] = $obj->endDate;
+		$st->fields['groups'] = $obj->groups;
+		$st->fields['notgroups'] = $obj->notgroups;
+		$st->fields['last_modified'] = $obj->lastModified;
+		$st->fields['repeat_type'] = $obj->repeatType;
+		$st->fields['repeat_count'] = $obj->repeatCount;
+		$st->fields['repeat_mask'] = $obj->repeatMask;
+		$st->fields['repeat_exclude'] = $obj->repeatExclude;
+		$st->fields['class_id'] = $obj->classId;
 
 
 		$st->key = 'lc_event_id';

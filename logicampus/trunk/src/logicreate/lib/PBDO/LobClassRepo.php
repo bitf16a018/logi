@@ -4,7 +4,7 @@ class LobClassRepoBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobClassRepoId;
 	var $classId;
@@ -189,19 +189,19 @@ class LobClassRepoPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_class_repo");
-		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
-		$st->fields['class_id'] = $this->classId;
-		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
-		$st->fields['lob_guid'] = $this->lobGuid;
-		$st->fields['lob_title'] = $this->lobTitle;
-		$st->fields['lob_urltitle'] = $this->lobUrltitle;
-		$st->fields['lob_copy_style'] = $this->lobCopyStyle;
-		$st->fields['lob_type'] = $this->lobType;
-		$st->fields['lob_sub_type'] = $this->lobSubType;
-		$st->fields['lob_mime'] = $this->lobMime;
-		$st->fields['lob_description'] = $this->lobDescription;
-		$st->fields['lob_version'] = $this->lobVersion;
-		$st->fields['lob_bytes'] = $this->lobBytes;
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
+		$st->fields['class_id'] = $obj->classId;
+		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
+		$st->fields['lob_guid'] = $obj->lobGuid;
+		$st->fields['lob_title'] = $obj->lobTitle;
+		$st->fields['lob_urltitle'] = $obj->lobUrltitle;
+		$st->fields['lob_copy_style'] = $obj->lobCopyStyle;
+		$st->fields['lob_type'] = $obj->lobType;
+		$st->fields['lob_sub_type'] = $obj->lobSubType;
+		$st->fields['lob_mime'] = $obj->lobMime;
+		$st->fields['lob_description'] = $obj->lobDescription;
+		$st->fields['lob_version'] = $obj->lobVersion;
+		$st->fields['lob_bytes'] = $obj->lobBytes;
 
 		$st->nulls['lob_description'] = 'lob_description';
 
