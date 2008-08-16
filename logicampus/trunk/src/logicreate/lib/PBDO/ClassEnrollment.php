@@ -4,7 +4,7 @@ class ClassEnrollmentBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $classEnrollmentId;
 	var $studentId;
@@ -49,6 +49,7 @@ class ClassEnrollmentBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -136,14 +137,14 @@ class ClassEnrollmentPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("class_enrollment");
-		$st->fields['class_enrollment_id'] = $this->classEnrollmentId;
-		$st->fields['student_id'] = $this->studentId;
-		$st->fields['semester_id'] = $this->semesterId;
-		$st->fields['class_id'] = $this->classId;
-		$st->fields['section_number'] = $this->sectionNumber;
-		$st->fields['enrolled_on'] = $this->enrolledOn;
-		$st->fields['active'] = $this->active;
-		$st->fields['withdrew_on'] = $this->withdrewOn;
+		$st->fields['class_enrollment_id'] = $obj->classEnrollmentId;
+		$st->fields['student_id'] = $obj->studentId;
+		$st->fields['semester_id'] = $obj->semesterId;
+		$st->fields['class_id'] = $obj->classId;
+		$st->fields['section_number'] = $obj->sectionNumber;
+		$st->fields['enrolled_on'] = $obj->enrolledOn;
+		$st->fields['active'] = $obj->active;
+		$st->fields['withdrew_on'] = $obj->withdrewOn;
 
 
 		$st->key = 'class_enrollment_id';

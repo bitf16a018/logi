@@ -4,7 +4,7 @@ class ClassLessonSequenceBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $classLessonSequenceId;
 	var $lessonId;
@@ -181,26 +181,26 @@ class ClassLessonSequencePeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("class_lesson_sequence");
-		$st->fields['class_lesson_sequence_id'] = $this->classLessonSequenceId;
-		$st->fields['lesson_id'] = $this->lessonId;
-		$st->fields['class_id'] = $this->classId;
-		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
-		$st->fields['lob_type'] = $this->lobType;
-		$st->fields['lob_sub_type'] = $this->lobSubType;
-		$st->fields['lob_mime'] = $this->lobMime;
-		$st->fields['lob_title'] = $this->lobTitle;
-		$st->fields['link_text'] = $this->linkText;
-		$st->fields['not_before_seq_id'] = $this->notBeforeSeqId;
-		$st->fields['start_offset'] = $this->startOffset;
-		$st->fields['start_time'] = $this->startTime;
-		$st->fields['end_offset'] = $this->endOffset;
-		$st->fields['end_time'] = $this->endTime;
-		$st->fields['due_offset'] = $this->dueOffset;
-		$st->fields['due_time'] = $this->dueTime;
-		$st->fields['grace_period_days'] = $this->gracePeriodDays;
-		$st->fields['rank'] = $this->rank;
-		$st->fields['hide_until_start'] = $this->hideUntilStart;
-		$st->fields['hide_after_end'] = $this->hideAfterEnd;
+		$st->fields['class_lesson_sequence_id'] = $obj->classLessonSequenceId;
+		$st->fields['lesson_id'] = $obj->lessonId;
+		$st->fields['class_id'] = $obj->classId;
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
+		$st->fields['lob_type'] = $obj->lobType;
+		$st->fields['lob_sub_type'] = $obj->lobSubType;
+		$st->fields['lob_mime'] = $obj->lobMime;
+		$st->fields['lob_title'] = $obj->lobTitle;
+		$st->fields['link_text'] = $obj->linkText;
+		$st->fields['not_before_seq_id'] = $obj->notBeforeSeqId;
+		$st->fields['start_offset'] = $obj->startOffset;
+		$st->fields['start_time'] = $obj->startTime;
+		$st->fields['end_offset'] = $obj->endOffset;
+		$st->fields['end_time'] = $obj->endTime;
+		$st->fields['due_offset'] = $obj->dueOffset;
+		$st->fields['due_time'] = $obj->dueTime;
+		$st->fields['grace_period_days'] = $obj->gracePeriodDays;
+		$st->fields['rank'] = $obj->rank;
+		$st->fields['hide_until_start'] = $obj->hideUntilStart;
+		$st->fields['hide_after_end'] = $obj->hideAfterEnd;
 
 		$st->nulls['not_before_seq_id'] = 'not_before_seq_id';
 		$st->nulls['start_offset'] = 'start_offset';

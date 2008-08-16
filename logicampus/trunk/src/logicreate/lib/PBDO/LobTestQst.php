@@ -4,7 +4,7 @@ class LobTestQstBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobTestQstId;
 	var $lobTestId;
@@ -132,8 +132,8 @@ class LobTestQstPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_test_qst");
-		$st->fields['lob_test_qst_id'] = $this->lobTestQstId;
-		$st->fields['lob_test_id'] = $this->lobTestId;
+		$st->fields['lob_test_qst_id'] = $obj->lobTestQstId;
+		$st->fields['lob_test_id'] = $obj->lobTestId;
 
 
 		$st->key = 'lob_test_qst_id';

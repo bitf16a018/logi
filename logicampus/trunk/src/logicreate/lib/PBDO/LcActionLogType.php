@@ -4,7 +4,7 @@ class LcActionLogTypeBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lcActionLogTypeId;
 	var $actionCode;
@@ -39,6 +39,7 @@ class LcActionLogTypeBase {
 
 
 	function load($key,$dsn="default") {
+		$where = '';
 		if (is_array($key) ) {
 			while (list ($k,$v) = @each($key) ) {
 			$where .= "$k='$v' and ";
@@ -121,9 +122,9 @@ class LcActionLogTypePeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lc_action_log_type");
-		$st->fields['lc_action_log_type_id'] = $this->lcActionLogTypeId;
-		$st->fields['action_code'] = $this->actionCode;
-		$st->fields['display_name'] = $this->displayName;
+		$st->fields['lc_action_log_type_id'] = $obj->lcActionLogTypeId;
+		$st->fields['action_code'] = $obj->actionCode;
+		$st->fields['display_name'] = $obj->displayName;
 
 
 		$st->key = 'lc_action_log_type_id';

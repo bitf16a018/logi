@@ -4,7 +4,7 @@ class LobClassContentBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobClassContentId;
 	var $lobClassRepoId;
@@ -146,12 +146,12 @@ class LobClassContentPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_class_content");
-		$st->fields['lob_class_content_id'] = $this->lobClassContentId;
-		$st->fields['lob_class_repo_id'] = $this->lobClassRepoId;
-		$st->fields['lob_text'] = $this->lobText;
-		$st->fields['lob_binary'] = $this->lobBinary;
-		$st->fields['lob_filename'] = $this->lobFilename;
-		$st->fields['lob_caption'] = $this->lobCaption;
+		$st->fields['lob_class_content_id'] = $obj->lobClassContentId;
+		$st->fields['lob_class_repo_id'] = $obj->lobClassRepoId;
+		$st->fields['lob_text'] = $obj->lobText;
+		$st->fields['lob_binary'] = $obj->lobBinary;
+		$st->fields['lob_filename'] = $obj->lobFilename;
+		$st->fields['lob_caption'] = $obj->lobCaption;
 
 		$st->nulls['lob_text'] = 'lob_text';
 		$st->nulls['lob_binary'] = 'lob_binary';

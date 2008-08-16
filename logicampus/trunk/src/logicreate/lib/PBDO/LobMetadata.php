@@ -4,7 +4,7 @@ class LobMetadataBase {
 
 	var $_new = true;	//not pulled from DB
 	var $_modified;		//set() called
-	var $_version = '1.6';	//PBDO version number
+	var $_version = '1.7';	//PBDO version number
 	var $_entityVersion = '';	//Source version number
 	var $lobMetadataId;
 	var $lobRepoEntryId;
@@ -149,18 +149,18 @@ class LobMetadataPeerBase {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 		$st = new PBDO_InsertStatement("lob_metadata");
-		$st->fields['lob_metadata_id'] = $this->lobMetadataId;
-		$st->fields['lob_repo_entry_id'] = $this->lobRepoEntryId;
-		$st->fields['subject'] = $this->subject;
-		$st->fields['subdisc'] = $this->subdisc;
-		$st->fields['author'] = $this->author;
-		$st->fields['source'] = $this->source;
-		$st->fields['copyright'] = $this->copyright;
-		$st->fields['license'] = $this->license;
-		$st->fields['user_version'] = $this->userVersion;
-		$st->fields['status'] = $this->status;
-		$st->fields['updated_on'] = $this->updatedOn;
-		$st->fields['created_on'] = $this->createdOn;
+		$st->fields['lob_metadata_id'] = $obj->lobMetadataId;
+		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
+		$st->fields['subject'] = $obj->subject;
+		$st->fields['subdisc'] = $obj->subdisc;
+		$st->fields['author'] = $obj->author;
+		$st->fields['source'] = $obj->source;
+		$st->fields['copyright'] = $obj->copyright;
+		$st->fields['license'] = $obj->license;
+		$st->fields['user_version'] = $obj->userVersion;
+		$st->fields['status'] = $obj->status;
+		$st->fields['updated_on'] = $obj->updatedOn;
+		$st->fields['created_on'] = $obj->createdOn;
 
 
 		$st->key = 'lob_metadata_id';
