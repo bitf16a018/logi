@@ -766,6 +766,7 @@ function redirectPresentation (&$obj,&$t) {
 		echo "click to continue:";
 		echo "\n<br/>\n";
 		echo '<a href="'.$t['url'].'">continue</a>';
+		echo lcSystem::getErrorBox();
 	} else {
 		header("Location: ".$t['url']);
 	}
