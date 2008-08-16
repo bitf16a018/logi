@@ -481,7 +481,7 @@ class '.$this->codeName.'PeerBase {
 		@reset($this->attributes);
 		while ( list ($k,$v) = @each($this->attributes) ) {
 			$ret .="\t\t";
-			$ret .= '$st->fields[\''.$v->colName.'\'] = $this->'.$v->codeName.';';
+			$ret .= '$st->fields[\''.$v->colName.'\'] = $obj->'.$v->codeName.';';
 			$ret .="\n";
 		}
 
