@@ -38,6 +38,7 @@ class Myobj extends FacultyService {
 			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id
 			LEFT JOIN lob_user_link as C on A.lob_repo_entry_id = C.lob_repo_entry_id
 			WHERE C.user_id = '.$u->userId.'
+			GROUP BY A.lob_repo_entry_id
 			');
 
 		$db->nextRecord();
@@ -58,6 +59,7 @@ class Myobj extends FacultyService {
 			LEFT JOIN lob_metadata as B on A.lob_repo_entry_id = B.lob_repo_entry_id
 			LEFT JOIN lob_user_link as C on A.lob_repo_entry_id = C.lob_repo_entry_id
 			WHERE C.user_id = '.$u->userId.'
+			GROUP BY A.lob_repo_entry_id
 			LIMIT '.$limitStart.','.$limitCount.'
 			');
 

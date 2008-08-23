@@ -90,6 +90,10 @@ class Lc_Lob {
 		$this->lobMetaObj->set($key,$val);
 	}
 
+	function getTitle() {
+		return $this->repoObj->lobTitle;
+	}
+
 	/**
 	 *  Get version
 	 **/
