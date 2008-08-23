@@ -51,9 +51,10 @@ class Exam extends FacultyService {
 	/**
 	 */
 	function editQuestionRun(&$db, &$u, &$lc, &$t) {
-		$lc->templateName='exam_question_mchoice';
-		$t['questionType'] = 'mchoice';
-//		$testId = intval($lc->postvars['id']);
+		$qCode = $this->findQuestionType($lc);
+		$t['questionType'] = $qCode;
+
+		$lc->templateName=$this->getTemplateName($qCode);
 
 		//load this question from the question array
 		if (isset($lc->getvars['qidx'])) {
@@ -64,8 +65,64 @@ class Exam extends FacultyService {
 			$t['qidx'] = -1;
 		}
 		$t['q'] = $t['questionObj'];
+	}
 
-//debug($test,1);
+	/**
+	 * Helper function to translate a qestion type into a filename.
+	 *
+	 * @return String   filename of template for this quesiton type
+	 */
+	function getTemplateName($qCode) {
+		switch ($qCode) {
+			case 'QUESTION_MCHOICE';
+				return 'exam_question_mchoice';
+
+			case 'QUESTION_MANSWER';
+				return 'exam_question_manswer';
+
+			case 'QUESTION_MATCHING';
+				return 'exam_question_matching';
+
+			case 'QUESTION_ESSAY';
+				return 'exam_question_essay';
+		}
+	}
+	/**
+	 * Helper function to inspect the get/post vars for a question type.
+	 *
+	 * @return String   type of question from get/post
+	 */
+	function findQuestionType($lc) {
+		$type = 'unknown';
+		if (isset($lc->postvars['questionType'])) {
+			switch($lc->postvars['questionType']) {
+				case 'mchoice':
+					$type = 'QUESTION_MCHOICE';
+					break;
+				case 'manswer':
+					$type = 'QUESTION_MANSWER';
+					break;
+				case 'matching':
+					$type = 'QUESTION_MATCHING';
+					break;
+
+				case 'essay':
+					$type = 'QUESTION_ESSAY';
+					break;
+			}
+		} else {
+			if (isset($lc->getvars['mc_submit']))
+				$type = 'QUESTION_MCHOICE';
+			if (isset($lc->getvars['ma_submit']))
+				$type = 'QUESTION_MANSWER';
+			if (isset($lc->getvars['mq_submit']))
+				$type = 'QUESTION_MATCHING';
+
+			if (isset($lc->getvars['es_submit']))
+				$type = 'QUESTION_ESSAY';
+		}
+
+		return $type;
 	}
 
 
