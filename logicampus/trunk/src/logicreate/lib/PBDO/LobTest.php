@@ -134,8 +134,8 @@ class LobTestPeerBase {
 		$st = new PBDO_SelectStatement("lob_test",$where);
 		$st->fields['lob_test_id'] = 'lob_test_id';
 		$st->fields['lob_repo_entry_id'] = 'lob_repo_entry_id';
-		$st->fields['num_retry'] = 'num_retry';
-		$st->fields['is_practice'] = 'is_practice';
+//		$st->fields['num_retry'] = 'num_retry';
+//		$st->fields['is_practice'] = 'is_practice';
 
 
 		$array = array();
@@ -152,8 +152,8 @@ class LobTestPeerBase {
 		$st = new PBDO_InsertStatement("lob_test");
 		$st->fields['lob_test_id'] = $obj->lobTestId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
-		$st->fields['num_retry'] = $obj->numRetry;
-		$st->fields['is_practice'] = $obj->isPractice;
+//		$st->fields['num_retry'] = $obj->numRetry;
+//		$st->fields['is_practice'] = $obj->isPractice;
 
 
 		$st->key = 'lob_test_id';
@@ -172,8 +172,8 @@ class LobTestPeerBase {
 		$st = new PBDO_UpdateStatement("lob_test");
 		$st->fields['lob_test_id'] = $obj->lobTestId;
 		$st->fields['lob_repo_entry_id'] = $obj->lobRepoEntryId;
-		$st->fields['num_retry'] = $obj->numRetry;
-		$st->fields['is_practice'] = $obj->isPractice;
+//		$st->fields['num_retry'] = $obj->numRetry;
+//		$st->fields['is_practice'] = $obj->isPractice;
 
 
 		$st->key = 'lob_test_id';
@@ -234,8 +234,8 @@ class LobTestPeerBase {
 		$x = new LobTest();
 		$x->lobTestId = $row['lob_test_id'];
 		$x->lobRepoEntryId = $row['lob_repo_entry_id'];
-		$x->numRetry = $row['num_retry'];
-		$x->isPractice = $row['is_practice'];
+//		$x->numRetry = $row['num_retry'];
+//		$x->isPractice = $row['is_practice'];
 
 		$x->_new = false;
 		return $x;
