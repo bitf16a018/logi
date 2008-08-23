@@ -9,8 +9,10 @@ CREATE TABLE `lob_test_qst` (
 		
 	`lob_test_qst_id` integer (11) NOT NULL auto_increment, 
 	`lob_test_id` integer (11) NOT NULL, 
-	`question_text` text NOT NULL, 
-	`label_list` text NOT NULL,
+	`qst_text` text NOT NULL, 
+	`qst_choices` text NOT NULL, 
+	`question_type_id` tinyint NOT NULL, 
+	`qst_points` tinyint NOT NULL,
 	PRIMARY KEY (lob_test_qst_id) 
 );
 
