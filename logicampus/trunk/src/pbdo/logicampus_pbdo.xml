@@ -463,15 +463,26 @@
 			size="11"
 			type="INTEGER"/>
 
-		<attribute name="question_text"
+		<attribute name="qst_text"
 			required="true"
 			default=""
 			type="TEXT"/>
 
-		<attribute name="label_list"
+		<attribute name="qst_choices"
 			required="true"
 			default=""
 			type="TEXT"/>
+
+		<attribute name="question_type_id"
+			required="true"
+			default=""
+			type="tinyint"/>
+
+		<attribute name="qst_points"
+			required="true"
+			default=""
+			type="tinyint"/>
+
 		<key
 			attribute="lob_test_id"
 			name="lob_test_idx"/>
