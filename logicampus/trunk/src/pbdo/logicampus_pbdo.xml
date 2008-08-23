@@ -462,6 +462,16 @@
 			required="true"
 			size="11"
 			type="INTEGER"/>
+
+		<attribute name="question_text"
+			required="true"
+			default=""
+			type="TEXT"/>
+
+		<attribute name="label_list"
+			required="true"
+			default=""
+			type="TEXT"/>
 		<key
 			attribute="lob_test_id"
 			name="lob_test_idx"/>

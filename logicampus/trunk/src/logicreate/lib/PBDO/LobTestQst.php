@@ -8,10 +8,14 @@ class LobTestQstBase {
 	var $_entityVersion = '';	//Source version number
 	var $lobTestQstId;
 	var $lobTestId;
+	var $questionText;
+	var $labelList;
 
 	var $__attributes = array( 
 	'lobTestQstId'=>'integer',
-	'lobTestId'=>'integer');
+	'lobTestId'=>'integer',
+	'questionText'=>'text',
+	'labelList'=>'text');
 
 	var $__nulls = array();
 
@@ -118,6 +122,8 @@ class LobTestQstPeerBase {
 		$st = new PBDO_SelectStatement("lob_test_qst",$where);
 		$st->fields['lob_test_qst_id'] = 'lob_test_qst_id';
 		$st->fields['lob_test_id'] = 'lob_test_id';
+		$st->fields['question_text'] = 'question_text';
+		$st->fields['label_list'] = 'label_list';
 
 
 		$array = array();
@@ -134,6 +140,8 @@ class LobTestQstPeerBase {
 		$st = new PBDO_InsertStatement("lob_test_qst");
 		$st->fields['lob_test_qst_id'] = $obj->lobTestQstId;
 		$st->fields['lob_test_id'] = $obj->lobTestId;
+		$st->fields['question_text'] = $obj->questionText;
+		$st->fields['label_list'] = $obj->labelList;
 
 
 		$st->key = 'lob_test_qst_id';
@@ -152,6 +160,8 @@ class LobTestQstPeerBase {
 		$st = new PBDO_UpdateStatement("lob_test_qst");
 		$st->fields['lob_test_qst_id'] = $obj->lobTestQstId;
 		$st->fields['lob_test_id'] = $obj->lobTestId;
+		$st->fields['question_text'] = $obj->questionText;
+		$st->fields['label_list'] = $obj->labelList;
 
 
 		$st->key = 'lob_test_qst_id';
@@ -212,6 +222,8 @@ class LobTestQstPeerBase {
 		$x = new LobTestQst();
 		$x->lobTestQstId = $row['lob_test_qst_id'];
 		$x->lobTestId = $row['lob_test_id'];
+		$x->questionText = $row['question_text'];
+		$x->labelList = $row['label_list'];
 
 		$x->_new = false;
 		return $x;
