@@ -11,6 +11,7 @@ CREATE TABLE `lob_class_metadata` (
 	`subject` varchar (255) NOT NULL, 
 	`subdisc` varchar (255) NOT NULL, 
 	`author` varchar (255) NOT NULL, 
+	`source` varchar (255) NOT NULL, 
 	`copyright` varchar (255) NOT NULL, 
 	`license` varchar (255) NOT NULL, 
 	`user_version` varchar (255) NOT NULL, 
@@ -22,7 +23,7 @@ CREATE TABLE `lob_class_metadata` (
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE INDEX lob_class_repo_idx ON lob_class_metadata (lob_class_repo_id);
+CREATE INDEX `lob_class_repo_idx` ON `lob_class_metadata` (`lob_class_repo_id`);
 campusdelimeter;
 $installTableSchemas[] = $table;
 

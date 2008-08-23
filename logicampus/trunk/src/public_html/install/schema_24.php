@@ -1,51 +1,77 @@
 <?
 $installTableSchemas = array();
 $table = <<<campusdelimeter
-CREATE TABLE exam_schedule_classes (
-  id_exam_schedule_classes int(11) NOT NULL auto_increment,
-  id_classes int(11) unsigned NOT NULL default '0',
-  id_semester int(11) unsigned NOT NULL default '0',
-  status int(1) NOT NULL default '1',
-  received_date datetime NOT NULL default '0000-00-00 00:00:00',
-  south_campus int(1) NOT NULL default '0',
-  southeast_campus int(1) NOT NULL default '0',
-  northeast_campus int(1) NOT NULL default '0',
-  northwest_campus int(1) NOT NULL default '0',
-  note text NOT NULL,
-  PRIMARY KEY  (id_exam_schedule_classes),
-  KEY id_semester (id_semester),
-  KEY id_classes (id_classes)
+CREATE TABLE profile_faculty (
+  username varchar(32) NOT NULL default '0',
+  emergencyContact varchar(50) default NULL,
+  emergencyPhone varchar(18) default NULL,
+  title varchar(5) default NULL,
+  degree text,
+  jobtitle varchar(255) default NULL,
+  officeLocation varchar(70) default NULL,
+  campusLocation varchar(10) default NULL,
+  relevantExp text,
+  officePhone varchar(18) default NULL,
+  offHrsMonday varchar(255) default NULL,
+  offHrsTuesday varchar(255) default NULL,
+  offHrsWednesday varchar(255) default NULL,
+  offHrsThursday varchar(255) default NULL,
+  offHrsFriday varchar(255) default NULL,
+  PRIMARY KEY  (username),
+  UNIQUE KEY username (username)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE exam_schedule_classes_dates (
-  id_exam_schedule_classes_dates int(11) NOT NULL auto_increment,
-  id_classes bigint(20) unsigned NOT NULL default '0',
-  id_exam_schedule_dates bigint(20) unsigned NOT NULL default '0',
-  new_exam int(1) NOT NULL default '0',
-  title varchar(255) NOT NULL default '',
-  instructions text NOT NULL,
-  south_copies int(1) default '0',
-  southeast_copies int(1) default '0',
-  northeast_copies int(1) default '0',
-  northwest_copies int(1) default '0',
-  num_of_copies int(11) default '0',
-  note text,
-  status tinyint(1) NOT NULL default '1',
-  PRIMARY KEY  (id_exam_schedule_classes_dates),
-  KEY id_exam_schedule_dates (id_exam_schedule_dates),
-  KEY id_classes (id_classes)
+CREATE TABLE profile_student (
+  username varchar(32) NOT NULL default '0',
+  operatingSystem varchar(50) default NULL,
+  connectType varchar(100) default NULL,
+  isp varchar(100) default NULL,
+  PRIMARY KEY  (username),
+  UNIQUE KEY username (username)
 ) TYPE=MyISAM
 campusdelimeter;
 $installTableSchemas[] = $table;
 $table = <<<campusdelimeter
-CREATE TABLE exam_schedule_dates (
-  id_exam_schedule_dates bigint(20) unsigned NOT NULL auto_increment,
-  id_semester bigint(20) unsigned NOT NULL default '0',
-  date_start datetime NOT NULL default '0000-00-00 00:00:00',
-  date_end datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (id_exam_schedule_dates)
+CREATE TABLE photos (
+  pkey int(11) NOT NULL auto_increment,
+  filename varchar(60) NOT NULL default '',
+  thumbname varchar(60) NOT NULL default '',
+  width smallint(5) unsigned NOT NULL default '0',
+  height smallint(5) unsigned NOT NULL default '0',
+  t_width smallint(5) unsigned NOT NULL default '0',
+  t_height smallint(5) unsigned NOT NULL default '0',
+  catID int(11) NOT NULL default '0',
+  caption varchar(255) NOT NULL default '',
+  count int(11) NOT NULL default '0',
+  PRIMARY KEY  (pkey),
+  UNIQUE KEY filename (filename),
+  KEY catID (catID)
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE profile_faculty_coursefamily (
+  username varchar(32) NOT NULL default '',
+  id_profile_faculty_coursefamily varchar(4) NOT NULL default ''
+) TYPE=MyISAM
+campusdelimeter;
+$installTableSchemas[] = $table;
+$table = <<<campusdelimeter
+CREATE TABLE userPhotos (
+  pkey int(11) NOT NULL auto_increment,
+  username varchar(32) NOT NULL default '',
+  filename varchar(60) NOT NULL default '',
+  thumbname varchar(60) NOT NULL default '',
+  width smallint(5) unsigned NOT NULL default '0',
+  height smallint(5) unsigned NOT NULL default '0',
+  t_width smallint(5) unsigned NOT NULL default '0',
+  t_height smallint(5) unsigned NOT NULL default '0',
+  caption varchar(255) NOT NULL default '',
+  count int(11) NOT NULL default '0',
+  PRIMARY KEY  (pkey),
+  UNIQUE KEY filename (filename)
 ) TYPE=MyISAM;
 campusdelimeter;
 $installTableSchemas[] = $table;
