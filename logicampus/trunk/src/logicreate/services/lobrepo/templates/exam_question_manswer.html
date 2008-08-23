@@ -86,8 +86,10 @@
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<input type="submit" value="Continue -&gt;">
-				<input type="hidden" name="event" value="save">
+				<input type="submit" name="sbmt_button" value="<?=lct('Continue -&gt;');?>"/>
+				<input type="hidden" name="event" value="saveQuestion"/>
+				<input type="hidden" name="qidx" value="<?=$t['qidx'];?>"/>
+				<input type="hidden" name="questionType" value="<?= $t['questionType'];?>"/>
 			</td>
 		</tr>
 	</table>

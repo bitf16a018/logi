@@ -21,14 +21,27 @@ class Lc_Lob_Test extends Lc_Lob {
 			$this->repoObj->lobType = $this->type;
 			$this->repoObj->lobSubType = $this->type;
 			$this->lobSub     = new LobTest();
-			$this->lobMetaObj = new LobMetadata();
-			$this->lobMetaObj->createdOn = time();
 		} else {
 			$this->repoObj   = LobRepoEntry::load($id);
 			$tests           = $this->repoObj->getLobTestsByLobRepoEntryId();
 			$this->lobSub    = $tests[0];
+			$this->loadQuestions();
+			$this->lobMetaObj = LobMetadata::load(array('lob_repo_entry_id'=>$id));
+		}
+
+		if (isset($this->lobMetaObj) || !is_object($this->lobMetaObj)) {
+			$this->lobMetaObj = new LobMetadata();
+			$this->lobMetaObj->createdOn = time();
 		}
 	}
+
+	function save() {
+		$ret = parent::save();
+		if (!$ret) { return FALSE;}
+
+		$this->saveQuestions();
+	}
+
 
 	function setTitle($t) {
 		$this->repoObj->set('lobTitle', $t);
@@ -66,10 +79,32 @@ class Lc_Lob_Test extends Lc_Lob {
 		$q->qstText =  $qtext;
 		$q->questionTypeId = constant($type);
 		if ( is_array($choices) ) {
+			$q->qstChoices = $choices;
 		}
 		return $q;
 	}
 
+	/**
+	 * Load questions from the DB, add to internal questionObjs array
+	 */
+	function loadQuestions() {
+		$this->questionObjs = array();
+		if ($this->lobSub->get('lobTestId') < 1) { return; }
+		$questionList =  LobTestQstPeer::doSelect( ' lob_test_id = '.$this->lobSub->get('lobTestId'));
+		foreach ($questionList as $q) {
+			$q->qstChoices = unserialize($q->qstChoices);
+			$this->questionObjs[] = $q;
+		}
+	}
+
+
+	function saveQuestions() {
+		foreach($this->questionObjs as $q) {
+			$q->set('lobTestId', $this->lobSub->get('lobTestId'));
+			$q->qstChoices = serialize($q->qstChoices);
+			$q->save();
+		}
+	}
 
 	/**
 	 *

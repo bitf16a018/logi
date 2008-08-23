@@ -1,19 +1,19 @@
 <?=$t['sectionheader'];?>
 <?=$t['error'];?>
-<form method="POST">
+<form method="post">
 
 	<table border="0" width="600">
 		<tr>
 			<td valign="top">
-				*<b>Question</b><br/>
+				*<b>question</b><br/>
 			</td>
 			<td>
-				<textarea rows="5" cols="50" name="questionText" <?= $t['disableFlag'];?>><?=$t['q']->questionText;?></textarea>
+				<textarea rows="5" cols="50" name="question_text" <?= $t['disableflag'];?>><?=$t['q']->questiontext;?></textarea>
 				<br/>
 			</td>
 		</tr>
 		<tr>
-			<td valign="top"><b>Select Image</b></td>
+			<td valign="top"><b>select image</b></td>
 			<td>
 
 				<style>
@@ -26,20 +26,20 @@
 
 				</style>
 
-			<FIELDSET valign="middle" style="width: 235px; height: 245px; padding: 2px;">
+			<fieldset valign="middle" style="width: 235px; height: 245px; padding: 2px;">
 			
-			<select name="fileHash"
+			<select name="filehash"
 				style="width: 235px;"
-				onChange="document.getElementById('previewfile').src='<?=appurl('classroom/viewContent/fhash=');?>' + this.value;"
+				onchange="document.getelementbyid('previewfile').src='<?=appurl('classroom/viewcontent/fhash=');?>' + this.value;"
 				>
-			<option value="">Select Image</option>
+			<option value="">select image</option>
 		<?php
-			foreach($t['images'] as $myIzimage)
+			foreach($t['images'] as $myizimage)
 			{
 				echo '
-				<option value="'.$myIzimage['daHasha'].'"'.
-				($t['q']->fileHash == $myIzimage['daHasha'] ? ' SELECTED' : '').'>'.
-					$myIzimage['displayname'].'</option>';
+				<option value="'.$myizimage['dahasha'].'"'.
+				($t['q']->filehash == $myizimage['dahasha'] ? ' selected' : '').'>'.
+					$myizimage['displayname'].'</option>';
 			}
 
 		?>	
@@ -51,7 +51,7 @@
 			<tr>
 
 				<td valign="middle" align="center" height="100%" width="100%">
-				<img alt="" src="<?= $t['q']->fileHash ? appurl('classroom/viewContent/fhash=').$t['q']->fileHash : IMAGES_URL.'spacer.gif'; ?>" id="previewfile">
+				<img alt="" src="<?= $t['q']->filehash ? appurl('classroom/viewcontent/fhash=').$t['q']->filehash : images_url.'spacer.gif'; ?>" id="previewfile">
 									
 							
 				</td>
@@ -59,15 +59,17 @@
 			</table>
 			</div>
 					
-			</FIELDSET>
+			</fieldset>
 
 			</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<input type="submit" value="Continue-&gt;">
-				<input type="hidden" name="event" value="save">
+				<input type="submit" name="sbmt_button" value="<?=lct('Continue -&gt;');?>"/>
+				<input type="hidden" name="event" value="saveQuestion"/>
+				<input type="hidden" name="qidx" value="<?=$t['qidx'];?>"/>
+				<input type="hidden" name="questionType" value="<?= $t['questionType'];?>"/>
 				</form>
 			</td>
 		</tr>
