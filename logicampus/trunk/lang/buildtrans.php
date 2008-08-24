@@ -58,9 +58,14 @@ function lct($key,$args = "") {
 	switch($key) {
 ';
 	foreach ($document->file->body->{"trans-unit"} as $node) {
+		if ( trim($node->target)) {
+			$target = trim($node->target);
+		} else {
+			$target = '<span class=\"untranslated trans-unit-'.$node['id'].'\" >'.trim($node->source).'</span>';
+		}
 		echo '
 		case \''.addslashes(trim($node->source)).'\':
-			return "'.trim($node->target).'";
+			return "'.$target.'";
 			break;
 ';
 
