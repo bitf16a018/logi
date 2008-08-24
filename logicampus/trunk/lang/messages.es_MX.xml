@@ -1,538 +1,1150 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<language locale="es_MX" charset="UTF-8">
-
-	<message id ="Calendar" domain="system" status="">
-		Calendario
-	</message>
-	<!--Calendar-->
-	<usage id ="Calendar" file="../src/public_html/templates/private/header.html.php" line="77"/>
-
-
-	<message id ="FAQs" domain="system" status="">
-		FAQs
-	</message>
-	<!--FAQs-->
-	<usage id ="FAQs" file="../src/public_html/templates/private/header.html.php" line="76"/>
-
-
-	<message id ="Help Desk" domain="system" status="">
-		Ayuda en linea
-	</message>
-	<!--Help Desk-->
-	<usage id ="Help Desk" file="../src/public_html/templates/private/header.html.php" line="78"/>
-
-
-	<message id ="Messages" domain="system" status="">
-		Mensajes
-	</message>
-	<!--Messages-->
-	<usage id ="Messages" file="../src/public_html/templates/private/header.html.php" line="81"/>
-
-
-	<message id ="classroom manager" domain="system" status="">
-		Administrador del salón
-	</message>
-	<!--classroom manager-->
-	<usage id ="classroom manager" file="../src/public_html/templates/private/header.html.php" line="136"/>
-
-
-	<message id ="Login" domain="system" status="">
-		Login
-	</message>
-	<!--Login-->
-	<usage id ="Login" file="../src/public_html/templates/private/welcome_login.html.php" line="94"/>
-
-
-	<message id ="my classes" domain="system" status="">
-		Mis clases
-	</message>
-	<!--my classes-->
-	<usage id ="my classes" file="../src/public_html/templates/private/header.html.php" line="144"/>
-
-
-	<message id ="password" domain="system" status="">
-		password
-	</message>
-	<!--password-->
-	<usage id ="password" file="../src/public_html/templates/private/header.html.php" line="122"/>
-	<usage id ="password" file="../src/public_html/templates/private/welcome_login.html.php" line="89"/>
-
-
-	<message id ="username" domain="system" status="">
-		usuario
-	</message>
-	<!--username-->
-	<usage id ="username" file="../src/public_html/templates/private/header.html.php" line="119"/>
-	<usage id ="username" file="../src/public_html/templates/private/welcome_login.html.php" line="85"/>
-
-
-	<message id ="welcome" domain="system" status="">
-		Bienvenido, $name
-	</message>
-	<!--welcome-->
-	<usage id ="welcome" file="../src/public_html/templates/private/header.html.php" line="106"/>
-
-
-	<message id ="Access Denied!" domain="system" status="">
-		Acceso Denegado!
-	</message>
-	<!--Access Denied!-->
-	<usage id ="Access Denied!" file="../src/logicreate/content/err_access_denied.html" line="1"/>
-
-
-	<message id ="Classroom Overview" domain="system" status="">
-		Descripción del Salón
-	</message>
-	<!--Classroom Overview-->
-	<usage id ="Classroom Overview" file="../src/logicreate/services/classmgr/templates/main_main.html" line="2"/>
-
-
-	<message id ="Classroom Portal Page" domain="system" status="">
-		Portal del Salón
-	</message>
-	<!--Classroom Portal Page-->
-	<usage id ="Classroom Portal Page" file="../src/logicreate/services/classroom/templates/main_main.html" line="1"/>
-
-
-	<message id ="Logout" domain="system" status="">
-		Salir
-	</message>
-	<!--Logout-->
-	<usage id ="Logout" file="../src/public_html/templates/private/header.html.php" line="110"/>
-
-
-	<message id ="Thanks!" domain="system" status="">
-		Gracias!
-	</message>
-	<!--Thanks!-->
-	<usage id ="Thanks!" file="../src/logicreate/content/registerthanks.html" line="1"/>
-	<usage id ="Thanks!" file="../src/logicreate/content/loginthanks.html" line="1"/>
-
-
-	<message id ="You have logged in to our site successfully." domain="system" status="">
-		Has hecho login exitosamente.
-	</message>
-	<!--You have logged in to our site successfully.-->
-	<usage id ="You have logged in to our site successfully." file="../src/logicreate/content/loginthanks.html" line="2"/>
-
-
-	<message id ="You have registered successfully with our site." domain="system" status="">
-		Te has registrado exitosamente.
-	</message>
-	<!--You have registered successfully with our site.-->
-	<usage id ="You have registered successfully with our site." file="../src/logicreate/content/registerthanks.html" line="2"/>
-
-
-	<message id ="Gradebook" domain="system" status="">
-		Calificaciones
-	</message>
-	<!--Gradebook-->
-	<usage id ="Gradebook" file="../src/logicreate/services/menu/menuObj.php" line="208"/>
-	<usage id ="Gradebook" file="../src/logicreate/services/menu/menuObj.php" line="228"/>
-
-
-	<message id ="Content &amp; Lesson Links" domain="system" status="">
-		Contenido &amp; Links de la lección
-	</message>
-	<!--Content &amp;amp;amp;amp;amp;amp;amp;amp; Lesson Links-->
-	<usage id ="Content &amp; Lesson Links" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="13"/>
-
-
-	<message id ="General Class Manager" domain="system" status="">
-		Administración General de la Clase
-	</message>
-	<!--General Class Manager-->
-	<usage id ="General Class Manager" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="12"/>
-
-
-	<message id ="Home Page" domain="system" status="">
-		Página Principal
-	</message>
-	<!--Home Page-->
-	<usage id ="Home Page" file="../src/public_html/templates/private/header.html.php" line="73"/>
-
-
-	<message id ="Message of the Day" domain="system" status="">
-		Mensaje del día
-	</message>
-	<!--Message of the Day-->
-	<usage id ="Message of the Day" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="5"/>
-
-
-	<message id ="Student Communication" domain="system" status="">
-		Comuncación con los estudiantes
-	</message>
-	<!--Student Communication-->
-	<usage id ="Student Communication" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="14"/>
-
-
-	<message id ="Assessment Manager" domain="system" status="">
-		Administrador de pruebas
-	</message>
-	<!--Assessment Manager-->
-	<usage id ="Assessment Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="47"/>
-
-
-	<message id ="Assignments" domain="system" status="">
-		Tareas
-	</message>
-	<!--Assignments-->
-	<usage id ="Assignments" file="../src/logicreate/services/classmgr/templates/main_main.html" line="53"/>
-
-
-	<message id ="File Manager" domain="system" status="">
-		Administrador de Archivos
-	</message>
-	<!--File Manager-->
-	<usage id ="File Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="48"/>
-
-
-	<message id ="Lesson Manager" domain="system" status="">
-		Administrador de lecciones
-	</message>
-	<!--Lesson Manager-->
-	<usage id ="Lesson Manager" file="../src/logicreate/services/classmgr/templates/main_main.html" line="51"/>
-
-
-	<message id ="Classroom Setup" domain="system" status="">
-		Confirguración del salón
-	</message>
-	<!--Classroom Setup-->
-	<usage id ="Classroom Setup" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="21"/>
-
-
-	<message id ="Content" domain="system" status="">
-		Contenido
-	</message>
-	<!--Content-->
-	<usage id ="Content" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="47"/>
-
-
-	<message id ="Exam Scheduling" domain="system" status="">
-		Programación de Exámenes
-	</message>
-	<!--Exam Scheduling-->
-	<usage id ="Exam Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="31"/>
-
-
-	<message id ="Export Class" domain="system" status="">
-		Exportar Clase
-	</message>
-	<!--Export Class-->
-	<usage id ="Export Class" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="23"/>
-
-
-	<message id ="FAQ" domain="system" status="">
-		FAQ
-	</message>
-	<!--FAQ-->
-	<usage id ="FAQ" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="51"/>
-
-
-	<message id ="Lessons" domain="system" status="">
-		Lecciones
-	</message>
-	<!--Lessons-->
-	<usage id ="Lessons" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="54"/>
-
-
-	<message id ="Objectives" domain="system" status="">
-		Objetivos
-	</message>
-	<!--Objectives-->
-	<usage id ="Objectives" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="56"/>
-
-
-	<message id ="Orientation Scheduling" domain="system" status="">
-		Reuiniones de la Clase
-	</message>
-	<!--Orientation Scheduling-->
-	<usage id ="Orientation Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="33"/>
-
-
-	<message id ="Seminar Scheduling" domain="system" status="">
-		Programación de Seminarios
-	</message>
-	<!--Seminar Scheduling-->
-	<usage id ="Seminar Scheduling" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="37"/>
-
-
-	<message id ="Student Presentation" domain="system" status="">
-		Presentación de los Estudiantes
-	</message>
-	<!--Student Presentation-->
-	<usage id ="Student Presentation" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="58"/>
-
-
-	<message id ="Syllabus" domain="system" status="">
-		Información de la Clase
-	</message>
-	<!--Syllabus-->
-	<usage id ="Syllabus" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="27"/>
-
-
-	<message id ="Textbooks" domain="system" status="">
-		Libros de Texto
-	</message>
-	<!--Textbooks-->
-	<usage id ="Textbooks" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="30"/>
-
-
-	<message id ="View Classroom" domain="system" status="">
-		Ver Portal del Salón
-	</message>
-	<!--View Classroom-->
-	<usage id ="View Classroom" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="29"/>
-
-
-	<message id ="Webliography" domain="system" status="">
-		Webliografía
-	</message>
-	<!--Webliography-->
-	<usage id ="Webliography" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="60"/>
-
-
-	<message id ="Announcements" domain="system" status="">
-		Anuncios
-	</message>
-	<!--Announcements-->
-	<usage id ="Announcements" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="66"/>
-
-
-	<message id ="Chat" domain="system" status="">
-		Chat
-	</message>
-	<!--Chat-->
-	<usage id ="Chat" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="68"/>
-
-
-	<message id ="Contact Students" domain="system" status="">
-		Contactar Estudiantes
-	</message>
-	<!--Contact Students-->
-	<usage id ="Contact Students" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="70"/>
-
-
-	<message id ="Discussion Forums" domain="system" status="">
-		Foros de Discusión
-	</message>
-	<!--Discussion Forums-->
-	<usage id ="Discussion Forums" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="72"/>
-
-
-	<message id ="Student Profile" domain="system" status="">
-		Perfil del Estudiante
-	</message>
-	<!--Student Profile-->
-	<usage id ="Student Profile" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="76"/>
-
-
-	<message id ="Presentations" domain="system" status="">
-		Presentations
-	</message>
-	<!--Presentations-->
-	<usage id ="Presentations" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1104"/>
-
-
-	<message id ="Student Management" domain="system" status="">
-		Student Management
-	</message>
-	<!--Student Management-->
-	<usage id ="Student Management" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="26"/>
-
-
-	<message id ="Semester Copy" domain="system" status="">
-		Semester Copy
-	</message>
-	<!--Semester Copy-->
-	<usage id ="Semester Copy" file="../src/logicreate/services/classmgr/templates/displayClass_main.html" line="36"/>
-
-
-	<message id ="List Assignments" domain="system" status="">
-		List Assignments
-	</message>
-	<!--List Assignments-->
-	<usage id ="List Assignments" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1106"/>
-
-
-	<message id ="Add Assignment" domain="system" status="">
-		Add Assignment
-	</message>
-	<!--Add Assignment-->
-	<usage id ="Add Assignment" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1107"/>
-
-
-	<message id ="Add a Lesson" domain="system" status="">
-		Add a Lesson
-	</message>
-	<!--Add a Lesson-->
-	<usage id ="Add a Lesson" file="../src/logicreate/services/classmgr/assignmentManage.lcp" line="1108"/>
-
-
-	<message id ="Classroom Manager" domain="system" status="">
-		Classroom Manager
-	</message>
-	<!--Classroom Manager-->
-	<usage id ="Classroom Manager" file="../src/logicreate/services/classmgr/announcements.lcp" line="182"/>
-
-
-	<message id ="Name" domain="system" status="">
-		Name
-	</message>
-	<!--Name-->
-	<usage id ="Name" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="20"/>
-
-
-	<message id ="Attempts" domain="system" status="">
-		Attempts
-	</message>
-	<!--Attempts-->
-	<usage id ="Attempts" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="21"/>
-
-
-	<message id ="Minute Limit" domain="system" status="">
-		Minute Limit
-	</message>
-	<!--Minute Limit-->
-	<usage id ="Minute Limit" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="22"/>
-
-
-	<message id ="Results" domain="system" status="">
-		Results
-	</message>
-	<!--Results-->
-	<usage id ="Results" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="23"/>
-
-
-	<message id ="Date Available" domain="system" status="">
-		Date Available
-	</message>
-	<!--Date Available-->
-	<usage id ="Date Available" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="24"/>
-
-
-	<message id ="Action" domain="system" status="">
-		Action
-	</message>
-	<!--Action-->
-	<usage id ="Action" file="../src/logicreate/services/classroom/templates/assessments_main.html" line="25"/>
-
-
-	<message id ="Posted On" domain="system" status="">
-		Posted On
-	</message>
-	<!--Posted On-->
-	<usage id ="Posted On" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="20"/>
-	<usage id ="Posted On" file="../src/logicreate/services/classroom/templates/announcements_view.html" line="7"/>
-
-
-	<message id ="Teacher Instructions" domain="system" status="">
-		Teacher Instructions
-	</message>
-	<!--Teacher Instructions-->
-	<usage id ="Teacher Instructions" file="../src/logicreate/services/classroom/templates/assessments_start.html" line="3"/>
-
-
-	<message id ="Complete the Assessment" domain="system" status="">
-		Complete the Assessment
-	</message>
-	<!--Complete the Assessment-->
-	<usage id ="Complete the Assessment" file="../src/logicreate/services/classroom/templates/assessments_start.html" line="87"/>
-
-
-	<message id ="Turn In Test" domain="system" status="">
-		Turn In Test
-	</message>
-	<!--Turn In Test-->
-	<usage id ="Turn In Test" file="../src/logicreate/services/classroom/templates/assessments_start.html" line="92"/>
-
-
-	<message id ="Assessment Graded" domain="system" status="">
-		Assessment Graded
-	</message>
-	<!--Assessment Graded-->
-	<usage id ="Assessment Graded" file="../src/logicreate/services/classroom/templates/assessments_stop_showgrade.html" line="4"/>
-
-
-	<message id ="Your Score: $grade out of $possiblePoints - $percentGrade" domain="system" status="">
-		Your Score: $grade out of $possiblePoints - $percentGrade
-	</message>
-	<!--Your Score: $grade out of $possiblePoints - $percentGrade-->
-	<usage id ="Your Score: $grade out of $possiblePoints - $percentGrade" file="../src/logicreate/services/classroom/templates/assessments_stop_showgrade.html" line="14"/>
-
-
-	<message id ="Return to Assessments" domain="system" status="">
-		Return to Assessments
-	</message>
-	<!--Return to Assessments-->
-	<usage id ="Return to Assessments" file="../src/logicreate/services/classroom/templates/assessments_stop_showgrade.html" line="15"/>
-	<usage id ="Return to Assessments" file="../src/logicreate/services/classroom/templates/assessments_stop.html" line="15"/>
-
-
-	<message id ="Assessment Completed" domain="system" status="">
-		Assessment Completed
-	</message>
-	<!--Assessment Completed-->
-	<usage id ="Assessment Completed" file="../src/logicreate/services/classroom/templates/assessments_stop.html" line="4"/>
-
-
-	<message id ="Assessments" domain="system" status="">
-		Assessments
-	</message>
-	<!--Assessments-->
-	<usage id ="Assessments" file="../src/logicreate/services/classroom/templates/assessments_stop.html" line="9"/>
-
-
-	<message id ="Prev" domain="system" status="">
-		Prev
-	</message>
-	<!--Prev-->
-	<usage id ="Prev" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="5"/>
-	<usage id ="Prev" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="29"/>
-
-
-	<message id ="Next" domain="system" status="">
-		Next
-	</message>
-	<!--Next-->
-	<usage id ="Next" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="6"/>
-	<usage id ="Next" file="../src/logicreate/services/classroom/templates/announcements_main.html" line="30"/>
-
-
-	<message id ="File Resource Manager" domain="system" status="">
-		File Resource Manager
-	</message>
-	<!--File Resource Manager-->
-	<usage id ="File Resource Manager" file="../src/logicreate/lib/pellet.php" line="528"/>
-
-
-	<message id ="You can not change this unless you uncheck [Has no due date]" domain="system" status="">
-		You can not change this unless you uncheck [Has no due date]
-	</message>
-	<!--You can not change this unless you uncheck [Has no due date]-->
-	<usage id ="You can not change this unless you uncheck [Has no due date]" file="../src/logicreate/services/classmgr/templates/assignmentManage_editAssignment.html" line="12"/>
-
-
-	<message id ="Click here" domain="system" status="">
-		Click here
-	</message>
-	<!--Click here-->
-	<usage id ="Click here" file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="12"/>
-	<usage id ="Click here" file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="14"/>
-
-
-	<message id ="to setup &lt;i&gt;gradebook categories&lt;/i&gt;." domain="system" status="">
-		to setup &lt;i&gt;gradebook categories&lt;/i&gt;.
-	</message>
-	<!--to setup &amp;lt;i&amp;gt;gradebook categories&amp;lt;/i&amp;gt;.-->
-	<usage id ="to setup &lt;i&gt;gradebook categories&lt;/i&gt;." file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="12"/>
-
-
-	<message id ="to add a &lt;i&gt;gradebook entry&lt;/i&gt; into a category." domain="system" status="">
-		to add a &lt;i&gt;gradebook entry&lt;/i&gt; into a category.
-	</message>
-	<!--to add a &amp;lt;i&amp;gt;gradebook entry&amp;lt;/i&amp;gt; into a category.-->
-	<usage id ="to add a &lt;i&gt;gradebook entry&lt;/i&gt; into a category." file="../src/logicreate/services/classmgr/templates/assignmentManage_pushtoGradebook.html" line="14"/>
-
-</language>
-
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff-core-1.1.dtd">
+<xliff version="1.1">
+<file source-language="en_US" target-language="" original="logicampus modules" tool="logicampus lct extractor" datatype="text/x-php">
+<header/>
+
+<body>
+	<trans-unit id="1">
+		<source xml:lang="en_US">
+			Message of the Day
+		</source>
+		<target xml:lang="es_MX">Mensaje del día</target>
+		<context-group name="x-php-reference-219908465" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">5</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1885361237" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">4</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="2">
+		<source xml:lang="en_US">
+			General Class Manager
+		</source>
+		<target xml:lang="es_MX">Administración General de la Clase</target>
+		<context-group name="x-php-reference-783356348" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">13</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="3">
+		<source xml:lang="en_US">
+			Content &amp;amp; Lesson Links
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--1328184289" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">14</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="4">
+		<source xml:lang="en_US">
+			Student Communication
+		</source>
+		<target xml:lang="es_MX">Comuncación con los estudiantes</target>
+		<context-group name="x-php-reference--942492535" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">15</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="5">
+		<source xml:lang="en_US">
+			Classroom Setup
+		</source>
+		<target xml:lang="es_MX">Confirguración del salón</target>
+		<context-group name="x-php-reference--342744237" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">21</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1447254796" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">17</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="6">
+		<source xml:lang="en_US">
+			Textbooks
+		</source>
+		<target xml:lang="es_MX">Libros de Texto</target>
+		<context-group name="x-php-reference-94126719" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">23</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-2047069398" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">23</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-218430528" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">22</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="7">
+		<source xml:lang="en_US">
+			Syllabus
+		</source>
+		<target xml:lang="es_MX">Información de la Clase</target>
+		<context-group name="x-php-reference--1678190628" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">24</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--956545379" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">18</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="8">
+		<source xml:lang="en_US">
+			Gradebook
+		</source>
+		<target xml:lang="es_MX">Calificaciones</target>
+		<context-group name="x-php-reference-1979102960" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">26</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1616433025" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">85</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--2146722703" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">64</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-510593490" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">63</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="9">
+		<source xml:lang="en_US">
+			Student Management
+		</source>
+		<target xml:lang="es_MX">Student Management</target>
+		<context-group name="x-php-reference-49383014" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">27</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--485843604" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">20</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="10">
+		<source xml:lang="en_US">
+			Export Class
+		</source>
+		<target xml:lang="es_MX">Exportar Clase</target>
+		<context-group name="x-php-reference--225897966" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">31</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1111845511" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">52</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="11">
+		<source xml:lang="en_US">
+			View Classroom
+		</source>
+		<target xml:lang="es_MX">Ver Portal del Salón</target>
+		<context-group name="x-php-reference-1803568040" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">32</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1404367957" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">50</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--1148472616" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">48</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="12">
+		<source xml:lang="en_US">
+			Exam Scheduling
+		</source>
+		<target xml:lang="es_MX">Programación de Exámenes</target>
+		<context-group name="x-php-reference-478638910" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">33</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--462988939" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">24</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-2047069398" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">23</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="13">
+		<source xml:lang="en_US">
+			Orientation Scheduling
+		</source>
+		<target xml:lang="es_MX">Reuiniones de la Clase</target>
+		<context-group name="x-php-reference--169552373" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">35</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1822397981" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">25</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--462988939" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">24</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="14">
+		<source xml:lang="en_US">
+			Semester Copy
+		</source>
+		<target xml:lang="es_MX">Semester Copy</target>
+		<context-group name="x-php-reference--61695456" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">39</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1423519822" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">54</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-893540881" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">53</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="15">
+		<source xml:lang="en_US">
+			Seminar Scheduling
+		</source>
+		<target xml:lang="es_MX">Programación de Seminarios</target>
+		<context-group name="x-php-reference--844992422" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">44</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1927897925" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">31</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--99505107" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">30</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="16">
+		<source xml:lang="en_US">
+			Assignments
+		</source>
+		<target xml:lang="es_MX">Tareas</target>
+		<context-group name="x-php-reference-1037755438" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">52</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--239390296" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">94</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--986001819" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">45</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="17">
+		<source xml:lang="en_US">
+			Content
+		</source>
+		<target xml:lang="es_MX">Contenido</target>
+		<context-group name="x-php-reference--726056677" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">54</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1532910534" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">42</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-744057680" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">43</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="18">
+		<source xml:lang="en_US">
+			Assessment Manager
+		</source>
+		<target xml:lang="es_MX">Administrador de pruebas</target>
+		<context-group name="x-php-reference-985079863" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">56</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-112091589" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">86</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-1546887135" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">46</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="19">
+		<source xml:lang="en_US">
+			FAQs
+		</source>
+		<target xml:lang="es_MX">FAQs</target>
+		<context-group name="x-php-reference--586216144" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">58</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1811042822" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">21</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="20">
+		<source xml:lang="en_US">
+			File Manager
+		</source>
+		<target xml:lang="es_MX">Administrador de Archivos</target>
+		<context-group name="x-php-reference--117844287" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">60</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1906921811" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">87</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="21">
+		<source xml:lang="en_US">
+			Lessons
+		</source>
+		<target xml:lang="es_MX">Lecciones</target>
+		<context-group name="x-php-reference--1879120297" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">61</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1253033238" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">40</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--1034483076" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">41</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="22">
+		<source xml:lang="en_US">
+			Objectives
+		</source>
+		<target xml:lang="es_MX">Objetivos</target>
+		<context-group name="x-php-reference-1643153275" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">63</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1304559885" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">44</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--986001819" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">45</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="23">
+		<source xml:lang="en_US">
+			Webliography
+		</source>
+		<target xml:lang="es_MX">Webliografía</target>
+		<context-group name="x-php-reference--2003623346" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">65</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1148472616" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">48</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-1546887135" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">46</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="24">
+		<source xml:lang="en_US">
+			Calendar
+		</source>
+		<target xml:lang="es_MX">Calendario</target>
+		<context-group name="x-php-reference--1763322090" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">71</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1876927499" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">93</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--150164249" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">65</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-1845886301" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">66</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="25">
+		<source xml:lang="en_US">
+			Announcements
+		</source>
+		<target xml:lang="es_MX">Anuncios</target>
+		<context-group name="x-php-reference-267159212" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">72</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1845886301" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">66</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-419614155" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">67</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="26">
+		<source xml:lang="en_US">
+			Chat
+		</source>
+		<target xml:lang="es_MX">Chat</target>
+		<context-group name="x-php-reference--426826855" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">74</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-419614155" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">67</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--1984049062" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">68</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="27">
+		<source xml:lang="en_US">
+			Contact Students
+		</source>
+		<target xml:lang="es_MX">Contactar Estudiantes</target>
+		<context-group name="x-php-reference-142688949" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">76</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1635948247" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">70</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="28">
+		<source xml:lang="en_US">
+			Discussion Forums
+		</source>
+		<target xml:lang="es_MX">Foros de Discusión</target>
+		<context-group name="x-php-reference--281448526" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">78</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1984049062" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">68</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--21307188" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">69</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="29">
+		<source xml:lang="en_US">
+			Student Presentation
+		</source>
+		<target xml:lang="es_MX">Presentación de los Estudiantes</target>
+		<context-group name="x-php-reference-1719335759" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">80</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--377857601" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">71</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="30">
+		<source xml:lang="en_US">
+			Student Profile
+		</source>
+		<target xml:lang="es_MX">Perfil del Estudiante</target>
+		<context-group name="x-php-reference--2005624221" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/displayClass_main.html</context>
+			<context context-type="linenumber">82</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1886586885" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">72</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="31">
+		<source xml:lang="en_US">
+			Classroom Overview
+		</source>
+		<target xml:lang="es_MX">Descripción del Salón</target>
+		<context-group name="x-php-reference--143965365" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">2</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="32">
+		<source xml:lang="en_US">
+			The following is a list of classes you are teaching. To select
+another semester, select the semester you wish to view in the drop
+down and press "Go".
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--2029930556" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">7</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="33">
+		<source xml:lang="en_US">
+			classroom manager
+		</source>
+		<target xml:lang="es_MX">Administrador del salón</target>
+		<context-group name="x-php-reference--1623160750" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">62</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="34">
+		<source xml:lang="en_US">
+			Lesson Manager
+		</source>
+		<target xml:lang="es_MX">Administrador de lecciones</target>
+		<context-group name="x-php-reference-416847005" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/main_main.html</context>
+			<context context-type="linenumber">92</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="35">
+		<source xml:lang="en_US">
+			Gradebook Setup
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--1308920309" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">19</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="36">
+		<source xml:lang="en_US">
+			Import SCORM
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-2104363215" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">27</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-174667865" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">26</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="37">
+		<source xml:lang="en_US">
+			Content / Learning Objects
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-724873033" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">47</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="38">
+		<source xml:lang="en_US">
+			Export Content
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-893540881" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">53</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="39">
+		<source xml:lang="en_US">
+			Prev
+		</source>
+		<target xml:lang="es_MX">Prev</target>
+		<context-group name="x-php-reference--1343935975" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/announcements_main.html</context>
+			<context context-type="linenumber">5</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--968542899" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/announcements_main.html</context>
+			<context context-type="linenumber">30</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="40">
+		<source xml:lang="en_US">
+			Next
+		</source>
+		<target xml:lang="es_MX">Next</target>
+		<context-group name="x-php-reference-921467811" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/announcements_main.html</context>
+			<context context-type="linenumber">6</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1321073189" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/announcements_main.html</context>
+			<context context-type="linenumber">31</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="41">
+		<source xml:lang="en_US">
+			Posted On
+		</source>
+		<target xml:lang="es_MX">Posted On</target>
+		<context-group name="x-php-reference--1470548838" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/announcements_main.html</context>
+			<context context-type="linenumber">21</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1512804698" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/announcements_view.html</context>
+			<context context-type="linenumber">7</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="42">
+		<source xml:lang="en_US">
+			Name
+		</source>
+		<target xml:lang="es_MX">Name</target>
+		<context-group name="x-php-reference--1216112634" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_main.html</context>
+			<context context-type="linenumber">21</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1239596977" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_main.html</context>
+			<context context-type="linenumber">21</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="43">
+		<source xml:lang="en_US">
+			Attempts
+		</source>
+		<target xml:lang="es_MX">Attempts</target>
+		<context-group name="x-php-reference-780847548" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_main.html</context>
+			<context context-type="linenumber">22</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-789844469" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_main.html</context>
+			<context context-type="linenumber">22</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="44">
+		<source xml:lang="en_US">
+			Minute Limit
+		</source>
+		<target xml:lang="es_MX">Minute Limit</target>
+		<context-group name="x-php-reference-1502476586" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_main.html</context>
+			<context context-type="linenumber">23</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1477648739" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_main.html</context>
+			<context context-type="linenumber">23</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="45">
+		<source xml:lang="en_US">
+			Results
+		</source>
+		<target xml:lang="es_MX">Results</target>
+		<context-group name="x-php-reference--941003639" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_main.html</context>
+			<context context-type="linenumber">24</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--965233472" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_main.html</context>
+			<context context-type="linenumber">24</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="46">
+		<source xml:lang="en_US">
+			Date Available
+		</source>
+		<target xml:lang="es_MX">Date Available</target>
+		<context-group name="x-php-reference--1326556129" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_main.html</context>
+			<context context-type="linenumber">25</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1318026154" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_main.html</context>
+			<context context-type="linenumber">25</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="47">
+		<source xml:lang="en_US">
+			Action
+		</source>
+		<target xml:lang="es_MX">Action</target>
+		<context-group name="x-php-reference-703008165" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_main.html</context>
+			<context context-type="linenumber">26</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-679073260" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_main.html</context>
+			<context context-type="linenumber">26</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="48">
+		<source xml:lang="en_US">
+			Teacher Instructions
+		</source>
+		<target xml:lang="es_MX">Teacher Instructions</target>
+		<context-group name="x-php-reference--519226321" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_start.html</context>
+			<context context-type="linenumber">3</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--527178650" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_start.html</context>
+			<context context-type="linenumber">3</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="49">
+		<source xml:lang="en_US">
+			Complete the Assessment
+		</source>
+		<target xml:lang="es_MX">Complete the Assessment</target>
+		<context-group name="x-php-reference-1281860347" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_start.html</context>
+			<context context-type="linenumber">96</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-990182294" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_start.html</context>
+			<context context-type="linenumber">145</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="50">
+		<source xml:lang="en_US">
+			Turn In Test
+		</source>
+		<target xml:lang="es_MX">Turn In Test</target>
+		<context-group name="x-php-reference--239708737" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_start.html</context>
+			<context context-type="linenumber">101</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1383415384" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_start.html</context>
+			<context context-type="linenumber">150</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="51">
+		<source xml:lang="en_US">
+			Assessment Completed
+		</source>
+		<target xml:lang="es_MX">Assessment Completed</target>
+		<context-group name="x-php-reference--2025554" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_stop.html</context>
+			<context context-type="linenumber">4</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1169663761" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_stop.html</context>
+			<context context-type="linenumber">4</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="52">
+		<source xml:lang="en_US">
+			Assessments
+		</source>
+		<target xml:lang="es_MX">Assessments</target>
+		<context-group name="x-php-reference--2125436141" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_stop.html</context>
+			<context context-type="linenumber">9</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--990305198" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_stop.html</context>
+			<context context-type="linenumber">9</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="53">
+		<source xml:lang="en_US">
+			Return to Assessments
+		</source>
+		<target xml:lang="es_MX">Return to Assessments</target>
+		<context-group name="x-php-reference--933777389" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_stop.html</context>
+			<context context-type="linenumber">15</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1874238929" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_stop_showgrade.html</context>
+			<context context-type="linenumber">15</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--909547430" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_stop.html</context>
+			<context context-type="linenumber">15</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-1052508141" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_stop_showgrade.html</context>
+			<context context-type="linenumber">15</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="54">
+		<source xml:lang="en_US">
+			Assessment Graded
+		</source>
+		<target xml:lang="es_MX">Assessment Graded</target>
+		<context-group name="x-php-reference-2045424714" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_stop_showgrade.html</context>
+			<context context-type="linenumber">4</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1433881989" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_stop_showgrade.html</context>
+			<context context-type="linenumber">4</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="55">
+		<source xml:lang="en_US">
+			Your Score: $grade out of $possiblePoints - $percentGrade
+		</source>
+		<target xml:lang="es_MX">Your Score: $grade out of $possiblePoints - $percentGrade</target>
+		<context-group name="x-php-reference-414297415" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/assessments_stop_showgrade.html</context>
+			<context context-type="linenumber">14</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1237110651" purpose="location">
+			<context context-type="sourcefile">logicreate/services/test/templates/take_stop_showgrade.html</context>
+			<context context-type="linenumber">14</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="56">
+		<source xml:lang="en_US">
+			Classroom Portal Page
+		</source>
+		<target xml:lang="es_MX">Portal del Salón</target>
+		<context-group name="x-php-reference-1801701715" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classroom/templates/main_main.html</context>
+			<context context-type="linenumber">1</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="57">
+		<source xml:lang="en_US">
+			Subject
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--1755070766" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classforums/templates/posts_reply.html</context>
+			<context context-type="linenumber">13</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--1275173128" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classforums/templates/posts_newTopic.html</context>
+			<context context-type="linenumber">9</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-1320025639" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classforums/templates/posts_edit.html</context>
+			<context context-type="linenumber">13</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="58">
+		<source xml:lang="en_US">
+			Message
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--418821539" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classforums/templates/posts_reply.html</context>
+			<context context-type="linenumber">16</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1641656397" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classforums/templates/posts_newTopic.html</context>
+			<context context-type="linenumber">12</context>
+		</context-group>
+		
+		<context-group name="x-php-reference-1053231784" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classforums/templates/posts_edit.html</context>
+			<context context-type="linenumber">16</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="59">
+		<source xml:lang="en_US">
+			Points
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-847231200" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_main.html</context>
+			<context context-type="linenumber">45</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="60">
+		<source xml:lang="en_US">
+			Question
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--1039717228" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_main.html</context>
+			<context context-type="linenumber">53</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-213433167" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_mchoice.html</context>
+			<context context-type="linenumber">5</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="61">
+		<source xml:lang="en_US">
+			Multiple Choice Question
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-198541142" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_mchoice.html</context>
+			<context context-type="linenumber">1</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="62">
+		<source xml:lang="en_US">
+			Answers
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-31444489" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_mchoice.html</context>
+			<context context-type="linenumber">11</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="63">
+		<source xml:lang="en_US">
+			(check boxes to indicate the correct responses)
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--1730764877" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_mchoice.html</context>
+			<context context-type="linenumber">12</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="64">
+		<source xml:lang="en_US">
+			Continue -&amp;gt;
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-1026696377" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_mchoice.html</context>
+			<context context-type="linenumber">39</context>
+		</context-group>
+	
+		<context-group name="x-php-reference-1454255634" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_manswer.html</context>
+			<context context-type="linenumber">93</context>
+		</context-group>
+		
+		<context-group name="x-php-reference--1641535414" purpose="location">
+			<context context-type="sourcefile">logicreate/services/lobrepo/templates/exam_question_essay.html</context>
+			<context context-type="linenumber">73</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="65">
+		<source xml:lang="en_US">
+			No Due Date
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-739452768" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/assignmentManage_viewAssignment_one.html</context>
+			<context context-type="linenumber">37</context>
+		</context-group>
+	
+		<context-group name="x-php-reference--522169465" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/assignmentManage_viewSubmit.html</context>
+			<context context-type="linenumber">41</context>
+		</context-group>
+		</trans-unit>
+
+	<trans-unit id="66">
+		<source xml:lang="en_US">
+			Classroom Materials
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--2083711863" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">39</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="67">
+		<source xml:lang="en_US">
+			Backup Class Content
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference-1111845511" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">52</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="68">
+		<source xml:lang="en_US">
+			Restore Backup
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--1423519822" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">54</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="69">
+		<source xml:lang="en_US">
+			Activities
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--2146722703" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">64</context>
+		</context-group>
+	</trans-unit>
+
+	<trans-unit id="70">
+		<source xml:lang="en_US">
+			Test Manager
+		</source>
+		<target xml:lang="es_MX"/>
+		<context-group name="x-php-reference--150164249" purpose="location">
+			<context context-type="sourcefile">logicreate/services/classmgr/templates/display_main.html</context>
+			<context context-type="linenumber">65</context>
+		</context-group>
+	</trans-unit>
+</body>
+</file></xliff>
