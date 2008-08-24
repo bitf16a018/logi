@@ -4,7 +4,7 @@
 
 	<TITLE>LogiCampus</TITLE>
 
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     	<meta name="keywords" content="distance learning, LogiCampus, courseware, e-learning, course management, LMS, CMS, classroom, grade book, online" />
 
 	<link rel="stylesheet" type="text/css" href="<?=TEMPLATE_URL;?>sinorca-screen.css" media="screen" title="Sinorca (screen)" />
