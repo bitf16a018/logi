@@ -66,6 +66,7 @@ class Exam extends FacultyService {
 			$t['qidx'] = intval($lc->getvars['qidx']);
 		} else {
 			$t['questionObj'] = new LobTestQst();
+			$t['questionObj']->qstChoices = array();
 			$t['qidx'] = -1;
 		}
 		$t['q'] = $t['questionObj'];
@@ -157,7 +158,7 @@ class Exam extends FacultyService {
 			if (is_array($correct) && in_array($lidx, array_keys($correct))) {
 				$isCorrect = TRUE;
 			} else {
-				$isCorrect = ($correct === $lidx);
+				$isCorrect = ($correct == (int)$lidx);
 			}
 			if (!$u->sessionvars['test_obj']->addLabel($label, $isCorrect, $qidx)) {
 				die('failed label.  label = '.$label);
