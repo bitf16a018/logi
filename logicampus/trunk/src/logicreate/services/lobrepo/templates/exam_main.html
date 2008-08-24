@@ -35,7 +35,6 @@ if ($t['message']) { ?>
 
 <p>&nbsp;</p>
 
-<form method="POST" action=<?=modurl('exam/');?>">
 <table width="100%" border="0">
 	<tr>
 		<td>
@@ -83,7 +82,11 @@ if ($t['message']) { ?>
 			<i><?= $v->qstText; ?></i>
 		</td>
 		<td width="90%" align="right" colspan="1">
-			Points <input type="text" size="3" name="points[<?=$v->assessmentQuestionId?>]" value="<?=$v->questionPoints?>" id="points<?=$v->assessmentQuestionId?>">
+
+			<form method="POST" action="<?=modurl('exam/event=savePoints');?>">
+			Points <input type="text" size="3" name="points[<?=$k?>]" value="<?=$v->qstPoints?>" id="points<?=$v->assessmentQuestionId?>">
+			<input type="submit" name="sort" value="<?=lct('save');?>"/>
+			</form>
 
 		</td>
 	</tr>
@@ -172,7 +175,7 @@ if ($t['message']) { ?>
 			<select name="order[<?=$k?>]" onChange="document.q<?=$v->assessmentQuestionId;?>.submit();">
 			<?=makeOptions($t['dropDownData'], $k+1);?>
 			</select>
-			<input type="submit" name="sort" value="go"/>
+			<input type="submit" name="sort" value="<?=lct('save');?>"/>
 	</td></tr>
 </table>
 </FIELDSET>
@@ -214,6 +217,7 @@ return true;
 
 </script>
 
+<form method="POST" action="<?=modurl('exam/');?>">
 	<p align="right">
 			<input type="hidden" name="event" value="saveTest">
 			<input type="submit" name="submit" value="Save Test"/>
