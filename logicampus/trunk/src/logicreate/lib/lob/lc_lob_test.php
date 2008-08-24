@@ -99,7 +99,20 @@ class Lc_Lob_Test extends Lc_Lob {
 
 
 	function saveQuestions() {
+		//clean out questions which have been deleted
+		$ids = array();
+		foreach ($this->questionObjs as $q) {
+			if ((int) $q->lobTestQstId < 1)  continue;
+			$ids[] = $q->lobTestQstId;
+		}
+
+		$idList = '('. implode(',', $ids).')';
+		LobTestQstPeer::doQuery( 'delete from lob_test_qst WHERE lob_test_id = '.$this->lobSub->get('lobTestId') .' AND lob_test_qst_id NOT IN '.$idList);
+
+		//save the questions which have been edited or created new
 		foreach($this->questionObjs as $q) {
+			if (!is_object($q)) { continue; }
+			if (!method_exists( $q, 'set')) { continue; }
 			$q->set('lobTestId', $this->lobSub->get('lobTestId'));
 			$q->qstChoices = serialize($q->qstChoices);
 			$q->save();

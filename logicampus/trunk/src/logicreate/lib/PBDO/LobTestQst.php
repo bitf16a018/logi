@@ -217,7 +217,7 @@ class LobTestQstPeerBase {
 	/**
 	 * send a raw query
 	 */
-	function doQuery(&$sql,$dsn="default") {
+	function doQuery($sql,$dsn="default") {
 		//use this tableName
 		$db = DB::getHandle($dsn);
 

@@ -56,21 +56,27 @@ class Exam extends FacultyService {
 	/**
 	 */
 	function editQuestionRun(&$db, &$u, &$lc, &$t) {
-		$qCode = $this->findQuestionType($lc);
+
+		//load this question from the question array
+		if (isset($lc->getvars['qidx'])) {
+			$t['q'] = $u->sessionvars['test_obj']->questionObjs[$lc->getvars['qidx']];
+			$t['qidx'] = intval($lc->getvars['qidx']);
+		} else {
+			$t['q'] = new LobTestQst();
+			$t['q']->qstChoices = array();
+			$t['qidx'] = -1;
+			if ($qCode == 'QUESTION_TRUEFALSE') {
+				$t['q']->qstChoices = array( array('label'=>'True'), array('label'=>'False'));
+			}
+
+		}
+
+		$qTypeId = $t['q']->questionTypeId;
+		$qCode = $this->getCodeForId($qTypeId);
 		$t['questionType'] = $qCode;
 
 		$lc->templateName=$this->getTemplateName($qCode);
 
-		//load this question from the question array
-		if (isset($lc->getvars['qidx'])) {
-			$t['questionObj'] = $u->sessionvars['test_obj']->questionObjs[$lc->getvars['qidx']];
-			$t['qidx'] = intval($lc->getvars['qidx']);
-		} else {
-			$t['questionObj'] = new LobTestQst();
-			$t['questionObj']->qstChoices = array();
-			$t['qidx'] = -1;
-		}
-		$t['q'] = $t['questionObj'];
 	}
 
 	/**
@@ -88,6 +94,9 @@ class Exam extends FacultyService {
 
 			case 'QUESTION_MATCHING';
 				return 'exam_question_matching';
+
+			case 'QUESTION_TRUEFALSE';
+				return 'exam_question_truefalse';
 
 			case 'QUESTION_ESSAY';
 				return 'exam_question_essay';
@@ -115,6 +124,11 @@ class Exam extends FacultyService {
 					$type = 'QUESTION_MATCHING';
 					break;
 
+				case 'truefalse':
+				case 'QUESTION_TRUEFALSE':
+					$type = 'QUESTION_TRUEFALSE';
+					break;
+
 				case 'essay':
 				case 'QUESTION_ESSAY':
 					$type = 'QUESTION_ESSAY';
@@ -128,11 +142,38 @@ class Exam extends FacultyService {
 			if (isset($lc->getvars['mq_submit']))
 				$type = 'QUESTION_MATCHING';
 
+			if (isset($lc->getvars['tf_submit']))
+				$type = 'QUESTION_TRUEFALSE';
+
 			if (isset($lc->getvars['es_submit']))
 				$type = 'QUESTION_ESSAY';
 		}
 
 		return $type;
+	}
+
+	function getCodeForId($qTypeId) {
+		$qTypeId = (int)$qTypeId;
+		switch($qTypeId) {
+		case QUESTION_TRUEFALSE:
+			return 'QUESTION_TRUEFALSE';
+
+		case QUESTION_MCHOICE:
+			return 'QUESTION_MCHOICE';
+
+		case QUESTION_MANSWER:
+			return 'QUESTION_MANSWER';
+
+		case QUESTION_MATCHING:
+			return 'QUESTION_MATCHING';
+
+		case QUESTION_FILLINBLANK:
+			return 'QUESTION_FILLINBLANK';
+
+		case QUESTION_ESSAY:
+			return 'QUESTION_ESSAY';
+		}
+		return 'unknown';
 	}
 
 
@@ -149,9 +190,21 @@ class Exam extends FacultyService {
 			$t['url'] = appurl('lobrepo/exam/');
 			return;
 		}
+		$test =& $u->sessionvars['test_obj'];
 		$qidx = intval($lc->postvars['qidx']);
+		if ($qidx > -1) {
+			$questionList =& $test->questionObjs;
+		} else {
+			$qidx = count($questionList);
+		}
+
+		//make a new quesiton, or update an existing one
 		$u->sessionvars['test_obj']->setQuestion($qidx,$lc->postvars['question_text'], $type);
+
+		$test =& $u->sessionvars['test_obj'];
 		$correct = $lc->postvars['correct'];
+
+		//handle choices/lables and correct choices
 		foreach ($lc->postvars['labels'] as $lidx => $label) {
 			$isCorrect = FALSE;
 			if ($label == '') { continue; }
@@ -164,6 +217,19 @@ class Exam extends FacultyService {
 			if (!$u->sessionvars['test_obj']->addLabel($label, $isCorrect, $qidx)) {
 				die('failed label.  label = '.$label);
 			}
+		}
+
+		//handle true/false questions differently (radio buttons)
+		if ($type == 'QUESTION_TRUEFALSE') {
+			//reset all to false
+
+			$test->questionObjs[$qidx]->qstChoices[0]['correct'] = FALSE;
+			$test->questionObjs[$qidx]->qstChoices[0]['label'] = 'True';
+
+			$test->questionObjs[$qidx]->qstChoices[1]['correct'] = FALSE;
+			$test->questionObjs[$qidx]->qstChoices[1]['label'] = 'False';
+			$lidx = (int)$lc->postvars['correct'];
+			$test->questionObjs[$qidx]->qstChoices[$lidx]['correct'] = TRUE;
 		}
 
 		$this->presentor = 'redirectPresentation';
