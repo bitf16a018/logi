@@ -11,7 +11,8 @@
 
 <hr/>
 
-<h3><?= $lob->get('lobTitle');?></h3>
+<h2><?= $lob->get('lobTitle');?></h2>
+<a href="<?=appurl('lobrepo/edit/event=change/id='.$lob->getRepoId());?>">[edit]</a>
 <table border="0" width="600">
 	<tr>
 		<td valign="top">
@@ -42,12 +43,9 @@
 		</td>
 	</tr>
 </table>
-<form method="GET" action="<?=appurl('lobrepo/edit/event=change/id='.$lob->getRepoId());?>">
 
-<input type="submit" value="Change this object"/>
-</form>
-
-
+<h2>Meta-Data</h2>
+<a href="<?=appurl('lobrepo/edit/event=meta/id='.$lob->getRepoId());?>">[edit meta-data]</a>
 <table border="0" width="600">
 	<tr>
 		<td valign="top">
@@ -93,9 +91,6 @@
 
 	</tr>
 </table>
-<form method="GET" action="<?=appurl('lobrepo/edit/event=meta/id='.$lob->getRepoId());?>">
-<input type="submit" value="Change Meta-data"/>
-</form>
 
 
 <br/>
@@ -108,5 +103,5 @@ Enter notes about this object for other faculty members to see.
 <textarea rows="15" cols="80" id="lob_notes" name="lob_notes"><?=$lob->repoObj->lobNotes;?></textarea>
 <br/>
 <input type="hidden" name="id" value="<?=$lob->getRepoId();?>"/>
-<input type="submit" id="sbmt_button2" name="sbmt_button2" value="Change the notes."/>
+<input type="submit" id="sbmt_button2" name="sbmt_button2" value="Save Notes"/>
 </form>
