@@ -10,6 +10,7 @@
 <hr/>
 
 
+<h2><?= $t['lobTitle'];?></h2>
 
 <form action="<?=appurl('lobrepo').'/exam/';?>" method="POST" enctype="application/x-www-form-urlencoded">
 
@@ -22,14 +23,7 @@
 	<tr>
 		<td valign="top" class="row1" valign="top">*Instructions for students</td>
 		<td valign="top" class="">
-			<textarea name="instructions" cols="40" rows="5" id="instructions"></textarea>
-		</td>
-	</tr>
-
-	<tr>
-		<td valign="top" class="row1" valign="top">Notes (only for faculty)</td>
-		<td valign="top" class="">
-			<textarea name="notes" cols="40" rows="5" id="notes"></textarea>
+			<textarea name="instructions" cols="40" rows="5" id="instructions"><?=$t['lob']->get('lobDescription');?></textarea>
 		</td>
 	</tr>
 

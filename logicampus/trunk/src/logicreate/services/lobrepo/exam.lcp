@@ -34,10 +34,11 @@ class Exam extends FacultyService {
 			$test = new Lc_Lob_Test($lobId);
 			$test->setTitle( $lc->postvars['title']);
 			$test->setInstructions( $lc->postvars['instructions']);
-			$test->setNotes( $lc->postvars['notes']);
 			$test->loadQuestions();
 			$t['testId'] = $test->get('lobRepoEntryId');
 			$u->sessionvars['test_obj'] = $test;
+		} else {
+			$test = $u->sessionvars['test_obj'];
 		}
 
 		$t['questionList'] = $u->sessionvars['test_obj']->questionObjs;

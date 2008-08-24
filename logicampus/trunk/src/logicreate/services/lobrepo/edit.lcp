@@ -60,6 +60,7 @@ class Edit extends FacultyService {
 		$lob = new Lc_Lob_Content($id);
 
 		$t['lob'] = $lob;
+		$t['lobTitle'] = $lob->getTitle();
 		$t['mimetype'] = $lob->repObj->lobMime;
 
 		if ($lob->isFile()) {
