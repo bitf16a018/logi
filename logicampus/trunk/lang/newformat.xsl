@@ -25,9 +25,9 @@
 	<!--
 		-->
 	<xsl:element name="target">
-		<xsl:attribute name="xml:lang" namespace="xml">zh_CN</xsl:attribute>
+		<xsl:attribute name="xml:lang" namespace="xml">es_MX</xsl:attribute>
 
-		<xsl:value-of select="normalize-space(document('messages.zh_CN.xml')//message[@id = $thistext])"/>
+		<xsl:value-of select="normalize-space(document('messages.es_MX.xml')//message[@id = $thistext])"/>
 	</xsl:element>
 	<!--
 	<xsl:value-of select="$thistext"/>
