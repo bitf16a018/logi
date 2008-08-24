@@ -4,15 +4,16 @@
 $argv = $_SERVER['argv'];
 $argc = $_SERVER['argc'];
 
-if ($filename == '') {
+if (!isset($filename) || $filename == '') {
 	if (count($argv) <= 1 ) {
 		printHelp();
 		exit(1);
 	}
 	$filename = $argv[1];
+	if (isset($argv[2]))
 	$locale = $argv[2];
 }
-if ($locale == '') {
+if (!isset($locale) || $locale == '') {
 	$locale = $filename;
 }
 
@@ -25,44 +26,14 @@ END;
 
 }
 
+
 //STEP 2: Initialize variables
-$document = domxml_open_file('messages.'.$filename.'.xml');
-
-
-$root = $document->document_element();
-$staticNodes = array();
-
-
-//STEP 3: Convert XML to PHP array structure
-extractNodes($root,$staticNodes);
-
-
-function extractNodes($node,&$struct) {
-
-//safeguard
-static $loop = 0;
-if ($loop > 1003 ) {print_r($struct); exit();}
-
-
-	if ($node->type ==3  && ! trim($node->content)) return;
-	$attr = $node->attributes();
-	while ( list (,$v)  = @each($attr) ){
-		$node->attributes[$v->name] = $v;
-	}
-	$struct[$loop] = $node;
-$loop++;
-
-	$kids = $node->child_nodes();
-
-	while ( list($k,$v) = each($kids) ) {
-		extractNodes($v,$struct);
-
-	}
-}
+$document = simplexml_load_string(  file_get_contents('messages.'.$filename.'.xml'), 'SimpleXMLElement', LIBXML_NOCDATA);
 
 
 //STEP 4: Add translations to the proper node
-foreach ($staticNodes as $id=>$node) {
+/*
+foreach ($document->file->body->{"trans-unit"} as $node) {
 
 	//if the node is a #text node, add it's contents to the
 	// previous message node
@@ -72,30 +43,24 @@ foreach ($staticNodes as $id=>$node) {
 	}
 	$lastid = $id;
 }
+ */
 
 
 //STEP 5: print nodes as switch function
 ob_start();
 echo '<?
 
-header("Content-type:text/html; charset='.$staticNodes[0]->attributes['charset']->value.'");
+header("Content-type:text/html; charset='.$document->language['charset'].'");
 
 function lct($key,$args = "") {
 
 	extract($args);
 	switch($key) {
 ';
-	foreach ($staticNodes as $id=>$node) {
-		if ( 'message' != $node->tagname ) {
-			continue;
-		}
-		if ( '' == $node->attributes['id']->value ) {
-			continue;
-		}
-
+	foreach ($document->file->body->{"trans-unit"} as $node) {
 		echo '
-		case \''.($node->attributes['id']->value).'\':
-			return "'.($node->translation).'";
+		case \''.addslashes(trim($node->source)).'\':
+			return "'.trim($node->target).'";
 			break;
 ';
 
