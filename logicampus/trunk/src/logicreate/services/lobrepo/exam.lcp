@@ -43,9 +43,12 @@ class Exam extends FacultyService {
 		$t['questionList'] = $u->sessionvars['test_obj']->questionObjs;
 
 
-		$t['questions_total_points'] = sprintf('%d', 0);
+		$totalPoints = 0;
+		foreach ($t['questionList'] as $q) {
+			$totalPoints += (int) $q->qstPoints;
+		}
+		$t['questions_total_points'] = sprintf('%d', $totalPoints);
 		$t['questions_count'] = sprintf('%d', $u->sessionvars['test_obj']->getQuestionCount());
-//debug($test,1);
 	}
 
 
@@ -198,6 +201,23 @@ class Exam extends FacultyService {
 
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('lobrepo/myobj/');
+	}
+
+
+	/**
+	 * Change the points for one question
+	 */
+	function savePointsRun(&$db, &$u, &$lc, &$t) {
+		$pointList = $lc->postvars['points'];
+		$test =& $u->sessionvars['test_obj'];
+
+		foreach ($pointList as $qidx => $p) {
+			if ((int)$p > 126) { $p = 126;}
+			if ( isset($test->questionObjs[$qidx]))
+				$test->questionObjs[$qidx]->qstPoints = (int)$p;
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/exam/');
 	}
 }
 
