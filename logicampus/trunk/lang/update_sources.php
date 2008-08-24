@@ -23,7 +23,7 @@ $msgDoc->substituteEntities=false;
 $msgDoc->resolveExternals=false;
 $msgDoc->preserveWhiteSpace=true;
 $msgDoc->validateOnParse=false;
-if (!@$msgDoc->load( "./messages.en_US.xml") ) {
+if (!$msgDoc->load( "./messages.en_US.xml") ) {
 	//we can't use it, have to start another way in order to get a doctype
 	unset($msgDoc);
 	$impl = new DomImplementation();
@@ -102,6 +102,8 @@ foreach($modules as $mod) {
 		if ($file == '.') continue;
 		if ($file == '..') continue;
 		if ($file == 'CVS') continue;
+		if ($file == '.svn') continue;
+		if ( strstr($file, 'svn')) continue;
 		if ( strstr($file, '~') ) { continue; }
 		if (! strstr($file, '.html') ) { continue; }
 		$modFiles[] = $file;
