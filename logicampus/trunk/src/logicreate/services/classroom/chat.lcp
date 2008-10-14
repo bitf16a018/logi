@@ -454,7 +454,7 @@ class chat extends StudentService {
 
 
 		$this->presentor = "emptyPresentation";
-		if (trim($lcObj->postvars['text'])=='' and trim($lcObj->postvars['url']=='') ) { $this->inputRun(&$db,&$u,&$lcObj,&$t); return; }
+		if (trim($lcObj->postvars['text'])=='' and trim($lcObj->postvars['url']=='') ) { $this->inputRun($db,$u,$lcObj,$t); return; }
 
 		$text = $lcObj->postvars['text'];
 		$url = $lcObj->postvars['url'];
@@ -509,7 +509,7 @@ class chat extends StudentService {
 
 		}
 		$lcObj->templateName = 'chat_input';
-		$this->inputRun(&$db,&$u,&$lcObj,&$t);
+		$this->inputRun($db,$u,$lcObj,$t);
 	}
 
 	function adminpostRun($db,&$u,&$lcObj,&$t) {	
