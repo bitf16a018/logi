@@ -1,4 +1,4 @@
-<?
+<?php
 
 include_once(LIB_PATH.'PBDO/LobContent.php');
 include_once(LIB_PATH.'PBDO/LobMetadata.php');
@@ -68,15 +68,18 @@ class Exam extends FacultyService {
 			if ($qCode == 'QUESTION_TRUEFALSE') {
 				$t['q']->qstChoices = array( array('label'=>'True'), array('label'=>'False'));
 			}
-
 		}
 
 		$qTypeId = $t['q']->questionTypeId;
-		$qCode = $this->getCodeForId($qTypeId);
+		if (!$qTypeId) {
+			$qCode = $this->findQuestionType($lc);
+		} else {
+			$qCode = $this->getCodeForId($qTypeId);
+		}
+
 		$t['questionType'] = $qCode;
 
 		$lc->templateName=$this->getTemplateName($qCode);
-
 	}
 
 	/**
