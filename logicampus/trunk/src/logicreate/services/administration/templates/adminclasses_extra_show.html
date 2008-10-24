@@ -13,7 +13,7 @@ Section Numbers: <?=$t['classInfo']['sectionNumbers'];?>
 
 <FIELDSET>
 <LEGEND><strong>Add Additional Users</strong></LEGEND>
-<form method='post' action='<?=modurl("classes_extra/event=add");?>'>
+<form method='post' action='<?=modurl("adminclasses_extra/event=add");?>'>
 	Faculty ID <input type='text' name='faculty'> 
 	Type: <select name='type'><option value='e'>Extra teacher</option><option value='o'>Observer</option></select>
 	<input type='hidden' name='id_classes' value='<?=$t['id_classes'];?>'>

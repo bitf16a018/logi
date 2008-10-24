@@ -12,7 +12,7 @@ include_once(LIB_PATH.'SiteForms.php');
  * Handles all methods for creating and managing classes.
  *
  */
-class classes extends AdminService
+class Adminclasses extends AdminService
 {
 	
 	// form stuff
@@ -32,13 +32,13 @@ class classes extends AdminService
 	var $navlinks = array(
 		'Administration Home' => '',
 		'Restore Class' => 'classrestore/',
-		'Restore All Classes' => 'classes/event=restoreall',
-		'Backup Classes' => 'classes/event=backup'
+		'Restore All Classes' => 'adminclasses/event=restoreall',
+		'Backup Classes' => 'adminclasses/event=backup'
 	);
 	**/
 	var $applinks = array(
-		'List Classes' => 'classes/',
-		'Add a Class' => 'classes/event=add'
+		'List Classes' => 'adminclasses/',
+		'Add a Class' => 'adminclasses/event=add'
 	);
 	
 	
@@ -280,7 +280,7 @@ class classes extends AdminService
 	function run($db,&$u,&$lc,&$t) {
 
 //auto-comment		$lc->templateStyle='private';
-		$lc->templateName = 'classes_main';
+		$lc->templateName = 'adminclasses_main';
 		
 		if ((int)$lc->postvars['semester'] > 0) {
 			$u->sessionvars['administration']['classes']['currentsemester'] = (int)$lc->postvars['semester'];
@@ -370,7 +370,7 @@ class classes extends AdminService
 	function addRun($db,&$u,&$lc,&$t) {
 		$t['myEvizent'] = 'add';
 		
-		$lc->templateName = 'classes_add';
+		$lc->templateName = 'adminclasses_add';
 		$this->sectionTitle = 'Add a Class';
 		$this->inactivelinks = array( 'Add a Class' );
 		$f = new SiteForm();
@@ -562,7 +562,7 @@ class classes extends AdminService
 	function editRun($db,&$u,&$lc,&$t) {
 		$t['myEvizent'] = 'edit/id='.$lc->getvars['id'];
 		$this->sectionTitle = 'Edit a Class';
-		$lc->templateName = 'classes_add';
+		$lc->templateName = 'adminclasses_add';
 
 		$sql = '
 		SELECT count(DISTINCT (A.username) ) AS f_count FROM profile as A';
@@ -959,13 +959,13 @@ $tables = array("class_announcements",
 			$t['error'] = '<blockquote><b>Error:</b> Could not find the requested class to remove.</blockquote>';
 		}
 		
-		$lc->templateName = 'classes_main';
+		$lc->templateName = 'adminclasses_main';
 		$this->run($db, $u, $lc, $t);
 	}
 	
 	
 	function scheduleRun($db,&$u,&$lc,&$t) {
-		$lc->templateName = 'classes_schedule';
+		$lc->templateName = 'adminclasses_schedule';
 	}
 
 	
