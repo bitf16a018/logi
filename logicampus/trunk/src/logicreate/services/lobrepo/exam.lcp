@@ -1,0 +1,306 @@
+<?php
+
+include_once(LIB_PATH.'PBDO/LobContent.php');
+include_once(LIB_PATH.'PBDO/LobMetadata.php');
+include_once(LIB_PATH.'PBDO/LobUserLink.php');
+include_once(LIB_PATH.'AssessmentQuestion.php');
+include_once(LIB_PATH.'AssessmentLib.php');
+
+include_once(LIB_PATH.'lob/lc_lob.php');
+include_once(LIB_PATH.'lob/lc_lob_test.php');
+include_once(LIB_PATH.'lc_table.php');
+include_once(LIB_PATH.'lc_table_renderer.php');
+
+/**
+ * Learning Object Repository
+ */
+class Exam extends FacultyService {
+
+	var $presentor='htmlPresentation';
+	var $sectionTitle = 'Classroom Manager';
+	var $navlinks = array (
+		''=>''
+		);
+
+
+	/**
+	 *
+	 */
+	function run(&$db,&$u,&$lc,&$t) {
+		$lc->templateName = 'exam_main';
+		$lobId = intval($lc->postvars['lob_id']);				
+
+		if (! is_object($u->sessionvars['test_obj']) ) {			
+			$test = new Lc_Lob_Test($lobId);
+			$test->setTitle( $lc->postvars['title']);
+			$test->setInstructions( $lc->postvars['instructions']);
+			$test->loadQuestions();
+			$t['testId'] = $test->get('lobRepoEntryId');
+			$u->sessionvars['test_obj'] = $test;
+		} else {
+			$test = $u->sessionvars['test_obj'];
+		}
+
+		$t['questionList'] = $u->sessionvars['test_obj']->questionObjs;
+
+
+		$totalPoints = 0;
+		foreach ($t['questionList'] as $q) {
+			$totalPoints += (int) $q->qstPoints;
+		}
+		$t['questions_total_points'] = sprintf('%d', $totalPoints);
+		$t['questions_count'] = sprintf('%d', $u->sessionvars['test_obj']->getQuestionCount());
+	}
+
+
+	/**
+	 */
+	function editQuestionRun(&$db, &$u, &$lc, &$t) {
+
+		//load this question from the question array
+		if (isset($lc->getvars['qidx'])) {
+			$t['q'] = $u->sessionvars['test_obj']->questionObjs[$lc->getvars['qidx']];
+			$t['qidx'] = intval($lc->getvars['qidx']);
+		} else {
+			$t['q'] = new LobTestQst();
+			$t['q']->qstChoices = array();
+			$t['qidx'] = -1;
+			if ($qCode == 'QUESTION_TRUEFALSE') {
+				$t['q']->qstChoices = array( array('label'=>'True'), array('label'=>'False'));
+			}
+		}
+
+		$qTypeId = $t['q']->questionTypeId;
+		if (!$qTypeId) {
+			$qCode = $this->findQuestionType($lc);
+		} else {
+			$qCode = $this->getCodeForId($qTypeId);
+		}
+
+		$t['questionType'] = $qCode;
+
+		$lc->templateName=$this->getTemplateName($qCode);
+	}
+
+	/**
+	 * Helper function to translate a qestion type into a filename.
+	 *
+	 * @return String   filename of template for this quesiton type
+	 */
+	function getTemplateName($qCode) {
+		switch ($qCode) {
+			case 'QUESTION_MCHOICE';
+				return 'exam_question_mchoice';
+
+			case 'QUESTION_MANSWER';
+				return 'exam_question_manswer';
+
+			case 'QUESTION_MATCHING';
+				return 'exam_question_matching';
+
+			case 'QUESTION_TRUEFALSE';
+				return 'exam_question_truefalse';
+
+			case 'QUESTION_ESSAY';
+				return 'exam_question_essay';
+				
+			case 'QUESTION_FILLINBLANK':
+				return 'exam_question_fillinblank';
+		}
+	}
+	/**
+	 * Helper function to inspect the get/post vars for a question type.
+	 *
+	 * @return String   type of question from get/post
+	 */
+	function findQuestionType($lc) {
+		$type = 'unknown';
+		if (isset($lc->postvars['questionType'])) {
+			switch($lc->postvars['questionType']) {
+				case 'mchoice':
+				case 'QUESTION_MCHOICE':
+					$type = 'QUESTION_MCHOICE';
+					break;
+				case 'manswer':
+				case 'QUESTION_MANSWER':
+					$type = 'QUESTION_MANSWER';
+					break;
+				case 'matching':
+				case 'QUESTION_MATCHING':
+					$type = 'QUESTION_MATCHING';
+					break;
+
+				case 'truefalse':
+				case 'QUESTION_TRUEFALSE':
+					$type = 'QUESTION_TRUEFALSE';
+					break;
+
+				case 'essay':
+				case 'QUESTION_ESSAY':
+					$type = 'QUESTION_ESSAY';
+					break;
+					
+				case 'fillinblank':
+				case 'QUESTION_FILLINBLANK':
+					$type = 'QUESTION_FILLINBLANK';
+					break;
+			}
+		} else {
+			if (isset($lc->getvars['mc_submit']))
+				$type = 'QUESTION_MCHOICE';
+			if (isset($lc->getvars['ma_submit']))
+				$type = 'QUESTION_MANSWER';
+			if (isset($lc->getvars['mq_submit']))
+				$type = 'QUESTION_MATCHING';
+
+			if (isset($lc->getvars['tf_submit']))
+				$type = 'QUESTION_TRUEFALSE';
+
+			if (isset($lc->getvars['es_submit']))
+				$type = 'QUESTION_ESSAY';
+				
+			if (isset($lc->getvars['fb_submit']))
+				$type = 'QUESTION_FILLINBLANK';
+		}
+
+		return $type;
+	}
+
+	function getCodeForId($qTypeId) {
+		$qTypeId = (int)$qTypeId;
+		switch($qTypeId) {
+		case QUESTION_TRUEFALSE:
+			return 'QUESTION_TRUEFALSE';
+
+		case QUESTION_MCHOICE:
+			return 'QUESTION_MCHOICE';
+
+		case QUESTION_MANSWER:
+			return 'QUESTION_MANSWER';
+
+		case QUESTION_MATCHING:
+			return 'QUESTION_MATCHING';
+
+		case QUESTION_FILLINBLANK:
+			return 'QUESTION_FILLINBLANK';
+
+		case QUESTION_ESSAY:
+			return 'QUESTION_ESSAY';
+		}
+		return 'unknown';
+	}
+
+
+	function saveQuestionRun(&$db, &$u, &$lc, &$t) {
+		if (! is_object($u->sessionvars['test_obj']) ) {
+			$u->sessionvars['test_obj'] = new Lc_Lob_Test();
+		}
+
+		$type = $this->findQuestionType($lc);
+
+		if ($type == 'unknown') {
+			$u->addSessionMessage('Unknown question type.','e');
+			$this->presentor = 'redirectPresentation';
+			$t['url'] = appurl('lobrepo/exam/');
+			return;
+		}
+		$test =& $u->sessionvars['test_obj'];
+		$qidx = intval($lc->postvars['qidx']);
+		if ($qidx > -1) {
+			$questionList =& $test->questionObjs;
+		} else {
+			$qidx = count($questionList);
+		}
+
+		//make a new quesiton, or update an existing one
+		$u->sessionvars['test_obj']->setQuestion($qidx,$lc->postvars['question_text'], $type);
+
+		$test =& $u->sessionvars['test_obj'];
+		$correct = $lc->postvars['correct'];
+
+		//handle choices/lables and correct choices
+		foreach ($lc->postvars['labels'] as $lidx => $label) {
+			$isCorrect = FALSE;
+			if ($label == '') { continue; }
+
+			if (is_array($correct) && in_array($lidx, array_keys($correct))) {
+				$isCorrect = TRUE;
+			} else {
+				$isCorrect = ($correct == (int)$lidx);
+			}
+			if (!$u->sessionvars['test_obj']->addLabel($label, $isCorrect, $qidx)) {
+				die('failed label.  label = '.$label);
+			}
+		}
+
+		//handle true/false questions differently (radio buttons)
+		if ($type == 'QUESTION_TRUEFALSE') {
+			//reset all to false
+
+			$test->questionObjs[$qidx]->qstChoices[0]['correct'] = FALSE;
+			$test->questionObjs[$qidx]->qstChoices[0]['label'] = 'True';
+
+			$test->questionObjs[$qidx]->qstChoices[1]['correct'] = FALSE;
+			$test->questionObjs[$qidx]->qstChoices[1]['label'] = 'False';
+			$lidx = (int)$lc->postvars['correct'];
+			$test->questionObjs[$qidx]->qstChoices[$lidx]['correct'] = TRUE;
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/exam/');
+	}
+
+
+	/**
+	 */
+	function deleteQuestionRun(&$db, &$u, &$lc, &$t) {
+
+		//load this question from the question array
+		if (isset($lc->getvars['qidx'])) {
+			unset($u->sessionvars['test_obj']->questionObjs[$lc->getvars['qidx']]);
+		}
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/exam/');
+	}
+
+
+	/**
+	 * Commit the test in the session to the database
+	 */
+	function saveTestRun(&$db, &$u, &$lc, &$t) {
+//		debug($u->sessionvars['test_obj'],1);
+		$u->sessionvars['test_obj']->save();
+
+		$lobUserObj = new LobUserLink();
+		$lobUserObj->set('lobRepoEntryId',$u->sessionvars['test_obj']->repoObj->getPrimaryKey());
+		$lobUserObj->set('userId',$u->userId);
+		$lobUserObj->set('lobKind','activity');
+		$lobUserObj->save();
+
+		$u->sessionvars['test_obj'] = NULL;
+		unset($u->sessionvars['test_obj']);
+
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/myobj/');
+	}
+
+
+	/**
+	 * Change the points for one question
+	 */
+	function savePointsRun(&$db, &$u, &$lc, &$t) {
+		$pointList = $lc->postvars['points'];
+		$test =& $u->sessionvars['test_obj'];
+
+		foreach ($pointList as $qidx => $p) {
+			if ((int)$p > 126) { $p = 126;}
+			if ( isset($test->questionObjs[$qidx]))
+				$test->questionObjs[$qidx]->qstPoints = (int)$p;
+		}
+		$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('lobrepo/exam/');
+	}
+}
+
+?>
