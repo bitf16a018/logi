@@ -1,0 +1,121 @@
+<?=$t['sectionheader'];?>
+<h3><?= lct('Fill in the Blank');?></h3>
+<?=$t['error'];?>
+<form method="POST">
+	<table border="0" width="600">
+		<tr>
+			<td valign="top">*<b>Question</b></td>
+			<td><textarea rows="5" cols="50" name="questionText"><?=$t['q']->questionText;?></textarea></td>
+		</tr>
+		<tr>
+			<td width="12">
+				<b>Answer</b>
+			</td>
+			<td width="100">
+				<input name="labels[0]" type="text" value="<?=$t['q']->questionChoices[0]->label;?>">
+			</td>
+		</tr>
+		<tr>
+			<td colspan=2 height=25>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>
+				&nbsp;
+			</td>
+			<td>
+				<b>Alternate Answer Help</b>
+				<br>
+				If you would like to enter alternate answers that you will accept, enter them
+				below.  Example:  If the if you are looking for the president of the U.S. and
+				the student enters 'George Washington' which is the correct answer.  However,
+				another student enters just 'Washington'.  If you have 'Washington' as an
+				alternate answer below, the student will receive credit for their entry.
+			</td>
+		</tr>
+		<tr>
+			<td valign="top">
+				<b>Alternate Answers</b>
+			</td>
+			<td  valign="top" width="100">
+				<table border=0 cellpadding=2 cellspacing=0>
+		<? for ($x=1;$x<11;++$x) { ?>
+		<? $qc = $t['q']->questionChoices[$x]; ?>
+				<tr>
+				<td><? printf('%d',$x);?>.</td>
+				<td><? $x <= 1 ? '*' : ''; ?>
+				<input name="labels[<?=$x;?>]" type="text" value="<?=$qc->label;?>"></td>
+				</tr>
+		<? } ?>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td colspan=2>
+<style>
+		
+	div.over {
+		overflow: scroll;
+		height: 220px;
+		width: 240px;
+	}
+
+</style>
+	<FIELDSET valign="middle" style="width: 235px; height: 245px; padding: 2px;">
+	
+		<select name="imagesMenu" id="imagesMenu"
+					style="width: 235px;"
+					onChange="document.getElementById('previewfile').src='<?=appurl('lobrepo/exam/event=viewImage/id=');?>' + this.value;"
+					>
+				<option value="">Select Image</option>
+					<?php
+					$images_array = array();
+					$images_array = $t['images'];
+					
+					foreach( $images_array as $img)
+					{ ?>
+					<option value="<?=$img['lob_repo_entry_id']?>"><?=$img['lob_title']?>	
+					</option>	
+					<?	}
+					?>	
+		</select>
+
+		
+	<div class="over" align="center" valign="middle">
+	<table cellpadding="2" cellspacing="0" border="0" width="100%" height="100%">
+	<tr>
+
+		<td valign="middle" align="center" height="100%" width="100%">
+		<img alt="" name="previewfile" id="previewfile">
+				<? if( isset($t['imgId']) ){ ?>
+				<script language="JavaScript" type="text/javascript">
+					document.getElementById('imagesMenu').value = <?=$t['imgId']?>;  
+					document.getElementById('previewfile').src='<?=appurl('lobrepo/exam/event=viewImage/id=').$t['imgId'];?>';
+				</script>
+				<? } ?>	
+							
+					
+		</td>
+	</tr>
+	</table>
+	</div>
+			
+	</FIELDSET>
+
+			</td>
+		</tr>
+		<tr>
+			<td>
+			&nbsp;
+			</td>
+			<td>
+				<input type="submit" value="<?=lct('Continue -&gt;');?>">
+				<input type="hidden" name="event" value="saveQuestion">
+				<input type="hidden" name="qidx" value="<?=$t['qidx'];?>"/>
+				<input type="hidden" name="questionType" value="<?= $t['questionType'];?>"/>
+				</form>
+			</td>
+		</tr>
+	</table>
+
+<p>* denotes a required field.</p>
