@@ -1,0 +1,84 @@
+<h3><?= lct('Essay Type Question');?></h3>
+<?=$t['error'];?>
+<form method="post">
+
+	<table border="0" width="600">
+		<tr>
+			<td valign="top">
+				*<b>question</b><br/>
+			</td>
+			<td>
+				<textarea rows="5" cols="50" name="question_text" <?= $t['disableflag'];?>><?=$t['q']->questiontext;?></textarea>
+				<br/>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Select Image</b></td>
+			<td>
+
+				<style>
+						
+					div.over {
+						overflow: scroll;
+						height: 220px;
+						width: 240px;
+					}
+
+				</style>
+
+			<fieldset valign="middle" style="width: 235px; height: 245px; padding: 2px;">
+			
+				<select name="imagesMenu" id="imagesMenu"
+					style="width: 235px;"
+					onChange="document.getElementById('previewfile').src='<?=appurl('lobrepo/exam/event=viewImage/id=');?>' + this.value;"
+					>
+				<option value="">Select Image</option>
+					<?php
+					$images_array = array();
+					$images_array = $t['images'];
+					
+					foreach( $images_array as $img)
+					{ ?>
+					<option value="<?=$img['lob_repo_entry_id']?>"><?=$img['lob_title']?>	
+					</option>	
+					<?	}
+					?>	
+				</select>
+
+				
+			<div class="over" align="center" valign="middle">
+			<table cellpadding="2" cellspacing="0" border="0" width="100%" height="100%">
+			<tr>
+
+				<td valign="middle" align="center" height="100%" width="100%">
+				<img alt="" name="previewfile" id="previewfile">
+				<? if( isset($t['imgId']) ){ ?>
+				<script language="JavaScript" type="text/javascript">
+					document.getElementById('imagesMenu').value = <?=$t['imgId']?>;  
+					document.getElementById('previewfile').src='<?=appurl('lobrepo/exam/event=viewImage/id=').$t['imgId'];?>';
+				</script>
+				<? } ?>					
+							
+							
+				</td>
+			</tr>
+			</table>
+			</div>
+					
+			</fieldset>
+
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" name="sbmt_button" value="<?=lct('Continue -&gt;');?>"/>
+				<input type="hidden" name="event" value="saveQuestion"/>
+				<input type="hidden" name="qidx" value="<?=$t['qidx'];?>"/>
+				<input type="hidden" name="questionType" value="<?= $t['questionType'];?>"/>
+				</form>
+			</td>
+		</tr>
+	</table>
+
+<p>* denotes a required field.</p>
