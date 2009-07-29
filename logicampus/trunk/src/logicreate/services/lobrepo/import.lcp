@@ -10,7 +10,7 @@ include_once(LIB_PATH.'PBDO/LobActivity.php');
 include_once(LIB_PATH.'PBDO/LobTest.php');
 
 include_once(LIB_PATH.'lob/lc_lob.php');
-
+include_once(LIB_PATH.'xmlparser.php');
 /**
  * Learning Object Repository
  */
@@ -30,100 +30,683 @@ class Import extends FacultyService {
 		$lc->templateName='import_main';
 	}
 
-
-	function handleUploadRun(&$db,&$u,&$lc,&$t) {
+	function handleUploadRun(&$db,&$u,&$lc,&$t)
+	{
 		if ($lc->uploads['lobxml']['error']) {
-			die('upload error');
+			$this->presentor = 'errorMessage';
+			$t['message'] = "There was a problem with the upload."; 
+			return false;
 		}
 
-		//debug($lc->uploads);
 
-		$tempdir = $this->tempdir('/tmp', 'campus');
-		$this->tempdir = $tempdir;
-		//debug($tempdir);
-
-		//$za = zip_open($lc->uploads['lobxml']['tmp_name']);
-		//debug($za);
-
-		exec('unzip -d '. $tempdir.' '.$lc->uploads['lobxml']['tmp_name'] );
-
-//		exit();
-
+		
+		//$tempdir="c:/windows/temp";
+		
+		//$this->tempdir = $tempdir;
+		
+	
+		
+		//$target_path=explode(".",$lc->uploads['lobxml']['tmp_name']);
+		//$target_pathing=$target_path[0].".zip";
+		//move_uploaded_file($lc->uploads['lobxml']['tmp_name'],$target_pathing);
+		$file = $lc->uploads['lobxml']['tmp_name'];
+		//$file = substr($file, 0, strlen($file)-4);
+		//$file .= '.zip';		
+		exec('mkdir '.$file.'_dir;');
+		$this->tempdir = $file['tmp_name'].'_dir';
+		$tempdir = $this->tempdir;		
+		$this->unzipper($file,$tempdir);
+		echo $tempdir;
+		
 		$doc = new DomDocument('1.0', 'UTF-8');
 		$doc->substituteEntities=false;
 		$doc->resolveExternals=false;
 		$doc->preserveWhiteSpace=true;
 		$doc->validateOnParse=false;
+		
 		if (!$doc->load( $tempdir."/learningobjects.xml") ) {
-			echo "can't open xml file.";
+			$this->presentor = 'errorMessage';
+			$t['message'] ="This file does not seem to be a proper backup file. (cannot find learningobjects.xml)"; 
+			//$this->cleanupDir($tempdir);
 			return false;
 		}
 
 		$root = $doc->childNodes;
 		//get the "lobcol" node
-		$collectionNode = $root->item(0);
+		$collectionNode = $root->item(1);
 
 		$lobNodes = $collectionNode->getElementsByTagnameNS('http://logicampus.sourceforge.net/2006/learning_object','obj');
-		for ($xidx = 0; $xidx < $lobNodes->length; $xidx++) {
-			$node = $lobNodes->item($xidx);
-			if ($node->nodeType == XML_TEXT_NODE) {
-				continue;
+		$xml_contents = file_get_contents($tempdir."/learningobjects.xml");
+		$xmlObj = new xmlparser($xml_contents);
+		$root_node =& $xmlObj->getRoot();
+		foreach($root_node->children as $classdata_node)
+		{	
+			
+			
+			if ($classdata_node->tag == 'lob:obj')
+			{
+				// execute classroom restore
+				
+				$this->lobobj_node($u,$db,$classdata_node);
+				
+			} else
+			{
+				
+				// what other tag could it be? if anything else, we won't process. we have one responsability.. to restore CLASSROOM node
 			}
-			$lobSub = null;
-			$lobObj = $this->makeRepoNode($node);
-			$lobMetaObj = $this->processLobMeta($node);
-			$lobUserObj = new LobUserLink();
-
-			if ($lobObj === null) { 
-echo "skipping node .. ".$node->tagName."...<br/>\n";
-				continue; /*die('null object'); continue;*/ 
-			}
-			if ($lobObj->lobType == 'content') {
-				$lobSub = $this->makeContentNode($node);
-			}
-			if ($lobObj->lobType == 'activity') {
-				$lobSub = $this->makeActivityNode($node);
-			}
-
-
-//			echo "saving ".$xidx." lob ... <br/>\n";
-		//	debug($lobObj->lobTitle);
-			$lobObj->save();
-
-			if ( is_object($lobSub) ) {
-				$lobSub->set('lobRepoEntryId',$lobObj->getPrimaryKey());
-				$lobSub->save();
-//				echo $xidx." is a *CONTENT* lob ... <br/>\n";
-//				echo substr($lobSub->lobText,0,1000)."<br/>\n";
-			}
-//*
-			$lobMetaObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
-			$lobMetaObj->save();
-
-			$lobUserObj->set('lobRepoEntryId',$lobObj->getPrimaryKey());
-			$lobUserObj->set('userId',$u->userId);
-			$lobUserObj->set('isOwner','1');
-			$lobUserObj->save();
-//*/
-
+			$this->presentor = 'redirectPresentation';
+		$t['url'] = appurl('classmgr');
 		}
-
-
-		$u->addSessionMessage('Successfully added content.');
-
-//		debug( htmlentities( file_get_contents( $tempdir.'/learningobjects.xml') ) );
-
-
-		unlink($tempdir.'/learningobjects.xml');
-		rmdir($tempdir);
-
-		$this->presentor = 'redirectPresentation';
-		$t['url'] = appurl('lobrepo/myobj');
+		
+		$this->run(&$db,&$u,&$lc,&$t);
+	return;
 	}
-
-	/**
+		/**
 	 * return a lob content sub-object
 	 */
+	 
+	  function test_child($u,$db,$node)
+	  {
+	  			
+	 	$class=$u->activeClassTaught->id_classes;
+		$userId=$u->userId;
+		$lob_guid=$node->attrs['guid'];
+		
+		$child=$node->children[0];
+		$lob_type=$child->value;
+		
+		$child=$node->children[1];
+		$lob_subtype=$child->value;
+					
+		$child=$node->children[2];
+		$lob_mime=$child->value;
+		
+		$child=$node->children[3];
+		$lob_title=$child->value;
+		
+		$child=$node->children[4];
+		$lob_description=$child->value;
+		
+		$child=$node->children[5];
+		$lob_copystyle=$child->value;
+		
+		$child=$node->children[6];
+		$lob_testqst=$child->value;
+		if($lob_testqst=' ')
+		{
+		$lob_testqst=' ';
+		}
+		$child=$node->children[7];
+		$lob_qstchoices=$child->value;
+		$lob_qstchoices=addslashes($lob_qstchoices);
+		$child=$node->children[8];
+		$lob_qsttype=$child->value;
+		
+		$child=$node->children[9];
+		$lob_qstpoints=$child->value;
+		
+		$child=$node->children[10];
+		$lob_numretry=$child->value;
+		
+		$child=$node->children[11];
+		$lob_ispractice=$child->value;
+		
+		$child=$node->children[12];
+		$lob_image=$child->value;
+		
+		$child=$node->children[13];
+		
+		$lifecyle=$child;
+		$child=$lifecyle->children[0];
+		$lob_createdon=$child->value;
+		$child=$lifecyle->children[1];
+		$lob_version=$child->value;
+		
+		$updatedtime=date("U");
+	 	$lob_repo_entry_id=0;
+		$lob_class_repo_id=0;
+		$lob_test_id=0;
+					
+				  $db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+				  if($db->nextRecord())
+				  {
+				  	$db->query("update lob_repo_entry set lob_title='$lob_title', lob_type='$lob_type', lob_sub_type='$lob_subtype', lob_mime='$lob_mime', lob_description='$lob_description',lob_version='$lob_version' where lob_guid='$lob_guid' ");
+				  }else
+				  {
+				  	$db->query("insert into lob_repo_entry(lob_guid,lob_title,lob_type,lob_sub_type,lob_mime,lob_description,lob_version) values('$lob_guid','$lob_title','$lob_type','$lob_subtype','$lob_mime','$lob_description','$lob_version')");
+				  }
+				  $db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+				  if($db->nextRecord())
+				  {
+				  $lob_repo_entry_id=$db->record['lob_repo_entry_id'];
+				  }
+				  $db->query("select * from lob_class_repo where lob_guid='$lob_guid'");
+				  if($db->nextRecord())
+				  {
+				  	$db->query("update lob_class_repo set lob_title='$lob_title', lob_type='$lob_type', lob_sub_type='$lob_subtype', lob_mime='$lob_mime', lob_description='$lob_description',lob_version='$lob_version',lob_copy_style='$lob_copystyle' where lob_guid='$lob_guid' ");
+				  }else
+				  {
+				  $db->query("insert into lob_class_repo(class_id,lob_repo_entry_id,lob_guid,lob_title,lob_type,lob_sub_type,lob_mime,lob_description,lob_version,lob_copy_style) values($class,$lob_repo_entry_id,'$lob_guid','$lob_title','$lob_type','$lob_subtype','$lob_mime','$lob_description','$lob_version','$lob_copystyle')");
+				  }
+				  
+				  $db->query("select * from lob_class_repo where lob_guid='$lob_guid' and lob_repo_entry_id=$lob_repo_entry_id");
+				  if($db->nextRecord())
+				  {
+				  $lob_class_repo_id=$db->record['lob_class_repo_id'];
+				  }
+				 
+				
+				  
+				  $db->query("select * from lob_test where lob_repo_entry_id=$lob_repo_entry_id");
+				  if($db->nextRecord())
+				  {
+				  
+				  }else
+				  {
+				  	$db->query("insert into lob_test(lob_repo_entry_id) values($lob_repo_entry_id)");
+				  }
+				 
+				  $db->query("select * from lob_test where lob_repo_entry_id=$lob_repo_entry_id");
+				  if($db->nextRecord())
+				  {
+				  $lob_test_id=$db->record['lob_test_id'];
+				  }
+				  $db->query("select * from lob_class_test where lob_class_repo_id=$lob_class_repo_id");
+				  if($db->nextRecord())
+				  {
+				  			$db->query("update lob_class_test set num_retry=$lob_numretry, is_practice=$lob_ispractice where lob_class_repo_id=$lob_class_repo_id");
+				  }else
+				  {
+				  	
+				  	$db->query("insert into lob_class_test(lob_class_repo_id,num_retry,is_practice) values($lob_class_repo_id,$lob_numretry,$lob_ispractice)");
+				  }
+				  
+				 
+				  $db->query("select * from lob_test_qst where lob_test_id=$lob_test_id");
+				  if($db->nextRecord())
+				  {
+				  	
+				  	$db->query("update lob_test_qst set qst_text='$lob_testqst', qst_choices='$lob_qstchoices', question_type_id=$lob_qsttype, image_content_id='$image' where lob_test_id=$lob_test_id" );
+				  	
+				  }else
+				  {
+				  	$db->query("insert into lob_test_qst(lob_test_id,qst_text,qst_choices,question_type_id,image_content_id) values($lob_test_id,'$lobtestqst','$lob_qstchoices','$lob_qsttype','$image')");
+				  }
+				  $db->query("select * from lob_user_link where lob_repo_entry_id=$lob_repo_entry_id and user_id=$userId");
+						if($db->nextRecord())
+						{
+							
+						}else
+						{
+							$db->query("insert into lob_user_link(lob_repo_entry_id,user_id) values($lob_repo_entry_id,$userId)");
+						}
+					$this->saveMetadata($db,$lob_repo_entry_id,$lob_class_repo_id,'','','','','','',$lob_createdon,$updatedtime);		  
+	  
+	  }
+	 
+	 function activity_child($u,$db,$node)
+	 {
+	 	
+	 	
+	 	$class=$u->activeClassTaught->id_classes;
+		$userId=$u->userId;
+		$lob_guid=$node->attrs['guid'];
+		
+		$child=$node->children[0];
+		$lob_type=$child->value;
+		
+		$child=$node->children[1];
+		$lob_sub_type=$child->value;
+		
+		$child=$node->children[2];
+		$lob_actualsub_type=$child->value;
+		
+		$child=$node->children[3];
+		$lob_mime=$child->value;
+		
+		$child=$node->children[4];
+		$lob_title=$child->value;
+		
+		$child=$node->children[5];
+		$lob_description=$child->value;
+		
+		$child=$node->children[6];
+		$lob_urltitle=$child->value;
+		echo $lob_urltitle."urltitle-";
+		$child=$node->children[7];
+		$lob_copystyle=$child->value;
+		
+		$child=$node->children[8];
+		$lob_notes=$child->value;
+		echo $lob_notes."notes-";
+		$child=$node->children[9];
+		$lifecyle=$child;
+		
+		$child=$lifecyle->children[0];
+		$lob_createdon=$child->value;
+		
+		$child=$lifecyle->children[1];
+		$lob_version=$child->value;
+	 	echo $lob_version."version-";
+	 	$updatedtime=date("U");
+	 	$lob_repo_entry_id=0;
+		$lob_class_repo_id=0;
+	 	$reponse_type=0;
+	 	
+			if($lob_sub_type=='assignment')
+			{
+				
+				$reponse_type=1;
+			}else if($lob_sub_type=='activity')
+			{
+			$reponse_type=5;
+	 		}else
+	 		{
+	 		$reponse_type=6;
+	 		}
+				 
+				
+
+				
+			
+	 	
+	 	
+	 	$db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+		if($db->nextRecord())
+		{
+		echo "update lob_repo_entry set lob_title='$lob_title',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime',lob_urltitle='$lob_urltitle',lob_notes='$lob_notes',lob_description='$lob_description',lob_version=$lob_version where lob_guid='$lob_guid'"."-->";
+		$db->query("update lob_repo_entry set lob_title='$lob_title',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime',lob_urltitle='$lob_urltitle',lob_notes='$lob_notes',lob_description='$lob_description',lob_version=$lob_version where lob_guid='$lob_guid'");
+		
+		}else
+		{
+		$db->query("insert into lob_repo_entry(lob_guid,lob_title,lob_type,lob_sub_type,lob_mime,lob_urltitle,lob_notes,lob_description,lob_version) values('$lob_guid','$lob_title','$lob_type','$lob_sub_type','$lob_mime','$lob_url','$lob_notes','$lob_description','$lob_version')");
+		}
+	 	$db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+		if($db->nextRecord())
+		{
+		$lob_repo_entry_id=$db->record['lob_repo_entry_id'];
+		
+		}
+		
+		$db->query("select * from lob_class_repo where class_id=$class and lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+		$db->query("update lob_class_repo set lob_guid='$lob_guid',lob_title='$lob_title',lob_urltitle='$lob_url',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime', lob_version=$lob_version,lob_copy_style='$lob_copystyle'  where class_id=$class and lob_repo_entry_id=$lob_repo_entry_id");
+		
+		}else
+		{
+		$db->query("insert into lob_class_repo(class_id,lob_repo_entry_id,lob_guid,lob_title,lob_urltitle,lob_type,lob_sub_type,lob_mime,lob_version,lob_copy_style) values($class,$lob_repo_entry_id,'$lob_guid','$lob_title','$lob_url','$lob_type','$lob_sub_type','$lob_mime',$lob_version,'$lob_copystyle')");
+		
+		}
+		
+		$db->query("select * from lob_class_repo where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+		$lob_class_repo_id=$db->record['lob_class_repo_id'];
+		}
+		
+		$db->query("select * from lob_class_activity where lob_class_repo_id=$lob_class_repo_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_class_activity set response_type_id=$reponse_type where lob_class_repo_id=$lob_class_repo_id ");
+		}else
+		{
+			
+			$db->query("insert into lob_class_activity(lob_class_repo_id,response_type_id) values($lob_class_repo_id,$reponse_type)");
+		}
+	 	$db->query("select * from lob_activity where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_class_activity set response_type_id=$reponse_type where lob_class_repo_id=$lob_class_repo_id ");
+		}else
+		{
+			
+			$db->query("insert into lob_activity(lob_repo_entry_id,response_type_id) values($lob_repo_entry_id,$reponse_type)");
+		}
+	 	$db->query("select * from lob_user_link where lob_repo_entry_id=$lob_repo_entry_id and user_id=$userId");
+		if($db->nextRecord())
+		{
+			
+		}else
+		{
+			$db->query("insert into lob_user_link(lob_repo_entry_id,user_id) values($lob_repo_entry_id,$userId)");
+		}
+	 	$this->saveMetadata($db,$lob_repo_entry_id,$lob_class_repo_id,'','','','','','',$lob_createdon,$updatedtime);
+	 
+	 
+	 }
+	
+	function document_child($u,$db,$node)
+	{
+		$class=$u->activeClassTaught->id_classes;
+		$userId=$u->userId;
+		$lob_guid=$node->attrs['guid'];
+		
+		$child=$node->children[0];
+		$lob_type=$child->value;
+		
+		$child=$node->children[1];
+		$lob_sub_type=$child->value;
+		
+		$child=$node->children[2];
+		$lob_mime=$child->value;
+		
+		$child=$node->children[3];
+		$lob_title=$child->value;
+		
+		$child=$node->children[4];
+		$lob_url=$child->value;
+		
+		$child=$node->children[5];
+		$lob_filename=$child->value;
+		
+		
+		
+		$lob_filename;
+		
+		$document_file=file_get_contents($this->tempdir.'/content/'.trim($lob_filename));
+		$document_file=addslashes($document_file);
+				
+		
+		$child=$node->children[6];
+		$lob_description=$child->value;
+		
+		$child=$node->children[7];
+		$lob_caption=$child->value;
+		
+		$child=$node->children[8];
+		$lob_notes=$child->value;
+		
+		$child=$node->children[9];
+		$lifecyle=$child;
+		 
+		$child=$node->children[10];
+		$metadata=$child;
+		
+		
+		$child=$lifecyle->children[0];
+		
+		$lob_createdon=$child->value;
+		
+		$child=$lifecyle->children[1];
+		
+		$lob_version=$child->value;
+		
+		
+		$lob_repo_entry_id=0;
+		$lob_class_repo_id=0;
+		
+		
+		$child=($metadata->children[0]);
+		$meta_subject=$child->value;
+		
+		$child=$metadata->children[1];	
+		$meta_subjectDisc=$child->value;
+		
+		$child=$metadata->children[2];
+		$meta_author=$child->value;
+		
+		$child=$metadata->children[3];
+		$meta_source=$child->value;
+		$child=$metadata->children[4];
+		 
+		$meta_copyright=$child->value;
+		
+		$child=$metadata->children[5];
+		$meta_license=$child->value;
+		$updatedtime=date("U");
+		$db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+		if($db->nextRecord())
+		{
+		
+		$db->query("update lob_repo_entry set lob_title='$lob_title',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime',lob_urltitle='$lob_url',lob_notes='$lob_notes',lob_description='$lob_description',lob_version=$lob_version where lob_guid='$lob_guid'");
+		
+		}else
+		{
+		$db->query("insert into lob_repo_entry(lob_guid,lob_title,lob_type,lob_sub_type,lob_mime,lob_urltitle,lob_notes,lob_description,lob_version) values('$lob_guid','$lob_title','$lob_type','$lob_sub_type','$lob_mime','$lob_url','$lob_notes','$lob_description','$lob_version')");
+		}
+	
+		
+		 //getting lob_guid of latest lob from lob_repo_entry
+		$db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+		if($db->nextRecord())
+		{
+		$lob_repo_entry_id=$db->record['lob_repo_entry_id'];
+		
+		}
+		//lob_user_link
+		$db->query("select * from lob_user_link where lob_repo_entry_id=$lob_repo_entry_id and user_id=$userId");
+		if($db->nextRecord())
+		{
+			
+		}else
+		{
+			$db->query("insert into lob_user_link(lob_repo_entry_id,user_id) values($lob_repo_entry_id,$userId)");
+		}
+		//setting data in lob_metadata
+		
+		  
+		 $db->query("select * from lob_metadata where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_metadata set created_on='$lob_createdon' where lob_repo_entry_id='$lob_repo_entry_id'");
+			
+		}else
+		{
+		$db->query("insert into lob_metadata(lob_repo_entry_id,created_on) values($lob_repo_entry_id,$lob_createdon)");
+		}
+		$db->query("select * from lob_content where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_content set lob_binary='$document_file',lob_caption='$lob_caption',lob_filename='$lob_filename' where lob_repo_entry_id='$lob_repo_entry_id'");
+		}else
+		{
+			$db->query("insert into lob_content(lob_binary,lob_repo_entry_id,lob_caption,lob_filename) values('$document_file',$lob_repo_entry_id,'$lob_caption','$lob_filename')");
+		}
+		
+		//setting data in lob_class_repo
+		$db->query("select * from lob_class_repo where class_id=$class and lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+		$db->query("update lob_class_repo set lob_guid='$lob_guid',lob_title='$lob_title',lob_urltitle='$lob_url',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime', lob_version=$lob_version  where class_id=$class and lob_repo_entry_id=$lob_repo_entry_id");
+		
+		}else
+		{
+		$db->query("insert into lob_class_repo(class_id,lob_repo_entry_id,lob_guid,lob_title,lob_urltitle,lob_type,lob_sub_type,lob_mime,lob_version) values($class,$lob_repo_entry_id,'$lob_guid','$lob_title','$lob_url','$lob_type','$lob_sub_type','$lob_mime',$lob_version)");
+		}
+		
+		$db->query("select * from lob_class_repo where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+		$lob_class_repo_id=$db->record['lob_class_repo_id'];
+		}
+		//setting data in lob_class_content
+		$db->query("select * from lob_class_content where lob_class_repo_id=$lob_class_repo_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_class_content set lob_binary='$document_file', lob_filename='$lob_filename', lob_caption='$lob_caption' where lob_class_repo_id='$lob_class_repo_id'");
+		}else
+		{
+			$db->query("insert into lob_class_content(lob_class_repo_id,lob_binary,lob_filename,lob_caption) values($lob_class_repo_id,'$document_file','$lob_filename','$lob_caption')");
+		}
+		//Entered data in tables
+	
+		$this->saveMetadata($db,$lob_repo_entry_id,$lob_class_repo_id,$meta_subject,$meta_subjectDisc,$meta_author,$meta_source,$meta_copyright,$meta_license,$lob_createdon,$updatedtime);
+		
+	}
+	
+	function text_child($u,$db,$node)
+	{
+		$class=$u->activeClassTaught->id_classes;
+		$userId=$u->userId;
+		
+		$lob_guid=$node->attrs['guid'];
+		//echo $lob_guid;
+		$child=$node->children[0];
+		$lob_type=$child->value;
+		//echo $lob_type;
+		$child=$node->children[1];
+		$lob_sub_type=$child->value;
+		//echo $lob_sub_type;
+		$child=$node->children[2];
+		$lob_mime=$child->value;
+		//echo $lob_mime;
+		$child=$node->children[3];
+		$lob_title=$child->value;
+		//echo $lob_title;
+		$child=$node->children[4];
+		$lob_url=$child->value;
+		//echo $lob_url;
+		$child=$node->children[5];
+		$lob_text=$child->value;
+		//echo $lob_text;
+		$child=$node->children[6];
+		
+		$lob_notes=$child->value;
+		//echo $lob_meta;
+		
+		$child=$node->children[7];
+		$lifecyle=$child;
+		$child=$node->children[8];
+		
+		$metadata=$child;
+		$child=$lifecyle->children[0];
+		
+		$lob_createdon=$child->value;
+		//echo $lob_createdon;
+		$child=$lifecyle->children[1];
+		$lob_version=$child->value;
+		//echo $lob_version;
+		$lob_repo_entry_id=0;
+		$lob_class_repo_id=0;
+		
+		
+		$child=($metadata->children[0]);
+		$meta_subject=$child->value;
+		
+		$child=$metadata->children[1];	
+		$meta_subjectDisc=$child->value;
+		$child=$metadata->children[2];
+		$meta_author=$child->value;
+		
+		$child=$metadata->children[3];
+		$meta_source=$child->value;
+		$child=$metadata->children[4];
+		 
+		$meta_copyright=$child->value;
+		
+		$child=$metadata->children[5];
+		$meta_license=$child->value;
+		$updatedtime=date("U");
+		//Entering data in tables
+		
+		//Entering text into lob_repo_entry
+		
+		$db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+		if($db->nextRecord())
+		{
+		$db->query("update lob_repo_entry set lob_title='$lob_title',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime',lob_urltitle='$lob_url',lob_version=$lob_version, lob_notes='$lob_notes' where lob_guid='$lob_guid'");
+		$lob_repo_entry_id=$db->record['lob_repo_entry_id'];
+		}else
+		{
+		$db->query("insert into lob_repo_entry(lob_guid,lob_title,lob_type,lob_sub_type,lob_mime,lob_urltitle,lob_version,lob_notes) values('$lob_guid','$lob_title','$lob_type','$lob_sub_type','$lob_mime','$lob_url','$lob_version','$lob_notes')");
+		}
+		
+		//getting lob_guid of latest lob from lob_repo_entry
+		$db->query("select * from lob_repo_entry where lob_guid='$lob_guid'");
+		if($db->nextRecord())
+		{
+		$lob_repo_entry_id=$db->record['lob_repo_entry_id'];
+		
+		}
+		//lob_user_link
+		$db->query("select * from lob_user_link where lob_repo_entry_id=$lob_repo_entry_id and user_id=$userId");
+		if($db->nextRecord())
+		{
+			
+		}else
+		{
+			$db->query("insert into lob_user_link(lob_repo_entry_id,user_id) values($lob_repo_entry_id,$userId)");
+		}
+		//setting data in lob_metadata
+		$db->query("select * from lob_metadata where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_metadata set created_on='$lob_createdon' where lob_repo_entry_id='$lob_repo_entry_id'");
+			
+		}else
+		{
+			$db->query("insert into lob_metadata(lob_repo_entry_id,created_on) values($lob_repo_entry_id,$lob_createdon)");
+		}
+		$db->query("select * from lob_content where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_content set lob_text='$lob_text' where lob_repo_entry_id='$lob_repo_entry_id'");
+		}else
+		{
+			$db->query("insert into lob_content(lob_text,lob_repo_entry_id) values('$lob_text',$lob_repo_entry_id)");
+		}
+		
+		//setting data in lob_class_repo
+		$db->query("select * from lob_class_repo where class_id=$class and lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+		$db->query("update lob_class_repo set lob_guid='$lob_guid',lob_title='$lob_title',lob_urltitle='$lob_url',lob_type='$lob_type',lob_sub_type='$lob_sub_type',lob_mime='$lob_mime',lob_version=$lob_version where class_id=$class and lob_repo_entry_id=$lob_repo_entry_id");
+		$lob_class_repo_id=$db->record['lob_class_repo_id'];
+		}else
+		{
+		$db->query("insert into lob_class_repo(class_id,lob_repo_entry_id,lob_guid,lob_title,lob_urltitle,lob_type,lob_sub_type,lob_mime,lob_version) values($class,$lob_repo_entry_id,'$lob_guid','$lob_title','$lob_url','$lob_type','$lob_sub_type','$lob_mime',$lob_version)");
+		}
+		
+		$db->query("select * from lob_class_repo where lob_repo_entry_id=$lob_repo_entry_id");
+		if($db->nextRecord())
+		{
+		$lob_class_repo_id=$db->record['lob_class_repo_id'];
+		}
+		//setting data in lob_class_content
+		$db->query("select * from lob_class_content where lob_class_repo_id=$lob_class_repo_id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_class_content set lob_text='$lob_text' where lob_class_repo_id='$lob_class_repo_id' ");
+		}else
+		{
+			$db->query("insert into lob_class_content(lob_class_repo_id,lob_text) values($lob_class_repo_id,'$lob_text')");
+		}
+		//Entered data in tables
+		
+		$this->saveMetadata($db,$lob_repo_entry_id,$lob_class_repo_id,$meta_subject,$meta_subjectDisc,$meta_author,$meta_source,$meta_copyright,$meta_license,$lob_createdon,$updatedtime);
+		
+	
+	}
+	function lobobj_node($u,$db,$node)
+	{
+			
+			
+			$child0=$node->children[0];
+			$child1=$node->children[1];			
+				
+		
+			if($child0->value=='content'&& $child1->value=='text')
+			{
+					$this->text_child($u,$db,$node);
+			}else if($child0->value=='content'&& $child1->value!='text')
+			{
+					$this->document_child($u,$db,$node);
+			}else if($child0->value=='activity')
+			{
+					$this->activity_child($u,$db,$node);
+			}else if($child0->value=='test' && $child1->value=='test')
+			{
+					$this->test_child($u,$db,$node);
+			}
+			
+			
+			
+			 
+	}
+	
+	
+	
 	function makeContentNode($n) {
 		$result = $n->getElementsByTagname('content');
 		$textContent = $result->item(0);
@@ -338,10 +921,62 @@ echo "skipping node .. ".$node->tagName."...<br/>\n";
 		if (substr($dir, -1) != '/') $dir .= '/';
 
 		do {
-			$path = $dir.$prefix.mt_rand(0, 9999999);
+			//$path = $dir.$prefix.mt_rand(0, 9999999);
+				$path = $dir.$prefix;	
 		} while (!mkdir($path, $mode));
 
 		return $path;
+	}
+ function getAttribute($name){
+        foreach($this->attributes() as $key=>$val){
+            if($key == $name){
+                return (string)$val;
+            }// end if
+        }// end foreach
+    }// end function 
+	
+	function saveMetadata($db,$lob_repo_entry_id,$lob_class_repo_id,$meta_subject,$meta_subjectDisc,$meta_author,$meta_source,$meta_copyright,$meta_license,$lob_createdon,$updatedon)
+	{
+		
+		$id=$lob_repo_entry_id;
+		
+		
+		$db->query("select * from lob_metadata where lob_repo_entry_id=$id");
+		if($db->nextRecord())
+		{
+			$db->query("update lob_metadata set subject='$meta_subject',subdisc='$meta_subjectDisc',author='$meta_author',source='$meta_source',copyright='$meta_copyright',license='$meta_license',updated_on='$updatedon',created_on='$lob_createdon' where lob_repo_entry_id=$id");
+		}else
+		{
+			$db->query("insert into lob_metadata(lob_repo_entry_id,subject,subdisc,author,source,copyright,license,updated_on,created_on) values($id,'$meta_subject','$meta_subjectDisc','$meta_author','$meta_source','$meta_copyright','$meta_license','$updatedon','$lob_createdon')");
+		}
+		
+		
+		$db->query("select * from lob_class_metadata where lob_class_repo_id=$lob_class_repo_id");
+		if($db->nextRecord())
+		{
+			
+			$db->query("update lob_class_metadata set subject='$meta_subject',subdisc='$meta_subjectDisc',author='$meta_author',source='$meta_source',copyright='$meta_copyright',license='$meta_license', created_on='$lob_createdon',updated_on='$updatedon' where lob_class_repo_id=$lob_class_repo_id");
+		}else
+		{
+			$db->query("insert into lob_class_metadata(lob_class_repo_id,subject,subdisc,author,source,copyright,license,created_on,updated_on) values($lob_class_repo_id,'$meta_subject','$meta_subjectDisc','$meta_author','$meta_source','$meta_copyright','$meta_license','$lob_createdon',$updatedon)");
+		}
+		
+		
+	
+	}
+	
+	function unzipper($file,$add)
+	{			$zip = new ZipArchive;
+				$res = $zip->open($file);
+				if ($res === TRUE) {
+				    
+				    $zip->extractTo($add);
+				    $zip->close();
+				} else {
+				    
+				}
+
+			
 	}
 }
 ?>

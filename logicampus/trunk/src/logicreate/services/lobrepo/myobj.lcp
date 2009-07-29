@@ -29,7 +29,7 @@ class Myobj extends FacultyService {
 	 */
 	function run(&$db,&$u,&$lc,&$t) {
 		$lc->templateName='myobj_main';
-
+		
 		//$lobs = LobContentPeer::doSelect();
 
 		//get total count for paged tables.
@@ -47,7 +47,9 @@ class Myobj extends FacultyService {
 
 
 		$pageIdx = intval($lc->getvars['p']);
-		if ($pageIdx ==0 ) {$pageIdx =1;}
+		if ($pageIdx ==0 ) {$pageIdx =1;
+							
+							}
 
 
 		$lobItems = array();
@@ -84,7 +86,7 @@ class Myobj extends FacultyService {
 		$dm->ignoreColumn('lobRepoEntryId');
 
 		$table = new LC_TablePaged($dm);
-		$table->url =  appurl('lobrepo').'/myobj/p=%d';
+		$table->url =  appurl('lobrepo').'/myobj/p=%d/idme='.$u->idme;
 		$table->maxRows = $totalCount;
 		$table->rowsPerPage = $limitCount = 30;
 		$table->currentPage = $pageIdx;
@@ -128,12 +130,14 @@ class Myobj extends FacultyService {
 
 		$c = (int)$lc->getvars['c'];
 		$l = (int)$lc->getvars['l'];
-
+		
+		//FIXME check for garbage entries in lob_class_metadata:lob_class_repo_id when calling useInClass
 		$lob = new Lc_Lob($l);
 		$lob->useInClass($c, 'notify');
+		
 //debug($lob,1);
 
-/*
+
 		$sql = "SELECT lob_repo_entry_id
 			FROM lob_user_link
 			WHERE lob_repo_entry_id = ".$l."
@@ -142,14 +146,17 @@ class Myobj extends FacultyService {
 		//FIXME check for db errors
 		$db->nextRecord();
 		$lobId = $db->record['lob_repo_entry_id'];
+		
+		
+		echo "Lob Repo";
+		
+		//$lobClass = new LobClassRepo();
+		//$lobClass->set('lobRepoEntryId'   ,$lobId);
+		//$lobClass->set('classId' ,$c);
+		//$lobClass->save();
 
-		$lobClass = new LobClassRepo();
-		$lobClass->set('lobRepoEntryId'   ,$lobId);
-		$lobClass->set('classId' ,$c);
-		$lobClass->save();
-*/
 		$u->addSessionMessage('Object linked to your class.');
-
+		//$this->run();
 		$this->presentor = 'redirectPresentation';
 		$t['url'] = appurl('lobrepo/myobj');
 	}
