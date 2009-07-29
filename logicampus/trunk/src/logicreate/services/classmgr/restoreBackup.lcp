@@ -48,12 +48,8 @@ class RestoreBackup extends FacultyService {
 
 		$tempdir = $this->tempdir('/tmp', 'campus');
 		$this->tempdir = $tempdir;
-//debug($tempdir);
-//exit();
 
-		//$za = zip_open($lc->uploads['lobxml']['tmp_name']);
-		//debug($za);
-
+	
 		exec('unzip -d '. $tempdir.' '.$lc->uploads['lobxml']['tmp_name'] );
 
 		$doc = new DomDocument('1.0', 'UTF-8');
