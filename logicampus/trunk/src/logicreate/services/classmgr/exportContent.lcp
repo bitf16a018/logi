@@ -49,6 +49,7 @@ class ExportContent extends FacultyService {
 	 * Let's try to create a zip file with the XML and externalize all content from
 	 * classdoclib
 	 */
+	 //--------------->
 	function downloadRun($db, &$u, &$lc, &$t) {
 		$this->obj_zip = new LcZipFile();
 //		$this->obj_zip->add_dir('interactions/');
@@ -136,10 +137,11 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 
 		$doclobs = $this->get_document_files();
 		foreach ($doclobs as $xmlnode) {
+			
 			$root->children[] = $xmlnode;
 		}
 		unset($doclobs);
-
+		
 		//do homework (interactions)
 //		$xmlObj = new xmlparser('<lobcol></lobcol>');
 //		$root =& $xmlObj->getRoot();
@@ -157,13 +159,13 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		}
 		unset($tstlobs);
 
-
+/*
 		$lesslobs = $this->get_lesson_nodes();
 		foreach ($lesslobs as $xmlnode) {
 			$root->children[] = $xmlnode;
 		}
 		unset($lesslobs);
-
+*/
 
 
 //		print_r($lobs);exit();
@@ -213,7 +215,7 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		echo $wiky;
 		exit;
 	}
-	
+	//------------------>
 	
 	/**
 	 * return an array of arrays that represent document lobs
@@ -221,22 +223,30 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 	function get_document_files() {
 		$lob_nodes = array();
 		$sql = '
-		SELECT A.*,B.*,C.*
+		SELECT A.*,B.*,C.*,D.*
 		FROM lob_class_repo as A
+		LEFT JOIN lob_repo_entry AS D ON D.lob_repo_entry_id=A.lob_repo_entry_id
 		LEFT JOIN lob_class_content AS B ON A.lob_class_repo_id = B.lob_class_repo_id
 		LEFT JOIN lob_class_metadata AS C ON C.lob_class_repo_id = A.lob_class_repo_id
 		WHERE A.class_id='.$this->classId.'
-		AND (lob_sub_type = "document" OR lob_sub_type = "image") ';
+		AND (A.lob_sub_type = "document" OR A.lob_sub_type = "image") ';
 
 		$db = DB::getHandle();
 		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
-
+		/*$temp_filename=0;
+		$temp_binary=0;
+		*/
 		while ($db->nextRecord()) {
 			if (trim($db->record['lob_filename']) == ''){
+				
 				// __FIXME__ make the filename safe for saving.
 				// change quotes?  change dots?  change spaces?
-				$db->record['lob_filename'] = $db->record['lob_title'];
+				
+								
+				//$db->record['lob_filename'] = $db->record['lob_title'];
+				//$db->record['lob_binary']=$db->record['lob_text'];
+				
 			}
 		
 
@@ -249,25 +259,35 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 				,
 				'content/'.str_replace('/','_',strip_tags($db->record['lob_filename']))
 			);
-
+			
+			 
 
 			$type_node = new xml_node('lob:type',null,null,'content');
 			//subtype
 			list($type,$submime) = explode('/', $db->record['lob_mime']);
 			$sub_type_node = new xml_node('lob:subtype',array('mime'=>$db->record['lob_mime']),null);
 			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
-
+			echo $db->record['lob_mime'];
+			
 			if ($type == 'image') {
 				$sub_type_node->value = 'image';
 			} else {
 				$sub_type_node->value = 'document';
+				
 			}
+					$lob_caption_node = new xml_node('lob:caption',null,null,$db->record['lob_caption']);
+					$lob_caption_node->cdata = true;
 			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
+			
 			$lob_title_node->cdata = true;
 			$lob_url = new xml_node('lob:urltitle',null,null,$db->record['lob_urltitle']);
+			$lob_url->cdata = true;
+			$lob_notes = new xml_node('lob:notes',null,null,$db->record['lob_notes']);
+			$lob_url->cdata = true;	
+				
 			$lob_file_node = new xml_node('lob:filename',null,null,$db->record['lob_filename']);
 			$lob_file_node->cdata = true;
-
+			
 			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['lob_description']);
 			$lob_desc_node->cdata = true;
 
@@ -276,22 +296,27 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
 			$xml_child_nodes[] = $mim_type_node;
+			
+			
+			
 			$xml_child_nodes[] = $lob_title_node;
+			$xml_child_nodes[] = $lob_url;
 			$xml_child_nodes[] = $lob_file_node;
 			$xml_child_nodes[] = $lob_desc_node;
-			$xml_child_nodes[] = $lob_url;
-
+			$xml_child_nodes[]=$lob_caption_node;
+			$xml_child_nodes[]=$lob_notes;	
 			//lifecycle
 			$createdon = $db->record['created_on'];
 
 			$lifecycleArray = array(
-				'lob:version'=>$db->record['version'], 
+				'lob:version'=>$db->record['lob_version'], 
 				'lob:createdon'=>$createdon, 'createdon_dateformat'=>'unix'
 			);
-
+			
 
 			$xml_child_nodes[] = $this->makeLifecycleNode($lifecycleArray);
-
+			
+			
 			//metadata
 			$metadataArray = array(
 				'lob:author'=>$db->record['author'],
@@ -299,6 +324,7 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 				'lob:subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
 				'subdisc_abbr'=>'false',
+				'lob:source'=>$db->record['source'],
 				'lob:copyright'=>$db->record['copyright'],
 				'lob:license'=>$db->record['license']
 			);
@@ -322,12 +348,13 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 	function get_content_nodes() {
 		$xml_child_nodes = array();
 		$sql = '
-		SELECT A.*, B.*, C.*
+		SELECT A.*, B.*, C.*,D.*
 		FROM lob_class_repo A
 		LEFT JOIN lob_class_content AS B 
 			ON A.lob_class_repo_id = B.lob_class_repo_id
 		LEFT JOIN lob_class_metadata AS C 
 			ON B.lob_class_repo_id = C.lob_class_repo_id
+		INNER JOIN lob_repo_entry AS D ON D.lob_repo_entry_id=A.lob_repo_entry_id
 		WHERE A.class_id='.$this->classId.'
 		AND A.lob_type = "content"
 		AND A.lob_sub_type != "document"
@@ -342,9 +369,17 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		while ($db->nextRecord()) {
 			$type_node = new xml_node('lob:type',null,null,'content');
 			$sub_type_node = new xml_node('lob:subtype',null,null,$db->record['lob_sub_type']);
+			
 			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
 			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
+			//done
+			
+			$lob_notes = new xml_node('lob:notes',null,null,$db->record['lob_notes']);
+			$lob_notes->cdata = true;
+			$lob_url = new xml_node('lob:urltitle',null,null,$db->record['lob_urltitle']);
+			$lob_url->cdata = true;
+			//done
 			$lob_content_node = new xml_node('lob:content',null,null,$db->record['lob_text']);
 			$lob_content_node->cdata = true;
 
@@ -352,9 +387,11 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
 			$xml_child_nodes[] = $mim_type_node;
+			
 			$xml_child_nodes[] = $lob_title_node;
+			$xml_child_nodes[]=$lob_url;
 			$xml_child_nodes[] = $lob_content_node;
-
+			$xml_child_nodes[]=$lob_notes;
 			//lifecycle
 			$lifecycleArray = array(
 				'lob:version'=>'1.0', 
@@ -370,6 +407,7 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 				'lob:subdisc'=>$db->record['subdisc'],
 				'subject_abbr'=>'true',
 				'subdisc_abbr'=>'false',
+				'lob:source'=>$db->record['source'],
 				'lob:copyright'=>$db->record['copyright'],
 				'lob:license'=>$db->record['license']
 			);
@@ -400,14 +438,16 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		//if you select C.* and there's no record for the metadata
 		// the lob_repo_id will be overwritten with a blank,
 		// Same thing can happen for table B.
+		
 		$sql = '
 		SELECT A.*, B.*, C.subject, C.subdisc, C.author, C.copyright, C.license, C.user_version
-		,C.status, C.updated_on, C.created_on
+		,C.status, C.updated_on, C.created_on,D.*
 		FROM lob_class_repo as A
 		LEFT JOIN lob_class_activity AS B 
 			ON A.lob_class_repo_id = B.lob_class_repo_id
 		LEFT JOIN lob_class_metadata AS C 
 			ON A.lob_class_repo_id = C.lob_class_repo_id
+	INNER JOIN lob_repo_entry AS D ON D.lob_repo_entry_id=A.lob_repo_entry_id
 		WHERE A.class_id='.$this->classId.'
 		AND A.lob_type ="activity"';
 
@@ -423,13 +463,14 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 		exit();
 		// */
 		while ($db->nextRecord()) {
-			$type_node = new xml_node('lob:type',null,null,'interaction');
+			$type_node = new xml_node('lob:type',null,null,$db->record['lob_type']);
 			//subtype
-			list($type,$submime) = explode('/', $db->record['lob_mime']);
-			$sub_type_node = new xml_node('lob:subtype',null,null);
+			//list($type,$submime) = explode('/', $db->record['lob_mime']);
+			$sub_type_node = new xml_node('lob:subtype',null,null,$db->record['lob_sub_type']);
+			$actual_sub_type_node = new xml_node('lob:actualsubtype',null,null,$db->record['lob_sub_type']);
 			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
-			$resp_node = new xml_node('logicampus:response',null,null);
-
+			$resp_node = new xml_node('logicampus:response',null,null,$db->record['lob_notes']);
+			$notes_node = new xml_node('lob:notes',null,null,$db->record['lob_notes']);
 			/*
 			1=>"Upload a file",
 			2=>"Text response",
@@ -479,23 +520,32 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 
 			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
-
+			
+			$lob_urltitle_node = new xml_node('lob:urltitle',null,null,$db->record['lob_urltitle']);
+			$lob_urltitle_node->cdata = true;
+			
+			$lob_copystyle_node = new xml_node('lob:copystyle',null,null,$db->record['lob_copy_style']);
+			$lob_copystyle_node->cdata = true;
+			
 			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['lob_description']);
 			$lob_desc_node->cdata = true;
 
 			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
 			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $actual_sub_type_node;
 			$xml_child_nodes[] = $mim_type_node;
-			$xml_child_nodes[] = $resp_node;
+			
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_desc_node;
-
+			$xml_child_nodes[] =$lob_urltitle_node;
+			$xml_child_nodes[] =$lob_copystyle_node;
+			$xml_child_nodes[] = $notes_node;
 			//lifecycle
 			$createdon = $db->record['created_on'];
 
 			$lifecycleArray = array(
-				'lob:version'=>$db->record['version'], 
+				'lob:version'=>$db->record['lob_version'], 
 				'lob:createdon'=>time(), 'createdon_dateformat'=>'unix'
 			);
 
@@ -685,42 +735,92 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 	 * return an array of arrays that represent document lobs
 	 */
 	function get_test_nodes() {
-		$lob_nodes = array();
-		$sql = '
-		SELECT A.*
-		FROM assessment as A
-		WHERE A.class_id='.$this->classId;
-
+		
 		$db = DB::getHandle();
-		$db->query($sql);
 		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$lob_nodes = array();
+		$sql = "
+		SELECT A.*, B.*,C.* ,D.*,E.*
+		FROM lob_class_repo as A
+		LEFT JOIN lob_test AS B 
+			ON B.lob_repo_entry_id = A.lob_repo_entry_id
+		LEFT JOIN lob_test_qst AS C 
+			ON C.lob_test_id = B.lob_test_id
+	LEFT JOIN lob_class_metadata AS D ON D.lob_class_repo_id=A.lob_class_repo_id
+	LEFT JOIN lob_class_test AS E on A.lob_class_repo_id=E.lob_class_repo_id
+		WHERE A.class_id=".$this->classId.'
+		AND A.lob_type = "test"
+		AND A.lob_sub_type = "test"
+		
+		';
+		
+		
+		$db->query($sql);
+		
 
 		$testRecs = array();
 		while ($db->nextRecord()) {
-			$testRecs[] = $db->record;
-		}
-
-		foreach ($testRecs as $tstidx => $testRec) {
-			$type_node = new xml_node('type',null,null,'assessment');
 
 
-			$xml_child_nodes = array();
+	
+			$type_node = new xml_node('type',null,null,$db->record['lob_type']);
+			
+			//subtype
+			//list($type,$submime) = explode('/', $db->record['lob_mime']);
+			$sub_type_node = new xml_node('lob:subtype',null,null,$db->record['lob_sub_type']);
+			
+			$mim_type_node = new xml_node('lob:mime',null,null, $db->record['lob_mime']);
+			
+			
+				
+			
 
-			$lob_title_node = new xml_node('lob:title',null,null,$testRec['display_name']);
+			$lob_title_node = new xml_node('lob:title',null,null,$db->record['lob_title']);
 			$lob_title_node->cdata = true;
 
-			$lob_desc_node = new xml_node('lob:description',null,null,$testRec['description']);
+			$lob_desc_node = new xml_node('lob:description',null,null,$db->record['lob_description']);
 			$lob_desc_node->cdata = true;
 
-			$lob_instr_node = new xml_node('instructions',null,null,$testRec['instructions']);
-			$lob_desc_node->cdata = true;
-
-
+			$lob_copystyle_node = new xml_node('lob:copystyle',null,null,$db->record['lob_copy_style']);
+			$lob_copystyle_node->cdata = true;
+			
+			$lob_qsttext_node = new xml_node('lob:qsttext',null,null,$db->record['qst_text']);
+			$lob_qsttext_node->cdata = true;
+			
+			$lob_qstchoice_node = new xml_node('lob:qstchoices',null,null,$db->record['qst_choices']);
+			$lob_qstchoice_node->cdata = true;
+			
+			
+			$lob_qsttype_node = new xml_node('lob:questiontype',null,null,$db->record['question_type_id']);
+			$lob_qsttype_node->cdata = true;
+			
+			$lob_qstpoints_node = new xml_node('lob:questionpoints',null,null,$db->record['qst_points']);
+			$lob_qstpoints_node->cdata = true;
+					
+			$lob_numretry_node = new xml_node('lob:numretry',null,null,$db->record['num_retry']);
+			$lob_numretry_node->cdata = true;
+			
+			$lob_ispractice_node = new xml_node('lob:ispractice',null,null,$db->record['is_practice']);
+			$lob_ispractice_node->cdata = true;
+			
+			$lob_image_node = new xml_node('lob:image',null,null,$db->record['image_content_id']);
+			$lob_image_node->cdata = true;
+							
+			$xml_child_nodes = array();
 			$xml_child_nodes[] = $type_node;
+			$xml_child_nodes[] = $sub_type_node;
+			$xml_child_nodes[] = $mim_type_node;
+			
 			$xml_child_nodes[] = $lob_title_node;
 			$xml_child_nodes[] = $lob_desc_node;
-			$xml_child_nodes[] = $lob_instr_node;
-
+			$xml_child_nodes[] = $lob_copystyle_node;
+			$xml_child_nodes[] =$lob_qsttext_node;
+			$xml_child_nodes[] =$lob_qstchoice_node;
+			$xml_child_nodes[] =$lob_qsttype_node;
+			$xml_child_nodes[] =$lob_qstpoints_node;
+			$xml_child_nodes[] =$lob_numretry_node;
+			$xml_child_nodes[] =$lob_ispractice_node;
+			$xml_child_nodes[]=$lob_image_node;
 
 			$attrs = array( 
 				'mail_responses',
@@ -730,16 +830,14 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 				'show_result_type',
 				'possible_points'
 			);
-			foreach($attrs as $at) {
-				$xml_child_nodes[] = new xml_node('logicampus:'.$at, null,null, $testRec[$at]);
-			}
+			
 
 
 			//lifecycle
-			$createdon = $testRec['created_on'];
+			$createdon = $db->record['created_on'];
 
 			$lifecycleArray = array(
-				'lob:version'=>$testRec['version'], 
+				'lob:version'=>$db->record['lob_version'], 
 				'lob:createdon'=>time(), 'createdon_dateformat'=>'unix'
 			);
 
@@ -758,17 +856,16 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 			);
 			$xml_child_nodes[] = $this->makeMetadataNode($metadataArray);
 			 */
-
-
-			$guid = lcUuid();
-			$this->testGuid[ $testRec['assessment_id'] ] = $guid;
-
-			$testLob = new xml_node('lob:obj', 
-				array('guid'=>$guid, 'dbid'=>$testRec['assessment_id']), 
+			
+			$guid = $db->record['lob_guid'];
+			$this->testGuid[ $db->record['lob_test_id' ] ]= $guid;
+			
+			$lob_nodes[] = new xml_node('lob:obj', 
+				array('guid'=>$guid, 'dbid'=>$db->record['lob_repo_entry_id']), 
 				$xml_child_nodes
 			);
 
-			//questions
+		/*	//questions
 			$db->query('SELECT * FROM assessment_question WHERE assessment_id = '.$testRec['assessment_id']);
 			$questionRecs = array();
 			while ($db->nextRecord()) {
@@ -795,7 +892,7 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 				$testLob->children[] = $qust_node;
 			}
 
-			$lob_nodes[] = $testLob;
+		*/	//$lob_nodes[] = $testLob;
 		}
 	return  $lob_nodes; 
 	}
@@ -825,6 +922,7 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 			'lob:status',
 			'lob:active',
 			'lob:createdby',
+			'lob:verdion',
 			'lob:updatedby'
 		);
 		$lifecycle_node = new xml_node('lob:lifecycle',null,null);
@@ -862,10 +960,12 @@ xmlns:lesson="http://logicampus.sourceforge.net/2006/lesson"></lobcol>');
 
 
 	function makeMetadataNode($metadataStruct) {
+		echo "metadata";
 		$allow = array(
 			'lob:subject',
 			'lob:subdisc',
 			'lob:author',
+			'lob:source',
 			'lob:copyright',
 			'lob:license',
 			'lob:objective'
