@@ -1,0 +1,120 @@
+
+<!--
+ * Created on Jun 18, 2009
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+
+-->
+
+<? if ($t['presentation'] == "Yes") {} else{?>
+
+<? echo $t['sectionheader']; }?>
+
+
+
+ <head>
+  <title> </title>
+ </head>
+ <body>
+ <? 
+ 	
+	$semesterList = $t['semesterList'];
+    $resultCourses = $t['resultCourses'];
+	$semesterClasses =  $t['semesterClasses'];
+    $semesterList = $t['semesterList'];
+	$semesterTermList = $t['semesterTermList'];
+   $courseIdList = $t['courseIdList'];
+   $courseNameList = $t['courseNameList'];
+   $courseNumberList = $t['courseNumberList'];
+   ?>
+ <form>
+ <div align="center">
+ 
+ <table>
+ 	<tr>
+	<td>&nbsp;
+	
+	</td>
+	</tr>
+ 
+ </table>
+ 
+ <table width="50%" border="0">
+   <tr>
+     <td width="50"><img src="<?php echo IMAGES_URL.$t['imgLocation']; ?>" width="200%" height="150%" /></td>
+	
+     <td rowspan="2" align="center" ><b><? echo $t['text1']; ?></b>
+	 <br/>
+	<b> <? echo $t['text2']; ?></b></td>
+ </table>
+ <table width="50%">
+ <tr>
+   <tr>
+         <td align="right">&nbsp;</td>
+         <td>&nbsp;</td>
+         <td align="right">Dated : </td>
+         <td><? echo date("d M, Y");?> </td>
+     
+   </tr> <td width align="right">	First Name : </td>
+         <td> <? echo $t['firstName']; ?> </td>
+         <td align="right">Last Name : </td>
+         <td > <? echo $t['lastName']; ?> </td>
+   </tr>
+
+  
+
+ </table>
+ 
+ <table width="50%" border="1">
+ <?
+ 		foreach($semesterList as $sl){
+		?> 
+		<tr bgcolor="#7785FD" style="color:#FFFFFF; background-color:#7785FD ">
+		<td colspan="3" > Semester 
+		  <?	echo $semesterTermList[$sl]; ?>  </td>
+		</tr>
+
+		<tr>
+		<td width="22%"><b>Course Number </b></td>
+		<td width="43%"><b>Course Name</b></td>
+		<td width="35%"><b>Marks Obtained</b></td>
+		
+		</tr>
+
+		<? foreach($semesterClasses[$sl] as $sc){
+		?> 
+		<tr>
+		
+			<td> <?	echo $courseNumberList[$courseIdList[$sc]]; ?> </td>
+			<td> <?	echo $courseNameList[$courseIdList[$sc]]; ?> </td>
+			<td> <?	echo $resultCourses[$sc]; ?>%</td>
+			
+		</tr>
+		<? } ?>
+		
+		<? } ?>
+</table>
+
+<table border="1" width="50%"> 
+	<tr>
+		<td align="center"><? echo $t['text3']; ?>
+		<br/> <? echo $t['text4']; ?> </td>
+	</tr>
+</table>
+<br/>
+<br/>
+<br/>
+<table  width="50%"> 
+	<tr>
+		<td align="left">Issuing Authority :   &nbsp;         _____________________________</td> 
+
+	</tr>
+</table>
+
+
+<input type="hidden" name="studentId" id="studentId" value="<?= $t['studentId']; ?>">
+</div>
+</form>
+ </body>
+</html>

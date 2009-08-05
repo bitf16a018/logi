@@ -1,0 +1,105 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<?=$t['sectionheader'];?>
+
+<?
+if ($t['msg'] != '') { ?>
+	<br><span style="color: blue;"><?=$t['msg'];?></span> <br><br><? } ?>
+	
+<?
+if ($t['err'] == '') { ?>
+
+<? } else { ?> 
+	<br><span style="color: red;"><?=$t['err'];?></span><br><br><? } ?>
+	
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+<!--
+ * Created on Jun 16, 2009
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+-->
+ <head>
+  <title>getTranscript </title>
+  <style type="text/css">
+<!--
+.style1 {color: #FFFFFF}
+-->
+  </style>
+ </head>
+<script type="text/javascript" language="javascript">
+function func(){
+	alert("HELLO");
+	alert(document.getElementById('fileLocation').src);
+
+}
+</script>
+ <body>
+
+<form  method="post" action="<?=appurl('administration/getTranscriptTemplate/event=showTranscript')?>" enctype="multipart/form-data">
+<table width="100%">
+<tr bgcolor="#7785FD">
+  <td colspan="2"><span class="style1">Define Header: </span></td>
+  </tr>
+<tr>
+<td width="30%">Header Text 1: </td>
+<td width="70%"><input name="text1" type="text" value="<?= $t['text1']?>" ></td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td> e.g . Punjab University College Of Information Technology </td>
+</tr>
+<tr>
+<td width="30%">Header Text 2: </td>
+<td width="70%"><input name="text2" type="text" value="<?= $t['text2']?>"></td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td>e.g. The University Of Punjab</td>
+</tr>
+<tr bgcolor="#7785FD">
+  <td colspan="2"><span class="style1">Select your Company Logo: </span></td>
+  </tr>
+<tr>
+<td width="30%">Locate the Logo Position: </td>
+<td width="70%"><input name="file" type="file"  value="" size="" id="file" > </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>e.g. Your Company Logo </td>
+</tr>
+<tr bgcolor="#7785FD">
+  <td colspan="2"><span class="style1">Define Footer: </span></td>
+  </tr>
+<tr>
+<td width="30%">Footer Line 1: </td>
+<td width="70%"><input name="text3" type="text" value="<?= $t['text3']?>"/>
+</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td>e.g. Shahrahe Quaid-e-Azam Allama Iqbal Campus ( Old Campus ) Lahore </td>
+</tr>
+<tr>
+<td width="30%">Footer Line 2: </td>
+<td width="70%"><input name="text4" type="text" value="<?= $t['text4']?>"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td>e.g. Contact # +92-111-923-923</td>
+</tr>
+<tr>
+<td></td>
+<td><input name="button1" value="Save" type="submit"  /></td>
+
+</tr>
+</table>
+
+</form>
+ 
+ </body>
+</html>
