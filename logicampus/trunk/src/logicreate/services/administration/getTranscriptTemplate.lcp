@@ -1,0 +1,186 @@
+	<?
+	/*
+	 * MODULENAME
+	 * created MODULEDATE
+	 *
+	 */
+	include_once(LIB_PATH.'PBDO/TranscriptTemplate.php');
+	include_once(LIB_PATH.'datagrid.php');
+	include_once(LIB_PATH."LC_html.php");
+	include_once(LIB_PATH.'semesterObj.php');
+	include_once(LIB_PATH.'SiteForms.php');
+	
+	class getTranscriptTemplate extends AdminService 
+	{
+		var $presentor = "htmlPresentation";
+		//var $authorizer = 'ServiceMapAuth';
+		var $navlinks = array(
+		'Administration Home' => '',
+		);
+		
+		function run($db,&$u,&$lc,&$t)
+		{
+			$lc->templateName = 'getTranscriptTemplate';
+			
+			$db->query("select * from transcript_template");
+			$db->nextRecord();
+			//echo $db->record['headerLine1'];
+			//echo $db->record['headerLine2'];
+			
+			$t['text1'] = $db->record['headerLine1'];
+			$t['text2'] = $db->record['headerLine2'];
+			$t['text3'] = $db->record['footerLine1'];
+			$t['text4'] = $db->record['footerLine2'];
+			$t['imgLocation'] = $db->record['imageLocation'];
+			
+			
+		
+		}
+	
+	
+		function showTranscriptRun($db,&$u,&$lc,&$t){
+		
+			//$lc->templateName = "displayTranscript";
+			//$lc->templateStyle = 'private';
+		
+			$id_classes = array();
+			$username = $lc->username;
+			
+			//echo "HELLO";
+			
+			$content =  file_get_contents( $lc->uploads['file']['tmp_name'] ) ;
+			
+			$text1 = $lc->postvars['text1'];
+			$text2 = $lc->postvars['text2'];
+			$footer1 = $lc->postvars['text3'];
+			$footer2 = $lc->postvars['text4'];
+		
+	  
+	     
+	//strrpos()Finds the position of the last occurrence of a string inside another string (case-sensitive)
+	/*
+	    echo "Upload: " . $_FILES["file"]["name"] . "<br />";
+	    echo "Type: " . $_FILES["file"]["type"] . "<br />";
+	    echo "Size: " . ($_FILES["file"]["size"] / 1024) . " Kb<br />";
+	    echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br />";
+	
+		//	$newName = time();
+			*/
+			$dotIndex = strrpos($_FILES["file"]["name"],".");
+			$myFileName = substr($_FILES["file"]["name"],0,$dotIndex);
+			//$myFileName = $myFileName.$newName;
+			$myFileExt = substr($_FILES["file"]["name"],$dotIndex,strlen($_FILES["file"]["name"]));
+			
+			$path = "images/".$_FILES['file']['name'];
+			
+	    if (move_uploaded_file($_FILES['file']['tmp_name'], "$path")) {
+	 //       print "Received {$_FILES['file']['name']} - its size is {$_FILES['file']['size']}";
+	    } else {
+	   //     print "Upload failed!";
+	    }
+	
+					
+		/*	$file=fopen("TranscriptLogo.jpg","w");
+			fwrite($file,$content);
+			fclose($file);
+			*/
+			$db2=DB::getHandle();
+			$db->query("select * from transcript_template ");
+			if($db->nextRecord()){
+				$db2->query("update transcript_template set headerLine1 = '$text1' , headerLine2 = '$text2', imageLocation = '$myFileName$myFileExt', footerLine1 = '$footer1', footerLine2 = '$footer2'");
+				
+					$t['msg'] = "Record saved SuccessFully";
+			}
+			else{
+				$db2->query("insert into transcript_template values('$text1','$text2','$myFileName$myFileExt','$footer1','$footer2')");
+				
+					$t['msg'] = "Record saved SuccessFully";
+				
+			}
+			$this->run($db,&$u,&$lc,&$t);
+			return ;
+			
+			
+	/*
+	    if (file_exists(IMAGES_URL. $_FILES["file"]["name"]))
+	      {
+	      echo $_FILES["file"]["name"] . " already exists. ";
+	      }
+	    else
+	      {
+	      move_uploaded_file($_FILES["file"]["tmp_name"],
+	      IMAGES_URL . $_FILES["file"]["name"]);
+	      echo "Stored in: " . IMAGES_URL. $_FILES["file"]["name"];
+	      }
+	 */
+	      
+	   
+	  //}
+	//else
+	
+	//  }
+			
+			
+			/*
+			 echo $lc->uploads['fileLocation'];
+			echo $lc->uploads['fileLocation']['tmp_name'] ;
+			
+			$file=fopen("TranscriptLogo.jpg","w");
+			fwrite($file,$content);
+			fclose($file);
+			 
+			//$db->query("insert into transcript_template values('$text1','$text2','".addslashes($content)."')");
+		
+			$db->query("select logoLocation from transcript_template");
+				$db->nextRecord();
+		
+			$t['image'] = $db->record['logoLocation'];
+		*/
+			}// end of function
+			
+			
+			function displayTranscriptRun($db,&$u,&$lc,&$t){
+		
+			$lc->templateName = "displayTranscript";
+			$lc->templateStyle = 'private';
+			//echo "In display Transcript func";
+			//header('Content-Type: image/jpeg');
+			//	header('Content-length: '. $db->record['logoLocation']);
+				
+				$db->query("select header1,logoLocation from transcript_template");
+				$db->nextRecord();
+				
+				echo $db->record['header1'] ;
+				echo $db->record['logoLocation'] ;
+				
+				
+				
+			$t['image'] = $db->record['logoLocation'];
+			
+			}
+	
+		function displayImageRun($db,&$u,&$lc,&$t){
+				
+			//$lc->templateName = "displayTranscript";
+			//$lc->templateStyle = 'private';
+		
+			$id_classes = array();
+			$username = $lc->username;
+				$db->query("select logoLocation from transcript_template");
+				$db->nextRecord();
+			
+				header('Content-Type: image/jpeg');
+				header('Content-length: '. $db->record['logoLocation']);
+				echo $db->record['logoLocation'];
+				flush();
+				ob_end_flush();
+				exit();
+				
+				
+				
+				$t['image'] = $db->record['logoLocation'];
+		
+		}		
+			
+	}// end of class
+	?>

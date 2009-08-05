@@ -1,0 +1,171 @@
+<?php
+/*
+ * Created on Jun 18, 2009
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+ */
+include_once(LIB_PATH.'datagrid.php');
+include_once(LIB_PATH."LC_html.php");
+include_once(LIB_PATH.'semesterObj.php');
+include_once(LIB_PATH.'SiteForms.php');
+
+class transcript extends AdminService {
+
+var $presentor = "htmlPresentation";
+	//var $authorizer = 'ServiceMapAuth';
+	var $a_semester_code = array();
+	var $a_semester = array();
+
+	// Links
+	var $sectionTitle = 'Semster Manager';
+	var $navlinks = array(
+		'Administration Home' => '',
+	);
+	var $applinks = array(
+		'Printer Friendly' => 'Printer Friendly/'
+	);
+
+	/* 
+	 * Semester terms is used to get the literal meaning of each code.  
+	 * If you wish to add additional semester terms to the system, you
+	 * MUST add them to this array.  For example, if you wanted to add 
+	 * Summer1 and Summer2, add them here first
+	 */
+
+	var $semesterTerms = array("SU"=>"Summer", "SP"=>"Spring", "FA"=>"Fall", "WI"=>"Winter"
+	,'S1'=> 'Summer I', 'S2'=>'Summer II', 'WM'=>'Winter Mini', 'FM'=>'Fall Mini', 'PM'=>'Spring Mini', 'SM'=>'Summer Mini'
+	);
+	
+
+	function run($db,&$u,&$lc,&$t)
+	{
+		
+		$lc->templateName = 'transcript';
+		$student_id = $lc->postvars['studentId'];
+		
+		if ( $lc->getvars['print'] ) {
+			$this->presentor = 'emptyPresentation';
+			//$this->presentor = 'htmlPresentation';
+			$t['presentation'] = "Yes";
+				$student_id = $lc->getvars['id']; 
+		}else{
+			$this->applinks['Printer Friendly'] = 'transcript/print=yes/id='.$student_id;	
+		}
+		
+		$db->query("select * from transcript_template");
+		$db->nextRecord();
+			
+		$t['text1'] = $db->record['headerLine1'];
+		$t['text2'] = $db->record['headerLine2'];
+		$t['text3'] = $db->record['footerLine1'];
+		$t['text4'] = $db->record['footerLine2'];
+		$t['imgLocation'] = $db->record['imageLocation'];
+		
+		$classIDList = array();//to hold the list of classes taken by the student
+		$courseIdList = array();// to hold the courseIds against the classes student have taken
+		$semesterList = array();// will hold the number of semesters student have taken so far
+		$semesterTermList = array();// will hold the particular name of the semester
+		$semesterClasses = array(array());// will hold the record of each class in a particular semester
+		
+		$db->query("select distinct semester_id from class_enrollment where student_id = $student_id");
+		while($db->nextRecord())
+		{
+			array_push($semesterList ,$db->record['semester_id']);
+		}
+		
+		$t['semesterList'] = $semesterList ;
+
+		$classMarks = array();
+		foreach ($semesterList as $sl )
+		{
+			$db->query("select semesterTerm, dateCensus from semesters where id_semesters = $sl");
+			$db->nextRecord();
+			$semesterTermList[$sl] = $db->record['semesterTerm'].' '.substr($db->record['dateCensus'],0,4);
+		}	
+		
+		$t['semesterTermList'] = $semesterTermList;
+		
+		foreach ($semesterList as $sl )
+		{
+			 $db->query("select class_id from class_enrollment where semester_id = $sl and student_id = $student_id ");
+			$i=0;// iterator to push id_classes in each semester from index 0.
+			 while ($db->nextRecord())
+			 {
+				 $semesterClasses[$sl][$i] = $db->record['class_id'] ; 
+				$i++;	 
+			}
+		 }
+		 
+		 $t['semesterList'] = $semesterList;
+		 $t['semesterClasses'] = $semesterClasses;
+
+		/**
+		 * getting the grades scored by the student from the previous classes 
+		 * */ 
+		 foreach($semesterList as $c ){
+			 foreach($semesterClasses[$c] as $r){
+				$db->query("select (sum(score)/tot.total)*100 as score from class_gradebook_val, (SELECT sum(total_points) AS total FROM class_gradebook_entries WHERE id_classes = '$r' ) AS tot" .
+						"	 where id_classes = $r and student_id =$student_id ");
+				$db->nextRecord();
+				$resultCourses[$r] = sprintf("%0.2f",$db->record['score']);
+		 	}
+		 }
+		$t['resultCourses'] = $resultCourses;
+		 
+		
+		/**
+		 * 
+		 * getting the name of the courses on the bases of class id
+		 * 
+		 * i have put the courseIdList on the bases of the classIds
+		 * 
+		 * */
+		 foreach($semesterList as $sl ){
+		 	foreach($semesterClasses[$sl] as $sc){
+		
+				$db->query("select distinct id_courses from classes where id_classes = $sc ");
+				$db->nextRecord();
+			
+		 	 $courseIdList[$sc] = $db->record['id_courses'];
+		 	}
+		 }
+		$t['courseIdList'] = $courseIdList;
+		
+		 foreach($semesterList as $sl ){
+			 foreach($semesterClasses[$sl] as $sc){
+					
+					$db->query("select distinct courseName, courseNumber from courses where id_courses = $courseIdList[$sc]");
+					$db->nextRecord();
+					
+					 $courseNameList[$courseIdList[$sc]] = $db->record['courseName'];
+					 $courseNumberList[$courseIdList[$sc]] = $db->record['courseNumber'];
+							
+			}
+		 }
+		
+		$t['courseNameList'] = $courseNameList;
+		$t['courseNumberList'] = $courseNumberList;
+		$t['classIDList'] = $classIDList;
+		$t['classMarks'] = $classMarks;
+	
+	
+	
+		$db->query("select firstname , lastname from profile where username = '$student_id'");
+		$db->nextRecord();
+		$firstName = $db->record['firstname'];
+		$lastName = $db->record['lastname'];
+		
+		$t['firstName'] = $firstName ;
+		$t['lastName'] = $lastName ;
+		
+	}// end of main function
+
+
+function generateStudentTranscriptRun($db,&$u,&$lc,&$t)
+{
+	$lc->templateName = 'generateStudentTranscript';
+}
+}// end of class 
+
+?>
