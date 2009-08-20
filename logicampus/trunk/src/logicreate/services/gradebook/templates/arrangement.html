@@ -1,0 +1,42 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+
+<html>
+<head>
+<title>ranking</title>
+</head>
+<body>
+<table>
+	<tr><td><strong><font size="+1">Entities</font></strong></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<?
+		$entries=$t['entries'];
+		$title=$t['title'];
+		$length=$t['length'];
+		$i=0;
+		foreach($title as $ti)
+		{
+			
+			print_r('<tr>');
+			print_r('<td width="150"><strong>'.$ti.'</strong></td>');			
+			print_r('<td>');
+			if($i > 0)
+			{
+				print_r ('<a href="'.appurl('gradebook/arrangement/event=up/id=').$i.'"><img src='.IMAGES_URL.'up.gif border="0"></a>');
+			}
+			print_r('</td>');
+			print_r('<td>');
+			if($i < ($length-1))
+			{
+				print_r('<a href="'.appurl('gradebook/arrangement/event=down/id=').$i.'"><img src='.IMAGES_URL.'down.gif border="0"></a>');
+			}
+			print_r('</td>');
+			print_r('</tr>');
+			$i++;
+		}
+	?>
+		
+</table>
+</body>
+</html>
