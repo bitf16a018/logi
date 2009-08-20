@@ -1,0 +1,175 @@
+<?php
+
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'gradeBookObj.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+
+class arrangement extends FacultyService
+{
+	
+	var $presentor='htmlPresentation';
+	var $permissionError = '<h3>Permission Error</h3>
+							Either the entry you were trying to access is not
+							a valid entry or you do not have access to edit that
+							grade book
+							entry.  We suggest going back to the main classroom
+							manager page and trying again.  If you continue to get
+							this error feel free to contact the help desk.';
+	var $dataError = '<h3>Problem saving your information</h3>
+					  There was a problem saving your informatino to the
+					  database.  We suggest trying again.  If you get this
+					  message consistently, please contact the site administrator.';
+
+	// links
+	var $sectionTitle = 'Entry';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => '%assessments',
+	);
+
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Entries' => 'entry/',
+		'Add Entry' => 'entry/event=add/',
+		'Rank Entries' => 'arrangement/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'Build Printable Report' => 'report/',
+		'Gradebook Setup' => 'main/event=controlPanel/'
+	);
+	
+		var $inactivelinks = array('Rank Entries');
+	# Holds cleaned postvar data
+	var $data = array();
+	
+	function run(&$db,&$u,&$lc,&$t)
+	{
+		
+		$lc->templateName='arrangement';
+		$this->sectionTitle = 'Gradebook Ranking';
+	
+		$classId = $u->activeClassTaught->id_classes;
+		
+		$title=array();
+			
+		$db->query("select title from class_gradebook_entries where id_classes='$classId' order by rank");
+		
+		while($db->nextRecord())
+		{
+			array_push($title,$db->record['title']);
+		}
+		$t['length']=count($title);
+		$t['title']=$title;
+		
+	}
+	
+	function upRun(&$db,&$u,&$lc,&$t)
+	{
+		$id=$lc->getvars['id'];
+		$classId = $u->activeClassTaught->id_classes;
+		
+		$id_class_gradebook_entries=array();
+		
+		$db->query("select id_class_gradebook_entries from class_gradebook_entries where id_classes='$classId' order by rank");
+		
+		while($db->nextRecord())
+		{
+			array_push($id_class_gradebook_entries,$db->record['id_class_gradebook_entries']);
+		}
+		$id_class_gradebook=$id_class_gradebook_entries[$id];
+				
+		$rank=array();
+		$db->query("select rank from class_gradebook_entries where id_classes='$classId' and id_class_gradebook_entries='$id_class_gradebook' order by rank");
+		while($db->nextRecord())
+		{
+			$rank=$db->record['rank']; 
+		}
+		
+		$temp = array();
+		$db->query("select rank from class_gradebook_entries where id_classes='$classId' order by rank");
+		while($db->nextRecord())
+		{
+			array_push($temp,$db->record['rank']);			
+		}
+		
+		$index=array_keys($temp,$rank,true);
+				
+		$indexPrev=$index[0]-1;
+				
+		$db->query("select rank from class_gradebook_entries where id_classes='$classId' and id_class_gradebook_entries='$id_class_gradebook_entries[$indexPrev]' order by rank");
+		if($db->nextRecord())
+		{
+			$rank2=$db->record['rank'];
+		}
+				
+		//** swapping the ranks
+		$temp=$rank;
+		$rank=$rank2;
+		$rank2=$temp;
+				
+		//**swapping the ranks in DB
+		$db->query("update class_gradebook_entries set rank='$rank' where id_class_gradebook_entries='$id_class_gradebook' and id_classes='$classId'");
+		$db->query("update class_gradebook_entries set rank='$rank2' where id_class_gradebook_entries='$id_class_gradebook_entries[$indexPrev]' and id_classes='$classId'");
+							
+		$this->run(&$db,&$u,&$lc,&$t);
+		
+	}
+	
+	function downRun(&$db,&$u,&$lc,&$t)
+	{
+		$id=$lc->getvars['id'];
+		$classId = $u->activeClassTaught->id_classes;
+		
+		$id_class_gradebook_entries=array();
+		
+		$db->query("select id_class_gradebook_entries from class_gradebook_entries where id_classes='$classId' order by rank");
+		
+		while($db->nextRecord())
+		{
+			array_push($id_class_gradebook_entries,$db->record['id_class_gradebook_entries']);
+		}
+		$id_class_gradebook=$id_class_gradebook_entries[$id];
+		
+		$rank=array();
+		$db->query("select rank from class_gradebook_entries where id_classes='$classId' and id_class_gradebook_entries='$id_class_gradebook' order by rank");
+		while($db->nextRecord())
+		{
+			$rank=$db->record['rank']; 
+		}
+				
+		
+		$temp = array();
+		$db->query("select rank from class_gradebook_entries where id_classes='$classId' order by rank");
+		while($db->nextRecord())
+		{
+			array_push($temp,$db->record['rank']);			
+		}
+		
+		$index=array_keys($temp,$rank,true);
+				
+		$indexNext=$index[0]+1;
+				
+		$db->query("select rank from class_gradebook_entries where id_classes='$classId' and id_class_gradebook_entries='$id_class_gradebook_entries[$indexNext]' order by rank");
+		if($db->nextRecord())
+		{
+			$rank2=$db->record['rank'];
+		}
+				
+		//** swapping the ranks
+		$temp=$rank;
+		$rank=$rank2;
+		$rank2=$temp;
+				
+		//**swapping the ranks in DB
+		$db->query("update class_gradebook_entries set rank='$rank' where id_class_gradebook_entries='$id_class_gradebook' and id_classes='$classId'");
+		$db->query("update class_gradebook_entries set rank='$rank2' where id_class_gradebook_entries='$id_class_gradebook_entries[$indexNext]' and id_classes='$classId'");
+		
+		$this->run(&$db,&$u,&$lc,&$t);
+		
+	}
+	
+}
+?>
