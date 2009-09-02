@@ -25,6 +25,7 @@ class gradesbystudent extends FacultyService {
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
+		'Rank Entries' => 'arrangement/',
 		'View Grades by Student' => 'gradesbystudent/',
 		'Build Printable Report' => 'report/',
 		'Gradebook Setup' => 'main/event=controlPanel/'

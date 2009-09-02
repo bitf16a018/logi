@@ -41,6 +41,7 @@ CREATE TABLE `class_gradebook_entries` (
 	`publish_flag` tinyint (1) NOT NULL, 
 	`notes` text, 
 	`class_lesson_sequence_id` integer (11) NOT NULL,
+	'rank' integer (10) NOT NULL,
 	PRIMARY KEY (id_class_gradebook_entries) 
 )
 campusdelimeter;
