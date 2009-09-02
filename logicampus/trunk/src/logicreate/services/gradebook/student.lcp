@@ -36,6 +36,7 @@ class student extends FacultyService {
 		'Gradebook Home' => '',
 		'List Entries' => 'entry/',
 		'Add Entry' => 'entry/event=add/',
+		'Rank Entries' => 'arrangement/',
 		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
 
