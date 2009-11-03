@@ -1,0 +1,103 @@
+<?=$t['sectionheader'];?>
+<?if($t['message']){ ?><span style="color:blue"><?=$t['message'];?></span><?}?>
+<?if($t['error']){ ?><span style="color:red"><?=$t['error'];?></span><?}?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+
+ <head>
+  <title>n-x policy</title>
+  	<script language="JavaScript" type="text/javascript">
+  	  function check()
+  	  {
+ 	  	var tc=document.applyForm.totalcount.value;
+ 	  	var c=document.applyForm.count.value;
+  	  	var p=tc/2;
+  	  	if(c > p)
+  	  	{
+  	  		alert("The count should be lesser or equal to the half of the total.");
+  	  		return false;
+  	  	}
+  	  	else
+  	  	{
+  	  		document.applyForm.action="<?php echo appurl('/gradebook/nxPolicy/event=apply');?>";
+  	   	}
+  	  }
+  	  
+  	  function decicheck(e)
+  	  {
+  	  	var key;
+			var keychar;
+		
+			if (window.event)
+		   		key = window.event.keyCode;
+		   	keychar = String.fromCharCode(key);
+				
+			if ((("0123456789abcefgimstABCEFGIMST").indexOf(keychar) > -1))
+		   		return true;
+			else
+		   		return false;
+  	  }
+  	</script>
+ </head>
+ <body>
+  	<form name="catForm" action="<?echo appurl('/gradebook/nxPolicy/event=entries')?>" method="post">
+  	<table>
+ 	<tr>
+ 	<td><strong>Categories</strong></td>
+ 	<td>
+ 	<select name="category">
+ 	<option value="-Select Here-">-Select Here-</option>
+ 	<?php
+ 		$cat=$t['categories'];
+ 		print_r($cat);
+ 		$ct=$t['cat'];
+ 		$floog=0;
+ 		echo $msg;
+ 		foreach($cat as $c)
+ 		{
+ 			if($c==$ct)
+ 			{
+ 				print_r('<option selected value="'.$ct.'">'.$ct.'</option>');
+ 				$floog=1; 
+ 				
+ 			}
+ 			else
+ 			{
+ 			print_r('<option value="'.$c.'">'.$c.'</option>');
+ 			}
+ 		}
+ 		
+ 	?>
+ 	</select></td>
+ 	<td><input type="submit" name="submit" value="Search"/></td>
+ 	</table>
+ 	</form>
+ 	<?
+ 		$tcount=$t['count'];	
+ 		
+ 	?>
+ 	<form name="applyForm" method="post" >
+ 	<table>
+ 	<tr><? if ($t['flag']== 0 && $t['fleeg']== 1) {?>
+ 		<td>Policy to apply on</td>
+ 		<td><input type="text" name="count" size="5" value="<?=$t['old']?>" onKeyPress="return decicheck(event)"/></td>
+ 		<td>/&nbsp;<input type="text" name="totalcount" value="<?echo $tcount?>" size="5" readonly/></td>
+ 		</tr>
+ 		<tr>
+ 		<td><?// print_r("<br>".$msg);?></td>
+ 		</tr>
+ 		<tr>
+ 		<td><input type="submit" name="applySubmit" value="Apply" onClick="return check()"/></td>
+ 		<td><input type="hidden" name="hidden" value="<? echo $ct; ?>"/></td>
+ 		</tr>	
+ 		<?}?>
+ 		
+ 	</table>
+ 	</form>
+ 
+ </body>
+</html>
+

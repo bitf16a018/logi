@@ -1,0 +1,322 @@
+<?php
+/*
+ * Created on Aug 31, 2009
+ *
+ */
+ 
+include_once(LIB_PATH.'SiteForms.php');
+include_once(LIB_PATH.'gradeBookObj.php');
+include_once(LIB_PATH.'ClassGradebookCategories.php');
+include_once(LIB_PATH.'ClassGradebook.php');
+include_once(LIB_PATH.'ClassGradebookEntries.php');
+include_once(LIB_PATH.'ClassGradebookVal.php');
+
+class nxPolicy extends FacultyService
+{
+	
+	var $presentor='htmlPresentation';
+	var $permissionError = '<h3>Permission Error</h3>
+							Either the entry you were trying to access is not
+							a valid entry or you do not have access to edit that
+							grade book
+							entry.  We suggest going back to the main classroom
+							manager page and trying again.  If you continue to get
+							this error feel free to contact the help desk.';
+	var $dataError = '<h3>Problem saving your information</h3>
+					  There was a problem saving your informatino to the
+					  database.  We suggest trying again.  If you get this
+					  message consistently, please contact the site administrator.';
+
+	// links
+	var $sectionTitle = 'N-X Policy';
+	var $navlinks = array (
+		'Classroom Manager' => '%classmgr/display/',
+		'Calendar' => '%classmgr/cal/',
+		'Assignments' => '%classmgr/assignmentManage/',
+		'Contact Students' => '%classmgr/contactStudents/',
+		'Assessments' => '%assessments',
+	);
+
+	var $applinks = array(
+		'Gradebook Home' => '',
+		'List Categories' => 'category/',
+		'Add category' => 'category/event=add/',
+		'List Entries' => 'entry/',
+		'Rank Entries' => 'arrangement/',
+		'Add Entry' => 'entry/event=add/',
+		'View Grades by Student' => 'gradesbystudent/',
+		'N-X Policy' => 'n-xPolicy/',
+		'Build Printable Report' => 'report/'
+	);
+		var $inactivelinks = array('N-X Policy');
+		
+		var $outerFlag=0;
+		
+	function run(&$db,&$u,&$lc,&$t)
+	{
+		$lc->templateName='nxPolicy';
+		//$lc->templateStyle = 'private';
+		$this->sectionTitle = 'N-X Policy';
+		
+		$cat=array();
+		$gradebookCat = new ClassGradebook();
+		$gradebookCat->idClasses = $u->activeClassTaught->id_classes;
+		$cat=$gradebookCat->loadCategoryList($u->activeClassTaught->id_classes);
+		
+		$this->outerFlag=0;	
+		$t['categories']=$cat;
+		$t['flag']=0;
+			
+	}
+	
+	function afterAssesmentRun(&$db,&$u,&$lc,&$t)
+	{
+		$u->entId = $lc->getvars['entid'];
+		
+		$classId=$u->activeClassTaught->id_classes;
+		$flag=0;
+						
+			$db->query("SELECT * FROM class_gradebook_categories cat,class_gradebook_entries ent WHERE cat.id_classes=ent.id_classes " .
+						"AND cat.id_classes='$classId' AND cat.flag='1' AND ent.id_class_gradebook_entries='$u->entId'");
+			
+			if($db->nextRecord())
+			{
+				$cat_id=$db->record['id_class_gradebook_categories'];
+				$flag=1;	
+			}
+			
+			if($flag == 1)
+			{
+				$db->query("select id_student from class_student_sections where id_classes='$classId'");
+				if($db->nextRecord())
+				{
+					$usr=$db->record['id_student'];
+				}
+				//to check either the policy has been already applied against id_category or not
+				$db->query("select count(ce.id_class_gradebook_entries)
+						from class_gradebook_entries ce,class_gradebook_val cv
+						where ce.id_class_gradebook_entries=cv.id_class_gradebook_entries 
+						and ce.id_classes='$classId' and cv.username='$usr' " .
+						"and ce.id_class_gradebook_categories='$cat_id'".
+						"and cv.flag='1'");
+				
+				if($db->nextRecord())
+				{
+					$c=$db->record['count(ce.id_class_gradebook_entries)'];
+				}
+				
+				$this->outerFlag=1;
+				
+				$this->applyFinal(&$db,&$u,&$lc,&$t,$c,$cat_id);
+			}
+			if($flag == 0)
+			{
+				//$t['url'] = modurl('main/event=iframe/id_classes='.$u->activeClassTaught->id_classes."/windowStatus=10");
+				$t['url'] = modurl('main/event=iframe/id_classes='.$u->activeClassTaught->id_classes);
+			}
+	}
+	
+	
+	function entriesRun(&$db,&$u,&$lc,&$t)
+	{
+		$category=$lc->postvars['category'];
+		$c = 0;
+		$flag=0;
+		$fleeg=1;
+		$cat=array();
+		$gradebookCat = new ClassGradebook();
+		$gradebookCat->idClasses = $u->activeClassTaught->id_classes;
+		$cat=$gradebookCat->loadCategoryList($u->activeClassTaught->id_classes);
+		$id_class_gradebook_categories=array_search($category,$cat);
+						
+		$db->query("select count(id_class_gradebook_entries) from class_gradebook_entries " .
+				"where id_classes='$gradebookCat->idClasses' and id_class_gradebook_categories='$id_class_gradebook_categories'");
+				
+		while($db->nextRecord())
+		{
+			$count=$db->record['count(id_class_gradebook_entries)'];
+		}
+		
+		if($count == 1)
+		{
+			$flag=1;
+			$t['flag']=$flag;
+			$t['message']="There is only one entry in it.";
+			
+		}
+		else
+		{
+			if($count > 1)
+				{
+				
+					$db->query("select student_id from class_enrollment where class_id='$gradebookCat->idClasses'");
+					if($db->nextRecord())
+					{
+						$usr=$db->record['student_id'];
+					}
+					//to check either the policy has already been applied against id_category or not
+					$db->query("select count(ce.id_class_gradebook_entries)
+								from class_gradebook_entries ce,class_gradebook_val cv
+								where ce.id_class_gradebook_entries=cv.id_class_gradebook_entries 
+								and ce.id_classes='$gradebookCat->idClasses' and cv.student_id='$usr' " .
+								"and ce.id_class_gradebook_categories='$id_class_gradebook_categories'".
+								"and cv.flag='1'");
+					
+					if($db->nextRecord())
+					{
+						$c=$db->record['count(ce.id_class_gradebook_entries)'];
+					}
+									
+					$flag=0;
+					$t['flag']=$flag;
+					$fleeg=1;
+					$t['fleeg']=$fleeg;
+					$t['cat']=$category;								
+					$t['count']=$count;
+					$t['old']=$c;
+					$t['categories']=$cat;
+					
+					unset($category);
+					empty($category);
+				}
+				else
+				{
+					$flag=1;
+					$t['flag']=$flag;
+					$t['error']="There is no entry in it.";
+					
+				}
+		}
+				
+		$this->run(&$db,&$u,&$lc,&$t);
+	}
+	
+	function applyRun(&$db,&$u,&$lc,&$t)
+	{
+			
+		$count=$lc->postvars['count'];
+		$totalcount=$lc->postvars['totalcount'];
+		$category=$lc->postvars['hidden'];
+			
+		$p=$totalcount/2;
+		if($count > $p)
+		{
+			$t['error']="Number should not be greater than".$p;
+			$this->run(&$db,&$u,&$lc,&$t);
+		}
+		
+		$cat=array();
+		$percentage=array();
+		$gradebookCat = new ClassGradebook();
+		$gradebookCat->idClasses = $u->activeClassTaught->id_classes;
+		$cat=$gradebookCat->loadCategoryList($u->activeClassTaught->id_classes);
+		$id_class_gradebook_categories=array_search($category,$cat);
+		
+		$this->applyFinal(&$db,&$u,&$lc,&$t,$count,$id_class_gradebook_categories);
+		
+		$this->run(&$db,&$u,&$lc,&$t);
+	}
+	
+	function applyFinal(&$db,&$u,&$lc,&$t,$count,$id_cat)
+	{
+		$classId = $u->activeClassTaught->id_classes;
+		$id_entries = array();
+		$tPoints = array();
+		$username = array();	
+		
+		if($count == 0)
+		{
+			$db->query("update class_gradebook_categories set flag='0' where id_classes='$classId'" .
+					"and id_class_gradebook_categories='$id_cat'");
+		}
+		
+		if($count != 0)
+		{
+			$db->query("update class_gradebook_categories set flag='1' where id_classes='$classId'" .
+					"and id_class_gradebook_categories='$id_cat'");
+		}
+		
+		$db->query("select id_class_gradebook_entries,total_points from class_gradebook_entries where id_classes='$classId' " .
+					"and id_class_gradebook_categories='$id_cat' and publish_flag='1'");
+		
+		while($db->nextRecord())
+		{
+			array_push($id_entries,$db->record['id_class_gradebook_entries']);
+			array_push($tPoints,$db->record['total_points']);
+		}
+		
+		$db->query("select student_id from class_enrollment where class_id='$classId'");
+		
+		while($db->nextRecord())
+			{
+				array_push($username,$db->record['student_id']);
+			}
+			
+		$score=array();
+		$c=count($username);
+		for($k=0;$k<=$c;)
+		{
+			//getting scores of all the entries against each student
+			$i=0;
+			foreach($id_entries as $ide)
+			{
+				$tp=$tPoints[$i];
+				$user=$username[$k];
+				
+				$db->query("select ((score/$tp)*100) as Score from class_gradebook_val where id_classes='$classId' and student_id='$user'".	
+							"and id_class_gradebook_entries='$ide'");
+				if($db->nextRecord())
+				{
+					$score[$ide]=$db->record['Score'];
+					
+				}
+				$i++;
+			}
+			
+			arsort($score);
+			
+			$this->update(&$db,&$u,&$lc,&$t,$count,$score,$user);
+			$t['message']="Successfully applied";
+			
+			$k++;
+		}
+							
+		if($this->outerFlag == 1)
+		{
+			$t['url'] = modurl('main/event=iframe/id_classes='.$u->activeClassTaught->id_classes);
+			$this->presentor="redirectPresentation";
+		}
+		else
+		{							
+			$t['message']="Successfully applied";
+			$this->run(&$db,&$u,&$lc,&$t);
+		}
+		
+	}
+	
+	function update(&$db,&$u,&$lc,&$t,$count,$score,$user)
+	{
+		$classId = $u->activeClassTaught->id_classes;
+		$id=array_keys($score);
+		$k=0;		
+		for($i=0;$i<$count;$i++)
+		{
+			$k++;
+			$db->query("update class_gradebook_val set flag='1' " .
+						"where id_classes='$classId' and student_id='$user' and id_class_gradebook_entries='$id[$i]'");
+			
+		}
+		//$k=$k-1;
+		for(;$k<count($score);$k++)
+		{
+			$db->query("update class_gradebook_val set flag='0' " .
+						"where id_classes='$classId' and student_id='$user' and id_class_gradebook_entries='$id[$k]'");
+			
+		}	
+		
+		
+	}
+ 
+}
+?>
+

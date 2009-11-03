@@ -105,12 +105,12 @@ class arrangement extends FacultyService
 			$rank2=$db->record['rank'];
 		}
 				
-		//** swapping the ranks
+		//* swapping the ranks
 		$temp=$rank;
 		$rank=$rank2;
 		$rank2=$temp;
 				
-		//**swapping the ranks in DB
+		//* swapping the ranks in DB
 		$db->query("update class_gradebook_entries set rank='$rank' where id_class_gradebook_entries='$id_class_gradebook' and id_classes='$classId'");
 		$db->query("update class_gradebook_entries set rank='$rank2' where id_class_gradebook_entries='$id_class_gradebook_entries[$indexPrev]' and id_classes='$classId'");
 							
