@@ -43,6 +43,7 @@ class gradebook extends FacultyOnlyService {
 		'Add Entry' => 'entry/event=add/',
 		'Rank Entries' => 'arrangement/',
 		'View Grades by Student' => 'gradesbystudent/',
+		'N-X Policy' => 'nxPolicy/',
 		'Build Printable Report' => 'report/',
 		'Gradebook Setup' => 'main/event=controlPanel/'
 	);
@@ -137,7 +138,7 @@ class gradebook extends FacultyOnlyService {
 //auto-comment		$lc->templateStyle = 'private';
 
 		// repeat student names every ? columns
-		$printNamesEvery = 8;
+		$printNamesEvery = 12;
 		$printHeadersEvery = 13;
 		$droppedStudentRowColor = '#ffa6a6';
 
@@ -181,8 +182,7 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 		//associate vals and students based on a number of criteria
 		// (dropped, due date ...)
 		$gradebook->setStudentVals();
-
-
+		
 		$gradebook->calculateEntryWeights();
 		$gradebook->calculateWeightedAverages();
 		$gradebook->calculatePercentScores();
@@ -241,14 +241,12 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 
 		$columnHeaders[] = 'Total';
 
-
 		// Get each student grades while finishing up the table data
 		reset($gradebook->students);
 		while ( list($username,$stud) = @each($gradebook->students) ) {
 
 			$row = array();  // array of cells to be pushed onto table[]
-
-
+			
 			// build the student's row. start with their name.
 			$counter = $printNamesEvery;
 			$row[] = '<a target="_parent" href="'.modurl('entry/event=showGrdbyStu/user='.$stud->username).'">'.$stud->lastname.', '.$stud->firstname.'</a>';
@@ -285,6 +283,8 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 					} else { 
 						$pct = sprintf('%.2f',$stud->vals[$entid]->score / $entry->totalPoints * 100);
 						$text = $stud->vals[$entid]->score.' / '.$pct.'%';
+						if($stud->vals[$entid]->flag ==1 )
+							$text="<div style='background:#FAAAAF'>".$text."</div>";
 					}
 
 					//this needs to be different for percentage classes, 
@@ -316,8 +316,8 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 				} else {
 */
 				//edit single should work for both assessments and assignments
-				$row[] = popup( modurl('entry/').'event=editSingle/entid='
-					.$entid.'/user='.$username, 200, 400, $text );
+			$row[] = popup( modurl('entry/').'event=editSingle/entid='
+				.$entid.'/user='.$username, 200, 400, $text );
 
 				$counter--;
 				if ( $counter == 0 ) {
@@ -327,7 +327,7 @@ if (count($gradebook->students)%$printHeadersEvery ==0) {
 					$counter = $printNamesEvery;  // reset counter
 				}
 			}
-
+	
 /**
 *
 I am putting in a hack here that basically says this
@@ -338,12 +338,14 @@ won't show any grade
 note: i'm usinga terany if block becuase its inline.
 */
 			// push on the total points
+			
 			if ( $stud->isWithdrawn() ) {
 				$currRow = 'Withdrawn';
 			} else {
 				if ( $gradebook->calculationType == 1 ) {
 					$currRow = $stud->weightedAverage.'% ';
 					if (($stud->possiblePoints) ) {
+						//print_r();
 						$currRow .= '/ '.$gradebook->getLetterGrade($stud->weightedAverage,$stud->possiblePoints);
 					}
 				} else {
@@ -362,6 +364,7 @@ note: i'm usinga terany if block becuase its inline.
 			}
 
 			$table[] = $row;
+			
 		}
 
 		$t['table'] = $table;
