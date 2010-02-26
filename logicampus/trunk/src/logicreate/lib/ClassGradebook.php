@@ -347,15 +347,14 @@ class ClassGradebook extends ClassGradebookBase {
 			$where .= ' and id_class_gradebook_categories="'.$this->filterCategory.'"';
 		if ( !$getUnpublished )
 			$where .= ' and publish_flag=1';
-
+		$where.=' order by rank';
 		$entries = ClassGradebookEntriesPeer::doSelect( $where );
-
 		//natural sort the names
 		$cnt = count($entries);
 		for ( $i=0; $i<$cnt; $i++ ) {
 			$sortTheEntries[$i] = $entries[$i]->gradebookCode;
 		}
-		natsort($sortTheEntries);
+		//natsort($sortTheEntries);
 		while ( list($ordinal,$id) = @each($sortTheEntries) ) {
 			$this->entries[$entries[$ordinal]->idClassGradebookEntries] = $entries[$ordinal];
 		}
@@ -484,6 +483,22 @@ class ClassGradebook extends ClassGradebookBase {
 		}
 		return $cats;
 	}
+	
+	function loadCategoryListFlag($id_classes)
+	{
+		$sql = "SELECT *
+		from class_gradebook_categories
+		where id_classes='$id_classes' and flag='1'";        
+		$db = DB::getHandle();
+		$db->RESULT_TYPE = MYSQL_ASSOC;
+		$db->query($sql);
+
+		$cats = array();
+		while($db->nextRecord() ) {
+			$cats[$db->record['id_class_gradebook_categories']] = $db->record['label'];
+		}
+		return $cats;
+	}
 
 
 	/**
@@ -494,7 +509,8 @@ class ClassGradebook extends ClassGradebookBase {
 	 * is responsible for a certain grade.  This function will apply
 	 * appropriate vals to each student.
 	 */
-	function setStudentVals() {
+	/*function setStudentVals() {
+		
 		$now = time();
 
 //print "<!-- SET STUDENT VALS START -->\n";
@@ -503,11 +519,21 @@ class ClassGradebook extends ClassGradebookBase {
 #print_r($this->vals);
 //print "--> \n";
 
-
+		$classId = $this->idClasses;
+		
+		
+			
+			$categories_1=array();
+			$categories_1=$this->loadCategoryListFlag($classId);
+			//print_r($categories_1);
+			
+			
 
 		foreach($this->vals as $valId=>$valObj) {
 
+			
 			$entry = $this->entries[$valObj->idClassGradebookEntries];
+			//print_r($entry);
 			$j = $valObj->studentId;
 			$student = $this->students[$j];
 			if ( strtolower(get_class($student)) != 'classgradebookstudent' ){
@@ -520,6 +546,7 @@ class ClassGradebook extends ClassGradebookBase {
 				$this->students[$j]->vals[$entry->idClassGradebookEntries] = $valObj;
 				continue;
 			}
+			
 			if (($entry->dateDue > 0 && $entry->dateDue < $now) || strlen($valObj->score) > 0 ) {
 				//date due is passed, assign points or 0 to student
 				// fixed - mgk 12/9/03
@@ -537,7 +564,11 @@ class ClassGradebook extends ClassGradebookBase {
 				$this->students[$j]->possiblePoints += $entry->totalPoints;
 				#$this->students[$valObj->username]->totalPointsEarned += $valObj->score;
 				$this->students[$j]->totalPointsEarned += $valObj->score;
+				//print_r($valObj->score);
+				
 			}
+			
+			//print_r($this->students[$j]->totalPointsEarned);
 		}
 
 
@@ -562,9 +593,102 @@ class ClassGradebook extends ClassGradebookBase {
 		*/
 
 
+	//	$this->dropGrades();
+//	}
+		
+		
+		function setStudentVals() {
+		
+		$now = time();
+			
+			$categories_1=array();
+			//loading flaged categories
+			$categories_1=$this->loadCategoryListFlag($this->idClasses);
+
+			$catIdFlag=array_keys($categories_1);
+				
+			$total=array();
+			 $flag=0;		
+			 $std=array();
+			foreach($this->vals as $valId=>$valObj)
+			{
+				$entry = $this->entries[$valObj->idClassGradebookEntries];				
+				$j = $valObj->studentId;
+				$student = $this->students[$j];
+				
+				
+				if ( strtolower(get_class($student)) != 'classgradebookstudent' )
+				{
+					continue;
+				}
+				 
+				 $totalEarned=0;
+				 $EntriesTotal=0;
+				 		 
+				 $earned=0;
+				 $per=0;
+				 $totalCatFlaged=0;
+				 $entriesNotFlaged = 0;
+																	
+					if (($entry->dateDue > 0 && $entry->dateDue < $now) || strlen($valObj->score) > 0)
+					{
+						for($d=0;$d<count($catIdFlag);$d++)
+				 	 {
+						if($entry->idClassGradebookCategories == $catIdFlag[$d])
+				  	  {	
+				  	  	$flag=1;
+						$this->students[$j]->possiblePoints += $entry->totalPoints;
+						if($valObj->flag == 1)
+						{
+							
+							$total[$j] += $entry->totalPoints;							
+							$earned=$this->students[$j]->totalPointsEarned += $valObj->score;
+												
+						}
+												
+						if($valObj->flag == 0)
+						{							
+							$entriesNotFlaged+=$entry->totalPoints;
+						}	
+						
+						$EntriesTotal=$total[$j]+$entriesNotFlaged;						
+					
+					}
+					else 
+					{
+							$total_0[$j] += $valObj->score;
+					}
+					
+				  }
+				 	$possiblePoints[$j] +=$entry->totalPoints;
+					$totalPointsEarned[$j] += $valObj->score;
+				}
+				
+					$this->students[$j]->vals[$entry->idClassGradebookEntries] = $valObj;
+					
+					if(in_array($valObj->studentId,$std) == 0)
+				{
+					array_push($std,$valObj->studentId);
+				}
+			}
+						
+				foreach($std as $s)
+				{
+					if($flag == 1)
+					{
+						$this->students[$s]->totalPointsEarned = (($this->students[$s]->totalPointsEarned / $total[$s]) * $this->students[$s]->possiblePoints)+$total_0[$s];
+					}
+					else
+					{
+						$this->students[$s]->possiblePoints = $possiblePoints[$s];
+						$this->students[$s]->totalPointsEarned = $totalPointsEarned[$s];
+					}
+				}
+			
+
 		$this->dropGrades();
 	}
-
+		
 
 	/**
 	 * Load all val objects for this class id
@@ -582,8 +706,9 @@ class ClassGradebook extends ClassGradebookBase {
 			// mgk 2/8/04
 			// karen richardson student (and others) had data not showing up
 			// due to this bug.
-			$valObj->username = strtolower($valObj->username);
+			$valObj->username = strtolower($valObj->username);			
 			$this->vals[$valObj->idClassGradebookVal] = $valObj;
+			
 		}
 	}
 
@@ -903,7 +1028,7 @@ class ClassGradebook extends ClassGradebookBase {
 			foreach ( $this->students as $username => $stuObj )
 			{
 				if ( $stuObj->isWithdrawn() ) { continue; }
-
+				
 				$score = $this->students[$username]->totalPointsEarned;
 				$poss = $this->students[$username]->possiblePoints;
 //print "<!-- ".$score. " / ". $poss. " -->\n";
