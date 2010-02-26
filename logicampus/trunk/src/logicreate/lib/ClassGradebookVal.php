@@ -14,6 +14,7 @@ class ClassGradebookValBase {
 	var $comments;
 	var $dateCreated;
 	var $dateModified;
+	var $flag;
 
 	var $__attributes = array( 
 	'idClassGradebookVal'=>'integer',
@@ -23,7 +24,8 @@ class ClassGradebookValBase {
 	'score'=>'float',
 	'comments'=>'longvarchar',
 	'dateCreated'=>'integer',
-	'dateModified'=>'integer');
+	'dateModified'=>'integer',
+	'flag'=>'integer');
 
 	var $__nulls = array( 
 	'score'=>'score',
@@ -124,8 +126,8 @@ class ClassGradebookValPeerBase {
 		$st->fields['comments'] = 'comments';
 		$st->fields['date_created'] = 'date_created';
 		$st->fields['date_modified'] = 'date_modified';
-
-
+		$st->fields['flag'] = 'flag';
+	
 		$array = array();
 		$db->executeQuery($st);
 		while($db->nextRecord() ) {
@@ -146,6 +148,7 @@ class ClassGradebookValPeerBase {
 		$st->fields['comments'] = $this->comments;
 		$st->fields['date_created'] = $this->dateCreated;
 		$st->fields['date_modified'] = $this->dateModified;
+		$st->fields['flag'] = $this->flag;
 
 		$st->nulls['score'] = 'score';
 		$st->nulls['comments'] = 'comments';
@@ -172,6 +175,7 @@ class ClassGradebookValPeerBase {
 		$st->fields['comments'] = $obj->comments;
 		$st->fields['date_created'] = $obj->dateCreated;
 		$st->fields['date_modified'] = $obj->dateModified;
+		$st->fields['flag'] = $obj->flag;
 
 		$st->nulls['score'] = 'score';
 		$st->nulls['comments'] = 'comments';
@@ -240,6 +244,7 @@ class ClassGradebookValPeerBase {
 		$x->comments = $row['comments'];
 		$x->dateCreated = $row['date_created'];
 		$x->dateModified = $row['date_modified'];
+		$x->flag = $row['flag'];
 
 		$x->_new = false;
 		return $x;
