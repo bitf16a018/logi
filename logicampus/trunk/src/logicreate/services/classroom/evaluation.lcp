@@ -1,0 +1,99 @@
+<?php
+/*
+ * Created on Dec 4, 2009
+ */
+ 
+ 
+ class evaluation extends StudentService
+ {
+ 	
+ 	var $presentor='htmlPresentation';
+
+	var $sectionTitle = 'Evaluation';
+	var $inactivelinks = array('Evaluation');
+ 	
+ 	function run(&$db,&$u,&$lc,&$t)
+ 	{
+ 		$lc->templateName='evaluation';
+ 		
+ 		$flag=0;
+ 		$today=date("Y-m-d",time());
+ 		 		
+ 		$db->query("SELECT * FROM evaluationform_flag WHERE flag='1' AND eval_form='form1'" .
+ 					"AND (START<'".$today."' AND END>'".$today."') " .
+ 					"OR(START='".$today."' OR END='".$today."')");
+ 		if($db->nextRecord())
+ 		{
+ 			$flag=1;
+ 		}
+ 		
+ 		if($flag == 1)
+ 		{
+
+			$classId=$u->activeClassTaken->id_classes;
+ 			$userId=$u->userId;
+ 			
+ 			$record=array();
+ 			
+ 			$db->query("select * from student_evaluation_form where id_classes='$classId' and student_id='$userId'");
+ 			while($db->nextRecord())
+ 			{
+ 				array_push($record,$db->record);
+ 			}
+ 			
+ 			$quests=array();
+ 			$db->query("select * from evaluation_form");
+ 			while($db->nextRecord())
+ 			{
+ 				array_push($quests,$db->record);
+ 			}
+ 		
+			$t['quests']=$quests;
+			$t['record']=$record;
+			$t['flag']=$flag;
+			
+			
+ 		}
+ 		else
+ 		{
+ 			$t['msg']="Sorry, the form can not be visible to you in the current dates.";
+ 		}
+ 		
+ 	}
+ 	
+ 	function evaluateRun(&$db,&$u,&$lc,&$t)
+ 	{
+ 				
+ 		$classId=$u->activeClassTaken->id_classes;
+ 		$userId=$u->userId;
+ 		 		
+ 		$totalQuest=$lc->postvars['hidden'];
+ 		 		
+ 		for($i=1;$i<=$totalQuest;$i++)
+ 		{
+ 			$value=$lc->postvars['quest'.$i];	
+ 			$value=explode('.',$value);
+ 		
+ 			$db->query("select * from student_evaluation_form " .
+ 						"where id_classes='$classId' and serial_no='$value[2]' and student_id='$userId'");
+ 			if($db->nextRecord())
+ 			{
+ 				
+ 				$db->query("update student_evaluation_form set rank='$value[0]' where id_classes='$classId' " .
+ 							"and student_id='$userId' and serial_no='$value[2]'");
+ 				
+ 			}
+ 			else
+ 			{
+ 				$db->query("insert into student_evaluation_form (student_id,id_classes,serial_no,rank)" .
+ 							"values('$userId','$classId','$value[2]','$value[0]')");
+ 			}
+	
+ 		}
+ 		
+ 		$t['msg']="Sucessfully saved.";
+ 		$this->run(&$db,&$u,&$lc,&$t);
+ 	}
+ }
+ 
+?>

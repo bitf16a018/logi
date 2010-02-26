@@ -1,0 +1,189 @@
+<?=$t['sectionheader'];?>
+
+<?php if ( $t['msg'] ) { ?>
+	<p style="color:blue;"><?=$t['msg'];?></p>
+<?php } ?>
+<?php if ( $t['error'] ) { ?>
+	<p style="color:red;"><?=$t['error'];?></p>
+<?php } ?>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+<!--
+ * Created on Oct 15, 2009
+ -->
+ <head>
+  <title>createEvalForm</title>
+  <script language="JavaScript" type="text/javascript">
+  
+      
+        function checkQuestion()
+		{
+			var quest=document.getElementById("question").value;
+			//alert("hello"+quest);
+			
+			if( quest == 0 )
+			{
+					alert("Write in a question and then press submit button.");
+					return false;
+			}
+			else
+			{
+				var reply=confirm("Are you sure to submit the following questions?\n"+quest);
+				if(reply)
+				{
+					return true;
+				}
+				return false;
+			}
+			
+		}
+		
+		function confirmFinal()
+		{
+			var reply=confirm("Are you sure to finalise the questions?");
+			if(reply)
+			{
+				return true;
+			}
+			return false;			
+		}
+		
+		function check(e)
+		{
+			var key;
+			var keychar;
+		
+			if (window.event)
+		   		key = window.event.keyCode;
+		   	keychar = String.fromCharCode(key);
+				
+			if ((("0123456789").indexOf(keychar) > -1))
+		   		return true;
+			else
+		   		return false;
+		}
+		
+		function deleteQuestion()
+		{
+			var reply=confirm("Are you sure to delete the question?");
+			if(reply)
+			{
+				return true;
+			}
+			return false;
+		}	
+		
+		
+  		
+  </script>
+    
+ </head>
+ <body>
+ 	<? if($t['flag']== 0){?>
+ 	<form method="post" action="<?=appurl('administration/createEvalForm/event=addQuestion')?>" name="questForm" onSubmit="return checkQuestion();">
+ 		<table>
+ 			<tr>
+ 				<!--<td><strong>Put your questions<strong></td>-->
+ 			</tr>
+ 			<tr><td>&nbsp;</td></tr>
+ 			<tr>
+ 				<td><strong>Question:<strong></td>
+ 				<td><textarea name="question" rows="4" cols="20" id="question"><?=$t['tempQuest']?></textarea></td>
+ 				<td>Please, enter question.</td>
+ 			</tr>
+ 			<tr>
+ 				<td><strong>Weightage:<strong></td>
+ 				<td><input type="text" name="percentage" value="<?=$t['weight']?>" onKeyPress="return check(event);"></td>
+ 				<td>Please, provide the percentage of this question. (Note: Overall percentage is 100%)</td>
+ 			</tr>
+ 			<tr><td>&nbsp;</td></tr>
+ 			<input type="hidden" name="hiddenserial" value="<?=$t['srno']?>"/>
+ 			<tr><td><input type="submit" value="Submit" /></td></tr>
+ 			<tr><td>&nbsp;</td></tr>
+ 			</table>
+ 	</form>	
+ 		<?}?>
+ 		<?php
+ 		
+ 			$questions=$t['question'];
+ 			$i=1;
+ 		
+ 		?>
+ 		
+ 		<hr>
+ 		<form action="<?= appurl('administration/createEvalForm/event=final')?>" method="post" name="viewForm">
+ 		<table border=1>
+ 				
+				<tr>
+					<td><strong>Question No.</strong></td>
+					<td><strong>Question</strong></td>
+					<td><strong>Weight</strong></td>
+					<?if($t['evalFlag']  == 0){?>
+					<td><strong>Excellent</strong></td>
+					<td><strong>Very Good</strong></td>
+					<td><strong>&nbsp;&nbsp;&nbsp;Good&nbsp;&nbsp;&nbsp;</strong></td>
+					<td><strong>Satisfactory</strong></td>
+					<td><strong>Unatisfactory</strong></td>
+					<?}?>
+					<!--<td>&nbsp;</td>-->
+					<!--<td><strong>Visibility</strong></td>-->
+				</tr>
+					
+				<?
+				foreach($questions as $q) 				
+ 				{
+ 					print_r("<tr>");
+ 					//print_r("<td>".$i."</td>");
+ 				?>
+ 					<td align="center"><?=$i?></td>
+ 					<input type="hidden" name="hiddensn<?=$i?>" value="<?=$q[serial_no]?>"/>
+ 					<!--<td><input type="text" name="qn<?=$i?>" value="<?=$q[question]?>" readonly></td>-->
+ 					<td><?=$q[question]?></td>
+ 					<!--<td align="center"><input type="text" name="weight<?=$i?>" value="<?=$q[weightage]?>" size="4" readonly"/></td>-->
+ 					<td><?=$q[weightage]?></td>
+ 					<?if($t['evalFlag']  == 0){?>
+ 					<td align="center"><a href="createEvalForm/event=update/data=<?=$q[serial_no].".".$q[excellent]."."."excellent"?>"><?if($q[excellent]){echo "delete";}else{echo "add";}?></a></td>
+ 					<td align="center"><a href="createEvalForm/event=update/data=<?=$q[serial_no].".".$q[very_good]."."."very_good"?>"><?if($q[very_good]){echo "delete";}else{echo "add";}?></a></td>
+ 					<td align="center"><a href="createEvalForm/event=update/data=<?=$q[serial_no].".".$q[good]."."."good"?>"><?if($q[good]){echo "delete";}else{echo "add";}?></a></td>
+ 					<td align="center"><a href="createEvalForm/event=update/data=<?=$q[serial_no].".".$q[satisfactory]."."."satisfactory"?>"><?if($q[satisfactory]){echo "delete";}else{echo "add";}?></a></td>
+ 					<td align="center"><a href="createEvalForm/event=update/data=<?=$q[serial_no].".".$q[unsatisfactory]."."."unsatisfactory"?>"><?if($q[unsatisfactory]){echo "delete";}else{echo "add";}?></a></td>
+ 					<td align="center"><a href="createEvalForm/event=editQuestion/id=<?=$q[serial_no]?>">edit</a>&nbsp;/&nbsp;<a href="createEvalForm/event=delete/id=<?=$q[serial_no]?>" onClick="return deleteQuestion();">delete</a></td>
+ 					<?}?>	 					
+ 				<!--	<td align="center"><input type="checkbox" name="visibility[]" id="visibility" value="<?=$i?>" --><?//if($q[visible]){echo "checked";}?>
+ 					 					 
+ 				<?	print_r("</tr>");
+ 					$i++;
+ 					$k++;
+ 				}
+ 				
+ 				?>
+ 				
+ 		</table>
+ 				
+ 		<!--<table>
+ 			<tr><td>&nbsp;</td></tr>
+ 			<tr>
+ 				<td width="300">&nbsp;<td>
+ 				<td><input type="submit" name="submitWeight" value="Submit"/></td>
+ 			</tr>
+  		</table>	-->
+ 		<table>
+  			<tr><td>&nbsp;</td></tr>
+    		<tr><td>&nbsp;</td></tr>
+   			<tr>
+ 				<td>&nbsp;</td>
+ 				<td>&nbsp;</td>
+ 				<?if($t['flag'] != 0){?>
+ 				<td><input type="submit" name="finalized" value="Finalize and make it visible to students" onClick="return confirmFinal()"/></td>
+ 				<?}else{?>
+ 				<td><input type="submit" name="finalized" value="Finalize and make it visible to students" disabled/></td>
+ 				<?}?>
+ 				<td>Note: You can finalize only when, overall weightage, 100% is completely distributed.</td>	
+ 			</tr>
+ 			
+ 		</table>
+ 		</form>
+   </body>
+
+</html>

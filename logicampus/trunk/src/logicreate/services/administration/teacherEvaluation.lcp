@@ -1,0 +1,183 @@
+<?php
+/*
+ * Created on Dec 15, 2009
+ *
+ */
+
+
+class teacherEvaluation extends AdminService
+{
+
+	var $presentor = "htmlPresentation";
+	var $cleanedArray = array();  # used for forms
+	var $authorizer = 'NoAuth';
+
+	// links
+	var $sectionTitle = 'Teacher Evaluation';
+	var $navlinks = array('Administration Home' => '');
+	//var $applinks = array('Student Visible Dates' => 'studentVisibleDates/');
+	
+	
+
+	function run($db,&$u,&$lc,&$t)
+	{
+		
+		$this->sectionTitle = 'Teacher Evaluation';
+		$this->inactivelinks = array( 'Teacher Evaluation' );
+		$lc->templateName='teacherEvaluation';
+		
+		$semRecord=array();
+		
+		$db->query("select * from  semesters");
+		while($db->nextRecord())
+		{
+				array_push($semRecord,$db->record);
+		}
+		
+		
+		
+		$t['semRecord']=$semRecord;
+ 
+	}
+	
+	function teacherRun($db,&$u,&$lc,&$t)
+	{
+			
+		$semesterId=$lc->postvars['semester'];
+			
+		$semesterEx=explode('.',$semesterId);
+		
+		$id=array();
+		$names=array();
+		$s=$semesterEx[0];
+		$db->query("select c.*,concat(p.firstname,' ',p.lastname) as name from classes as c, profile as p " .
+					"where c.id_semesters='$s' and c.facultyId=p.username order by p.firstname");
+		while($db->nextRecord())
+		{
+			array_push($id,$db->record);
+			array_push($names,$db->record['name']);
+		}
+						 		
+		$t['semesterSel']=$semesterEx[1]." ".$semesterEx[2];
+		$t['flog']=1;
+		$t['ids']=$id;
+		$t['names']=$names;
+		$t['semesterId']=$semesterId;
+		
+		
+		$this->run($db,&$u,&$lc,&$t);
+	}
+	
+	function recordRun($db,&$u,&$lc,&$t)
+	{
+		$flag=1;
+		
+		$rec=$lc->getvars['rec'];
+		$rec=explode('|',$rec);
+		$semRecord=array();
+		
+		$db->query("select c.*,s.id_semesters, s.semesterTerm,s.semesterYear,concat(p.firstname,' ',p.lastname) as name " .
+					"from classes c,semesters s,profile p " .
+					"where s.id_semesters=c.id_semesters and p.username=c.facultyId" .
+					" and c.facultyId='".$rec[2]."' and c.id_courses='".$rec[1]."' and c.id_classes='".$rec[0]."'");
+				
+			
+		if($db->nextRecord())
+		{
+			$header=$db->record;
+		}
+		
+		$t['header']=$header;
+		$t['flag']=$flag;
+		
+		$this->evaluationRun($db,&$u,&$lc,&$t,$header[id_semesters],$header[id_classes]);
+		
+		$lc->postvars['semester'] = $rec[3];
+		$this->teacherRun($db,&$u,&$lc,&$t);
+		
+	}
+	
+	function evaluationRun($db,&$u,&$lc,&$t,$id_semester,$id_classes)
+	{
+					
+		//getting the serial number of questions and their respective weightage
+		$evalForm=array();
+		$countEval=0;
+		
+		$db->query("select * from evaluation_form");
+		while($db->nextRecord())
+		{
+			array_push($evalForm,$db->record);	
+			$countEval++;
+		}
+		
+		$option=array();
+		foreach($evalForm as $e)
+		{
+			if($e['excellent'])
+				$option[$e[serial_no]][count]++;
+			if($e['very_good'])
+				$option[$e[serial_no]][count]++;
+			if($e['good'])
+				$option[$e[serial_no]][count]++;
+			if($e['satisfactory'])
+				$option[$e[serial_no]][count]++;
+			if($e['unsatisfactory'])
+				$option[$e[serial_no]][count]++;
+			
+		}
+		
+				
+		//getting the data(ids of students) from student_evaluation_form
+		$totalStud=0;
+		$studIds=array();
+		$db->query("select * from student_evaluation_form where id_classes='$id_classes' group by student_id");
+		while($db->nextRecord())
+		{
+			array_push(	$studIds,$db->record);
+			$totalStud++;
+		}
+		
+		$score=0;
+		$rep=array();
+		foreach($evalForm as $e)
+		{
+				
+				$score=0;
+				foreach($studIds as $id)
+				{
+					$db->query("select rank from student_evaluation_form " .
+								"where id_classes='$id_classes' and serial_no='".$e[serial_no]."' and student_id='".$id[student_id]."'");
+					if($db->nextRecord())
+					{
+						$score=$score+$db->record['rank'];			
+					}		
+				}
+				$rep[$e[serial_no]]=$score;
+				
+		}
+		
+			
+		$average=array();
+		$i=0;
+		foreach($evalForm as $e)
+		{
+			$val=0;
+			$val=$e[weightage]/$option[$e[serial_no]][count];
+			$average[$i]=($rep[$e[serial_no]] * $val)/($totalStud * $e[weightage]);
+			$i++;
+		}
+				
+		$t['average']=$average;
+		$t['fleeg']=1;
+		$t['flog']=1;
+		
+	}
+}
+
+
+
+?>
+
+
+

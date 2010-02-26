@@ -1,0 +1,111 @@
+<?=$t['sectionheader'];?>
+
+<?php if ( $t['msg'] ) { ?>
+	<p style="color:blue;"><?=$t['msg'];?></p>
+<?php } ?>
+<?php if ( $t['error'] ) { ?>
+	<p style="color:red;"><?=$t['error'];?></p>
+<?php } ?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+<!--
+ * Created on Dec 4, 2009
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+-->
+ <head>
+  <title>evaluation form</title>
+  
+  <script language="JavaScript" type="text/javascript">
+	function checkQuestion(i)
+	{
+		var k = 0;
+		for(k=1; k < i; k++)
+		{	
+			var flag = false;
+			for (var l=0; l < 5; l++)
+   			{				
+   				var ques = document.getElementById('quest'+k+l).checked;
+   				if(ques)
+				{
+					flag =  true;
+					break;
+				}
+   			}
+   			if(!flag)
+   			{
+   			 	alert("Select At Least One Choice From Each Question");
+   			 	return false;
+   			}
+   			
+		}
+		document.getElementById("form1").submit();
+	}
+			
+  </script>
+  
+ </head>
+ <body>
+ 		<?php
+ 			$quests=$t['quests'];
+ 			$record=$t['record'];
+ 		?>
+ 		
+		<form action="<?=appurl('classroom/evaluation/event=evaluate')?>" method="post" name="form1" id="form1">
+			<?php if($t['flag'] == 1){?>
+			<table border='1'>
+				<tr>
+					<td><strong>Question No.</strong></td>
+					<td><strong>Question</strong></td>
+					<td><strong>Excellent</strong></td>
+					<td><strong>Very Good</strong></td>
+					<td><strong>Good</strong></td>
+					<td><strong>Satisfactory</strong></td>
+					<td><strong>Unsatisfactory</strong></td>
+				</tr>
+				
+					
+					<?php
+						$i=1;
+						foreach($quests as $q)
+						{
+							$j = 0;
+					?>
+					<tr>
+						<td align="center"><?=$i?></td>
+						<td><?=$q[question]?></td>
+						<td align="center"><input type="radio" name="quest<?=$i?>" id = "quest<?=$i.$j?>"  value="5.excellent.<?=$q[serial_no]?>" <?if($q[excellent]== 0){echo "DISABLED";} if($record[$i-1][rank] == 5){echo "CHECKED";}?>/></td>
+						<?$j++?>
+						<td align="center"><input type="radio" name="quest<?=$i?>" id = "quest<?=$i.$j?>" value="4.verygood.<?=$q[serial_no]?>" <?if($q[very_good]== 0){echo "DISABLED";}if($record[$i-1][rank] == 4){echo "CHECKED";}?>/></td>
+						<?$j++?>
+						<td align="center"><input type="radio" name="quest<?=$i?>" id = "quest<?=$i.$j?>" value="3.good.<?=$q[serial_no]?>" <?if($q[good]== 0){echo "DISABLED";}if($record[$i-1][rank] == 3){echo "CHECKED";}?>/></td>
+						<?$j++?>
+						<td align="center"><input type="radio" name="quest<?=$i?>" id = "quest<?=$i.$j?>" value="2.satisfactory.<?=$q[serial_no]?>" <?if($q[satisfactory]== 0){echo "DISABLED";}if($record[$i-1][rank] == 2){echo "CHECKED";}?>/></td>
+						<?$j++?>
+						<td align="center"><input type="radio" name="quest<?=$i?>" id = "quest<?=$i.$j?>" value="1.unsatisfactory.<?=$q[serial_no]?>" <?if($q[unsatisfactory]== 0){echo "DISABLED";}if($record[$i-1][rank] == 1){echo "CHECKED";}?>/></td>
+					</tr>	
+					<?	
+						$i++;
+						}
+						
+					?>
+					
+			</table>
+			<table>
+				<input type="hidden" name="hidden" value="<?=$i-1?>"/>
+				<tr><td>&nbsp;</td></tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><input type="button" name="submitBtn" value="Save" onClick = "return checkQuestion(<?=$i?>)"/></td>
+				</tr>
+			</table>
+			<?}?>
+		</form>
+		 		
+ </body>
+</html>

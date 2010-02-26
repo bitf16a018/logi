@@ -1,0 +1,216 @@
+<?=$t['sectionheader'];?>
+
+<?php if ( $t['msg'] ) { ?>
+	<p style="color:blue;"><?=$t['msg'];?></p>
+<?php } ?>
+<?php if ( $t['error'] ) { ?>
+	<p style="color:red;"><?=$t['error'];?></p>
+<?php } ?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+<!--
+ * Created on Dec 1, 2009
+ -->
+ <head>
+  <title> </title>
+ </head>
+ <body>
+ <?php
+ $sdate=array();
+ $edate=array();
+ $sdate=$t['sdate'];
+ $edate=$t['edate'];
+ ?>
+ 
+ <form action="<?=appurl('administration/studentVisibleDates/event=date')?>" method="post" name="dateForm">
+ <table>
+ <tr><td colspan="2" valign="top" class="tabletitle">Visibility Dates</td></tr>
+	<tr><td colspan="2" valign="top" class="instructions">instructions: Enter the begining and ending date for the visibility of the form.
+</td></tr>
+	
+	<tr><td valign="top" class="">Visibility Start Date</td><td valign="top" class="">
+<select name='dateStart[month]'>	
+	<?if($sdate[0] == "January" ){?>
+	<option value="1" SELECTED>January</option>
+	<?}else{?>
+		<option value="1">January</option>
+	<?}if($sdate[0] == "February"){?>
+	<option value="2" SELECTED>February</option>
+	<?}else{?>
+		<option value="2">February</option>
+	<?}if($sdate[0] == "March"){?>
+	<option value="3" SELECTED>March</option>
+	<?}else{?>
+		<option value="3">March</option>
+	<?}if($sdate[0] == "April"){?>
+	<option value="4" SELECTED>April</option>
+	<?}else{?>
+		<option value="4">April</option>
+	<?}if($sdate[0] == "May"){?>
+	<option value="5" SELECTED>May</option>
+	<?}else{?>
+		<option value="5">May</option>
+	<?}if($sdate[0] == "June"){?>	
+	<option value="6" SELECTED>June</option>
+	<?}else{?>
+		<option value="6">June</option>
+	<?}if($sdate[0] == "July"){?>	
+	<option value="7" SELECTED>July</option>
+	<?}else{?>
+		<option value="7">July</option>
+	<?}if($sdate[0] == "August"){?>	
+	<option value="8" SELECTED>August</option>
+	<?}else{?>
+		<option value="8">August</option>
+	<?}if($sdate[0] == "September"){?>	
+	<option value="9" SELECTED>September</option>
+	<?}else{?>
+		<option value="9">September</option>
+	<?}if($sdate[0] == "October"){?>	
+	<option value="10" SELECTED>October</option>
+	<?}else{?>
+		<option value="10">October</option>
+	<?}if($sdate[0] == "November"){?>	
+	<option value="11" SELECTED>November</option>
+	<?}else{?>
+		<option value="11">November</option>
+	<?}if($sdate[0] == "December"){?>	
+	<option value="12" SELECTED>December</option>
+	<?}else{?>
+		<option value="12">December</option>
+	<?}?>
+</select>
+
+<select name='dateStart[day]'>	
+<?php
+
+	for($i=1;$i<=31;$i++)
+	{
+			if($sdate[1] == $i)
+			{
+				print_r("<option value=".$i." SELECTED>".$i."</option>");
+			}
+			else
+			{
+				print_r("<option value=".$i.">".$i."</option>");
+			}
+	}
+?>
+</select>
+<select name='dateStart[year]'>
+<?php
+	
+	for($j=2009;$j<=2020;$j++)
+	{
+			if($sdate[2] == $j)
+			{
+				print_r("<option value=".$j." SELECTED>".$j."</option>");
+			}
+			else
+			{
+				print_r("<option value=".$j.">".$j."</option>");
+			}
+	}
+?>
+</select>
+
+</td>
+</tr>
+
+<tr><td valign="top" class="">Visibility End Date</td><td valign="top" class="">
+<select name='dateEnd[month]'>	
+	<?if($edate[0] == "January" ){?>
+	<option value="1" SELECTED>January</option>
+	<?}else{?>
+		<option value="1">January</option>
+	<?}if($edate[0] == "February"){?>
+	<option value="2" SELECTED>February</option>
+	<?}else{?>
+		<option value="2">February</option>
+	<?}if($edate[0] == "March"){?>
+	<option value="3" SELECTED>March</option>
+	<?}else{?>
+		<option value="3">March</option>
+	<?}if($edate[0] == "April"){?>
+	<option value="4" SELECTED>April</option>
+	<?}else{?>
+		<option value="4">April</option>
+	<?}if($edate[0] == "May"){?>
+	<option value="5" SELECTED>May</option>
+	<?}else{?>
+		<option value="5">May</option>
+	<?}if($edate[0] == "June"){?>	
+	<option value="6" SELECTED>June</option>
+	<?}else{?>
+		<option value="6">June</option>
+	<?}if($edate[0] == "July"){?>	
+	<option value="7" SELECTED>July</option>
+	<?}else{?>
+		<option value="7">July</option>
+	<?}if($edate[0] == "August"){?>	
+	<option value="8" SELECTED>August</option>
+	<?}else{?>
+		<option value="8">August</option>
+	<?}if($edate[0] == "September"){?>	
+	<option value="9" SELECTED>September</option>
+	<?}else{?>
+		<option value="9">September</option>
+	<?}if($edate[0] == "October"){?>	
+	<option value="10" SELECTED>October</option>
+	<?}else{?>
+		<option value="10">October</option>
+	<?}if($edate[0] == "November"){?>	
+	<option value="11" SELECTED>November</option>
+	<?}else{?>
+		<option value="11">November</option>
+	<?}if($edate[0] == "December"){?>	
+	<option value="12" SELECTED>December</option>
+	<?}else{?>
+		<option value="12">December</option>
+	<?}?>	
+</select>
+<select name='dateEnd[day]'>	
+<?php
+
+	for($i=1;$i<=31;$i++)
+	{
+			if($edate[1] == $i)
+			{
+				print_r("<option value=".$i." SELECTED>".$i."</option>");
+			}
+			else
+			{
+				print_r("<option value=".$i.">".$i."</option>");
+			}
+	}
+?>	
+</select>
+
+<select name='dateEnd[year]'>	
+<?php
+	
+	for($j=2009;$j<=2020;$j++)
+	{
+			if($edate[2] == $j)
+			{
+				print_r("<option value=".$j." SELECTED>".$j."</option>");
+			}
+			else
+			{
+				print_r("<option value=".$j.">".$j."</option>");
+			}
+	}
+?>	
+</select>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><input type="submit" name="submit" value="Submit"/></td></tr>
+
+ </table>
+ </form>
+ </body>
+</html>
