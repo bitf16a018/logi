@@ -1,0 +1,161 @@
+<?=$t['sectionheader'];?>
+
+<?php if ( $t['msg'] ) { ?>
+	<p style="color:blue;"><?=$t['msg'];?></p>
+<?php } ?>
+<?php if ( $t['error'] ) { ?>
+	<p style="color:red;"><?=$t['error'];?></p>
+<?php } ?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+<!--
+ * Created on Dec 15, 2009
+ -->
+ <head>
+  <title>Teacher Evaluation</title>
+ </head>
+ <script language="JavaScript" type="text/javascript">
+ 	
+ 	function reDirect(rec)
+ 	{
+ 		
+ 		window.location="../teacherEvaluation/event=record/rec="+rec;
+		
+ 	}
+ 	
+ </script>
+  
+ <body>
+ 		<?php
+ 			$semRecord=$t['semRecord'];
+ 			
+ 		?>
+ 		<form action="<?= appurl('administration/teacherEvaluation/event=teacher')?>" method="post" name="formSemester">
+ 		<table>
+ 			<tr>
+ 				<td><strong>View Evaluation :</strong></td>	
+ 				<td><select name="semester">
+    				<?php
+    				
+    				foreach($semRecord as $sem)
+    				{
+    					
+    					if($t['semesterSel']==$sem[semesterTerm]." ".$sem[semesterYear]){?>
+    						
+    						<option value="<?=$sem[id_semesters].".".$sem[semesterTerm].".".$sem[semesterYear]?>" Selected><?=$sem[semesterTerm]." ".$sem[semesterYear]?></option>
+    					<?}else{?>
+    				<option value="<?=$sem[id_semesters].".".$sem[semesterTerm].".".$sem[semesterYear]?>"><?=$sem[semesterTerm]." ".$sem[semesterYear]?></option>
+    				<?}
+    				}?>
+    				</select></td>	
+ 			</tr>
+ 			<tr><td>&nbsp;</td></tr>
+ 			<tr>
+ 				<td>&nbsp;</td>
+ 				<td><input type="submit" name="submit" value="Get List"/></td>
+ 			</tr>
+ 		</table>
+ 		</form>
+ 	
+ 		
+ 		<?php
+ 			$names=$t['names'];
+ 			$ids=$t['ids'];
+ 			$semId=$t['semesterId'];
+ 			$i=0;
+ 			
+ 			if($t['flog']){
+ 		?>
+ 			<hr>
+ 		<form action="<?=appurl('administration/teacherEvaluation/event=record')?>" method="post" name="formRecord">
+ 			<table>
+ 				<tr>
+ 					<td><strong>Serial No.</strong></td>
+ 					<td><strong>Name</strong></td>
+ 				</tr>
+ 				<?php
+ 					$i=1;
+ 					foreach($names as $n)
+ 					{
+ 						print_r("<tr><td align=\"center\">".$i."</td>");
+ 						print_r("<td>".$n."</td>");
+ 				?>
+ 					<td><input type="button" name="view" value="view" onClick="<?echo "reDirect('".$ids[$i-1][id_classes]."|".$ids[$i-1][id_courses]."|".$ids[$i-1][facultyId]."|".$semId."')";?>"/></td></tr>
+ 					<?	
+   					$i++;
+   					}?>
+ 				</tr>
+ 			</table>
+ 		</form>
+ 		
+  		
+ 		
+ 		<?php
+ 			}
+ 			$header=$t['header'];		
+ 			
+ 			if ($t['flag']){
+ 		?>
+ 
+ 			<hr>
+ 			<table>
+ 				<tr>
+ 					<td>Semester:&nbsp;<strong><?=$header[semestserTerm]." ".$header[semesterTear]?></strong></td>
+ 					<td width="850">&nbsp;</td>
+ 					<td>Instructor Name:&nbsp;<strong><?=$header[name]?></strong></td>
+ 				</tr>
+ 				<tr>
+ 					<td>Course:&nbsp;<strong><?=$header[courseFamilyNumber]?></strong></td>
+ 					<td width="850">&nbsp;</td>
+ 					<td>Section Number:&nbsp;<strong><?=$header[sectionNumbers]?></strong></td>
+ 				</tr>
+ 				<tr>
+ 					<td>Clsss Id:&nbsp;<strong><?=$header[id_classes]?></strong></td>
+ 				</tr>
+ 			</table>
+ 			
+ 		<?}?>
+ 		<br>
+ 		<?php
+ 			$average=$t['average'];
+ 			$overall=array();
+ 			$i=1;
+ 			if($t['fleeg']){
+ 		?>	
+ 		
+ 			<table>
+ 				<tr>
+ 				<td><strong>Questions</strong></td>
+ 				<td>&nbsp;</td>
+ 				<td><strong>Percentage</strong></td>
+ 				</tr>
+ 				<?php
+ 					foreach($average as $a)
+ 					{
+				?>
+					<tr>
+					<td align="center">Q<?=$i?></strong></td>
+					<td align="center">----------------</td>
+					<?
+						$overall[$i-1]=($a * 100);
+					?>
+					<td align="center"><?=round($overall[$i-1],2)?></td>
+ 					</tr>
+ 				<?	$i++;
+ 					}?>
+ 					
+ 					<tr><td>&nbsp;</td></tr>
+ 					<tr>
+ 					<td><strong>Overall Percentage:<strong></td>
+ 					<td><strong><?= round(array_sum($overall)/($i-1),2)?>%</strong></td>
+ 					<tr>
+ 					
+ 			</table>
+ 		
+ 		<?}?>
+ </body>
+</html>

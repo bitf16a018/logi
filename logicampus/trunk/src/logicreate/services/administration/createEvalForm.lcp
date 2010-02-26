@@ -1,0 +1,183 @@
+<?php
+/*
+ * Created on Oct 15, 2009
+ */
+ 
+ 
+include_once(LIB_PATH.'rss/simplepie.php');
+//include_once(LIB_PATH.'lc_enrollment.php');
+//include_once(LIB_PATH.'lc_class.php');
+
+
+class createEvalForm extends AdminService
+{
+
+	var $presentor = "htmlPresentation";
+	var $cleanedArray = array();  # used for forms
+	var $authorizer = 'NoAuth';
+
+	// links
+	var $sectionTitle = 'Create Evaluation Form';
+	var $navlinks = array(
+		'Administration Home' => ''
+	);
+	var $applinks = array(
+		'Student Visible Dates' => 'studentVisibleDates/'
+	);
+	
+
+	function run($db,&$u,&$lc,&$t)
+	{
+		
+		
+		$this->sectionTitle = 'Create Evaluation Form';
+		$this->inactivelinks = array( 'Create Evaluation Form' );
+		$lc->templateName='createEvalForm';
+				
+		$evalFlag=0;		
+		$db->query("select flag from evaluationform_flag where eval_form='form1' and flag='1'");
+		if($db->nextRecord())
+		{
+			$evalFlag=$db->record['flag'];
+		}
+		
+		$questions=array();
+				
+		$db->query("select * from evaluation_form");
+		While($db->nextRecord())
+		{
+			array_push($questions,$db->record);
+			
+		}
+		
+		$db->query("select sum(weightage) as sum from evaluation_form");
+		if($db->nextRecord())
+		{
+			$sum=$db->record['sum'];
+		}
+		if($sum == 100)
+		{
+			$t['flag']=1;	
+		}
+		
+		$t['evalFlag']=$evalFlag;
+		$t['question']=$questions;
+	}
+	
+	function addQuestionRun($db,&$u,&$lc,&$t)
+	{
+	
+		$quest=$lc->postvars['question'];
+		$per=$lc->postvars['percentage']; 
+		$fleeg=0;
+		
+		$serial=$lc->postvars['hiddenserial'];
+					
+		$db->query("select * from evaluation_form where serial_no='$serial'");
+		if($db->nextRecord())
+		{
+			$alreadyQuest=$db->record['weightage'];
+			$fleeg=1;
+			
+		}
+		
+		$db->query("select sum(weightage) as sum from evaluation_form");
+		if($db->nextRecord())
+		{
+			$sum=$db->record['sum'];
+		}
+		if($fleeg)
+		{
+			$sum=$sum-$alreadyQuest;
+		}
+		$sum=$sum+$per;
+		
+		
+		if($sum > 100)
+		{
+			$t['srno'] = $serial;
+			$t['tempQuest']=$quest;
+			$t['error']="The limit to 100% has been acceded!";
+			$t['msg']="Please, re-enter percentage for the question.";
+		}
+		else
+		{
+			if($sum == 100)
+			{
+				$t['msg']="The limit to 100% has been achieved.";
+				$t['flag']=1;
+			}
+			
+			if($fleeg)
+			{
+				$db->query("delete from evaluation_form where serial_no='$serial'");
+				
+			}
+					
+			$db->query("insert into evaluation_form (question,date_created,weightage)values('$quest',sysdate(),'$per')");
+			$t['msg']="Added Successfully";		
+			
+			$serial=0;
+		}
+		
+		$this->run($db,&$u,&$lc,&$t);
+	}
+	
+	function updateRun($db,&$u,&$lc,&$t)
+	{
+		
+		$data=explode('.',$lc->getvars['data']);
+		$column=$data[2];
+		if($data[1])
+		{
+			$db->query("update evaluation_form set $data[2]='0' where serial_no='$data[0]'");
+		}
+		else
+		{
+			$db->query("update evaluation_form set $data[2]='1' where serial_no='$data[0]'");
+		}
+		$this->run($db,&$u,&$lc,&$t);
+		
+	}
+	
+	function finalRun($db,&$u,&$lc,&$t)
+	{
+		$db->query("update evaluationform_flag SET flag='1' where eval_form='form1'");			
+		
+		$t['msg']="Sucessfully Finalized.";
+		$this->run($db,&$u,&$lc,&$t);
+	}
+	
+	function deleteRun($db,&$u,&$lc,&$t)
+	{
+		$sno=$lc->getvars['id'];
+	
+		$db->query("delete from  evaluation_form where serial_no='$sno'");
+		$this->run($db,&$u,&$lc,&$t);
+	}
+	
+	
+	function editQuestionRun($db,&$u,&$lc,&$t)
+	{
+		$sno=$lc->getvars['id'];
+				
+		$db->query("select question,weightage,serial_no from evaluation_form where serial_no='$sno'");
+		if($db->nextRecord())
+		{
+			$quest=$db->record['question'];
+			$weight=$db->record['weightage'];
+			$sno=$db->record['serial_no'];
+		}
+		
+		$t['tempQuest']=$quest;
+		$t['weight']=$weight;
+		$t['srno']=$sno;
+		
+		$this->run($db,&$u,&$lc,&$t);
+	}
+	
+	
+	
+} 
+ 
+?>

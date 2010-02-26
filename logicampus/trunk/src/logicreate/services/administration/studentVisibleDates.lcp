@@ -1,0 +1,63 @@
+<?php
+/*
+ * Created on Dec 1, 2009
+ */
+ 
+ include_once(LIB_PATH.'rss/simplepie.php');
+
+
+class studentVisibleDates extends AdminService
+{
+
+	var $presentor = "htmlPresentation";
+	var $cleanedArray = array();  # used for forms
+	var $authorizer = 'NoAuth';
+
+	// links
+	var $sectionTitle = 'Student Visible Dates';
+	var $navlinks = array(
+		'Administration Home' => ''
+	);
+	var $applinks = array(
+		'Create Evaluation Form' => 'createEvalForm/'
+	);
+	
+
+	function run($db,&$u,&$lc,&$t)
+	{
+			
+		$this->sectionTitle = 'Student Visible Dates';
+		$this->inactivelinks = array( 'Student Visible Dates' );
+		$lc->templateName='studentVisibleDates';
+	
+		$db->query("select  DATE_FORMAT(start,'%M,%e,%Y')as sdate,DATE_FORMAT(end,'%M,%e,%Y') as edate from evaluationform_flag where flag='1' and eval_form='form1'");
+		if($db->nextRecord())
+		{
+			$start=$db->record['sdate'];
+			$end=$db->record['edate'];
+		}
+				
+		$sdate=explode(',',$start);
+		$edate=explode(',',$end);
+		
+		$t['sdate']=$sdate;
+		$t['edate']=$edate;
+	
+	}
+	
+	function dateRun($db,&$u,&$lc,&$t)
+	{
+		$dateStart=$lc->postvars['dateStart']['year']. '-'.$lc->postvars['dateStart']['month']. '-'. $lc->postvars['dateStart']['day'];
+		$dateEnd=$lc->postvars['dateEnd']['year']. '-'.$lc->postvars['dateEnd']['month']. '-'. $lc->postvars['dateEnd']['day'];	
+		
+		$db->query("update evaluationform_flag set start='".addslashes($dateStart)."',end='".addslashes($dateEnd)."' where eval_form='form1' and flag='1'");
+		
+		$t['msg']="Successfully Set.";
+		
+		$this->run($db,&$u,&$lc,&$t);
+	}
+	
+} 
+ 
+ 
+?>
